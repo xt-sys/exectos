@@ -1,0 +1,81 @@
+/**
+ * PROJECT:         ExectOS
+ * COPYRIGHT:       See COPYING.md in the top level directory
+ * FILE:            sdk/xtdk/xtdefs.h
+ * DESCRIPTION:     XT definitions for basic types
+ * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ */
+
+#ifndef __XTDK_XTBASE_H
+#define __XTDK_XTBASE_H
+
+
+/* Routines and arguments modifiers */
+#define IN
+#define OUT
+#define XTAPI                                   __stdcall
+#define XTCDECL                                 __cdecl
+#define XTFASTCALL                              __fastcall
+#define XTINLINE                                __inline
+
+/* Variable modifiers */
+#define CONST                                   const
+#define EXTERN                                  extern
+#define STRUCT                                  struct
+#define STATIC                                  static
+#define VOLATILE                                volatile
+
+/* NULL values */
+#define NULL                                   ((PVOID) 0)
+#define NULL64                                 ((VOID * PVOID) 0)
+
+/* Preprocessor macro for defining a structure alignment */
+#define ALIGN(x)                               __declspec(align(x))
+
+/* Macro for calculating size of an array */
+#define ARRAY_SIZE(x)                          (sizeof(x) / sizeof(*x))
+
+/* Macro for accessing the base address of a structure from a structure member */
+#define CONTAIN_RECORD(Address, Type, Field)   ((Type *)(((ULONG_PTR)Address) - (ULONG_PTR)(&(((Type *)0)->Field))))
+
+/* Macro for calculating byte offset of a field in the structure */
+#define FIELD_OFFSET(Structure, Field)         ((LONG)(LONG_PTR)&(((Structure *)0)->Field))
+
+/* Macro for calculating size of a field in the structure */
+#define FIELD_SIZE(Structure, Field)           (sizeof(((Structure *)0)->Field))
+
+/* Macro that yields field type in the structure */
+#define FIELD_TYPE(Structure, Field)           (((Structure*)0)->Field)
+
+/* Macro for rounding down */
+#define ROUND_DOWN(X, Alignment)               ((X) & ~((Alignment) - 1l))
+
+/* Macro for rounding up */
+#define ROUND_UP(X, Alignment)                 ROUND_DOWN((X) + (Alignment - 1), Alignment)
+
+/* Variadic ABI functions */
+typedef __builtin_va_list VA_LIST;
+#define VA_ARG(Marker, Type)                   ((sizeof (Type) < sizeof(UINT_PTR)) ? \
+                                               (Type)(__builtin_va_arg(Marker, UINT_PTR)) : \
+                                               (Type)(__builtin_va_arg(Marker, Type)))
+#define VA_COPY(Dest, Start)                   __builtin_va_copy(Dest, Start)
+#define VA_START(Marker, Parameter)            __builtin_va_start(Marker, Parameter)
+#define VA_END(Marker)                         __builtin_va_end(Marker)
+
+/* Data conversion macros */
+#define HandleToLong(Var)                      ((LONG)(LONG_PTR)Var)
+#define HandleToUlong(Var)                     ((ULONG)(ULONG_PTR)Var)
+#define IntToPtr(Var)                          ((PVOID)(INT_PTR)Var)
+#define LongToHandle(Var)                      ((HANDLE)(LONG_PTR)Var)
+#define LongToPtr(Var)                         ((PVOID)(LONG_PTR)Var)
+#define PtrToInt(Var)                          ((INT)(INT_PTR)Var)
+#define PtrToLong(Var)                         ((LONG)(LONG_PTR)Var)
+#define PtrToShort(Var)                        ((SHORT)(LONG_PTR)Var)
+#define PtrToUint(Var)                         ((UINT)(UINT_PTR)Var)
+#define PtrToUlong(Var)                        ((ULONG)(ULONG_PTR)Var)
+#define PtrToUshort(Var)                       ((USHORT)(ULONG_PTR)Var)
+#define UintToPtr(Var)                         ((PVOID)(UINT_PTR)Var)
+#define UlongToHandle(Var)                     ((HANDLE)(ULONG_PTR)Var)
+#define UlongToPtr(Var)                        ((PVOID)(ULONG_PTR)Var)
+
+#endif /* __XTDK_XTBASE_H */
