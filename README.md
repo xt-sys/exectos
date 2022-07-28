@@ -79,7 +79,7 @@ ninja
 ```
 It is also possible to build a disk image ready to use with QEMU with the following command:
 ```
-ninja image
+ninja diskimg
 ```
 
 # Contributing
