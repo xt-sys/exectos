@@ -23,6 +23,7 @@
 #define EXTERN                                  extern
 #define STRUCT                                  struct
 #define STATIC                                  static
+#define UNION                                   union
 #define VOLATILE                                volatile
 
 /* NULL values */
