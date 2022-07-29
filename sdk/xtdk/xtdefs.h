@@ -39,6 +39,9 @@
 /* Macro for accessing the base address of a structure from a structure member */
 #define CONTAIN_RECORD(Address, Type, Field)   ((Type *)(((ULONG_PTR)Address) - (ULONG_PTR)(&(((Type *)0)->Field))))
 
+/* EFI size to pages conversion macro */
+#define EFI_SIZE_TO_PAGES(Size)                (((Size) >> EFI_PAGE_SHIFT) + (((Size) & EFI_PAGE_MASK) ? 1 : 0))
+
 /* Macro for calculating byte offset of a field in the structure */
 #define FIELD_OFFSET(Structure, Field)         ((LONG)(LONG_PTR)&(((Structure *)0)->Field))
 
