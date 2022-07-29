@@ -6,8 +6,8 @@
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#ifndef __XTDK_XTBASE_H
-#define __XTDK_XTBASE_H
+#ifndef __XTDK_XTDEFS_H
+#define __XTDK_XTDEFS_H
 
 
 /* Routines and arguments modifiers */
@@ -82,4 +82,4 @@ typedef __builtin_va_list VA_LIST;
 #define UlongToHandle(Var)                     ((HANDLE)(ULONG_PTR)Var)
 #define UlongToPtr(Var)                        ((PVOID)(ULONG_PTR)Var)
 
-#endif /* __XTDK_XTBASE_H */
+#endif /* __XTDK_XTDEFS_H */

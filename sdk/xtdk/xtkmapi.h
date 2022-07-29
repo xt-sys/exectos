@@ -11,3 +11,12 @@
 #include "xttypes.h"
 #include "xtdefs.h"
 #include "xtstatus.h"
+
+/* XT forward references */
+#include "xtstruct.h"
+
+/* Architecture-specific XT forward references */
+#include ARCH_HEADER(xtstruct.h)
+
+/* Architecture-independent XT API */
+#include "xtcommon.h"
