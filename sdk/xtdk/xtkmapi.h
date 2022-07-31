@@ -20,3 +20,4 @@
 
 /* Architecture-independent XT API */
 #include "xtcommon.h"
+#include "xtuefi.h"
