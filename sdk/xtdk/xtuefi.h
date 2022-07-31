@@ -9,10 +9,26 @@
 #ifndef __XTDK_XTUEFI_H
 #define __XTDK_XTUEFI_H
 
+#include "xtdefs.h"
 #include "xttypes.h"
 #include "xtstruct.h"
 #include "xtcommon.h"
 
+
+/* EFI Pages related definitions */
+#define EFI_PAGE_SIZE   4096
+#define EFI_PAGE_MASK   0xFFF
+#define EFI_PAGE_SHIFT  12
+
+/* DeviceType definitions according to BBS specification */
+#define EFI_BBS_TYPE_FLOPPY                 0x01
+#define EFI_BBS_TYPE_HARDDRIVE              0x02
+#define EFI_BBS_TYPE_CDROM                  0x03
+#define EFI_BBS_TYPE_PCMCIA                 0x04
+#define EFI_BBS_TYPE_USB                    0x05
+#define EFI_BBS_TYPE_EMBEDDED_NETWORK       0x06
+#define EFI_BBS_TYPE_DEV                    0x80
+#define EFI_BBS_TYPE_UNKNOWN                0xFF
 
 /* Basic UEFI types */
 typedef PVOID EFI_EVENT, *PEFI_EVENT;
@@ -170,6 +186,18 @@ typedef EFI_STATUS (*PEFI_TEXT_SET_ATTRIBUTE)(PEFI_SIMPLE_TEXT_OUTPUT_PROTOCOL T
 typedef EFI_STATUS (*PEFI_TEXT_CLEAR_SCREEN)(PEFI_SIMPLE_TEXT_OUTPUT_PROTOCOL This);
 typedef EFI_STATUS (*PEFI_TEXT_SET_CURSOR_POSITION)(PEFI_SIMPLE_TEXT_OUTPUT_PROTOCOL This, UINT_PTR Column, UINT_PTR Row);
 typedef EFI_STATUS (*PEFI_TEXT_ENABLE_CURSOR)(PEFI_SIMPLE_TEXT_OUTPUT_PROTOCOL This, UCHAR Visible);
+typedef PUINT16(*PEFI_DEVICE_PATH_TO_TEXT_NODE)(IN CONST PEFI_DEVICE_PATH_PROTOCOL DeviceNode, IN BOOLEAN DisplayOnly, IN BOOLEAN AllowShortcuts);
+typedef PUINT16(*PEFI_DEVICE_PATH_TO_TEXT_PATH)(IN CONST PEFI_DEVICE_PATH_PROTOCOL DevicePath, IN BOOLEAN DisplayOnly, IN BOOLEAN AllowShortcuts);
+typedef PEFI_DEVICE_PATH_PROTOCOL(*PEFI_DEVICE_PATH_FROM_TEXT_NODE)(IN CONST PUINT16 TextDeviceNode);
+typedef PEFI_DEVICE_PATH_PROTOCOL(*PEFI_DEVICE_PATH_FROM_TEXT_PATH)(IN CONST PUINT16 TextDevicePath);
+typedef UINT_PTR(*PEFI_DEVICE_PATH_UTILS_GET_DEVICE_PATH_SIZE)(IN CONST PEFI_DEVICE_PATH_PROTOCOL DevicePath);
+typedef PEFI_DEVICE_PATH_PROTOCOL(*PEFI_DEVICE_PATH_UTILS_DUP_DEVICE_PATH)(IN CONST PEFI_DEVICE_PATH_PROTOCOL DevicePath);
+typedef PEFI_DEVICE_PATH_PROTOCOL(*PEFI_DEVICE_PATH_UTILS_APPEND_PATH)(IN CONST PEFI_DEVICE_PATH_PROTOCOL Src1, IN CONST PEFI_DEVICE_PATH_PROTOCOL Src2);
+typedef PEFI_DEVICE_PATH_PROTOCOL(*PEFI_DEVICE_PATH_UTILS_APPEND_NODE)(IN CONST PEFI_DEVICE_PATH_PROTOCOL DevicePath, IN CONST PEFI_DEVICE_PATH_PROTOCOL DeviceNode);
+typedef PEFI_DEVICE_PATH_PROTOCOL(*PEFI_DEVICE_PATH_UTILS_APPEND_INSTANCE)(IN CONST PEFI_DEVICE_PATH_PROTOCOL DevicePath, IN CONST PEFI_DEVICE_PATH_PROTOCOL DevicePathInstance);
+typedef PEFI_DEVICE_PATH_PROTOCOL(*PEFI_DEVICE_PATH_UTILS_GET_NEXT_INSTANCE)(IN OUT PEFI_DEVICE_PATH_PROTOCOL *DevicePathInstance, OUT PUINT_PTR DevicePathInstanceSize);
+typedef PEFI_DEVICE_PATH_PROTOCOL(*PEFI_DEVICE_PATH_UTILS_CREATE_NODE)(IN UINT8 NodeType, IN UINT8 NodeSubType, IN UINT16 NodeLength);
+typedef BOOLEAN (*PEFI_DEVICE_PATH_UTILS_IS_MULTI_INSTANCE)(IN CONST PEFI_DEVICE_PATH_PROTOCOL DevicePath);
 
 /* 128-bit buffer containing a unique identifier value */
 typedef struct _EFI_GUID
@@ -233,14 +261,6 @@ typedef struct _EFI_TIME_CAPABILITIES
     UINT32 Accuracy;
     UCHAR SetsToZero;
 } EFI_TIME_CAPABILITIES, *PEFI_TIME_CAPABILITIES;
-
-/* Describes the location of the device the handle is for */
-typedef struct _EFI_DEVICE_PATH_PROTOCOL
-{
-    UINT8 Type;
-    UINT8 SubType;
-    UINT8 Length[2];
-} EFI_DEVICE_PATH_PROTOCOL, *PEFI_DEVICE_PATH_PROTOCOL;
 
 /* EFI Open Protocol Information Entry */
 typedef struct _EFI_OPEN_PROTOCOL_INFORMATION_ENTRY
@@ -386,5 +406,438 @@ typedef struct _EFI_SYSTEM_TABLE
     UINT_PTR NumberOfTableEntries;
     PEFI_CONFIGURATION_TABLE ConfigurationTable;
 } EFI_SYSTEM_TABLE, *PEFI_SYSTEM_TABLE;
+
+/* EFI IPv4 network protocol */
+typedef struct _EFI_IPv4_ADDRESS
+{
+    UINT8 Addr[4];
+} EFI_IPv4_ADDRESS, *PEFI_IPv4_ADDRESS;
+
+/* EFI IPv6 network protocol */
+typedef struct _EFI_IPv6_ADDRESS
+{
+    UINT8 Addr[16];
+} EFI_IPv6_ADDRESS, *PEFI_IPv6_ADDRESS;
+
+/* EFI MAC address definition */
+typedef struct _EFI_MAC_ADDRESS
+{
+    UINT8 Addr[32];
+} EFI_MAC_ADDRESS, *PEFI_MAC_ADDRESS;
+
+/* EFI network configuration data structure */
+typedef struct _EFI_MANAGED_NETWORK_CONFIG_DATA
+{
+    UINT32 ReceivedQueueTimeoutValue;
+    UINT32 TransmitQueueTimeoutValue;
+    UINT16 ProtocolTypeFilter;
+    BOOLEAN EnableUnicastReceive;
+    BOOLEAN EnableMulticastReceive;
+    BOOLEAN EnableBroadcastReceive;
+    BOOLEAN EnablePromiscuousReceive;
+    BOOLEAN FlushQueuesOnReset;
+    BOOLEAN EnableReceiveTimestamps;
+    BOOLEAN DisableBackgroundPolling;
+} EFI_MANAGED_NETWORK_CONFIG_DATA, *PEFI_MANAGED_NETWORK_CONFIG_DATA;
+
+/* Describes the location of the device the handle is for */
+typedef struct _EFI_DEVICE_PATH_PROTOCOL
+{
+    UINT8 Type;
+    UINT8 SubType;
+    UINT8 Length[2];
+} EFI_DEVICE_PATH_PROTOCOL, *PEFI_DEVICE_PATH_PROTOCOL;
+
+/* PCI device path node */
+typedef struct _EFI_PCI_DEVICE_PATH
+{
+    EFI_DEVICE_PATH_PROTOCOL Header;
+    UINT8 Function;
+    UINT8 Device;
+} EFI_PCI_DEVICE_PATH, *PEFI_PCI_DEVICE_PATH;
+
+/* PCCARD device path node */
+typedef struct _EFI_PCCARD_DEVICE_PATH
+{
+    EFI_DEVICE_PATH_PROTOCOL Header;
+    UINT8 FunctionNumber;
+} EFI_PCCARD_DEVICE_PATH, *PEFI_PCCARD_DEVICE_PATH;
+
+/* MemMap device path node */
+typedef struct _EFI_MEMMAP_DEVICE_PATH
+{
+    EFI_DEVICE_PATH_PROTOCOL Header;
+    UINT32 MemoryType;
+    EFI_PHYSICAL_ADDRESS StartingAddress;
+    EFI_PHYSICAL_ADDRESS EndingAddress;
+} EFI_MEMMAP_DEVICE_PATH, *PEFI_MEMMAP_DEVICE_PATH;
+
+/* Vendor device path node */
+typedef struct _EFI_VENDOR_DEVICE_PATH
+{
+    EFI_DEVICE_PATH_PROTOCOL Header;
+    EFI_GUID Guid;
+} EFI_VENDOR_DEVICE_PATH, *PEFI_VENDOR_DEVICE_PATH;
+
+/* Unknown Device Vendor device path node */
+typedef struct _EFI_UKNOWN_DEVICE_VENDOR_DEVICE_PATH
+{
+    EFI_VENDOR_DEVICE_PATH DevicePath;
+    UINT8 LegacyDriveLetter;
+} EFI_UNKNOWN_DEVICE_VENDOR_DEVICE_PATH, *PEFI_UNKNOWN_DEVICE_VENDOR_DEVICE_PATH;
+
+/* Controller device path node */
+typedef struct _EFI_CONTROLLER_DEVICE_PATH
+{
+    EFI_DEVICE_PATH_PROTOCOL Header;
+    UINT32 Controller;
+} EFI_CONTROLLER_DEVICE_PATH, *PEFI_CONTROLLER_DEVICE_PATH;
+
+/* ACPI device path node */
+typedef struct _EFI_ACPI_HID_DEVICE_PATH
+{
+    EFI_DEVICE_PATH_PROTOCOL Header;
+    UINT32 HID;
+    UINT32 UID;
+} EFI_ACPI_HID_DEVICE_PATH, *PEFI_ACPI_HID_DEVICE_PATH;
+
+/* Expanded ACPI device path node */
+typedef struct _EFI_EXPANDED_ACPI_HID_DEVICE_PATH
+{
+    EFI_DEVICE_PATH_PROTOCOL Header;
+    UINT32 HID;
+    UINT32 UID;
+    UINT32 CID;
+    UINT8 HidStr[1];
+} EFI_EXPANDED_ACPI_HID_DEVICE_PATH, *PEFI_EXPANDED_ACPI_HID_DEVICE_PATH;
+
+/* ACPI ADR device path node */
+typedef struct _EFI_ACPI_ADR_DEVICE_PATH
+{
+    EFI_DEVICE_PATH_PROTOCOL Header;
+    UINT32 ADR;
+} EFI_ACPI_ADR_DEVICE_PATH, *PEFI_ACPI_ADR_DEVICE_PATH;
+
+/* ATAPI device path node */
+typedef struct _EFI_ATAPI_DEVICE_PATH
+{
+    EFI_DEVICE_PATH_PROTOCOL Header;
+    UINT8 PrimarySecondary;
+    UINT8 SlaveMaster;
+    UINT16 Lun;
+} EFI_ATAPI_DEVICE_PATH, *PEFI_ATAPI_DEVICE_PATH;
+
+/* SCSI device path node */
+typedef struct _EFI_SCSI_DEVICE_PATH
+{
+    EFI_DEVICE_PATH_PROTOCOL Header;
+    UINT16 Pun;
+    UINT16 Lun;
+} EFI_SCSI_DEVICE_PATH, *PEFI_SCSI_DEVICE_PATH;
+
+/* Fibre Channel device path node */
+typedef struct _EFI_FIBRECHANNEL_DEVICE_PATH
+{
+    EFI_DEVICE_PATH_PROTOCOL Header;
+    UINT32 Reserved;
+    UINT64 WWN;
+    UINT64 Lun;
+} EFI_FIBRECHANNEL_DEVICE_PATH, *PEFI_FIBRECHANNEL_DEVICE_PATH;
+
+/* Fibre Channerl EX subtype device path node */
+typedef struct _EFI_FIBRECHANNELEX_DEVICE_PATH
+{
+    EFI_DEVICE_PATH_PROTOCOL Header ;
+    UINT32 Reserved;
+    UINT8 WWN[8];
+    UINT8 Lun[8];
+} EFI_FIBRECHANNELEX_DEVICE_PATH, *PEFI_FIBRECHANNELEX_DEVICE_PATH;
+
+/* 1394 device path node */
+typedef struct _EFI_1394_DEVICE_PATH
+{
+    EFI_DEVICE_PATH_PROTOCOL Header;
+    UINT32 Reserved;
+    UINT64 Guid;
+} EFI_1394_DEVICE_PATH, *PEFI_1394_DEVICE_PATH;
+
+/* USB device path node */
+typedef struct _EFI_USB_DEVICE_PATH
+{
+    EFI_DEVICE_PATH_PROTOCOL Header;
+    UINT8 Port;
+    UINT8 Endpoint;
+} EFI_USB_DEVICE_PATH, *PEFI_USB_DEVICE_PATH;
+
+/* USB WWID device path node */
+typedef struct _EFI_USB_WWID_DEVICE_PATH
+{
+    EFI_DEVICE_PATH_PROTOCOL Header;
+    UINT16 InterfaceNumber;
+    UINT16 VendorId;
+    UINT16 ProductId;
+    UINT16 SerialNumber[1];
+} EFI_USB_WWID_DEVICE_PATH, *PEFI_USB_WWID_DEVICE_PATH;
+
+/* USB Class device path node */
+typedef struct _EFI_USB_CLASS_DEVICE_PATH
+{
+    EFI_DEVICE_PATH_PROTOCOL Header;
+    UINT16 VendorId;
+    UINT16 ProductId;
+    UINT8 DeviceClass;
+    UINT8 DeviceSubclass;
+    UINT8 DeviceProtocol;
+} EFI_USB_CLASS_DEVICE_PATH, *PEFI_USB_CLASS_DEVICE_PATH;
+
+/* SATA device path node */
+typedef struct _EFI_SATA_DEVICE_PATH
+{
+    EFI_DEVICE_PATH_PROTOCOL Header;
+    UINT16 HBAPortNumber;
+    UINT16 PortMultiplierPortNumber;
+    UINT16 Lun;
+} EFI_SATA_DEVICE_PATH, *PEFI_SATA_DEVICE_PATH;
+
+/* Device Logical Unit device path node */
+typedef struct _EFI_DEVICE_LOGICAL_UNIT_DEVICE_PATH
+{
+    EFI_DEVICE_PATH_PROTOCOL Header;
+    UINT8 Lun;
+} EFI_DEVICE_LOGICAL_UNIT_DEVICE_PATH, *PEFI_DEVICE_LOGICAL_UNIT_DEVICE_PATH;
+
+/* I2O device path node */
+typedef struct _EFI_I2O_DEVICE_PATH
+{
+    EFI_DEVICE_PATH_PROTOCOL Header;
+    UINT32 Tid;
+} EFI_I2O_DEVICE_PATH, *PEFI_I2O_DEVICE_PATH;
+
+/* MAC Address device path node */
+typedef struct _EFI_MAC_ADDR_DEVICE_PATH
+{
+    EFI_DEVICE_PATH_PROTOCOL Header;
+    EFI_MAC_ADDRESS MacAddress;
+    UINT8 IfType;
+} EFI_MAC_ADDR_DEVICE_PATH, *PEFI_MAC_ADDR_DEVICE_PATH;
+
+/* IPv4 device path node */
+typedef struct _EFI_IPv4_DEVICE_PATH
+{
+    EFI_DEVICE_PATH_PROTOCOL Header;
+    EFI_IPv4_ADDRESS LocalIpAddress;
+    EFI_IPv4_ADDRESS RemoteIpAddress;
+    UINT16 LocalPort;
+    UINT16 RemotePort;
+    UINT16 Protocol;
+    BOOLEAN StaticIpAddress;
+    EFI_IPv4_ADDRESS GatewayIpAddress ;
+    EFI_IPv4_ADDRESS SubnetMask ;
+} EFI_IPv4_DEVICE_PATH, *PEFI_IPv4_DEVICE_PATH;
+
+/* IPv6 device path node */
+typedef struct _EFI_IPv6_DEVICE_PATH
+{
+    EFI_DEVICE_PATH_PROTOCOL Header;
+    EFI_IPv6_ADDRESS LocalIpAddress;
+    EFI_IPv6_ADDRESS RemoteIpAddress;
+    UINT16 LocalPort;
+    UINT16 RemotePort;
+    UINT16 Protocol;
+    BOOLEAN IPAddressOrigin ;
+    UINT8 PrefixLength ;
+    EFI_IPv6_ADDRESS GatewayIpAddress ;
+} EFI_IPv6_DEVICE_PATH, *PEFI_IPv6_DEVICE_PATH;
+
+/* Uniform Resource Identifiers SubType device path node */
+typedef struct _EFI_URI_DEVICE_PATH
+{
+    EFI_DEVICE_PATH_PROTOCOL Header;
+    UINT8 Uri[1];
+} EFI_URI_DEVICE_PATH, *PEFI_URI_DEVICE_PATH;
+
+/* VLAN device path node */
+typedef struct _EFI_VLAN_DEVICE_PATH
+{
+    EFI_DEVICE_PATH_PROTOCOL Header;
+    UINT16 VlanId;
+} EFI_VLAN_DEVICE_PATH, *PEFI_VLAN_DEVICE_PATH;
+
+/* InfiniBand device path node */
+typedef struct _EFI_INFINIBAND_DEVICE_PATH
+{
+    EFI_DEVICE_PATH_PROTOCOL Header;
+    UINT32 ResourceFlags;
+    UINT8 PortGid[16];
+    UINT64 ServiceId;
+    UINT64 TargetPortId;
+    UINT64 DeviceId;
+} EFI_INFINIBAND_DEVICE_PATH, *PEFI_INFINIBAND_DEVICE_PATH;
+
+/* UART device path node */
+typedef struct _EFI_UART_DEVICE_PATH
+{
+    EFI_DEVICE_PATH_PROTOCOL Header;
+    UINT32 Reserved;
+    UINT64 BaudRate;
+    UINT8 DataBits;
+    UINT8 Parity;
+    UINT8 StopBits;
+} EFI_UART_DEVICE_PATH, *PEFI_UART_DEVICE_PATH;
+
+/* Hard Drive device path node */
+typedef struct _EFI_HARDDRIVE_DEVICE_PATH
+{
+    EFI_DEVICE_PATH_PROTOCOL Header;
+    UINT32 PartitionNumber;
+    UINT64 PartitionStart;
+    UINT64 PartitionSize;
+    UINT8 Signature[16];
+    UINT8 MBRType;
+    UINT8 SignatureType;
+} EFI_HARDDRIVE_DEVICE_PATH, *PEFI_HARDDRIVE_DEVICE_PATH;
+
+/* CDROM device path node */
+typedef struct _EFI_CDROM_DEVICE_PATH
+{
+    EFI_DEVICE_PATH_PROTOCOL Header;
+    UINT32 BootEntry;
+    UINT64 PartitionStart;
+    UINT64 PartitionSize;
+} EFI_CDROM_DEVICE_PATH, *PEFI_CDROM_DEVICE_PATH;
+
+/* File Path device path node */
+typedef struct _EFI_FILEPATH_DEVICE_PATH
+{
+    EFI_DEVICE_PATH_PROTOCOL Header;
+    UINT16 PathName[1];
+} EFI_FILEPATH_DEVICE_PATH, *PEFI_FILEPATH_DEVICE_PATH;
+
+/* Media Protocol device path node */
+typedef struct _EFI_MEDIA_PROTOCOL_DEVICE_PATH
+{
+    EFI_DEVICE_PATH_PROTOCOL Header;
+    EFI_GUID Protocol;
+} EFI_MEDIA_PROTOCOL_DEVICE_PATH, *PEFI_MEDIA_PROTOCOL_DEVICE_PATH;
+
+/* Media Firmware File SubType device path node */
+typedef struct _EFI_MEDIA_FW_VOL_FILEPATH_DEVICE_PATH
+{
+    EFI_DEVICE_PATH_PROTOCOL Header;
+    EFI_GUID FvFileName;
+} EFI_MEDIA_FW_VOL_FILEPATH_DEVICE_PATH, *PEFI_MEDIA_FW_VOL_FILEPATH_DEVICE_PATH;
+
+/* Media Firmware Volume SubType device path node */
+typedef struct _EFI_MEDIA_FW_VOL_DEVICE_PATH
+{
+    EFI_DEVICE_PATH_PROTOCOL Header;
+    EFI_GUID FvName;
+} EFI_MEDIA_FW_VOL_DEVICE_PATH, *PEFI_MEDIA_FW_VOL_DEVICE_PATH;
+
+/* Media relative offset range device path node */
+typedef struct _EFI_MEDIA_RELATIVE_OFFSET_RANGE_DEVICE_PATH {
+    EFI_DEVICE_PATH_PROTOCOL Header;
+    UINT32 Reserved;
+    UINT64 StartingOffset;
+    UINT64 EndingOffset;
+} EFI_MEDIA_RELATIVE_OFFSET_RANGE_DEVICE_PATH, *PEFI_MEDIA_RELATIVE_OFFSET_RANGE_DEVICE_PATH;
+
+/* BIOS Boot Specification (BBS) device path node */
+typedef struct _EFI_BBS_BBS_DEVICE_PATH
+{
+    EFI_DEVICE_PATH_PROTOCOL Header;
+    UINT16 DeviceType;
+    UINT16 StatusFlag;
+    UINT8 String[1];
+} EFI_BBS_BBS_DEVICE_PATH, *PEFI_BBS_BBS_DEVICE_PATH;
+
+/* EFI device path nodes union */
+typedef union _EFI_DEV_PATH
+{
+    EFI_DEVICE_PATH_PROTOCOL DevPath;
+    EFI_PCI_DEVICE_PATH Pci;
+    EFI_PCCARD_DEVICE_PATH PcCard;
+    EFI_MEMMAP_DEVICE_PATH MemMap;
+    EFI_VENDOR_DEVICE_PATH Vendor;
+    EFI_UNKNOWN_DEVICE_VENDOR_DEVICE_PATH UnknownVendor;
+    EFI_CONTROLLER_DEVICE_PATH Controller;
+    EFI_ACPI_HID_DEVICE_PATH Acpi;
+    EFI_ATAPI_DEVICE_PATH Atapi;
+    EFI_SCSI_DEVICE_PATH Scsi;
+    EFI_FIBRECHANNEL_DEVICE_PATH FibreChannel;
+    EFI_1394_DEVICE_PATH F1394;
+    EFI_USB_DEVICE_PATH Usb;
+    EFI_USB_CLASS_DEVICE_PATH UsbClass;
+    EFI_I2O_DEVICE_PATH I2O;
+    EFI_MAC_ADDR_DEVICE_PATH MacAddr;
+    EFI_IPv4_DEVICE_PATH Ipv4;
+    EFI_IPv6_DEVICE_PATH Ipv6;
+    EFI_URI_DEVICE_PATH Uri;
+    EFI_INFINIBAND_DEVICE_PATH InfiniBand;
+    EFI_UART_DEVICE_PATH Uart;
+    EFI_HARDDRIVE_DEVICE_PATH HardDrive;
+    EFI_CDROM_DEVICE_PATH CD;
+    EFI_FILEPATH_DEVICE_PATH FilePath;
+    EFI_MEDIA_PROTOCOL_DEVICE_PATH MediaProtocol;
+    EFI_BBS_BBS_DEVICE_PATH Bbs;
+} EFI_DEV_PATH, *PEFI_DEV_PATH;
+
+/* EFI device path node pointers union */
+typedef union _EFI_DEV_PATH_PTR
+{
+    PEFI_DEVICE_PATH_PROTOCOL DevPath;
+    PEFI_PCI_DEVICE_PATH Pci;
+    PEFI_PCCARD_DEVICE_PATH PcCard;
+    PEFI_MEMMAP_DEVICE_PATH MemMap;
+    PEFI_VENDOR_DEVICE_PATH Vendor;
+    PEFI_UNKNOWN_DEVICE_VENDOR_DEVICE_PATH UnknownVendor;
+    PEFI_CONTROLLER_DEVICE_PATH Controller;
+    PEFI_ACPI_HID_DEVICE_PATH Acpi;
+    PEFI_ATAPI_DEVICE_PATH Atapi;
+    PEFI_SCSI_DEVICE_PATH Scsi;
+    PEFI_FIBRECHANNEL_DEVICE_PATH FibreChannel;
+    PEFI_1394_DEVICE_PATH F1394;
+    PEFI_USB_DEVICE_PATH Usb;
+    PEFI_USB_CLASS_DEVICE_PATH UsbClass;
+    PEFI_I2O_DEVICE_PATH I2O;
+    PEFI_MAC_ADDR_DEVICE_PATH MacAddr;
+    PEFI_IPv4_DEVICE_PATH Ipv4;
+    PEFI_IPv6_DEVICE_PATH Ipv6;
+    PEFI_URI_DEVICE_PATH Uri;
+    PEFI_INFINIBAND_DEVICE_PATH InfiniBand;
+    PEFI_UART_DEVICE_PATH Uart;
+    PEFI_HARDDRIVE_DEVICE_PATH HardDrive;
+    PEFI_FILEPATH_DEVICE_PATH FilePath;
+    PEFI_MEDIA_PROTOCOL_DEVICE_PATH MediaProtocol;
+    PEFI_CDROM_DEVICE_PATH CD;
+    PEFI_BBS_BBS_DEVICE_PATH Bbs;
+} EFI_DEV_PATH_PTR, *PEFI_DEV_PATH_PTR;
+
+/* EFI device path to text protocol */
+typedef struct _EFI_DEVICE_PATH_TO_TEXT_PROTOCOL
+{
+    PEFI_DEVICE_PATH_TO_TEXT_NODE ConvertDeviceNodeToText;
+    PEFI_DEVICE_PATH_TO_TEXT_PATH ConvertDevicePathToText;
+} EFI_DEVICE_PATH_TO_TEXT_PROTOCOL, *PEFI_DEVICE_PATH_TO_TEXT_PROTOCOL;
+
+/* EFI device path from text protocol */
+typedef struct _EFI_DEVICE_PATH_FROM_TEXT_PROTOCOL
+{
+    PEFI_DEVICE_PATH_FROM_TEXT_NODE ConvertTextToDeviceNode;
+    PEFI_DEVICE_PATH_FROM_TEXT_PATH ConvertTextToDevicePath;
+} EFI_DEVICE_PATH_FROM_TEXT_PROTOCOL, *PEFI_DEVICE_PATH_FROM_TEXT_PROTOCOL;
+
+/* EFI device path utility protocol */
+typedef struct _EFI_DEVICE_PATH_UTILITIES_PROTOCOL
+{
+    PEFI_DEVICE_PATH_UTILS_GET_DEVICE_PATH_SIZE GetDevicePathSize;
+    PEFI_DEVICE_PATH_UTILS_DUP_DEVICE_PATH DuplicateDevicePath;
+    PEFI_DEVICE_PATH_UTILS_APPEND_PATH AppendDevicePath;
+    PEFI_DEVICE_PATH_UTILS_APPEND_NODE AppendDeviceNode;
+    PEFI_DEVICE_PATH_UTILS_APPEND_INSTANCE AppendDevicePathInstance;
+    PEFI_DEVICE_PATH_UTILS_GET_NEXT_INSTANCE GetNextDevicePathInstance;
+    PEFI_DEVICE_PATH_UTILS_IS_MULTI_INSTANCE IsDevicePathMultiInstance;
+    PEFI_DEVICE_PATH_UTILS_CREATE_NODE CreateDeviceNode;
+} EFI_DEVICE_PATH_UTILITIES_PROTOCOL, *PEFI_DEVICE_PATH_UTILITIES_PROTOCOL;
 
 #endif /* __XTDK_XTUEFI_H */
