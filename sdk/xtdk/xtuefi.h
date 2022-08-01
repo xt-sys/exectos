@@ -15,20 +15,207 @@
 #include "xtcommon.h"
 
 
+/* EFI service signatures */
+#define EFI_BOOT_SERVICES_SIGNATURE                        0x56524553544f4f42
+#define EFI_RUNTIME_SERVICES_SIGNATURE                     0x56524553544e5552
+#define EFI_SYSTEM_TABLE_SIGNATURE                         0x5453595320494249
+
+/* Caching types for the memory range */
+#define EFI_MEMORY_UC                                      0x0000000000000001
+#define EFI_MEMORY_WC                                      0x0000000000000002
+#define EFI_MEMORY_WT                                      0x0000000000000004
+#define EFI_MEMORY_WB                                      0x0000000000000008
+#define EFI_MEMORY_UCE                                     0x0000000000000010
+
+/* Physical memory protection on range */
+#define EFI_MEMORY_WP                                      0x0000000000001000
+#define EFI_MEMORY_RP                                      0x0000000000002000
+#define EFI_MEMORY_XP                                      0x0000000000004000
+
 /* EFI Pages related definitions */
-#define EFI_PAGE_SIZE   4096
-#define EFI_PAGE_MASK   0xFFF
-#define EFI_PAGE_SHIFT  12
+#define EFI_PAGE_SIZE                                      4096
+#define EFI_PAGE_MASK                                      0xFFF
+#define EFI_PAGE_SHIFT                                     12
+
+/* EFI open protocol */
+#define EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL               0x00000001
+#define EFI_OPEN_PROTOCOL_GET_PROTOCOL                     0x00000002
+#define EFI_OPEN_PROTOCOL_TEST_PROTOCOL                    0x00000004
+#define EFI_OPEN_PROTOCOL_BY_CHILD_CONTROLLER              0x00000008
+#define EFI_OPEN_PROTOCOL_BY_DRIVER                        0x00000010
+#define EFI_OPEN_PROTOCOL_EXCLUSIVE                        0x00000020
+
+/* EFI capsule flags */
+#define CAPSULE_FLAGS_PERSIST_ACROSS_RESET                 0x00010000
+#define CAPSULE_FLAGS_POPULATE_SYSTEM_TABLE                0x00020000
+#define CAPSULE_FLAGS_INITIATE_RESET                       0x00040000
+
+/* EFI variables related definitions */
+#define EFI_VARIABLE_NON_VOLATILE                          0x00000001
+#define EFI_VARIABLE_BOOTSERVICE_ACCESS                    0x00000002
+#define EFI_VARIABLE_RUNTIME_ACCESS                        0x00000004
+#define EFI_VARIABLE_HARDWARE_ERROR_RECORD                 0x00000008
+#define EFI_VARIABLE_AUTHENTICATED_WRITE_ACCESS            0x00000010
+#define EFI_VARIABLE_TIME_BASED_AUTHENTICATED_WRITE_ACCESS 0x00000020
+#define EFI_VARIABLE_APPEND_WRITE                          0x00000040
+
+/* Maximum EFI variable size */
+#define EFI_MAXIMUM_VARIABLE_SIZE                          1024
+
+/* EFI event types */
+#define EFI_EVENT_TIMER                                    0x80000000
+#define EFI_EVENT_RUNTIME                                  0x40000000
+#define EFI_EVENT_RUNTIME_CONTEXT                          0x20000000
+#define EFI_EVENT_NOTIFY_WAIT                              0x00000100
+#define EFI_EVENT_NOTIFY_SIGNAL                            0x00000200
+#define EFI_EVENT_SIGNAL_EXIT_BOOT_SERVICES                0x00000201
+#define EFI_EVENT_SIGNAL_VIRTUAL_ADDRESS_CHANGE            0x60000202
+#define EFI_EVENT_EFI_SIGNAL_MASK                          0x000000FF
+
+/* EFI device path types */
+#define EFI_HARDWARE_DEVICE_PATH                           0x01
+#define EFI_ACPI_DEVICE_PATH                               0x02
+#define EFI_MESSAGING_DEVICE_PATH                          0x03
+#define EFI_MEDIA_DEVICE_PATH                              0x04
+
+/* EFI hardware device path subtypes */
+#define EFI_HARDWARE_PCI_DP                                0x01
+#define EFI_HARDWARE_PCCARD_DP                             0x02
+#define EFI_HARDWARE_MEMMAP_DP                             0x03
+#define EFI_HARDWARE_VENDOR_DP                             0x04
+#define EFI_HARDWARE_CONTROLLER_DP                         0x05
+
+/* EFI ACPI device path subtypes */
+#define EFI_ACPI_DP                                        0x01
+#define EFI_ACPI_EXPANDED_DP                               0x02
+
+/* EFI messaging device path subtypes */
+#define EFI_MESSAGING_ATAPI_DP                             0x01
+#define EFI_MESSAGING_SCSI_DP                              0x02
+#define EFI_MESSAGING_FIBRECHANNEL_DP                      0x03
+#define EFI_MESSAGING_1394_DP                              0x04
+#define EFI_MESSAGING_USB_DP                               0x05
+#define EFI_MESSAGING_I2O_DP                               0x06
+#define EFI_MESSAGING_INFINIBAND_DP                        0x09
+#define EFI_MESSAGING_VENDOR_DP                            0x0A
+#define EFI_MESSAGING_MAC_ADDR_DP                          0x0B
+#define EFI_MESSAGING_IPv4_DP                              0x0C
+#define EFI_MESSAGING_IPv6_DP                              0x0D
+#define EFI_MESSAGING_UART_DP                              0x0E
+#define EFI_MESSAGING_USB_CLASS_DP                         0x0F
+#define EFI_MESSAGING_USB_WWID_DP                          0x10
+#define EFI_MESSAGING_DEVICE_LOGICAL_UNIT_DP               0x11
+#define EFI_MESSAGING_SATA_DP                              0x12
+#define EFI_MESSAGING_VLAN_DP                              0x14
+#define EFI_MESSAGING_FIBRECHANNELEX_DP                    0x15
+#define EFI_MESSAGING_URI_DP                               0x18
+
+/* EFI media device path subtypes */
+#define EFI_MEDIA_HARDDRIVE_DP                             0x01
+#define EFI_MEDIA_CDROM_DP                                 0x02
+#define EFI_MEDIA_VENDOR_DP                                0x03
+#define EFI_MEDIA_FILEPATH_DP                              0x04
+#define EFI_MEDIA_PROTOCOL_DP                              0x05
+#define EFI_MEDIA_PIWG_FW_FILE_DP                          0x06
+#define EFI_MEDIA_PIWG_FW_VOL_DP                           0x07
+#define EFI_MEDIA_RELATIVE_OFFSET_RANGE_DP                 0x08
 
 /* DeviceType definitions according to BBS specification */
-#define EFI_BBS_TYPE_FLOPPY                 0x01
-#define EFI_BBS_TYPE_HARDDRIVE              0x02
-#define EFI_BBS_TYPE_CDROM                  0x03
-#define EFI_BBS_TYPE_PCMCIA                 0x04
-#define EFI_BBS_TYPE_USB                    0x05
-#define EFI_BBS_TYPE_EMBEDDED_NETWORK       0x06
-#define EFI_BBS_TYPE_DEV                    0x80
-#define EFI_BBS_TYPE_UNKNOWN                0xFF
+#define EFI_BBS_TYPE_FLOPPY                                0x01
+#define EFI_BBS_TYPE_HARDDRIVE                             0x02
+#define EFI_BBS_TYPE_CDROM                                 0x03
+#define EFI_BBS_TYPE_PCMCIA                                0x04
+#define EFI_BBS_TYPE_USB                                   0x05
+#define EFI_BBS_TYPE_EMBEDDED_NETWORK                      0x06
+#define EFI_BBS_TYPE_DEV                                   0x80
+#define EFI_BBS_TYPE_UNKNOWN                               0xFF
+
+/* EFI file open modes */
+#define EFI_FILE_MODE_READ                                 0x0000000000000001
+#define EFI_FILE_MODE_WRITE                                0x0000000000000002
+#define EFI_FILE_MODE_CREATE                               0x8000000000000000
+
+/* EFI file attributes */
+#define EFI_FILE_READ_ONLY                                 0x0000000000000001
+#define EFI_FILE_HIDDEN                                    0x0000000000000002
+#define EFI_FILE_SYSTEM                                    0x0000000000000004
+#define EFI_FILE_RESERVIED                                 0x0000000000000008
+#define EFI_FILE_DIRECTORY                                 0x0000000000000010
+#define EFI_FILE_ARCHIVE                                   0x0000000000000020
+#define EFI_FILE_VALID_ATTR                                0x0000000000000037
+
+/* EFI PCI attributes */
+#define EFI_PCI_ATTRIBUTE_ISA_MOTHERBOARD_IO               0x00001
+#define EFI_PCI_ATTRIBUTE_ISA_IO                           0x00002
+#define EFI_PCI_ATTRIBUTE_VGA_PALETTE_IO                   0x00004
+#define EFI_PCI_ATTRIBUTE_VGA_MEMORY                       0x00008
+#define EFI_PCI_ATTRIBUTE_VGA_IO                           0x00010
+#define EFI_PCI_ATTRIBUTE_IDE_PRIMARY_IO                   0x00020
+#define EFI_PCI_ATTRIBUTE_IDE_SECONDARY_IO                 0x00040
+#define EFI_PCI_ATTRIBUTE_MEMORY_WRITE_COMBINE             0x00080
+#define EFI_PCI_ATTRIBUTE_IO                               0x00100
+#define EFI_PCI_ATTRIBUTE_MEMORY                           0x00200
+#define EFI_PCI_ATTRIBUTE_BUS_MASTER                       0x00400
+#define EFI_PCI_ATTRIBUTE_MEMORY_CACHED                    0x00800
+#define EFI_PCI_ATTRIBUTE_MEMORY_DISABLE                   0x01000
+#define EFI_PCI_ATTRIBUTE_EMBEDDED_DEVICE                  0x02000
+#define EFI_PCI_ATTRIBUTE_EMBEDDED_ROM                     0x04000
+#define EFI_PCI_ATTRIBUTE_DUAL_ADDRESS_CYCLE               0x08000
+#define EFI_PCI_ATTRIBUTE_ISA_IO_16                        0x10000
+#define EFI_PCI_ATTRIBUTE_VGA_PALETTE_IO_16                0x20000
+#define EFI_PCI_ATTRIBUTE_VGA_IO_16                        0x40000
+
+/* EFI UART attributes */
+#define EFI_UART_CLEAR_TO_SEND                             0x0010
+#define EFI_UART_DATA_SET_READY                            0x0020
+#define EFI_UART_RING_INDICATE                             0x0040
+#define EFI_UART_CARRIER_DETECT                            0x0080
+#define EFI_UART_REQUEST_TO_SEND                           0x0002
+#define EFI_UART_DATA_TERMINAL_READY                       0x0001
+#define EFI_UART_INPUT_BUFFER_EMPTY                        0x0100
+#define EFI_UART_OUTPUT_BUFFER_EMPTY                       0x0200
+#define EFI_UART_HARDWARE_LOOPBACK_ENABLE                  0x1000
+#define EFI_UART_SOFTWARE_LOOPBACK_ENABLE                  0x2000
+#define EFI_UART_HARDWARE_FLOW_CONTROL_ENABLE              0x4000
+
+/* EFI protocols GUIDs */
+#define EFI_BLOCK_IO_PROTOCOL_GUID                         {0x964E5B21, 0x6459, 0x11D2, {0x8E, 0x39, 0x00, 0xA0, 0xC9, 0x69, 0x72, 0x3B}}
+#define EFI_BLOCK_IO2_PROTOCOL_GUID                        {0xA77B2472, 0xE282, 0x4E9F, {0xA2, 0x45, 0xC2, 0xC0, 0xE2, 0x7B, 0xBC, 0xC1}}
+#define EFI_BUS_SPECIFIC_DRIVER_OVERRIDE_PROTOCOL_GUID     {0x3BC1B285, 0x8A15, 0x4A82, {0xAA, 0xBF, 0x4D, 0x7D, 0x13, 0xFB, 0x32, 0x65}}
+#define EFI_COMPONENT_NAME_PROTOCOL_GUID                   {0x107A772C, 0xD5E1, 0x11D4, {0x9A, 0x46, 0x00, 0x90, 0x27, 0x3F, 0xC1, 0x4D}}
+#define EFI_COMPONENT_NAME2_PROTOCOL_GUID                  {0x6A7A5CFF, 0xE8D9, 0x4F70, {0xBA, 0xDA, 0x75, 0xAB, 0x30, 0x25, 0xCE, 0x14}}
+#define EFI_DEBUG_IMAGE_INFO_TABLE_GUID                    {0x49152E77, 0x1ADA, 0x4764, {0xB7, 0xA2, 0x7A, 0xFE, 0xFE, 0xD9, 0x5E, 0x8B}}
+#define EFI_DEBUG_SUPPORT_PROTOCOL_GUID                    {0x2755590C, 0x6F3C, 0x42FA, {0x9E, 0xA4, 0xA3, 0xBA, 0x54, 0x3C, 0xDA, 0x25}}
+#define EFI_DEVICE_IO_PROTOCOL_GUID                        {0xAF6AC311, 0x84C3, 0x11D2, {0x8E, 0x3C, 0x00, 0xA0, 0xC9, 0x69, 0x72, 0x3B}}
+#define EFI_DEVICE_PATH_PROTOCOL_GUID                      {0x09576E91, 0x6D3F, 0x11D2, {0x8E, 0x39, 0x00, 0xA0, 0xC9, 0x69, 0x72, 0x3B}}
+#define EFI_DEVICE_PATH_FROM_TEXT_PROTOCOL_GUID            {0x05C99A21, 0xC70F, 0x4AD2, {0x8A, 0x5F, 0x35, 0xDF, 0x33, 0x43, 0xF5, 0x1E}}
+#define EFI_DEVICE_PATH_TO_TEXT_PROTOCOL_GUID              {0x8B843E20, 0x8132, 0x4852, {0x90, 0xCC, 0x55, 0x1A, 0x4E, 0x4A, 0x7F, 0x1C}}
+#define EFI_DEVICE_PATH_UTILITIES_PROTOCOL_GUID            {0x0379BE4E, 0xD706, 0x437D, {0xB0, 0x37, 0xED, 0xB8, 0x2F, 0xB7, 0x72, 0xA4}}
+#define EFI_DISK_IO_PROTOCOL_GUID                          {0xCE345171, 0xBA0B, 0x11D2, {0x8E, 0x4F, 0x00, 0xA0, 0xC9, 0x69, 0x72, 0x3B}}
+#define EFI_DISK_IO2_PROTOCOL_GUID                         {0x151C8EAE, 0x7F2C, 0x472C, {0x9E, 0x54, 0x98, 0x28, 0x19, 0x4F, 0x6A, 0x88}}
+#define EFI_DRIVER_BINDING_PROTOCOL_GUID                   {0x18A031AB, 0xB443, 0x4D1A, {0xA5, 0xC0, 0x0C, 0x09, 0x26, 0x1E, 0x9F, 0x71}}
+#define EFI_DRIVER_FAMILY_OVERRIDE_PROTOCOL_GUID           {0xB1EE129E, 0xDA36, 0x4181, {0x91, 0xF8, 0x04, 0xA4, 0x92, 0x37, 0x66, 0xA7}}
+#define EFI_EBC_INTERPRETER_PROTOCOL_GUID                  {0x13AC6DD1, 0x73D0, 0x11D4, {0xB0, 0x6B, 0x00, 0xAA, 0x00, 0xBD, 0x6D, 0xE7}}
+#define EFI_EDID_ACTIVE_PROTOCOL_GUID                      {0xBD8C1056, 0x9F36, 0x44EC, {0x92, 0xA8, 0xA6, 0x33, 0x7F, 0x81, 0x79, 0x86}}
+#define EFI_EDID_DISCOVERED_PROTOCOL_GUID                  {0x1C0C34F6, 0xD380, 0x41FA, {0xA0, 0x49, 0x8a, 0xD0, 0x6C, 0x1A, 0x66, 0xAA}}
+#define EFI_EDID_OVERRIDE_PROTOCOL_GUID                    {0x48ECB431, 0xFB72, 0x45C0, {0xA9, 0x22, 0xF4, 0x58, 0xFE, 0x04, 0x0B, 0xD5}}
+#define EFI_FPSWA_PROTOCOL_GUID                            {0xC41B6531, 0x97B9, 0x11D3, {0x9A, 0x29, 0x00, 0x90, 0x27, 0x3F, 0xC1, 0x4D}}
+#define EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID                  {0x9042A9DE, 0x23DC, 0x4A38, {0x96, 0xFB, 0x7A, 0xDE, 0xD0, 0x80, 0x51, 0x6A}}
+#define EFI_HASH_PROTOCOL_GUID                             {0xC5184932, 0xDBA5, 0x46DB, {0xA5, 0xBA, 0xCC, 0x0B, 0xDA, 0x9C, 0x14, 0x35}}
+#define EFI_LOAD_FILE_PROTOCOL_GUID                        {0x56EC3091, 0x954C, 0x11d2, {0x8E, 0x3F, 0x00, 0xA0, 0xC9, 0x69, 0x72, 0x3B}}
+#define EFI_LOADED_IMAGE_PROTOCOL_GUID                     {0x5B1B31A1, 0x9562, 0x11d2, {0x8E, 0x3F, 0x00, 0xA0, 0xC9, 0x69, 0x72, 0x3B}}
+#define EFI_LOADED_IMAGE_DEVICE_PATH_PROTOCOL_GUID         {0xBC62157E, 0x3E33, 0x4FEC, {0x99, 0x20, 0x2D, 0x3B, 0x36, 0xD7, 0x50, 0xDF}}
+#define EFI_NETWORK_INTERFACE_IDENTIFIER_PROTOCOL_GUID     {0xE18541CD, 0xF755, 0x4f73, {0x92, 0x8D, 0x64, 0x3C, 0x8A, 0x79, 0xB2, 0x29}}
+#define EFI_PCI_IO_PROTOCOL_GUID                           {0x4CF5B200, 0x68B8, 0x4CA5, {0x9E, 0xEC, 0xB2, 0x3E, 0x3F, 0x50, 0x02, 0x9A}}
+#define EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL_GUID               {0x2F707EBB, 0x4A1A, 0x11d4, {0x9A, 0x38, 0x00, 0x90, 0x27, 0x3F, 0xC1, 0x4D}}
+#define EFI_PLATFORM_DRIVER_OVERRIDE_PROTOCOL_GUID         {0x6B30C738, 0xA391, 0x11D4, {0x9A, 0x3B, 0x00, 0x90, 0x27, 0x3F, 0xC1, 0x4D}}
+#define EFI_RNG_PROTOCOL_GUID                              {0x3152BCA5, 0xEADE, 0x433D, {0x86, 0x2E, 0xC0, 0x1C, 0xDC, 0x29, 0x1F, 0x44}}
+#define EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_GUID               {0x964E5B22, 0x6459, 0x11D2, {0x8E, 0x39, 0x00, 0xA0, 0xC9, 0x69, 0x72, 0x3B}}
+#define EFI_SIMPLE_TEXT_INPUT_PROTOCOL_GUID                {0x387477C1, 0x69C7, 0x11D2, {0x8E, 0x39, 0x00, 0xA0, 0xC9, 0x69, 0x72, 0x3B}}
+#define EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL_GUID             {0xDD9E7534, 0x7762, 0x4698, {0x8C, 0x14, 0xF5, 0x85, 0x17, 0xA6, 0x25, 0xAA}}
+#define EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL_GUID               {0x387477C2, 0x69C7, 0x11D2, {0x8E, 0x39, 0x00, 0xA0, 0xC9, 0x69, 0x72, 0x3B}}
+#define EFI_UART_IO_PROTOCOL_GUID                          {0xBB25CF6F, 0xF1D4, 0x11D2, {0x9A, 0x0C, 0x00, 0x90, 0x27, 0x3F, 0xC1, 0xFD}}
+#define EFI_UNICODE_COLLATION_PROTOCOL_GUID                {0x1D85CD7F, 0xF43D, 0x11D2, {0x9A, 0x0C, 0x00, 0x90, 0x27, 0x3F, 0xc1, 0x4D}}
 
 /* Basic UEFI types */
 typedef PVOID EFI_EVENT, *PEFI_EVENT;
@@ -233,6 +420,7 @@ typedef struct _EFI_SYSTEM_TABLE EFI_SYSTEM_TABLE, *PEFI_SYSTEM_TABLE;
 typedef struct _EFI_IPv4_ADDRESS EFI_IPv4_ADDRESS, *PEFI_IPv4_ADDRESS;
 typedef struct _EFI_IPv6_ADDRESS EFI_IPv6_ADDRESS, *PEFI_IPv6_ADDRESS;
 typedef struct _EFI_MAC_ADDRESS EFI_MAC_ADDRESS, *PEFI_MAC_ADDRESS;
+typedef struct _EFI_NETWORK_INTERFACE_IDENTIFIER_PROTOCOL EFI_NETWORK_INTERFACE_IDENTIFIER_PROTOCOL, EFI_NETWORK_INTERFACE_IDENTIFIER_INTERFACE;
 typedef struct _EFI_MANAGED_NETWORK_CONFIG_DATA EFI_MANAGED_NETWORK_CONFIG_DATA, *PEFI_MANAGED_NETWORK_CONFIG_DATA;
 typedef struct _EFI_DEVICE_PATH_PROTOCOL EFI_DEVICE_PATH_PROTOCOL, *PEFI_DEVICE_PATH_PROTOCOL;
 typedef struct _EFI_PCI_DEVICE_PATH EFI_PCI_DEVICE_PATH, *PEFI_PCI_DEVICE_PATH;
@@ -781,6 +969,21 @@ typedef struct _EFI_MAC_ADDRESS
 {
     UINT8 Addr[32];
 } EFI_MAC_ADDRESS, *PEFI_MAC_ADDRESS;
+
+/* EFI network interface identifier protocol */
+typedef struct _EFI_NETWORK_INTERFACE_IDENTIFIER_PROTOCOL
+{
+    UINT64 Revision;
+    UINT64 ID;
+    UINT64 ImageAddr;
+    UINT32 ImageSize;
+    UINT8 StringId[4];
+    UINT8 Type;
+    UINT8 MajorVer;
+    UINT8 MinorVer;
+    BOOLEAN Ipv6Supported;
+    UINT8 IfNum;
+} EFI_NETWORK_INTERFACE_IDENTIFIER_PROTOCOL, EFI_NETWORK_INTERFACE_IDENTIFIER_INTERFACE;
 
 /* EFI network configuration data structure */
 typedef struct _EFI_MANAGED_NETWORK_CONFIG_DATA
