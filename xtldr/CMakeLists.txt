@@ -8,6 +8,7 @@ include_directories(
 
 # Specify list of source code files
 list(APPEND XTLDR_SOURCE
+    ${XTLDR_SOURCE_DIR}/console.c
     ${XTLDR_SOURCE_DIR}/xtldr.c)
 
 # Add executable

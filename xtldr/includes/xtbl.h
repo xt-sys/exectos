@@ -18,6 +18,15 @@ EXTERN EFI_HANDLE EfiImageHandle;
 /* EFI System Table */
 EXTERN EFI_SYSTEM_TABLE *EfiSystemTable;
 
+VOID
+BlConsoleClearScreen();
+
+EFI_STATUS
+BlConsoleInitialize();
+
+VOID
+BlConsolePutChar(IN USHORT Character);
+
 EFI_STATUS
 XtLoaderStartup(IN EFI_HANDLE ImageHandle,
                 IN PEFI_SYSTEM_TABLE SystemTable);

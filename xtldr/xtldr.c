@@ -32,9 +32,19 @@ EFI_STATUS
 XtLoaderStartup(IN EFI_HANDLE ImageHandle,
                 IN PEFI_SYSTEM_TABLE SystemTable)
 {
+    EFI_STATUS Status;
+
     /* Set the system table and image handle */
     EfiImageHandle = ImageHandle;
     EfiSystemTable = SystemTable;
+
+    /* Initialize EFI console */
+    Status = BlConsoleInitialize();
+    if(Status != STATUS_EFI_SUCCESS) {
+        /* TODO: Display error message on the serial console */
+        /* Temporarily return error code */
+        return STATUS_EFI_INCOMPATIBLE_VERSION;
+    }
 
     /* Infinite bootloader loop */
     for(;;);
