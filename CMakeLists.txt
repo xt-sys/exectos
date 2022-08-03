@@ -63,3 +63,4 @@ set_disk_image_size(128)
 
 # Build subprojects
 add_subdirectory(bootdata)
+add_subdirectory(xtldr)
