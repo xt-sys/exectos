@@ -27,6 +27,7 @@ PEFI_SYSTEM_TABLE EfiSystemTable;
  * @return This routine returns status code.
  *
  * @since XT 1.0
+ *
  */
 EFI_STATUS
 XtLoaderStartup(IN EFI_HANDLE ImageHandle,
