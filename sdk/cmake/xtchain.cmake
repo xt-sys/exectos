@@ -1,10 +1,10 @@
 # Architecture specific flags
 if(ARCH STREQUAL i686)
-    add_compiler_flags("-m32 --target=i686-w64-windows-msvc")
+    add_compiler_flags("-m32 --target=i686-pc-windows-msvc")
     add_linker_flags("/machine:X86")
     set(HOTPATCH_LINKER_FLAG "/FUNCTIONPADMIN:5")
 elseif(ARCH STREQUAL amd64)
-    add_compiler_flags("-m64 --target=x86_64-w64-windows-msvc")
+    add_compiler_flags("-m64 --target=x86_64-pc-windows-msvc")
     add_linker_flags("/machine:X64")
     set(HOTPATCH_LINKER_FLAG "/FUNCTIONPADMIN:6")
 endif()
