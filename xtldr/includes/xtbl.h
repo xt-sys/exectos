@@ -10,6 +10,7 @@
 #define __XTLDR_XTBL_H
 
 #include <xtkmapi.h>
+#include <xtklib.h>
 
 
 /* EFI Image Handle */
@@ -17,6 +18,12 @@ EXTERN EFI_HANDLE EfiImageHandle;
 
 /* EFI System Table */
 EXTERN EFI_SYSTEM_TABLE *EfiSystemTable;
+
+/* Serial port configuration */
+EXTERN CPPORT EfiSerialPort;
+
+VOID
+BlComPortPutChar(IN USHORT Character);
 
 VOID
 BlConsoleClearScreen();
@@ -28,8 +35,16 @@ VOID
 BlConsolePutChar(IN USHORT Character);
 
 VOID
+BlDbgPrint(IN PUINT16 Format,
+           IN ...);
+
+VOID
 BlEfiPrint(IN PUINT16 Format,
            IN ...);
+
+EFI_STATUS
+BlStartXtLoader(IN EFI_HANDLE ImageHandle,
+                IN PEFI_SYSTEM_TABLE SystemTable);
 
 VOID
 BlStringPrint(IN VOID PutChar(IN USHORT Character),
@@ -65,9 +80,5 @@ BlpStringPrintUnsigned64(IN VOID PutChar(IN USHORT Character),
 
 UINT64
 BlpStringReadPadding(IN PUINT16 *Format);
-
-EFI_STATUS
-XtLoaderStartup(IN EFI_HANDLE ImageHandle,
-                IN PEFI_SYSTEM_TABLE SystemTable);
 
 #endif /* __XTLDR_XTBL_H */

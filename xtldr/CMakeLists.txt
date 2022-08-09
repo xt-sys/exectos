@@ -4,6 +4,7 @@ PROJECT(XTLDR)
 # Specify include directories
 include_directories(
     ${EXECTOS_SOURCE_DIR}/sdk/xtdk
+    ${EXECTOS_SOURCE_DIR}/sdk/xtklib/includes
     ${XTLDR_SOURCE_DIR}/includes)
 
 # Specify list of source code files
@@ -16,6 +17,9 @@ list(APPEND XTLDR_SOURCE
 # Add executable
 add_executable(xtldr ${XTLDR_SOURCE})
 
+# Add linker libraries
+target_link_libraries(xtldr xtklib)
+
 # Set proper binary name and install target
 if(ARCH STREQUAL "i686")
 	set(BINARY_NAME "bootia32")
@@ -26,5 +30,5 @@ set_target_properties(xtldr PROPERTIES OUTPUT_NAME ${BINARY_NAME} SUFFIX .efi)
 set_install_target(xtldr efi/boot)
 
 # Set loader entrypoint, imagebase address, ordinals and subsystem
-set_entrypoint(xtldr "XtLoaderStartup")
+set_entrypoint(xtldr "BlStartXtLoader")
 set_subsystem(xtldr efi_application)

@@ -15,6 +15,31 @@ EFI_HANDLE EfiImageHandle;
 /* EFI System Table */
 PEFI_SYSTEM_TABLE EfiSystemTable;
 
+/* Serial port configuration */
+CPPORT EfiSerialPort;
+
+/**
+ * Writes a character to the serial console.
+ *
+ * @param Character
+ *        The integer promotion of the character to be written.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+VOID
+BlComPortPutChar(IN USHORT Character)
+{
+    USHORT Buffer[2];
+
+    /* Write character to the serial console */
+    Buffer[0] = Character;
+    Buffer[1] = 0;
+
+    HlComPortPutByte(&EfiSerialPort, Buffer[0]);
+}
+
 /**
  * This routine is the entry point of the XT EFI boot loader.
  *
@@ -27,10 +52,9 @@ PEFI_SYSTEM_TABLE EfiSystemTable;
  * @return This routine returns status code.
  *
  * @since XT 1.0
- *
  */
 EFI_STATUS
-XtLoaderStartup(IN EFI_HANDLE ImageHandle,
+BlStartXtLoader(IN EFI_HANDLE ImageHandle,
                 IN PEFI_SYSTEM_TABLE SystemTable)
 {
     EFI_STATUS Status;
@@ -38,6 +62,12 @@ XtLoaderStartup(IN EFI_HANDLE ImageHandle,
     /* Set the system table and image handle */
     EfiImageHandle = ImageHandle;
     EfiSystemTable = SystemTable;
+
+    Status = HlInitializeComPort(&EfiSerialPort, 1, 0);
+    if(Status != STATUS_SUCCESS)
+    {
+        BlEfiPrint(L"Failed to initialize serial console");
+    }
 
     /* Initialize EFI console */
     Status = BlConsoleInitialize();
