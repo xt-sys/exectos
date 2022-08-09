@@ -21,3 +21,6 @@
 /* Architecture-independent XT API */
 #include "xtcommon.h"
 #include "xtuefi.h"
+
+/* Low level data types headers */
+#include "hltypes.h"

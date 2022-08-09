@@ -1,0 +1,298 @@
+/**
+ * PROJECT:         ExectOS
+ * COPYRIGHT:       See COPYING.md in the top level directory
+ * FILE:            sdk/xtklib/hl/cport.c
+ * DESCRIPTION:     Serial (COM) port support
+ * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ */
+
+#include "xtkmapi.h"
+#include "xtklib.h"
+
+
+/* I/O port addresses for COM1 - COM8 (valid only for ia32 and amd64) */
+ULONG ComPortAddress[] = {0x000, 0x3F8, 0x2F8, 0x3E8, 0x2E8, 0x5F8, 0x4F8, 0x5E8, 0x4E8};
+
+
+/**
+ * This routine gets a byte from serial port.
+ *
+ * @param Port
+ *        Address of port object describing a port settings.
+ *
+ * @param Byte
+ *        Address of variable where to store the result.
+ *
+ * @param Wait
+ *        Specifies whether to wait for a data or not.
+ *
+ * @param Poll
+ *        Indicates whether to only poll, not reading the data.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTSTATUS
+HlComPortGetByte(IN PCPPORT Port,
+                 OUT PUCHAR Byte,
+                 IN BOOLEAN Wait,
+                 IN BOOLEAN Poll)
+{
+    UCHAR Lsr;
+    ULONG Retry;
+
+    /* Make sure the port has been initialized */
+    if(Port->Address == 0)
+    {
+        return STATUS_DEVICE_NOT_READY;
+    }
+
+    /* Retry getting data if allowed to wait */
+    Retry = Wait ? COMPORT_WAIT_TIMEOUT : 1;
+    while(Retry--)
+    {
+        /* Get LSR for data ready */
+        Lsr = HlComPortReadLsr(Port, COMPORT_LSR_DR);
+        if((Lsr & COMPORT_LSR_DR) == COMPORT_LSR_DR)
+        {
+            /* Check for errors */
+            if(Lsr & (COMPORT_LSR_FE | COMPORT_LSR_OE | COMPORT_LSR_PE))
+            {
+                /* Framing, parity or overrun error occurred */
+                *Byte = 0;
+                return STATUS_IO_DEVICE_ERROR;
+            }
+
+            /* Check if only polling */
+            if(Poll)
+            {
+                /* Only polling, return success */
+                return STATUS_SUCCESS;
+            }
+
+            /* Read the byte from serial port */
+            *Byte = HlIoPortInByte(PtrToUshort(Port->Address + (ULONG)COMPORT_REG_RBR));
+
+            /* Check if in modem control mode */
+            if(Port->Flags & COMPORT_FLAG_MC)
+            {
+                /* Handle Carrier Detected (CD) */
+                if((HlIoPortInByte(PtrToShort(Port->Address + (ULONG)COMPORT_REG_MSR)) & COMPORT_MSR_DCD) == 0)
+                {
+                    /* Skip byte if no CD present */
+                    continue;
+                }
+            }
+            return STATUS_SUCCESS;
+        }
+    }
+
+    /* Reset LSR and return that no data found */
+    HlComPortReadLsr(Port, 0);
+    return STATUS_NOT_FOUND;
+}
+
+/**
+ * Reads LSR from specified serial port.
+ *
+ * @param Port
+ *        Address of COM port.
+ *
+ * @param Byte
+ *        Value expected from the port.
+ *
+ * @return Byte read from COM port.
+ *
+ * @since XT 1.0
+ */
+UCHAR
+HlComPortReadLsr(IN PCPPORT Port,
+                 IN UCHAR Byte)
+{
+    UCHAR Lsr, Msr;
+    STATIC UCHAR RingFlag;
+
+    /* Read the Line Status Register (LSR) */ 
+    Lsr = HlIoPortInByte(PtrToUshort(Port->Address + (ULONG)COMPORT_REG_LSR));
+
+    /* Check if expected byte is present */
+    if((Lsr & Byte) == 0)
+    {
+        /* Check Modem Status Register (MSR) for ring indicator */
+        Msr = HlIoPortInByte(PtrToUshort(Port->Address + (ULONG)COMPORT_REG_MSR));
+        RingFlag |= (Msr & COMPORT_MSR_RI) ? 1 : 2;
+        if(RingFlag == 3)
+        {
+            /* Ring indicator toggled, use modem control */
+            Port->Flags |= COMPORT_FLAG_MC;
+        }
+    }
+
+    /* Return byte read */
+    return Lsr;
+}
+
+/**
+ * This routine writes a byte to the serial port.
+ *
+ * @param Port
+ *        Address of port object describing a port settings.
+ *
+ * @param Byte
+ *        Data to be written.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTSTATUS 
+HlComPortPutByte(IN PCPPORT Port,
+                 IN UCHAR Byte)
+{
+    UCHAR Lsr, Msr;
+
+    /* Make sure the port has been initialized */
+    if(Port->Address == 0)
+    {
+        return STATUS_DEVICE_NOT_READY;
+    }
+
+    /* Check if port is in modem control */
+    while(Port->Flags & COMPORT_FLAG_MC)
+    {
+        /* Get the Modem Status Register (MSR) */
+        Msr = HlIoPortInByte(PtrToUshort(Port->Address + (ULONG)COMPORT_REG_MSR)) & COMPORT_MSR_DSRCTSCD;
+        if(Msr != COMPORT_MSR_DSRCTSCD)
+        {
+            /* Take character, if CD is not set */
+            Lsr = HlComPortReadLsr(Port, 0);
+            if((Msr & COMPORT_MSR_DCD) == 0 && (Lsr & COMPORT_LSR_DR) == COMPORT_LSR_DR)
+            {
+                /* Eat the character */
+                HlIoPortInByte(PtrToUshort(Port->Address + (ULONG)COMPORT_REG_RBR));
+            }
+        }
+        else
+        {
+            /* CD, CTS and DSR are set, we can continue */
+            break;
+        }
+    }
+
+    /* Wait for busy port */
+    while((HlComPortReadLsr(Port, COMPORT_LSR_THRE) & COMPORT_LSR_THRE) == 0);
+
+    /* Send byte to the port */
+    HlIoPortOutByte(PtrToUshort(Port->Address + (ULONG)COMPORT_REG_THR), Byte);
+
+    return STATUS_SUCCESS;
+}
+
+/**
+ * This routine initializes the COM port.
+ *
+ * @param Port
+ *        Address of port object describing a port settings.
+ *
+ * @param PortNumber
+ *        Supplies a port number.
+ *
+ * @param BaudRate
+ *        Supplies an optional port baud rate.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTSTATUS
+HlInitializeComPort(IN OUT PCPPORT Port,
+                    IN ULONG PortNumber,
+                    IN ULONG BaudRate)
+{
+    PUCHAR Address;
+    UCHAR Byte = 0;
+    ULONG Mode;
+
+    /* Check if serial port is set */
+    if(PortNumber == 0)
+    {
+        /* Use COM1 by default */
+        PortNumber = 1;
+    }
+
+    /* We support up to COM8 */
+    if(PortNumber > ARRAY_SIZE(ComPortAddress))
+    {
+        /* Fail if wrong/unsupported port used */
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    /* Check if baud rate is set */
+    if(BaudRate == 0)
+    {
+        /* Use default baud (clock) rate if not set */
+        BaudRate = COMPORT_CLOCK_RATE;
+        Port->Flags = COMPORT_FLAG_DBR;
+    }
+
+    /* Store COM pointer */
+    Address = UlongToPtr(ComPortAddress[PortNumber]);
+
+    /* Check whether this port is not already initialized */
+    if((Port->Address == Address) && (Port->Baud == BaudRate))
+    {
+        return STATUS_SUCCESS;
+    }
+
+    /* Test if chosen COM port exists */
+    do
+    {
+        /* Check whether the 16450/16550 scratch register exists */
+        HlIoPortOutByte(PtrToUshort(Address + (ULONG)COMPROT_REG_SR), Byte);
+        if(HlIoPortInByte(PtrToUshort(Address + (ULONG)COMPROT_REG_SR)) != Byte)
+        {
+            return STATUS_NOT_FOUND;
+        }
+    } while(++Byte != 0);
+
+    /* Disable interrupts */
+    HlIoPortOutByte(PtrToUshort(Address + (ULONG)COMPORT_REG_LCR), COMPORT_LSR_DIS);
+    HlIoPortOutByte(PtrToUshort(Address + (ULONG)COMPORT_REG_IER), COMPORT_LSR_DIS);
+
+    /* Enable Divisor Latch Access Bit (DLAB) */
+    HlIoPortOutByte(PtrToUshort(Address + (ULONG)COMPORT_REG_LCR), COMPORT_LCR_DLAB);
+
+    /* Set baud rate */
+    Mode = COMPORT_CLOCK_RATE / BaudRate;
+    HlIoPortOutByte(PtrToUshort(Address + (ULONG)COMPORT_DIV_DLL), (UCHAR)(Mode & 0xFF));
+    HlIoPortOutByte(PtrToUshort(Address + (ULONG)COMPORT_DIV_DLM), (UCHAR)((Mode >> 8) & 0xFF));
+
+    /* Set 8 data bits, 1 stop bits, no parity (8n1) */
+    HlIoPortOutByte(PtrToUshort(Address + (ULONG)COMPORT_REG_LCR),
+                       COMPORT_LCR_8DATA | COMPORT_LCR_1STOP | COMPORT_LCR_PARN);
+
+    /* Enable DTR, RTS and OUT2 */
+    HlIoPortOutByte(PtrToUshort(Address + (ULONG)COMPORT_REG_MCR),
+                       COMPORT_MCR_DTR | COMPORT_MCR_RTS | COMPORT_MCR_OUT2);
+
+    /* Enable FIFO */
+    HlIoPortOutByte(PtrToUshort(Address + (ULONG)COMPORT_REG_FCR),
+                       COMPORT_FCR_ENABLE | COMPORT_FCR_RCVR_RESET | COMPORT_FCR_TXMT_RESET);
+
+    /* Enable loopback mode and test serial port */
+    HlIoPortOutByte(PtrToUshort(Address + (ULONG)COMPORT_REG_MCR), COMPORT_MCR_LOOP);
+    HlIoPortOutByte(PtrToUshort(Address + (ULONG)COMPORT_REG_RBR), COMPORT_MSR_TST);
+    if(HlIoPortInByte(PtrToUshort(Address + (ULONG)COMPORT_REG_RBR)) != COMPORT_MSR_TST)
+    {
+        return STATUS_IO_DEVICE_ERROR;
+    }
+
+    /* Disable loopback mode and use port normally */
+    HlIoPortOutByte(PtrToUshort(Address + (ULONG)COMPORT_REG_MCR), COMPORT_MCR_NOM);
+    Port->Address = Address;
+    Port->Baud = BaudRate;
+
+    /* Return success */
+    return STATUS_SUCCESS;
+}
