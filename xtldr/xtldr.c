@@ -63,6 +63,7 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
     EfiImageHandle = ImageHandle;
     EfiSystemTable = SystemTable;
 
+    /* Early initialize COM port for debugging (115200 8n1) */
     Status = HlInitializeComPort(&EfiSerialPort, 1, 0);
     if(Status != STATUS_SUCCESS)
     {

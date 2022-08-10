@@ -221,7 +221,7 @@ HlInitializeComPort(IN OUT PCPPORT Port,
         PortNumber = 1;
     }
 
-    /* We support up to COM8 */
+    /* We support only a pre-defined number of ports */
     if(PortNumber > ARRAY_SIZE(ComPortAddress))
     {
         /* Fail if wrong/unsupported port used */
