@@ -21,8 +21,9 @@
 #define COMPORT_DIV_DLM             0x01 /* Divisor Latch Most */
 
 /* Serial port control flags */
-#define COMPORT_FLAG_DBR            0x01 /* Default Baud Rate */
-#define COMPORT_FLAG_MC             0x02 /* Modem Control */
+#define COMPORT_FLAG_INIT           0x01 /* Port Initialized */
+#define COMPORT_FLAG_DBR            0x02 /* Default Baud Rate */
+#define COMPORT_FLAG_MC             0x04 /* Modem Control */
 
 /* Serial port Fifo Control Register (FCR) access masks */
 #define COMPORT_FCR_DISABLE         0x00 /* Disable */

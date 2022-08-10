@@ -28,14 +28,18 @@ BlDbgPrint(IN PUINT16 Format,
 {
     VA_LIST Arguments;
 
-    /* Initialise the va_list */
-    VA_START(Arguments, Format);
+    /* Check if EFI serial port is fully initialized */
+    if(EfiSerialPort.Flags & COMPORT_FLAG_INIT)
+    {
+        /* Initialise the va_list */
+        VA_START(Arguments, Format);
 
-    /* Format and print the string to the serial console */
-    BlStringPrint(BlComPortPutChar, Format, Arguments);
+        /* Format and print the string to the serial console */
+        BlStringPrint(BlComPortPutChar, Format, Arguments);
 
-    /* Clean up the va_list */
-    VA_END(Arguments);
+        /* Clean up the va_list */
+        VA_END(Arguments);
+    }
 }
 
 /**
@@ -65,8 +69,12 @@ BlEfiPrint(IN PUINT16 Format,
     /* Format and print the string to the stdout */
     BlStringPrint(BlConsolePutChar, Format, Arguments);
 
-    /* Format and print the string to the serial console */
-    BlStringPrint(BlComPortPutChar, Format, Arguments);
+    /* Check if EFI serial port is fully initialized */
+    if(EfiSerialPort.Flags & COMPORT_FLAG_INIT)
+    {
+        /* Format and print the string to the serial console */
+        BlStringPrint(BlComPortPutChar, Format, Arguments);
+    }
 
     /* Clean up the va_list */
     VA_END(Arguments);

@@ -212,6 +212,7 @@ HlInitializeComPort(IN OUT PCPPORT Port,
 {
     PUCHAR Address;
     UCHAR Byte = 0;
+    USHORT Flags = 0;
     ULONG Mode;
 
     /* Check if serial port is set */
@@ -233,7 +234,7 @@ HlInitializeComPort(IN OUT PCPPORT Port,
     {
         /* Use default baud (clock) rate if not set */
         BaudRate = COMPORT_CLOCK_RATE;
-        Port->Flags = COMPORT_FLAG_DBR;
+        Flags |= COMPORT_FLAG_DBR;
     }
 
     /* Store COM pointer */
@@ -288,10 +289,14 @@ HlInitializeComPort(IN OUT PCPPORT Port,
         return STATUS_IO_DEVICE_ERROR;
     }
 
+    /* Mark port as fully initialized */
+    Flags |= COMPORT_FLAG_INIT;
+
     /* Disable loopback mode and use port normally */
     HlIoPortOutByte(PtrToUshort(Address + (ULONG)COMPORT_REG_MCR), COMPORT_MCR_NOM);
     Port->Address = Address;
     Port->Baud = BaudRate;
+    Port->Flags = Flags;
 
     /* Return success */
     return STATUS_SUCCESS;
