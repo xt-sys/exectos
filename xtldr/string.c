@@ -34,6 +34,7 @@ BlStringPrint(IN VOID PutChar(IN USHORT Character),
 {
     PEFI_GUID Guid;
     PUCHAR String;
+    PWCHAR WideString;
     ULONG PaddingCount;
 
     /* Read the variable arguments */
@@ -95,6 +96,13 @@ BlStringPrint(IN VOID PutChar(IN USHORT Character),
                         while(*String)
                         {
                             PutChar(*String++);
+                        }
+                        break;
+                    case L'S':
+                        WideString = VA_ARG(Arguments, PWCHAR);
+                        while(*WideString)
+                        {
+                            PutChar((UCHAR)*WideString++);
                         }
                         break;
                     case L'u':
