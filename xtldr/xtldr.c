@@ -67,14 +67,17 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
     Status = HlInitializeComPort(&EfiSerialPort, 1, 0);
     if(Status != STATUS_SUCCESS)
     {
+        /* Initialization failed, try printing error to stdout and serial console */
         BlEfiPrint(L"Failed to initialize serial console");
     }
 
     /* Initialize EFI console */
     Status = BlConsoleInitialize();
     if(Status != STATUS_EFI_SUCCESS) {
-        /* TODO: Display error message on the serial console */
-        /* Temporarily return error code */
+        /* Initialization failed, try printing error to stdout and serial console */
+        BlEfiPrint(L"Failed to initialize EFI console services");
+
+        /* Consider it as unsupported EFI implementation */
         return STATUS_EFI_INCOMPATIBLE_VERSION;
     }
 
