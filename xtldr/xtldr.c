@@ -81,6 +81,14 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
         return STATUS_EFI_INCOMPATIBLE_VERSION;
     }
 
+    /* Disable watchdog timer */
+    Status = EfiSystemTable->BootServices->SetWatchdogTimer(0, 0x10000, 0, NULL);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to disable the timer, print message */
+        BlDbgPrint(L"WARNING: Failed to disable watchdog timer");
+    }
+
     /* Infinite bootloader loop */
     for(;;);
 
