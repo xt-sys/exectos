@@ -13,7 +13,7 @@
 #include "xttypes.h"
 
 
-UINT64
+INT
 RtlWideStringCompare(IN CONST PWCHAR String1,
                      IN CONST PWCHAR String2,
                      IN CONST ULONG Length);

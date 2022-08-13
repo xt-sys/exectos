@@ -25,12 +25,12 @@
  *
  * @since XT 1.0
  */
-UINT64
+INT
 RtlWideStringCompare(IN CONST PWCHAR String1,
                      IN CONST PWCHAR String2,
                      IN CONST ULONG Length)
 {
-    UINT64 Index;
+    ULONG Index;
 
     /* Iterate through the strings */
     for(Index = 0; Index < Length; Index++) {
@@ -74,8 +74,8 @@ RtlWideStringTokenize(IN PWCHAR String,
                       IN CONST PWCHAR Delimiter,
                       IN OUT PWCHAR *SavePtr)
 {
-    WCHAR *Span, *Token;
-    UINT64 Char, SpanChar;
+    PWCHAR Span, Token;
+    WCHAR Char, SpanChar;
 
     /* Check if there is anything to tokenize */
     if(String == NULL && (String = *SavePtr) == NULL)
