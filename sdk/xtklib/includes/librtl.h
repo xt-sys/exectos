@@ -10,8 +10,21 @@
 #define __XTKLIB_LIBRTL_H
 
 #include "xtdefs.h"
+#include "xtstruct.h"
 #include "xttypes.h"
 
+
+XTINLINE
+VOID
+RtlInitializeListHead(IN PLIST_ENTRY ListHead);
+
+XTINLINE
+VOID
+RtlInitializeListHead32(IN PLIST_ENTRY32 ListHead);
+
+XTINLINE
+BOOLEAN
+RtlListEmpty(PLIST_ENTRY ListHead);
 
 INT
 RtlWideStringCompare(IN CONST PWCHAR String1,
