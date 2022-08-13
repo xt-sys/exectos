@@ -45,17 +45,17 @@ ExectOS is in very early development stage, thus its requirements have been not 
 design, it requires a modern EFI enabled hardware. It is not possible currently to boot ExectOS on a legacy BIOS.
 
 # Source structure
-| Directory  | Description                                              |
-|------------|----------------------------------------------------------|
-| bootdata   | default configuration and data needed to boot XTOS       |
-| drivers    | XT native drivers source code                            |
-| sdk/cmake  | Host toolchain configuration and build-related functions |
-| sdk/xtdk   | XT Software Development Kit headers                      |
-| sdk/xtklib | XT Base kernel-mode library source code                  |
-| services   | integral subsystems services source code                 |
-| subsystems | environment subsystems source code                       |
-| xtoskrnl   | XTOS kernel source code                                  |
-| xtldr      | XTOS boot loader source code                             |
+| Directory   | Description                                              |
+|-------------|----------------------------------------------------------|
+| bootdata    | default configuration and data needed to boot XTOS       |
+| drivers     | XT native drivers source code                            |
+| sdk/cmake   | Host toolchain configuration and build-related functions |
+| sdk/xtdk    | XT Software Development Kit headers                      |
+| sdk/xtklib  | XT Base kernel-mode library source code                  |
+| services    | integral subsystems services source code                 |
+| subsystems  | environment subsystems source code                       |
+| xtoskrnl    | XTOS kernel source code                                  |
+| xtldr       | XTOS boot loader source code                             |
 
 # Build
 XTOS can be built only by using XTChain, a special toolchain prepared for compiling XT software. Currently, there is
