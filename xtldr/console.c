@@ -29,15 +29,9 @@ BlConsoleClearScreen()
  * 
  * @since XT 1.0
  */
-EFI_STATUS
+VOID
 BlConsoleInitialize()
 {
-    /* Check the console support */
-    if(!EfiSystemTable->ConOut)
-    {
-        return STATUS_EFI_UNSUPPORTED;
-    }
-
     /* Clear console buffers */
     EfiSystemTable->ConIn->Reset(EfiSystemTable->ConIn, TRUE);
     EfiSystemTable->ConOut->Reset(EfiSystemTable->ConOut, TRUE);
@@ -48,9 +42,6 @@ BlConsoleInitialize()
 
     /* Enable cursor */
     EfiSystemTable->ConOut->EnableCursor(EfiSystemTable->ConOut, TRUE);
-
-    /* Return success */
-    return STATUS_EFI_SUCCESS;
 }
 
 /**

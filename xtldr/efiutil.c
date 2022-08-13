@@ -9,6 +9,119 @@
 #include <xtbl.h>
 
 
+EFI_STATUS
+BlComPortInitialize()
+{
+    EFI_GUID LIPGuid = EFI_LOADED_IMAGE_PROTOCOL_GUID;
+    PEFI_LOADED_IMAGE_PROTOCOL LoadedImage;
+    ULONG PortNumber, BaudRate;
+    PWCHAR Argument, CommandLine, LastArg;
+    EFI_STATUS EfiStatus;
+    XTSTATUS Status;
+
+    /* Set default serial port options */
+    PortNumber = 0;
+    BaudRate = 0;
+
+    /* Handle loaded image protocol */
+    EfiStatus = EfiSystemTable->BootServices->HandleProtocol(EfiImageHandle, &LIPGuid, (PVOID *)&LoadedImage);
+    if(EfiStatus == STATUS_EFI_SUCCESS)
+    {
+
+        /* Check if launched from UEFI shell */
+        if(LoadedImage && LoadedImage->LoadOptions)
+        {
+            /* Store arguments passed from UEFI shell */
+            CommandLine = (PWCHAR)LoadedImage->LoadOptions;
+
+            /* Find command in command line */
+            Argument = RtlWideStringTokenize(CommandLine, L" ", &LastArg);
+
+            /* Iterate over all arguments passed to boot loader */
+            while(Argument != NULL)
+            {
+                /* Check if this is DEBUG parameter */
+                if(RtlWideStringCompare(Argument, L"DEBUG=", 6) == 0)
+                {
+                    /* Skip to the argument value */
+                    Argument += 6;
+
+                    /* Make sure COM port is being used */
+                    if(RtlWideStringCompare(Argument, L"COM", 3))
+                    {
+                        /* Invalid debug port specified */
+                        BlEfiPrint(L"ERROR: Invalid debug port specified, falling back to defaults\n");
+                        break;
+                    }
+
+                    /* Read COM port number */
+                    Argument += 3;
+                    while(*Argument >= '0' && *Argument <= '9')
+                    {
+                        /* Get port number */
+                        PortNumber *= 10;
+                        PortNumber += *Argument - '0';
+                        Argument++;
+                    }
+
+                    /* Look for additional COM port parameters */
+                    if(*Argument == ',')
+                    {
+                        /* Baud rate provided */
+                        Argument++;
+                        while(*Argument >= '0' && *Argument <= '9')
+                        {
+                            /* Get baud rate */
+                            BaudRate *= 10;
+                            BaudRate += *Argument - '0';
+                            Argument++;
+                        }
+                    }
+
+                    /* No need to check next arguments */
+                    break;
+                }
+
+                /* Take next argument */
+                Argument = RtlWideStringTokenize(NULL, L" ", &LastArg);
+            }
+        }
+    }
+
+    /* Initialize COM port */
+    Status = HlInitializeComPort(&EfiSerialPort, PortNumber, BaudRate);
+    if(Status != STATUS_SUCCESS)
+    {
+        /* Serial port initialization failed, mark as not ready */
+        return STATUS_EFI_NOT_READY;
+    }
+
+    /* Return success */
+    return STATUS_EFI_SUCCESS;
+}
+
+/**
+ * Writes a character to the serial console.
+ *
+ * @param Character
+ *        The integer promotion of the character to be written.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+VOID
+BlComPortPutChar(IN USHORT Character)
+{
+    USHORT Buffer[2];
+
+    /* Write character to the serial console */
+    Buffer[0] = Character;
+    Buffer[1] = 0;
+
+    HlComPortPutByte(&EfiSerialPort, Buffer[0]);
+}
+
 /**
  * This routine formats the input string and prints it out to the serial console.
  *

@@ -22,13 +22,16 @@ EXTERN EFI_SYSTEM_TABLE *EfiSystemTable;
 /* Serial port configuration */
 EXTERN CPPORT EfiSerialPort;
 
+EFI_STATUS
+BlComPortInitialize();
+
 VOID
 BlComPortPutChar(IN USHORT Character);
 
 VOID
 BlConsoleClearScreen();
 
-EFI_STATUS
+VOID
 BlConsoleInitialize();
 
 VOID

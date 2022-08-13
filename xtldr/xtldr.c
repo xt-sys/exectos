@@ -19,28 +19,6 @@ PEFI_SYSTEM_TABLE EfiSystemTable;
 CPPORT EfiSerialPort;
 
 /**
- * Writes a character to the serial console.
- *
- * @param Character
- *        The integer promotion of the character to be written.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-VOID
-BlComPortPutChar(IN USHORT Character)
-{
-    USHORT Buffer[2];
-
-    /* Write character to the serial console */
-    Buffer[0] = Character;
-    Buffer[1] = 0;
-
-    HlComPortPutByte(&EfiSerialPort, Buffer[0]);
-}
-
-/**
  * This routine is the entry point of the XT EFI boot loader.
  *
  * @param ImageHandle
@@ -63,22 +41,15 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
     EfiImageHandle = ImageHandle;
     EfiSystemTable = SystemTable;
 
-    /* Early initialize COM port for debugging (115200 8n1) */
-    Status = HlInitializeComPort(&EfiSerialPort, 1, 0);
-    if(Status != STATUS_SUCCESS)
+    /* Initialize EFI console */
+    BlConsoleInitialize();
+
+    /* Early initialize COM port for debugging */
+    Status = BlComPortInitialize();
+    if(Status != STATUS_EFI_SUCCESS)
     {
         /* Initialization failed, try printing error to stdout and serial console */
-        BlEfiPrint(L"Failed to initialize serial console");
-    }
-
-    /* Initialize EFI console */
-    Status = BlConsoleInitialize();
-    if(Status != STATUS_EFI_SUCCESS) {
-        /* Initialization failed, try printing error to stdout and serial console */
-        BlEfiPrint(L"Failed to initialize EFI console services");
-
-        /* Consider it as unsupported EFI implementation */
-        return STATUS_EFI_INCOMPATIBLE_VERSION;
+        BlEfiPrint(L"ERROR: Failed to initialize serial console");
     }
 
     /* Disable watchdog timer */
