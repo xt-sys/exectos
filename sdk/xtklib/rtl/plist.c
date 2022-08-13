@@ -46,7 +46,7 @@ RtlInitializeListHead32(IN PLIST_ENTRY32 ListHead)
 }
 
 /**
- * Indicates whether a doubly linked list structure is empty.
+ * Indicates whether a double linked list structure is empty.
  *
  * @param ListHead
  *        Pointer to a structure that represents the head of the list.
