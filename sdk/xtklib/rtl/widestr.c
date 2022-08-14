@@ -53,7 +53,7 @@ RtlWideStringCompare(IN CONST PWCHAR String1,
     return 0;
 }
 
-/*
+/**
  * Finds the next token in a null-terminated wide string.
  *
  * @param String
