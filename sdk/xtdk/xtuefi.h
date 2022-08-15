@@ -121,6 +121,7 @@
 #define EFI_MEDIA_PIWG_FW_FILE_DP                          0x06
 #define EFI_MEDIA_PIWG_FW_VOL_DP                           0x07
 #define EFI_MEDIA_RELATIVE_OFFSET_RANGE_DP                 0x08
+#define EFI_MEDIA_RAMDISK_DP                               0x09
 
 /* DeviceType definitions according to BBS specification */
 #define EFI_BBS_TYPE_FLOPPY                                0x01
