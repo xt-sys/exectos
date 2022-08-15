@@ -77,6 +77,8 @@
 #define EFI_ACPI_DEVICE_PATH                               0x02
 #define EFI_MESSAGING_DEVICE_PATH                          0x03
 #define EFI_MEDIA_DEVICE_PATH                              0x04
+#define EFI_BBS_DEVICE_PATH                                0x05
+#define EFI_END_DEVICE_PATH                                0x7F
 
 /* EFI hardware device path subtypes */
 #define EFI_HARDWARE_PCI_DP                                0x01
@@ -1435,6 +1437,16 @@ typedef struct _EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL
     EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL_CONFIGURATION Configuration;
     UINT32 SegmentNumber;
 } EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL, *PEFI_PCI_ROOT_BRIDGE_IO_PROTOCOL;
+
+/* Describes block device */
+typedef struct _EFI_BLOCK_DEVICE
+{
+    PEFI_DEVICE_PATH_PROTOCOL DevicePath;
+    EFI_GUID Guid;
+    USHORT DriveType;
+    ULONG DriveNumber;
+    ULONG PartitionNumber;
+} EFI_BLOCK_DEVICE, *PEFI_BLOCK_DEVICE;
 
 /* Block I/O media structure */
 typedef struct _EFI_BLOCK_IO_MEDIA
