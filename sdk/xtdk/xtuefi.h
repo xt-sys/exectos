@@ -1442,11 +1442,12 @@ typedef struct _EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL
 /* Describes block device */
 typedef struct _EFI_BLOCK_DEVICE
 {
-    PEFI_DEVICE_PATH_PROTOCOL DevicePath;
+    LIST_ENTRY ListEntry;
     EFI_GUID Guid;
     USHORT DriveType;
     ULONG DriveNumber;
     ULONG PartitionNumber;
+    PEFI_DEVICE_PATH_PROTOCOL DevicePath;
 } EFI_BLOCK_DEVICE, *PEFI_BLOCK_DEVICE;
 
 /* Block I/O media structure */
