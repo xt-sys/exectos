@@ -10,8 +10,8 @@
 #define __XTKLIB_LIBHL_H
 
 #include "xtdefs.h"
-#include "xttypes.h"
 #include "xtstruct.h"
+#include "xttypes.h"
 
 
 /* I/O port addresses for COM ports */
@@ -37,12 +37,12 @@ HlInitializeComPort(IN OUT PCPPORT Port,
                     IN ULONG PortNumber,
                     IN ULONG BaudRate);
 
-UCHAR
 XTAPI
+UCHAR
 HlIoPortInByte(IN USHORT Port);
 
-VOID
 XTAPI
+VOID
 HlIoPortOutByte(IN USHORT Port,
                 IN UCHAR Data);
 
