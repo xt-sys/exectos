@@ -46,6 +46,54 @@ RtlInitializeListHead32(IN PLIST_ENTRY32 ListHead)
 }
 
 /**
+ * This routine inserts an entry at the head of a double linked list.
+ *
+ * @param ListHead
+ *        Pointer to the head of the list.
+ *
+ * @param Entry
+ *        Pointer to the entry that will be inserted in the list.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTINLINE
+VOID
+RtlInsertHeadList(IN OUT PLIST_ENTRY ListHead,
+                  IN OUT PLIST_ENTRY Entry)
+{
+    Entry->Flink = ListHead->Flink;
+    Entry->Blink = ListHead;
+    ListHead->Flink->Blink = Entry;
+    ListHead->Flink = Entry;
+}
+
+/**
+ * This routine inserts an entry at the tail of a double linked list.
+ *
+ * @param ListHead
+ *        Pointer to the head of the list.
+ *
+ * @param Entry
+ *        Pointer to the entry that will be inserted in the list.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTINLINE
+VOID
+RtlInsertTailList(IN OUT PLIST_ENTRY ListHead,
+                  IN OUT PLIST_ENTRY Entry)
+{
+    Entry->Flink = ListHead;
+    Entry->Blink = ListHead->Blink;
+    ListHead->Blink->Flink = Entry;
+    ListHead->Blink = Entry;
+}
+
+/**
  * Indicates whether a double linked list structure is empty.
  *
  * @param ListHead

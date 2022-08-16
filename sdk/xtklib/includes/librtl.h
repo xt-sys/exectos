@@ -23,6 +23,16 @@ VOID
 RtlInitializeListHead32(IN PLIST_ENTRY32 ListHead);
 
 XTINLINE
+VOID
+RtlInsertHeadList(IN OUT PLIST_ENTRY ListHead,
+                  IN OUT PLIST_ENTRY Entry);
+
+XTINLINE
+VOID
+RtlInsertTailList(IN OUT PLIST_ENTRY ListHead,
+                  IN OUT PLIST_ENTRY Entry);
+
+XTINLINE
 BOOLEAN
 RtlListEmpty(PLIST_ENTRY ListHead);
 
