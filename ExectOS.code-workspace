@@ -1,0 +1,24 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"clangd.arguments": [
+			"--compile-commands-dir=${workspaceFolder}/build/",
+			"--header-insertion=never",
+			"--enable-config",
+			"--log=verbose"
+		],
+		"editor.rulers": [
+			120
+		],
+		"terminal.integrated.profiles.linux": {
+			"xtchain": {
+				"path": "xtchain"
+			}
+		},
+		"terminal.integrated.defaultProfile.linux": "xtchain",
+	}
+}
