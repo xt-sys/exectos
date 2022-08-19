@@ -46,9 +46,9 @@
 #define EFI_OPEN_PROTOCOL_EXCLUSIVE                        0x00000020
 
 /* EFI capsule flags */
-#define CAPSULE_FLAGS_PERSIST_ACROSS_RESET                 0x00010000
-#define CAPSULE_FLAGS_POPULATE_SYSTEM_TABLE                0x00020000
-#define CAPSULE_FLAGS_INITIATE_RESET                       0x00040000
+#define EFI_CAPSULE_FLAGS_PERSIST_ACROSS_RESET             0x00010000
+#define EFI_CAPSULE_FLAGS_POPULATE_SYSTEM_TABLE            0x00020000
+#define EFI_CAPSULE_FLAGS_INITIATE_RESET                   0x00040000
 
 /* EFI variables related definitions */
 #define EFI_VARIABLE_NON_VOLATILE                          0x00000001
@@ -71,6 +71,10 @@
 #define EFI_EVENT_SIGNAL_EXIT_BOOT_SERVICES                0x00000201
 #define EFI_EVENT_SIGNAL_VIRTUAL_ADDRESS_CHANGE            0x60000202
 #define EFI_EVENT_EFI_SIGNAL_MASK                          0x000000FF
+
+/* EFI disk signature type */
+#define EFI_DISK_SIGNATURE_TYPE_MBR                        0x01
+#define EFI_DISK_SIGNATURE_TYPE_GPT                        0x02
 
 /* EFI device path types */
 #define EFI_HARDWARE_DEVICE_PATH                           0x01
@@ -1447,8 +1451,17 @@ typedef struct _EFI_BLOCK_DEVICE
     USHORT DriveType;
     ULONG DriveNumber;
     ULONG PartitionNumber;
+    PEFI_GUID PartitionGuid;
     PEFI_DEVICE_PATH_PROTOCOL DevicePath;
 } EFI_BLOCK_DEVICE, *PEFI_BLOCK_DEVICE;
+
+/* Describes block device I/O and DP protocols */
+typedef struct _EFI_BLOCK_DEVICE_DATA
+{
+    LIST_ENTRY ListEntry;
+    PEFI_DEVICE_PATH_PROTOCOL DevicePath;
+    PEFI_BLOCK_IO_PROTOCOL BlockIo;
+} EFI_BLOCK_DEVICE_DATA, *PEFI_BLOCK_DEVICE_DATA;
 
 /* Block I/O media structure */
 typedef struct _EFI_BLOCK_IO_MEDIA
