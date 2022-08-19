@@ -49,7 +49,7 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Initialization failed, try printing error to stdout and serial console */
-        BlEfiPrint(L"ERROR: Failed to initialize serial console");
+        BlEfiPrint(L"ERROR: Failed to initialize serial console\n");
     }
 
     /* Disable watchdog timer */
@@ -57,7 +57,7 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to disable the timer, print message */
-        BlDbgPrint(L"WARNING: Failed to disable watchdog timer");
+        BlDbgPrint(L"WARNING: Failed to disable watchdog timer\n");
     }
 
     /* Infinite bootloader loop */
