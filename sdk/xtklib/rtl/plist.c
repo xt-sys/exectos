@@ -19,7 +19,6 @@
  *
  * @since XT 1.0
  */
-XTINLINE
 VOID
 RtlInitializeListHead(IN PLIST_ENTRY ListHead)
 {
@@ -37,7 +36,6 @@ RtlInitializeListHead(IN PLIST_ENTRY ListHead)
  *
  * @since XT 1.0
  */
-XTINLINE
 VOID
 RtlInitializeListHead32(IN PLIST_ENTRY32 ListHead)
 {
@@ -58,7 +56,6 @@ RtlInitializeListHead32(IN PLIST_ENTRY32 ListHead)
  *
  * @since XT 1.0
  */
-XTINLINE
 VOID
 RtlInsertHeadList(IN OUT PLIST_ENTRY ListHead,
                   IN OUT PLIST_ENTRY Entry)
@@ -82,7 +79,6 @@ RtlInsertHeadList(IN OUT PLIST_ENTRY ListHead,
  *
  * @since XT 1.0
  */
-XTINLINE
 VOID
 RtlInsertTailList(IN OUT PLIST_ENTRY ListHead,
                   IN OUT PLIST_ENTRY Entry)
@@ -103,7 +99,6 @@ RtlInsertTailList(IN OUT PLIST_ENTRY ListHead,
  *
  * @since XT 1.0
  */
-XTINLINE
 BOOLEAN
 RtlListEmpty(PLIST_ENTRY ListHead)
 {

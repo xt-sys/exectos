@@ -14,27 +14,34 @@
 #include "xttypes.h"
 
 
-XTINLINE
+XTAPI
+PVOID
+RtlCopyMemory(IN PVOID Destination,
+              IN PCVOID Source,
+              IN SIZE_T Length);
+
 VOID
 RtlInitializeListHead(IN PLIST_ENTRY ListHead);
 
-XTINLINE
 VOID
 RtlInitializeListHead32(IN PLIST_ENTRY32 ListHead);
 
-XTINLINE
 VOID
 RtlInsertHeadList(IN OUT PLIST_ENTRY ListHead,
                   IN OUT PLIST_ENTRY Entry);
 
-XTINLINE
 VOID
 RtlInsertTailList(IN OUT PLIST_ENTRY ListHead,
                   IN OUT PLIST_ENTRY Entry);
 
-XTINLINE
 BOOLEAN
 RtlListEmpty(PLIST_ENTRY ListHead);
+
+XTAPI
+SIZE_T
+RtlSameMemory(IN PCVOID LeftBuffer,
+              IN PCVOID RightBuffer,
+              IN SIZE_T Length);
 
 INT
 RtlWideStringCompare(IN CONST PWCHAR String1,

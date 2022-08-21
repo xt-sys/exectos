@@ -10,6 +10,7 @@ include_directories(
 list(APPEND XTKLIB_SOURCE
     ${XTKLIB_SOURCE_DIR}/hl/cport.c
     ${XTKLIB_SOURCE_DIR}/hl/${ARCH}/cpufunc.c
+    ${XTKLIB_SOURCE_DIR}/rtl/memory.c
     ${XTKLIB_SOURCE_DIR}/rtl/plist.c
     ${XTKLIB_SOURCE_DIR}/rtl/widestr.c)
 
