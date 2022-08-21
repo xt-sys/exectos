@@ -9,6 +9,13 @@
 #include <xtbl.h>
 
 
+/**
+ * This routine initializes the COM port debug console.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
 EFI_STATUS
 BlComPortInitialize()
 {
