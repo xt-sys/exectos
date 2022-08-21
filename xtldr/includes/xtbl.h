@@ -41,6 +41,13 @@ VOID
 BlDbgPrint(IN PUINT16 Format,
            IN ...);
 
+EFI_STATUS
+BlEfiMemoryAllocatePool(IN UINT_PTR Size,
+                        OUT PVOID *Memory);
+
+EFI_STATUS
+BlEfiMemoryFreePool(IN PVOID Memory);
+
 VOID
 BlEfiPrint(IN PUINT16 Format,
            IN ...);

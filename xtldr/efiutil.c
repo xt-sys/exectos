@@ -156,6 +156,44 @@ BlDbgPrint(IN PUINT16 Format,
 }
 
 /**
+ * This routine allocates a pool memory.
+ *
+ * @param Size
+ *        The number of bytes to allocate from the pool.
+ *
+ * @param Memory
+ *        The pointer to a physical address.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+EFI_STATUS
+BlEfiMemoryAllocatePool(IN UINT_PTR Size,
+                        OUT PVOID *Memory)
+{
+    /* Allocate pool */
+    return EfiSystemTable->BootServices->AllocatePool(EfiLoaderData, Size, Memory);
+}
+
+/**
+ * Returns pool memory to the system.
+ *
+ * @param Memory
+ *        The pointer to the buffer to free.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+EFI_STATUS
+BlEfiMemoryFreePool(IN PVOID Memory)
+{
+    /* Free pool */
+    return EfiSystemTable->BootServices->FreePool(Memory);
+}
+
+/**
  * This routine formats the input string and prints it out to the stdout and serial console.
  *
  * @param Format
