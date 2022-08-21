@@ -60,6 +60,9 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
         BlDbgPrint(L"WARNING: Failed to disable watchdog timer\n");
     }
 
+    /* Discover and enumerate EFI block devices */
+    BlEnumerateEfiBlockDevices();
+
     /* Infinite bootloader loop */
     for(;;);
 

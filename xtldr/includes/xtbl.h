@@ -13,6 +13,12 @@
 #include <xtklib.h>
 
 
+#define XT_BOOT_DEVICE_UNKNOWN               0x00
+#define XT_BOOT_DEVICE_CDROM                 0x01
+#define XT_BOOT_DEVICE_FLOPPY                0x02
+#define XT_BOOT_DEVICE_HARDDISK              0x03
+#define XT_BOOT_DEVICE_RAMDISK               0x04
+
 /* EFI Image Handle */
 EXTERN EFI_HANDLE EfiImageHandle;
 
@@ -53,6 +59,9 @@ BlEfiPrint(IN PUINT16 Format,
            IN ...);
 
 EFI_STATUS
+BlEnumerateEfiBlockDevices();
+
+EFI_STATUS
 BlStartXtLoader(IN EFI_HANDLE ImageHandle,
                 IN PEFI_SYSTEM_TABLE SystemTable);
 
@@ -60,6 +69,21 @@ VOID
 BlStringPrint(IN VOID PutChar(IN USHORT Character),
               IN PUINT16 Format,
               IN VA_LIST Arguments);
+
+EFI_STATUS
+BlpDiscoverEfiBlockDevices(PLIST_ENTRY BlockDevices);
+
+PEFI_DEVICE_PATH_PROTOCOL
+BlpDuplicateDevicePath(PEFI_DEVICE_PATH_PROTOCOL DevicePath);
+
+EFI_STATUS
+BlpFindLastEfiBlockDeviceNode(PEFI_DEVICE_PATH_PROTOCOL DevicePath,
+                              PEFI_DEVICE_PATH_PROTOCOL *LastNode);
+
+BOOLEAN
+BlpFindParentEfiBlockDevice(IN PLIST_ENTRY BlockDevices,
+                            IN PEFI_BLOCK_DEVICE_DATA ChildNode,
+                            OUT PEFI_BLOCK_DEVICE_DATA ParentNode);
 
 VOID
 BlpStringFormat(IN VOID PutChar(IN USHORT Character),

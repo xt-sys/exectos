@@ -12,6 +12,7 @@ list(APPEND XTLDR_SOURCE
     ${XTLDR_SOURCE_DIR}/console.c
     ${XTLDR_SOURCE_DIR}/efiutil.c
     ${XTLDR_SOURCE_DIR}/string.c
+    ${XTLDR_SOURCE_DIR}/volume.c
     ${XTLDR_SOURCE_DIR}/xtldr.c)
 
 # Add executable
