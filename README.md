@@ -66,7 +66,7 @@ to launch XTChain build console:
 xtchain
 ```
 While the console is already running, navigate to the directory containing ExectOS source code and use the following
-commands to fisr set target build architecture and configure the sources:
+commands to first set target build architecture and configure the sources:
 ```
 charch [i686|amd64]
 chbuild [DEBUG|RELEASE]
