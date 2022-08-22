@@ -23,4 +23,5 @@
 #include "xtuefi.h"
 
 /* Low level data types headers */
+#include "rtltypes.h"
 #include "hltypes.h"

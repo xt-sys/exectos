@@ -11,6 +11,48 @@
 
 STATIC PUINT16 HexTable = L"0123456789abcdef";
 
+INT
+BlStringCompareInsensitive(IN PUCHAR String1,
+                           IN PUCHAR String2)
+{
+    UCHAR Character1;
+    UCHAR Character2;
+    ULONG Index = 0;
+
+    /* Iterate through the strings */
+    while(String1[Index] != '\0' && String2[Index] != '\0')
+    {
+        /* Get the characters */
+        Character1 = String1[Index];
+        Character2 = String2[Index];
+
+        /* Lowercase string1 character if needed */
+        if(String1[Index] >= 'A' && String1[Index] <= 'Z')
+        {
+            Character1 = String1[Index] - 'A' + 'a';
+        }
+
+        /* Lowercase string2 character if needed */
+        if(String2[Index] >= 'A' && String2[Index] <= 'Z')
+        {
+            Character2 = String2[Index] - 'A' + 'a';
+        }
+
+        /* Compare the characters */
+        if(Character1 != Character2)
+        {
+            /* Strings are not equal */
+            return Character1 > Character2 ? 1 : -1;
+        }
+
+        /* Get next character */
+        Index++;
+    }
+
+    /* Strings are equal */
+    return 0;
+}
+
 /**
  * This routine formats the input string and prints it using specified routine.
  *

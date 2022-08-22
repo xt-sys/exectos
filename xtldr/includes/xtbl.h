@@ -62,8 +62,17 @@ EFI_STATUS
 BlEnumerateEfiBlockDevices();
 
 EFI_STATUS
+BlGetVolumeDevicePath(IN PUCHAR SystemPath,
+                      OUT PEFI_DEVICE_PATH_PROTOCOL *DevicePath,
+                      OUT PUCHAR *Path);
+
+EFI_STATUS
 BlStartXtLoader(IN EFI_HANDLE ImageHandle,
                 IN PEFI_SYSTEM_TABLE SystemTable);
+
+INT
+BlStringCompareInsensitive(IN PUCHAR String1,
+                           IN PUCHAR String2);
 
 VOID
 BlStringPrint(IN VOID PutChar(IN USHORT Character),
@@ -72,6 +81,13 @@ BlStringPrint(IN VOID PutChar(IN USHORT Character),
 
 EFI_STATUS
 BlpDiscoverEfiBlockDevices(OUT PLIST_ENTRY BlockDevices);
+
+EFI_STATUS
+BlpDissectVolumeArcPath(IN PUCHAR SystemPath,
+                        OUT PUCHAR *Path,
+                        OUT PUSHORT DriveType,
+                        OUT PULONG DriveNumber,
+                        OUT PULONG PartNumber);
 
 PEFI_DEVICE_PATH_PROTOCOL
 BlpDuplicateDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath);

@@ -105,7 +105,7 @@ BlEnumerateEfiBlockDevices()
                 PartitionGuid = (PEFI_GUID)HDPath->Signature;
 
                 /* Print debug message */
-                BlDbgPrint(L"Found Hard Disk partition (DiskNumber: %lu, PartNumber: %u, "
+                BlDbgPrint(L"Found Hard Disk partition (DiskNumber: %lu, PartNumber: %lu, "
                            L"MBRType: %u, GUID: {%g}, PartSize: %luB)\n",
                            DriveNumber, PartitionNumber, HDPath->MBRType,
                            PartitionGuid, HDPath->PartitionSize * Media->BlockSize);
@@ -157,6 +157,103 @@ BlEnumerateEfiBlockDevices()
     }
 
     /* Return success */
+    return STATUS_EFI_SUCCESS;
+}
+
+EFI_STATUS
+BlGetVolumeDevicePath(IN PUCHAR SystemPath,
+                      OUT PEFI_DEVICE_PATH_PROTOCOL *DevicePath,
+                      OUT PUCHAR *Path)
+{
+    PEFI_BLOCK_DEVICE Device;
+    USHORT DriveType;
+    ULONG DriveNumber;
+    ULONG PartNumber;
+    PUCHAR Volume;
+    ULONG PathLength;
+    PLIST_ENTRY ListEntry;
+    EFI_STATUS Status;
+
+    /* Make sure this is not set */
+    *DevicePath = NULL;
+
+    /* Find volume path and its length */
+    Volume = SystemPath;
+    while(*Volume != '/' && *Volume != '\\' && *Volume != '\0')
+    {
+        Volume++;
+    }
+    PathLength = Volume - SystemPath;
+
+    /* Check if valume path specified */
+    if(PathLength == 0)
+    {
+        /* No volume path available */
+        *Path = SystemPath;
+        return STATUS_EFI_NOT_FOUND;
+    }
+
+    /* Check system path format */
+    if(SystemPath[0] == '{')
+    {
+        if(PathLength == GUID_STRING_LENGTH)
+        {
+            /* This is EFI GUID */
+            BlDbgPrint(L"EFI/GPT GUID in system path is not supported yet\n");
+            return STATUS_EFI_UNSUPPORTED;
+        }
+        else if(PathLength == PARTUUID_STRING_LENGTH)
+        {
+            /* This is MBR UUID */
+            BlDbgPrint(L"MBR partition UUID in system path is not supported yet\n");
+            return STATUS_EFI_UNSUPPORTED;
+        }
+        else
+        {
+            /* Invalid UUID format */
+            return STATUS_EFI_INVALID_PARAMETER;
+        }
+    }
+    else
+    {
+        /* Defaults to ARC path, dissect it */
+        Status = BlpDissectVolumeArcPath(SystemPath, Path, &DriveType, &DriveNumber, &PartNumber);
+    }
+
+    /* Check if volume path parsed successfully */
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to parse system path */
+        BlDbgPrint(L"Failed to parse system path: '%s' with status code: %lx\n", SystemPath, Status);
+        return Status;
+    }
+
+    /* Look for block device corresponding to dissected ARC path */
+    ListEntry = BlBlockDevices.Flink;
+    while(ListEntry != &BlBlockDevices)
+    {
+        /* Check if this is the volume we are looking for */
+        Device = CONTAIN_RECORD(ListEntry, EFI_BLOCK_DEVICE, ListEntry);
+        if((Device->DriveType == DriveType && Device->DriveNumber == DriveNumber &&
+           Device->PartitionNumber == PartNumber))
+        {
+            /* Found volume */
+            *DevicePath = Device->DevicePath;
+            break;
+        }
+        ListEntry = ListEntry->Flink;
+    }
+
+    /* Check if volume was found */
+    if(*DevicePath == NULL)
+    {
+        /* Failed to find volume */
+        BlDbgPrint(L"Volume (DriveType: %u, DriveNumber: %lu, PartNumber: %lu) not found\n",
+                   DriveType, DriveNumber, PartNumber);
+        return STATUS_EFI_NOT_FOUND;
+    }
+
+    /* return success */
     return STATUS_EFI_SUCCESS;
 }
 
@@ -236,6 +333,141 @@ BlpDiscoverEfiBlockDevices(OUT PLIST_ENTRY BlockDevices)
 
     /* Free handles buffer */
     BlEfiMemoryFreePool(Handles);
+
+    /* Return success */
+    return STATUS_EFI_SUCCESS;
+}
+
+EFI_STATUS
+BlpDissectVolumeArcPath(IN PUCHAR SystemPath,
+                        OUT PUCHAR *Path,
+                        OUT PUSHORT DriveType,
+                        OUT PULONG DriveNumber,
+                        OUT PULONG PartNumber)
+{
+    PUCHAR ArcPath;
+    ULONG ArcLength = 0;
+
+    /* Set default values */
+    *DriveType = XT_BOOT_DEVICE_UNKNOWN;
+    *DriveNumber = 0;
+    *PartNumber = 0;
+
+    /* Look for the ARC path */
+    if(BlStringCompareInsensitive(SystemPath, (PUCHAR)"ramdisk(0)") == 0)
+    {
+        /* This is RAM disk */
+        ArcLength = 10;
+        *DriveType = XT_BOOT_DEVICE_RAMDISK;
+    }
+    else if(BlStringCompareInsensitive(SystemPath, (PUCHAR)"multi(0)disk(0)") == 0)
+    {
+        /* This is a multi-disk port */
+        ArcLength = 15;
+        ArcPath = SystemPath + ArcLength;
+
+        /* Check for disk type */
+        if(BlStringCompareInsensitive(ArcPath, (PUCHAR)"cdrom(") == 0)
+        {
+            /* This is an optical drive */
+            ArcLength += 6;
+
+            /* Find drive number */
+            while(SystemPath[ArcLength] != ')' && SystemPath[ArcLength] != '\0')
+            {
+                if(SystemPath[ArcLength] >= '0' && SystemPath[ArcLength] <= '9')
+                {
+                    /* Calculate drive number */
+                    *DriveNumber *= 10;
+                    *DriveNumber += SystemPath[ArcLength] - '0';
+                }
+                ArcLength++;
+            }
+
+            /* Set proper drive type */
+            *DriveType = XT_BOOT_DEVICE_CDROM;
+            ArcLength++;
+        }
+        else if(BlStringCompareInsensitive(ArcPath, (PUCHAR)"fdisk(") == 0)
+        {
+            /* This is a floppy drive */
+            ArcLength += 6;
+
+            /* Find drive number */
+            while(SystemPath[ArcLength] != ')' && SystemPath[ArcLength] != '\0')
+            {
+                if(SystemPath[ArcLength] >= '0' && SystemPath[ArcLength] <= '9')
+                {
+                    /* Calculate drive number */
+                    *DriveNumber *= 10;
+                    *DriveNumber += SystemPath[ArcLength] - '0';
+                }
+                ArcLength++;
+            }
+
+            /* Set proper drive type */
+            *DriveType = XT_BOOT_DEVICE_FLOPPY;
+            ArcLength++;
+        }
+        else if(BlStringCompareInsensitive(ArcPath, (PUCHAR)"rdisk(") == 0)
+        {
+            /* This is a hard disk */
+            ArcLength += 6;
+
+            /* Find drive number */
+            while(SystemPath[ArcLength] != ')' && SystemPath[ArcLength] != '\0')
+            {
+                if(SystemPath[ArcLength] >= '0' && SystemPath[ArcLength] <= '9')
+                {
+                    /* Calculate drive number */
+                    *DriveNumber *= 10;
+                    *DriveNumber += SystemPath[ArcLength] - '0';
+                }
+                ArcLength++;
+            }
+
+            /* Set proper drive type */
+            *DriveType = XT_BOOT_DEVICE_HARDDISK;
+            ArcLength++;
+            ArcPath = SystemPath + ArcLength;
+
+            /* Look for a partition */
+            if(BlStringCompareInsensitive(ArcPath, (PUCHAR)"partition(") == 0)
+            {
+                /* Partition information found */
+                ArcLength += 10;
+
+                /* Find partition number */
+                while(SystemPath[ArcLength] != ')' && SystemPath[ArcLength] != '\0')
+                {
+                    if(SystemPath[ArcLength] >= '0' && SystemPath[ArcLength] <= '9')
+                    {
+                        /* Calculate partition number */
+                        *PartNumber *= 10;
+                        *PartNumber += SystemPath[ArcLength] - '0';
+                    }
+                    ArcLength++;
+                }
+                ArcLength++;
+            }
+        }
+        else
+        {
+            /* Unsupported disk type */
+            return STATUS_EFI_UNSUPPORTED;
+        }
+    }
+    else
+    {
+        /* Unsupported ARC path */
+        return STATUS_EFI_UNSUPPORTED;
+    }
+
+    /* Store the path if possible */
+    if(Path)
+    {
+        *Path = SystemPath + ArcLength;
+    }
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
