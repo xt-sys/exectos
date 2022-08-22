@@ -71,14 +71,14 @@ BlStringPrint(IN VOID PutChar(IN USHORT Character),
               IN VA_LIST Arguments);
 
 EFI_STATUS
-BlpDiscoverEfiBlockDevices(PLIST_ENTRY BlockDevices);
+BlpDiscoverEfiBlockDevices(OUT PLIST_ENTRY BlockDevices);
 
 PEFI_DEVICE_PATH_PROTOCOL
-BlpDuplicateDevicePath(PEFI_DEVICE_PATH_PROTOCOL DevicePath);
+BlpDuplicateDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath);
 
 EFI_STATUS
-BlpFindLastEfiBlockDeviceNode(PEFI_DEVICE_PATH_PROTOCOL DevicePath,
-                              PEFI_DEVICE_PATH_PROTOCOL *LastNode);
+BlpFindLastEfiBlockDeviceNode(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
+                              OUT PEFI_DEVICE_PATH_PROTOCOL *LastNode);
 
 BOOLEAN
 BlpFindParentEfiBlockDevice(IN PLIST_ENTRY BlockDevices,
