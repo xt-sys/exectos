@@ -13,6 +13,15 @@
 #include "xtstruct.h"
 
 
+/* 128-bit buffer containing a unique identifier value */
+typedef struct _GUID
+{
+    UINT Data1;
+    USHORT Data2;
+    USHORT Data3;
+    UCHAR Data4[8];
+} GUID, *PGUID;
+
 /* Double linked list structure definition */
 typedef struct _LIST_ENTRY
 {
