@@ -57,6 +57,11 @@
 /* Macro for rounding up */
 #define ROUND_UP(X, Alignment)                 ROUND_DOWN((X) + (Alignment - 1), Alignment)
 
+/* Macros for defining signatures built from ASCII characters */
+#define SIGNATURE16(A, B)                      ((A) | (B << 8))
+#define SIGNATURE32(A, B, C, D)                (SIGNATURE16(A, B) | (SIGNATURE16(C, D) << 16))
+#define SIGNATURE64(A, B, C, D, E, F, G, H)    (SIGNATURE32(A, B, C, D) | ((UINT64)(SIGNATURE32(E, F, G, H)) << 32))
+
 /* Variadic ABI functions */
 typedef __builtin_va_list VA_LIST;
 #define VA_ARG(Marker, Type)                   ((sizeof (Type) < sizeof(UINT_PTR)) ? \
