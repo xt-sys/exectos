@@ -1,7 +1,7 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            sdk/xtklib/rtl/memory.c
+ * FILE:            xtoskrnl/rtl/memory.c
  * DESCRIPTION:     Memory related routines
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */

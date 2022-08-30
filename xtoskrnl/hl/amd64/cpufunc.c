@@ -1,7 +1,7 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            sdk/xtklib/hl/cpufunc.c
+ * FILE:            xtoskrnl/hl/amd64/cpufunc.c
  * DESCRIPTION:     Routines to provide access to special AMD64 CPU instructions
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */

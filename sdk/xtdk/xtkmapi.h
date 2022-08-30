@@ -25,3 +25,7 @@
 /* Low level data types headers */
 #include "rtltypes.h"
 #include "hltypes.h"
+
+/* XT routines */
+#include "hlfuncs.h"
+#include "rtlfuncs.h"

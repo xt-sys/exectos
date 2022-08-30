@@ -1,13 +1,13 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            sdk/xtklib/includes/librtl.h
- * DESCRIPTION:     Kernel mode runtime library
+ * FILE:            sdk/xtdk/rtlfuncs.h
+ * DESCRIPTION:     XT runtime library routines
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#ifndef __XTKLIB_LIBRTL_H
-#define __XTKLIB_LIBRTL_H
+#ifndef __XTDK_RTLFUNCS_H
+#define __XTDK_RTLFUNCS_H
 
 #include "xtdefs.h"
 #include "xtstruct.h"
@@ -53,4 +53,4 @@ RtlWideStringTokenize(IN PWCHAR String,
                       IN CONST PWCHAR Delimiter,
                       IN OUT PWCHAR *SavePtr);
 
-#endif /* __XTKLIB_LIBRTL_H */
+#endif /* __XTDK_RTLFUNCS_H */

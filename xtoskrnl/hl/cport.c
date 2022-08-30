@@ -1,13 +1,12 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            sdk/xtklib/hl/cport.c
+ * FILE:            xtoskrnl/hl/cport.c
  * DESCRIPTION:     Serial (COM) port support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
 #include "xtkmapi.h"
-#include "xtklib.h"
 
 
 /* I/O port addresses for COM1 - COM8 (valid only for ia32 and amd64) */

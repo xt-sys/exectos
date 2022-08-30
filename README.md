@@ -51,7 +51,6 @@ design, it requires a modern EFI enabled hardware. It is not possible currently 
 | drivers     | XT native drivers source code                            |
 | sdk/cmake   | Host toolchain configuration and build-related functions |
 | sdk/xtdk    | XT Software Development Kit headers                      |
-| sdk/xtklib  | XT Base kernel-mode library source code                  |
 | services    | integral subsystems services source code                 |
 | subsystems  | environment subsystems source code                       |
 | xtoskrnl    | XTOS kernel source code                                  |

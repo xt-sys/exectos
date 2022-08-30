@@ -1,13 +1,13 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            sdk/xtklib/includes/libhl.h
- * DESCRIPTION:     Hardware Abstraction Layer library
+ * FILE:            sdk/xtdk/hlfuncs.h
+ * DESCRIPTION:     XT hardware abstraction layer routines
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#ifndef __XTKLIB_LIBHL_H
-#define __XTKLIB_LIBHL_H
+#ifndef __XTDK_HLFUNCS_H
+#define __XTDK_HLFUNCS_H
 
 #include "xtdefs.h"
 #include "xtstruct.h"
@@ -46,4 +46,4 @@ VOID
 HlIoPortOutByte(IN USHORT Port,
                 IN UCHAR Data);
 
-#endif /* __XTKLIB_LIBHL_H */
+#endif /* __XTDK_HLFUNCS_H */

@@ -10,7 +10,6 @@
 #define __XTLDR_XTBL_H
 
 #include <xtkmapi.h>
-#include <xtklib.h>
 
 
 #define XT_BOOT_DEVICE_UNKNOWN               0x00

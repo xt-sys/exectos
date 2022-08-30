@@ -4,7 +4,6 @@ PROJECT(XTLDR)
 # Specify include directories
 include_directories(
     ${EXECTOS_SOURCE_DIR}/sdk/xtdk
-    ${EXECTOS_SOURCE_DIR}/sdk/xtklib/includes
     ${XTLDR_SOURCE_DIR}/includes)
 
 # Specify list of source code files
@@ -15,11 +14,11 @@ list(APPEND XTLDR_SOURCE
     ${XTLDR_SOURCE_DIR}/volume.c
     ${XTLDR_SOURCE_DIR}/xtldr.c)
 
-# Add executable
+# Link bootloader executable
 add_executable(xtldr ${XTLDR_SOURCE})
 
 # Add linker libraries
-target_link_libraries(xtldr xtklib)
+target_link_libraries(xtldr xtoslib)
 
 # Set proper binary name and install target
 if(ARCH STREQUAL "i686")

@@ -1,7 +1,7 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            sdk/xtrtlib/widestr.c
+ * FILE:            xtoskrnl/rtl/widestr.c
  * DESCRIPTION:     Wide string support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */

@@ -1,7 +1,7 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            sdk/xtklib/rtl/plist.c
+ * FILE:            xtoskrnl/rtl/plist.c
  * DESCRIPTION:     Linked list manipulation routines
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
