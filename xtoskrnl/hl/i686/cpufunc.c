@@ -19,8 +19,8 @@
  *
  * @since XT 1.0
  */
-UCHAR
 XTAPI
+UCHAR
 HlIoPortInByte(IN USHORT Port)
 {
     UCHAR Value;
@@ -43,8 +43,8 @@ HlIoPortInByte(IN USHORT Port)
  *
  * @since XT 1.0
  */
-VOID
 XTAPI
+VOID
 HlIoPortOutByte(IN USHORT Port,
                 IN UCHAR Value)
 {
