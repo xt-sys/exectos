@@ -1,2 +1,5 @@
 @ stdcall HlIoPortInByte(ptr)
 @ stdcall HlIoPortOutByte(ptr long)
+@ stdcall RtlCopyMemory(ptr ptr long)
+@ stdcall RtlSameMemory(ptr ptr long)
+@ stdcall RtlWideStringCompare(wstr wstr long)
