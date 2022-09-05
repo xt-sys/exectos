@@ -3,3 +3,4 @@
 @ stdcall RtlCopyMemory(ptr ptr long)
 @ stdcall RtlSameMemory(ptr ptr long)
 @ stdcall RtlWideStringCompare(wstr wstr long)
+@ stdcall RtlWideStringTokenize(wstr wstr wstr)

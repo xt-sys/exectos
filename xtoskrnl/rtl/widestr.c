@@ -25,6 +25,7 @@
  *
  * @since XT 1.0
  */
+XTCDECL
 INT
 RtlWideStringCompare(IN CONST PWCHAR String1,
                      IN CONST PWCHAR String2,
@@ -33,7 +34,14 @@ RtlWideStringCompare(IN CONST PWCHAR String1,
     ULONG Index;
 
     /* Iterate through the strings */
-    for(Index = 0; Index < Length; Index++) {
+    for(Index = 0; ; Index++) {
+        /* Check if length limit reached */
+        if(Index != 0 && Index == Length)
+        {
+            /* Skip checking next characters */
+            break;
+        }
+
         /* Check if string characters are equal */
         if(String1[Index] != String2[Index])
         {
@@ -42,9 +50,9 @@ RtlWideStringCompare(IN CONST PWCHAR String1,
         }
 
         /* Check if end of string reached */
-        if(!String1[Index])
+        if(!String1[Index] || !String2[Index])
         {
-            /* Equal strings until the end of String1 */
+            /* Equal strings until the end of one of them */
             return 0;
         }
     }
@@ -69,6 +77,7 @@ RtlWideStringCompare(IN CONST PWCHAR String1,
  *
  * @since: XT 1.0
  */
+XTCDECL
 PWCHAR
 RtlWideStringTokenize(IN PWCHAR String,
                       IN CONST PWCHAR Delimiter,
@@ -81,7 +90,7 @@ RtlWideStringTokenize(IN PWCHAR String,
     if(String == NULL && (String = *SavePtr) == NULL)
     {
         /* Empty string given */
-        return (NULL);
+        return NULL;
     }
 
     /* Check non-delimiter characters */
@@ -89,7 +98,7 @@ RtlWideStringTokenize(IN PWCHAR String,
     if(Char == L'\0')
     {
         *SavePtr = NULL;
-        return (NULL);
+        return NULL;
     }
     Token = String - 1;
 
@@ -110,6 +119,7 @@ RtlWideStringTokenize(IN PWCHAR String,
                 {
                     String[-1] = L'\0';
                 }
+
                 /* Store pointer to the next token */
                 *SavePtr = String;
 

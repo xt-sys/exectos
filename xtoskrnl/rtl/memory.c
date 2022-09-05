@@ -21,27 +21,24 @@
  * @param Length
  *        Specifies the number of bytes to copy.
  *
- * @return Returns the destination pointer.
+ * @return This routine does not return any value.
  *
  * @since NT 3.5
  */
 XTAPI
-PVOID
+VOID
 RtlCopyMemory(IN PVOID Destination,
               IN PCVOID Source,
               IN SIZE_T Length)
 {
     PCHAR DestinationBytes = (PCHAR)Destination;
-    PCHAR SourceBytes = (PCHAR)Source;
+    PCCHAR SourceBytes = (PCHAR)Source;
 
     /* Forward buffer copy */
     while(Length--)
     {
         *DestinationBytes++ = *SourceBytes++;
     }
-
-    /* Return pointer to destination buffer */
-    return Destination;
 }
 
 /**
@@ -56,20 +53,18 @@ RtlCopyMemory(IN PVOID Destination,
  * @param Length
  *        Specifies a number of bytes to compare.
  *
- * @return A value indicating the relationship between the content of the memory blocks.
- *         It returns zero (0) if both memory blocks are equal or a value different than
- *         zero representing which is greater if they do not match.
+ * @return Returns TRUE if both buffers are equal up to the specified length, or FALSE otherwise.
  *
  * @since XT 1.0
  */
 XTAPI
-SIZE_T
+BOOLEAN
 RtlSameMemory(IN PCVOID LeftBuffer,
               IN PCVOID RightBuffer,
               IN SIZE_T Length)
 {
-    CONST UCHAR *Left = (PUCHAR)LeftBuffer;
-    CONST UCHAR *Right = (PUCHAR)RightBuffer;
+    CONST CHAR *Left = (PCHAR)LeftBuffer;
+    CONST CHAR *Right = (PCHAR)RightBuffer;
 
     /* Check if there is anything to compare */
     if(Length)
@@ -81,7 +76,7 @@ RtlSameMemory(IN PCVOID LeftBuffer,
             if(*Left != *Right)
             {
                 /* Buffers differ */
-                return (*Left - *Right);
+                return FALSE;
             }
 
             /* Advance to next byte */
@@ -91,5 +86,5 @@ RtlSameMemory(IN PCVOID LeftBuffer,
     }
 
     /* Buffers equal */
-    return 0;
+    return TRUE;
 }

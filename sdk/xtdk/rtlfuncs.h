@@ -15,7 +15,7 @@
 
 
 XTAPI
-PVOID
+VOID
 RtlCopyMemory(IN PVOID Destination,
               IN PCVOID Source,
               IN SIZE_T Length);
@@ -38,16 +38,18 @@ BOOLEAN
 RtlListEmpty(PLIST_ENTRY ListHead);
 
 XTAPI
-SIZE_T
+BOOLEAN
 RtlSameMemory(IN PCVOID LeftBuffer,
               IN PCVOID RightBuffer,
               IN SIZE_T Length);
 
+XTCDECL
 INT
 RtlWideStringCompare(IN CONST PWCHAR String1,
                      IN CONST PWCHAR String2,
                      IN CONST ULONG Length);
 
+XTCDECL
 PWCHAR
 RtlWideStringTokenize(IN PWCHAR String,
                       IN CONST PWCHAR Delimiter,
