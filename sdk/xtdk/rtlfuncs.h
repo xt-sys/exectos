@@ -15,10 +15,22 @@
 
 
 XTAPI
+SIZE_T
+RtlCompareMemory(IN PCVOID LeftBuffer,
+                 IN PCVOID RightBuffer,
+                 IN SIZE_T Length);
+
+XTAPI
 VOID
-RtlCopyMemory(IN PVOID Destination,
+RtlCopyMemory(OUT PVOID Destination,
               IN PCVOID Source,
               IN SIZE_T Length);
+
+XTAPI
+VOID
+RtlFillMemory(OUT PVOID Destination,
+              IN SIZE_T Length,
+              IN UCHAR Value);
 
 VOID
 RtlInitializeListHead(IN PLIST_ENTRY ListHead);
@@ -38,10 +50,22 @@ BOOLEAN
 RtlListEmpty(PLIST_ENTRY ListHead);
 
 XTAPI
+VOID
+RtlMoveMemory(OUT PVOID Destination,
+              IN PCVOID Source,
+              IN SIZE_T Length);
+
+XTAPI
 BOOLEAN
 RtlSameMemory(IN PCVOID LeftBuffer,
               IN PCVOID RightBuffer,
               IN SIZE_T Length);
+
+XTAPI
+VOID
+RtlSetMemory(OUT PVOID Destination,
+             IN UCHAR Byte,
+             IN SIZE_T Length);
 
 XTCDECL
 INT
@@ -54,5 +78,10 @@ PWCHAR
 RtlWideStringTokenize(IN PWCHAR String,
                       IN CONST PWCHAR Delimiter,
                       IN OUT PWCHAR *SavePtr);
+
+XTAPI
+VOID
+RtlZeroMemory(OUT PVOID Destination,
+              IN SIZE_T Length);
 
 #endif /* __XTDK_RTLFUNCS_H */
