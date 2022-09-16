@@ -18,7 +18,7 @@ list(APPEND XTOSKRNL_SOURCE
 set_specfile(xtoskrnl.spec)
 
 # Link static XTOS library
-add_library(xtoslib ${XTOSKRNL_SOURCE})
+add_library(libxtos ${XTOSKRNL_SOURCE})
 
 # Link kernel executable
 add_executable(xtoskrnl

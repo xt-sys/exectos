@@ -1,3 +1,6 @@
+# Build XTLDR modules
+add_subdirectory(modules)
+
 # XT Boot Loader
 PROJECT(XTLDR)
 
@@ -18,7 +21,7 @@ list(APPEND XTLDR_SOURCE
 add_executable(xtldr ${XTLDR_SOURCE})
 
 # Add linker libraries
-target_link_libraries(xtldr xtoslib)
+target_link_libraries(xtldr libxtos)
 
 # Set proper binary name and install target
 if(ARCH STREQUAL "i686")

@@ -10,19 +10,14 @@
 #define __XTLDR_XTBL_H
 
 #include <xtkmapi.h>
+#include <bldefs.h>
 
-
-#define XT_BOOT_DEVICE_UNKNOWN               0x00
-#define XT_BOOT_DEVICE_CDROM                 0x01
-#define XT_BOOT_DEVICE_FLOPPY                0x02
-#define XT_BOOT_DEVICE_HARDDISK              0x03
-#define XT_BOOT_DEVICE_RAMDISK               0x04
 
 /* EFI Image Handle */
 EXTERN EFI_HANDLE EfiImageHandle;
 
 /* EFI System Table */
-EXTERN EFI_SYSTEM_TABLE *EfiSystemTable;
+EXTERN PEFI_SYSTEM_TABLE EfiSystemTable;
 
 /* Serial port configuration */
 EXTERN CPPORT EfiSerialPort;
@@ -64,6 +59,17 @@ EFI_STATUS
 BlGetVolumeDevicePath(IN PUCHAR SystemPath,
                       OUT PEFI_DEVICE_PATH_PROTOCOL *DevicePath,
                       OUT PUCHAR *Path);
+
+EFI_STATUS
+BlGetXtLoaderProtocol(EFI_HANDLE ImageHandle,
+                      PEFI_SYSTEM_TABLE SystemTable,
+                      PXT_BOOT_LOADER_PROTOCOL *LoaderProtocol);
+
+EFI_STATUS
+BlLoadEfiModules();
+
+EFI_STATUS
+BlpRegisterXtLoaderProtocol();
 
 EFI_STATUS
 BlStartXtLoader(IN EFI_HANDLE ImageHandle,

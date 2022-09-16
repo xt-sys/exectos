@@ -61,7 +61,7 @@ add_compiler_flags(-D__RELFILE__="&__FILE__[__FILE__[0] == '.' ? sizeof \\\"${_P
 # Set the virtual disk image size (in MiB)
 set_disk_image_size(128)
 
-# Build subprojects
+# Build all subprojects
 add_subdirectory(bootdata)
 add_subdirectory(xtldr)
 add_subdirectory(xtoskrnl)
