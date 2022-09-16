@@ -1,8 +1,8 @@
-# Build XTLDR modules
-add_subdirectory(modules)
-
 # XT Boot Loader
 PROJECT(XTLDR)
+
+# Build XTLDR modules
+add_subdirectory(modules)
 
 # Specify include directories
 include_directories(
