@@ -12,6 +12,32 @@
 /* List of available block devices */
 LIST_ENTRY BlBlockDevices;
 
+/**
+ * This routine closes an EFI volume handle.
+ *
+ * @param VolumeHandle
+ *        Specifies a handle of opened volume.
+ *
+ * @return This routine returns status code.
+ *
+ * @since XT 1.0
+ */
+EFI_STATUS
+BlCloseVolume(IN PEFI_HANDLE VolumeHandle)
+{
+    EFI_GUID LIPGuid = EFI_LOADED_IMAGE_PROTOCOL_GUID;
+
+    /* Make sure a handle specified */
+    if(VolumeHandle != NULL)
+    {
+        /* Close a handle */
+        return EfiSystemTable->BootServices->CloseProtocol(VolumeHandle, &LIPGuid, EfiImageHandle, NULL);
+    }
+
+    /* Return success */
+    return STATUS_EFI_SUCCESS;
+}
+
 EFI_STATUS
 BlEnumerateEfiBlockDevices()
 {
@@ -254,6 +280,88 @@ BlGetVolumeDevicePath(IN PUCHAR SystemPath,
     }
 
     /* return success */
+    return STATUS_EFI_SUCCESS;
+}
+
+/**
+ * This routine opens an EFI volume and corresponding filesystem.
+ *
+ * @param DevicePath
+ *        Specifies a device path of the volume to open. If not specifies, uses image protocol by default.
+ *
+ * @param DiskHandle
+ *        The handle of the opened disk volume.
+ *
+ * @param FsHandle
+ *        The handle of the opened file system.
+ *
+ * @return This routine returns status code.
+ *
+ * @since XT 1.0
+ */
+EFI_STATUS
+BlOpenVolume(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
+             OUT PEFI_HANDLE DiskHandle,
+             OUT PEFI_FILE_HANDLE *FsHandle)
+{
+    EFI_GUID SFSGuid = EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_GUID;
+    EFI_GUID LIPGuid = EFI_LOADED_IMAGE_PROTOCOL_GUID;
+    PEFI_SIMPLE_FILE_SYSTEM_PROTOCOL FileSystemProtocol;
+    PEFI_LOADED_IMAGE_PROTOCOL ImageProtocol;
+    EFI_STATUS Status;
+
+    /* Check if device path has been passed or not */
+    if(DevicePath != NULL)
+    {
+        /* Locate the device path */
+        Status = EfiSystemTable->BootServices->LocateDevicePath(&SFSGuid, &DevicePath, DiskHandle);
+        if(Status != STATUS_EFI_SUCCESS)
+        {
+            /* Failed to locate device path */
+            return Status;
+        }
+
+        /* Open the filesystem protocol */
+        Status = EfiSystemTable->BootServices->OpenProtocol(*DiskHandle, &SFSGuid, (PVOID *)&FileSystemProtocol,
+                                                            EfiImageHandle, NULL, EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
+    }
+    else
+    {
+        /* Open the image protocol if no device path specified */
+        Status = EfiSystemTable->BootServices->OpenProtocol(EfiImageHandle, &LIPGuid, (PVOID *)&ImageProtocol,
+                                                            EfiImageHandle, NULL, EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
+        if(Status != STATUS_EFI_SUCCESS)
+        {
+            /* Failed to open image protocol */
+            return Status;
+        }
+
+        /* Store disk handle */
+        DiskHandle = ImageProtocol->DeviceHandle;
+
+        /* Open the filesystem protocol */
+        Status = EfiSystemTable->BootServices->OpenProtocol(DiskHandle, &SFSGuid, (PVOID *)&FileSystemProtocol,
+                                                            EfiImageHandle, NULL, EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
+    }
+
+    /* Check if filesystem protocol opened successfully */
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to open the filesystem protocol, close volume */
+        BlCloseVolume(DiskHandle);
+        return Status;
+    }
+
+    /* Open the corresponding filesystem */
+    Status = FileSystemProtocol->OpenVolume(FileSystemProtocol, FsHandle);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to open the filesystem, close volume */
+        BlCloseVolume(DiskHandle);
+        return Status;
+    }
+
+    /* Return success */
     return STATUS_EFI_SUCCESS;
 }
 

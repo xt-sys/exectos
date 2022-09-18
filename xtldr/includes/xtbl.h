@@ -23,6 +23,9 @@ EXTERN PEFI_SYSTEM_TABLE EfiSystemTable;
 EXTERN CPPORT EfiSerialPort;
 
 EFI_STATUS
+BlCloseVolume(IN PEFI_HANDLE VolumeHandle);
+
+EFI_STATUS
 BlComPortInitialize();
 
 VOID
@@ -67,6 +70,11 @@ BlGetXtLoaderProtocol(EFI_HANDLE ImageHandle,
 
 EFI_STATUS
 BlLoadEfiModules();
+
+EFI_STATUS
+BlOpenVolume(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
+             OUT PEFI_HANDLE DiskHandle,
+             OUT PEFI_FILE_HANDLE *FsHandle);
 
 EFI_STATUS
 BlpRegisterXtLoaderProtocol();
