@@ -6,6 +6,6 @@
 @ stdcall RtlMoveMemory(ptr ptr long)
 @ stdcall RtlSameMemory(ptr ptr long)
 @ stdcall RtlSetMemory(ptr long long)
-@ stdcall RtlWideStringCompare(wstr wstr long)
-@ stdcall RtlWideStringTokenize(wstr wstr wstr)
+@ cdecl RtlWideStringCompare(wstr wstr long)
+@ cdecl RtlWideStringTokenize(wstr wstr wstr)
 @ stdcall RtlZeroMemory(ptr long)
