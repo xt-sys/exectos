@@ -7,5 +7,7 @@
 @ stdcall RtlSameMemory(ptr ptr long)
 @ stdcall RtlSetMemory(ptr long long)
 @ cdecl RtlWideStringCompare(wstr wstr long)
+@ cdecl RtlWideStringConcatenate(wstr wstr long)
+@ cdecl RtlWideStringLength(wstr long)
 @ cdecl RtlWideStringTokenize(wstr wstr wstr)
 @ stdcall RtlZeroMemory(ptr long)
