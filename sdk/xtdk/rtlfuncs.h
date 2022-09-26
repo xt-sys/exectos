@@ -74,6 +74,12 @@ RtlWideStringCompare(IN CONST PWCHAR String1,
                      IN CONST ULONG Length);
 
 XTCDECL
+PWCHAR
+RtlWideStringConcatenate(PWCHAR Destination,
+                         PWCHAR Source,
+                         SIZE_T Count);
+
+XTCDECL
 SIZE_T
 RtlWideStringLength(IN CONST PWCHAR String,
                     IN SIZE_T MaxLength);

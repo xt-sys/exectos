@@ -62,6 +62,65 @@ RtlWideStringCompare(IN CONST PWCHAR String1,
 }
 
 /**
+ * Appends a copy of the source wide string to the end of the destination wide string.
+ *
+ * @param Destination
+ *        Supplies a pointer to the null-terminated wide string to append to.
+ *
+ * @param Source
+ *        Supplies a pointer to the null-terminated wide string to copy from.
+ *
+ * @param Count
+ *        Sets a maximum number of wide characters to copy. If no limit set, appends whole wide string.
+ *
+ * @return This routine returns a copy of a destination wide string.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+PWCHAR
+RtlWideStringConcatenate(PWCHAR Destination,
+                         PWCHAR Source,
+                         SIZE_T Count)
+{
+    PWCHAR DestString = Destination;
+
+    /* Go to the end of destination wide string */
+    while(*Destination)
+    {
+        Destination++;
+    }
+
+    /* Check if copy limit set */
+    if(Count > 0)
+    {
+        /* Copy character-by-character */
+        do
+        {
+            /* Check if NULL terminated character found */
+            if((*Destination = *Source++) == '\0')
+            {
+                /* Break on '\0' character */
+                break;
+            }
+            Destination++;
+        }
+        while(--Count != 0);
+
+        /* Add NULL termination character to the end of destination wide string */
+        *Destination = '\0';
+    }
+    else
+    {
+        /* No limit set, copy all wide characters */
+        while((*Destination++ = *Source++) != 0);
+    }
+
+    /* Return copy of the destination wide string */
+    return DestString;
+}
+
+/**
  * Calculates the length of a given wide string.
  *
  * @param String
