@@ -71,7 +71,7 @@ XTCDECL
 INT
 RtlWideStringCompare(IN CONST PWCHAR String1,
                      IN CONST PWCHAR String2,
-                     IN CONST ULONG Length);
+                     IN CONST SIZE_T Length);
 
 XTCDECL
 PWCHAR
