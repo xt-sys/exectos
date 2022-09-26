@@ -19,7 +19,7 @@
  *        Wide string to be compared.
  *
  * @param Length
- *        Maximum number of characters to compare.
+ *        Maximum number of characters to compare. If no limit set, it compares whole strings.
  *
  * @return Integral value indicating the relationship between the wide strings.
  *
@@ -59,6 +59,48 @@ RtlWideStringCompare(IN CONST PWCHAR String1,
 
     /* Strings are equal */
     return 0;
+}
+
+/**
+ * Calculates the length of a given wide string.
+ *
+ * @param String
+ *        Pointer to the null-terminated wide string to be examined.
+ *
+ * @param MaxLength
+ *        Maximum number of wide characters to examine. If no limit set, it examines whole string.
+ *
+ * @return The length of the null-terminated wide string.
+ *
+ * @since: XT 1.0
+ */
+XTCDECL
+SIZE_T
+RtlWideStringLength(IN CONST PWCHAR String,
+                    IN SIZE_T MaxLength)
+{
+    SIZE_T Length;
+
+    /* Check if NULL pointer passed */
+    if(String == NULL)
+    {
+        return 0;
+    }
+
+    /* Iterate through the wide string */
+    for(Length = 0; ; Length++)
+    {
+
+        /* Check if NULL found or max length limit reached */
+        if((Length != 0 && Length == MaxLength) || !String[Length])
+        {
+            /* Finish examination */
+            break;
+        }
+    }
+
+    /* Return wide string length */
+    return Length;
 }
 
 /**

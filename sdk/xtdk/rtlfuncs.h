@@ -74,6 +74,11 @@ RtlWideStringCompare(IN CONST PWCHAR String1,
                      IN CONST ULONG Length);
 
 XTCDECL
+SIZE_T
+RtlWideStringLength(IN CONST PWCHAR String,
+                    IN SIZE_T MaxLength);
+
+XTCDECL
 PWCHAR
 RtlWideStringTokenize(IN PWCHAR String,
                       IN CONST PWCHAR Delimiter,
