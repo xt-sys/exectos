@@ -44,7 +44,7 @@ RtlInitializeListHead32(IN PLIST_ENTRY32 ListHead)
 }
 
 /**
- * This routine inserts an entry at the head of a double linked list.
+ * This routine inserts an entry at the head of a doubly linked list.
  *
  * @param ListHead
  *        Pointer to the head of the list.
@@ -67,7 +67,7 @@ RtlInsertHeadList(IN OUT PLIST_ENTRY ListHead,
 }
 
 /**
- * This routine inserts an entry at the tail of a double linked list.
+ * This routine inserts an entry at the tail of a doubly linked list.
  *
  * @param ListHead
  *        Pointer to the head of the list.
@@ -90,7 +90,7 @@ RtlInsertTailList(IN OUT PLIST_ENTRY ListHead,
 }
 
 /**
- * Indicates whether a double linked list structure is empty.
+ * Indicates whether a doubly linked list structure is empty.
  *
  * @param ListHead
  *        Pointer to a structure that represents the head of the list.
@@ -103,4 +103,49 @@ BOOLEAN
 RtlListEmpty(PLIST_ENTRY ListHead)
 {
     return (ListHead->Flink == ListHead);
+}
+
+/**
+ * This routine detects a loop in a doubly linked list.
+ *
+ * @param ListHead
+ *        Pointer to a structure that represents the head of the list.
+ *
+ * @return TRUE if linked list contains a loop or FALSE otherwise.
+ *
+ * @since XT 1.0
+ */
+BOOLEAN
+RtlListLoop(PLIST_ENTRY ListHead)
+{
+    PLIST_ENTRY SlowEntry, FastEntry;
+
+    /* Check if list exists */
+    if(ListHead == NULL)
+    {
+        /* No loop in non-existen list */
+        return FALSE;
+    }
+
+    /* Make both references pointing to the start of the list */
+    FastEntry = ListHead;
+    SlowEntry = ListHead;
+
+    /* Iterate through the linked list to find a loop */
+    while(SlowEntry != NULL && FastEntry != NULL && FastEntry->Flink != NULL)
+    {
+        /* Move slow and fast pointers by one and two positions accordingly */
+        SlowEntry = SlowEntry->Flink;
+        FastEntry = FastEntry->Flink->Flink;
+
+        /* Compare both pointers */
+        if(SlowEntry == FastEntry)
+        {
+            /* Loop found */
+            return TRUE;
+        }
+    }
+
+    /* No loop found */
+    return FALSE;
 }
