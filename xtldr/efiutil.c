@@ -227,11 +227,15 @@ BlEfiPrint(IN PUINT16 Format,
     /* Format and print the string to the stdout */
     BlStringPrint(BlConsolePutChar, Format, Arguments);
 
-    /* Check if EFI serial port is fully initialized */
-    if(EfiSerialPort.Flags & COMPORT_FLAG_INIT)
+    /* Print to serial console only if not running under OVMF */
+    if(RtlWideStringCompare(EfiSystemTable->FirmwareVendor, L"EDK II", 6) != 0)
     {
-        /* Format and print the string to the serial console */
-        BlStringPrint(BlComPortPutChar, Format, Arguments);
+        /* Check if EFI serial port is fully initialized */
+        if(EfiSerialPort.Flags & COMPORT_FLAG_INIT)
+        {
+            /* Format and print the string to the serial console */
+            BlStringPrint(BlComPortPutChar, Format, Arguments);
+        }
     }
 
     /* Clean up the va_list */
