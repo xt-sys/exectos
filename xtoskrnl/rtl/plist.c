@@ -100,7 +100,7 @@ RtlInsertTailList(IN OUT PLIST_ENTRY ListHead,
  * @since XT 1.0
  */
 BOOLEAN
-RtlListEmpty(PLIST_ENTRY ListHead)
+RtlListEmpty(IN PLIST_ENTRY ListHead)
 {
     return (ListHead->Flink == ListHead);
 }
@@ -116,7 +116,7 @@ RtlListEmpty(PLIST_ENTRY ListHead)
  * @since XT 1.0
  */
 BOOLEAN
-RtlListLoop(PLIST_ENTRY ListHead)
+RtlListLoop(IN PLIST_ENTRY ListHead)
 {
     PLIST_ENTRY SlowEntry, FastEntry;
 

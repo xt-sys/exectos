@@ -79,9 +79,9 @@ RtlWideStringCompare(IN CONST PWCHAR String1,
  */
 XTCDECL
 PWCHAR
-RtlWideStringConcatenate(PWCHAR Destination,
-                         PWCHAR Source,
-                         SIZE_T Count)
+RtlWideStringConcatenate(OUT PWCHAR Destination,
+                         IN PWCHAR Source,
+                         IN SIZE_T Count)
 {
     PWCHAR DestString = Destination;
 
