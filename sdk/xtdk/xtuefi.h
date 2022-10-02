@@ -137,6 +137,11 @@
 #define EFI_BBS_TYPE_DEV                                   0x80
 #define EFI_BBS_TYPE_UNKNOWN                               0xFF
 
+/* EFI end device path subtypes */
+#define EFI_END_INSTANCE_DP                                0x01
+#define EFI_END_UNPACKED_DP                                0x7F
+#define EFI_END_ENTIRE_DP                                  0xFF
+
 /* EFI file open modes */
 #define EFI_FILE_MODE_READ                                 0x0000000000000001
 #define EFI_FILE_MODE_WRITE                                0x0000000000000002
