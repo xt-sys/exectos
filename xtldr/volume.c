@@ -320,10 +320,6 @@ BlOpenVolume(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
             /* Failed to locate device path */
             return Status;
         }
-
-        /* Open the filesystem protocol */
-        Status = EfiSystemTable->BootServices->OpenProtocol(*DiskHandle, &SFSGuid, (PVOID *)&FileSystemProtocol,
-                                                            EfiImageHandle, NULL, EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
     }
     else
     {
@@ -337,18 +333,18 @@ BlOpenVolume(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
         }
 
         /* Store disk handle */
-        DiskHandle = ImageProtocol->DeviceHandle;
-
-        /* Open the filesystem protocol */
-        Status = EfiSystemTable->BootServices->OpenProtocol(DiskHandle, &SFSGuid, (PVOID *)&FileSystemProtocol,
-                                                            EfiImageHandle, NULL, EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
+        *DiskHandle = ImageProtocol->DeviceHandle;
     }
+
+    /* Open the filesystem protocol */
+    Status = EfiSystemTable->BootServices->OpenProtocol(*DiskHandle, &SFSGuid, (PVOID *)&FileSystemProtocol,
+                                                        EfiImageHandle, NULL, EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
 
     /* Check if filesystem protocol opened successfully */
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to open the filesystem protocol, close volume */
-        BlCloseVolume(DiskHandle);
+        BlCloseVolume(*DiskHandle);
         return Status;
     }
 
@@ -357,7 +353,7 @@ BlOpenVolume(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to open the filesystem, close volume */
-        BlCloseVolume(DiskHandle);
+        BlCloseVolume(*DiskHandle);
         return Status;
     }
 
