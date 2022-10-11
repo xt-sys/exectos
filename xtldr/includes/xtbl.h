@@ -59,6 +59,11 @@ EFI_STATUS
 BlEnumerateEfiBlockDevices();
 
 EFI_STATUS
+BlFindVolumeDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL FsHandle,
+                       IN CONST PWCHAR FileSystemPath,
+                       OUT PEFI_DEVICE_PATH_PROTOCOL* DevicePath);
+
+EFI_STATUS
 BlGetVolumeDevicePath(IN PUCHAR SystemPath,
                       OUT PEFI_DEVICE_PATH_PROTOCOL *DevicePath,
                       OUT PUCHAR *Path);

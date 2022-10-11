@@ -15,6 +15,9 @@ EFI_HANDLE EfiImageHandle;
 /* EFI System Table */
 PEFI_SYSTEM_TABLE EfiSystemTable;
 
+/* EFI Secure Boot status */
+INT_PTR EfiSecureBoot;
+
 /* Serial port configuration */
 CPPORT EfiSerialPort;
 
@@ -28,8 +31,215 @@ CPPORT EfiSerialPort;
 EFI_STATUS
 BlLoadEfiModules()
 {
+    CONST PWCHAR ModulesDirPath = L"\\EFI\\BOOT\\XTLDR\\";
+    EFI_GUID DevicePathGuid = EFI_DEVICE_PATH_PROTOCOL_GUID;
+    EFI_GUID LIPGuid = EFI_LOADED_IMAGE_PROTOCOL_GUID;
+    PEFI_DEVICE_PATH_PROTOCOL VolumeDevicePath, DevicePath;
+    PEFI_LOADED_IMAGE_PROTOCOL LoadedImage;
+    PEFI_FILE_HANDLE FsHandle, ModulesDir;
+    EFI_HANDLE DiskHandle, ModuleHandle;
+    PEFI_HANDLE Handles;
+    SIZE_T Length;
     EFI_STATUS Status;
+    UINT_PTR DirSize, ModulesCount;
+    CHAR Buffer[1024];
+    WCHAR ModulePath[1024];
+    PWCHAR ModuleName;
+    UINT Index;
 
+    /* Open EFI volume */
+    Status = BlOpenVolume(NULL, &DiskHandle, &FsHandle);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to open a volume */
+        return Status;
+    }
+
+    /* Open EFI/BOOT/XTLDR directory, which contains all the modules and close the FS immediately */
+    Status = FsHandle->Open(FsHandle, &ModulesDir, ModulesDirPath, EFI_FILE_MODE_READ, 0);
+    FsHandle->Close(FsHandle);
+
+    /* Check if modules directory opened successfully */
+    if(Status == STATUS_EFI_NOT_FOUND)
+    {
+        /* Directory not found, nothing to load */
+        BlDbgPrint(L"WARNING: Boot loader directory (EFI/BOOT/XTLDR) not found\n");
+
+        /* Close volume */
+        BlCloseVolume(DiskHandle);
+        return STATUS_EFI_SUCCESS;
+    }
+    else if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to open directory */
+        BlDbgPrint(L"ERROR: Unable to open XTLDR directory (EFI/BOOT/XTLDR)\n");
+        BlCloseVolume(DiskHandle);
+        return Status;
+    }
+
+    /* Open EFI device path protocol */
+    Status = EfiSystemTable->BootServices->HandleProtocol(DiskHandle, &DevicePathGuid, (PVOID *)&DevicePath);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Close volume */
+        BlCloseVolume(DiskHandle);
+        return Status;
+    }
+
+    /* Iterate through files inside XTLDR directory */
+    while(TRUE)
+    {
+        /* Read directory */
+        DirSize = sizeof(Buffer);
+        Status = ModulesDir->Read(ModulesDir, &DirSize, Buffer);
+        if(Status != STATUS_EFI_SUCCESS)
+        {
+            /* Failed to read directory */
+            BlDbgPrint(L"\n");
+
+            /* Close directory and volume */
+            ModulesDir->Close(ModulesDir);
+            BlCloseVolume(DiskHandle);
+            return Status;
+        }
+
+        /* Check if read anything */
+        if(DirSize == 0)
+        {
+            /* Already read all contents, break loop execution */
+            break;
+        }
+
+        /* Take filename and its length */
+        ModuleName = ((PEFI_FILE_INFO)Buffer)->FileName;
+        Length = RtlWideStringLength(ModuleName, 0);
+
+        /* Make sure we deal with .EFI executable file */
+        if(Length < 4 || ModuleName[Length - 4] != '.' ||
+           (ModuleName[Length - 3] != 'E' && ModuleName[Length - 3] != 'e') ||
+           (ModuleName[Length - 2] != 'F' && ModuleName[Length - 2] != 'f') ||
+           (ModuleName[Length - 1] != 'I' && ModuleName[Length - 1] != 'i'))
+        {
+            /* Skip non .EFI file */
+            continue;
+        }
+
+        /* Print debug message */
+        BlDbgPrint(L"Loading module '%S' ... ", ModuleName);
+
+        /* Set correct path to the module file */
+        RtlWideStringConcatenate(ModulePath, ModulesDirPath, 0);
+        RtlWideStringConcatenate(ModulePath, ModuleName, 0);
+
+        /* Find valid device path */
+        Status = BlFindVolumeDevicePath(DevicePath, ModulePath, &VolumeDevicePath);
+        if(Status != STATUS_EFI_SUCCESS)
+        {
+            /* Failed to set path */
+            BlDbgPrint(L"FAIL\n");
+            BlDbgPrint(L"ERROR: Unable to set valid device path\n");
+
+            /* Close directory and volume */
+            ModulesDir->Close(ModulesDir);
+            BlCloseVolume(DiskHandle);
+            return Status;
+        }
+
+        /* Load the module into memory */
+        Status = EfiSystemTable->BootServices->LoadImage(FALSE, EfiImageHandle, VolumeDevicePath, NULL, 0, &ModuleHandle);
+        if(Status != STATUS_EFI_SUCCESS)
+        {
+            /* Module failed */
+            BlDbgPrint(L"FAIL\n");
+
+            /* Check if caused by secure boot */
+            if(Status == STATUS_EFI_ACCESS_DENIED && EfiSecureBoot >= 1)
+            {
+                BlDbgPrint(L"ERROR: SecureBoot signature validation failed\n");
+            }
+            else
+            {
+                BlDbgPrint(L"ERROR: Unable to load module\n");
+            }
+
+            /* Free memory and skip module */
+            BlEfiMemoryFreePool(VolumeDevicePath);
+            continue;
+        }
+
+        /* Free memory */
+        BlEfiMemoryFreePool(VolumeDevicePath);
+
+        /* Access module interface for further module type check */
+        Status = EfiSystemTable->BootServices->OpenProtocol(ModuleHandle, &LIPGuid, (PVOID *)&LoadedImage,
+                                                            EfiImageHandle, NULL, EFI_OPEN_PROTOCOL_GET_PROTOCOL);
+        if(Status != STATUS_EFI_SUCCESS)
+        {
+            /* Failed to open protocol */
+            BlDbgPrint(L"FAIL\n");
+            BlDbgPrint(L"ERROR: Unable to access module interface\n");
+
+            /* Skip to the next module */
+            continue;
+        }
+
+        /* Some firmwares do not allow to start drivers which are not of 'boot system driver' type, so check it */
+        if(LoadedImage->ImageCodeType != EfiBootServicesCode)
+        {
+            /* Different type set, probably 'runtime driver', refuse to load it */
+            BlDbgPrint(L"FAIL\n");
+            BlDbgPrint(L"ERROR: Loaded module is not a boot system driver\n");
+
+            /* Close protocol and skip module */
+            EfiSystemTable->BootServices->CloseProtocol(LoadedImage, &LIPGuid, LoadedImage, NULL);
+            continue;
+        }
+
+        /* Close loaded image protocol */
+        EfiSystemTable->BootServices->CloseProtocol(LoadedImage, &LIPGuid, LoadedImage, NULL);
+
+        /* Start the module */
+        Status = EfiSystemTable->BootServices->StartImage(ModuleHandle, NULL, NULL);
+        if(Status != STATUS_EFI_SUCCESS)
+        {
+            /* Module failed */
+            BlDbgPrint(L"FAIL\n");
+            BlDbgPrint(L"ERROR: Unable to start module\n");
+
+            /* Skip module */
+            continue;
+        }
+
+        /* Module loaded successfully */
+        BlDbgPrint(L"OK\n");
+    }
+
+    /* Get list of all handles */
+    Status = EfiSystemTable->BootServices->LocateHandleBuffer(AllHandles, NULL, NULL, &ModulesCount, &Handles);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to get list of handles */
+        BlDbgPrint(L"WARNING: Unable to get a list of handles, some modules might not work properly\n");
+    }
+    else
+    {
+        /* Iterate through a list of handles */
+        BlDbgPrint(L"Starting services for %lu handles\n", ModulesCount);
+        for(Index = 0; Index < ModulesCount; Index++)
+        {
+            /* Start services for all loaded modules */
+            EfiSystemTable->BootServices->ConnectController(Handles[Index], NULL, NULL, TRUE);
+        }
+    }
+
+    /* Free memory */
+    BlEfiMemoryFreePool(Handles);
+
+    /* Close directory and volume */
+    ModulesDir->Close(ModulesDir);
+    BlCloseVolume(DiskHandle);
+
+    /* Return success */
     return STATUS_EFI_SUCCESS;
 }
 
@@ -52,6 +262,7 @@ BlRegisterXtLoaderProtocol()
     LoaderProtocol.EfiPrint = BlEfiPrint;
 
     /* Register loader protocol */
+    BlDbgPrint(L"Registering XT loader protocol\n");
     return EfiSystemTable->BootServices->InstallProtocolInterface(&Handle, &Guid, EFI_NATIVE_INTERFACE, &LoaderProtocol);
 }
 

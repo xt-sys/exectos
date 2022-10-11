@@ -186,6 +186,89 @@ BlEnumerateEfiBlockDevices()
     return STATUS_EFI_SUCCESS;
 }
 
+/**
+ * Finds an EFI device path for a specified path on a given file system.
+ *
+ * @param FsHandle
+ *        The handle of the corresponding file system.
+ *
+ * @param FileSystemPath
+ *        Specifies a path on the corresponding file system.
+ *
+ * @param DevicePath
+ *        Specifies a pointer to the memory area, where found device path will be stored.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+EFI_STATUS
+BlFindVolumeDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL FsHandle,
+                       IN CONST PWCHAR FileSystemPath,
+                       OUT PEFI_DEVICE_PATH_PROTOCOL* DevicePath)
+{
+    EFI_STATUS Status;
+    SIZE_T FsPathLength, DevicePathLength = 0;
+    PEFI_FILEPATH_DEVICE_PATH FilePath = NULL;
+    PEFI_DEVICE_PATH_PROTOCOL EndDevicePath;
+    PEFI_DEVICE_PATH_PROTOCOL DevicePathHandle;
+
+    /* Set local device path handle */
+    DevicePathHandle = FsHandle;
+
+    /* Find the end device path node */
+    while(TRUE) {
+        /* Make sure there is a next node */
+        if(*(PUSHORT)DevicePathHandle->Length == 0)
+        {
+            /* End device path not found */
+            return STATUS_EFI_NOT_FOUND;
+        }
+
+        /* Check if end device path node found */
+        if(DevicePathHandle->Type == EFI_END_DEVICE_PATH)
+        {
+            /* End device path node found */
+            break;
+        }
+
+        /* Get next node */
+        DevicePathLength += *(PUSHORT)DevicePathHandle->Length;
+        DevicePathHandle = (PEFI_DEVICE_PATH_PROTOCOL)((PUCHAR)DevicePathHandle + *(PUSHORT)DevicePathHandle->Length);
+    }
+
+    /* Check real path length */
+    FsPathLength = RtlWideStringLength(FileSystemPath, 0) * sizeof(WCHAR);
+
+    /* Allocate memory pool for device path */
+    Status = BlEfiMemoryAllocatePool(FsPathLength + DevicePathLength + sizeof(EFI_DEVICE_PATH_PROTOCOL),
+                                     (PVOID *)DevicePath);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Memory allocation failure */
+        return Status;
+    }
+
+    /* Set file path */
+    RtlCopyMemory(*DevicePath, FsHandle, DevicePathLength);
+    FilePath = (PEFI_FILEPATH_DEVICE_PATH)((PUCHAR)*DevicePath + DevicePathLength);
+    FilePath->Header.Type = EFI_MEDIA_DEVICE_PATH;
+    FilePath->Header.SubType = EFI_MEDIA_FILEPATH_DP;
+    FilePath->Header.Length[0] = (UCHAR)FsPathLength + FIELD_OFFSET(EFI_FILEPATH_DEVICE_PATH, PathName) + sizeof(WCHAR);
+    FilePath->Header.Length[1] = FilePath->Header.Length[0] >> 8;
+
+    /* Set device path end node */
+    RtlCopyMemory(FilePath->PathName, FileSystemPath, FsPathLength + sizeof(WCHAR));
+    EndDevicePath = (PEFI_DEVICE_PATH_PROTOCOL)&FilePath->PathName[(FsPathLength / sizeof(WCHAR)) + 1];
+    EndDevicePath->Type = EFI_END_DEVICE_PATH;
+    EndDevicePath->SubType = EFI_END_ENTIRE_DP;
+    EndDevicePath->Length[0] = sizeof(EFI_DEVICE_PATH_PROTOCOL);
+    EndDevicePath->Length[1] = 0;
+
+    /* Return success */
+    return STATUS_EFI_SUCCESS;
+}
+
 EFI_STATUS
 BlGetVolumeDevicePath(IN PUCHAR SystemPath,
                       OUT PEFI_DEVICE_PATH_PROTOCOL *DevicePath,
