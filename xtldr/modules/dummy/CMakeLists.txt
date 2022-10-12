@@ -8,7 +8,7 @@ include_directories(
 
 # Specify list of source code files
 list(APPEND XTLDR_DUMMY_SOURCE
-    ${XTLDR_SOURCE_DIR}/modules/blproto.c
+    ${XTLDR_SOURCE_DIR}/blproto.c
     ${XTLDR_DUMMY_SOURCE_DIR}/dummy.c)
 
 # Link bootloader executable

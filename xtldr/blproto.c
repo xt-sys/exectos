@@ -1,7 +1,7 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtldr/modules/blproto.c
+ * FILE:            xtldr/blproto.c
  * DESCRIPTION:     EFI XTLDR protocol API
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
