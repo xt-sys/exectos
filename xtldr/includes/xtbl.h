@@ -19,6 +19,9 @@ EXTERN EFI_HANDLE EfiImageHandle;
 /* EFI System Table */
 EXTERN PEFI_SYSTEM_TABLE EfiSystemTable;
 
+/* EFI Secure Boot status */
+EXTERN INT_PTR EfiSecureBoot;
+
 /* Serial port configuration */
 EXTERN CPPORT EfiSerialPort;
 
@@ -43,6 +46,9 @@ BlConsolePutChar(IN USHORT Character);
 VOID
 BlDbgPrint(IN PUINT16 Format,
            IN ...);
+
+INT_PTR
+BlEfiGetSecureBootStatus();
 
 EFI_STATUS
 BlEfiMemoryAllocatePool(IN UINT_PTR Size,

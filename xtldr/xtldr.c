@@ -308,6 +308,10 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
         BlDbgPrint(L"WARNING: Failed to disable watchdog timer\n");
     }
 
+    /* Check SecureBoot status */
+    EfiSecureBoot = BlEfiGetSecureBootStatus();
+    BlDbgPrint(L"SecureBoot status: %S\n", EfiSecureBoot == 0 ? L"DISABLED" : EfiSecureBoot > 0 ? L"ENABLED" : L"SETUP");
+
     /* Register loader protocol */
     Status = BlRegisterXtLoaderProtocol();
     if(Status != STATUS_EFI_SUCCESS)

@@ -163,6 +163,38 @@ BlDbgPrint(IN PUINT16 Format,
 }
 
 /**
+ * This routine checks whether SecureBoot is enabled or not.
+ *
+ * @return Numeric representation of SecureBoot status (0 = Disabled, >0 = Enabled, <0 SetupMode).
+ *
+ * @since XT 1.0
+ */
+INT_PTR
+BlEfiGetSecureBootStatus()
+{
+    EFI_GUID VarGuid = EFI_GLOBAL_VARIABLE_GUID;
+    INT_PTR SecureBootStatus = 0;
+    UCHAR VarValue = 0;
+    UINT_PTR Size;
+
+    Size = sizeof(VarValue);
+    if(EfiSystemTable->RuntimeServices->GetVariable(L"SecureBoot", &VarGuid,
+       NULL, &Size, &VarValue) == STATUS_EFI_SUCCESS)
+    {
+        SecureBootStatus = (INT_PTR)VarValue;
+
+        if((EfiSystemTable->RuntimeServices->GetVariable(L"SetupMode", &VarGuid,
+           NULL, &Size, &VarValue) == STATUS_EFI_SUCCESS) && VarValue != 0)
+        {
+            SecureBootStatus = -1;
+        }
+    }
+
+    /* Return SecureBoot status */
+    return SecureBootStatus;
+}
+
+/**
  * This routine allocates a pool memory.
  *
  * @param Size
