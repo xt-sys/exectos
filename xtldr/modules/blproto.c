@@ -7,28 +7,18 @@
  */
 
 #include <xtbl.h>
+#include <blmod.h>
 
 
 /**
  * This routine locates and opens the XT boot loader protocol.
- *
- * @param ImageHandle
- *        Firmware-allocated handle that identifies the image.
- *
- * @param SystemTable
- *        Provides the EFI system table.
- *
- * @param LoaderProtocol
- *        Supplies the address where a pointer to the bootloader protocol is returned.
  *
  * @return This routine returns status code.
  *
  * @since XT 1.0
  */
 EFI_STATUS
-BlGetXtLoaderProtocol(EFI_HANDLE ImageHandle,
-                      PEFI_SYSTEM_TABLE SystemTable,
-                      PXT_BOOT_LOADER_PROTOCOL *LoaderProtocol)
+BlGetXtLoaderProtocol()
 {
     EFI_GUID Guid = XT_BOOT_LOADER_PROTOCOL_GUID;
     PEFI_HANDLE Handles = NULL;
@@ -37,7 +27,7 @@ BlGetXtLoaderProtocol(EFI_HANDLE ImageHandle,
     UINT Index;
 
     /* Try to locate the handles */
-    Status = SystemTable->BootServices->LocateHandleBuffer(ByProtocol, &Guid, NULL, &Count, &Handles);
+    Status = EfiSystemTable->BootServices->LocateHandleBuffer(ByProtocol, &Guid, NULL, &Count, &Handles);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Unable to get handles */
@@ -51,23 +41,23 @@ BlGetXtLoaderProtocol(EFI_HANDLE ImageHandle,
         for(Index = 0; Index < Count; Index++)
         {
             /* Try to open protocol */
-            Status = SystemTable->BootServices->OpenProtocol(Handles[Index], &Guid, (PVOID *)&LoaderProtocol,
-                                                             ImageHandle, NULL, EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
+            Status = EfiSystemTable->BootServices->OpenProtocol(Handles[Index], &Guid, (PVOID*)&EfiXtLdrProtocol,
+                                                                EfiImageHandle, NULL, EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
 
             /* Check if successfully opened the loader protocol */
             if(Status == STATUS_EFI_SUCCESS)
             {
-                /* Protocol found */
+                /* Protocol found and successfully opened */
                 break;
             }
         }
     }
 
     /* Free handles */
-    SystemTable->BootServices->FreePool(Handles);
+    EfiSystemTable->BootServices->FreePool(Handles);
 
     /* Make sure the loaded protocol has been found */
-    if(LoaderProtocol == NULL)
+    if(EfiXtLdrProtocol == NULL)
     {
         /* Protocol not found */
         return STATUS_EFI_NOT_FOUND;

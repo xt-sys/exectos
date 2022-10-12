@@ -75,11 +75,6 @@ BlGetVolumeDevicePath(IN PUCHAR SystemPath,
                       OUT PUCHAR *Path);
 
 EFI_STATUS
-BlGetXtLoaderProtocol(EFI_HANDLE ImageHandle,
-                      PEFI_SYSTEM_TABLE SystemTable,
-                      PXT_BOOT_LOADER_PROTOCOL *LoaderProtocol);
-
-EFI_STATUS
 BlLoadEfiModules();
 
 EFI_STATUS

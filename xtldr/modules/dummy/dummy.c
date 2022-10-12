@@ -7,6 +7,7 @@
  */
 
 #include <xtbl.h>
+#include <blmod.h>
 
 
 /* EFI Image Handle */
@@ -40,7 +41,7 @@ BlXtLoaderModuleMain(EFI_HANDLE ImageHandle,
     EfiSystemTable = SystemTable;
 
     /* Open the XTLDR protocol */
-    BlGetXtLoaderProtocol(ImageHandle, SystemTable, &EfiXtLdrProtocol);
+    BlGetXtLoaderProtocol();
 
     /* Print message and return success */
     EfiXtLdrProtocol->EfiPrint(L"XTLDR dummy module initialized\n");

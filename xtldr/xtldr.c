@@ -12,6 +12,9 @@
 /* EFI Image Handle */
 EFI_HANDLE EfiImageHandle;
 
+/* XT Boot Loader protocol */
+XT_BOOT_LOADER_PROTOCOL EfiLdrProtocol;
+
 /* EFI System Table */
 PEFI_SYSTEM_TABLE EfiSystemTable;
 
@@ -254,16 +257,15 @@ EFI_STATUS
 BlRegisterXtLoaderProtocol()
 {
     EFI_GUID Guid = XT_BOOT_LOADER_PROTOCOL_GUID;
-    XT_BOOT_LOADER_PROTOCOL LoaderProtocol;
-    EFI_HANDLE Handle;
+    EFI_HANDLE Handle = NULL;
 
     /* Set all routines available via loader protocol */
-    LoaderProtocol.DbgPrint = BlDbgPrint;
-    LoaderProtocol.EfiPrint = BlEfiPrint;
+    EfiLdrProtocol.DbgPrint = BlDbgPrint;
+    EfiLdrProtocol.EfiPrint = BlEfiPrint;
 
     /* Register loader protocol */
     BlDbgPrint(L"Registering XT loader protocol\n");
-    return EfiSystemTable->BootServices->InstallProtocolInterface(&Handle, &Guid, EFI_NATIVE_INTERFACE, &LoaderProtocol);
+    return EfiSystemTable->BootServices->InstallProtocolInterface(&Handle, &Guid, EFI_NATIVE_INTERFACE, &EfiLdrProtocol);
 }
 
 /**
