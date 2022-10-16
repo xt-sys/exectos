@@ -131,7 +131,7 @@ BlLoadEfiModules()
         BlDbgPrint(L"Loading module '%S' ... ", ModuleName);
 
         /* Set correct path to the module file */
-        RtlWideStringConcatenate(ModulePath, ModulesDirPath, 0);
+        RtlCopyMemory(ModulePath, ModulesDirPath, sizeof(ModulePath) / sizeof(WCHAR));
         RtlWideStringConcatenate(ModulePath, ModuleName, 0);
 
         /* Find valid device path */
