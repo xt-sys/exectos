@@ -302,6 +302,14 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
         BlEfiPrint(L"ERROR: Failed to initialize serial console\n");
     }
 
+    /* Check SecureBoot status */
+    EfiSecureBoot = BlEfiGetSecureBootStatus();
+
+    /* Print firmware information */
+    BlDbgPrint(L"UEFI v%d.%d (%S 0x%08x), SecureBoot %S\n", EfiSystemTable->Hdr.Revision >> 16,
+               EfiSystemTable->Hdr.Revision & 0xFFFF, EfiSystemTable->FirmwareVendor, EfiSystemTable->FirmwareRevision,
+               EfiSecureBoot == 0 ? L"DISABLED" : EfiSecureBoot > 0 ? L"ENABLED" : L"SETUP");
+
     /* Disable watchdog timer */
     Status = EfiSystemTable->BootServices->SetWatchdogTimer(0, 0x10000, 0, NULL);
     if(Status != STATUS_EFI_SUCCESS)
@@ -309,10 +317,6 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
         /* Failed to disable the timer, print message */
         BlDbgPrint(L"WARNING: Failed to disable watchdog timer\n");
     }
-
-    /* Check SecureBoot status */
-    EfiSecureBoot = BlEfiGetSecureBootStatus();
-    BlDbgPrint(L"SecureBoot status: %S\n", EfiSecureBoot == 0 ? L"DISABLED" : EfiSecureBoot > 0 ? L"ENABLED" : L"SETUP");
 
     /* Register loader protocol */
     Status = BlRegisterXtLoaderProtocol();
