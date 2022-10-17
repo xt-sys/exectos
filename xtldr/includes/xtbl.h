@@ -51,6 +51,10 @@ INT_PTR
 BlEfiGetSecureBootStatus();
 
 EFI_STATUS
+BlEfiGetSystemConfigurationTable(IN PEFI_GUID TableGuid,
+                                 OUT PVOID *Table);
+
+EFI_STATUS
 BlEfiMemoryAllocatePool(IN UINT_PTR Size,
                         OUT PVOID *Memory);
 
