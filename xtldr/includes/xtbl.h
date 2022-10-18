@@ -87,7 +87,7 @@ BlOpenVolume(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
              OUT PEFI_FILE_HANDLE *FsHandle);
 
 EFI_STATUS
-BlpRegisterXtLoaderProtocol();
+BlRegisterXtLoaderProtocol();
 
 EFI_STATUS
 BlStartXtLoader(IN EFI_HANDLE ImageHandle,
