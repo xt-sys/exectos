@@ -18,7 +18,7 @@
  * @since XT 1.0
  */
 EFI_STATUS
-BlGetXtLoaderProtocol()
+BlGetXtLoaderProtocol(PXT_BOOT_LOADER_PROTOCOL *LdrProtocol)
 {
     EFI_GUID Guid = XT_BOOT_LOADER_PROTOCOL_GUID;
     PEFI_HANDLE Handles = NULL;
@@ -41,7 +41,7 @@ BlGetXtLoaderProtocol()
         for(Index = 0; Index < Count; Index++)
         {
             /* Try to open protocol */
-            Status = EfiSystemTable->BootServices->OpenProtocol(Handles[Index], &Guid, (PVOID*)&EfiXtLdrProtocol,
+            Status = EfiSystemTable->BootServices->OpenProtocol(Handles[Index], &Guid, (PVOID*)LdrProtocol,
                                                                 EfiImageHandle, NULL, EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
 
             /* Check if successfully opened the loader protocol */
@@ -57,7 +57,7 @@ BlGetXtLoaderProtocol()
     EfiSystemTable->BootServices->FreePool(Handles);
 
     /* Make sure the loaded protocol has been found */
-    if(EfiXtLdrProtocol == NULL)
+    if(*LdrProtocol == NULL)
     {
         /* Protocol not found */
         return STATUS_EFI_NOT_FOUND;

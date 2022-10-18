@@ -17,6 +17,6 @@
 EXTERN PXT_BOOT_LOADER_PROTOCOL EfiXtLdrProtocol;
 
 EFI_STATUS
-BlGetXtLoaderProtocol();
+BlGetXtLoaderProtocol(PXT_BOOT_LOADER_PROTOCOL *LdrProtocol);
 
 #endif /* __XTLDR_BLMOD_H */

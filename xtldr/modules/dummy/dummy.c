@@ -36,14 +36,20 @@ EFI_STATUS
 BlXtLoaderModuleMain(EFI_HANDLE ImageHandle,
                      PEFI_SYSTEM_TABLE SystemTable)
 {
+    EFI_STATUS Status;
+
     /* Set the system table and image handle */
     EfiImageHandle = ImageHandle;
     EfiSystemTable = SystemTable;
 
     /* Open the XTLDR protocol */
-    BlGetXtLoaderProtocol();
+    Status = BlGetXtLoaderProtocol(&EfiXtLdrProtocol);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to open loader protocol */
+        return STATUS_EFI_PROTOCOL_ERROR;
+    }
 
-    /* Print message and return success */
-    EfiXtLdrProtocol->EfiPrint(L"XTLDR dummy module initialized\n");
+    /* Return success */
     return STATUS_EFI_SUCCESS;
 }
