@@ -38,6 +38,13 @@ BlCloseVolume(IN PEFI_HANDLE VolumeHandle)
     return STATUS_EFI_SUCCESS;
 }
 
+/**
+ * Discovers and enumerates a block devices available to EFI system.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
 EFI_STATUS
 BlEnumerateEfiBlockDevices()
 {
@@ -269,6 +276,22 @@ BlFindVolumeDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL FsHandle,
     return STATUS_EFI_SUCCESS;
 }
 
+/**
+ * Finds a volume device path based on the specified ARC name or UUID.
+ *
+ * @param SystemPath
+ *        An input string containing ARC/UUID path.
+ *
+ * @param DevicePath
+ *        Supplies a pointer to memory region where device path will be stored.
+ *
+ * @param Path
+ *        Supplies a pointer to the memory area, where path on device will be saved.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
 EFI_STATUS
 BlGetVolumeDevicePath(IN PUCHAR SystemPath,
                       OUT PEFI_DEVICE_PATH_PROTOCOL *DevicePath,
@@ -444,6 +467,16 @@ BlOpenVolume(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
     return STATUS_EFI_SUCCESS;
 }
 
+/**
+ * Gets a list of block devices from an EFI enabled BIOS.
+ *
+ * @param BlockDevices
+ *        Supplies a pointer to a variable to receive a list of EFI block devices.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
 EFI_STATUS
 BlpDiscoverEfiBlockDevices(OUT PLIST_ENTRY BlockDevices)
 {
@@ -525,6 +558,28 @@ BlpDiscoverEfiBlockDevices(OUT PLIST_ENTRY BlockDevices)
     return STATUS_EFI_SUCCESS;
 }
 
+/**
+ * Dissects a specified ARC name and provides detailed information about corresponding device and on disk path.
+ *
+ * @param SystemPath
+ *        Supplies an input ARC path.
+ *
+ * @param Path
+ *        Specifies a pointer to variable, where on disk path will be saved.
+ *
+ * @param DriveType
+ *        Supplies a pointer to the variable that receives a drive type.
+ *
+ * @param DriveNumber
+ *        Supplies a pointer to the variable that receives a drive number.
+ *
+ * @param PartNumber
+ *        Supplies a pointer to the variable that receives a parition number if applicable, otherwise stores 0 (zero).
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
 EFI_STATUS
 BlpDissectVolumeArcPath(IN PUCHAR SystemPath,
                         OUT PUCHAR *Path,
@@ -660,6 +715,16 @@ BlpDissectVolumeArcPath(IN PUCHAR SystemPath,
     return STATUS_EFI_SUCCESS;
 }
 
+/**
+ * This routine duplicates a device path object.
+ *
+ * @param DevicePath
+ *        An input device path that is going to be clonned.
+ *
+ * @return Returns a duplicate of input device path.
+ *
+ * @since XT 1.0
+ */
 PEFI_DEVICE_PATH_PROTOCOL
 BlpDuplicateDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath)
 {
@@ -704,6 +769,19 @@ BlpDuplicateDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath)
     return DevicePathClone;
 }
 
+/**
+ * Attempts to find a last node of the EFI block device.
+ *
+ * @param DevicePath
+ *        An input device path.
+ *
+ * @param LastNode
+ *        A pointer to the buffer where last node will be stored.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
 EFI_STATUS
 BlpFindLastEfiBlockDeviceNode(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
                               OUT PEFI_DEVICE_PATH_PROTOCOL *LastNode)
@@ -733,6 +811,22 @@ BlpFindLastEfiBlockDeviceNode(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
     return STATUS_EFI_SUCCESS;
 }
 
+/**
+ * This routine attempts to find a parent device of the provided block device.
+ *
+ * @param BlockDevice
+ *        A linked list of discovered block devices.
+ *
+ * @param ChildNode
+ *        Block device that is looking for a parent device.
+ *
+ * @param ParentNode
+ *        A pointer to memory region where pointer to the parent node will be provided.
+ *
+ * @return This routine returns TRUE if parent node has been found, or FALSE otherwise.
+ *
+ * @since XT 1.0
+ */
 BOOLEAN
 BlpFindParentEfiBlockDevice(IN PLIST_ENTRY BlockDevices,
                             IN PEFI_BLOCK_DEVICE_DATA ChildNode,
