@@ -13,9 +13,6 @@
 #include <bldefs.h>
 
 
-/* EFI XT Loader Protocol */
-EXTERN PXT_BOOT_LOADER_PROTOCOL EfiXtLdrProtocol;
-
 EFI_STATUS
 BlGetXtLoaderProtocol(PXT_BOOT_LOADER_PROTOCOL *LdrProtocol);
 
