@@ -20,6 +20,7 @@
 
 /* Architecture-independent XT API */
 #include "xtcommon.h"
+#include "xtimage.h"
 #include "xtuefi.h"
 
 /* Low level data types headers */
