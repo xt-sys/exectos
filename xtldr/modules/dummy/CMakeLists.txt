@@ -22,5 +22,5 @@ set_target_properties(dummy PROPERTIES SUFFIX .efi)
 set_install_target(dummy efi/boot/xtldr)
 
 # Set loader entrypoint, imagebase address, ordinals and subsystem
-set_entrypoint(dummy "BlXtLoaderModuleMain")
+set_entrypoint(dummy "BlXtLdrModuleMain")
 set_subsystem(dummy efi_boot_service_driver)
