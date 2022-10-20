@@ -1,8 +1,8 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtldr/modules/dummy/dummy.c
- * DESCRIPTION:     Boot loader dummy module
+ * FILE:            xtldr/modules/pecoff/pecoff.c
+ * DESCRIPTION:     PE/COFF executable file format support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 

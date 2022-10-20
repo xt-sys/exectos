@@ -11,6 +11,7 @@
 
 #include <xtkmapi.h>
 #include <bldefs.h>
+#include <blproto.h>
 
 
 /* EFI Image Handle */

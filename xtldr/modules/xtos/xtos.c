@@ -1,8 +1,8 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtldr/modules/dummy/dummy.c
- * DESCRIPTION:     Boot loader dummy module
+ * FILE:            xtldr/modules/xtos/xtos.c
+ * DESCRIPTION:     XTOS boot protocol support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 

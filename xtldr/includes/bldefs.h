@@ -25,15 +25,13 @@
 #define XT_HIVE_IMAGE_PROTOCOL_GUID          {0x5A3688A2, 0x5854, 0x424C, {0xBC, 0xDF, 0x00, 0x8F, 0xAA, 0x52, 0x63, 0xD4}}
 #define XT_PECOFF_IMAGE_PROTOCOL_GUID        {0x85DAFF92, 0x5854, 0x424C, {0xB1, 0xBF, 0x00, 0x79, 0x39, 0xEA, 0x6E, 0xFD}}
 
-/* EFI XT routines forward references */
-typedef VOID (*PBL_DBG_PRINT)(IN PUINT16 Format, IN ...);
-typedef VOID (*PBL_EFI_PRINT)(IN PUINT16 Format, IN ...);
+/* EFI XT boot protocols GUIDs */
+#define XT_CHAIN_BOOT_PROTOCOL_GUID          {0xC4D19201, 0x5854, 0x424C, {0x3C, 0x01, 0x00, 0x64, 0x90, 0x11, 0x9E, 0xA1}}
+#define XT_LINUX_BOOT_PROTOCOL_GUID          {0x6B2A9841, 0x5854, 0x424C, {0x93, 0x71, 0x00, 0x3C, 0x34, 0x9B, 0x11, 0x91}}
+#define XT_WINNT_BOOT_PROTOCOL_GUID          {0x98A80819, 0x5854, 0x424C, {0x37, 0x17, 0x00, 0x2A, 0x55, 0xA3, 0x09, 0xDC}}
+#define XT_XTOS_BOOT_PROTOCOL_GUID           {0xFF8AD077, 0x5854, 0x424C, {0xA1, 0x77, 0x00, 0x92, 0xEF, 0x1C, 0x09, 0xDC}}
 
-/* EFI XT Boot Loader Protocol */
-typedef struct _XT_BOOT_LOADER_PROTOCOL
-{
-    PBL_DBG_PRINT DbgPrint;
-    PBL_EFI_PRINT EfiPrint;
-} XT_BOOT_LOADER_PROTOCOL, *PXT_BOOT_LOADER_PROTOCOL;
+/* Structures forward references */
+typedef struct _XT_BOOT_LOADER_PROTOCOL XT_BOOT_LOADER_PROTOCOL, *PXT_BOOT_LOADER_PROTOCOL;
 
 #endif /* __XTLDR_BLDEFS_H */
