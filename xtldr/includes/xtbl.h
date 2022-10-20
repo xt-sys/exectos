@@ -16,6 +16,9 @@
 /* EFI Image Handle */
 EXTERN EFI_HANDLE EfiImageHandle;
 
+/* XT Boot Loader protocol */
+EXTERN XT_BOOT_LOADER_PROTOCOL EfiLdrProtocol;
+
 /* EFI System Table */
 EXTERN PEFI_SYSTEM_TABLE EfiSystemTable;
 

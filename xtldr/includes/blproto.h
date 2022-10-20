@@ -16,4 +16,8 @@
 EFI_STATUS
 BlGetXtLoaderProtocol(PXT_BOOT_LOADER_PROTOCOL *LdrProtocol);
 
+EFI_STATUS
+BlLoadXtProtocol(PVOID *ProtocolHandler,
+                 PEFI_GUID ProtocolGuid);
+
 #endif /* __XTLDR_BLMOD_H */

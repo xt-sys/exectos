@@ -7,7 +7,7 @@
  */
 
 #include <xtbl.h>
-#include <blmod.h>
+#include <blproto.h>
 
 
 /* EFI Image Handle */
