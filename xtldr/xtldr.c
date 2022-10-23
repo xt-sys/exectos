@@ -293,6 +293,7 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
 
     /* Initialize EFI console */
     BlConsoleInitialize();
+    BlEfiPrint(L"XTLDR boot loader v%s\n", XTOS_VERSION);
 
     /* Early initialize COM port for debugging */
     Status = BlComPortInitialize();
