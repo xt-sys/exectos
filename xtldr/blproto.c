@@ -21,7 +21,7 @@
  * @since XT 1.0
  */
 EFI_STATUS
-BlGetXtLoaderProtocol(PXT_BOOT_LOADER_PROTOCOL *LdrProtocol)
+BlGetXtLoaderProtocol(OUT PXT_BOOT_LOADER_PROTOCOL *LdrProtocol)
 {
     EFI_GUID Guid = XT_BOOT_LOADER_PROTOCOL_GUID;
 
@@ -43,8 +43,8 @@ BlGetXtLoaderProtocol(PXT_BOOT_LOADER_PROTOCOL *LdrProtocol)
  * @since XT 1.0
  */
 EFI_STATUS
-BlLoadXtProtocol(PVOID *ProtocolHandler,
-                 PEFI_GUID ProtocolGuid)
+BlLoadXtProtocol(OUT PVOID *ProtocolHandler,
+                 IN PEFI_GUID ProtocolGuid)
 {
     PEFI_HANDLE Handles = NULL;
     EFI_STATUS Status;
