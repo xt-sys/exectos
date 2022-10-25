@@ -10,8 +10,7 @@
 #define __XTLDR_XTBL_H
 
 #include <xtkmapi.h>
-#include <bldefs.h>
-#include <blproto.h>
+#include <blmod.h>
 #include <xtver.h>
 
 
@@ -51,6 +50,9 @@ BlConsolePutChar(IN USHORT Character);
 VOID
 BlDbgPrint(IN PUINT16 Format,
            IN ...);
+
+VOID
+BlEfiDirectorySeparator(IN OUT PUCHAR Path);
 
 INT_PTR
 BlEfiGetSecureBootStatus();

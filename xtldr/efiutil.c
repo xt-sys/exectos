@@ -163,6 +163,29 @@ BlDbgPrint(IN PUINT16 Format,
 }
 
 /**
+ * Replaces slashes (/) with backslashes (\) in the input string.
+ *
+ * @param Path
+ *        A pointer to the string containing a system path, where directory separator will get replaced.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+VOID
+BlEfiDirectorySeparator(IN OUT PUCHAR Path)
+{
+    while(*Path)
+    {
+        if(*Path == '/')
+        {
+            *Path = '\\';
+        }
+        Path++;
+    }
+}
+
+/**
  * This routine allocates a pool memory.
  *
  * @param Size
