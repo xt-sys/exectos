@@ -6,6 +6,8 @@
 @ stdcall RtlMoveMemory(ptr ptr long)
 @ stdcall RtlSameMemory(ptr ptr long)
 @ stdcall RtlSetMemory(ptr long long)
+@ cdecl RtlStringLength(str long)
+@ cdecl RtlStringToWideString(wstr str long)
 @ cdecl RtlWideStringCompare(wstr wstr long)
 @ cdecl RtlWideStringConcatenate(wstr wstr long)
 @ cdecl RtlWideStringLength(wstr long)

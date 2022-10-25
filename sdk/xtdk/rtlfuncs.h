@@ -68,6 +68,17 @@ RtlSetMemory(OUT PVOID Destination,
              IN SIZE_T Length);
 
 XTCDECL
+SIZE_T
+RtlStringLength(IN CONST PUCHAR String,
+                IN SIZE_T MaxLength);
+
+XTCDECL
+INT
+RtlStringToWideString(PWCHAR Destination,
+                      CONST PUCHAR *Source,
+                      SIZE_T Length);
+
+XTCDECL
 INT
 RtlWideStringCompare(IN CONST PWCHAR String1,
                      IN CONST PWCHAR String2,
