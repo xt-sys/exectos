@@ -16,12 +16,16 @@
 /* Loader protocol routine pointers */
 typedef VOID (*PBL_DBG_PRINT)(IN PUINT16 Format, IN ...);
 typedef VOID (*PBL_EFI_PRINT)(IN PUINT16 Format, IN ...);
+typedef EFI_STATUS (*PBL_CLOSE_VOLUME)(IN PEFI_HANDLE VolumeHandle);
+typedef EFI_STATUS (*PBL_OPEN_VOLUME)(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath, OUT PEFI_HANDLE DiskHandle, OUT PEFI_FILE_HANDLE *FsHandle);
 
 /* EFI XT Boot Loader Protocol */
 typedef struct _XT_BOOT_LOADER_PROTOCOL
 {
     PBL_DBG_PRINT DbgPrint;
     PBL_EFI_PRINT EfiPrint;
+    PBL_CLOSE_VOLUME CloseVolume;
+    PBL_OPEN_VOLUME OpenVolume;
 } XT_BOOT_LOADER_PROTOCOL, *PXT_BOOT_LOADER_PROTOCOL;
 
 /* Loader protocol related routines forward references */
