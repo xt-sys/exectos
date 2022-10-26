@@ -51,8 +51,8 @@ VOID
 BlDbgPrint(IN PUINT16 Format,
            IN ...);
 
-VOID
-BlEfiDirectorySeparator(IN OUT PUCHAR Path);
+PWCHAR
+BlEfiDirectorySeparator(IN PWCHAR Path);
 
 INT_PTR
 BlEfiGetSecureBootStatus();
