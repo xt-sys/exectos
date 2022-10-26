@@ -30,7 +30,7 @@ add_executable(xtoskrnl
 target_link_libraries(xtoskrnl)
 
 # Set instal target
-set_install_target(xtoskrnl "exectos/system")
+set_install_target(xtoskrnl "exectos/boot")
 
 # Set kernel entrypoint, imagebase address, ordinals and subsystem
 set_entrypoint(xtoskrnl "KeStartXtSystem")
