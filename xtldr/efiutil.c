@@ -163,6 +163,27 @@ BlDbgPrint(IN PUINT16 Format,
 }
 
 /**
+ * This routine allocates one or more 4KB pages.
+ *
+ * @param Size
+ *        The number of contiguous 4KB pages to allocate.
+ *
+ * @param Memory
+ *        The pointer to a physical address.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+EFI_STATUS
+BlEfiMemoryAllocatePages(IN UINT64 Size,
+                         OUT PEFI_PHYSICAL_ADDRESS Memory)
+{
+    return EfiSystemTable->BootServices->AllocatePages(AllocateAnyPages, EfiRuntimeServicesData,
+                                                       EFI_SIZE_TO_PAGES(Size), Memory);
+}
+
+/**
  * This routine allocates a pool memory.
  *
  * @param Size
@@ -181,6 +202,26 @@ BlEfiMemoryAllocatePool(IN UINT_PTR Size,
 {
     /* Allocate pool */
     return EfiSystemTable->BootServices->AllocatePool(EfiLoaderData, Size, Memory);
+}
+
+/**
+ * This routine frees memory pages.
+ *
+ * @param Size
+ *        The number of contiguous 4 KB pages to free.
+ *
+ * @param Memory
+ *        The base physical address of the pages to be freed.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+EFI_STATUS
+BlEfiMemoryFreePages(IN UINT64 Size,
+                     IN EFI_PHYSICAL_ADDRESS Memory)
+{
+    return EfiSystemTable->BootServices->FreePages(Memory, Size);
 }
 
 /**

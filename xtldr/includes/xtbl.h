@@ -59,8 +59,16 @@ BlEfiGetSystemConfigurationTable(IN PEFI_GUID TableGuid,
                                  OUT PVOID *Table);
 
 EFI_STATUS
+BlEfiMemoryAllocatePages(IN UINT64 Size,
+                         OUT PEFI_PHYSICAL_ADDRESS Memory);
+
+EFI_STATUS
 BlEfiMemoryAllocatePool(IN UINT_PTR Size,
                         OUT PVOID *Memory);
+
+EFI_STATUS
+BlEfiMemoryFreePages(IN UINT64 Size,
+                     IN EFI_PHYSICAL_ADDRESS Memory);
 
 EFI_STATUS
 BlEfiMemoryFreePool(IN PVOID Memory);
