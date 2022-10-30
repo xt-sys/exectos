@@ -295,6 +295,7 @@ BlFindVolumeDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL FsHandle,
 EFI_STATUS
 BlGetVolumeDevicePath(IN PUCHAR SystemPath,
                       OUT PEFI_DEVICE_PATH_PROTOCOL *DevicePath,
+                      OUT PUCHAR *ArcName,
                       OUT PUCHAR *Path)
 {
     PEFI_BLOCK_DEVICE Device;
@@ -349,7 +350,7 @@ BlGetVolumeDevicePath(IN PUCHAR SystemPath,
     else
     {
         /* Defaults to ARC path, dissect it */
-        Status = BlpDissectVolumeArcPath(SystemPath, Path, &DriveType, &DriveNumber, &PartNumber);
+        Status = BlpDissectVolumeArcPath(SystemPath, ArcName, Path, &DriveType, &DriveNumber, &PartNumber);
     }
 
     /* Check if volume path parsed successfully */
@@ -582,6 +583,7 @@ BlpDiscoverEfiBlockDevices(OUT PLIST_ENTRY BlockDevices)
  */
 EFI_STATUS
 BlpDissectVolumeArcPath(IN PUCHAR SystemPath,
+                        OUT PUCHAR *ArcName,
                         OUT PUCHAR *Path,
                         OUT PUSHORT DriveType,
                         OUT PULONG DriveNumber,
@@ -709,6 +711,11 @@ BlpDissectVolumeArcPath(IN PUCHAR SystemPath,
     if(Path)
     {
         *Path = SystemPath + ArcLength;
+    }
+
+    if(ArcName)
+    {
+        /* TODO: Store ARC path in ArcName */
     }
 
     /* Return success */

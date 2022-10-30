@@ -51,9 +51,6 @@ VOID
 BlDbgPrint(IN PUINT16 Format,
            IN ...);
 
-PWCHAR
-BlEfiDirectorySeparator(IN PWCHAR Path);
-
 INT_PTR
 BlEfiGetSecureBootStatus();
 
@@ -83,6 +80,7 @@ BlFindVolumeDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL FsHandle,
 EFI_STATUS
 BlGetVolumeDevicePath(IN PUCHAR SystemPath,
                       OUT PEFI_DEVICE_PATH_PROTOCOL *DevicePath,
+                      OUT PUCHAR *ArcName,
                       OUT PUCHAR *Path);
 
 EFI_STATUS
@@ -114,6 +112,7 @@ BlpDiscoverEfiBlockDevices(OUT PLIST_ENTRY BlockDevices);
 
 EFI_STATUS
 BlpDissectVolumeArcPath(IN PUCHAR SystemPath,
+                        OUT PUCHAR *ArcName,
                         OUT PUCHAR *Path,
                         OUT PUSHORT DriveType,
                         OUT PULONG DriveNumber,

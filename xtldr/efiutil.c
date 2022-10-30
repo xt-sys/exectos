@@ -163,38 +163,6 @@ BlDbgPrint(IN PUINT16 Format,
 }
 
 /**
- * Replaces slashes (/) with backslashes (\) in the string containing on-disk path.
- *
- * @param Path
- *        A pointer to the string containing an original system path.
- *
- * @return A pointer to converted string with EFI supported path separators.
- *
- * @since XT 1.0
- */
-PWCHAR
-BlEfiDirectorySeparator(IN PWCHAR Path)
-{
-    PWCHAR EfiPath = NULL;
-
-    while(*Path)
-    {
-        if(*Path == '/')
-        {
-            *EfiPath = '\\';
-        }
-        else
-        {
-            *EfiPath = *Path;
-        }
-        Path++;
-        EfiPath++;
-    }
-
-    return EfiPath;
-}
-
-/**
  * This routine allocates a pool memory.
  *
  * @param Size
