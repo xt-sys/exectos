@@ -427,6 +427,18 @@ typedef struct _PECOFF_IMAGE_ROM_OPTIONAL_HEADER
     ULONG GpValue;
 } PECOFF_IMAGE_ROM_OPTIONAL_HEADER, *PPECOFF_IMAGE_ROM_OPTIONAL_HEADER;
 
+/* PE/COFF NT image headers */
+typedef struct _PECOFF_IMAGE_NT_HEADERS
+{
+    ULONG Signature;
+    PECOFF_IMAGE_FILE_HEADER FileHeader;
+    union
+    {
+        PECOFF_IMAGE_OPTIONAL_HEADER32 OptionalHeader32;
+        PECOFF_IMAGE_OPTIONAL_HEADER32 OptionalHeader64;
+    };
+} PECOFF_IMAGE_NT_HEADERS, *PPECOFF_IMAGE_NT_HEADERS;
+
 /* 32-bit PE/COFF NT image headers */
 typedef struct _PECOFF_IMAGE_NT_HEADERS32
 {
