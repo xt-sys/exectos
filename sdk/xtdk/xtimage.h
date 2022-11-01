@@ -19,6 +19,7 @@
 #define PECOFF_IMAGE_OS2_SIGNATURE                         0x454E /* NE */
 #define PECOFF_IMAGE_OS2LE_SIGNATURE                       0x454C /* LE */
 #define PECOFF_IMAGE_VXD_SIGNATURE                         0x454C /* LE */
+#define PECOFF_IMAGE_EDOS_SIGNATURE                        0x44454550 /* PEED */
 #define PECOFF_IMAGE_NT_SIGNATURE                          0x00004550 /* PE00 */
 #define PECOFF_IMAGE_XT_SIGNATURE                          0x54584550 /* PEXT */
 
@@ -95,8 +96,8 @@
 #define PECOFF_IMAGE_NUMBEROF_DIRECTORY_ENTRIES            16
 
 /* PE/COFF image HDR magic */
-#define PECOFF_IMAGE_NT_OPTIONAL_HDR32_MAGIC               0x10b
-#define PECOFF_IMAGE_NT_OPTIONAL_HDR64_MAGIC               0x20b
+#define PECOFF_IMAGE_NT_OPTIONAL_HDR32_MAGIC               0x10B
+#define PECOFF_IMAGE_NT_OPTIONAL_HDR64_MAGIC               0x20B
 #define PECOFF_IMAGE_ROM_OPTIONAL_HDR_MAGIC                0x107
 
 /* PE/COFF directory entries */
@@ -184,6 +185,17 @@
 #define PECOFF_IMAGE_SCN_MEM_EXECUTE                       0x20000000
 #define PECOFF_IMAGE_SCN_MEM_READ                          0x40000000
 #define PECOFF_IMAGE_SCN_MEM_WRITE                         0x80000000
+
+/* PE/COFF image representation structure */
+typedef struct _PECOFF_IMAGE_CONTEXT
+{
+    PVOID Data;
+    PVOID BaseAddress;
+    ULONG NtSignature;
+    UINT64 FileSize;
+    UINT ImageSize;
+    UINT Pages;
+} PECOFF_IMAGE_CONTEXT, *PPECOFF_IMAGE_CONTEXT;
 
 /* PE/COFF directory format */
 typedef struct _PECOFF_IMAGE_DATA_DIRECTORY
@@ -338,8 +350,8 @@ typedef struct _PECOFF_IMAGE_SECTION_HEADER
     ULONG Characteristics;
 } PECOFF_IMAGE_SECTION_HEADER, *PPECOFF_IMAGE_SECTION_HEADER;
 
-/* 32-bit PE/COFF image optional header */
-typedef struct _PECOFF_IMAGE_OPTIONAL_HEADER32
+/* PE/COFF image optional header */
+typedef struct _PECOFF_IMAGE_OPTIONAL_HEADER
 {
     USHORT Magic;
     UCHAR MajorLinkerVersion;
@@ -349,8 +361,15 @@ typedef struct _PECOFF_IMAGE_OPTIONAL_HEADER32
     ULONG SizeOfUninitializedData;
     ULONG AddressOfEntryPoint;
     ULONG BaseOfCode;
-    ULONG BaseOfData;
-    ULONG ImageBase;
+    union
+    {
+        struct
+        {
+            ULONG BaseOfData;
+            ULONG ImageBase32;
+        };
+        ULONGLONG ImageBase64;
+    };
     ULONG SectionAlignment;
     ULONG FileAlignment;
     USHORT MajorOperatingSystemVersion;
@@ -372,42 +391,7 @@ typedef struct _PECOFF_IMAGE_OPTIONAL_HEADER32
     ULONG LoaderFlags;
     ULONG NumberOfRvaAndSizes;
     PECOFF_IMAGE_DATA_DIRECTORY DataDirectory[PECOFF_IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
-} PECOFF_IMAGE_OPTIONAL_HEADER32, *PPECOFF_IMAGE_OPTIONAL_HEADER32;
-
-/* 64-bit PE/COFF image optional header */
-typedef struct _PECOFF_IMAGE_OPTIONAL_HEADER64
-{
-    USHORT Magic;
-    UCHAR MajorLinkerVersion;
-    UCHAR MinorLinkerVersion;
-    ULONG SizeOfCode;
-    ULONG SizeOfInitializedData;
-    ULONG SizeOfUninitializedData;
-    ULONG AddressOfEntryPoint;
-    ULONG BaseOfCode;
-    ULONGLONG ImageBase;
-    ULONG SectionAlignment;
-    ULONG FileAlignment;
-    USHORT MajorOperatingSystemVersion;
-    USHORT MinorOperatingSystemVersion;
-    USHORT MajorImageVersion;
-    USHORT MinorImageVersion;
-    USHORT MajorSubsystemVersion;
-    USHORT MinorSubsystemVersion;
-    ULONG Win32VersionValue;
-    ULONG SizeOfImage;
-    ULONG SizeOfHeaders;
-    ULONG CheckSum;
-    USHORT Subsystem;
-    USHORT DllCharacteristics;
-    ULONGLONG SizeOfStackReserve;
-    ULONGLONG SizeOfStackCommit;
-    ULONGLONG SizeOfHeapReserve;
-    ULONGLONG SizeOfHeapCommit;
-    ULONG LoaderFlags;
-    ULONG NumberOfRvaAndSizes;
-    PECOFF_IMAGE_DATA_DIRECTORY DataDirectory[PECOFF_IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
-} PECOFF_IMAGE_OPTIONAL_HEADER64, *PPECOFF_IMAGE_OPTIONAL_HEADER64;
+} PECOFF_IMAGE_OPTIONAL_HEADER, *PPECOFF_IMAGE_OPTIONAL_HEADER;
 
 /* PE/COFF ROM optional header */
 typedef struct _PECOFF_IMAGE_ROM_OPTIONAL_HEADER
@@ -427,38 +411,19 @@ typedef struct _PECOFF_IMAGE_ROM_OPTIONAL_HEADER
     ULONG GpValue;
 } PECOFF_IMAGE_ROM_OPTIONAL_HEADER, *PPECOFF_IMAGE_ROM_OPTIONAL_HEADER;
 
-/* PE/COFF NT image headers */
-typedef struct _PECOFF_IMAGE_NT_HEADERS
+/* PE/COFF NT image header */
+typedef struct _PECOFF_IMAGE_NT_HEADER
 {
     ULONG Signature;
     PECOFF_IMAGE_FILE_HEADER FileHeader;
-    union
-    {
-        PECOFF_IMAGE_OPTIONAL_HEADER32 OptionalHeader32;
-        PECOFF_IMAGE_OPTIONAL_HEADER32 OptionalHeader64;
-    };
-} PECOFF_IMAGE_NT_HEADERS, *PPECOFF_IMAGE_NT_HEADERS;
+    PECOFF_IMAGE_OPTIONAL_HEADER OptionalHeader;
+} PECOFF_IMAGE_NT_HEADER, *PPECOFF_IMAGE_NT_HEADER;
 
-/* 32-bit PE/COFF NT image headers */
-typedef struct _PECOFF_IMAGE_NT_HEADERS32
-{
-    ULONG Signature;
-    PECOFF_IMAGE_FILE_HEADER FileHeader;
-    PECOFF_IMAGE_OPTIONAL_HEADER32 OptionalHeader;
-} PECOFF_IMAGE_NT_HEADERS32, *PPECOFF_IMAGE_NT_HEADERS32;
-
-/* 64-bit PE/COFF NT image headers */
-typedef struct _PECOFF_IMAGE_NT_HEADERS64 {
-    ULONG Signature;
-    PECOFF_IMAGE_FILE_HEADER FileHeader;
-    PECOFF_IMAGE_OPTIONAL_HEADER64 OptionalHeader;
-} PECOFF_IMAGE_NT_HEADERS64, *PPECOFF_IMAGE_NT_HEADERS64;
-
-/* PE/COFF ROM image headers */
-typedef struct _PECOFF_IMAGE_ROM_HEADERS {
+/* PE/COFF ROM image header */
+typedef struct _PECOFF_IMAGE_ROM_HEADER {
     PECOFF_IMAGE_FILE_HEADER FileHeader;
     PECOFF_IMAGE_ROM_OPTIONAL_HEADER OptionalHeader;
-} PECOFF_IMAGE_ROM_HEADERS, *PPECOFF_IMAGE_ROM_HEADERS;
+} PECOFF_IMAGE_ROM_HEADER, *PPECOFF_IMAGE_ROM_HEADER;
 
 /* PE/COFF based relocation format */
 typedef struct _PECOFF_IMAGE_BASE_RELOCATION
