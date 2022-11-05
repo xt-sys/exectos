@@ -165,7 +165,7 @@ BlDbgPrint(IN PUINT16 Format,
 /**
  * This routine allocates one or more 4KB pages.
  *
- * @param Size
+ * @param Pages
  *        The number of contiguous 4KB pages to allocate.
  *
  * @param Memory
@@ -176,11 +176,10 @@ BlDbgPrint(IN PUINT16 Format,
  * @since XT 1.0
  */
 EFI_STATUS
-BlEfiMemoryAllocatePages(IN UINT64 Size,
+BlEfiMemoryAllocatePages(IN UINT64 Pages,
                          OUT PEFI_PHYSICAL_ADDRESS Memory)
 {
-    return EfiSystemTable->BootServices->AllocatePages(AllocateAnyPages, EfiRuntimeServicesData,
-                                                       EFI_SIZE_TO_PAGES(Size), Memory);
+    return EfiSystemTable->BootServices->AllocatePages(AllocateAnyPages, EfiLoaderData, Pages, Memory);
 }
 
 /**
@@ -207,7 +206,7 @@ BlEfiMemoryAllocatePool(IN UINT_PTR Size,
 /**
  * This routine frees memory pages.
  *
- * @param Size
+ * @param Pages
  *        The number of contiguous 4 KB pages to free.
  *
  * @param Memory
@@ -218,10 +217,10 @@ BlEfiMemoryAllocatePool(IN UINT_PTR Size,
  * @since XT 1.0
  */
 EFI_STATUS
-BlEfiMemoryFreePages(IN UINT64 Size,
+BlEfiMemoryFreePages(IN UINT64 Pages,
                      IN EFI_PHYSICAL_ADDRESS Memory)
 {
-    return EfiSystemTable->BootServices->FreePages(Memory, Size);
+    return EfiSystemTable->BootServices->FreePages(Memory, Pages);
 }
 
 /**
