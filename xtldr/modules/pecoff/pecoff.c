@@ -173,8 +173,6 @@ EFI_STATUS PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
     /* Load each section into memory */
     for(Index = 0; Index < PeHeader->FileHeader.NumberOfSections; Index++)
     {
-        EfiXtLdrProtocol->EfiPrint(L"TEST: %lx\n", SectionHeader[Index].Misc.VirtualSize);
-
         /* Check section raw data size and section virtual size */
         if(SectionHeader[Index].SizeOfRawData < SectionHeader[Index].Misc.VirtualSize)
         {
