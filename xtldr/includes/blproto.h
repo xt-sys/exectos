@@ -14,6 +14,10 @@
 
 
 /* Loader protocol routine pointers */
+typedef EFI_STATUS (*PBL_ALLOCATE_PAGES)(IN UINT64 Size, OUT PEFI_PHYSICAL_ADDRESS Memory);
+typedef EFI_STATUS (*PBL_ALLOCATE_POOL)(IN UINT_PTR Size, OUT PVOID *Memory);
+typedef EFI_STATUS (*PBL_FREE_PAGES)(IN UINT64 Size, IN EFI_PHYSICAL_ADDRESS Memory);
+typedef EFI_STATUS (*PBL_FREE_POOL)(IN PVOID Memory);
 typedef VOID (*PBL_DBG_PRINT)(IN PUINT16 Format, IN ...);
 typedef VOID (*PBL_EFI_PRINT)(IN PUINT16 Format, IN ...);
 typedef EFI_STATUS (*PBL_CLOSE_VOLUME)(IN PEFI_HANDLE VolumeHandle);
@@ -22,6 +26,10 @@ typedef EFI_STATUS (*PBL_OPEN_VOLUME)(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath, O
 /* EFI XT Boot Loader Protocol */
 typedef struct _XT_BOOT_LOADER_PROTOCOL
 {
+    PBL_ALLOCATE_PAGES AllocatePages;
+    PBL_ALLOCATE_POOL AllocatePool;
+    PBL_FREE_PAGES FreePages;
+    PBL_FREE_POOL FreePool;
     PBL_DBG_PRINT DbgPrint;
     PBL_EFI_PRINT EfiPrint;
     PBL_CLOSE_VOLUME CloseVolume;

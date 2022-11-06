@@ -2,7 +2,7 @@
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
  * FILE:            xtldr/includes/blmod.h
- * DESCRIPTION:     Top level header for XTLDR modules
+ * DESCRIPTION:     Top level header for XTLDR modules support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
@@ -13,5 +13,17 @@
 #include <bldefs.h>
 #include <blproto.h>
 
+
+/* Structures forward declarations */
+typedef struct _XT_PECOFFF_IMAGE_PROTOCOL XT_PECOFF_IMAGE_PROTOCOL, *PXT_PECOFF_IMAGE_PROTOCOL;
+
+/* Pointers to the routines provided by the modules */
+typedef EFI_STATUS (*PXT_PECOFF_PROTOCOL_LOAD)(IN PEFI_FILE_HANDLE FileHandle, IN PVOID VirtualAddress, OUT PPECOFF_IMAGE_CONTEXT *Image);
+
+/* EFI XT PE/COFF Image Protocol */
+typedef struct _XT_PECOFFF_IMAGE_PROTOCOL
+{
+    PXT_PECOFF_PROTOCOL_LOAD Load;
+} XT_PECOFF_IMAGE_PROTOCOL, *PXT_PECOFF_IMAGE_PROTOCOL;
 
 #endif /* __XTLDR_BLMOD_H */

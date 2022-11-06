@@ -260,6 +260,10 @@ BlRegisterXtLoaderProtocol()
     EFI_HANDLE Handle = NULL;
 
     /* Set all routines available via loader protocol */
+    EfiLdrProtocol.AllocatePages = BlEfiMemoryAllocatePages;
+    EfiLdrProtocol.AllocatePool = BlEfiMemoryAllocatePool;
+    EfiLdrProtocol.FreePages = BlEfiMemoryFreePages;
+    EfiLdrProtocol.FreePool = BlEfiMemoryFreePool;
     EfiLdrProtocol.DbgPrint = BlDbgPrint;
     EfiLdrProtocol.EfiPrint = BlEfiPrint;
 
@@ -327,6 +331,7 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
         BlDbgPrint(L"ERROR: Failed to register XTLDR loader protocol\n");
     }
 
+    /* Load XTLDR modules */
     Status = BlLoadEfiModules();
     if(Status != STATUS_EFI_SUCCESS)
     {

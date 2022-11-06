@@ -96,8 +96,8 @@
 #define PECOFF_IMAGE_NUMBEROF_DIRECTORY_ENTRIES            16
 
 /* PE/COFF image HDR magic */
-#define PECOFF_IMAGE_NT_OPTIONAL_HDR32_MAGIC               0x10B
-#define PECOFF_IMAGE_NT_OPTIONAL_HDR64_MAGIC               0x20B
+#define PECOFF_IMAGE_PE_OPTIONAL_HDR32_MAGIC               0x10B
+#define PECOFF_IMAGE_PE_OPTIONAL_HDR64_MAGIC               0x20B
 #define PECOFF_IMAGE_ROM_OPTIONAL_HDR_MAGIC                0x107
 
 /* PE/COFF directory entries */
@@ -137,8 +137,8 @@
 #define PECOFF_IMAGE_SIZEOF_SECTION_HEADER                 40
 #define PECOFF_IMAGE_SIZEOF_ROM_OPTIONAL_HEADER            56
 #define PECOFF_IMAGE_SIZEOF_STD_OPTIONAL_HEADER            28
-#define PECOFF_IMAGE_SIZEOF_NT_OPTIONAL32_HEADER           224
-#define PECOFF_IMAGE_SIZEOF_NT_OPTIONAL64_HEADER           240
+#define PECOFF_IMAGE_SIZEOF_PE_OPTIONAL32_HEADER           224
+#define PECOFF_IMAGE_SIZEOF_PE_OPTIONAL64_HEADER           240
 
 /* PE/COFF image section characteristics */
 #define PECOFF_IMAGE_SCN_TYPE_REG                          0x00000000
@@ -190,11 +190,10 @@
 typedef struct _PECOFF_IMAGE_CONTEXT
 {
     PVOID Data;
-    PVOID BaseAddress;
-    ULONG NtSignature;
     UINT64 FileSize;
+    UINT ImagePages;
     UINT ImageSize;
-    UINT Pages;
+    PVOID VirtualAddress;
 } PECOFF_IMAGE_CONTEXT, *PPECOFF_IMAGE_CONTEXT;
 
 /* PE/COFF directory format */
@@ -411,13 +410,13 @@ typedef struct _PECOFF_IMAGE_ROM_OPTIONAL_HEADER
     ULONG GpValue;
 } PECOFF_IMAGE_ROM_OPTIONAL_HEADER, *PPECOFF_IMAGE_ROM_OPTIONAL_HEADER;
 
-/* PE/COFF NT image header */
-typedef struct _PECOFF_IMAGE_NT_HEADER
+/* PE/COFF PE image header */
+typedef struct _PECOFF_IMAGE_PE_HEADER
 {
     ULONG Signature;
     PECOFF_IMAGE_FILE_HEADER FileHeader;
     PECOFF_IMAGE_OPTIONAL_HEADER OptionalHeader;
-} PECOFF_IMAGE_NT_HEADER, *PPECOFF_IMAGE_NT_HEADER;
+} PECOFF_IMAGE_PE_HEADER, *PPECOFF_IMAGE_PE_HEADER;
 
 /* PE/COFF ROM image header */
 typedef struct _PECOFF_IMAGE_ROM_HEADER {
