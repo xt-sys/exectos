@@ -130,7 +130,7 @@ EFI_STATUS PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Header validation failed, probably broken or invalid PE/COFF image */
-        EfiXtLdrProtocol->DbgPrint(L"ERROR: PE/COFF image validation failed\n");
+        EfiXtLdrProtocol->DbgPrint(L"ERROR: Invalid PE/COFF image header\n");
         EfiXtLdrProtocol->FreePages(Pages, (EFI_PHYSICAL_ADDRESS)(UINT_PTR)Data);
         EfiXtLdrProtocol->FreePool(ImageData);
         return Status;
