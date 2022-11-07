@@ -16,7 +16,7 @@ EFI_HANDLE EfiImageHandle;
 PEFI_SYSTEM_TABLE EfiSystemTable;
 
 /* EFI XT Loader Protocol */
-PXT_BOOT_LOADER_PROTOCOL EfiXtLdrProtocol;
+PXT_BOOT_LOADER_PROTOCOL XtLdrProtocol;
 
 /* XTOS PE/COFF Image Protocol */
 XT_PECOFF_IMAGE_PROTOCOL XtPeCoffProtocol;
@@ -55,11 +55,11 @@ EFI_STATUS PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
     Size = sizeof(EFI_FILE_INFO) + 32;
 
     /* Allocate necessary amount of memory */
-    Status = EfiXtLdrProtocol->AllocatePool(Size, (PVOID *)&FileInfo);
+    Status = XtLdrProtocol->AllocatePool(Size, (PVOID *)&FileInfo);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Memory allocation failure */
-        EfiXtLdrProtocol->DbgPrint(L"ERROR: Memory pool allocation failure\n");
+        XtLdrProtocol->DbgPrint(L"ERROR: Memory pool allocation failure\n");
         return Status;
     }
 
@@ -68,12 +68,12 @@ EFI_STATUS PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
     if(Status == STATUS_EFI_BUFFER_TOO_SMALL)
     {
         /* Buffer it too small, but EFI tells the required size, let's reallocate */
-        EfiXtLdrProtocol->FreePool(&FileInfo);
-        Status = EfiXtLdrProtocol->AllocatePool(Size, (PVOID *)&FileInfo);
+        XtLdrProtocol->FreePool(&FileInfo);
+        Status = XtLdrProtocol->AllocatePool(Size, (PVOID *)&FileInfo);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory allocation failure */
-            EfiXtLdrProtocol->DbgPrint(L"ERROR: Memory pool allocation failure\n");
+            XtLdrProtocol->DbgPrint(L"ERROR: Memory pool allocation failure\n");
             return Status;
         }
         /* Second attempt to get file information */
@@ -82,33 +82,33 @@ EFI_STATUS PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Unable to get file information */
-        EfiXtLdrProtocol->DbgPrint(L"ERROR: Failed to get file information\n");
+        XtLdrProtocol->DbgPrint(L"ERROR: Failed to get file information\n");
         return Status;
     }
 
     /* Allocate memory for storing image data */
-    Status = EfiXtLdrProtocol->AllocatePool(sizeof(PECOFF_IMAGE_CONTEXT), (PVOID *)&ImageData);
+    Status = XtLdrProtocol->AllocatePool(sizeof(PECOFF_IMAGE_CONTEXT), (PVOID *)&ImageData);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Memory allocation failure */
-        EfiXtLdrProtocol->DbgPrint(L"ERROR: Memory pool allocation failure\n");
+        XtLdrProtocol->DbgPrint(L"ERROR: Memory pool allocation failure\n");
         return Status;
     }
 
     /* Store file size and free memory */
     ImageData->FileSize = FileInfo->FileSize;
-    EfiXtLdrProtocol->FreePool(FileInfo);
+    XtLdrProtocol->FreePool(FileInfo);
 
     /* Calculate number of pages */
     Pages = EFI_SIZE_TO_PAGES(ImageData->FileSize);
 
     /* Allocate pages */
-    Status = EfiXtLdrProtocol->AllocatePages(Pages, &Address);
+    Status = XtLdrProtocol->AllocatePages(Pages, &Address);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Pages allocation failure */
-        EfiXtLdrProtocol->DbgPrint(L"ERROR: Pages allocation failure\n");
-        EfiXtLdrProtocol->FreePool(ImageData);
+        XtLdrProtocol->DbgPrint(L"ERROR: Pages allocation failure\n");
+        XtLdrProtocol->FreePool(ImageData);
         return Status;
     }
 
@@ -119,9 +119,9 @@ EFI_STATUS PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to read data */
-        EfiXtLdrProtocol->DbgPrint(L"ERROR: Unable to read PE/COFF image file\n");
-        EfiXtLdrProtocol->FreePages(Pages, (EFI_PHYSICAL_ADDRESS)(UINT_PTR)Data);
-        EfiXtLdrProtocol->FreePool(ImageData);
+        XtLdrProtocol->DbgPrint(L"ERROR: Unable to read PE/COFF image file\n");
+        XtLdrProtocol->FreePages(Pages, (EFI_PHYSICAL_ADDRESS)(UINT_PTR)Data);
+        XtLdrProtocol->FreePool(ImageData);
         return Status;
     }
 
@@ -130,9 +130,9 @@ EFI_STATUS PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Header validation failed, probably broken or invalid PE/COFF image */
-        EfiXtLdrProtocol->DbgPrint(L"ERROR: Invalid PE/COFF image header\n");
-        EfiXtLdrProtocol->FreePages(Pages, (EFI_PHYSICAL_ADDRESS)(UINT_PTR)Data);
-        EfiXtLdrProtocol->FreePool(ImageData);
+        XtLdrProtocol->DbgPrint(L"ERROR: Invalid PE/COFF image header\n");
+        XtLdrProtocol->FreePages(Pages, (EFI_PHYSICAL_ADDRESS)(UINT_PTR)Data);
+        XtLdrProtocol->FreePool(ImageData);
         return Status;
     }
 
@@ -141,12 +141,12 @@ EFI_STATUS PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
     ImageData->ImagePages = EFI_SIZE_TO_PAGES(ImageData->ImageSize);
 
     /* Allocate image pages */
-    Status = EfiXtLdrProtocol->AllocatePages(ImageData->ImagePages, &Address);
+    Status = XtLdrProtocol->AllocatePages(ImageData->ImagePages, &Address);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Pages reallocation failure */
-        EfiXtLdrProtocol->DbgPrint(L"ERROR: Pages reallocation failure\n");
-        EfiXtLdrProtocol->FreePool(ImageData);
+        XtLdrProtocol->DbgPrint(L"ERROR: Pages reallocation failure\n");
+        XtLdrProtocol->FreePool(ImageData);
         return Status;
     }
 
@@ -203,7 +203,7 @@ EFI_STATUS PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
     }
 
     /* Free pages */
-    EfiXtLdrProtocol->FreePages((EFI_PHYSICAL_ADDRESS)(UINT_PTR)Data, Pages);
+    XtLdrProtocol->FreePages((EFI_PHYSICAL_ADDRESS)(UINT_PTR)Data, Pages);
 
     /* Store image data */
     *Image = ImageData;
@@ -238,7 +238,7 @@ PepReadImageHeader(IN PUCHAR ImageData,
     /* Validate file size */
     if(FileSize < sizeof(PECOFF_IMAGE_DOS_HEADER))
     {
-        EfiXtLdrProtocol->DbgPrint(L"WARNING: PE/COFF image shorter than DOS header\n");
+        XtLdrProtocol->DbgPrint(L"WARNING: PE/COFF image shorter than DOS header\n");
         return STATUS_EFI_END_OF_FILE;
     }
 
@@ -246,7 +246,7 @@ PepReadImageHeader(IN PUCHAR ImageData,
     DosHeader = (PPECOFF_IMAGE_DOS_HEADER)ImageData;
     if(DosHeader->e_magic != PECOFF_IMAGE_DOS_SIGNATURE)
     {
-        EfiXtLdrProtocol->DbgPrint(L"WARNING: Invalid DOS signature found\n");
+        XtLdrProtocol->DbgPrint(L"WARNING: Invalid DOS signature found\n");
         return STATUS_EFI_INCOMPATIBLE_VERSION;
     }
 
@@ -254,7 +254,7 @@ PepReadImageHeader(IN PUCHAR ImageData,
     *PeHeader = (PPECOFF_IMAGE_PE_HEADER)(ImageData + DosHeader->e_lfanew);
     if((*PeHeader)->Signature != PECOFF_IMAGE_NT_SIGNATURE && (*PeHeader)->Signature != PECOFF_IMAGE_XT_SIGNATURE)
     {
-        EfiXtLdrProtocol->DbgPrint(L"WARNING: Invalid NT/XT signature found\n");
+        XtLdrProtocol->DbgPrint(L"WARNING: Invalid NT/XT signature found\n");
         return STATUS_EFI_INCOMPATIBLE_VERSION;
     }
 
@@ -262,7 +262,7 @@ PepReadImageHeader(IN PUCHAR ImageData,
     if((*PeHeader)->OptionalHeader.Magic != PECOFF_IMAGE_PE_OPTIONAL_HDR32_MAGIC &&
        (*PeHeader)->OptionalHeader.Magic != PECOFF_IMAGE_PE_OPTIONAL_HDR64_MAGIC)
     {
-        EfiXtLdrProtocol->DbgPrint(L"WARNING: Invalid optional header signature found\n");
+        XtLdrProtocol->DbgPrint(L"WARNING: Invalid optional header signature found\n");
         return STATUS_EFI_INCOMPATIBLE_VERSION;
     }
 
@@ -296,7 +296,7 @@ BlXtLdrModuleMain(EFI_HANDLE ImageHandle,
     EfiSystemTable = SystemTable;
 
     /* Open the XTLDR protocol */
-    Status = BlGetXtLoaderProtocol(&EfiXtLdrProtocol);
+    Status = BlGetXtLoaderProtocol(&XtLdrProtocol);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to open loader protocol */

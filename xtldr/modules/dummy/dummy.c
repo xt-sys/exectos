@@ -16,7 +16,7 @@ EFI_HANDLE EfiImageHandle;
 PEFI_SYSTEM_TABLE EfiSystemTable;
 
 /* EFI XT Loader Protocol */
-PXT_BOOT_LOADER_PROTOCOL EfiXtLdrProtocol;
+PXT_BOOT_LOADER_PROTOCOL XtLdrProtocol;
 
 /**
  * This routine is the entry point of the XT EFI boot loader module.
@@ -42,7 +42,7 @@ BlXtLdrModuleMain(EFI_HANDLE ImageHandle,
     EfiSystemTable = SystemTable;
 
     /* Open the XTLDR protocol */
-    Status = BlGetXtLoaderProtocol(&EfiXtLdrProtocol);
+    Status = BlGetXtLoaderProtocol(&XtLdrProtocol);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to open loader protocol */
