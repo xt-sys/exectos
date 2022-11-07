@@ -4,7 +4,8 @@ PROJECT(XTLDR_XTOS)
 # Specify include directories
 include_directories(
     ${EXECTOS_SOURCE_DIR}/sdk/xtdk
-    ${XTLDR_SOURCE_DIR}/includes)
+    ${XTLDR_SOURCE_DIR}/includes
+    ${XTLDR_XTOS_SOURCE_DIR}/includes)
 
 # Specify list of source code files
 list(APPEND XTLDR_XTOS_SOURCE
