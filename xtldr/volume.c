@@ -589,7 +589,7 @@ BlpDissectVolumeArcPath(IN PUCHAR SystemPath,
                         OUT PULONG DriveNumber,
                         OUT PULONG PartNumber)
 {
-    PUCHAR ArcPath;
+    PUCHAR ArcPath, LocalArcName;
     ULONG ArcLength = 0;
 
     /* Set default values */
@@ -713,9 +713,13 @@ BlpDissectVolumeArcPath(IN PUCHAR SystemPath,
         *Path = SystemPath + ArcLength;
     }
 
+    /* Store ARC name if possible */
     if(ArcName)
     {
-        /* TODO: Store ARC path in ArcName */
+        BlEfiMemoryAllocatePool(ArcLength, (PVOID *)&LocalArcName);
+        RtlCopyMemory(LocalArcName, SystemPath, ArcLength);
+        LocalArcName[ArcLength] = '\0';
+        *ArcName = LocalArcName;
     }
 
     /* Return success */
