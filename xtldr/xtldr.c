@@ -247,6 +247,61 @@ BlLoadEfiModules()
 }
 
 /**
+ * This routine attempts to start XT Operating System.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+EFI_STATUS BlLoadXtSystem()
+{
+    EFI_GUID ProtocolGuid = XT_XTOS_BOOT_PROTOCOL_GUID;
+    XT_BOOT_PROTOCOL_PARAMETERS BootParameters;
+    PXT_BOOT_PROTOCOL BootProtocol;
+    PUCHAR ArcName, SystemPath;
+    EFI_STATUS Status;
+    PCHAR ArcPath;
+    SIZE_T Length;
+
+    /* Set ARC path */
+    ArcPath = "multi(0)disk(0)rdisk(0)partition(1)/ExectOS";
+
+    /* Zero boot parameters structure to NULLify all pointers */
+    RtlZeroMemory(&BootParameters, sizeof(XT_BOOT_PROTOCOL_PARAMETERS));
+
+    /* Get boot volume path */
+    Status = BlGetVolumeDevicePath((PUCHAR)ArcPath, &BootParameters.DevicePath, &ArcName, &SystemPath);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to find volume */
+        BlDbgPrint(L"ERROR: Unable to find volume device path\n");
+        return Status;
+    }
+
+    /* Store ARC name in boot parameters */
+    Length = RtlStringLength(ArcName, 0);
+    BlEfiMemoryAllocatePool(Length + 1, (PVOID *)&BootParameters.ArcName);
+    RtlStringToWideString(BootParameters.ArcName, &ArcName, Length * 2);
+
+    /* Store system path in boot parameters */
+    Length = RtlStringLength(SystemPath, 0);
+    BlEfiMemoryAllocatePool(Length + 1, (PVOID *)&BootParameters.SystemPath);
+    RtlStringToWideString(BootParameters.SystemPath, &SystemPath, Length + 1);
+
+    /* Open the XT boot protocol */
+    Status = BlLoadXtProtocol((PVOID *)&BootProtocol, &ProtocolGuid);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to open boot protocol */
+        BlDbgPrint(L"ERROR: Unable to load boot protocol\n");
+        return STATUS_EFI_PROTOCOL_ERROR;
+    }
+
+    /* Boot operating system */
+    return BootProtocol->BootSystem(&BootParameters);
+}
+
+/**
  * This routine registers XTLDR protocol for further usage by modules.
  *
  * @return This routine returns status code.
@@ -266,6 +321,8 @@ BlRegisterXtLoaderProtocol()
     EfiLdrProtocol.FreePool = BlEfiMemoryFreePool;
     EfiLdrProtocol.DbgPrint = BlDbgPrint;
     EfiLdrProtocol.EfiPrint = BlEfiPrint;
+    EfiLdrProtocol.CloseVolume = BlCloseVolume;
+    EfiLdrProtocol.OpenVolume = BlOpenVolume;
 
     /* Register loader protocol */
     BlDbgPrint(L"Registering XT loader protocol\n");
@@ -341,7 +398,16 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
     /* Discover and enumerate EFI block devices */
     BlEnumerateEfiBlockDevices();
 
+    /* Boot XTOS */
+    Status = BlLoadXtSystem();
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Boot process failed */
+        BlEfiPrint(L"Failed to start XT OS (Status code: %lx)!\n", Status);
+    }
+
     /* Infinite bootloader loop */
+    BlEfiPrint(L"System halted!");
     for(;;);
 
     /* Return success */
