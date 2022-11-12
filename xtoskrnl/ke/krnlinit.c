@@ -18,7 +18,7 @@
  */
 XTAPI
 VOID
-KeStartXtSystem()
+KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK LoaderBlock)
 {
     /* Enter infinite kernel thread loop */
     for(;;);

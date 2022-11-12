@@ -10,7 +10,11 @@
 #define __XTDK_XTFW_H
 
 #include "xttypes.h"
+#include "xtcommon.h"
 
+
+/* Version number of the current kernel initialization block */
+#define INITIALIZATION_BLOCK_VERSION                            1
 
 /* Memory allocation structures */
 typedef enum _LOADER_MEMORY_TYPE
@@ -44,5 +48,55 @@ typedef enum _LOADER_MEMORY_TYPE
     LoaderHALCachedMemory,
     LoaderMaximum
 } LOADER_MEMORY_TYPE, *PLOADER_MEMORY_TYPE;
+
+/* Firmware types enumeration list */
+typedef enum _SYSTEM_FIRMWARE_TYPE {
+    SystemFirmwareInvalid,
+    SystemFirmwareUnknown,
+    SystemFirmwareEfi,
+    SystemFirmwarePcat
+} SYSTEM_FIRMWARE_TYPE, *PSYSTEM_FIRMWARE_TYPE;
+
+/* PCAT Firmware information block */
+typedef struct _PCAT_FIRMWARE_INFORMATION
+{
+    ULONG PlaceHolder;
+} PCAT_FIRMWARE_INFORMATION, *PPCAT_FIRMWARE_INFORMATION;
+
+/* UEFI Firmware information block */
+typedef struct _UEFI_FIRMWARE_INFORMATION
+{
+    ULONG EfiVersion;
+    ULONGLONG EfiImageHandle;
+    ULONGLONG EfiSystemTable;
+    PVOID EfiRuntimeServices;
+} UEFI_FIRMWARE_INFORMATION, *PUEFI_FIRMWARE_INFORMATION;
+
+/* Firmware information block */
+typedef struct _FIRMWARE_INFORMATION_BLOCK
+{
+    SYSTEM_FIRMWARE_TYPE FirmwareType;
+    union
+    {
+        UEFI_FIRMWARE_INFORMATION EfiFirmware;
+        PCAT_FIRMWARE_INFORMATION PcatFirmware;
+    };
+} FIRMWARE_INFORMATION_BLOCK, *PFIRMWARE_INFORMATION_BLOCK;
+
+/* Boot Loader information block */
+typedef struct _LOADER_INFORMATION_BLOCK
+{
+    PVOID DbgPrint;
+} LOADER_INFORMATION_BLOCK, *PLOADER_INFORMATION_BLOCK;
+
+/* Loader provided information needed by the kernel to initialize */
+typedef struct _KERNEL_INITIALIZATION_BLOCK
+{
+    ULONG Size;
+    ULONG Version;
+    ULONG_PTR KernelStack;
+    LOADER_INFORMATION_BLOCK LoaderInformation;
+    FIRMWARE_INFORMATION_BLOCK FirmwareInformation;
+} KERNEL_INITIALIZATION_BLOCK, *PKERNEL_INITIALIZATION_BLOCK;
 
 #endif /* __XTDK_XTFW_H */
