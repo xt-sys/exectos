@@ -22,6 +22,7 @@
 #include "xtcommon.h"
 #include "xtimage.h"
 #include "xtuefi.h"
+#include "xtfw.h"
 
 /* Low level data types headers */
 #include "rtltypes.h"
