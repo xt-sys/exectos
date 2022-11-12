@@ -178,6 +178,16 @@ PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
         return Status;
     }
 
+    /* Make sure image is executable */
+    if (!(ImageData->PeHeader->FileHeader.Characteristics & PECOFF_IMAGE_FILE_EXECUTABLE_IMAGE))
+    {
+        /* Loaded image is not executable */
+        XtLdrProtocol->DbgPrint(L"ERROR: Non-executable PE/COFF image loaded\n");
+        XtLdrProtocol->FreePages(Pages, (EFI_PHYSICAL_ADDRESS)(UINT_PTR)Data);
+        XtLdrProtocol->FreePool(ImageData);
+        return STATUS_EFI_LOAD_ERROR;
+    }
+
     /* Store image size and calculate number of image pages */
     ImageData->ImageSize = ImageData->PeHeader->OptionalHeader.SizeOfImage;
     ImageData->ImagePages = EFI_SIZE_TO_PAGES(ImageData->ImageSize);
