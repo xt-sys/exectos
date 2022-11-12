@@ -22,40 +22,75 @@ PXT_BOOT_LOADER_PROTOCOL XtLdrProtocol;
 XT_PECOFF_IMAGE_PROTOCOL XtPeCoffProtocol;
 
 /**
+ * Returns the address of the entry point.
+ *
+ * @param Image
+ *        A pointer to the PE/COFF context structure representing the loaded image.
+ *
+ * @param EntryPoint
+ *        A pointer to the memory area where address of the image entry point will be stored.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+EFI_STATUS
+PeGetEntryPoint(IN PPECOFF_IMAGE_CONTEXT Image,
+                OUT PVOID *EntryPoint)
+{
+    /* Validate input date */
+    if(!Image || !Image->PeHeader)
+    {
+        /* Invalid parameter passed */
+        return STATUS_EFI_INVALID_PARAMETER;
+    }
+
+    /* Set entry point and return success */
+    *EntryPoint = (UINT8*)Image->VirtualAddress + Image->PeHeader->OptionalHeader.AddressOfEntryPoint;
+    return STATUS_EFI_SUCCESS;
+}
+
+/**
  * Loads a PE/COFF image file.
  *
  * @param FileHandle
  *        The handle of the opened portable executable (PE) file.
  *
+ * @param MemoryType
+ *        Supplies the type of memory to be assigned to the memory descriptor.
+ *
  * @param VirtualAddress
  *        Optional virtual address pointing to the memory area where PE/COFF file will be loaded.
+ *
+ * @param Image
+ *        Supplies pointer to the memory area where loaded PE/COFF image context will be stored.
  *
  * @return This routine returns status code.
  *
  * @since XT 1.0
  */
-EFI_STATUS PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
-                       IN PVOID VirtualAddress,
-                       OUT PPECOFF_IMAGE_CONTEXT *Image)
+EFI_STATUS
+PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
+            IN LOADER_MEMORY_TYPE MemoryType,
+            IN PVOID VirtualAddress,
+            OUT PPECOFF_IMAGE_CONTEXT *Image)
 {
     EFI_GUID FileInfoGuid = EFI_FILE_INFO_PROTOCOL_GUID;
     PPECOFF_IMAGE_SECTION_HEADER SectionHeader;
-    PPECOFF_IMAGE_PE_HEADER PeHeader;
     PPECOFF_IMAGE_CONTEXT ImageData;
     EFI_PHYSICAL_ADDRESS Address;
     PEFI_FILE_INFO FileInfo;
-    SIZE_T Size, Pages;
+    SIZE_T Pages, ReadSize;
     EFI_STATUS Status;
-    UINT_PTR ReadSize;
     UINT SectionSize;
     PUCHAR Data;
     UINT Index;
 
     /* Set required size for getting file information */
-    Size = sizeof(EFI_FILE_INFO) + 32;
+    ReadSize = sizeof(EFI_FILE_INFO) + 32;
 
     /* Allocate necessary amount of memory */
-    Status = XtLdrProtocol->AllocatePool(Size, (PVOID *)&FileInfo);
+    Status = XtLdrProtocol->AllocatePool(ReadSize, (PVOID *)&FileInfo);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Memory allocation failure */
@@ -64,20 +99,21 @@ EFI_STATUS PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
     }
 
     /* First attempt to get file information */
-    Status = FileHandle->GetInfo(FileHandle, &FileInfoGuid, &Size, FileInfo);
+    Status = FileHandle->GetInfo(FileHandle, &FileInfoGuid, &ReadSize, FileInfo);
     if(Status == STATUS_EFI_BUFFER_TOO_SMALL)
     {
         /* Buffer it too small, but EFI tells the required size, let's reallocate */
         XtLdrProtocol->FreePool(&FileInfo);
-        Status = XtLdrProtocol->AllocatePool(Size, (PVOID *)&FileInfo);
+        Status = XtLdrProtocol->AllocatePool(ReadSize, (PVOID *)&FileInfo);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory allocation failure */
             XtLdrProtocol->DbgPrint(L"ERROR: Memory pool allocation failure\n");
             return Status;
         }
+
         /* Second attempt to get file information */
-        Status = FileHandle->GetInfo(FileHandle, &FileInfoGuid, &Size, FileInfo);
+        Status = FileHandle->GetInfo(FileHandle, &FileInfoGuid, &ReadSize, FileInfo);
     }
     if(Status != STATUS_EFI_SUCCESS)
     {
@@ -95,8 +131,10 @@ EFI_STATUS PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
         return Status;
     }
 
-    /* Store file size and free memory */
+    /* Store file size and memory type, nullify data and free up memory */
+    ImageData->Data = NULL;
     ImageData->FileSize = FileInfo->FileSize;
+    ImageData->MemoryType = MemoryType;
     XtLdrProtocol->FreePool(FileInfo);
 
     /* Calculate number of pages */
@@ -125,19 +163,23 @@ EFI_STATUS PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
         return Status;
     }
 
-    /* Read and validate headers */
-    Status = PepReadImageHeader(Data, ImageData->FileSize, &PeHeader);
+    /* Extract DOS and PE headers */
+    ImageData->DosHeader = (PPECOFF_IMAGE_DOS_HEADER)Data;
+    ImageData->PeHeader = (PPECOFF_IMAGE_PE_HEADER)((PUINT8)Data + ImageData->DosHeader->e_lfanew);
+
+    /* Validate headers */
+    Status = PepValidateImageHeaders(ImageData->DosHeader, ImageData->PeHeader, ImageData->FileSize);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Header validation failed, probably broken or invalid PE/COFF image */
-        XtLdrProtocol->DbgPrint(L"ERROR: Invalid PE/COFF image header\n");
+        XtLdrProtocol->DbgPrint(L"ERROR: Invalid PE/COFF image headers\n");
         XtLdrProtocol->FreePages(Pages, (EFI_PHYSICAL_ADDRESS)(UINT_PTR)Data);
         XtLdrProtocol->FreePool(ImageData);
         return Status;
     }
 
     /* Store image size and calculate number of image pages */
-    ImageData->ImageSize = PeHeader->OptionalHeader.SizeOfImage;
+    ImageData->ImageSize = ImageData->PeHeader->OptionalHeader.SizeOfImage;
     ImageData->ImagePages = EFI_SIZE_TO_PAGES(ImageData->ImageSize);
 
     /* Allocate image pages */
@@ -150,7 +192,7 @@ EFI_STATUS PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
         return Status;
     }
 
-    /* Store image data and base address */
+    /* Store image data and virtual address */
     ImageData->Data = (PUINT8)(UINT_PTR)Address;
     if(VirtualAddress)
     {
@@ -164,14 +206,14 @@ EFI_STATUS PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
     }
 
     /* Copy all sections */
-    RtlCopyMemory(ImageData->Data, Data, PeHeader->OptionalHeader.SizeOfHeaders);
+    RtlCopyMemory(ImageData->Data, Data, ImageData->PeHeader->OptionalHeader.SizeOfHeaders);
 
     /* Find section header */
-    SectionHeader = (PPECOFF_IMAGE_SECTION_HEADER)((PUCHAR)&PeHeader->OptionalHeader +
-                                                   PeHeader->FileHeader.SizeOfOptionalHeader);
+    SectionHeader = (PPECOFF_IMAGE_SECTION_HEADER)((PUCHAR)&ImageData->PeHeader->OptionalHeader +
+                                                   ImageData->PeHeader->FileHeader.SizeOfOptionalHeader);
 
     /* Load each section into memory */
-    for(Index = 0; Index < PeHeader->FileHeader.NumberOfSections; Index++)
+    for(Index = 0; Index < ImageData->PeHeader->FileHeader.NumberOfSections; Index++)
     {
         /* Check section raw data size and section virtual size */
         if(SectionHeader[Index].SizeOfRawData < SectionHeader[Index].Misc.VirtualSize)
@@ -213,28 +255,26 @@ EFI_STATUS PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
 }
 
 /**
- * Reads and validate a PE/COFF image headers
+ * Validates a PE/COFF image headers.
  *
- * @param ImageData
- *        A pointer to the buffer containing PE/COFF image contents.
- *
- * @param FileSize
- *        An input PE/COFF image file size.
+ * @param DosHeader
+ *        Pointer to the memory area with DOS header stored.
  *
  * @param PeHeader
- *        Pointer to the memory area where PE header will be saved.
+ *        Pointer to the memory area with PE header stored.
+ *
+ * @param FileSize
+ *        A PE/COFF image file size.
  *
  * @return This routine returns a status code.
  *
  * @since XT 1.0
  */
 EFI_STATUS
-PepReadImageHeader(IN PUCHAR ImageData,
-                   IN SIZE_T FileSize,
-                   OUT PPECOFF_IMAGE_PE_HEADER *PeHeader)
+PepValidateImageHeaders(IN PPECOFF_IMAGE_DOS_HEADER DosHeader,
+                        IN PPECOFF_IMAGE_PE_HEADER PeHeader,
+                        IN SIZE_T FileSize)
 {
-    PPECOFF_IMAGE_DOS_HEADER DosHeader;
-
     /* Validate file size */
     if(FileSize < sizeof(PECOFF_IMAGE_DOS_HEADER))
     {
@@ -243,30 +283,27 @@ PepReadImageHeader(IN PUCHAR ImageData,
     }
 
     /* Validate DOS header */
-    DosHeader = (PPECOFF_IMAGE_DOS_HEADER)ImageData;
     if(DosHeader->e_magic != PECOFF_IMAGE_DOS_SIGNATURE)
     {
         XtLdrProtocol->DbgPrint(L"WARNING: Invalid DOS signature found\n");
         return STATUS_EFI_INCOMPATIBLE_VERSION;
     }
 
-    /* Validate NT/XT header */
-    *PeHeader = (PPECOFF_IMAGE_PE_HEADER)(ImageData + DosHeader->e_lfanew);
-    if((*PeHeader)->Signature != PECOFF_IMAGE_NT_SIGNATURE && (*PeHeader)->Signature != PECOFF_IMAGE_XT_SIGNATURE)
+    /* Validate PE header */
+    if(PeHeader->Signature != PECOFF_IMAGE_NT_SIGNATURE && PeHeader->Signature != PECOFF_IMAGE_XT_SIGNATURE)
     {
         XtLdrProtocol->DbgPrint(L"WARNING: Invalid NT/XT signature found\n");
         return STATUS_EFI_INCOMPATIBLE_VERSION;
     }
 
     /* Validate optional header */
-    if((*PeHeader)->OptionalHeader.Magic != PECOFF_IMAGE_PE_OPTIONAL_HDR32_MAGIC &&
-       (*PeHeader)->OptionalHeader.Magic != PECOFF_IMAGE_PE_OPTIONAL_HDR64_MAGIC)
+    if(PeHeader->OptionalHeader.Magic != PECOFF_IMAGE_PE_OPTIONAL_HDR32_MAGIC &&
+       PeHeader->OptionalHeader.Magic != PECOFF_IMAGE_PE_OPTIONAL_HDR64_MAGIC)
     {
         XtLdrProtocol->DbgPrint(L"WARNING: Invalid optional header signature found\n");
         return STATUS_EFI_INCOMPATIBLE_VERSION;
     }
 
-    /* Return SUCCESS */
     return STATUS_EFI_SUCCESS;
 }
 
@@ -284,8 +321,8 @@ PepReadImageHeader(IN PUCHAR ImageData,
  * @since XT 1.0
  */
 EFI_STATUS
-BlXtLdrModuleMain(EFI_HANDLE ImageHandle,
-                  PEFI_SYSTEM_TABLE SystemTable)
+BlXtLdrModuleMain(IN EFI_HANDLE ImageHandle,
+                  IN PEFI_SYSTEM_TABLE SystemTable)
 {
     EFI_GUID Guid = XT_PECOFF_IMAGE_PROTOCOL_GUID;
     EFI_HANDLE Handle = NULL;
@@ -304,6 +341,7 @@ BlXtLdrModuleMain(EFI_HANDLE ImageHandle,
     }
 
     /* Set routines available via PE/COFF image protocol */
+    XtPeCoffProtocol.GetEntryPoint = PeGetEntryPoint;
     XtPeCoffProtocol.Load = PeLoadImage;
 
     /* Register PE/COFF protocol */

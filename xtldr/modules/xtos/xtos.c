@@ -160,6 +160,7 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
                 IN PXT_BOOT_PROTOCOL_PARAMETERS Parameters)
 {
     PEFI_FILE_HANDLE KernelHandle;
+    PPECOFF_IMAGE_CONTEXT Image;
     EFI_STATUS Status;
 
     XtLdrProtocol->DbgPrint(L"Issuing XT startup sequence\n");
@@ -174,7 +175,7 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
     }
 
     /* Load the PE/COFF kernel file */
-    Status = XtPeCoffProtocol->Load(KernelHandle, (PVOID)XTOS_KERNEL_ADDRESS, NULL);
+    Status = XtPeCoffProtocol->Load(KernelHandle, LoaderSystemCode, NULL, &Image);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Unable to load the file */
@@ -203,8 +204,8 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
  * @since XT 1.0
  */
 EFI_STATUS
-BlXtLdrModuleMain(EFI_HANDLE ImageHandle,
-                  PEFI_SYSTEM_TABLE SystemTable)
+BlXtLdrModuleMain(IN EFI_HANDLE ImageHandle,
+                  IN PEFI_SYSTEM_TABLE SystemTable)
 {
     EFI_GUID Guid = XT_XTOS_BOOT_PROTOCOL_GUID;
     EFI_HANDLE Handle = NULL;

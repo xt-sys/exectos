@@ -12,17 +12,24 @@
 #include <blmod.h>
 
 
-EFI_STATUS PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
-                       IN PVOID VirtualAddress,
-                       OUT PPECOFF_IMAGE_CONTEXT *Image);
+/* PE/COFF image protocol related routines forward references */
+EFI_STATUS
+PeGetEntryPoint(IN PPECOFF_IMAGE_CONTEXT Image,
+                OUT PVOID *EntryPoint);
 
 EFI_STATUS
-PepReadImageHeader(IN PUCHAR ImageData,
-                   IN SIZE_T FileSize,
-                   OUT PPECOFF_IMAGE_PE_HEADER *PeHeader);
+PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
+            IN LOADER_MEMORY_TYPE MemoryType,
+            IN PVOID VirtualAddress,
+            OUT PPECOFF_IMAGE_CONTEXT *Image);
 
 EFI_STATUS
-BlXtLdrModuleMain(EFI_HANDLE ImageHandle,
-                  PEFI_SYSTEM_TABLE SystemTable);
+PepValidateImageHeaders(IN PPECOFF_IMAGE_DOS_HEADER DosHeader,
+                        IN PPECOFF_IMAGE_PE_HEADER PeHeader,
+                        IN SIZE_T FileSize);
+
+EFI_STATUS
+BlXtLdrModuleMain(IN EFI_HANDLE ImageHandle,
+                  IN PEFI_SYSTEM_TABLE SystemTable);
 
 #endif /* __XTLDR_MODULES_PECOFF_H */

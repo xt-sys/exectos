@@ -12,6 +12,7 @@
 #include "xtdefs.h"
 #include "xtstruct.h"
 #include "xttypes.h"
+#include "xtfw.h"
 
 
 /* PE/COFF file image signatures */
@@ -190,10 +191,13 @@
 /* PE/COFF image representation structure */
 typedef struct _PECOFF_IMAGE_CONTEXT
 {
+    PPECOFF_IMAGE_DOS_HEADER DosHeader;
+    PPECOFF_IMAGE_PE_HEADER PeHeader;
     PVOID Data;
     UINT64 FileSize;
     UINT ImagePages;
     UINT ImageSize;
+    LOADER_MEMORY_TYPE MemoryType;
     PVOID VirtualAddress;
 } PECOFF_IMAGE_CONTEXT, *PPECOFF_IMAGE_CONTEXT;
 
