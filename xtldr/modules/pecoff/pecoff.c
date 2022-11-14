@@ -80,9 +80,10 @@ PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
     PPECOFF_IMAGE_CONTEXT ImageData;
     EFI_PHYSICAL_ADDRESS Address;
     PEFI_FILE_INFO FileInfo;
-    SIZE_T Pages, ReadSize;
+    UINT_PTR ReadSize;
     EFI_STATUS Status;
     UINT SectionSize;
+    SIZE_T Pages;
     PUCHAR Data;
     UINT Index;
 
