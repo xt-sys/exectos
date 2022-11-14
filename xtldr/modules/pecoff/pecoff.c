@@ -258,8 +258,130 @@ PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
     /* Free pages */
     XtLdrProtocol->FreePages((EFI_PHYSICAL_ADDRESS)(UINT_PTR)Data, Pages);
 
+    /* Perform relocation fixups */
+    Status = PepRelocateImage(ImageData);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        XtLdrProtocol->DbgPrint(L"ERROR: PE/COFF image relocation failed\n");
+        return Status;
+    }
+
     /* Store image data */
     *Image = ImageData;
+
+    /* Return SUCCESS */
+    return STATUS_EFI_SUCCESS;
+}
+
+/**
+ * Relocates a loaded PE/COFF image.
+ *
+ * @param Image
+ *        A pointer to the PE/COFF context structure representing the loaded image.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+EFI_STATUS
+PepRelocateImage(IN PPECOFF_IMAGE_CONTEXT Image)
+{
+    PPECOFF_IMAGE_BASE_RELOCATION RelocationDir, RelocationEnd;
+    PPECOFF_IMAGE_DATA_DIRECTORY DataDirectory;
+    USHORT Offset, Type, Count;
+    PUSHORT TypeOffset;
+    UINT64 ImageBase;
+    PUINT32 Address;
+    PUINT64 LongPtr;
+    PUINT ShortPtr;
+
+    /* Make sure image is not stripped */
+    if(Image->PeHeader->FileHeader.Characteristics & PECOFF_IMAGE_FILE_RELOCS_STRIPPED)
+    {
+        /* No relocation information found */
+        return STATUS_EFI_UNSUPPORTED;
+    }
+
+    /* Set relocation data directory */
+    DataDirectory = &Image->PeHeader->OptionalHeader.DataDirectory[PECOFF_IMAGE_DIRECTORY_ENTRY_BASERELOC];
+
+    /* Check if loaded image should be relocated */
+    if(Image->PeHeader->OptionalHeader.NumberOfRvaAndSizes <= PECOFF_IMAGE_DIRECTORY_ENTRY_BASERELOC ||
+       DataDirectory->VirtualAddress == 0 || DataDirectory->Size < sizeof(PECOFF_IMAGE_BASE_RELOCATION))
+    {
+        /* No need to relocate the image */
+        return STATUS_EFI_SUCCESS;
+    }
+
+    /* Check PE/COFF image type */
+    if(Image->PeHeader->OptionalHeader.Magic == PECOFF_IMAGE_PE_OPTIONAL_HDR64_MAGIC)
+    {
+        /* This is 64-bit PE32+, store its image base address */
+        ImageBase = Image->PeHeader->OptionalHeader.ImageBase64;
+    }
+    else
+    {
+        /* This is 32-bit PE32, store its image base address */
+        ImageBase = Image->PeHeader->OptionalHeader.ImageBase32;
+    }
+
+    /* Set relocation pointers */
+    RelocationDir = (PPECOFF_IMAGE_BASE_RELOCATION)((ULONG_PTR)Image->Data + DataDirectory->VirtualAddress);
+    RelocationEnd = (PPECOFF_IMAGE_BASE_RELOCATION)((ULONG_PTR)RelocationDir + DataDirectory->Size);
+
+    /* Do relocations */
+    while(RelocationDir < RelocationEnd && RelocationDir->SizeOfBlock > 0)
+    {
+        /* Calculate number of relocations needed, address and type offset */
+        Count = (RelocationDir->SizeOfBlock - sizeof(PECOFF_IMAGE_BASE_RELOCATION)) / sizeof(UINT16);
+        Address = (UINT32*)((UINT8*)Image->Data + RelocationDir->VirtualAddress);
+        TypeOffset = (UINT16*)((UINT8*)RelocationDir + sizeof(PECOFF_IMAGE_BASE_RELOCATION));
+
+        /* Do relocations */
+        while(Count--)
+        {
+            /* Calculate offset and relocation type */
+            Offset = *TypeOffset & 0xFFF;
+            Type = *TypeOffset >> 12;
+
+            /* Check if end of the loaded address reached */
+            if((PVOID)(PUSHORT)(Address + Offset) >= Image->Data + Image->ImageSize)
+            {
+                /* Do not relocate after the end of loaded image */
+                break;
+            }
+
+            /* Make sure we are not going to relocate into .reloc section */
+            if((ULONG_PTR)(Address + Offset) < (ULONG_PTR)RelocationDir ||
+               (ULONG_PTR)(Address + Offset) >= (ULONG_PTR)RelocationEnd)
+            {
+                /* Apply relocation fixup */
+                switch (Type)
+                {
+                    case PECOFF_IMAGE_REL_BASED_ABSOLUTE:
+                        /* No relocation required */
+                        break;
+                    case PECOFF_IMAGE_REL_BASED_DIR64:
+                        /* 64-bit relocation */
+                        LongPtr = (UINT64*)((UINT8*)Address + Offset);
+                        *LongPtr = *LongPtr - ImageBase + (UINT_PTR)Image->VirtualAddress;
+                        break;
+                    case PECOFF_IMAGE_REL_BASED_HIGHLOW:
+                        /* 32-bit relocation of hight and low half of address */
+                        ShortPtr = (UINT32*)((UINT8*)Address + Offset);
+                        *ShortPtr = *ShortPtr - ImageBase + (UINT_PTR)Image->VirtualAddress;
+                        break;
+                    default:
+                        /* Unknown or unsupported relocation type */
+                        return STATUS_EFI_UNSUPPORTED;
+                }
+            }
+            /* Increment the type offset */
+            TypeOffset++;
+        }
+        /* Next relocation */
+        RelocationDir += RelocationDir->SizeOfBlock;
+    }
 
     /* Return SUCCESS */
     return STATUS_EFI_SUCCESS;
