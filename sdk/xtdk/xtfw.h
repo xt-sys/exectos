@@ -92,6 +92,9 @@ typedef struct _LOADER_INFORMATION_BLOCK
 /* Loader provided information needed by the kernel to initialize */
 typedef struct _KERNEL_INITIALIZATION_BLOCK
 {
+    LIST_ENTRY LoadOrderListHead;
+    LIST_ENTRY MemoryDescriptorListHead;
+    LIST_ENTRY BootDriverListHead;
     ULONG Size;
     ULONG Version;
     ULONG_PTR KernelStack;
