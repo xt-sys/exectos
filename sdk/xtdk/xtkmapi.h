@@ -26,6 +26,7 @@
 
 /* Low level data types headers */
 #include "rtltypes.h"
+#include "ldrtypes.h"
 #include "hltypes.h"
 
 /* XT routines */
