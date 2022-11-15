@@ -24,7 +24,11 @@ PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
             OUT PPECOFF_IMAGE_CONTEXT *Image);
 
 EFI_STATUS
-PepRelocateImage(IN PPECOFF_IMAGE_CONTEXT Image);
+PeRelocateImage(IN PPECOFF_IMAGE_CONTEXT Image,
+                IN EFI_VIRTUAL_ADDRESS Address);
+
+EFI_STATUS
+PepRelocateLoadedImage(IN PPECOFF_IMAGE_CONTEXT Image);
 
 EFI_STATUS
 PepValidateImageHeaders(IN PPECOFF_IMAGE_DOS_HEADER DosHeader,

@@ -46,7 +46,7 @@ PeGetEntryPoint(IN PPECOFF_IMAGE_CONTEXT Image,
     }
 
     /* Set entry point and return success */
-    *EntryPoint = (UINT8*)Image->VirtualAddress + Image->PeHeader->OptionalHeader.AddressOfEntryPoint;
+    *EntryPoint = (PUINT8)Image->VirtualAddress + Image->PeHeader->OptionalHeader.AddressOfEntryPoint;
     return STATUS_EFI_SUCCESS;
 }
 
@@ -259,7 +259,7 @@ PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
     XtLdrProtocol->FreePages((EFI_PHYSICAL_ADDRESS)(UINT_PTR)Data, Pages);
 
     /* Perform relocation fixups */
-    Status = PepRelocateImage(ImageData);
+    Status = PepRelocateLoadedImage(ImageData);
     if(Status != STATUS_EFI_SUCCESS)
     {
         XtLdrProtocol->DbgPrint(L"ERROR: PE/COFF image relocation failed\n");
@@ -274,6 +274,57 @@ PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
 }
 
 /**
+ * Relocates PE/COFF image to the specified address.
+ *
+ * @param Image
+ *        A pointer to the PE/COFF context structure representing the loaded image.
+ *
+ * @param Address
+ *        Destination address of memory region, where image should be relocated.
+ *
+ * @return This routine returns status code.
+ *
+ * @since XT 1.0
+ */
+EFI_STATUS
+PeRelocateImage(IN PPECOFF_IMAGE_CONTEXT Image,
+                IN EFI_VIRTUAL_ADDRESS Address)
+{
+    UINT64 ImageBase, OldVirtualAddress;
+    EFI_STATUS Status;
+
+    /* Store original virtual address */
+    OldVirtualAddress = (UINT_PTR)Image->VirtualAddress;
+
+    /* Check PE/COFF image type */
+    if(Image->PeHeader->OptionalHeader.Magic == PECOFF_IMAGE_PE_OPTIONAL_HDR64_MAGIC)
+    {
+        /* This is 64-bit PE32+, store its image base address */
+        ImageBase = Image->PeHeader->OptionalHeader.ImageBase64;
+    }
+    else
+    {
+        /* This is 32-bit PE32, store its image base address */
+        ImageBase = Image->PeHeader->OptionalHeader.ImageBase32;
+    }
+
+    /* Overwrite virtual address and relocate image once again */
+    Image->VirtualAddress = (PVOID)(Address - OldVirtualAddress + ImageBase);
+    Status = PepRelocateLoadedImage(Image);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Relocation failed */
+        return Status;
+    }
+
+    /* Store new image virtual address */
+    Image->VirtualAddress = (PVOID)Address;
+
+    /* Return success */
+    return STATUS_EFI_SUCCESS;
+}
+
+/**
  * Relocates a loaded PE/COFF image.
  *
  * @param Image
@@ -284,7 +335,7 @@ PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
  * @since XT 1.0
  */
 EFI_STATUS
-PepRelocateImage(IN PPECOFF_IMAGE_CONTEXT Image)
+PepRelocateLoadedImage(IN PPECOFF_IMAGE_CONTEXT Image)
 {
     PPECOFF_IMAGE_BASE_RELOCATION RelocationDir, RelocationEnd;
     PPECOFF_IMAGE_DATA_DIRECTORY DataDirectory;
@@ -476,6 +527,7 @@ BlXtLdrModuleMain(IN EFI_HANDLE ImageHandle,
     /* Set routines available via PE/COFF image protocol */
     XtPeCoffProtocol.GetEntryPoint = PeGetEntryPoint;
     XtPeCoffProtocol.Load = PeLoadImage;
+    XtPeCoffProtocol.Relocate = PeRelocateImage;
 
     /* Register PE/COFF protocol */
     return EfiSystemTable->BootServices->InstallProtocolInterface(&Handle, &Guid, EFI_NATIVE_INTERFACE, &XtPeCoffProtocol);
