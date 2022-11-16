@@ -18,6 +18,10 @@ PeGetEntryPoint(IN PPECOFF_IMAGE_CONTEXT Image,
                 OUT PVOID *EntryPoint);
 
 EFI_STATUS
+PeGetSubSystem(IN PPECOFF_IMAGE_CONTEXT Image,
+               OUT PUSHORT SubSystem);
+
+EFI_STATUS
 PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
             IN LOADER_MEMORY_TYPE MemoryType,
             IN PVOID VirtualAddress,

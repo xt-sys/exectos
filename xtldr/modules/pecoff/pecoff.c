@@ -51,6 +51,27 @@ PeGetEntryPoint(IN PPECOFF_IMAGE_CONTEXT Image,
 }
 
 /**
+ * Returns an information about subsystem that is required to run PE/COFF image.
+ *
+ * @param Image
+ *        A pointer to the PE/COFF context structure representing the loaded image.
+ *
+ * @param SubSystem
+ *        A pointer to the memory area storing a value defined for the 'subsystem' field of the image.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+EFI_STATUS
+PeGetSubSystem(IN PPECOFF_IMAGE_CONTEXT Image,
+               OUT PUSHORT SubSystem)
+{
+    *SubSystem = Image->PeHeader->OptionalHeader.Subsystem;
+    return STATUS_EFI_SUCCESS;
+}
+
+/**
  * Loads a PE/COFF image file.
  *
  * @param FileHandle
@@ -526,6 +547,7 @@ BlXtLdrModuleMain(IN EFI_HANDLE ImageHandle,
 
     /* Set routines available via PE/COFF image protocol */
     XtPeCoffProtocol.GetEntryPoint = PeGetEntryPoint;
+    XtPeCoffProtocol.GetSubSystem = PeGetSubSystem;
     XtPeCoffProtocol.Load = PeLoadImage;
     XtPeCoffProtocol.Relocate = PeRelocateImage;
 
