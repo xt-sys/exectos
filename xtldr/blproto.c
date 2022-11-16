@@ -66,8 +66,9 @@ BlLoadXtProtocol(OUT PVOID *ProtocolHandler,
         for(Index = 0; Index < Count; Index++)
         {
             /* Try to open protocol */
-            Status = EfiSystemTable->BootServices->OpenProtocol(Handles[Index], ProtocolGuid, ProtocolHandler,
-                                                                EfiImageHandle, NULL, EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
+            Status = EfiSystemTable->BootServices->OpenProtocol(Handles[Index], ProtocolGuid,
+                                                                ProtocolHandler, EfiImageHandle, NULL,
+                                                                EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
 
             /* Check if successfully opened the loader protocol */
             if(Status == STATUS_EFI_SUCCESS)

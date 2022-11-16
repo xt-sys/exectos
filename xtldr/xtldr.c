@@ -149,7 +149,8 @@ BlLoadEfiModules()
         }
 
         /* Load the module into memory */
-        Status = EfiSystemTable->BootServices->LoadImage(FALSE, EfiImageHandle, VolumeDevicePath, NULL, 0, &ModuleHandle);
+        Status = EfiSystemTable->BootServices->LoadImage(FALSE, EfiImageHandle, VolumeDevicePath,
+                                                         NULL, 0, &ModuleHandle);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Module failed */
@@ -326,7 +327,8 @@ BlRegisterXtLoaderProtocol()
 
     /* Register loader protocol */
     BlDbgPrint(L"Registering XT loader protocol\n");
-    return EfiSystemTable->BootServices->InstallProtocolInterface(&Handle, &Guid, EFI_NATIVE_INTERFACE, &EfiLdrProtocol);
+    return EfiSystemTable->BootServices->InstallProtocolInterface(&Handle, &Guid, EFI_NATIVE_INTERFACE,
+                                                                  &EfiLdrProtocol);
 }
 
 /**

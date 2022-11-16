@@ -552,5 +552,6 @@ BlXtLdrModuleMain(IN EFI_HANDLE ImageHandle,
     XtPeCoffProtocol.Relocate = PeRelocateImage;
 
     /* Register PE/COFF protocol */
-    return EfiSystemTable->BootServices->InstallProtocolInterface(&Handle, &Guid, EFI_NATIVE_INTERFACE, &XtPeCoffProtocol);
+    return EfiSystemTable->BootServices->InstallProtocolInterface(&Handle, &Guid, EFI_NATIVE_INTERFACE,
+                                                                  &XtPeCoffProtocol);
 }
