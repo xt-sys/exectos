@@ -90,7 +90,7 @@ XtBootSystem(IN PXT_BOOT_PROTOCOL_PARAMETERS Parameters)
     }
     else
     {
-        /* Fallback to /ExectOS by default */
+        /* Fallback to '/ExectOS' by default */
         XtLdrProtocol->DbgPrint(L"WARNING: No system path set, falling back to defaults\n");
         Parameters->SystemPath = L"\\ExectOS";
     }
@@ -103,7 +103,10 @@ XtBootSystem(IN PXT_BOOT_PROTOCOL_PARAMETERS Parameters)
     }
 
     /* Print a debug message */
-    XtLdrProtocol->DbgPrint(L"ARC Path: %S\nSystem Path: %S\nKernel File: %S\nBoot Arguments: %S\n",
+    XtLdrProtocol->DbgPrint(L"[XTOS] ARC Path: %S\n"
+                            L"[XTOS] System Path: %S\n"
+                            L"[XTOS] Kernel File: %S\n"
+                            L"[XTOS] Boot Arguments: %S\n",
                                Parameters->ArcName, Parameters->SystemPath,
                                Parameters->KernelFile, Parameters->Arguments);
 
@@ -159,32 +162,65 @@ EFI_STATUS
 XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
                 IN PXT_BOOT_PROTOCOL_PARAMETERS Parameters)
 {
-    PEFI_FILE_HANDLE KernelHandle;
-    PPECOFF_IMAGE_CONTEXT Image;
+    PPECOFF_IMAGE_CONTEXT Image = NULL;
     EFI_STATUS Status;
 
-    XtLdrProtocol->DbgPrint(L"Issuing XT startup sequence\n");
+    /* Initialize XTOS startup sequence */
+    XtLdrProtocol->DbgPrint(L"Initializing XTOS startup sequence\n");
 
-    /* Open kernel file */
-    Status = BootDir->Open(BootDir, &KernelHandle, Parameters->KernelFile, EFI_FILE_MODE_READ, 0);
+    /* Load the kernel */
+    Status = XtpLoadModule(BootDir, Parameters->KernelFile, LoaderSystemCode, &Image);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to load the kernel */
+        return Status;
+    }
+
+    /* Return success */
+    return STATUS_EFI_SUCCESS;
+}
+
+EFI_STATUS
+XtpLoadModule(IN PEFI_FILE_HANDLE BootDir,
+              IN PWCHAR FileName,
+              IN LOADER_MEMORY_TYPE MemoryType,
+              OUT PPECOFF_IMAGE_CONTEXT *ImageContext)
+{
+    PEFI_FILE_HANDLE ModuleHandle;
+    USHORT SubSystem;
+    EFI_STATUS Status;
+
+    /* Print debug message */
+    XtLdrProtocol->DbgPrint(L"Loading %S ... \n", FileName);
+
+    /* Open module file */
+    Status = BootDir->Open(BootDir, &ModuleHandle, FileName, EFI_FILE_MODE_READ, 0);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Unable to open the file */
-        XtLdrProtocol->DbgPrint(L"ERROR: Failed to open the XTOS kernel\n");
+        XtLdrProtocol->DbgPrint(L"ERROR: Failed to open '%S'\n", FileName);
         return Status;
     }
 
-    /* Load the PE/COFF kernel file */
-    Status = XtPeCoffProtocol->Load(KernelHandle, LoaderSystemCode, NULL, &Image);
+    /* Load the PE/COFF image file */
+    Status = XtPeCoffProtocol->Load(ModuleHandle, MemoryType, NULL, ImageContext);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Unable to load the file */
-        XtLdrProtocol->DbgPrint(L"ERROR: Failed to load the XTOS kernel\n");
+        XtLdrProtocol->DbgPrint(L"ERROR: Failed to load '%S'\n", FileName);
         return Status;
     }
 
-    /* Close kernel file */
-    KernelHandle->Close(KernelHandle);
+    /* Close image file */
+    ModuleHandle->Close(ModuleHandle);
+
+    /* Check PE/COFF image subsystem */
+    XtPeCoffProtocol->GetSubSystem(*ImageContext, &SubSystem);
+    if(SubSystem != PECOFF_IMAGE_SUBSYSTEM_XT_NATIVE_APPLICATION &&
+       SubSystem != PECOFF_IMAGE_SUBSYSTEM_XT_NATIVE_DRIVER)
+    {
+        XtLdrProtocol->DbgPrint(L"WARNING: Loaded PE/COFF image with non-XT subsystem set\n");
+    }
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
@@ -227,5 +263,6 @@ BlXtLdrModuleMain(IN EFI_HANDLE ImageHandle,
     XtBootProtocol.BootSystem = XtBootSystem;
 
     /* Register XTOS boot protocol */
-    return EfiSystemTable->BootServices->InstallProtocolInterface(&Handle, &Guid, EFI_NATIVE_INTERFACE, &XtBootProtocol);
+    return EfiSystemTable->BootServices->InstallProtocolInterface(&Handle, &Guid, EFI_NATIVE_INTERFACE,
+                                                                  &XtBootProtocol);
 }
