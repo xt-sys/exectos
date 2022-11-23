@@ -169,7 +169,7 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
     XtLdrProtocol->DbgPrint(L"Initializing XTOS startup sequence\n");
 
     /* Load the kernel */
-    Status = XtpLoadModule(BootDir, Parameters->KernelFile, LoaderSystemCode, &Image);
+    Status = XtpLoadModule(BootDir, Parameters->KernelFile, NULL, LoaderSystemCode, &Image);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to load the kernel */
@@ -183,6 +183,7 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
 EFI_STATUS
 XtpLoadModule(IN PEFI_FILE_HANDLE BootDir,
               IN PWCHAR FileName,
+              IN PVOID VirtualAddress,
               IN LOADER_MEMORY_TYPE MemoryType,
               OUT PPECOFF_IMAGE_CONTEXT *ImageContext)
 {
@@ -203,7 +204,7 @@ XtpLoadModule(IN PEFI_FILE_HANDLE BootDir,
     }
 
     /* Load the PE/COFF image file */
-    Status = XtPeCoffProtocol->Load(ModuleHandle, MemoryType, NULL, ImageContext);
+    Status = XtPeCoffProtocol->Load(ModuleHandle, MemoryType, VirtualAddress, ImageContext);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Unable to load the file */
@@ -221,6 +222,9 @@ XtpLoadModule(IN PEFI_FILE_HANDLE BootDir,
     {
         XtLdrProtocol->DbgPrint(L"WARNING: Loaded PE/COFF image with non-XT subsystem set\n");
     }
+
+    /* Print debug message */
+    XtLdrProtocol->DbgPrint(L"Loaded '%S' at %lx\n", FileName, (*ImageContext)->VirtualAddress);
 
     /* Return success */
     return STATUS_EFI_SUCCESS;

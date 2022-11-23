@@ -26,6 +26,7 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
 EFI_STATUS
 XtpLoadModule(IN PEFI_FILE_HANDLE BootDir,
               IN PWCHAR FileName,
+              IN PVOID VirtualAddress,
               IN LOADER_MEMORY_TYPE MemoryType,
               OUT PPECOFF_IMAGE_CONTEXT *ImageContext);
 
