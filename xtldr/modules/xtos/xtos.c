@@ -151,6 +151,9 @@ XtBootSystem(IN PXT_BOOT_PROTOCOL_PARAMETERS Parameters)
 /**
  * This routine initiates an XTOS boot sequence.
  *
+ * @param BootDir
+ *        An EFI handle to the XTOS boot directory.
+ *
  * @param Parameters
  *        Input parameters with detailed system configuration like boot device or kernel path.
  *
@@ -162,14 +165,14 @@ EFI_STATUS
 XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
                 IN PXT_BOOT_PROTOCOL_PARAMETERS Parameters)
 {
-    PPECOFF_IMAGE_CONTEXT Image = NULL;
+    PPECOFF_IMAGE_CONTEXT ImageContext = NULL;
     EFI_STATUS Status;
 
     /* Initialize XTOS startup sequence */
     XtLdrProtocol->DbgPrint(L"Initializing XTOS startup sequence\n");
 
     /* Load the kernel */
-    Status = XtpLoadModule(BootDir, Parameters->KernelFile, NULL, LoaderSystemCode, &Image);
+    Status = XtpLoadModule(BootDir, Parameters->KernelFile, NULL, LoaderSystemCode, &ImageContext);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to load the kernel */
@@ -180,8 +183,30 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
     return STATUS_EFI_SUCCESS;
 }
 
+/**
+ * Loads XTOS PE/COFF module.
+ *
+ * @param SystemDir
+ *        An EFI handle to the opened system directory containing a module that will be loaded.
+ *
+ * @param FileName
+ *        An on disk filename of the module that will be loaded.
+ *
+ * @param VirtualAddress
+ *        Optional virtual address pointing to the memory area where PE/COFF file will be loaded.
+ *
+ * @param MemoryType
+ *        Supplies the type of memory to be assigned to the memory descriptor.
+ *
+ * @param ImageContext
+ *        Supplies pointer to the memory area where loaded PE/COFF image context will be stored.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
 EFI_STATUS
-XtpLoadModule(IN PEFI_FILE_HANDLE BootDir,
+XtpLoadModule(IN PEFI_FILE_HANDLE SystemDir,
               IN PWCHAR FileName,
               IN PVOID VirtualAddress,
               IN LOADER_MEMORY_TYPE MemoryType,
@@ -195,7 +220,7 @@ XtpLoadModule(IN PEFI_FILE_HANDLE BootDir,
     XtLdrProtocol->DbgPrint(L"Loading %S ... \n", FileName);
 
     /* Open module file */
-    Status = BootDir->Open(BootDir, &ModuleHandle, FileName, EFI_FILE_MODE_READ, 0);
+    Status = SystemDir->Open(SystemDir, &ModuleHandle, FileName, EFI_FILE_MODE_READ, 0);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Unable to open the file */
