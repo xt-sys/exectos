@@ -149,3 +149,20 @@ RtlListLoop(IN PLIST_ENTRY ListHead)
     /* No loop found */
     return FALSE;
 }
+
+/**
+ * This routine removes an entry from a doubly linked list.
+ *
+ * @param Entry
+ *        Pointer to the entry that will be removed from the list.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+VOID
+RtlRemoveEntryList(IN PLIST_ENTRY Entry)
+{
+    Entry->Flink->Blink = Entry->Blink;
+    Entry->Blink->Flink = Entry->Flink;
+}

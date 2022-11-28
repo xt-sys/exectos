@@ -55,6 +55,9 @@ RtlMoveMemory(OUT PVOID Destination,
               IN PCVOID Source,
               IN SIZE_T Length);
 
+VOID
+RtlRemoveEntryList(IN PLIST_ENTRY Entry);
+
 XTAPI
 BOOLEAN
 RtlSameMemory(IN PCVOID LeftBuffer,
