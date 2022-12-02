@@ -54,3 +54,223 @@ HlIoPortOutByte(IN USHORT Port,
                  "a"(Value),
                  "Nd"(Port));
 }
+
+/**
+ * Reads the CR0 register and returns its value.
+ *
+ * @return The value stored in the CR0 register.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG_PTR
+HlReadCR0()
+{
+    ULONG_PTR Value;
+    asm volatile("mov %%cr0, %0"
+                 :
+                 "=r"
+                 (Value)
+                 :
+                 :
+                 "memory");
+    return Value;
+}
+
+/**
+ * Reads the CR2 register and returns its value.
+ *
+ * @return The value stored in the CR2 register.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG_PTR
+HlReadCR2()
+{
+    ULONG_PTR Value;
+    asm volatile("mov %%cr2, %0"
+                 :
+                 "=r"
+                 (Value)
+                 :
+                 :
+                 "memory");
+    return Value;
+}
+
+/**
+ * Reads the CR3 register and returns its value.
+ *
+ * @return The value stored in the CR3 register.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG_PTR
+HlReadCR3()
+{
+    ULONG_PTR Value;
+    asm volatile("mov %%cr3, %0"
+                 :
+                 "=r"
+                 (Value)
+                 :
+                 :
+                 "memory");
+    return Value;
+}
+
+/**
+ * Reads the CR4 register and returns its value.
+ *
+ * @return The value stored in the CR4 register.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG_PTR
+HlReadCR4()
+{
+    ULONG_PTR Value;
+    asm volatile("mov %%cr4, %0"
+                 :
+                 "=r"
+                 (Value)
+                 :
+                 :
+                 "memory");
+    return Value;
+}
+
+/**
+ * Reads the CR8 register and returns its value.
+ *
+ * @return The value stored in the CR8 register.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG_PTR
+HlReadCR8()
+{
+    ULONG_PTR Value;
+    asm volatile("mov %%cr8, %0"
+                 :
+                 "=r"
+                 (Value)
+                 :
+                 :
+                 "memory");
+    return Value;
+}
+
+/**
+ * Writes the value to the CR0 register.
+ *
+ * @param Data
+ *        The value to write to the CR0 register.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+HlWriteCR0(UINT_PTR Data)
+{
+    asm volatile("mov %0, %%cr0"
+                 :
+                 :
+                 "r"(Data)
+                 :
+                 "memory");
+}
+
+/**
+ * Writes the value to the CR2 register.
+ *
+ * @param Data
+ *        The value to write to the CR2 register.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+HlWriteCR2(UINT_PTR Data)
+{
+    asm volatile("mov %0, %%cr2"
+                 :
+                 :
+                 "r"(Data)
+                 :
+                 "memory");
+}
+
+/**
+ * Writes the value to the CR3 register.
+ *
+ * @param Data
+ *        The value to write to the CR3 register.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+HlWriteCR3(UINT_PTR Data)
+{
+    asm volatile("mov %0, %%cr3"
+                 :
+                 :
+                 "r"(Data)
+                 :
+                 "memory");
+}
+
+/**
+ * Writes the value to the CR4 register.
+ *
+ * @param Data
+ *        The value to write to the CR4 register.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+HlWriteCR4(UINT_PTR Data)
+{
+    asm volatile("mov %0, %%cr4"
+                 :
+                 :
+                 "r"(Data)
+                 :
+                 "memory");
+}
+
+/**
+ * Writes the value to the CR8 register.
+ *
+ * @param Data
+ *        The value to write to the CR8 register.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+HlWriteCR8(UINT_PTR Data)
+{
+    asm volatile("mov %0, %%cr8"
+                 :
+                 :
+                 "r"(Data)
+                 :
+                 "memory");
+}

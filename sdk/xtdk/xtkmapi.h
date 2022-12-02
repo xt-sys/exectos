@@ -32,3 +32,6 @@
 /* XT routines */
 #include "hlfuncs.h"
 #include "rtlfuncs.h"
+
+/* Architecture specific XT routines*/
+#include ARCH_HEADER(hlfuncs.h)

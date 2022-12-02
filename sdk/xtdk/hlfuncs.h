@@ -37,13 +37,4 @@ HlInitializeComPort(IN OUT PCPPORT Port,
                     IN ULONG PortNumber,
                     IN ULONG BaudRate);
 
-XTAPI
-UCHAR
-HlIoPortInByte(IN USHORT Port);
-
-XTAPI
-VOID
-HlIoPortOutByte(IN USHORT Port,
-                IN UCHAR Data);
-
 #endif /* __XTDK_HLFUNCS_H */
