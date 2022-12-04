@@ -211,6 +211,7 @@ typedef struct _PECOFF_IMAGE_CONTEXT
     UINT ImagePages;
     UINT ImageSize;
     LOADER_MEMORY_TYPE MemoryType;
+    PVOID PhysicalAddress;
     PVOID VirtualAddress;
 } PECOFF_IMAGE_CONTEXT, *PPECOFF_IMAGE_CONTEXT;
 

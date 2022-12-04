@@ -226,6 +226,7 @@ PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
 
     /* Store image data and virtual address */
     ImageData->Data = (PUINT8)(UINT_PTR)Address;
+    ImageData->PhysicalAddress = (PVOID)(UINT_PTR)Address;
     if(VirtualAddress)
     {
         /* Virtual address passed to this routine */
