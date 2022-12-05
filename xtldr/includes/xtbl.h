@@ -86,6 +86,12 @@ BlFindVolumeDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL FsHandle,
                        OUT PEFI_DEVICE_PATH_PROTOCOL* DevicePath);
 
 EFI_STATUS
+BlGetMemoryMap(OUT PEFI_MEMORY_DESCRIPTOR *MemoryMap,
+               OUT PUINT_PTR MapKey,
+               OUT PUINT_PTR DescriptorSize,
+               OUT PUINT_PTR DescriptorCount);
+
+EFI_STATUS
 BlGetVolumeDevicePath(IN PUCHAR SystemPath,
                       OUT PEFI_DEVICE_PATH_PROTOCOL *DevicePath,
                       OUT PUCHAR *ArcName,
