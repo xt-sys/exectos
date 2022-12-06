@@ -112,6 +112,13 @@ EFI_STATUS
 BlLoadEfiModules();
 
 EFI_STATUS
+BlMapVirtualMemory(IN PLIST_ENTRY MemoryMappings,
+                   IN UINT_PTR VirtualAddress,
+                   IN UINT_PTR PhysicalAddress,
+                   IN UINT NumberOfPages,
+                   IN OUT PHARDWARE_PTE *PtePointer);
+
+EFI_STATUS
 BlOpenVolume(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
              OUT PEFI_HANDLE DiskHandle,
              OUT PEFI_FILE_HANDLE *FsHandle);
