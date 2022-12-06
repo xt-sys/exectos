@@ -30,6 +30,13 @@ EXTERN INT_PTR EfiSecureBoot;
 EXTERN CPPORT EfiSerialPort;
 
 EFI_STATUS
+BlAddVirtualMemoryMapping(IN PLIST_ENTRY MemoryMappings,
+                          IN PVOID VirtualAddress,
+                          IN PVOID PhysicalAddress,
+                          IN UINT NumberOfPages,
+                          LOADER_MEMORY_TYPE MemoryType);
+
+EFI_STATUS
 BlCloseVolume(IN PEFI_HANDLE VolumeHandle);
 
 EFI_STATUS
@@ -96,6 +103,10 @@ BlGetVolumeDevicePath(IN PUCHAR SystemPath,
                       OUT PEFI_DEVICE_PATH_PROTOCOL *DevicePath,
                       OUT PUCHAR *ArcName,
                       OUT PUCHAR *Path);
+
+EFI_STATUS
+BlInitializeVirtualMemory(IN OUT PLIST_ENTRY MemoryMappings,
+                          IN OUT PVOID *MemoryMapAddress);
 
 EFI_STATUS
 BlLoadEfiModules();

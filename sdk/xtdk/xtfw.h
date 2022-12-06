@@ -89,6 +89,15 @@ typedef struct _LOADER_INFORMATION_BLOCK
     PVOID DbgPrint;
 } LOADER_INFORMATION_BLOCK, *PLOADER_INFORMATION_BLOCK;
 
+typedef struct _LOADER_MEMORY_MAPPING
+{
+    LIST_ENTRY ListEntry;
+    PVOID VirtualAddress;
+    PVOID PhysicalAddress;
+    UINT NumberOfPages;
+    LOADER_MEMORY_TYPE MemoryType;
+} LOADER_MEMORY_MAPPING, *PLOADER_MEMORY_MAPPING;
+
 /* Loader provided information needed by the kernel to initialize */
 typedef struct _KERNEL_INITIALIZATION_BLOCK
 {

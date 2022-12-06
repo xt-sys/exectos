@@ -8,6 +8,177 @@
 
 #include <xtbl.h>
 
+
+/**
+ * Adds a physical to virtual address mapping to the linked list for future processing.
+ *
+ * @param MemoryMapping
+ *        Supplies the head of the memory mapping list.
+ *
+ * @param VirtualAddress
+ *        Supplies a virtual address where the physical address should be mapped.
+ *
+ * @param PhysicalAddress
+ *        Supplies a physical address which will be mapped.
+ *
+ * @param NumberOfPages
+ *        Supplies a number of pages which will be mapped.
+ *
+ * @param MemoryType
+ *        Supplies the type of memory that will be assigned to the memory descriptor.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+EFI_STATUS
+BlAddVirtualMemoryMapping(IN PLIST_ENTRY MemoryMappings,
+                          IN PVOID VirtualAddress,
+                          IN PVOID PhysicalAddress,
+                          IN UINT NumberOfPages,
+                          LOADER_MEMORY_TYPE MemoryType)
+{
+    PLOADER_MEMORY_MAPPING Mapping1, Mapping2, Mapping3;
+    PVOID PhysicalAddressEnd, PhysicalAddress2End;
+    PLIST_ENTRY ListEntry, MappingListEntry;
+    SIZE_T NumberOfMappedPages;
+    EFI_STATUS Status;
+
+    /* Allocate memory for new mapping */
+    Status = BlEfiMemoryAllocatePool(sizeof(LOADER_MEMORY_MAPPING), (PVOID *)&Mapping1);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Memory allocation failure */
+        return Status;
+    }
+
+    /* Set mapping fields */
+    Mapping1->PhysicalAddress = PhysicalAddress;
+    Mapping1->VirtualAddress = VirtualAddress;
+    Mapping1->NumberOfPages = NumberOfPages;
+    Mapping1->MemoryType = MemoryType;
+
+    /* Calculate the end of the physical address */
+    PhysicalAddressEnd = (PUINT8)PhysicalAddress + (NumberOfPages * EFI_PAGE_SIZE) - 1;
+
+    /* Iterate through all the mappings already set to insert new mapping at the correct place */
+    ListEntry = MemoryMappings->Flink;
+    while(ListEntry != MemoryMappings)
+    {
+        /* Take a mapping from the list and calculate its end of physical address */
+        Mapping2 = CONTAIN_RECORD(ListEntry, LOADER_MEMORY_MAPPING, ListEntry);
+        PhysicalAddress2End = (PUINT8)Mapping2->PhysicalAddress + (Mapping2->NumberOfPages * EFI_PAGE_SIZE) - 1 ;
+
+        /* Check if they overlap */
+        if(PhysicalAddressEnd > Mapping2->PhysicalAddress && PhysicalAddressEnd <= PhysicalAddress2End)
+        {
+            /* Make sure it's memory type is LoaderFree */
+            if(Mapping2->MemoryType != LoaderFree)
+            {
+                /* LoaderFree memory type is strictly expected */
+                return STATUS_EFI_INVALID_PARAMETER;
+            }
+
+            /* Calculate number of pages for this mapping */
+            NumberOfMappedPages = ((PUINT8)PhysicalAddress2End - (PUINT8)PhysicalAddressEnd) / EFI_PAGE_SIZE;
+            if(NumberOfMappedPages > 0)
+            {
+                /* Pages associated to the mapping, allocate memory for it */
+                Status = BlEfiMemoryAllocatePool(sizeof(LOADER_MEMORY_MAPPING), (PVOID*)&Mapping3);
+                if(Status != STATUS_EFI_SUCCESS)
+                {
+                    /* Memory allocation failure */
+                    return Status;
+                }
+
+                /* Set mapping fields and insert it on the top */
+                Mapping3->PhysicalAddress = (PUINT8)PhysicalAddressEnd + 1;
+                Mapping3->VirtualAddress = NULL;
+                Mapping3->NumberOfPages = NumberOfMappedPages;
+                Mapping3->MemoryType = Mapping2->MemoryType;
+                RtlInsertHeadList(&Mapping2->ListEntry, &Mapping3->ListEntry);
+            }
+
+            /* Calculate number of pages and the end of the physical address */
+            Mapping2->NumberOfPages = ((PUINT8)PhysicalAddressEnd + 1 -
+                                       (PUINT8)Mapping2->PhysicalAddress) / EFI_PAGE_SIZE;
+            PhysicalAddress2End = (PUINT8)Mapping2->PhysicalAddress + (Mapping2->NumberOfPages * EFI_PAGE_SIZE) - 1;
+        }
+
+        /* Check if they overlap */
+        if(Mapping1->PhysicalAddress > Mapping2->PhysicalAddress && Mapping1->PhysicalAddress < PhysicalAddress2End)
+        {
+            /* Make sure it's memory type is LoaderFree */
+            if(Mapping2->MemoryType != LoaderFree)
+            {
+                /* LoaderFree memory type is strictly expected */
+                return STATUS_EFI_INVALID_PARAMETER;
+            }
+
+            /* Calculate number of pages for this mapping */
+            NumberOfMappedPages = ((PUINT8)PhysicalAddress2End + 1 - (PUINT8)Mapping1->PhysicalAddress) / EFI_PAGE_SIZE;
+            if(NumberOfMappedPages > 0)
+            {
+                /* Pages associated to the mapping, allocate memory for it */
+                Status = BlEfiMemoryAllocatePool(sizeof(LOADER_MEMORY_MAPPING), (PVOID*)&Mapping3);
+                if(Status != STATUS_EFI_SUCCESS)
+                {
+                    /* Memory allocation failure */
+                    return Status;
+                }
+
+                /* Set mapping fields and insert it on the top */
+                Mapping3->PhysicalAddress = Mapping1->PhysicalAddress;
+                Mapping3->VirtualAddress = NULL;
+                Mapping3->NumberOfPages = NumberOfMappedPages;
+                Mapping3->MemoryType = Mapping2->MemoryType;
+                RtlInsertHeadList(&Mapping2->ListEntry, &Mapping3->ListEntry);
+            }
+
+            /* Calculate number of pages and the end of the physical address */
+            Mapping2->NumberOfPages = ((PUINT8)Mapping1->PhysicalAddress -
+                                       (PUINT8)Mapping2->PhysicalAddress) / EFI_PAGE_SIZE;
+            PhysicalAddress2End = (PUINT8)Mapping2->PhysicalAddress + (Mapping2->NumberOfPages * EFI_PAGE_SIZE) - 1;
+        }
+
+        /* Check if mapping is really needed */
+        if((Mapping2->PhysicalAddress >= Mapping1->PhysicalAddress && PhysicalAddress2End <= PhysicalAddressEnd) ||
+           (Mapping2->NumberOfPages == 0))
+        {
+            /* Make sure it's memory type is LoaderFree */
+            if(Mapping2->MemoryType != LoaderFree)
+            {
+                /* LoaderFree memory type is strictly expected */
+                return STATUS_EFI_INVALID_PARAMETER;
+            }
+
+            /* Store address of the next mapping */
+            MappingListEntry = ListEntry->Flink;
+
+            /* Remove mapping from the list and free up it's memory */
+            RtlRemoveEntryList(&Mapping2->ListEntry);
+            BlEfiMemoryFreePool(Mapping2);
+            ListEntry = MappingListEntry;
+            continue;
+        }
+
+        /* Determine phsical address order */
+        if(Mapping2->PhysicalAddress > Mapping1->PhysicalAddress)
+        {
+            /* Insert new mapping in front */
+            RtlInsertHeadList(Mapping2->ListEntry.Blink, &Mapping1->ListEntry);
+            return STATUS_EFI_SUCCESS;
+        }
+
+        /* Get next mapping from the list */
+        ListEntry = ListEntry->Flink;
+    }
+
+    /* Insert new mapping to the end of the list and return success */
+    RtlInsertTailList(MemoryMappings, &Mapping1->ListEntry);
+    return STATUS_EFI_SUCCESS;
+}
+
 /**
  * This routine allocates one or more 4KB pages.
  *
@@ -158,5 +329,123 @@ BlGetMemoryMap(OUT PEFI_MEMORY_DESCRIPTOR *MemoryMap,
     *DescriptorCount = MemoryMapSize / LocalDescriptorSize;
 
     /* Return success */
+    return STATUS_EFI_SUCCESS;
+}
+
+/**
+ * Initializes virtual memory by adding known and general mappings.
+ *
+ * @param MemoryMappings
+ *        Supplies a pointer to linked list containing all memory mappings.
+ *
+ * @param MemoryMapAddress
+ *        Supplies an address of the mapped virtual memory area.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+EFI_STATUS
+BlInitializeVirtualMemory(IN OUT PLIST_ENTRY MemoryMappings,
+                          IN OUT PVOID *MemoryMapAddress)
+{
+    UINT_PTR MapKey, DescriptorSize, DescriptorCount;
+    PEFI_MEMORY_DESCRIPTOR MemoryMap = NULL;
+    LOADER_MEMORY_TYPE MemoryType;
+    PUCHAR VirtualAddress;
+    EFI_STATUS Status;
+    BOOLEAN MapVRam;
+    SIZE_T Index;
+
+    /* Set initial VA and assume VRAM will be mapped */
+    VirtualAddress = *MemoryMapAddress;
+    MapVRam = TRUE;
+
+    /* Get memory map */
+    Status = BlGetMemoryMap(&MemoryMap, &MapKey, &DescriptorSize, &DescriptorCount);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        return Status;
+    }
+
+    /* Iterate through all descriptors from memory map */
+    for(Index = 0; Index < DescriptorCount; Index++)
+    {
+        /* Check memory type */
+        switch(MemoryMap->Type)
+        {
+            case EfiACPIMemoryNVS:
+            case EfiACPIReclaimMemory:
+            case EfiPalCode:
+            case EfiReservedMemoryType:
+                MemoryType = LoaderSpecialMemory;
+                break;
+            case EfiLoaderCode:
+                MemoryType = LoaderFirmwareTemporary;
+                break;
+            case EfiUnusableMemory:
+                MemoryType = LoaderBad;
+                break;
+            default:
+                MemoryType = LoaderFree;
+                break;
+        }
+
+        /* Do initial memory mappings */
+        if(MemoryType == LoaderFirmwareTemporary)
+        {
+            /* Map EFI firmware code */
+            Status = BlAddVirtualMemoryMapping(MemoryMappings, (PVOID)MemoryMap->PhysicalStart,
+                                               (PVOID)MemoryMap->PhysicalStart, MemoryMap->NumberOfPages, MemoryType);
+        }
+        else if(MemoryType != LoaderFree)
+        {
+            /* Add non-free memory mapping */
+            Status = BlAddVirtualMemoryMapping(MemoryMappings, VirtualAddress,
+                                               (PVOID)MemoryMap->PhysicalStart, MemoryMap->NumberOfPages, MemoryType);
+
+            /* Calculate next valid virtual address */
+            VirtualAddress += MemoryMap->NumberOfPages * EFI_PAGE_SIZE;
+
+            /* Check if VRAM should be as well mapped */
+            if((MemoryMap->PhysicalStart + (MemoryMap->NumberOfPages << EFI_PAGE_SHIFT) > 0xA0000) &&
+               (MemoryMap->PhysicalStart <= 0xA0000))
+            {
+                /* No need to map VRAM */
+                MapVRam = FALSE;
+            }
+        }
+        else
+        {
+            /* Map all other memory as loader free */
+            Status = BlAddVirtualMemoryMapping(MemoryMappings, NULL, (PVOID)MemoryMap->PhysicalStart,
+                                               MemoryMap->NumberOfPages, LoaderFree);
+        }
+
+        /* Make sure memory mapping succeeded */
+        if(Status != STATUS_EFI_SUCCESS)
+        {
+            /* Mapping failed */
+            return Status;
+        }
+
+        /* Grab next descriptor */
+        MemoryMap = (PEFI_MEMORY_DESCRIPTOR)((PUCHAR)MemoryMap + DescriptorSize);
+    }
+
+    /* Check if VRAM should mapped */
+    if(MapVRam)
+    {
+        /* Add VRAM mapping */
+        Status = BlAddVirtualMemoryMapping(MemoryMappings, NULL, (PVOID)0xA0000, 0x60, LoaderFirmwarePermanent);
+        if(Status != STATUS_EFI_SUCCESS)
+        {
+            /* VRAM mapping failed */
+            return Status;
+        }
+    }
+
+    /* Store next valid virtual address and return success */
+    *MemoryMapAddress = VirtualAddress;
     return STATUS_EFI_SUCCESS;
 }
