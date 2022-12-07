@@ -14,6 +14,26 @@ BlCreateStack(IN PVOID *StackPtr,
               IN ULONG StackSize,
               IN PVOID Callback)
 {
+    EFI_PHYSICAL_ADDRESS Address;
+    PVOID StackEnd;
+
+    /* Allocate pages for new stack and calculate its end */
+    BlEfiMemoryAllocatePages(StackSize, &Address);
+    *StackPtr = (PVOID)(UINT_PTR)Address;
+    StackEnd = (PUINT8)*StackPtr + (StackSize * EFI_PAGE_SIZE) - EFI_PAGE_SIZE;
+
+    /* Create new stack and switch to it immediatelly by calling callback function */
+    asm volatile("mov %1, %%eax\n"
+                 "mov %%esp, %%ebx\n"
+                 "mov %0, %%esp\n"
+                 "push %%ebp\n"
+                 "mov %%esp, %%ebp\n"
+                 "push %%ebx\n"
+                 "sub $32, %%esp\n"
+                 "call *%%eax\n"
+                 :
+                 : "m" (StackEnd), "m" (Callback)
+                 : "eax", "ebx");
 }
 
 /**
