@@ -9,6 +9,13 @@
 #include <xtbl.h>
 
 
+VOID
+BlCreateStack(IN PVOID *StackPtr,
+              IN ULONG StackSize,
+              IN PVOID Callback)
+{
+}
+
 /**
  * This routine does the actual virtual memory mapping.
  *
