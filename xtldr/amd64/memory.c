@@ -9,6 +9,33 @@
 #include <xtbl.h>
 
 
+VOID
+BlCreateStack(IN PVOID *StackPtr,
+              IN ULONG StackSize,
+              IN PVOID Callback)
+{
+    EFI_PHYSICAL_ADDRESS Address;
+    PVOID StackEnd;
+
+    /* Allocate pages for new stack and calculate its end */
+    BlEfiMemoryAllocatePages(StackSize, &Address);
+    *StackPtr = (PVOID)(UINT_PTR)Address;
+    StackEnd = (PUINT8)*StackPtr + (StackSize * EFI_PAGE_SIZE) - EFI_PAGE_SIZE;
+
+    /* Create new stack and switch to it immediatelly by calling callback function */
+    asm volatile("mov %1, %%rax\n"
+                 "mov %%rsp, %%rbx\n"
+                 "mov %0, %%rsp\n"
+                 "push %%rbp\n"
+                 "mov %%rsp, %%rbp\n"
+                 "push %%rbx\n"
+                 "sub $32, %%rsp\n"
+                 "call *%%rax\n"
+                 :
+                 : "m" (StackEnd), "m" (Callback)
+                 : "rax", "rbx");
+}
+
 /**
  * This routine does the actual virtual memory mapping.
  *

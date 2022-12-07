@@ -55,6 +55,11 @@ VOID
 BlConsolePutChar(IN USHORT Character);
 
 VOID
+BlCreateStack(IN PVOID *StackPtr,
+              IN ULONG StackSize,
+              IN PVOID Callback);
+
+VOID
 BlDbgPrint(IN PUINT16 Format,
            IN ...);
 
