@@ -116,7 +116,7 @@ BlMapVirtualMemory(IN PLIST_ENTRY MemoryMappings,
                    IN UINT_PTR VirtualAddress,
                    IN UINT_PTR PhysicalAddress,
                    IN UINT NumberOfPages,
-                   IN OUT PHARDWARE_PTE *PtePointer);
+                   IN OUT PVOID *PtePointer);
 
 EFI_STATUS
 BlOpenVolume(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,

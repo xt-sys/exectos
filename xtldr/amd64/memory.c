@@ -36,7 +36,7 @@ BlMapVirtualMemory(IN PLIST_ENTRY MemoryMappings,
                    IN UINT_PTR VirtualAddress,
                    IN UINT_PTR PhysicalAddress,
                    IN UINT NumberOfPages,
-                   IN OUT PHARDWARE_PTE *PtePointer)
+                   IN OUT PVOID *PtePointer)
 {
     PHARDWARE_PTE PageDirectoryPointTable, PageDirectory, PageTable;
     UINT Pml4Index, PdpIndex, PdIndex, PtIndex;
@@ -58,7 +58,7 @@ BlMapVirtualMemory(IN PLIST_ENTRY MemoryMappings,
         PtIndex = (VirtualAddress >> 12) & 0x1FF;
 
         /* Validate Page Map Level 4 (PML4) */
-        if(!(*PtePointer)[Pml4Index].Valid)
+        if(!((PHARDWARE_PTE)(*PtePointer))[Pml4Index].Valid)
         {
             /* Allocate pages for the PDPT */
             Status = BlEfiMemoryAllocatePages(1, &Address);
@@ -78,15 +78,15 @@ BlMapVirtualMemory(IN PLIST_ENTRY MemoryMappings,
             RtlZeroMemory((PVOID)(UINT_PTR)Address, EFI_PAGE_SIZE);
 
             /* Set paging entry setting */
-            (*PtePointer)[Pml4Index].PageFrameNumber = Address / EFI_PAGE_SIZE;
-            (*PtePointer)[Pml4Index].Valid = 1;
-            (*PtePointer)[Pml4Index].Write = 1;
+            ((PHARDWARE_PTE)(*PtePointer))[Pml4Index].PageFrameNumber = Address / EFI_PAGE_SIZE;
+            ((PHARDWARE_PTE)(*PtePointer))[Pml4Index].Valid = 1;
+            ((PHARDWARE_PTE)(*PtePointer))[Pml4Index].Write = 1;
             PageDirectoryPointTable = (PHARDWARE_PTE)(UINT_PTR)Address;
         }
         else
         {
             /* Find Page Directory Point Table (PDPT) */
-            Pointer = (*PtePointer)[Pml4Index].PageFrameNumber;
+            Pointer = ((PHARDWARE_PTE)(*PtePointer))[Pml4Index].PageFrameNumber;
             Pointer <<= EFI_PAGE_SHIFT;
             PageDirectoryPointTable = (PHARDWARE_PTE)(UINT_PTR)Pointer;
         }
