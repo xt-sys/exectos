@@ -21,8 +21,17 @@ PEFI_SYSTEM_TABLE EfiSystemTable;
 /* EFI Secure Boot status */
 INT_PTR EfiSecureBoot;
 
+/* New bootloader stack */
+PVOID EfiLoaderStack;
+
 /* Serial port configuration */
 CPPORT EfiSerialPort;
+
+
+VOID BlGetStackPointer(OUT PVOID *Stack)
+{
+    *Stack = EfiLoaderStack;
+}
 
 /**
  * This routine loads XTLDR EFI modules.
@@ -316,10 +325,15 @@ BlRegisterXtLoaderProtocol()
     EFI_HANDLE Handle = NULL;
 
     /* Set all routines available via loader protocol */
+    EfiLdrProtocol.AddVirtualMemoryMapping = BlAddVirtualMemoryMapping;
     EfiLdrProtocol.AllocatePages = BlEfiMemoryAllocatePages;
     EfiLdrProtocol.AllocatePool = BlEfiMemoryAllocatePool;
     EfiLdrProtocol.FreePages = BlEfiMemoryFreePages;
     EfiLdrProtocol.FreePool = BlEfiMemoryFreePool;
+    EfiLdrProtocol.GetMemoryMap = BlGetMemoryMap;
+    EfiLdrProtocol.InitializeVirtualMemory = BlInitializeVirtualMemory;
+    EfiLdrProtocol.MapVirtualMemory = BlMapVirtualMemory;
+    EfiLdrProtocol.GetStack = BlGetStackPointer;
     EfiLdrProtocol.DbgPrint = BlDbgPrint;
     EfiLdrProtocol.EfiPrint = BlEfiPrint;
     EfiLdrProtocol.CloseVolume = BlCloseVolume;
@@ -329,6 +343,27 @@ BlRegisterXtLoaderProtocol()
     BlDbgPrint(L"Registering XT loader protocol\n");
     return EfiSystemTable->BootServices->InstallProtocolInterface(&Handle, &Guid, EFI_NATIVE_INTERFACE,
                                                                   &EfiLdrProtocol);
+}
+
+EFI_STATUS
+BlStartNewStack()
+{
+    EFI_STATUS Status;
+
+    /* Boot XTOS */
+    Status = BlLoadXtSystem();
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Boot process failed */
+        BlEfiPrint(L"Failed to start XT OS (Status code: %lx)!\n", Status);
+    }
+
+    /* Infinite bootloader loop */
+    BlEfiPrint(L"System halted!");
+    for(;;);
+
+    /* Return success */
+    return STATUS_EFI_SUCCESS;
 }
 
 /**
@@ -400,15 +435,11 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
     /* Discover and enumerate EFI block devices */
     BlEnumerateEfiBlockDevices();
 
-    /* Boot XTOS */
-    Status = BlLoadXtSystem();
-    if(Status != STATUS_EFI_SUCCESS)
-    {
-        /* Boot process failed */
-        BlEfiPrint(L"Failed to start XT OS (Status code: %lx)!\n", Status);
-    }
+    /* Create new bootloader stack */
+    BlCreateStack(&EfiLoaderStack, XTOS_KERNEL_STACK_SIZE, &BlStartNewStack);
 
     /* Infinite bootloader loop */
+    BlDbgPrint(L"ERROR: Unexpected exception occurred, probably did not create a new stack");
     BlEfiPrint(L"System halted!");
     for(;;);
 

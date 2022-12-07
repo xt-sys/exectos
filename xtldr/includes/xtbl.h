@@ -26,6 +26,9 @@ EXTERN PEFI_SYSTEM_TABLE EfiSystemTable;
 /* EFI Secure Boot status */
 EXTERN INT_PTR EfiSecureBoot;
 
+/* New bootloader stack */
+EXTERN PVOID EfiLoaderStack;
+
 /* Serial port configuration */
 EXTERN CPPORT EfiSerialPort;
 
@@ -103,6 +106,8 @@ BlGetMemoryMap(OUT PEFI_MEMORY_DESCRIPTOR *MemoryMap,
                OUT PUINT_PTR DescriptorSize,
                OUT PUINT_PTR DescriptorCount);
 
+VOID BlGetStackPointer(OUT PVOID *Stack);
+
 EFI_STATUS
 BlGetVolumeDevicePath(IN PUCHAR SystemPath,
                       OUT PEFI_DEVICE_PATH_PROTOCOL *DevicePath,
@@ -130,6 +135,9 @@ BlOpenVolume(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
 
 EFI_STATUS
 BlRegisterXtLoaderProtocol();
+
+EFI_STATUS
+BlStartNewStack();
 
 EFI_STATUS
 BlStartXtLoader(IN EFI_HANDLE ImageHandle,
