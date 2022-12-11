@@ -145,21 +145,20 @@ BlAddVirtualMemoryMapping(IN PLIST_ENTRY MemoryMappings,
         if((Mapping2->PhysicalAddress >= Mapping1->PhysicalAddress && PhysicalAddress2End <= PhysicalAddressEnd) ||
            (Mapping2->NumberOfPages == 0))
         {
-            /* Make sure it's memory type is LoaderFree */
-            if(Mapping2->MemoryType != LoaderFree)
+            /* If it is of LoaderFree type, then we can skip it */
+            if(Mapping2->MemoryType == LoaderFree)
             {
-                /* LoaderFree memory type is strictly expected */
-                return STATUS_EFI_INVALID_PARAMETER;
+                /* Store address of the next mapping */
+                MappingListEntry = ListEntry->Flink;
+
+                /* Remove mapping from the list and free up it's memory */
+                RtlRemoveEntryList(&Mapping2->ListEntry);
+                BlEfiMemoryFreePool(Mapping2);
+                ListEntry = MappingListEntry;
+
+                /* Go to the next mapping */
+                continue;
             }
-
-            /* Store address of the next mapping */
-            MappingListEntry = ListEntry->Flink;
-
-            /* Remove mapping from the list and free up it's memory */
-            RtlRemoveEntryList(&Mapping2->ListEntry);
-            BlEfiMemoryFreePool(Mapping2);
-            ListEntry = MappingListEntry;
-            continue;
         }
 
         /* Determine phsical address order */
