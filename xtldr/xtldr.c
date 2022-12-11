@@ -361,7 +361,7 @@ BlStartNewStack()
 
     /* Infinite bootloader loop */
     BlEfiPrint(L"System halted!");
-    for(;;);
+    HlHalt();
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
@@ -437,12 +437,12 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
     BlEnumerateEfiBlockDevices();
 
     /* Create new bootloader stack */
-    BlCreateStack(&EfiLoaderStack, XTOS_KERNEL_STACK_SIZE, &BlStartNewStack);
+    BlCreateStack(&EfiLoaderStack, KERNEL_STACK_SIZE, &BlStartNewStack);
 
     /* Infinite bootloader loop */
     BlDbgPrint(L"ERROR: Unexpected exception occurred, probably did not create a new stack\n");
     BlEfiPrint(L"System halted!");
-    for(;;);
+    HlHalt();
 
     /* Return success */
     return STATUS_EFI_SUCCESS;

@@ -23,6 +23,10 @@ BOOLEAN
 HlCpuId(IN OUT PCPUID_REGISTERS Registers);
 
 XTAPI
+VOID
+HlHalt();
+
+XTAPI
 UCHAR
 HlIoPortInByte(IN USHORT Port);
 

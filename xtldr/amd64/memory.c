@@ -91,7 +91,7 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
 
     /* Map the stack */
     BlGetStackPointer(&Stack);
-    Status = BlAddVirtualMemoryMapping(MemoryMappings, Stack, Stack, XTOS_KERNEL_STACK_SIZE,
+    Status = BlAddVirtualMemoryMapping(MemoryMappings, Stack, Stack, KERNEL_STACK_SIZE,
                                                     LoaderOsloaderStack);
     if(Status != STATUS_EFI_SUCCESS)
     {

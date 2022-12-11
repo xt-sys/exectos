@@ -51,6 +51,16 @@ HlCpuId(IN OUT PCPUID_REGISTERS Registers)
     return TRUE;
 }
 
+XTAPI
+VOID
+HlHalt()
+{
+    while(TRUE)
+    {
+        asm volatile("hlt");
+    }
+}
+
 /**
  * Reads the data from the specified I/O port.
  *

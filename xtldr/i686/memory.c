@@ -101,7 +101,7 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
         BlDbgPrint(L"Physical Address Extension (PAE) available\n");
 
         /* Calculate physical address based on KSEG0 base */
-        PhysicalAddress = (UINT_PTR)VirtualAddress - XTOS_VIRTUAL_MEMORY_AREA;
+        PhysicalAddress = (UINT_PTR)VirtualAddress - KSEG0_BASE;
 
         /* Iterate over all descriptors from memory map to find satisfying address for PDPT */
         for(Index = 0; Index < DescriptorCount; Index++)
@@ -142,7 +142,7 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
         }
 
         /* Set virtual address based on new PDPT address mapped to KSEG0 base */
-        VirtualAddress = (void*)(UINT_PTR)(PDPTAddress + EFI_PAGE_SIZE + XTOS_VIRTUAL_MEMORY_AREA);
+        VirtualAddress = (void*)(UINT_PTR)(PDPTAddress + EFI_PAGE_SIZE + KSEG0_BASE);
 
         /* Set base page frame number */
         Address = 0x100000; // MEM_TOP_DOWN ?
@@ -191,7 +191,7 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
 
     /* Map the stack */
     BlGetStackPointer(&Stack);
-    Status = BlAddVirtualMemoryMapping(MemoryMappings, Stack, Stack, XTOS_KERNEL_STACK_SIZE,
+    Status = BlAddVirtualMemoryMapping(MemoryMappings, Stack, Stack, KERNEL_STACK_SIZE,
                                                     LoaderOsloaderStack);
     if(Status != STATUS_EFI_SUCCESS)
     {
