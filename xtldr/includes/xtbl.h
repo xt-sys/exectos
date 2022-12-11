@@ -93,6 +93,12 @@ BlEfiPrint(IN PUINT16 Format,
            IN ...);
 
 EFI_STATUS
+BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
+               IN PVOID VirtualAddress,
+               IN PEFI_LOADED_IMAGE_PROTOCOL ImageProtocol,
+               IN PVOID *PtePointer);
+
+EFI_STATUS
 BlEnumerateEfiBlockDevices();
 
 EFI_STATUS
@@ -126,6 +132,7 @@ BlMapVirtualMemory(IN PLIST_ENTRY MemoryMappings,
                    IN UINT_PTR VirtualAddress,
                    IN UINT_PTR PhysicalAddress,
                    IN UINT NumberOfPages,
+                   IN BOOLEAN PaeExtension,
                    IN OUT PVOID *PtePointer);
 
 EFI_STATUS

@@ -330,6 +330,7 @@ BlRegisterXtLoaderProtocol()
     EfiLdrProtocol.AllocatePool = BlEfiMemoryAllocatePool;
     EfiLdrProtocol.FreePages = BlEfiMemoryFreePages;
     EfiLdrProtocol.FreePool = BlEfiMemoryFreePool;
+    EfiLdrProtocol.EnablePaging = BlEnablePaging;
     EfiLdrProtocol.GetMemoryMap = BlGetMemoryMap;
     EfiLdrProtocol.InitializeVirtualMemory = BlInitializeVirtualMemory;
     EfiLdrProtocol.MapVirtualMemory = BlMapVirtualMemory;
@@ -439,7 +440,7 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
     BlCreateStack(&EfiLoaderStack, XTOS_KERNEL_STACK_SIZE, &BlStartNewStack);
 
     /* Infinite bootloader loop */
-    BlDbgPrint(L"ERROR: Unexpected exception occurred, probably did not create a new stack");
+    BlDbgPrint(L"ERROR: Unexpected exception occurred, probably did not create a new stack\n");
     BlEfiPrint(L"System halted!");
     for(;;);
 

@@ -37,6 +37,123 @@ BlCreateStack(IN PVOID *StackPtr,
 }
 
 /**
+ * Builds the actual memory mapping page table and enables paging. This routine exits EFI boot services as well.
+ *
+ * @param MemoryMappings
+ *        Supplies a pointer to linked list containing all memory mappings.
+ *
+ * @param VirtualAddress
+ *        Supplies a pointer to the next valid, free and available virtual address.
+ *
+ * @param ImageProtocol
+ *        A pointer to the EFI loaded image protocol with information about where in memory the loader code was placed.
+ *
+ * @param PtePointer
+ *        Supplies a pointer to memory area containing a Page Table Entries (PTE).
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+EFI_STATUS
+BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
+                IN PVOID VirtualAddress,
+                IN PEFI_LOADED_IMAGE_PROTOCOL ImageProtocol,
+                IN PVOID *PtePointer)
+{
+    UINT_PTR MapKey, DescriptorSize, DescriptorCount;
+    PEFI_MEMORY_DESCRIPTOR MemoryMap = NULL;
+    PLOADER_MEMORY_MAPPING Mapping;
+    EFI_PHYSICAL_ADDRESS Address;
+    PLIST_ENTRY ListEntry;
+    EFI_STATUS Status;
+    PVOID Stack;
+
+    /* Get EFI memory map */
+    Status = BlGetMemoryMap(&MemoryMap, &MapKey, &DescriptorSize, &DescriptorCount);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Unable to get memory map */
+        return Status;
+    }
+
+    /* Allocate pages for PML4 */
+    Status = BlEfiMemoryAllocatePages(1, &Address);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Memory allocation failure */
+        return Status;
+    }
+
+    /* Assign and zero-fill memory used by page mappings */
+    *PtePointer = (PVOID)(UINT_PTR)Address;
+    RtlZeroMemory(*PtePointer, EFI_PAGE_SIZE);
+
+    /* Map the stack */
+    BlGetStackPointer(&Stack);
+    Status = BlAddVirtualMemoryMapping(MemoryMappings, Stack, Stack, XTOS_KERNEL_STACK_SIZE,
+                                                    LoaderOsloaderStack);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Mapping the stack failed */
+        return Status;
+    }
+
+    /* Map XTLDR code */
+    Status = BlAddVirtualMemoryMapping(MemoryMappings, ImageProtocol->ImageBase, ImageProtocol->ImageBase,
+                                                    EFI_SIZE_TO_PAGES(ImageProtocol->ImageSize),
+                                                    LoaderFirmwareTemporary);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Mapping the boot loader code failed */
+        return Status;
+    }
+
+    /* Add page mapping itself to memory mapping */
+    Status = BlAddVirtualMemoryMapping(MemoryMappings, NULL, *PtePointer, 1, LoaderMemoryData);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Mapping PML4 failed */
+        return Status;
+    }
+
+    /* Iterate through all mappings */
+    ListEntry = MemoryMappings->Flink;
+    while(ListEntry != MemoryMappings)
+    {
+        /* Take mapping from the list */
+        Mapping = CONTAIN_RECORD(ListEntry, LOADER_MEMORY_MAPPING, ListEntry);
+
+        /* Check if virtual address is set */
+        if(Mapping->VirtualAddress)
+        {
+            /* Map memory */
+            Status = BlMapVirtualMemory(MemoryMappings, (UINT_PTR)Mapping->VirtualAddress,
+                                                     (UINT_PTR)Mapping->PhysicalAddress, Mapping->NumberOfPages,
+                                                     FALSE, PtePointer);
+            if(Status != STATUS_EFI_SUCCESS)
+            {
+                /* Memory mapping failed */
+                return Status;
+            }
+        }
+
+        /* Take next element */
+        ListEntry = ListEntry->Flink;
+    }
+
+    /* Exit EFI Boot Services */
+    BlDbgPrint(L"Exiting EFI boot services\n");
+    EfiSystemTable->BootServices->ExitBootServices(EfiImageHandle, MapKey);
+
+    /* Write PML4 to CR3 */
+    HlWriteCR3((UINT_PTR)*PtePointer);
+
+    /* Return success */
+    return STATUS_EFI_SUCCESS;
+}
+
+/**
  * This routine does the actual virtual memory mapping.
  *
  * @param MemoryMappings
@@ -51,6 +168,9 @@ BlCreateStack(IN PVOID *StackPtr,
  * @param NumberOfPages
  *        Supplies a number of the pages of the mapping.
  *
+ * @param PaeExtension
+ *        Specifies whether Physical Address Extension (PAE) is supported by the hardware. Not used on AMD64.
+ *
  * @param PtePointer
  *        Supplies a pointer to an array of pointers to page table entries.
  *
@@ -63,6 +183,7 @@ BlMapVirtualMemory(IN PLIST_ENTRY MemoryMappings,
                    IN UINT_PTR VirtualAddress,
                    IN UINT_PTR PhysicalAddress,
                    IN UINT NumberOfPages,
+                   IN BOOLEAN PaeExtension,
                    IN OUT PVOID *PtePointer)
 {
     PHARDWARE_PTE PageDirectoryPointTable, PageDirectory, PageTable;
@@ -101,10 +222,10 @@ BlMapVirtualMemory(IN PLIST_ENTRY MemoryMappings,
                 return Status;
             }
 
-            /* Zero memory */
+            /* Fill allocated memory with zeros */
             RtlZeroMemory((PVOID)(UINT_PTR)Address, EFI_PAGE_SIZE);
 
-            /* Set paging entry setting */
+            /* Set paging entry settings */
             ((PHARDWARE_PTE)(*PtePointer))[Pml4Index].PageFrameNumber = Address / EFI_PAGE_SIZE;
             ((PHARDWARE_PTE)(*PtePointer))[Pml4Index].Valid = 1;
             ((PHARDWARE_PTE)(*PtePointer))[Pml4Index].Write = 1;
@@ -135,10 +256,10 @@ BlMapVirtualMemory(IN PLIST_ENTRY MemoryMappings,
                 return Status;
             }
 
-            /* Zero memory */
+            /* Fill allocated memory with zeros */
             RtlZeroMemory((PVOID)(UINT_PTR)Address, EFI_PAGE_SIZE);
 
-            /* Set paging entry setting */
+            /* Set paging entry settings */
             PageDirectoryPointTable[PdpIndex].PageFrameNumber = Address / EFI_PAGE_SIZE;
             PageDirectoryPointTable[PdpIndex].Valid = 1;
             PageDirectoryPointTable[PdpIndex].Write = 1;
@@ -169,10 +290,10 @@ BlMapVirtualMemory(IN PLIST_ENTRY MemoryMappings,
                 return Status;
             }
 
-            /* Zero memory */
+            /* Fill allocated memory with zeros */
             RtlZeroMemory((PVOID)(UINT_PTR)Address, EFI_PAGE_SIZE);
 
-            /* Set paging entry setting */
+            /* Set paging entry settings */
             PageDirectory[PdIndex].PageFrameNumber = Address / EFI_PAGE_SIZE;
             PageDirectory[PdIndex].Valid = 1;
             PageDirectory[PdIndex].Write = 1;
@@ -186,7 +307,7 @@ BlMapVirtualMemory(IN PLIST_ENTRY MemoryMappings,
             PageTable = (PHARDWARE_PTE)(UINT_PTR)Pointer;
         }
 
-        /* Set paging entry setting */
+        /* Set paging entry settings */
         PageTable[PtIndex].PageFrameNumber = PageFrameNumber;
         PageTable[PtIndex].Valid = 1;
         PageTable[PtIndex].Write = 1;
