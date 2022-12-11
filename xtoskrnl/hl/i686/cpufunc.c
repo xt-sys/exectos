@@ -10,6 +10,48 @@
 
 
 /**
+ * Retrieves a various amount of information about the CPU.
+ *
+ * @param Registers
+ *        Supplies a pointer to the structure containing all the necessary registers and leafs for CPUID.
+ *
+ * @return TRUE if CPUID function could be executed, FALSE otherwise.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+BOOLEAN
+HlCpuId(IN OUT PCPUID_REGISTERS Registers)
+{
+    UINT32 MaxLeaf;
+
+    /* Get highest function ID available */
+    asm volatile("cpuid"
+                 : "=a" (MaxLeaf)
+                 : "a" (Registers->Leaf & 0x80000000)
+                 : "rbx", "rcx", "rdx");
+
+    /* Check if CPU supports this command */
+    if(Registers->Leaf > MaxLeaf)
+    {
+        /* Cannot call it, return FALSE */
+        return FALSE;
+    }
+
+    /* Execute CPUID function */
+    asm volatile("cpuid"
+                 : "=a" (Registers->Eax),
+                 "=b" (Registers->Ebx),
+                 "=c" (Registers->Ecx),
+                 "=d" (Registers->Edx)
+                 : "a" (Registers->Leaf),
+                 "c" (Registers->SubLeaf));
+
+    /* Return TRUE */
+    return TRUE;
+}
+
+/**
  * Reads the data from the specified I/O port.
  *
  * @param Port
@@ -50,8 +92,7 @@ HlIoPortOutByte(IN USHORT Port,
 {
     asm volatile("outb %0, %1"
                  :
-                 :
-                 "a"(Value),
+                 : "a"(Value),
                  "Nd"(Port));
 }
 
@@ -68,12 +109,9 @@ HlReadCR0()
 {
     ULONG_PTR Value;
     asm volatile("mov %%cr0, %0"
+                 : "=r" (Value)
                  :
-                 "=r"
-                 (Value)
-                 :
-                 :
-                 "memory");
+                 : "memory");
     return Value;
 }
 
@@ -90,12 +128,9 @@ HlReadCR2()
 {
     ULONG_PTR Value;
     asm volatile("mov %%cr2, %0"
+                 : "=r" (Value)
                  :
-                 "=r"
-                 (Value)
-                 :
-                 :
-                 "memory");
+                 : "memory");
     return Value;
 }
 
@@ -112,12 +147,9 @@ HlReadCR3()
 {
     ULONG_PTR Value;
     asm volatile("mov %%cr3, %0"
+                 : "=r" (Value)
                  :
-                 "=r"
-                 (Value)
-                 :
-                 :
-                 "memory");
+                 : "memory");
     return Value;
 }
 
@@ -134,12 +166,9 @@ HlReadCR4()
 {
     ULONG_PTR Value;
     asm volatile("mov %%cr4, %0"
+                 : "=r" (Value)
                  :
-                 "=r"
-                 (Value)
-                 :
-                 :
-                 "memory");
+                 : "memory");
     return Value;
 }
 
@@ -159,10 +188,8 @@ HlWriteCR0(UINT_PTR Data)
 {
     asm volatile("mov %0, %%cr0"
                  :
-                 :
-                 "r"(Data)
-                 :
-                 "memory");
+                 : "r"(Data)
+                 : "memory");
 }
 
 /**
@@ -181,10 +208,8 @@ HlWriteCR2(UINT_PTR Data)
 {
     asm volatile("mov %0, %%cr2"
                  :
-                 :
-                 "r"(Data)
-                 :
-                 "memory");
+                 : "r"(Data)
+                 : "memory");
 }
 
 /**
@@ -203,10 +228,8 @@ HlWriteCR3(UINT_PTR Data)
 {
     asm volatile("mov %0, %%cr3"
                  :
-                 :
-                 "r"(Data)
-                 :
-                 "memory");
+                 : "r"(Data)
+                 : "memory");
 }
 
 /**
@@ -225,8 +248,6 @@ HlWriteCR4(UINT_PTR Data)
 {
     asm volatile("mov %0, %%cr4"
                  :
-                 :
-                 "r"(Data)
-                 :
-                 "memory");
+                 : "r"(Data)
+                 : "memory");
 }

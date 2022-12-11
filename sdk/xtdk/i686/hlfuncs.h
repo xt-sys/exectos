@@ -19,6 +19,10 @@ extern ULONG ComPortAddress[];
 
 /* HAL library routines forward references */
 XTAPI
+BOOLEAN
+HlCpuId(IN OUT PCPUID_REGISTERS Registers);
+
+XTAPI
 UCHAR
 HlIoPortInByte(IN USHORT Port);
 
@@ -45,18 +49,18 @@ HlReadCR4();
 
 XTAPI
 VOID
-HlWriteCR0(UINT_PTR Data);
+HlWriteCR0(IN UINT_PTR Data);
 
 XTAPI
 VOID
-HlWriteCR2(UINT_PTR Data);
+HlWriteCR2(IN UINT_PTR Data);
 
 XTAPI
 VOID
-HlWriteCR3(UINT_PTR Data);
+HlWriteCR3(IN UINT_PTR Data);
 
 XTAPI
 VOID
-HlWriteCR4(UINT_PTR Data);
+HlWriteCR4(IN UINT_PTR Data);
 
 #endif /* __XTDK_I686_HLFUNCS_H */

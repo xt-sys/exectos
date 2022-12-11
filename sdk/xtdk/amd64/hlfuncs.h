@@ -19,6 +19,10 @@ extern ULONG ComPortAddress[];
 
 /* HAL library routines forward references */
 XTAPI
+BOOLEAN
+HlCpuId(IN OUT PCPUID_REGISTERS Registers);
+
+XTAPI
 UCHAR
 HlIoPortInByte(IN USHORT Port);
 

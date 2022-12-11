@@ -30,6 +30,7 @@
 #include "hltypes.h"
 
 /* Architecture-specific low level data types headers */
+#include ARCH_HEADER(hltypes.h)
 #include ARCH_HEADER(mmtypes.h)
 
 /* XT routines */
