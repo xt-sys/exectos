@@ -52,7 +52,7 @@ add_compiler_ccxxflags("-Wno-gnu-folding-constant")
 set(CMAKE_PDB_OUTPUT_DIRECTORY "${EXECTOS_BINARY_DIR}/output/symbols")
 
 # Set linker flags
-add_linker_flags("${HOTPATCH_LINKER_FLAG} /IGNORE:4039 /IGNORE:4104 /MANIFEST:NO /NODEFAULTLIB /SAFESEH:NO")
+add_linker_flags("${HOTPATCH_LINKER_FLAG} /LARGEADDRESSAWARE /IGNORE:4039 /IGNORE:4104 /MANIFEST:NO /NODEFAULTLIB /SAFESEH:NO")
 
 # Set runtime library
 set(CMAKE_MSVC_RUNTIME_LIBRARY "")
