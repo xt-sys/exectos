@@ -31,6 +31,22 @@
 #define EFI_MEMORY_WP                                      0x0000000000001000
 #define EFI_MEMORY_RP                                      0x0000000000002000
 #define EFI_MEMORY_XP                                      0x0000000000004000
+#define EFI_MEMORY_RO                                      0x0000000000020000
+
+/* Physical memory persistence attribute */
+#define EFI_MEMORY_NV                                      0x0000000000008000
+
+/* Memory region provides higher reliability relative to other memory in the system */
+#define EFI_MEMORY_MORE_RELIABLE                           0x0000000000010000
+
+/* Specific-purpose memory (SPM) */
+#define EFI_MEMORY_SP                                      0x0000000000040000
+
+/* Memory region capable of being protected with the CPU's cryptography */
+#define EFI_MEMORY_CPU_CRYPTO                              0x0000000000080000
+
+/* EFI Runtime memory attribute */
+#define EFI_MEMORY_RUNTIME                                 0x8000000000000000
 
 /* EFI Pages related definitions */
 #define EFI_PAGE_SIZE                                      4096
