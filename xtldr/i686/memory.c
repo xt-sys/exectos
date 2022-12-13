@@ -57,9 +57,9 @@ BlCreateStack(IN PVOID *StackPtr,
  */
 EFI_STATUS
 BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
-                IN PVOID VirtualAddress,
-                IN PEFI_LOADED_IMAGE_PROTOCOL ImageProtocol,
-                IN PVOID *PtePointer)
+               IN PVOID VirtualAddress,
+               IN PEFI_LOADED_IMAGE_PROTOCOL ImageProtocol,
+               IN PVOID *PtePointer)
 {
     UINT_PTR PhysicalAddress, MapKey, DescriptorSize, DescriptorCount;
     EFI_PHYSICAL_ADDRESS Address, PDPTAddress = 0;
@@ -142,7 +142,7 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
         }
 
         /* Set virtual address based on new PDPT address mapped to KSEG0 base */
-        VirtualAddress = (void*)(UINT_PTR)(PDPTAddress + EFI_PAGE_SIZE + KSEG0_BASE);
+        VirtualAddress = (PVOID)(UINT_PTR)(PDPTAddress + EFI_PAGE_SIZE + KSEG0_BASE);
 
         /* Set base page frame number */
         Address = 0x100000; // MEM_TOP_DOWN ?
@@ -314,8 +314,8 @@ BlMapVirtualMemory(IN PLIST_ENTRY MemoryMappings,
         {
             /* Find Page Directory and calculate indices from a virtual address */
             PageDirectory = (HARDWARE_PTE_PAE*)(((PHARDWARE_PTE_PAE)(*PtePointer))[VirtualAddress >> 30].PageFrameNumber * EFI_PAGE_SIZE);
-            PdIndex = (VirtualAddress >> 21) & 0x1ff;
-            PtIndex = (VirtualAddress & 0x1ff000) >> 12;
+            PdIndex = (VirtualAddress >> 21) & 0x1FF;
+            PtIndex = (VirtualAddress & 0x1FF000) >> 12;
 
             /* Validate Page Directory */
             if(!PageDirectory[PdIndex].Valid) {
@@ -363,7 +363,7 @@ BlMapVirtualMemory(IN PLIST_ENTRY MemoryMappings,
         {
             /* Calculate indices from a virtual address */
             PdIndex = VirtualAddress >> 22;
-            PtIndex = (VirtualAddress & 0x3ff000) >> 12;
+            PtIndex = (VirtualAddress & 0x3FF000) >> 12;
 
             /* Validate Page Table */
             if(!((PHARDWARE_PTE)(*PtePointer))[PdIndex].Valid)
@@ -376,7 +376,7 @@ BlMapVirtualMemory(IN PLIST_ENTRY MemoryMappings,
                 }
 
                 /* Fill allocated memory with zeros */
-                RtlZeroMemory((void*)(UINT_PTR)Address, EFI_PAGE_SIZE);
+                RtlZeroMemory((PVOID)(UINT_PTR)Address, EFI_PAGE_SIZE);
 
                 /* Set paging entry settings */
                 ((PHARDWARE_PTE)(*PtePointer))[PdIndex].PageFrameNumber = Address / EFI_PAGE_SIZE;
