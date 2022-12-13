@@ -46,6 +46,7 @@ project(EXECTOS)
 # Load all the CMake SDK
 include(sdk/cmake/baseaddress.cmake)
 include(sdk/cmake/functions.cmake)
+include(sdk/cmake/qemu.cmake)
 include(sdk/cmake/version.cmake)
 include(sdk/cmake/xtchain.cmake)
 

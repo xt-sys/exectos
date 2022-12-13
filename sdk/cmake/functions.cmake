@@ -113,17 +113,3 @@ function(set_disk_image_size SIZE)
 	set(PROJECT_DISK_IMAGE_BLOCKS ${DISK_BLOCKS} CACHE INTERNAL "PROJECT_DISK_IMAGE_BLOCKS")
 	set(PROJECT_PART_IMAGE_BLOCKS ${PART_BLOCKS} CACHE INTERNAL "PROJECT_PART_IMAGE_BLOCKS")
 endfunction()
-
-# This target creates a disk image
-add_custom_target(diskimg
-                  DEPENDS install
-                  COMMAND sh -c "dd if=/dev/zero of=${EXECTOS_BINARY_DIR}/output/disk.img bs=512 count=${PROJECT_DISK_IMAGE_BLOCKS} &>/dev/null"
-                  COMMAND parted ${EXECTOS_BINARY_DIR}/output/disk.img -s -a minimal mklabel gpt
-                  COMMAND parted ${EXECTOS_BINARY_DIR}/output/disk.img -s -a minimal mkpart EFI FAT32 2048s ${PROJECT_PART_IMAGE_BLOCKS}s
-                  COMMAND parted ${EXECTOS_BINARY_DIR}/output/disk.img -s -a minimal toggle 1 boot
-                  COMMAND sh -c "dd if=/dev/zero of=${EXECTOS_BINARY_DIR}/output/part.img bs=512 count=${PROJECT_PART_IMAGE_BLOCKS} &>/dev/null"
-                  COMMAND mformat -i ${EXECTOS_BINARY_DIR}/output/part.img -h32 -t32 -n64 -L32
-                  COMMAND sh -c "mcopy -s -i ${EXECTOS_BINARY_DIR}/output/part.img ${EXECTOS_BINARY_DIR}/output/binaries/* ::"
-                  COMMAND sh -c "dd if=${EXECTOS_BINARY_DIR}/output/part.img of=${EXECTOS_BINARY_DIR}/output/disk.img bs=512 count=${PROJECT_PART_IMAGE_BLOCKS} seek=2048 conv=notrunc &>/dev/null"
-                  COMMAND rm ${EXECTOS_BINARY_DIR}/output/part.img
-                  VERBATIM)
