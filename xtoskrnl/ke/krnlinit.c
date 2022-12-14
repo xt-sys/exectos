@@ -18,8 +18,14 @@
  */
 XTAPI
 VOID
-KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK LoaderBlock)
+KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
 {
+    /* Use XTLDR provided DbgPrint() routine for early printing to serial console */
+    VOID (*DbgPrint)(IN PWCHAR Format, IN ...) = Parameters->LoaderInformation.DbgPrint;
+
+    /* Print some message to serial console */
+    DbgPrint(L"Hello world from ExectOS kernel!\n");
+
     /* Enter infinite kernel thread loop */
     for(;;);
 }

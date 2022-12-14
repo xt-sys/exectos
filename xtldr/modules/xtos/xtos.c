@@ -24,6 +24,9 @@ PXT_PECOFF_IMAGE_PROTOCOL XtPeCoffProtocol;
 /* XTOS Boot Protocol */
 XT_BOOT_PROTOCOL XtBootProtocol;
 
+/* XTOS Page Map */
+PVOID XtPageMap;
+
 /**
  * Starts the operating system according to the provided parameters using XTOS boot protocol.
  *
@@ -148,6 +151,33 @@ XtBootSystem(IN PXT_BOOT_PROTOCOL_PARAMETERS Parameters)
     return XtpBootSequence(BootDir, Parameters);
 }
 
+EFI_STATUS
+XtpInitializeLoaderBlock(IN PKERNEL_INITIALIZATION_BLOCK *InitializationBlock)
+{
+    PKERNEL_INITIALIZATION_BLOCK LoaderBlock;
+    EFI_PHYSICAL_ADDRESS Address;
+    EFI_STATUS Status;
+    UINT BlockPages;
+
+    BlockPages = EFI_SIZE_TO_PAGES(sizeof(KERNEL_INITIALIZATION_BLOCK));
+
+    Status = XtLdrProtocol->AllocatePages(BlockPages, &Address);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        return Status;
+    }
+
+    LoaderBlock = (PKERNEL_INITIALIZATION_BLOCK)(UINT_PTR)Address;
+    RtlZeroMemory(LoaderBlock, sizeof(KERNEL_INITIALIZATION_BLOCK));
+
+    LoaderBlock->LoaderInformation.DbgPrint = XtLdrProtocol->DbgPrint;
+    LoaderBlock->Version = INITIALIZATION_BLOCK_VERSION;
+
+    *InitializationBlock = LoaderBlock;
+
+    return STATUS_EFI_SUCCESS;
+}
+
 /**
  * This routine initiates an XTOS boot sequence.
  *
@@ -165,19 +195,71 @@ EFI_STATUS
 XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
                 IN PXT_BOOT_PROTOCOL_PARAMETERS Parameters)
 {
+    PKERNEL_INITIALIZATION_BLOCK KernelParameters, LoaderBlock;
+    EFI_GUID LoadedImageGuid = EFI_LOADED_IMAGE_PROTOCOL_GUID;
     PPECOFF_IMAGE_CONTEXT ImageContext = NULL;
+    PEFI_LOADED_IMAGE_PROTOCOL ImageProtocol;
+    PVOID VirtualAddress, VirtualMemoryArea;
+    PXT_ENTRY_POINT KernelEntryPoint;
+    LIST_ENTRY MemoryMappings;
     EFI_STATUS Status;
 
     /* Initialize XTOS startup sequence */
     XtLdrProtocol->DbgPrint(L"Initializing XTOS startup sequence\n");
 
+    /* Set virtual memory area for the kernel */
+    VirtualMemoryArea = (PVOID)KSEG0_BASE;
+    VirtualAddress = (PVOID)(KSEG0_BASE + KERNEL_ADDRESS_BASE);
+
+    /* Initialize memory mapping linked list */
+    RtlInitializeListHead(&MemoryMappings);
+
+    /* Initialize virtual memory mappings */
+    Status = XtLdrProtocol->InitializeVirtualMemory(&MemoryMappings, &VirtualMemoryArea);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to initialize virtual memory */
+        return Status;
+    }
+
     /* Load the kernel */
-    Status = XtpLoadModule(BootDir, Parameters->KernelFile, NULL, LoaderSystemCode, &ImageContext);
+    Status = XtpLoadModule(BootDir, Parameters->KernelFile, VirtualAddress, LoaderSystemCode, &ImageContext);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to load the kernel */
         return Status;
     }
+
+    /* Add memory mapping for the kernel */
+    Status = XtLdrProtocol->AddVirtualMemoryMapping(&MemoryMappings, ImageContext->VirtualAddress,
+                                                    ImageContext->PhysicalAddress, ImageContext->ImagePages, 0);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        return Status;
+    }
+
+    /* Set next valid virtual address right after the kernel */
+    VirtualAddress += ImageContext->ImagePages * EFI_PAGE_SIZE;
+
+    /* Setup and map kernel initialization block */
+    Status = XtpInitializeLoaderBlock(&LoaderBlock);
+    XtLdrProtocol->AddVirtualMemoryMapping(&MemoryMappings, VirtualAddress, (PVOID)LoaderBlock, 1, LoaderSystemBlock);
+
+    /* Store virtual address of kernel initialization block for future kernel call */
+    KernelParameters = (PKERNEL_INITIALIZATION_BLOCK)VirtualAddress;
+
+    /* Get kernel entry point */
+    XtPeCoffProtocol->GetEntryPoint(ImageContext, (PVOID)&KernelEntryPoint);
+
+    /* Close boot directory handle */
+    BootDir->Close(BootDir);
+
+    /* Enable paging */
+    EfiSystemTable->BootServices->HandleProtocol(EfiImageHandle, &LoadedImageGuid, (PVOID*)&ImageProtocol);
+    XtLdrProtocol->EnablePaging(&MemoryMappings, VirtualAddress, ImageProtocol, &XtPageMap);
+
+    /* Call XTOS kernel */
+    KernelEntryPoint(KernelParameters);
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
@@ -249,7 +331,8 @@ XtpLoadModule(IN PEFI_FILE_HANDLE SystemDir,
     }
 
     /* Print debug message */
-    XtLdrProtocol->DbgPrint(L"Loaded '%S' at %lx\n", FileName, (*ImageContext)->VirtualAddress);
+    XtLdrProtocol->DbgPrint(L"Loaded %S at PA: 0x%lx, VA: 0x%lx\n", FileName,
+                            (*ImageContext)->PhysicalAddress, (*ImageContext)->VirtualAddress);
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
