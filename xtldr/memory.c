@@ -179,6 +179,51 @@ BlAddVirtualMemoryMapping(IN PLIST_ENTRY MemoryMappings,
 }
 
 /**
+ * Converts an EFI memory type into an XTOS memory type.
+ *
+ * @param EfiMemoryType
+ *        Supplies the EFI memory type.
+ *
+ * @return Returns a conversion of the memory type.
+ *
+ * @since XT 1.0
+ */
+LOADER_MEMORY_TYPE
+BlConvertEfiMemoryType(IN EFI_MEMORY_TYPE EfiMemoryType)
+{
+    LOADER_MEMORY_TYPE MemoryType;
+
+    /* Check EFI memory type and convert to XTOS memory type */
+    switch(EfiMemoryType)
+    {
+        case EfiACPIMemoryNVS:
+        case EfiACPIReclaimMemory:
+        case EfiPalCode:
+        case EfiReservedMemoryType:
+            MemoryType = LoaderSpecialMemory;
+            break;
+        case EfiRuntimeServicesCode:
+        case EfiRuntimeServicesData:
+        case EfiMemoryMappedIO:
+        case EfiMemoryMappedIOPortSpace:
+            MemoryType = LoaderFirmwarePermanent;
+            break;
+        case EfiLoaderCode:
+            MemoryType = LoaderFirmwareTemporary;
+            break;
+        case EfiUnusableMemory:
+            MemoryType = LoaderBad;
+            break;
+        default:
+            MemoryType = LoaderFree;
+            break;
+    }
+
+    /* Return XTOS memory type */
+    return MemoryType;
+}
+
+/**
  * This routine allocates one or more 4KB pages.
  *
  * @param Pages
@@ -353,12 +398,10 @@ BlInitializeVirtualMemory(IN OUT PLIST_ENTRY MemoryMappings,
     LOADER_MEMORY_TYPE MemoryType;
     PUCHAR VirtualAddress;
     EFI_STATUS Status;
-    BOOLEAN MapVRam;
     SIZE_T Index;
 
-    /* Set initial VA and assume VRAM will be mapped */
+    /* Set initial virtual address */
     VirtualAddress = *MemoryMapAddress;
-    MapVRam = TRUE;
 
     /* Get memory map */
     Status = BlGetMemoryMap(&MemoryMap, &MapKey, &DescriptorSize, &DescriptorCount);
@@ -370,77 +413,46 @@ BlInitializeVirtualMemory(IN OUT PLIST_ENTRY MemoryMappings,
     /* Iterate through all descriptors from memory map */
     for(Index = 0; Index < DescriptorCount; Index++)
     {
-        /* Check memory type */
-        switch(MemoryMap->Type)
-        {
-            case EfiACPIMemoryNVS:
-            case EfiACPIReclaimMemory:
-            case EfiPalCode:
-            case EfiReservedMemoryType:
-                MemoryType = LoaderSpecialMemory;
-                break;
-            case EfiLoaderCode:
-                MemoryType = LoaderFirmwareTemporary;
-                break;
-            case EfiUnusableMemory:
-                MemoryType = LoaderBad;
-                break;
-            default:
-                MemoryType = LoaderFree;
-                break;
-        }
 
-        /* Do initial memory mappings */
-        if(MemoryType == LoaderFirmwareTemporary)
+        /* Make sure descriptor does not go beyond lowest physical page */
+        if((MemoryMap->PhysicalStart + (MemoryMap->NumberOfPages * EFI_PAGE_SIZE)) <= (UINT_PTR)-1)
         {
-            /* Map EFI firmware code */
-            Status = BlAddVirtualMemoryMapping(MemoryMappings, (PVOID)MemoryMap->PhysicalStart,
-                                               (PVOID)MemoryMap->PhysicalStart, MemoryMap->NumberOfPages, MemoryType);
-        }
-        else if(MemoryType != LoaderFree)
-        {
-            /* Add non-free memory mapping */
-            Status = BlAddVirtualMemoryMapping(MemoryMappings, VirtualAddress,
-                                               (PVOID)MemoryMap->PhysicalStart, MemoryMap->NumberOfPages, MemoryType);
+            /* Convert EFI memory type into XTOS memory type */
+            MemoryType = BlConvertEfiMemoryType(MemoryMap->Type);
 
-            /* Calculate next valid virtual address */
-            VirtualAddress += MemoryMap->NumberOfPages * EFI_PAGE_SIZE;
-
-            /* Check if VRAM should be as well mapped */
-            if((MemoryMap->PhysicalStart + (MemoryMap->NumberOfPages << EFI_PAGE_SHIFT) > 0xA0000) &&
-               (MemoryMap->PhysicalStart <= 0xA0000))
+            /* Do memory mappings depending on memory type */
+            if(MemoryType == LoaderFirmwareTemporary)
             {
-                /* No need to map VRAM */
-                MapVRam = FALSE;
+                /* Map EFI firmware code */
+                Status = BlAddVirtualMemoryMapping(MemoryMappings, (PVOID)MemoryMap->PhysicalStart,
+                                                   (PVOID)MemoryMap->PhysicalStart, MemoryMap->NumberOfPages, MemoryType);
             }
-        }
-        else
-        {
-            /* Map all other memory as loader free */
-            Status = BlAddVirtualMemoryMapping(MemoryMappings, NULL, (PVOID)MemoryMap->PhysicalStart,
-                                               MemoryMap->NumberOfPages, LoaderFree);
-        }
+            else if(MemoryType != LoaderFree)
+            {
+                /* Add any non-free memory mapping */
+                Status = BlAddVirtualMemoryMapping(MemoryMappings, VirtualAddress,
+                                                   (PVOID)MemoryMap->PhysicalStart, MemoryMap->NumberOfPages, MemoryType);
 
-        /* Make sure memory mapping succeeded */
-        if(Status != STATUS_EFI_SUCCESS)
-        {
-            /* Mapping failed */
-            return Status;
-        }
+                /* Calculate next valid virtual address */
+                VirtualAddress += MemoryMap->NumberOfPages * EFI_PAGE_SIZE;
 
-        /* Grab next descriptor */
-        MemoryMap = (PEFI_MEMORY_DESCRIPTOR)((PUCHAR)MemoryMap + DescriptorSize);
-    }
+            }
+            else
+            {
+                /* Map all other memory as loader free */
+                Status = BlAddVirtualMemoryMapping(MemoryMappings, NULL, (PVOID)MemoryMap->PhysicalStart,
+                                                   MemoryMap->NumberOfPages, LoaderFree);
+            }
 
-    /* Check if VRAM should mapped */
-    if(MapVRam)
-    {
-        /* Add VRAM mapping */
-        Status = BlAddVirtualMemoryMapping(MemoryMappings, NULL, (PVOID)0xA0000, 0x60, LoaderFirmwarePermanent);
-        if(Status != STATUS_EFI_SUCCESS)
-        {
-            /* VRAM mapping failed */
-            return Status;
+            /* Make sure memory mapping succeeded */
+            if(Status != STATUS_EFI_SUCCESS)
+            {
+                /* Mapping failed */
+                return Status;
+            }
+
+            /* Grab next descriptor */
+            MemoryMap = (PEFI_MEMORY_DESCRIPTOR)((PUCHAR)MemoryMap + DescriptorSize);
         }
     }
 

@@ -57,6 +57,9 @@ BlConsoleInitialize();
 VOID
 BlConsolePutChar(IN USHORT Character);
 
+LOADER_MEMORY_TYPE
+BlConvertEfiMemoryType(IN EFI_MEMORY_TYPE EfiMemoryType);
+
 VOID
 BlCreateStack(IN PVOID *StackPtr,
               IN ULONG StackSize,
