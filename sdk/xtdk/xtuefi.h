@@ -748,6 +748,16 @@ typedef struct _EFI_MEMORY_DESCRIPTOR
     UINT64 Attribute;
 } EFI_MEMORY_DESCRIPTOR, *PEFI_MEMORY_DESCRIPTOR;
 
+/* Definition of an EFI memory map */
+typedef struct _EFI_MEMORY_MAP
+{
+  PEFI_MEMORY_DESCRIPTOR Map;
+  UINT_PTR MapSize;
+  UINT_PTR MapKey;
+  UINT_PTR DescriptorSize;
+  UINT32 DescriptorVersion;
+} EFI_MEMORY_MAP, *PEFI_MEMORY_MAP;
+
 /* Data structure that precedes all of the standard EFI table types */
 typedef struct _EFI_TABLE_HEADER
 {
