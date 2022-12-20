@@ -50,6 +50,19 @@ PeGetEntryPoint(IN PPECOFF_IMAGE_CONTEXT Image,
     return STATUS_EFI_SUCCESS;
 }
 
+EFI_STATUS
+PeGetMachineType(IN PPECOFF_IMAGE_CONTEXT Image,
+                 OUT PUSHORT MachineType)
+{
+    if(!Image || !Image->PeHeader)
+    {
+        return STATUS_EFI_INVALID_PARAMETER;
+    }
+
+    *MachineType = Image->PeHeader->FileHeader.Machine;
+    return STATUS_EFI_SUCCESS;
+}
+
 /**
  * Returns an information about subsystem that is required to run PE/COFF image.
  *
@@ -548,6 +561,7 @@ BlXtLdrModuleMain(IN EFI_HANDLE ImageHandle,
 
     /* Set routines available via PE/COFF image protocol */
     XtPeCoffProtocol.GetEntryPoint = PeGetEntryPoint;
+    XtPeCoffProtocol.GetMachineType = PeGetMachineType;
     XtPeCoffProtocol.GetSubSystem = PeGetSubSystem;
     XtPeCoffProtocol.Load = PeLoadImage;
     XtPeCoffProtocol.Relocate = PeRelocateImage;

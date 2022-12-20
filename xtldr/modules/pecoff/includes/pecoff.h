@@ -18,6 +18,10 @@ PeGetEntryPoint(IN PPECOFF_IMAGE_CONTEXT Image,
                 OUT PVOID *EntryPoint);
 
 EFI_STATUS
+PeGetMachineType(IN PPECOFF_IMAGE_CONTEXT Image,
+                 OUT PUSHORT MachineType);
+
+EFI_STATUS
 PeGetSubSystem(IN PPECOFF_IMAGE_CONTEXT Image,
                OUT PUSHORT SubSystem);
 
