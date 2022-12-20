@@ -10,11 +10,11 @@
 #define __XTDK_AMD64_KETYPES_H
 
 
-/* Static Kernel-Mode Address start */
+/* Static Kernel-Mode address start */
 #define KSEG0_BASE                        0xFFFFF80000000000
 
 /* XTOS Kernel address base */
-#define KERNEL_ADDRESS_BASE               0x0000000800000000
+#define KSEG0_KERNEL_BASE                 0x0000000800000000
 
 /* XTOS Kernel stack size */
 #define KERNEL_STACK_SIZE                 8

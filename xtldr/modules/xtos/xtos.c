@@ -152,7 +152,7 @@ XtBootSystem(IN PXT_BOOT_PROTOCOL_PARAMETERS Parameters)
 }
 
 EFI_STATUS
-XtpInitializeLoaderBlock(IN PKERNEL_INITIALIZATION_BLOCK *InitializationBlock)
+XtpInitializeLoaderBlock(IN PLIST_ENTRY MemoryMappings, IN PVOID *VirtualAddress)
 {
     PKERNEL_INITIALIZATION_BLOCK LoaderBlock;
     EFI_PHYSICAL_ADDRESS Address;
@@ -173,7 +173,9 @@ XtpInitializeLoaderBlock(IN PKERNEL_INITIALIZATION_BLOCK *InitializationBlock)
     LoaderBlock->LoaderInformation.DbgPrint = XtLdrProtocol->DbgPrint;
     LoaderBlock->Version = INITIALIZATION_BLOCK_VERSION;
 
-    *InitializationBlock = LoaderBlock;
+    XtLdrProtocol->AddVirtualMemoryMapping(MemoryMappings, *VirtualAddress, (PVOID)LoaderBlock, BlockPages, LoaderSystemBlock);
+
+    *VirtualAddress += (UINT_PTR)(BlockPages * EFI_PAGE_SIZE);
 
     return STATUS_EFI_SUCCESS;
 }
@@ -195,7 +197,7 @@ EFI_STATUS
 XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
                 IN PXT_BOOT_PROTOCOL_PARAMETERS Parameters)
 {
-    PKERNEL_INITIALIZATION_BLOCK KernelParameters, LoaderBlock;
+    PKERNEL_INITIALIZATION_BLOCK KernelParameters;
     EFI_GUID LoadedImageGuid = EFI_LOADED_IMAGE_PROTOCOL_GUID;
     PPECOFF_IMAGE_CONTEXT ImageContext = NULL;
     PEFI_LOADED_IMAGE_PROTOCOL ImageProtocol;
@@ -207,9 +209,9 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
     /* Initialize XTOS startup sequence */
     XtLdrProtocol->DbgPrint(L"Initializing XTOS startup sequence\n");
 
-    /* Set virtual memory area for the kernel */
+    /* Set base virtual memory area for the kernel mappings */
     VirtualMemoryArea = (PVOID)KSEG0_BASE;
-    VirtualAddress = (PVOID)(KSEG0_BASE + KERNEL_ADDRESS_BASE);
+    VirtualAddress = (PVOID)(KSEG0_BASE + KSEG0_KERNEL_BASE);
 
     /* Initialize memory mapping linked list */
     RtlInitializeListHead(&MemoryMappings);
@@ -230,7 +232,7 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
         return Status;
     }
 
-    /* Add memory mapping for the kernel */
+    /* Add kernel image memory mapping */
     Status = XtLdrProtocol->AddVirtualMemoryMapping(&MemoryMappings, ImageContext->VirtualAddress,
                                                     ImageContext->PhysicalAddress, ImageContext->ImagePages, 0);
     if(Status != STATUS_EFI_SUCCESS)
@@ -241,12 +243,11 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
     /* Set next valid virtual address right after the kernel */
     VirtualAddress += ImageContext->ImagePages * EFI_PAGE_SIZE;
 
-    /* Setup and map kernel initialization block */
-    Status = XtpInitializeLoaderBlock(&LoaderBlock);
-    XtLdrProtocol->AddVirtualMemoryMapping(&MemoryMappings, VirtualAddress, (PVOID)LoaderBlock, 1, LoaderSystemBlock);
-
     /* Store virtual address of kernel initialization block for future kernel call */
     KernelParameters = (PKERNEL_INITIALIZATION_BLOCK)VirtualAddress;
+
+    /* Setup and map kernel initialization block */
+    Status = XtpInitializeLoaderBlock(&MemoryMappings, &VirtualAddress);
 
     /* Get kernel entry point */
     XtPeCoffProtocol->GetEntryPoint(ImageContext, (PVOID)&KernelEntryPoint);
@@ -295,7 +296,7 @@ XtpLoadModule(IN PEFI_FILE_HANDLE SystemDir,
               OUT PPECOFF_IMAGE_CONTEXT *ImageContext)
 {
     PEFI_FILE_HANDLE ModuleHandle;
-    USHORT SubSystem;
+    USHORT MachineType, SubSystem;
     EFI_STATUS Status;
 
     /* Print debug message */
@@ -321,6 +322,15 @@ XtpLoadModule(IN PEFI_FILE_HANDLE SystemDir,
 
     /* Close image file */
     ModuleHandle->Close(ModuleHandle);
+
+    /* Check PE/COFF image machine type compatibility */
+    XtPeCoffProtocol->GetMachineType(*ImageContext, &MachineType);
+    if(MachineType != _ARCH_IMAGE_MACHINE_TYPE)
+    {
+        /* Machine type mismatch */
+        XtLdrProtocol->DbgPrint(L"ERROR: Loaded incompatible PE/COFF image (machine type mismatch)\n");
+        return STATUS_EFI_INCOMPATIBLE_VERSION;
+    }
 
     /* Check PE/COFF image subsystem */
     XtPeCoffProtocol->GetSubSystem(*ImageContext, &SubSystem);

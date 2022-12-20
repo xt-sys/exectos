@@ -14,7 +14,7 @@
 #define KSEG0_BASE                        0x80000000
 
 /* XTOS Kernel address base */
-#define KERNEL_ADDRESS_BASE               0x01800000
+#define KSEG0_KERNEL_BASE                 0x01800000
 
 /* XTOS Kernel stack size */
 #define KERNEL_STACK_SIZE                 8
