@@ -145,20 +145,23 @@ BlAddVirtualMemoryMapping(IN PLIST_ENTRY MemoryMappings,
         if((Mapping2->PhysicalAddress >= Mapping1->PhysicalAddress && PhysicalAddress2End <= PhysicalAddressEnd) ||
            (Mapping2->NumberOfPages == 0))
         {
-            /* If it is of LoaderFree type, then we can skip it */
-            if(Mapping2->MemoryType == LoaderFree)
+            /* Make sure it's memory type is LoaderFree */
+            if(Mapping2->MemoryType != LoaderFree)
             {
-                /* Store address of the next mapping */
-                MappingListEntry = ListEntry->Flink;
-
-                /* Remove mapping from the list and free up it's memory */
-                RtlRemoveEntryList(&Mapping2->ListEntry);
-                BlEfiMemoryFreePool(Mapping2);
-                ListEntry = MappingListEntry;
-
-                /* Go to the next mapping */
-                continue;
+                /* LoaderFree memory type is strictly expected */
+                return STATUS_EFI_INVALID_PARAMETER;
             }
+
+            /* Store address of the next mapping */
+            MappingListEntry = ListEntry->Flink;
+
+            /* Remove mapping from the list and free up it's memory */
+            RtlRemoveEntryList(&Mapping2->ListEntry);
+            BlEfiMemoryFreePool(Mapping2);
+            ListEntry = MappingListEntry;
+
+            /* Go to the next mapping */
+            continue;
         }
 
         /* Determine phsical address order */
@@ -199,7 +202,6 @@ BlConvertEfiMemoryType(IN EFI_MEMORY_TYPE EfiMemoryType)
         case EfiACPIMemoryNVS:
         case EfiACPIReclaimMemory:
         case EfiPalCode:
-        case EfiReservedMemoryType:
             MemoryType = LoaderSpecialMemory;
             break;
         case EfiRuntimeServicesCode:
@@ -208,6 +210,7 @@ BlConvertEfiMemoryType(IN EFI_MEMORY_TYPE EfiMemoryType)
         case EfiMemoryMappedIOPortSpace:
             MemoryType = LoaderFirmwarePermanent;
             break;
+        case EfiBootServicesData:
         case EfiLoaderCode:
             MemoryType = LoaderFirmwareTemporary;
             break;
@@ -307,36 +310,29 @@ BlEfiMemoryFreePool(IN PVOID Memory)
  * @param MemoryMap
  *        Supplies a pointer to the buffer where memory map will be written.
  *
- * @param MapKey
- *        Supplies a pointer where the firmware stores the map key.
- *
- * @param DescriptorSize
- *        Supplies a pointer where the size of EFI_MEMORY_DESCRIPTOR will be stored.
- *
- * @param DescriptorCount
- *        Supplies a pointer where number of written descriptors will be stored.
- *
  * @return This routine returns a status code.
  *
  * @since XT 1.0
  */
 EFI_STATUS
-BlGetMemoryMap(OUT PEFI_MEMORY_DESCRIPTOR *MemoryMap,
-               OUT PUINT_PTR MapKey,
-               OUT PUINT_PTR DescriptorSize,
-               OUT PUINT_PTR DescriptorCount)
+BlGetMemoryMap(OUT PEFI_MEMORY_MAP MemoryMap)
 {
-    PEFI_MEMORY_DESCRIPTOR LocalMemoryMap = NULL;
-    UINT_PTR MemoryMapSize = 0, LocalMapKey, LocalDescriptorSize;
-    UINT32 DescriptorVersion;
     EFI_STATUS Status;
+
+    if(MemoryMap == NULL)
+    {
+        return STATUS_EFI_INVALID_PARAMETER;
+    }
+
+    MemoryMap->Map = NULL;
+    MemoryMap->MapSize = 0;
 
     /* Get memory map */
     do
     {
         /* Attempt do get EFI memory map */
-        Status = EfiSystemTable->BootServices->GetMemoryMap(&MemoryMapSize, LocalMemoryMap, &LocalMapKey,
-                                                            &LocalDescriptorSize, &DescriptorVersion);
+        Status = EfiSystemTable->BootServices->GetMemoryMap(&MemoryMap->MapSize, MemoryMap->Map, &MemoryMap->MapKey,
+                                                            &MemoryMap->DescriptorSize, &MemoryMap->DescriptorVersion);
         if(Status == STATUS_EFI_SUCCESS)
         {
             /* Go further if succeeded */
@@ -345,32 +341,26 @@ BlGetMemoryMap(OUT PEFI_MEMORY_DESCRIPTOR *MemoryMap,
         else if(Status != STATUS_EFI_BUFFER_TOO_SMALL)
         {
             /* Some error occurred */
-            if(MemoryMap)
+            if(MemoryMap->Map)
             {
                 /* Free allocated memory */
-                BlEfiMemoryFreePool(MemoryMap);
+                BlEfiMemoryFreePool(MemoryMap->Map);
             }
             return Status;
         }
 
         /* Allocate the desired amount of memory */
-        MemoryMapSize += 2 * LocalDescriptorSize;
-        BlEfiMemoryAllocatePool(MemoryMapSize, (PVOID *)&LocalMemoryMap);
+        MemoryMap->MapSize += 2 * MemoryMap->DescriptorSize;
+        BlEfiMemoryAllocatePool(MemoryMap->MapSize, (PVOID *)&MemoryMap->Map);
     }
     while(Status == STATUS_EFI_BUFFER_TOO_SMALL);
 
     /* Make sure memory map is set */
-    if(LocalMemoryMap == NULL)
+    if(MemoryMap->Map == NULL)
     {
         /* Something went wrong */
-        return STATUS_EFI_INVALID_PARAMETER;
+        return STATUS_EFI_NO_MAPPING;
     }
-
-    /* Store memory map details */
-    *MemoryMap = LocalMemoryMap;
-    *MapKey = LocalMapKey;
-    *DescriptorSize = LocalDescriptorSize;
-    *DescriptorCount = MemoryMapSize / LocalDescriptorSize;
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
@@ -393,9 +383,10 @@ EFI_STATUS
 BlInitializeVirtualMemory(IN OUT PLIST_ENTRY MemoryMappings,
                           IN OUT PVOID *MemoryMapAddress)
 {
-    UINT_PTR MapKey, DescriptorSize, DescriptorCount;
-    PEFI_MEMORY_DESCRIPTOR MemoryMap = NULL;
+    PEFI_MEMORY_DESCRIPTOR Descriptor;
     LOADER_MEMORY_TYPE MemoryType;
+    PEFI_MEMORY_MAP MemoryMap;
+    SIZE_T DescriptorCount;
     PUCHAR VirtualAddress;
     EFI_STATUS Status;
     SIZE_T Index;
@@ -403,45 +394,51 @@ BlInitializeVirtualMemory(IN OUT PLIST_ENTRY MemoryMappings,
     /* Set initial virtual address */
     VirtualAddress = *MemoryMapAddress;
 
-    /* Get memory map */
-    Status = BlGetMemoryMap(&MemoryMap, &MapKey, &DescriptorSize, &DescriptorCount);
+    /* Allocate and zero-fill buffer for EFI memory map */
+    BlEfiMemoryAllocatePool(sizeof(EFI_MEMORY_MAP), (PVOID*)&MemoryMap);
+    RtlZeroMemory(MemoryMap, sizeof(EFI_MEMORY_MAP));
+
+    /* Get EFI memory map */
+    Status = BlGetMemoryMap(MemoryMap);
     if(Status != STATUS_EFI_SUCCESS)
     {
         return Status;
     }
 
-    /* Iterate through all descriptors from memory map */
+    /* Calculate descriptors count and get first one */
+    Descriptor = MemoryMap->Map;
+    DescriptorCount = MemoryMap->MapSize / MemoryMap->DescriptorSize;
+
+    /* Iterate through all descriptors from the memory map */
     for(Index = 0; Index < DescriptorCount; Index++)
     {
-
         /* Make sure descriptor does not go beyond lowest physical page */
-        if((MemoryMap->PhysicalStart + (MemoryMap->NumberOfPages * EFI_PAGE_SIZE)) <= (UINT_PTR)-1)
+        if((Descriptor->PhysicalStart + (Descriptor->NumberOfPages * EFI_PAGE_SIZE)) <= (UINT_PTR)-1)
         {
             /* Convert EFI memory type into XTOS memory type */
-            MemoryType = BlConvertEfiMemoryType(MemoryMap->Type);
+            MemoryType = BlConvertEfiMemoryType(Descriptor->Type);
 
             /* Do memory mappings depending on memory type */
             if(MemoryType == LoaderFirmwareTemporary)
             {
                 /* Map EFI firmware code */
-                Status = BlAddVirtualMemoryMapping(MemoryMappings, (PVOID)MemoryMap->PhysicalStart,
-                                                   (PVOID)MemoryMap->PhysicalStart, MemoryMap->NumberOfPages, MemoryType);
+                Status = BlAddVirtualMemoryMapping(MemoryMappings, (PVOID)Descriptor->PhysicalStart,
+                                                   (PVOID)Descriptor->PhysicalStart, Descriptor->NumberOfPages, MemoryType);
             }
             else if(MemoryType != LoaderFree)
             {
                 /* Add any non-free memory mapping */
                 Status = BlAddVirtualMemoryMapping(MemoryMappings, VirtualAddress,
-                                                   (PVOID)MemoryMap->PhysicalStart, MemoryMap->NumberOfPages, MemoryType);
+                                                   (PVOID)Descriptor->PhysicalStart, Descriptor->NumberOfPages, MemoryType);
 
                 /* Calculate next valid virtual address */
-                VirtualAddress += MemoryMap->NumberOfPages * EFI_PAGE_SIZE;
-
+                VirtualAddress += Descriptor->NumberOfPages * EFI_PAGE_SIZE;
             }
             else
             {
                 /* Map all other memory as loader free */
-                Status = BlAddVirtualMemoryMapping(MemoryMappings, NULL, (PVOID)MemoryMap->PhysicalStart,
-                                                   MemoryMap->NumberOfPages, LoaderFree);
+                Status = BlAddVirtualMemoryMapping(MemoryMappings, NULL, (PVOID)Descriptor->PhysicalStart,
+                                                   Descriptor->NumberOfPages, LoaderFree);
             }
 
             /* Make sure memory mapping succeeded */
@@ -452,7 +449,7 @@ BlInitializeVirtualMemory(IN OUT PLIST_ENTRY MemoryMappings,
             }
 
             /* Grab next descriptor */
-            MemoryMap = (PEFI_MEMORY_DESCRIPTOR)((PUCHAR)MemoryMap + DescriptorSize);
+            Descriptor = (PEFI_MEMORY_DESCRIPTOR)((PUCHAR)Descriptor + MemoryMap->DescriptorSize);
         }
     }
 

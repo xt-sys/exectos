@@ -61,16 +61,19 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
                 IN PEFI_LOADED_IMAGE_PROTOCOL ImageProtocol,
                 IN PVOID *PtePointer)
 {
-    UINT_PTR MapKey, DescriptorSize, DescriptorCount;
-    PEFI_MEMORY_DESCRIPTOR MemoryMap = NULL;
     PLOADER_MEMORY_MAPPING Mapping;
     EFI_PHYSICAL_ADDRESS Address;
+    PEFI_MEMORY_MAP MemoryMap;
     PLIST_ENTRY ListEntry;
     EFI_STATUS Status;
     PVOID Stack;
 
+    /* Allocate and zero-fill buffer for EFI memory map */
+    BlEfiMemoryAllocatePool(sizeof(EFI_MEMORY_MAP), (PVOID*)&MemoryMap);
+    RtlZeroMemory(MemoryMap, sizeof(EFI_MEMORY_MAP));
+
     /* Get EFI memory map */
-    Status = BlGetMemoryMap(&MemoryMap, &MapKey, &DescriptorSize, &DescriptorCount);
+    Status = BlGetMemoryMap(MemoryMap);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Unable to get memory map */
@@ -144,7 +147,7 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
 
     /* Exit EFI Boot Services */
     BlDbgPrint(L"Exiting EFI boot services\n");
-    EfiSystemTable->BootServices->ExitBootServices(EfiImageHandle, MapKey);
+    EfiSystemTable->BootServices->ExitBootServices(EfiImageHandle, MemoryMap->MapKey);
 
     /* Write PML4 to CR3 */
     HlWriteCR3((UINT_PTR)*PtePointer);

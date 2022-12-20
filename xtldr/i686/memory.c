@@ -61,11 +61,12 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
                IN PEFI_LOADED_IMAGE_PROTOCOL ImageProtocol,
                IN PVOID *PtePointer)
 {
-    UINT_PTR PhysicalAddress, MapKey, DescriptorSize, DescriptorCount;
+    UINT_PTR PhysicalAddress, DescriptorCount;
     EFI_PHYSICAL_ADDRESS Address, PDPTAddress = 0;
-    PEFI_MEMORY_DESCRIPTOR MemoryMap = NULL;
+    PEFI_MEMORY_DESCRIPTOR Descriptor;
     PLOADER_MEMORY_MAPPING Mapping;
     PCPUID_REGISTERS CpuRegisters;
+    PEFI_MEMORY_MAP MemoryMap;
     PLIST_ENTRY ListEntry;
     BOOLEAN PaeExtension;
     EFI_STATUS Status;
@@ -86,13 +87,21 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
     /* Store PAE status from the CPUID results */
     PaeExtension = CpuRegisters->Edx & CPUID_FEATURES_EDX_PAE;
 
+    /* Allocate and zero-fill buffer for EFI memory map */
+    BlEfiMemoryAllocatePool(sizeof(EFI_MEMORY_MAP), (PVOID*)&MemoryMap);
+    RtlZeroMemory(MemoryMap, sizeof(EFI_MEMORY_MAP));
+
     /* Get EFI memory map */
-    Status = BlGetMemoryMap(&MemoryMap, &MapKey, &DescriptorSize, &DescriptorCount);
+    Status = BlGetMemoryMap(MemoryMap);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Unable to get memory map */
         return Status;
     }
+
+    /* Calculate descriptors count and get first one */
+    Descriptor = MemoryMap->Map;
+    DescriptorCount = MemoryMap->MapSize / MemoryMap->DescriptorSize;
 
     /* Check if PAE supported by the underlying hardware */
     if(PaeExtension)
@@ -107,11 +116,11 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
         for(Index = 0; Index < DescriptorCount; Index++)
         {
             /* Check descriptor if it can be used to store PDPT */
-            if((MemoryMap->PhysicalStart + ((MemoryMap->NumberOfPages - 1) * EFI_PAGE_SIZE) >= PhysicalAddress) &&
-               (MemoryMap->Type == EfiConventionalMemory))
+            if((Descriptor->PhysicalStart + ((Descriptor->NumberOfPages - 1) * EFI_PAGE_SIZE) >= PhysicalAddress) &&
+               (Descriptor->Type == EfiConventionalMemory))
             {
                 /* Use highest address possible */
-                if(PhysicalAddress >= MemoryMap->PhysicalStart)
+                if(PhysicalAddress >= Descriptor->PhysicalStart)
                 {
                     /* Use physical address */
                     PDPTAddress = PhysicalAddress;
@@ -119,7 +128,7 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
                 else
                 {
                     /* Use descriptor physical start as PDPT address */
-                    PDPTAddress = MemoryMap->PhysicalStart;
+                    PDPTAddress = Descriptor->PhysicalStart;
                 }
 
                 /* Allocate pages for the PDPT address */
@@ -131,7 +140,7 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
             }
 
             /* Get next descriptor */
-            MemoryMap = (EFI_MEMORY_DESCRIPTOR*)((UINT8*)MemoryMap + DescriptorSize);
+            Descriptor = (EFI_MEMORY_DESCRIPTOR*)((UINT8*)Descriptor + MemoryMap->DescriptorSize);
         }
 
         /* Make sure PDPT address found */
@@ -244,7 +253,7 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
 
     /* Exit EFI Boot Services */
     BlDbgPrint(L"Exiting EFI boot services\n");
-    EfiSystemTable->BootServices->ExitBootServices(EfiImageHandle, MapKey);
+    EfiSystemTable->BootServices->ExitBootServices(EfiImageHandle, MemoryMap->MapKey);
 
     /* Enable PAE if supported by CPU */
     if(PaeExtension)
