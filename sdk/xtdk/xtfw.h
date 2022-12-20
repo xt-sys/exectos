@@ -67,8 +67,6 @@ typedef struct _PCAT_FIRMWARE_INFORMATION
 typedef struct _UEFI_FIRMWARE_INFORMATION
 {
     ULONG EfiVersion;
-    ULONGLONG EfiImageHandle;
-    ULONGLONG EfiSystemTable;
     PVOID EfiRuntimeServices;
 } UEFI_FIRMWARE_INFORMATION, *PUEFI_FIRMWARE_INFORMATION;
 
