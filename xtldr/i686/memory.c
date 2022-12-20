@@ -255,6 +255,10 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
     BlDbgPrint(L"Exiting EFI boot services\n");
     EfiSystemTable->BootServices->ExitBootServices(EfiImageHandle, MemoryMap->MapKey);
 
+    /* No runtime services should touch boot services code, so get rid of it all at this point */
+    EfiSystemTable->RuntimeServices->SetVirtualAddressMap(MemoryMap->MapSize, MemoryMap->DescriptorSize,
+                                                          MemoryMap->DescriptorVersion, MemoryMap->Map);
+
     /* Enable PAE if supported by CPU */
     if(PaeExtension)
     {
