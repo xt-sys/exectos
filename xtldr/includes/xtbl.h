@@ -115,6 +115,11 @@ BlGetMemoryMap(OUT PEFI_MEMORY_MAP MemoryMap);
 VOID BlGetStackPointer(OUT PVOID *Stack);
 
 EFI_STATUS
+BlGetVirtualAddress(IN PLIST_ENTRY MemoryMappings,
+                    IN PVOID PhysicalAddress,
+                    OUT PVOID *VirtualAddress);
+
+EFI_STATUS
 BlGetVolumeDevicePath(IN PUCHAR SystemPath,
                       OUT PEFI_DEVICE_PATH_PROTOCOL *DevicePath,
                       OUT PUCHAR *ArcName,

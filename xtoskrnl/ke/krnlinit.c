@@ -26,6 +26,18 @@ KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
     /* Print some message to serial console */
     DbgPrint(L"Hello world from ExectOS kernel!\n");
 
+    /* Test kernel parameters */
+    DbgPrint(L"\n\n------ Kernel parameters block ------\n"
+             L"Loader block size: %lu\n"
+             L"Loader block version: %lu\n"
+             L"EFI Revision: %lu\n"
+             L"EFI RunTime Revision: %lu\n",
+             Parameters->Size,
+             Parameters->Version,
+             Parameters->FirmwareInformation.EfiFirmware.EfiVersion,
+             ((PEFI_RUNTIME_SERVICES) Parameters->FirmwareInformation.EfiFirmware.EfiRuntimeServices)->Hdr.Revision
+            );
+
     /* Enter infinite kernel thread loop */
     for(;;);
 }

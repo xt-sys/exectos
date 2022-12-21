@@ -21,6 +21,7 @@ typedef EFI_STATUS (*PBL_ENABLE_PAGING)(IN PLIST_ENTRY MemoryMappings, IN PVOID 
 typedef EFI_STATUS (*PBL_FREE_PAGES)(IN UINT64 Size, IN EFI_PHYSICAL_ADDRESS Memory);
 typedef EFI_STATUS (*PBL_FREE_POOL)(IN PVOID Memory);
 typedef EFI_STATUS (*PBL_GET_MEMORY_MAP)(OUT PEFI_MEMORY_MAP MemoryMap);
+typedef EFI_STATUS (*PBL_GET_VIRTUAL_ADDRESS)(IN PLIST_ENTRY MemoryMappings, IN PVOID PhysicalAddress, OUT PVOID *VirtualAddress);
 typedef EFI_STATUS (*PBL_INIT_VIRTUAL_MEMORY)(IN OUT PLIST_ENTRY MemoryMappings, IN OUT PVOID *MemoryMapAddress);
 typedef EFI_STATUS (*PBL_MAP_VIRTUAL_MEMORY)(IN PLIST_ENTRY MemoryMappings, IN UINT_PTR VirtualAddress, IN UINT_PTR PhysicalAddress, IN UINT NumberOfPages, IN BOOLEAN PaeExtension, IN OUT PVOID *PtePointer);
 typedef VOID (*PBL_GET_STACK)(OUT PVOID *Stack);
@@ -39,6 +40,7 @@ typedef struct _XT_BOOT_LOADER_PROTOCOL
     PBL_FREE_POOL FreePool;
     PBL_ENABLE_PAGING EnablePaging;
     PBL_GET_MEMORY_MAP GetMemoryMap;
+    PBL_GET_VIRTUAL_ADDRESS GetVirtualAddress;
     PBL_INIT_VIRTUAL_MEMORY InitializeVirtualMemory;
     PBL_MAP_VIRTUAL_MEMORY MapVirtualMemory;
     PBL_GET_STACK GetStack;

@@ -367,6 +367,67 @@ BlGetMemoryMap(OUT PEFI_MEMORY_MAP MemoryMap)
 }
 
 /**
+ * Attempts to find a virtual address of the specified physical address in memory mappings.
+ *
+ * @param MemoryMappings
+ *        Supplies a pointer to linked list containing all memory mappings.
+ *
+ * @param PhysicalAddress
+ *        Supplies a physical address to search for in the mappings.
+ *
+ * @param VirtualAddress
+ *        Supplies a buffer, where mapped virtual address of the found mapping will be stored.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+EFI_STATUS
+BlGetVirtualAddress(IN PLIST_ENTRY MemoryMappings,
+                    IN PVOID PhysicalAddress,
+                    OUT PVOID *VirtualAddress)
+{
+    PLOADER_MEMORY_MAPPING Mapping;
+    PLIST_ENTRY ListEntry;
+
+    /* NULLify virtual address */
+    *VirtualAddress = NULL;
+
+    /* Iterate over memory mappings in order to find descriptor containing a physical address */
+    ListEntry = MemoryMappings->Flink;
+    while(ListEntry != MemoryMappings)
+    {
+        /* Get mapping from linked list */
+        Mapping = CONTAIN_RECORD(ListEntry, LOADER_MEMORY_MAPPING, ListEntry);
+
+        /* Make sure any virtual address is set */
+        if(Mapping->VirtualAddress)
+        {
+            /* Check if provided physical address is in range of this mapping */
+            if((PhysicalAddress >= Mapping->PhysicalAddress) &&
+               (PhysicalAddress < Mapping->PhysicalAddress + (Mapping->NumberOfPages * EFI_PAGE_SIZE)))
+            {
+                /* Calculate virtual address based on the mapping */
+                *VirtualAddress = PhysicalAddress - Mapping->PhysicalAddress + Mapping->VirtualAddress;
+            }
+        }
+
+        /* Get next element from the list */
+        ListEntry = ListEntry->Flink;
+    }
+
+    /* If virtual address is still NULL, then mapping was not found */
+    if(*VirtualAddress == NULL)
+    {
+        /* Mapping not found */
+        return STATUS_EFI_NOT_FOUND;
+    }
+
+    /* Mapping found, return success */
+    return STATUS_EFI_SUCCESS;
+}
+
+/**
  * Initializes virtual memory by adding known and general mappings.
  *
  * @param MemoryMappings
@@ -428,8 +489,8 @@ BlInitializeVirtualMemory(IN OUT PLIST_ENTRY MemoryMappings,
             else if(MemoryType != LoaderFree)
             {
                 /* Add any non-free memory mapping */
-                Status = BlAddVirtualMemoryMapping(MemoryMappings, VirtualAddress,
-                                                   (PVOID)Descriptor->PhysicalStart, Descriptor->NumberOfPages, MemoryType);
+                Status = BlAddVirtualMemoryMapping(MemoryMappings, VirtualAddress, (PVOID)Descriptor->PhysicalStart,
+                                                   Descriptor->NumberOfPages, MemoryType);
 
                 /* Calculate next valid virtual address */
                 VirtualAddress += Descriptor->NumberOfPages * EFI_PAGE_SIZE;

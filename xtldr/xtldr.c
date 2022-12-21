@@ -332,6 +332,7 @@ BlRegisterXtLoaderProtocol()
     EfiLdrProtocol.FreePool = BlEfiMemoryFreePool;
     EfiLdrProtocol.EnablePaging = BlEnablePaging;
     EfiLdrProtocol.GetMemoryMap = BlGetMemoryMap;
+    EfiLdrProtocol.GetVirtualAddress = BlGetVirtualAddress;
     EfiLdrProtocol.InitializeVirtualMemory = BlInitializeVirtualMemory;
     EfiLdrProtocol.MapVirtualMemory = BlMapVirtualMemory;
     EfiLdrProtocol.GetStack = BlGetStackPointer;
