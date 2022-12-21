@@ -291,6 +291,7 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
     XtLdrProtocol->EnablePaging(&MemoryMappings, VirtualAddress, ImageProtocol, &XtPageMap);
 
     /* Call XTOS kernel */
+    XtLdrProtocol->DbgPrint(L"Booting the XTOS kernel\n");
     KernelEntryPoint(KernelParameters);
 
     /* Return success */
