@@ -9,6 +9,22 @@
 #include <xtbl.h>
 
 
+/**
+ * Creates and switches to a new stack.
+ *
+ * @param StackPtr
+ *        Supplies a pointer to memory area, where the stack will be created.
+ *
+ * @param StackSize
+ *        Specifies a size (in bytes) of the new stack.
+ *
+ * @param Callback
+ *        Supplies a pointer to a callback function that will be executed on top of new stack.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
 VOID
 BlCreateStack(IN PVOID *StackPtr,
               IN ULONG StackSize,
