@@ -18,9 +18,9 @@ BlCreateStack(IN PVOID *StackPtr,
     PVOID StackEnd;
 
     /* Allocate pages for new stack and calculate its end */
-    BlEfiMemoryAllocatePages(StackSize, &Address);
+    BlEfiMemoryAllocatePages(EFI_SIZE_TO_PAGES(StackSize), &Address);
     *StackPtr = (PVOID)(UINT_PTR)Address;
-    StackEnd = (PUINT8)*StackPtr + (StackSize * EFI_PAGE_SIZE) - EFI_PAGE_SIZE;
+    StackEnd = (PUINT8)*StackPtr + (StackSize - EFI_PAGE_SIZE);
 
     /* Create new stack and switch to it immediatelly by calling callback function */
     asm volatile("mov %1, %%eax\n"
@@ -200,8 +200,8 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
 
     /* Map the stack */
     BlGetStackPointer(&Stack);
-    Status = BlAddVirtualMemoryMapping(MemoryMappings, Stack, Stack, KERNEL_STACK_SIZE,
-                                                    LoaderOsloaderStack);
+    Status = BlAddVirtualMemoryMapping(MemoryMappings, Stack, Stack, EFI_SIZE_TO_PAGES(KERNEL_STACK_SIZE),
+                                       LoaderOsloaderStack);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Mapping the stack failed */
@@ -210,8 +210,7 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
 
     /* Map XTLDR code */
     Status = BlAddVirtualMemoryMapping(MemoryMappings, ImageProtocol->ImageBase, ImageProtocol->ImageBase,
-                                                    EFI_SIZE_TO_PAGES(ImageProtocol->ImageSize),
-                                                    LoaderFirmwareTemporary);
+                                       EFI_SIZE_TO_PAGES(ImageProtocol->ImageSize), LoaderFirmwareTemporary);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Mapping the boot loader code failed */
@@ -238,8 +237,8 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
         {
             /* Map memory */
             Status = BlMapVirtualMemory(MemoryMappings, (UINT_PTR)Mapping->VirtualAddress,
-                                                     (UINT_PTR)Mapping->PhysicalAddress, Mapping->NumberOfPages,
-                                                     PaeExtension, PtePointer);
+                                        (UINT_PTR)Mapping->PhysicalAddress, Mapping->NumberOfPages,
+                                        PaeExtension, PtePointer);
             if(Status != STATUS_EFI_SUCCESS)
             {
                 /* Memory mapping failed */

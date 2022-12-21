@@ -17,6 +17,6 @@
 #define KSEG0_KERNEL_BASE                 0x01800000
 
 /* XTOS Kernel stack size */
-#define KERNEL_STACK_SIZE                 8
+#define KERNEL_STACK_SIZE                 0x4000
 
 #endif /* __XTDK_I686_KETYPES_H */
