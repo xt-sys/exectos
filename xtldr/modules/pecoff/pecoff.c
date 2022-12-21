@@ -38,27 +38,43 @@ EFI_STATUS
 PeGetEntryPoint(IN PPECOFF_IMAGE_CONTEXT Image,
                 OUT PVOID *EntryPoint)
 {
-    /* Validate input date */
+    /* Validate input data */
     if(!Image || !Image->PeHeader)
     {
         /* Invalid parameter passed */
         return STATUS_EFI_INVALID_PARAMETER;
     }
 
-    /* Set entry point and return success */
+    /* Get entry point and return success */
     *EntryPoint = (PUINT8)Image->VirtualAddress + Image->PeHeader->OptionalHeader.AddressOfEntryPoint;
     return STATUS_EFI_SUCCESS;
 }
 
+/**
+ * Returns the machine type of the PE/COFF image.
+ *
+ * @param Image
+ *        A pointer to the PE/COFF context structure representing the loaded image.
+ *
+ * @param MachineType
+ *        A pointer to the memory area where a value defined for the 'machine' field will be stored.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
 EFI_STATUS
 PeGetMachineType(IN PPECOFF_IMAGE_CONTEXT Image,
                  OUT PUSHORT MachineType)
 {
+    /* Validate input data */
     if(!Image || !Image->PeHeader)
     {
+        /* Invalid parameter passed */
         return STATUS_EFI_INVALID_PARAMETER;
     }
 
+    /* Get image machine type and return success */
     *MachineType = Image->PeHeader->FileHeader.Machine;
     return STATUS_EFI_SUCCESS;
 }
@@ -80,6 +96,14 @@ EFI_STATUS
 PeGetSubSystem(IN PPECOFF_IMAGE_CONTEXT Image,
                OUT PUSHORT SubSystem)
 {
+    /* Validate input data */
+    if(!Image || !Image->PeHeader)
+    {
+        /* Invalid parameter passed */
+        return STATUS_EFI_INVALID_PARAMETER;
+    }
+
+    /* Get image subsystem and return success */
     *SubSystem = Image->PeHeader->OptionalHeader.Subsystem;
     return STATUS_EFI_SUCCESS;
 }
@@ -297,6 +321,7 @@ PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
     Status = PepRelocateLoadedImage(ImageData);
     if(Status != STATUS_EFI_SUCCESS)
     {
+        /* Failed to relocate image */
         XtLdrProtocol->DbgPrint(L"ERROR: PE/COFF image relocation failed\n");
         return Status;
     }
@@ -523,6 +548,7 @@ PepValidateImageHeaders(IN PPECOFF_IMAGE_DOS_HEADER DosHeader,
         return STATUS_EFI_INCOMPATIBLE_VERSION;
     }
 
+    /* Return success */
     return STATUS_EFI_SUCCESS;
 }
 
