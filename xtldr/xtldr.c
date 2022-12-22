@@ -28,6 +28,16 @@ PVOID EfiLoaderStack;
 CPPORT EfiSerialPort;
 
 
+/**
+ * Gets a pointer to the stack address.
+ *
+ * @param Stack
+ *        Supplies a pointer to the memory area where address to the current stack will be stored.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
 VOID BlGetStackPointer(OUT PVOID *Stack)
 {
     *Stack = EfiLoaderStack;
@@ -348,6 +358,13 @@ BlRegisterXtLoaderProtocol()
                                                                   &EfiLdrProtocol);
 }
 
+/**
+ * Callback routine called right after new stack is created.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
 EFI_STATUS
 BlStartNewStack()
 {

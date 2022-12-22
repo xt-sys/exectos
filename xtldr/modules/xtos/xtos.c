@@ -238,6 +238,19 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
     return STATUS_EFI_SUCCESS;
 }
 
+/**
+ * Initializes and maps the kernel initialization block.
+ *
+ * @param MemoryMappings
+ *        Supplies a pointer to linked list containing all memory mappings.
+ *
+ * @param VirtualAddress
+ *        Supplies a pointer to the next valid, free and available virtual address.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
 EFI_STATUS
 XtpInitializeLoaderBlock(IN PLIST_ENTRY MemoryMappings,
                          IN PVOID *VirtualAddress)
