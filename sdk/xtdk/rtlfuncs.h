@@ -49,6 +49,9 @@ RtlInsertTailList(IN OUT PLIST_ENTRY ListHead,
 BOOLEAN
 RtlListEmpty(PLIST_ENTRY ListHead);
 
+BOOLEAN
+RtlListLoop(IN PLIST_ENTRY ListHead);
+
 XTAPI
 VOID
 RtlMoveMemory(OUT PVOID Destination,

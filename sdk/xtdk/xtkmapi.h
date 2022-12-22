@@ -36,6 +36,7 @@
 
 /* XT routines */
 #include "hlfuncs.h"
+#include "kefuncs.h"
 #include "rtlfuncs.h"
 
 /* Architecture specific XT routines*/
