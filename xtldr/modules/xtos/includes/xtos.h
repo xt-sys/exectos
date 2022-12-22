@@ -24,6 +24,10 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
                 IN PXT_BOOT_PROTOCOL_PARAMETERS Parameters);
 
 EFI_STATUS
+XtpInitializeLoaderBlock(IN PLIST_ENTRY MemoryMappings,
+                         IN PVOID *VirtualAddress);
+
+EFI_STATUS
 XtpLoadModule(IN PEFI_FILE_HANDLE BootDir,
               IN PWCHAR FileName,
               IN PVOID VirtualAddress,

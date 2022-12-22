@@ -6,7 +6,7 @@
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <blmod.h>
+#include <dummy.h>
 
 
 /* EFI Image Handle */

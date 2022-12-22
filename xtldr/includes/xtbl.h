@@ -112,7 +112,8 @@ BlFindVolumeDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL FsHandle,
 EFI_STATUS
 BlGetMemoryMap(OUT PEFI_MEMORY_MAP MemoryMap);
 
-VOID BlGetStackPointer(OUT PVOID *Stack);
+VOID
+BlGetStackPointer(OUT PVOID *Stack);
 
 EFI_STATUS
 BlGetVirtualAddress(IN PLIST_ENTRY MemoryMappings,
@@ -131,6 +132,9 @@ BlInitializeVirtualMemory(IN OUT PLIST_ENTRY MemoryMappings,
 
 EFI_STATUS
 BlLoadEfiModules();
+
+EFI_STATUS
+BlLoadXtSystem();
 
 EFI_STATUS
 BlMapVirtualMemory(IN PLIST_ENTRY MemoryMappings,

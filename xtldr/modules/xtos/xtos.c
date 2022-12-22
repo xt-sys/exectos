@@ -151,66 +151,6 @@ XtBootSystem(IN PXT_BOOT_PROTOCOL_PARAMETERS Parameters)
     return XtpBootSequence(BootDir, Parameters);
 }
 
-EFI_STATUS
-XtpInitializeLoaderBlock(IN PLIST_ENTRY MemoryMappings, IN PVOID *VirtualAddress)
-{
-    PKERNEL_INITIALIZATION_BLOCK LoaderBlock;
-    EFI_PHYSICAL_ADDRESS Address;
-    PVOID RuntimeServices;
-    EFI_STATUS Status;
-    UINT BlockPages;
-
-    /* Calculate number of pages needed for initialization block */
-    BlockPages = EFI_SIZE_TO_PAGES(sizeof(KERNEL_INITIALIZATION_BLOCK));
-
-    /* Allocate memory for kernel initialization block */
-    Status = XtLdrProtocol->AllocatePages(BlockPages, &Address);
-    if(Status != STATUS_EFI_SUCCESS)
-    {
-        /* Memory allocation failure */
-        return Status;
-    }
-
-    /* Initialize and zero-fill kernel initialization block */
-    LoaderBlock = (PKERNEL_INITIALIZATION_BLOCK)(UINT_PTR)Address;
-    RtlZeroMemory(LoaderBlock, sizeof(KERNEL_INITIALIZATION_BLOCK));
-
-    /* Set basic loader block properties */
-    LoaderBlock->Size = sizeof(KERNEL_INITIALIZATION_BLOCK);
-    LoaderBlock->Version = INITIALIZATION_BLOCK_VERSION;
-
-    /* No kernel stack available now */
-    LoaderBlock->KernelStack = (ULONG_PTR)NULL;
-
-    /* Set LoaderInformation block properties */
-    LoaderBlock->LoaderInformation.DbgPrint = XtLdrProtocol->DbgPrint;
-
-    /* Attempt to find virtual address of the EFI Runtime Services */
-    Status = XtLdrProtocol->GetVirtualAddress(MemoryMappings, &EfiSystemTable->RuntimeServices->Hdr, &RuntimeServices);
-    if(Status == STATUS_EFI_SUCCESS)
-    {
-        /* Set FirmwareInformation block properties */
-        LoaderBlock->FirmwareInformation.FirmwareType = SystemFirmwareEfi;
-        LoaderBlock->FirmwareInformation.EfiFirmware.EfiVersion = EfiSystemTable->Hdr.Revision;
-        LoaderBlock->FirmwareInformation.EfiFirmware.EfiRuntimeServices = RuntimeServices;
-    }
-    else
-    {
-        /* Set invalid firmware type to indicate that kernel cannot rely on FirmwareInformation block */
-        LoaderBlock->FirmwareInformation.FirmwareType = SystemFirmwareInvalid;
-    }
-
-    /* Map kernel initialization block */
-    XtLdrProtocol->AddVirtualMemoryMapping(MemoryMappings, *VirtualAddress, (PVOID)LoaderBlock,
-                                           BlockPages, LoaderSystemBlock);
-
-    /* Calculate next valid virtual address */
-    *VirtualAddress += (UINT_PTR)(BlockPages * EFI_PAGE_SIZE);
-
-    /* Return success */
-    return STATUS_EFI_SUCCESS;
-}
-
 /**
  * This routine initiates an XTOS boot sequence.
  *
@@ -293,6 +233,67 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
     /* Call XTOS kernel */
     XtLdrProtocol->DbgPrint(L"Booting the XTOS kernel\n");
     KernelEntryPoint(KernelParameters);
+
+    /* Return success */
+    return STATUS_EFI_SUCCESS;
+}
+
+EFI_STATUS
+XtpInitializeLoaderBlock(IN PLIST_ENTRY MemoryMappings,
+                         IN PVOID *VirtualAddress)
+{
+    PKERNEL_INITIALIZATION_BLOCK LoaderBlock;
+    EFI_PHYSICAL_ADDRESS Address;
+    PVOID RuntimeServices;
+    EFI_STATUS Status;
+    UINT BlockPages;
+
+    /* Calculate number of pages needed for initialization block */
+    BlockPages = EFI_SIZE_TO_PAGES(sizeof(KERNEL_INITIALIZATION_BLOCK));
+
+    /* Allocate memory for kernel initialization block */
+    Status = XtLdrProtocol->AllocatePages(BlockPages, &Address);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Memory allocation failure */
+        return Status;
+    }
+
+    /* Initialize and zero-fill kernel initialization block */
+    LoaderBlock = (PKERNEL_INITIALIZATION_BLOCK)(UINT_PTR)Address;
+    RtlZeroMemory(LoaderBlock, sizeof(KERNEL_INITIALIZATION_BLOCK));
+
+    /* Set basic loader block properties */
+    LoaderBlock->Size = sizeof(KERNEL_INITIALIZATION_BLOCK);
+    LoaderBlock->Version = INITIALIZATION_BLOCK_VERSION;
+
+    /* No kernel stack available now */
+    LoaderBlock->KernelStack = (ULONG_PTR)NULL;
+
+    /* Set LoaderInformation block properties */
+    LoaderBlock->LoaderInformation.DbgPrint = XtLdrProtocol->DbgPrint;
+
+    /* Attempt to find virtual address of the EFI Runtime Services */
+    Status = XtLdrProtocol->GetVirtualAddress(MemoryMappings, &EfiSystemTable->RuntimeServices->Hdr, &RuntimeServices);
+    if(Status == STATUS_EFI_SUCCESS)
+    {
+        /* Set FirmwareInformation block properties */
+        LoaderBlock->FirmwareInformation.FirmwareType = SystemFirmwareEfi;
+        LoaderBlock->FirmwareInformation.EfiFirmware.EfiVersion = EfiSystemTable->Hdr.Revision;
+        LoaderBlock->FirmwareInformation.EfiFirmware.EfiRuntimeServices = RuntimeServices;
+    }
+    else
+    {
+        /* Set invalid firmware type to indicate that kernel cannot rely on FirmwareInformation block */
+        LoaderBlock->FirmwareInformation.FirmwareType = SystemFirmwareInvalid;
+    }
+
+    /* Map kernel initialization block */
+    XtLdrProtocol->AddVirtualMemoryMapping(MemoryMappings, *VirtualAddress, (PVOID)LoaderBlock,
+                                           BlockPages, LoaderSystemBlock);
+
+    /* Calculate next valid virtual address */
+    *VirtualAddress += (UINT_PTR)(BlockPages * EFI_PAGE_SIZE);
 
     /* Return success */
     return STATUS_EFI_SUCCESS;

@@ -263,7 +263,8 @@ BlLoadEfiModules()
  *
  * @since XT 1.0
  */
-EFI_STATUS BlLoadXtSystem()
+EFI_STATUS
+BlLoadXtSystem()
 {
     EFI_GUID ProtocolGuid = XT_XTOS_BOOT_PROTOCOL_GUID;
     XT_BOOT_PROTOCOL_PARAMETERS BootParameters;
