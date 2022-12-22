@@ -51,6 +51,13 @@ HlCpuId(IN OUT PCPUID_REGISTERS Registers)
     return TRUE;
 }
 
+/**
+ * Halts the central processing unit (CPU).
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
 XTAPI
 VOID
 HlHalt()

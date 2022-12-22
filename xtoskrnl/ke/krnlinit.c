@@ -12,6 +12,9 @@
 /**
  * This routine starts up the XT kernel. It is called by boot loader.
  *
+ * @param Parameters
+ *        Supplies a pointer to memory area containing parameters passed to kernel by bootloader.
+ *
  * @return This routine does not return any value.
  *
  * @since XT 1.0
