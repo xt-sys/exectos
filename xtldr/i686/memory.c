@@ -79,9 +79,9 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
 {
     UINT_PTR PhysicalAddress, DescriptorCount;
     EFI_PHYSICAL_ADDRESS Address, PDPTAddress = 0;
+    PCPUID_REGISTERS CpuRegisters = NULL;
     PEFI_MEMORY_DESCRIPTOR Descriptor;
     PLOADER_MEMORY_MAPPING Mapping;
-    PCPUID_REGISTERS CpuRegisters;
     PEFI_MEMORY_MAP MemoryMap;
     PLIST_ENTRY ListEntry;
     BOOLEAN PaeExtension;
