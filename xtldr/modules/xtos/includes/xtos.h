@@ -35,7 +35,7 @@ XtpLoadModule(IN PEFI_FILE_HANDLE BootDir,
               OUT PPECOFF_IMAGE_CONTEXT *ImageContext);
 
 EFI_STATUS
-BlXtLdrModuleMain(EFI_HANDLE ImageHandle,
-                  PEFI_SYSTEM_TABLE SystemTable);
+BlXtLdrModuleMain(IN EFI_HANDLE ImageHandle,
+                  IN PEFI_SYSTEM_TABLE SystemTable);
 
 #endif /* __XTLDR_MODULES_XTOS_H */

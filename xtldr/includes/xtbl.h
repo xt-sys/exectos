@@ -37,7 +37,7 @@ BlAddVirtualMemoryMapping(IN PLIST_ENTRY MemoryMappings,
                           IN PVOID VirtualAddress,
                           IN PVOID PhysicalAddress,
                           IN UINT NumberOfPages,
-                          LOADER_MEMORY_TYPE MemoryType);
+                          IN LOADER_MEMORY_TYPE MemoryType);
 
 EFI_STATUS
 BlCloseVolume(IN PEFI_HANDLE VolumeHandle);

@@ -69,9 +69,9 @@ RtlStringLength(IN CONST PUCHAR String,
  */
 XTCDECL
 INT
-RtlStringToWideString(PWCHAR Destination,
-                      CONST PUCHAR *Source,
-                      SIZE_T Length)
+RtlStringToWideString(OUT PWCHAR Destination,
+                      IN CONST PUCHAR *Source,
+                      IN SIZE_T Length)
 {
     PUCHAR LocalSource = *Source;
     SIZE_T Count = Length;

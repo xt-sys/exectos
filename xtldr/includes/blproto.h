@@ -14,7 +14,7 @@
 
 
 /* Loader protocol routine pointers */
-typedef EFI_STATUS (*PBL_ADD_VIRTUAL_MEMORY_MAPPING)(IN PLIST_ENTRY MemoryMappings, IN PVOID VirtualAddress, IN PVOID PhysicalAddress, IN UINT NumberOfPages, LOADER_MEMORY_TYPE MemoryType);
+typedef EFI_STATUS (*PBL_ADD_VIRTUAL_MEMORY_MAPPING)(IN PLIST_ENTRY MemoryMappings, IN PVOID VirtualAddress, IN PVOID PhysicalAddress, IN UINT NumberOfPages, IN LOADER_MEMORY_TYPE MemoryType);
 typedef EFI_STATUS (*PBL_ALLOCATE_PAGES)(IN UINT64 Size, OUT PEFI_PHYSICAL_ADDRESS Memory);
 typedef EFI_STATUS (*PBL_ALLOCATE_POOL)(IN UINT_PTR Size, OUT PVOID *Memory);
 typedef EFI_STATUS (*PBL_ENABLE_PAGING)(IN PLIST_ENTRY MemoryMappings, IN PVOID VirtualAddress, IN PEFI_LOADED_IMAGE_PROTOCOL ImageProtocol, IN PVOID *PtePointer);

@@ -40,11 +40,11 @@ RtlInitializeListHead32(IN PLIST_ENTRY32 ListHead);
 
 VOID
 RtlInsertHeadList(IN OUT PLIST_ENTRY ListHead,
-                  IN OUT PLIST_ENTRY Entry);
+                  IN PLIST_ENTRY Entry);
 
 VOID
 RtlInsertTailList(IN OUT PLIST_ENTRY ListHead,
-                  IN OUT PLIST_ENTRY Entry);
+                  IN PLIST_ENTRY Entry);
 
 BOOLEAN
 RtlListEmpty(PLIST_ENTRY ListHead);
@@ -80,9 +80,9 @@ RtlStringLength(IN CONST PUCHAR String,
 
 XTCDECL
 INT
-RtlStringToWideString(PWCHAR Destination,
-                      CONST PUCHAR *Source,
-                      SIZE_T Length);
+RtlStringToWideString(OUT PWCHAR Destination,
+                      IN CONST PUCHAR *Source,
+                      IN SIZE_T Length);
 
 XTCDECL
 INT
@@ -92,9 +92,9 @@ RtlWideStringCompare(IN CONST PWCHAR String1,
 
 XTCDECL
 PWCHAR
-RtlWideStringConcatenate(PWCHAR Destination,
-                         PWCHAR Source,
-                         SIZE_T Count);
+RtlWideStringConcatenate(OUT PWCHAR Destination,
+                         IN PWCHAR Source,
+                         IN SIZE_T Count);
 
 XTCDECL
 SIZE_T

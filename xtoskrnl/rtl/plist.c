@@ -58,7 +58,7 @@ RtlInitializeListHead32(IN PLIST_ENTRY32 ListHead)
  */
 VOID
 RtlInsertHeadList(IN OUT PLIST_ENTRY ListHead,
-                  IN OUT PLIST_ENTRY Entry)
+                  IN PLIST_ENTRY Entry)
 {
     Entry->Flink = ListHead->Flink;
     Entry->Blink = ListHead;
@@ -81,7 +81,7 @@ RtlInsertHeadList(IN OUT PLIST_ENTRY ListHead,
  */
 VOID
 RtlInsertTailList(IN OUT PLIST_ENTRY ListHead,
-                  IN OUT PLIST_ENTRY Entry)
+                  IN PLIST_ENTRY Entry)
 {
     Entry->Flink = ListHead;
     Entry->Blink = ListHead->Blink;

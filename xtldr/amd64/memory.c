@@ -73,9 +73,9 @@ BlCreateStack(IN PVOID *StackPtr,
  */
 EFI_STATUS
 BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
-                IN PVOID VirtualAddress,
-                IN PEFI_LOADED_IMAGE_PROTOCOL ImageProtocol,
-                IN PVOID *PtePointer)
+               IN PVOID VirtualAddress,
+               IN PEFI_LOADED_IMAGE_PROTOCOL ImageProtocol,
+               IN PVOID *PtePointer)
 {
     PLOADER_MEMORY_MAPPING Mapping;
     EFI_PHYSICAL_ADDRESS Address;

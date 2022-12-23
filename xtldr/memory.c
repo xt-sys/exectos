@@ -36,7 +36,7 @@ BlAddVirtualMemoryMapping(IN PLIST_ENTRY MemoryMappings,
                           IN PVOID VirtualAddress,
                           IN PVOID PhysicalAddress,
                           IN UINT NumberOfPages,
-                          LOADER_MEMORY_TYPE MemoryType)
+                          IN LOADER_MEMORY_TYPE MemoryType)
 {
     PLOADER_MEMORY_MAPPING Mapping1, Mapping2, Mapping3;
     PVOID PhysicalAddressEnd, PhysicalAddress2End;
