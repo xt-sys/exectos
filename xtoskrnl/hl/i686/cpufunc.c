@@ -114,86 +114,70 @@ HlIoPortOutByte(IN USHORT Port,
 }
 
 /**
- * Reads the CR0 register and returns its value.
+ * Reads the specified CPU control register and returns its value.
  *
- * @return The value stored in the CR0 register.
+ * @param ControlRegister
+ *        Supplies a number of a control register which controls the general behavior of a CPU.
  *
- * @since XT 1.0
- */
-XTAPI
-ULONG_PTR
-HlReadCR0()
-{
-    ULONG_PTR Value;
-    asm volatile("mov %%cr0, %0"
-                 : "=r" (Value)
-                 :
-                 : "memory");
-    return Value;
-}
-
-/**
- * Reads the CR2 register and returns its value.
- *
- * @return The value stored in the CR2 register.
+ * @return The value stored in the control register.
  *
  * @since XT 1.0
  */
 XTAPI
 ULONG_PTR
-HlReadCR2()
+HlReadControlRegister(USHORT ControlRegister)
 {
     ULONG_PTR Value;
-    asm volatile("mov %%cr2, %0"
-                 : "=r" (Value)
-                 :
-                 : "memory");
+
+    /* Read a value from specified CR register */
+    switch(ControlRegister)
+    {
+        case 0:
+            /* Read value from CR0 */
+            asm volatile("mov %%cr0, %0"
+                         : "=r" (Value)
+                         :
+                         : "memory");
+            break;
+        case 2:
+            /* Read value from CR2 */
+            asm volatile("mov %%cr2, %0"
+                         : "=r" (Value)
+                         :
+                         : "memory");
+            break;
+        case 3:
+            /* Read value from CR3 */
+            asm volatile("mov %%cr3, %0"
+                         : "=r" (Value)
+                         :
+                         : "memory");
+            break;
+        case 4:
+            /* Read value from CR4 */
+            asm volatile("mov %%cr4, %0"
+                         : "=r" (Value)
+                         :
+                         : "memory");
+            break;
+        default:
+            /* Invalid control register set */
+            Value = 0;
+            break;
+    }
+
+    /* Return value read from given CR register */
     return Value;
 }
 
 /**
- * Reads the CR3 register and returns its value.
+ * Writes a value to the specified CPU control register.
  *
- * @return The value stored in the CR3 register.
+ * @param ControlRegister
+ *        Supplies a number of a control register which controls the general behavior of a CPU.
  *
- * @since XT 1.0
- */
-XTAPI
-ULONG_PTR
-HlReadCR3()
-{
-    ULONG_PTR Value;
-    asm volatile("mov %%cr3, %0"
-                 : "=r" (Value)
-                 :
-                 : "memory");
-    return Value;
-}
-
-/**
- * Reads the CR4 register and returns its value.
- *
- * @return The value stored in the CR4 register.
- *
- * @since XT 1.0
- */
-XTAPI
-ULONG_PTR
-HlReadCR4()
-{
-    ULONG_PTR Value;
-    asm volatile("mov %%cr4, %0"
-                 : "=r" (Value)
-                 :
-                 : "memory");
-    return Value;
-}
-
-/**
- * Writes the value to the CR0 register.
- *
- * @param Data
- *        The value to write to the CR0 register.
+ * @param Value
+ *        Suplies a value to write to the CR register.
  *
  * @return This routine does not return any value.
  *
@@ -201,70 +185,39 @@ HlReadCR4()
  */
 XTAPI
 VOID
-HlWriteCR0(UINT_PTR Data)
+HlWriteControlRegister(USHORT ControlRegister,
+                       UINT_PTR Value)
 {
-    asm volatile("mov %0, %%cr0"
-                 :
-                 : "r"(Data)
-                 : "memory");
-}
-
-/**
- * Writes the value to the CR2 register.
- *
- * @param Data
- *        The value to write to the CR2 register.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTAPI
-VOID
-HlWriteCR2(UINT_PTR Data)
-{
-    asm volatile("mov %0, %%cr2"
-                 :
-                 : "r"(Data)
-                 : "memory");
-}
-
-/**
- * Writes the value to the CR3 register.
- *
- * @param Data
- *        The value to write to the CR3 register.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTAPI
-VOID
-HlWriteCR3(UINT_PTR Data)
-{
-    asm volatile("mov %0, %%cr3"
-                 :
-                 : "r"(Data)
-                 : "memory");
-}
-
-/**
- * Writes the value to the CR4 register.
- *
- * @param Data
- *        The value to write to the CR4 register.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTAPI
-VOID
-HlWriteCR4(UINT_PTR Data)
-{
-    asm volatile("mov %0, %%cr4"
-                 :
-                 : "r"(Data)
-                 : "memory");
+    /* Write a value into specified control register */
+    switch(ControlRegister)
+    {
+        case 0:
+            /* Write value to CR0 */
+            asm volatile("mov %0, %%cr0"
+                         :
+                         : "r"(Value)
+                         : "memory");
+            break;
+        case 2:
+            /* Write value to CR2 */
+            asm volatile("mov %0, %%cr2"
+                         :
+                         : "r"(Value)
+                         : "memory");
+            break;
+        case 3:
+            /* Write value to CR3 */
+            asm volatile("mov %0, %%cr3"
+                         :
+                         : "r"(Value)
+                         : "memory");
+            break;
+        case 4:
+            /* Write value to CR4 */
+            asm volatile("mov %0, %%cr4"
+                         :
+                         : "r"(Value)
+                         : "memory");
+            break;
+    }
 }

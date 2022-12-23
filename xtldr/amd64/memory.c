@@ -168,7 +168,7 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
                                                           MemoryMap->DescriptorVersion, MemoryMap->Map);
 
     /* Write PML4 to CR3 */
-    HlWriteCR3((UINT_PTR)*PtePointer);
+    HlWriteControlRegister(3, (UINT_PTR)*PtePointer);
 
     /* Return success */
     return STATUS_EFI_SUCCESS;

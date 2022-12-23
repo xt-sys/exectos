@@ -170,7 +170,7 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
         VirtualAddress = (PVOID)(UINT_PTR)(PDPTAddress + EFI_PAGE_SIZE + KSEG0_BASE);
 
         /* Set base page frame number */
-        Address = 0x100000; // MEM_TOP_DOWN ?
+        Address = 0x100000;
 
         /* Allocate pages for the PFN */
         Status = BlEfiMemoryAllocatePages(4, &Address);
@@ -278,14 +278,14 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
     if(PaeExtension)
     {
         /* Enable Physical Address Extension (PAE) */
-        HlWriteCR4(HlReadCR4() | 0x00000020);
+        HlWriteControlRegister(4, HlReadControlRegister(4) | 0x00000020);
     }
 
     /* Write page mappings to CR3 */
-    HlWriteCR3((UINT_PTR)*PtePointer);
+    HlWriteControlRegister(3, (UINT_PTR)*PtePointer);
 
     /* Enable paging */
-    HlWriteCR0(HlReadCR0() | 0x80000000);
+    HlWriteControlRegister(0, HlReadControlRegister(0) | 0x80000000);
 
     /* Return success */
     return STATUS_EFI_SUCCESS;

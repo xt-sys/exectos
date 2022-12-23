@@ -37,34 +37,11 @@ HlIoPortOutByte(IN USHORT Port,
 
 XTAPI
 ULONG_PTR
-HlReadCR0();
-
-XTAPI
-ULONG_PTR
-HlReadCR2();
-
-XTAPI
-ULONG_PTR
-HlReadCR3();
-
-XTAPI
-ULONG_PTR
-HlReadCR4();
+HlReadControlRegister(USHORT ControlRegister);
 
 XTAPI
 VOID
-HlWriteCR0(IN UINT_PTR Data);
-
-XTAPI
-VOID
-HlWriteCR2(IN UINT_PTR Data);
-
-XTAPI
-VOID
-HlWriteCR3(IN UINT_PTR Data);
-
-XTAPI
-VOID
-HlWriteCR4(IN UINT_PTR Data);
+HlWriteControlRegister(USHORT ControlRegister,
+                       UINT_PTR Value);
 
 #endif /* __XTDK_I686_HLFUNCS_H */

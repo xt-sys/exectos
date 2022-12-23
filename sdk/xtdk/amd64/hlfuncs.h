@@ -37,42 +37,11 @@ HlIoPortOutByte(IN USHORT Port,
 
 XTAPI
 ULONG_PTR
-HlReadCR0();
-
-XTAPI
-ULONG_PTR
-HlReadCR2();
-
-XTAPI
-ULONG_PTR
-HlReadCR3();
-
-XTAPI
-ULONG_PTR
-HlReadCR4();
-
-XTAPI
-ULONG_PTR
-HlReadCR8();
+HlReadControlRegister(USHORT ControlRegister);
 
 XTAPI
 VOID
-HlWriteCR0(UINT_PTR Data);
-
-XTAPI
-VOID
-HlWriteCR2(UINT_PTR Data);
-
-XTAPI
-VOID
-HlWriteCR3(UINT_PTR Data);
-
-XTAPI
-VOID
-HlWriteCR4(UINT_PTR Data);
-
-XTAPI
-VOID
-HlWriteCR8(UINT_PTR Data);
+HlWriteControlRegister(USHORT ControlRegister,
+                       UINT_PTR Value);
 
 #endif /* __XTDK_AMD64_HLFUNCS_H */
