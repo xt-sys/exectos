@@ -18,30 +18,30 @@
 extern ULONG ComPortAddress[];
 
 /* HAL library routines forward references */
-XTAPI
+XTCDECL
 BOOLEAN
 HlCpuId(IN OUT PCPUID_REGISTERS Registers);
 
-XTAPI
+XTCDECL
 VOID
 HlHalt();
 
-XTAPI
+XTCDECL
 UCHAR
 HlIoPortInByte(IN USHORT Port);
 
-XTAPI
+XTCDECL
 VOID
 HlIoPortOutByte(IN USHORT Port,
                 IN UCHAR Data);
 
-XTAPI
+XTCDECL
 ULONG_PTR
-HlReadControlRegister(USHORT ControlRegister);
+HlReadControlRegister(IN USHORT ControlRegister);
 
-XTAPI
+XTCDECL
 VOID
-HlWriteControlRegister(USHORT ControlRegister,
-                       UINT_PTR Value);
+HlWriteControlRegister(IN USHORT ControlRegister,
+                       IN UINT_PTR Value);
 
 #endif /* __XTDK_I686_HLFUNCS_H */

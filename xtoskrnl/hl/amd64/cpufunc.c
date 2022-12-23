@@ -19,7 +19,7 @@
  *
  * @since XT 1.0
  */
-XTAPI
+XTCDECL
 BOOLEAN
 HlCpuId(IN OUT PCPUID_REGISTERS Registers)
 {
@@ -58,7 +58,7 @@ HlCpuId(IN OUT PCPUID_REGISTERS Registers)
  *
  * @since XT 1.0
  */
-XTAPI
+XTCDECL
 VOID
 HlHalt()
 {
@@ -78,7 +78,7 @@ HlHalt()
  *
  * @since XT 1.0
  */
-XTAPI
+XTCDECL
 UCHAR
 HlIoPortInByte(IN USHORT Port)
 {
@@ -102,7 +102,7 @@ HlIoPortInByte(IN USHORT Port)
  *
  * @since XT 1.0
  */
-XTAPI
+XTCDECL
 VOID
 HlIoPortOutByte(IN USHORT Port,
                 IN UCHAR Value)
@@ -123,9 +123,9 @@ HlIoPortOutByte(IN USHORT Port,
  *
  * @since XT 1.0
  */
-XTAPI
+XTCDECL
 ULONG_PTR
-HlReadControlRegister(USHORT ControlRegister)
+HlReadControlRegister(IN USHORT ControlRegister)
 {
     ULONG_PTR Value;
 
@@ -189,10 +189,10 @@ HlReadControlRegister(USHORT ControlRegister)
  *
  * @since XT 1.0
  */
-XTAPI
+XTCDECL
 VOID
-HlWriteControlRegister(USHORT ControlRegister,
-                       UINT_PTR Value)
+HlWriteControlRegister(IN USHORT ControlRegister,
+                       IN UINT_PTR Value)
 {
     /* Write a value into specified control register */
     switch(ControlRegister)
