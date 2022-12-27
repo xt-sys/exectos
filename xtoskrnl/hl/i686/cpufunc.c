@@ -76,10 +76,27 @@ XTCDECL
 VOID
 HlHalt()
 {
-    while(TRUE)
-    {
-        asm volatile("hlt");
-    }
+    asm volatile("hlt");
+}
+
+/**
+ * Invalidates the TLB (Translation Lookaside Buffer) for specified virtual address.
+ *
+ * @param Address
+ *        Suuplies a virtual address whose associated TLB entry will be invalidated.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+HlInvalidateTlbEntry(PVOID Address)
+{
+    asm volatile("invlpg (%0)"
+                 :
+                 : "b"(Address)
+                 : "memory");
 }
 
 /**
@@ -275,6 +292,28 @@ HlReadControlRegister(IN USHORT ControlRegister)
 }
 
 /**
+ * Reads a 64-bit value from the requested Model Specific Register (MSR).
+ *
+ * @param Register
+ *        Supplies the MSR to read.
+ *
+ * @return This routine returns the 64-bit MSR value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+ULONGLONG
+HlReadModelSpecificRegister(IN ULONG Register)
+{
+    ULONGLONG Value;
+
+    asm volatile("rdmsr"
+                 : "=A" (Value)
+                 : "c" (Register));
+    return Value;
+}
+
+/**
  * Instructs the processor to set the interrupt flag.
  *
  * @return This routine does not return any value.
@@ -338,4 +377,28 @@ HlWriteControlRegister(IN USHORT ControlRegister,
                          : "memory");
             break;
     }
+}
+
+/**
+ * Writes a 64-bit value to the requested Model Specific Register (MSR).
+ *
+ * @param Register
+ *        Supplies the MSR register to write.
+ *
+ * @param Value
+ *        Supplies the 64-bit value to write.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+HlWriteModelSpecificRegister(IN ULONG Register,
+                             IN ULONGLONG Value)
+{
+    asm volatile("wrmsr"
+                 :
+                 : "c" (Register),
+                 "A" (Value));
 }

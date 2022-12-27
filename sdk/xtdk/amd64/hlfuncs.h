@@ -31,6 +31,10 @@ VOID
 HlHalt();
 
 XTCDECL
+VOID
+HlInvalidateTlbEntry(IN PVOID Address);
+
+XTCDECL
 UCHAR
 HlIoPortInByte(IN USHORT Port);
 
@@ -62,6 +66,10 @@ ULONG_PTR
 HlReadControlRegister(IN USHORT ControlRegister);
 
 XTCDECL
+ULONGLONG
+HlReadModelSpecificRegister(IN ULONG Register);
+
+XTCDECL
 VOID
 HlSetInterruptFlag();
 
@@ -69,5 +77,10 @@ XTCDECL
 VOID
 HlWriteControlRegister(IN USHORT ControlRegister,
                        IN UINT_PTR Value);
+
+XTCDECL
+VOID
+HlWriteModelSpecificRegister(IN ULONG Register,
+                             IN ULONGLONG Value);
 
 #endif /* __XTDK_AMD64_HLFUNCS_H */
