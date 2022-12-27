@@ -10,6 +10,20 @@
 
 
 /**
+ * Instructs the processor to clear the interrupt flag.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+HlClearInterruptFlag()
+{
+    asm volatile("cli");
+}
+
+/**
  * Retrieves a various amount of information about the CPU.
  *
  * @param Registers
@@ -168,6 +182,20 @@ HlReadControlRegister(IN USHORT ControlRegister)
 
     /* Return value read from given CR register */
     return Value;
+}
+
+/**
+ * Instructs the processor to set the interrupt flag.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+HlSetInterruptFlag()
+{
+    asm volatile("sti");
 }
 
 /**

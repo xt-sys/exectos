@@ -19,6 +19,10 @@ extern ULONG ComPortAddress[];
 
 /* HAL library routines forward references */
 XTCDECL
+VOID
+HlClearInterruptFlag();
+
+XTCDECL
 BOOLEAN
 HlCpuId(IN OUT PCPUID_REGISTERS Registers);
 
@@ -38,6 +42,10 @@ HlIoPortOutByte(IN USHORT Port,
 XTCDECL
 ULONG_PTR
 HlReadControlRegister(IN USHORT ControlRegister);
+
+XTCDECL
+VOID
+HlSetInterruptFlag();
 
 XTCDECL
 VOID

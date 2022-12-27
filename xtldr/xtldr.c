@@ -380,6 +380,7 @@ BlStartNewStack()
 
     /* Infinite bootloader loop */
     BlEfiPrint(L"System halted!");
+    HlClearInterruptFlag();
     HlHalt();
 
     /* Return success */
@@ -461,6 +462,7 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
     /* Infinite bootloader loop */
     BlDbgPrint(L"ERROR: Unexpected exception occurred, probably did not create a new stack\n");
     BlEfiPrint(L"System halted!");
+    HlClearInterruptFlag();
     HlHalt();
 
     /* Return success */
