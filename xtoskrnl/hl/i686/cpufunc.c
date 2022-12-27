@@ -114,10 +114,10 @@ HlIoPortInByte(IN USHORT Port)
  * @since XT 1.0
  */
 XTCDECL
-UCHAR
+USHORT
 HlIoPortInShort(IN USHORT Port)
 {
-    UCHAR Value;
+    USHORT Value;
     asm volatile("inw %1, %0"
                  : "=a"(Value)
                  : "Nd"(Port));
@@ -135,10 +135,10 @@ HlIoPortInShort(IN USHORT Port)
  * @since XT 1.0
  */
 XTCDECL
-UCHAR
+ULONG
 HlIoPortInLong(IN USHORT Port)
 {
-    UCHAR Value;
+    ULONG Value;
     asm volatile("inl %1, %0"
                  : "=a"(Value)
                  : "Nd"(Port));
@@ -209,7 +209,7 @@ HlIoPortOutShort(IN USHORT Port,
 XTCDECL
 VOID
 HlIoPortOutLong(IN USHORT Port,
-                IN UINT Value)
+                IN ULONG Value)
 {
     asm volatile("outl %0, %1"
                  :
