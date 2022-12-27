@@ -70,6 +70,10 @@ ULONGLONG
 HlReadModelSpecificRegister(IN ULONG Register);
 
 XTCDECL
+ULONGLONG
+HlReadTimeStampCounter();
+
+XTCDECL
 VOID
 HlSetInterruptFlag();
 

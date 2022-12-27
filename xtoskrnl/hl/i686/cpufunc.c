@@ -314,6 +314,25 @@ HlReadModelSpecificRegister(IN ULONG Register)
 }
 
 /**
+ * Reads the current value of the CPU's time-stamp counter.
+ *
+ * @return This routine returns the current instruction cycle count since the processor was started.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+ULONGLONG
+HlReadTimeStampCounter()
+{
+    ULONGLONG Value;
+
+    asm volatile("rdtsc"
+                 : "=A"(Value));
+
+    return Value;
+}
+
+/**
  * Instructs the processor to set the interrupt flag.
  *
  * @return This routine does not return any value.
