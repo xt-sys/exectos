@@ -22,6 +22,7 @@ LIST_ENTRY BlBlockDevices;
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 BlCloseVolume(IN PEFI_HANDLE VolumeHandle)
 {
@@ -45,6 +46,7 @@ BlCloseVolume(IN PEFI_HANDLE VolumeHandle)
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 BlEnumerateEfiBlockDevices()
 {
@@ -209,6 +211,7 @@ BlEnumerateEfiBlockDevices()
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 BlFindVolumeDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL FsHandle,
                        IN CONST PWCHAR FileSystemPath,
@@ -292,6 +295,7 @@ BlFindVolumeDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL FsHandle,
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 BlGetVolumeDevicePath(IN PUCHAR SystemPath,
                       OUT PEFI_DEVICE_PATH_PROTOCOL *DevicePath,
@@ -406,6 +410,7 @@ BlGetVolumeDevicePath(IN PUCHAR SystemPath,
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 BlOpenVolume(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
              OUT PEFI_HANDLE DiskHandle,
@@ -478,6 +483,7 @@ BlOpenVolume(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 BlpDiscoverEfiBlockDevices(OUT PLIST_ENTRY BlockDevices)
 {
@@ -581,6 +587,7 @@ BlpDiscoverEfiBlockDevices(OUT PLIST_ENTRY BlockDevices)
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 BlpDissectVolumeArcPath(IN PUCHAR SystemPath,
                         OUT PUCHAR *ArcName,
@@ -736,6 +743,7 @@ BlpDissectVolumeArcPath(IN PUCHAR SystemPath,
  *
  * @since XT 1.0
  */
+XTCDECL
 PEFI_DEVICE_PATH_PROTOCOL
 BlpDuplicateDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath)
 {
@@ -793,6 +801,7 @@ BlpDuplicateDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath)
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 BlpFindLastEfiBlockDeviceNode(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
                               OUT PEFI_DEVICE_PATH_PROTOCOL *LastNode)
@@ -838,6 +847,7 @@ BlpFindLastEfiBlockDeviceNode(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
  *
  * @since XT 1.0
  */
+XTCDECL
 BOOLEAN
 BlpFindParentEfiBlockDevice(IN PLIST_ENTRY BlockDevices,
                             IN PEFI_BLOCK_DEVICE_DATA ChildNode,

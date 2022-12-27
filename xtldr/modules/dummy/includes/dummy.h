@@ -13,6 +13,7 @@
 
 
 /* Dummy module related routines forward references */
+XTCDECL
 EFI_STATUS
 BlXtLdrModuleMain(IN EFI_HANDLE ImageHandle,
                   IN PEFI_SYSTEM_TABLE SystemTable);

@@ -31,6 +31,7 @@
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 BlAddVirtualMemoryMapping(IN PLIST_ENTRY MemoryMappings,
                           IN PVOID VirtualAddress,
@@ -191,6 +192,7 @@ BlAddVirtualMemoryMapping(IN PLIST_ENTRY MemoryMappings,
  *
  * @since XT 1.0
  */
+XTCDECL
 LOADER_MEMORY_TYPE
 BlConvertEfiMemoryType(IN EFI_MEMORY_TYPE EfiMemoryType)
 {
@@ -239,6 +241,7 @@ BlConvertEfiMemoryType(IN EFI_MEMORY_TYPE EfiMemoryType)
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 BlEfiMemoryAllocatePages(IN UINT64 Pages,
                          OUT PEFI_PHYSICAL_ADDRESS Memory)
@@ -259,6 +262,7 @@ BlEfiMemoryAllocatePages(IN UINT64 Pages,
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 BlEfiMemoryAllocatePool(IN UINT_PTR Size,
                         OUT PVOID *Memory)
@@ -280,6 +284,7 @@ BlEfiMemoryAllocatePool(IN UINT_PTR Size,
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 BlEfiMemoryFreePages(IN UINT64 Pages,
                      IN EFI_PHYSICAL_ADDRESS Memory)
@@ -297,6 +302,7 @@ BlEfiMemoryFreePages(IN UINT64 Pages,
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 BlEfiMemoryFreePool(IN PVOID Memory)
 {
@@ -314,6 +320,7 @@ BlEfiMemoryFreePool(IN PVOID Memory)
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 BlGetMemoryMap(OUT PEFI_MEMORY_MAP MemoryMap)
 {
@@ -382,6 +389,7 @@ BlGetMemoryMap(OUT PEFI_MEMORY_MAP MemoryMap)
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 BlGetVirtualAddress(IN PLIST_ENTRY MemoryMappings,
                     IN PVOID PhysicalAddress,
@@ -440,6 +448,7 @@ BlGetVirtualAddress(IN PLIST_ENTRY MemoryMappings,
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 BlInitializeVirtualMemory(IN OUT PLIST_ENTRY MemoryMappings,
                           IN OUT PVOID *MemoryMapAddress)

@@ -16,6 +16,7 @@
  *
  * @since XT 1.0
  */
+XTCDECL
 INT_PTR
 BlEfiGetSecureBootStatus()
 {
@@ -54,6 +55,7 @@ BlEfiGetSecureBootStatus()
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 BlEfiGetSystemConfigurationTable(IN PEFI_GUID TableGuid,
                                  OUT PVOID *Table)

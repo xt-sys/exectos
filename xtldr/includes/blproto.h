@@ -51,9 +51,11 @@ typedef struct _XT_BOOT_LOADER_PROTOCOL
 } XT_BOOT_LOADER_PROTOCOL, *PXT_BOOT_LOADER_PROTOCOL;
 
 /* Loader protocol related routines forward references */
+XTCDECL
 EFI_STATUS
 BlGetXtLoaderProtocol(OUT PXT_BOOT_LOADER_PROTOCOL *LdrProtocol);
 
+XTCDECL
 EFI_STATUS
 BlLoadXtProtocol(OUT PVOID *ProtocolHandler,
                  IN PEFI_GUID ProtocolGuid);

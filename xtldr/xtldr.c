@@ -38,7 +38,9 @@ CPPORT EfiSerialPort;
  *
  * @since XT 1.0
  */
-VOID BlGetStackPointer(OUT PVOID *Stack)
+XTCDECL
+VOID
+BlGetStackPointer(OUT PVOID *Stack)
 {
     *Stack = EfiLoaderStack;
 }
@@ -50,6 +52,7 @@ VOID BlGetStackPointer(OUT PVOID *Stack)
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 BlLoadEfiModules()
 {
@@ -273,6 +276,7 @@ BlLoadEfiModules()
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 BlLoadXtSystem()
 {
@@ -329,6 +333,7 @@ BlLoadXtSystem()
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 BlRegisterXtLoaderProtocol()
 {
@@ -365,6 +370,7 @@ BlRegisterXtLoaderProtocol()
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 BlStartNewStack()
 {
@@ -380,8 +386,11 @@ BlStartNewStack()
 
     /* Infinite bootloader loop */
     BlEfiPrint(L"System halted!");
-    HlClearInterruptFlag();
-    HlHalt();
+    for(;;)
+    {
+        HlClearInterruptFlag();
+        HlHalt();
+    }
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
@@ -400,6 +409,7 @@ BlStartNewStack()
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 BlStartXtLoader(IN EFI_HANDLE ImageHandle,
                 IN PEFI_SYSTEM_TABLE SystemTable)
@@ -462,8 +472,11 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
     /* Infinite bootloader loop */
     BlDbgPrint(L"ERROR: Unexpected exception occurred, probably did not create a new stack\n");
     BlEfiPrint(L"System halted!");
-    HlClearInterruptFlag();
-    HlHalt();
+    for(;;)
+    {
+        HlClearInterruptFlag();
+        HlHalt();
+    }
 
     /* Return success */
     return STATUS_EFI_SUCCESS;

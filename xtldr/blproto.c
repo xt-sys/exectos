@@ -20,6 +20,7 @@
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 BlGetXtLoaderProtocol(OUT PXT_BOOT_LOADER_PROTOCOL *LdrProtocol)
 {
@@ -42,6 +43,7 @@ BlGetXtLoaderProtocol(OUT PXT_BOOT_LOADER_PROTOCOL *LdrProtocol)
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 BlLoadXtProtocol(OUT PVOID *ProtocolHandler,
                  IN PEFI_GUID ProtocolGuid)

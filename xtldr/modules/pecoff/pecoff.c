@@ -34,6 +34,7 @@ XT_PECOFF_IMAGE_PROTOCOL XtPeCoffProtocol;
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 PeGetEntryPoint(IN PPECOFF_IMAGE_CONTEXT Image,
                 OUT PVOID *EntryPoint)
@@ -63,6 +64,7 @@ PeGetEntryPoint(IN PPECOFF_IMAGE_CONTEXT Image,
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 PeGetMachineType(IN PPECOFF_IMAGE_CONTEXT Image,
                  OUT PUSHORT MachineType)
@@ -92,6 +94,7 @@ PeGetMachineType(IN PPECOFF_IMAGE_CONTEXT Image,
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 PeGetSubSystem(IN PPECOFF_IMAGE_CONTEXT Image,
                OUT PUSHORT SubSystem)
@@ -127,6 +130,7 @@ PeGetSubSystem(IN PPECOFF_IMAGE_CONTEXT Image,
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
             IN LOADER_MEMORY_TYPE MemoryType,
@@ -346,6 +350,7 @@ PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 PeRelocateImage(IN PPECOFF_IMAGE_CONTEXT Image,
                 IN EFI_VIRTUAL_ADDRESS Address)
@@ -394,6 +399,7 @@ PeRelocateImage(IN PPECOFF_IMAGE_CONTEXT Image,
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 PepRelocateLoadedImage(IN PPECOFF_IMAGE_CONTEXT Image)
 {
@@ -514,6 +520,7 @@ PepRelocateLoadedImage(IN PPECOFF_IMAGE_CONTEXT Image)
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 PepValidateImageHeaders(IN PPECOFF_IMAGE_DOS_HEADER DosHeader,
                         IN PPECOFF_IMAGE_PE_HEADER PeHeader,
@@ -565,6 +572,7 @@ PepValidateImageHeaders(IN PPECOFF_IMAGE_DOS_HEADER DosHeader,
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 BlXtLdrModuleMain(IN EFI_HANDLE ImageHandle,
                   IN PEFI_SYSTEM_TABLE SystemTable)

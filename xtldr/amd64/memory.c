@@ -25,6 +25,7 @@
  *
  * @since XT 1.0
  */
+XTCDECL
 VOID
 BlCreateStack(IN PVOID *StackPtr,
               IN ULONG StackSize,
@@ -71,6 +72,7 @@ BlCreateStack(IN PVOID *StackPtr,
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
                IN PVOID VirtualAddress,
@@ -199,6 +201,7 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 BlMapVirtualMemory(IN PLIST_ENTRY MemoryMappings,
                    IN UINT_PTR VirtualAddress,

@@ -11,6 +11,7 @@
 
 STATIC PUINT16 HexTable = L"0123456789abcdef";
 
+XTCDECL
 INT
 BlStringCompareInsensitive(IN PUCHAR String1,
                            IN PUCHAR String2)
@@ -69,6 +70,7 @@ BlStringCompareInsensitive(IN PUCHAR String1,
  *
  * @since XT 1.0
  */
+XTCDECL
 VOID
 BlStringPrint(IN VOID PutChar(IN USHORT Character),
               IN PUINT16 Format,
@@ -243,6 +245,7 @@ BlStringPrint(IN VOID PutChar(IN USHORT Character),
  *
  * @since XT 1.0
  */
+XTCDECL
 VOID
 BlpStringFormat(IN VOID PutChar(IN USHORT Character),
                 IN PUINT16 Format,
@@ -276,6 +279,7 @@ BlpStringFormat(IN VOID PutChar(IN USHORT Character),
  *
  * @since XT 1.0
  */
+XTCDECL
 VOID
 BlpStringPrintSigned32(IN VOID PutChar(IN USHORT Character),
                        IN INT32 Number,
@@ -308,6 +312,7 @@ BlpStringPrintSigned32(IN VOID PutChar(IN USHORT Character),
  *
  * @since XT 1.0
  */
+XTCDECL
 VOID
 BlpStringPrintSigned64(IN VOID PutChar(IN USHORT Character),
                        IN INT_PTR Number,
@@ -343,6 +348,7 @@ BlpStringPrintSigned64(IN VOID PutChar(IN USHORT Character),
  *
  * @since XT 1.0
  */
+XTCDECL
 VOID
 BlpStringPrintUnsigned32(IN VOID PutChar(IN USHORT Character),
                          IN UINT32 Number,
@@ -399,6 +405,7 @@ BlpStringPrintUnsigned32(IN VOID PutChar(IN USHORT Character),
  *
  * @since XT 1.0
  */
+XTCDECL
 VOID
 BlpStringPrintUnsigned64(IN VOID PutChar(IN USHORT Character),
                          IN UINT_PTR Number,
@@ -446,6 +453,7 @@ BlpStringPrintUnsigned64(IN VOID PutChar(IN USHORT Character),
  *
  * @since XT 1.0
  */
+XTCDECL
 UINT64
 BlpStringReadPadding(IN PUINT16 *Format)
 {

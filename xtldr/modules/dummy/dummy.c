@@ -31,6 +31,7 @@ PXT_BOOT_LOADER_PROTOCOL XtLdrProtocol;
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 BlXtLdrModuleMain(IN EFI_HANDLE ImageHandle,
                   IN PEFI_SYSTEM_TABLE SystemTable)

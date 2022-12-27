@@ -16,17 +16,21 @@
 typedef VOID (XTAPI *PXT_ENTRY_POINT)(IN PKERNEL_INITIALIZATION_BLOCK BootParameters);
 
 /* XTOS boot protocol related routines forward references */
+XTCDECL
 EFI_STATUS
 XtBootSystem(IN PXT_BOOT_PROTOCOL_PARAMETERS Parameters);
 
+XTCDECL
 EFI_STATUS
 XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
                 IN PXT_BOOT_PROTOCOL_PARAMETERS Parameters);
 
+XTCDECL
 EFI_STATUS
 XtpInitializeLoaderBlock(IN PLIST_ENTRY MemoryMappings,
                          IN PVOID *VirtualAddress);
 
+XTCDECL
 EFI_STATUS
 XtpLoadModule(IN PEFI_FILE_HANDLE BootDir,
               IN PWCHAR FileName,
@@ -34,6 +38,7 @@ XtpLoadModule(IN PEFI_FILE_HANDLE BootDir,
               IN LOADER_MEMORY_TYPE MemoryType,
               OUT PPECOFF_IMAGE_CONTEXT *ImageContext);
 
+XTCDECL
 EFI_STATUS
 BlXtLdrModuleMain(IN EFI_HANDLE ImageHandle,
                   IN PEFI_SYSTEM_TABLE SystemTable);

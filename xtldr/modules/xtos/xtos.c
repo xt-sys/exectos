@@ -37,6 +37,7 @@ PVOID XtPageMap;
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 XtBootSystem(IN PXT_BOOT_PROTOCOL_PARAMETERS Parameters)
 {
@@ -164,6 +165,7 @@ XtBootSystem(IN PXT_BOOT_PROTOCOL_PARAMETERS Parameters)
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
                 IN PXT_BOOT_PROTOCOL_PARAMETERS Parameters)
@@ -251,6 +253,7 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 XtpInitializeLoaderBlock(IN PLIST_ENTRY MemoryMappings,
                          IN PVOID *VirtualAddress)
@@ -334,6 +337,7 @@ XtpInitializeLoaderBlock(IN PLIST_ENTRY MemoryMappings,
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 XtpLoadModule(IN PEFI_FILE_HANDLE SystemDir,
               IN PWCHAR FileName,
@@ -407,6 +411,7 @@ XtpLoadModule(IN PEFI_FILE_HANDLE SystemDir,
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 BlXtLdrModuleMain(IN EFI_HANDLE ImageHandle,
                   IN PEFI_SYSTEM_TABLE SystemTable)

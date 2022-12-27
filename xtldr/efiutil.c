@@ -16,6 +16,7 @@
  *
  * @since XT 1.0
  */
+XTCDECL
 EFI_STATUS
 BlComPortInitialize()
 {
@@ -117,6 +118,7 @@ BlComPortInitialize()
  *
  * @since XT 1.0
  */
+XTCDECL
 VOID
 BlComPortPutChar(IN USHORT Character)
 {
@@ -142,6 +144,7 @@ BlComPortPutChar(IN USHORT Character)
  *
  * @since XT 1.0
  */
+XTCDECL
 VOID
 BlDbgPrint(IN PUINT16 Format,
            IN ...)
@@ -177,6 +180,7 @@ BlDbgPrint(IN PUINT16 Format,
  *
  * @todo Check if GOP is active and use it instead of default conout protocol
  */
+XTCDECL
 VOID
 BlEfiPrint(IN PUINT16 Format,
            IN ...)

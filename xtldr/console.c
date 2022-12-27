@@ -16,6 +16,7 @@
  *
  * @since XT 1.0
  */
+XTCDECL
 VOID
 BlConsoleClearScreen()
 {
@@ -29,6 +30,7 @@ BlConsoleClearScreen()
  * 
  * @since XT 1.0
  */
+XTCDECL
 VOID
 BlConsoleInitialize()
 {
@@ -54,6 +56,7 @@ BlConsoleInitialize()
  *
  * @since XT 1.0
  */
+XTCDECL
 VOID
 BlConsolePutChar(IN USHORT Character)
 {
