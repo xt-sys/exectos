@@ -11,6 +11,19 @@
 
 STATIC PUINT16 HexTable = L"0123456789abcdef";
 
+/**
+ * Compares two strings without sensitivity to case.
+ *
+ * @param String1
+ *        First string to be compared.
+ *
+ * @param String2
+ *        Second string to be compared.
+ *
+ * @return This routine returns a value indicating the relationship between the two strings.
+ *
+ * @since XT 1.0
+ */
 XTCDECL
 INT
 BlStringCompareInsensitive(IN PUCHAR String1,
