@@ -83,10 +83,10 @@ HlHalt()
 }
 
 /**
- * Reads the data from the specified I/O port.
+ * Reads the 8-bit data from the specified I/O port.
  *
  * @param Port
- *        Specifies the port number in the range of 0-0xFFFF.
+ *        Specifies the address to read from, in the range of 0-0xFFFF.
  *
  * @return The value read from the port.
  *
@@ -104,10 +104,52 @@ HlIoPortInByte(IN USHORT Port)
 }
 
 /**
- * Writes the data to the specified I/O port.
+ * Reads the 16-bit data from the specified I/O port.
  *
  * @param Port
- *        Specifies the port number in the range of 0-0xFFFF.
+ *        Specifies the address to read from, in the range of 0-0xFFFF.
+ *
+ * @return The value read from the port.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+UCHAR
+HlIoPortInShort(IN USHORT Port)
+{
+    UCHAR Value;
+    asm volatile("inw %1, %0"
+                 : "=a"(Value)
+                 : "Nd"(Port));
+    return Value;
+}
+
+/**
+ * Reads the 32-bit data from the specified I/O port.
+ *
+ * @param Port
+ *        Specifies the address to read from, in the range of 0-0xFFFF.
+ *
+ * @return The value read from the port.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+UCHAR
+HlIoPortInLong(IN USHORT Port)
+{
+    UCHAR Value;
+    asm volatile("inl %1, %0"
+                 : "=a"(Value)
+                 : "Nd"(Port));
+    return Value;
+}
+
+/**
+ * Writes the 8-bit data to the specified I/O port.
+ *
+ * @param Port
+ *        Specifies the address to write to, in the range of 0-0xFFFF.
  *
  * @param Value
  *        Supplies the value to write.
@@ -122,6 +164,54 @@ HlIoPortOutByte(IN USHORT Port,
                 IN UCHAR Value)
 {
     asm volatile("outb %0, %1"
+                 :
+                 : "a"(Value),
+                 "Nd"(Port));
+}
+
+/**
+ * Writes the 16-bit data to the specified I/O port.
+ *
+ * @param Port
+ *        Specifies the address to write to, in the range of 0-0xFFFF.
+ *
+ * @param Value
+ *        Supplies the value to write.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+HlIoPortOutShort(IN USHORT Port,
+                 IN USHORT Value)
+{
+    asm volatile("outw %0, %1"
+                 :
+                 : "a"(Value),
+                 "Nd"(Port));
+}
+
+/**
+ * Writes the 32-bit data to the specified I/O port.
+ *
+ * @param Port
+ *        Specifies the address to write to, in the range of 0-0xFFFF.
+ *
+ * @param Value
+ *        Supplies the value to write.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+HlIoPortOutLong(IN USHORT Port,
+                IN UINT Value)
+{
+    asm volatile("outl %0, %1"
                  :
                  : "a"(Value),
                  "Nd"(Port));

@@ -35,9 +35,27 @@ UCHAR
 HlIoPortInByte(IN USHORT Port);
 
 XTCDECL
+UCHAR
+HlIoPortInShort(IN USHORT Port);
+
+XTCDECL
+UCHAR
+HlIoPortInLong(IN USHORT Port);
+
+XTCDECL
 VOID
 HlIoPortOutByte(IN USHORT Port,
                 IN UCHAR Data);
+
+XTCDECL
+VOID
+HlIoPortOutShort(IN USHORT Port,
+                 IN USHORT Value);
+
+XTCDECL
+VOID
+HlIoPortOutLong(IN USHORT Port,
+                IN UINT Value);
 
 XTCDECL
 ULONG_PTR
