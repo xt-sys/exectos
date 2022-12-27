@@ -18,20 +18,24 @@
 extern ULONG ComPortAddress[];
 
 /* HAL library routines forward references */
+XTCDECL
 XTSTATUS
 HlComPortGetByte(IN PCPPORT Port,
                  OUT PUCHAR Byte,
                  IN BOOLEAN Wait,
                  IN BOOLEAN Poll);
 
+XTCDECL
 UCHAR
 HlComPortReadLsr(IN PCPPORT Port,
                  IN UCHAR Byte);
 
+XTCDECL
 XTSTATUS 
 HlComPortPutByte(IN PCPPORT Port,
                  IN UCHAR Byte);
 
+XTCDECL
 XTSTATUS
 HlInitializeComPort(IN OUT PCPPORT Port,
                     IN ULONG PortNumber,

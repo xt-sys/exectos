@@ -32,23 +32,29 @@ RtlFillMemory(OUT PVOID Destination,
               IN SIZE_T Length,
               IN UCHAR Value);
 
+XTCDECL
 VOID
 RtlInitializeListHead(IN PLIST_ENTRY ListHead);
 
+XTCDECL
 VOID
 RtlInitializeListHead32(IN PLIST_ENTRY32 ListHead);
 
+XTCDECL
 VOID
 RtlInsertHeadList(IN OUT PLIST_ENTRY ListHead,
                   IN PLIST_ENTRY Entry);
 
+XTCDECL
 VOID
 RtlInsertTailList(IN OUT PLIST_ENTRY ListHead,
                   IN PLIST_ENTRY Entry);
 
+XTCDECL
 BOOLEAN
 RtlListEmpty(PLIST_ENTRY ListHead);
 
+XTCDECL
 BOOLEAN
 RtlListLoop(IN PLIST_ENTRY ListHead);
 
@@ -58,6 +64,7 @@ RtlMoveMemory(OUT PVOID Destination,
               IN PCVOID Source,
               IN SIZE_T Length);
 
+XTCDECL
 VOID
 RtlRemoveEntryList(IN PLIST_ENTRY Entry);
 

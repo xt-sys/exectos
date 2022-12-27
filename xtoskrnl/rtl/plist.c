@@ -19,6 +19,7 @@
  *
  * @since XT 1.0
  */
+XTCDECL
 VOID
 RtlInitializeListHead(IN PLIST_ENTRY ListHead)
 {
@@ -36,6 +37,7 @@ RtlInitializeListHead(IN PLIST_ENTRY ListHead)
  *
  * @since XT 1.0
  */
+XTCDECL
 VOID
 RtlInitializeListHead32(IN PLIST_ENTRY32 ListHead)
 {
@@ -56,6 +58,7 @@ RtlInitializeListHead32(IN PLIST_ENTRY32 ListHead)
  *
  * @since XT 1.0
  */
+XTCDECL
 VOID
 RtlInsertHeadList(IN OUT PLIST_ENTRY ListHead,
                   IN PLIST_ENTRY Entry)
@@ -79,6 +82,7 @@ RtlInsertHeadList(IN OUT PLIST_ENTRY ListHead,
  *
  * @since XT 1.0
  */
+XTCDECL
 VOID
 RtlInsertTailList(IN OUT PLIST_ENTRY ListHead,
                   IN PLIST_ENTRY Entry)
@@ -99,6 +103,7 @@ RtlInsertTailList(IN OUT PLIST_ENTRY ListHead,
  *
  * @since XT 1.0
  */
+XTCDECL
 BOOLEAN
 RtlListEmpty(IN PLIST_ENTRY ListHead)
 {
@@ -115,6 +120,7 @@ RtlListEmpty(IN PLIST_ENTRY ListHead)
  *
  * @since XT 1.0
  */
+XTCDECL
 BOOLEAN
 RtlListLoop(IN PLIST_ENTRY ListHead)
 {
@@ -160,6 +166,7 @@ RtlListLoop(IN PLIST_ENTRY ListHead)
  *
  * @since XT 1.0
  */
+XTCDECL
 VOID
 RtlRemoveEntryList(IN PLIST_ENTRY Entry)
 {

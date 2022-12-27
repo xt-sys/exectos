@@ -32,6 +32,7 @@ ULONG ComPortAddress[] = {0x000, 0x3F8, 0x2F8, 0x3E8, 0x2E8, 0x5F8, 0x4F8, 0x5E8
  *
  * @since XT 1.0
  */
+XTCDECL
 XTSTATUS
 HlComPortGetByte(IN PCPPORT Port,
                  OUT PUCHAR Byte,
@@ -105,6 +106,7 @@ HlComPortGetByte(IN PCPPORT Port,
  *
  * @since XT 1.0
  */
+XTCDECL
 UCHAR
 HlComPortReadLsr(IN PCPPORT Port,
                  IN UCHAR Byte)
@@ -145,6 +147,7 @@ HlComPortReadLsr(IN PCPPORT Port,
  *
  * @since XT 1.0
  */
+XTCDECL
 XTSTATUS 
 HlComPortPutByte(IN PCPPORT Port,
                  IN UCHAR Byte)
@@ -204,6 +207,7 @@ HlComPortPutByte(IN PCPPORT Port,
  *
  * @since XT 1.0
  */
+XTCDECL
 XTSTATUS
 HlInitializeComPort(IN OUT PCPPORT Port,
                     IN ULONG PortNumber,
