@@ -151,8 +151,8 @@ BlDbgPrint(IN PUINT16 Format,
 {
     VA_LIST Arguments;
 
-    /* Check if EFI serial port is fully initialized */
-    if(EfiSerialPort.Flags & COMPORT_FLAG_INIT)
+    /* Check if debugging enabled and if EFI serial port is fully initialized */
+    if(DEBUG && (EfiSerialPort.Flags & COMPORT_FLAG_INIT))
     {
         /* Initialise the va_list */
         VA_START(Arguments, Format);
@@ -196,8 +196,8 @@ BlEfiPrint(IN PUINT16 Format,
     /* Print to serial console only if not running under OVMF */
     if(RtlWideStringCompare(EfiSystemTable->FirmwareVendor, L"EDK II", 6) != 0)
     {
-        /* Check if EFI serial port is fully initialized */
-        if(EfiSerialPort.Flags & COMPORT_FLAG_INIT)
+        /* Check if debugging enabled and if EFI serial port is fully initialized */
+        if(DEBUG && (EfiSerialPort.Flags & COMPORT_FLAG_INIT))
         {
             /* Format and print the string to the serial console */
             BlStringPrint(BlComPortPutChar, Format, Arguments);
