@@ -24,7 +24,7 @@ VOID
 KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
 {
     /* Check if debugging enabled and if boot loader provided routine for debug printing */
-    if(DBG && Parameters->LoaderInformation.DbgPrint)
+    if(DEBUG && Parameters->LoaderInformation.DbgPrint)
     {
         /* Use loader's provided DbgPrint() routine for early printing to serial console */
         LdrPrint = Parameters->LoaderInformation.DbgPrint;

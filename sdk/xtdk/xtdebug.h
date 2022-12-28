@@ -12,8 +12,10 @@
 
 /* XTOS platform debugging macros */
 #ifdef DBG
+    #define DEBUG                       1
     #define LDRPRINT(Format, ...)       if(LdrPrint) LdrPrint(Format, __VA_ARGS__);
 #else
+    #define DEBUG                       0
     #define LDRPRINT(Format, ...)       ((VOID)NULL)
 #endif
 
