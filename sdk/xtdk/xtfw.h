@@ -104,7 +104,8 @@ typedef struct _KERNEL_INITIALIZATION_BLOCK
     LIST_ENTRY BootDriverListHead;
     ULONG Size;
     ULONG Version;
-    ULONG_PTR KernelStack;
+    ULONG_PTR KernelBootStack;
+    ULONG_PTR KernelFaultStack;
     LOADER_INFORMATION_BLOCK LoaderInformation;
     FIRMWARE_INFORMATION_BLOCK FirmwareInformation;
 } KERNEL_INITIALIZATION_BLOCK, *PKERNEL_INITIALIZATION_BLOCK;

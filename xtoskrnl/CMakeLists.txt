@@ -3,12 +3,14 @@ PROJECT(XTOSKRNL)
 
 # Specify include directories
 include_directories(
-    ${EXECTOS_SOURCE_DIR}/sdk/xtdk)
+    ${EXECTOS_SOURCE_DIR}/sdk/xtdk
+    ${XTOSKRNL_SOURCE_DIR}/includes)
 
 # Specify list of source code files
 list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/hl/cport.c
     ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/cpufunc.c
+    ${XTOSKRNL_SOURCE_DIR}/ke/globals.c
     ${XTOSKRNL_SOURCE_DIR}/ke/krnlinit.c
     ${XTOSKRNL_SOURCE_DIR}/rtl/memory.c
     ${XTOSKRNL_SOURCE_DIR}/rtl/plist.c

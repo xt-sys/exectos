@@ -20,6 +20,7 @@
 
 /* Architecture-independent XT API */
 #include "xtcommon.h"
+#include "xtdebug.h"
 #include "xtimage.h"
 #include "xtuefi.h"
 #include "xtfw.h"

@@ -283,8 +283,9 @@ XtpInitializeLoaderBlock(IN PLIST_ENTRY MemoryMappings,
     LoaderBlock->Size = sizeof(KERNEL_INITIALIZATION_BLOCK);
     LoaderBlock->Version = INITIALIZATION_BLOCK_VERSION;
 
-    /* No kernel stack available now */
-    LoaderBlock->KernelStack = (ULONG_PTR)NULL;
+    /* No kernel boot, nor fault stacks available now */
+    LoaderBlock->KernelBootStack = (ULONG_PTR)NULL;
+    LoaderBlock->KernelFaultStack = (ULONG_PTR)NULL;
 
     /* Set LoaderInformation block properties */
     LoaderBlock->LoaderInformation.DbgPrint = XtLdrProtocol->DbgPrint;
