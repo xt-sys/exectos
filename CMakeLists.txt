@@ -24,14 +24,14 @@ if(NOT BUILD_TYPE)
     set(BUILD_TYPE DEBUG)
 endif()
 string(TOUPPER ${BUILD_TYPE} BUILD_TYPE)
-set(CMAKE_BUILD_TYPE "")
 
 # Set build type specific definitions
 if(BUILD_TYPE STREQUAL "DEBUG")
     add_definitions(-DDBG=1)
+    set(CMAKE_BUILD_TYPE DEBUG)
 else()
     set(BUILD_TYPE RELEASE)
-    add_definitions(-DDBG=0)
+    set(CMAKE_BUILD_TYPE NONE)
 endif()
 
 # Print build type
