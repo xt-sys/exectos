@@ -23,7 +23,7 @@ typedef EFI_STATUS (*PBL_FREE_POOL)(IN PVOID Memory);
 typedef EFI_STATUS (*PBL_GET_MEMORY_MAP)(OUT PEFI_MEMORY_MAP MemoryMap);
 typedef EFI_STATUS (*PBL_GET_VIRTUAL_ADDRESS)(IN PLIST_ENTRY MemoryMappings, IN PVOID PhysicalAddress, OUT PVOID *VirtualAddress);
 typedef EFI_STATUS (*PBL_INIT_VIRTUAL_MEMORY)(IN OUT PLIST_ENTRY MemoryMappings, IN OUT PVOID *MemoryMapAddress);
-typedef EFI_STATUS (*PBL_MAP_VIRTUAL_MEMORY)(IN PLIST_ENTRY MemoryMappings, IN UINT_PTR VirtualAddress, IN UINT_PTR PhysicalAddress, IN UINT NumberOfPages, IN BOOLEAN PaeExtension, IN OUT PVOID *PtePointer);
+typedef EFI_STATUS (*PBL_MAP_VIRTUAL_MEMORY)(IN PLIST_ENTRY MemoryMappings, IN UINT_PTR VirtualAddress, IN UINT_PTR PhysicalAddress, IN UINT NumberOfPages, IN OUT PVOID *PtePointer);
 typedef VOID (*PBL_GET_STACK)(OUT PVOID *Stack);
 typedef VOID (*PBL_DBG_PRINT)(IN PUINT16 Format, IN ...);
 typedef VOID (*PBL_EFI_PRINT)(IN PUINT16 Format, IN ...);

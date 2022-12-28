@@ -169,7 +169,6 @@ BlMapVirtualMemory(IN PLIST_ENTRY MemoryMappings,
                    IN UINT_PTR VirtualAddress,
                    IN UINT_PTR PhysicalAddress,
                    IN UINT NumberOfPages,
-                   IN BOOLEAN PaeExtension,
                    IN OUT PVOID *PtePointer);
 
 XTCDECL

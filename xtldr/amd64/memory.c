@@ -149,7 +149,7 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
         {
             /* Map memory */
             Status = BlMapVirtualMemory(MemoryMappings, (UINT_PTR)Mapping->VirtualAddress,
-                                        (UINT_PTR)Mapping->PhysicalAddress, Mapping->NumberOfPages, FALSE, PtePointer);
+                                        (UINT_PTR)Mapping->PhysicalAddress, Mapping->NumberOfPages, PtePointer);
             if(Status != STATUS_EFI_SUCCESS)
             {
                 /* Memory mapping failed */
@@ -207,7 +207,6 @@ BlMapVirtualMemory(IN PLIST_ENTRY MemoryMappings,
                    IN UINT_PTR VirtualAddress,
                    IN UINT_PTR PhysicalAddress,
                    IN UINT NumberOfPages,
-                   IN BOOLEAN PaeExtension,
                    IN OUT PVOID *PtePointer)
 {
     PHARDWARE_PTE PageDirectoryPointTable, PageDirectory, PageTable;

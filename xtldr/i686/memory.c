@@ -86,7 +86,6 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
     PLOADER_MEMORY_MAPPING Mapping;
     PEFI_MEMORY_MAP MemoryMap;
     PLIST_ENTRY ListEntry;
-    BOOLEAN PaeExtension;
     EFI_STATUS Status;
     PVOID Stack;
     UINT Index;
@@ -103,7 +102,12 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
     HlCpuId(CpuRegisters);
 
     /* Store PAE status from the CPUID results */
-    PaeExtension = CpuRegisters->Edx & CPUID_FEATURES_EDX_PAE;
+    if(!(CpuRegisters->Edx & CPUID_FEATURES_EDX_PAE))
+    {
+        /* No PAE support */
+        BlDbgPrint(L"ERROR: PAE extension not supported by the CPU\n");
+        return STATUS_EFI_UNSUPPORTED;
+    }
 
     /* Allocate and zero-fill buffer for EFI memory map */
     BlEfiMemoryAllocatePool(sizeof(EFI_MEMORY_MAP), (PVOID*)&MemoryMap);
@@ -121,99 +125,75 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
     Descriptor = MemoryMap->Map;
     DescriptorCount = MemoryMap->MapSize / MemoryMap->DescriptorSize;
 
-    /* Check if PAE supported by the underlying hardware */
-    if(PaeExtension)
+    /* Calculate physical address based on KSEG0 base */
+    PhysicalAddress = (UINT_PTR)VirtualAddress - KSEG0_BASE;
+
+    /* Iterate over all descriptors from memory map to find satisfying address for PDPT */
+    for(Index = 0; Index < DescriptorCount; Index++)
     {
-        /* Print debug message */
-        BlDbgPrint(L"Physical Address Extension (PAE) available\n");
-
-        /* Calculate physical address based on KSEG0 base */
-        PhysicalAddress = (UINT_PTR)VirtualAddress - KSEG0_BASE;
-
-        /* Iterate over all descriptors from memory map to find satisfying address for PDPT */
-        for(Index = 0; Index < DescriptorCount; Index++)
+        /* Check descriptor if it can be used to store PDPT */
+        if((Descriptor->PhysicalStart + ((Descriptor->NumberOfPages - 1) * EFI_PAGE_SIZE) >= PhysicalAddress) &&
+           (Descriptor->Type == EfiConventionalMemory))
         {
-            /* Check descriptor if it can be used to store PDPT */
-            if((Descriptor->PhysicalStart + ((Descriptor->NumberOfPages - 1) * EFI_PAGE_SIZE) >= PhysicalAddress) &&
-               (Descriptor->Type == EfiConventionalMemory))
+            /* Use highest address possible */
+            if(PhysicalAddress >= Descriptor->PhysicalStart)
             {
-                /* Use highest address possible */
-                if(PhysicalAddress >= Descriptor->PhysicalStart)
-                {
-                    /* Use physical address */
-                    PDPTAddress = PhysicalAddress;
-                }
-                else
-                {
-                    /* Use descriptor physical start as PDPT address */
-                    PDPTAddress = Descriptor->PhysicalStart;
-                }
-
-                /* Allocate pages for the PDPT address */
-                Status = BlEfiMemoryAllocatePages(1, &PDPTAddress);
-                if(Status != STATUS_EFI_SUCCESS) {
-                    return Status;
-                }
-                break;
+                /* Use physical address */
+                PDPTAddress = PhysicalAddress;
+            }
+            else
+            {
+                /* Use descriptor physical start as PDPT address */
+                PDPTAddress = Descriptor->PhysicalStart;
             }
 
-            /* Get next descriptor */
-            Descriptor = (EFI_MEMORY_DESCRIPTOR*)((UINT8*)Descriptor + MemoryMap->DescriptorSize);
+            /* Allocate pages for the PDPT address */
+            Status = BlEfiMemoryAllocatePages(1, &PDPTAddress);
+            if(Status != STATUS_EFI_SUCCESS) {
+                return Status;
+            }
+            break;
         }
 
-        /* Make sure PDPT address found */
-        if(PDPTAddress == 0)
-        {
-            /* No suitable area for PDPT found in EFI memory map */
-            return STATUS_EFI_NOT_FOUND;
-        }
-
-        /* Set virtual address based on new PDPT address mapped to KSEG0 base */
-        VirtualAddress = (PVOID)(UINT_PTR)(PDPTAddress + EFI_PAGE_SIZE + KSEG0_BASE);
-
-        /* Set base page frame number */
-        Address = 0x100000;
-
-        /* Allocate pages for the PFN */
-        Status = BlEfiMemoryAllocatePages(4, &Address);
-        if(Status != STATUS_EFI_SUCCESS)
-        {
-            /* Memory allocation failure */
-            return Status;
-        }
-
-        /* Set and zero memory used by page mappings and CR3 */
-        *PtePointer = (PVOID)(UINT_PTR)PDPTAddress;
-        RtlZeroMemory(*PtePointer, EFI_PAGE_SIZE);
-        RtlZeroMemory((PVOID)Address, EFI_PAGE_SIZE * 4);
-
-        /* Set the page directory into the PDPT and mark it present */
-        for(Index = 0; Index < 4; Index++)
-        {
-            /* Set paging entry settings */
-            ((PHARDWARE_PTE_PAE)*PtePointer)[Index].PageFrameNumber = Address / EFI_PAGE_SIZE;
-            ((PHARDWARE_PTE_PAE)*PtePointer)[Index].Valid = 1;
-
-            /* Next valid PFN address */
-            Address += EFI_PAGE_SIZE;
-        }
+        /* Get next descriptor */
+        Descriptor = (EFI_MEMORY_DESCRIPTOR*)((UINT8*)Descriptor + MemoryMap->DescriptorSize);
     }
-    else
+
+    /* Make sure PDPT address found */
+    if(PDPTAddress == 0)
     {
-        /* Print debug message */
-        BlDbgPrint(L"Physical Address Extension (PAE) NOT available\n");
+        /* No suitable area for PDPT found in EFI memory map */
+        return STATUS_EFI_NOT_FOUND;
+    }
 
-        /* Allocate pages for Page Directory */
-        Status = BlEfiMemoryAllocatePages(1, &Address);
-        if(Status != STATUS_EFI_SUCCESS)
-        {
-            /* Memory allocation failure */
-            return Status;
-        }
+    /* Set virtual address based on new PDPT address mapped to KSEG0 base */
+    VirtualAddress = (PVOID)(UINT_PTR)(PDPTAddress + EFI_PAGE_SIZE + KSEG0_BASE);
 
-        /* Set and zero memory used by Page Directory */
-        *PtePointer = (PVOID)(UINT_PTR)Address;
-        RtlZeroMemory(*PtePointer, EFI_PAGE_SIZE);
+    /* Set base page frame number */
+    Address = 0x100000;
+
+    /* Allocate pages for the PFN */
+    Status = BlEfiMemoryAllocatePages(4, &Address);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Memory allocation failure */
+        return Status;
+    }
+
+    /* Set and zero memory used by page mappings and CR3 */
+    *PtePointer = (PVOID)(UINT_PTR)PDPTAddress;
+    RtlZeroMemory(*PtePointer, EFI_PAGE_SIZE);
+    RtlZeroMemory((PVOID)Address, EFI_PAGE_SIZE * 4);
+
+    /* Set the page directory into the PDPT and mark it present */
+    for(Index = 0; Index < 4; Index++)
+    {
+        /* Set paging entry settings */
+        ((PHARDWARE_PTE)*PtePointer)[Index].PageFrameNumber = Address / EFI_PAGE_SIZE;
+        ((PHARDWARE_PTE)*PtePointer)[Index].Valid = 1;
+
+        /* Next valid PFN address */
+        Address += EFI_PAGE_SIZE;
     }
 
     /* Map the stack */
@@ -255,8 +235,7 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
         {
             /* Map memory */
             Status = BlMapVirtualMemory(MemoryMappings, (UINT_PTR)Mapping->VirtualAddress,
-                                        (UINT_PTR)Mapping->PhysicalAddress, Mapping->NumberOfPages,
-                                        PaeExtension, PtePointer);
+                                        (UINT_PTR)Mapping->PhysicalAddress, Mapping->NumberOfPages, PtePointer);
             if(Status != STATUS_EFI_SUCCESS)
             {
                 /* Memory mapping failed */
@@ -276,12 +255,8 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
     EfiSystemTable->RuntimeServices->SetVirtualAddressMap(MemoryMap->MapSize, MemoryMap->DescriptorSize,
                                                           MemoryMap->DescriptorVersion, MemoryMap->Map);
 
-    /* Enable PAE if supported by CPU */
-    if(PaeExtension)
-    {
-        /* Enable Physical Address Extension (PAE) */
-        HlWriteControlRegister(4, HlReadControlRegister(4) | 0x00000020);
-    }
+    /* Enable Physical Address Extension (PAE) */
+    HlWriteControlRegister(4, HlReadControlRegister(4) | 0x00000020);
 
     /* Write page mappings to CR3 */
     HlWriteControlRegister(3, (UINT_PTR)*PtePointer);
@@ -324,117 +299,61 @@ BlMapVirtualMemory(IN PLIST_ENTRY MemoryMappings,
                    IN UINT_PTR VirtualAddress,
                    IN UINT_PTR PhysicalAddress,
                    IN UINT NumberOfPages,
-                   IN BOOLEAN PaeExtension,
                    IN OUT PVOID *PtePointer)
 {
     EFI_PHYSICAL_ADDRESS Address;
     UINT_PTR PageFrameNumber;
-    PHARDWARE_PTE_PAE PaePageTable, PageDirectory;
-    PHARDWARE_PTE PageTable;
+    PHARDWARE_PTE PageTable, PageDirectory;
     EFI_STATUS Status;
     unsigned int PdIndex, PtIndex;
 
     /* Set the PFN */
     PageFrameNumber = PhysicalAddress >> EFI_PAGE_SHIFT;
 
-    /* Check if PAE supported by the hardware */
-    if(PaeExtension)
+    /* Do the recursive mapping */
+    while(NumberOfPages > 0)
     {
-        /* PAE supported, do the recursive mapping */
-        while(NumberOfPages > 0)
-        {
-            /* Find Page Directory and calculate indices from a virtual address */
-            PageDirectory = (HARDWARE_PTE_PAE*)(((PHARDWARE_PTE_PAE)(*PtePointer))[VirtualAddress >> 30].PageFrameNumber * EFI_PAGE_SIZE);
-            PdIndex = (VirtualAddress >> 21) & 0x1FF;
-            PtIndex = (VirtualAddress & 0x1FF000) >> 12;
+        /* Find Page Directory and calculate indices from a virtual address */
+        PageDirectory = (PHARDWARE_PTE)(UINT_PTR)(((PHARDWARE_PTE)(*PtePointer))[VirtualAddress >> 30].PageFrameNumber * EFI_PAGE_SIZE);
+        PdIndex = (VirtualAddress >> 21) & 0x1FF;
+        PtIndex = (VirtualAddress & 0x1FF000) >> 12;
 
-            /* Validate Page Directory */
-            if(!PageDirectory[PdIndex].Valid) {
-                /* Allocate pages for new page table */
-                Status = BlEfiMemoryAllocatePages(1, &Address);
-                if(Status != STATUS_EFI_SUCCESS) {
-                    /* Memory allocation failure */
-                    return Status;
-                }
-
-                /* Fill allocated memory with zeros */
-                RtlZeroMemory((PVOID)(UINT_PTR)Address, EFI_PAGE_SIZE);
-
-                /* Set paging entry settings */
-                PageDirectory[PdIndex].PageFrameNumber = Address / EFI_PAGE_SIZE;
-                PageDirectory[PdIndex].Valid = 1;
-                PageDirectory[PdIndex].Write = 1;
-
-                /* Set page table */
-                PaePageTable = (HARDWARE_PTE_PAE*)(UINT_PTR)Address;
-            }
-            else
-            {
-                /* Set page table */
-                PaePageTable = (HARDWARE_PTE_PAE*)(PageDirectory[PdIndex].PageFrameNumber * EFI_PAGE_SIZE);
+        /* Validate Page Directory */
+        if(!PageDirectory[PdIndex].Valid) {
+            /* Allocate pages for new page table */
+            Status = BlEfiMemoryAllocatePages(1, &Address);
+            if(Status != STATUS_EFI_SUCCESS) {
+                /* Memory allocation failure */
+                return Status;
             }
 
-            /* Set page table settings */
-            PaePageTable[PtIndex].PageFrameNumber = PageFrameNumber;
-            PaePageTable[PtIndex].Valid = 1;
-            PaePageTable[PtIndex].Write = 1;
+            /* Fill allocated memory with zeros */
+            RtlZeroMemory((PVOID)(UINT_PTR)Address, EFI_PAGE_SIZE);
 
-            /* Take next virtual address and PFN */
-            VirtualAddress += EFI_PAGE_SIZE;
-            PageFrameNumber++;
+            /* Set paging entry settings */
+            PageDirectory[PdIndex].PageFrameNumber = Address / EFI_PAGE_SIZE;
+            PageDirectory[PdIndex].Valid = 1;
+            PageDirectory[PdIndex].Write = 1;
 
-            /* Decrease number of pages left */
-            NumberOfPages--;
+            /* Set page table */
+            PageTable = (PHARDWARE_PTE)(UINT_PTR)Address;
         }
-    }
-    else
-    {
-        /* PAE not supported, do the recursive mapping */
-        while (NumberOfPages > 0)
+        else
         {
-            /* Calculate indices from a virtual address */
-            PdIndex = VirtualAddress >> 22;
-            PtIndex = (VirtualAddress & 0x3FF000) >> 12;
-
-            /* Validate Page Table */
-            if(!((PHARDWARE_PTE)(*PtePointer))[PdIndex].Valid)
-            {
-                /* Allocate pages for new page table */
-                Status = BlEfiMemoryAllocatePages(1, &Address);
-                if (Status != STATUS_EFI_SUCCESS) {
-                    /* Memory allocation failure */
-                    return Status;
-                }
-
-                /* Fill allocated memory with zeros */
-                RtlZeroMemory((PVOID)(UINT_PTR)Address, EFI_PAGE_SIZE);
-
-                /* Set paging entry settings */
-                ((PHARDWARE_PTE)(*PtePointer))[PdIndex].PageFrameNumber = Address / EFI_PAGE_SIZE;
-                ((PHARDWARE_PTE)(*PtePointer))[PdIndex].Valid = 1;
-                ((PHARDWARE_PTE)(*PtePointer))[PdIndex].Write = 1;
-
-                /* Set page table */
-                PageTable = (HARDWARE_PTE*)(UINT_PTR)Address;
-            }
-            else
-            {
-                /* Set page table */
-                PageTable = (HARDWARE_PTE*)(((PHARDWARE_PTE)(*PtePointer))[PdIndex].PageFrameNumber * EFI_PAGE_SIZE);
-            }
-
-            /* Set page table settings */
-            PageTable[PtIndex].PageFrameNumber = PageFrameNumber;
-            PageTable[PtIndex].Valid = 1;
-            PageTable[PtIndex].Write = 1;
-
-            /* Take next virtual address and PFN */
-            VirtualAddress += EFI_PAGE_SIZE;
-            PageFrameNumber++;
-
-            /* Decrease number of pages left */
-            NumberOfPages--;
+            /* Set page table */
+            PageTable = (PHARDWARE_PTE)(UINT_PTR)(PageDirectory[PdIndex].PageFrameNumber * EFI_PAGE_SIZE);
         }
+        /* Set page table settings */
+        PageTable[PtIndex].PageFrameNumber = PageFrameNumber;
+        PageTable[PtIndex].Valid = 1;
+        PageTable[PtIndex].Write = 1;
+
+        /* Take next virtual address and PFN */
+        VirtualAddress += EFI_PAGE_SIZE;
+        PageFrameNumber++;
+
+        /* Decrease number of pages left */
+        NumberOfPages--;
     }
 
     /* Return success */
