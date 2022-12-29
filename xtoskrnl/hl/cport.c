@@ -200,6 +200,9 @@ HlComPortPutByte(IN PCPPORT Port,
  * @param PortNumber
  *        Supplies a port number.
  *
+ * @param PortAddress
+ *        Supplies an address of the COM port.
+ *
  * @param BaudRate
  *        Supplies an optional port baud rate.
  *
@@ -211,6 +214,7 @@ XTCDECL
 XTSTATUS
 HlInitializeComPort(IN OUT PCPPORT Port,
                     IN ULONG PortNumber,
+                    IN PUCHAR PortAddress,
                     IN ULONG BaudRate)
 {
     PUCHAR Address;
@@ -218,18 +222,27 @@ HlInitializeComPort(IN OUT PCPPORT Port,
     USHORT Flags = 0;
     ULONG Mode;
 
-    /* Check if serial port is set */
-    if(PortNumber == 0)
-    {
-        /* Use COM1 by default */
-        PortNumber = 1;
-    }
-
     /* We support only a pre-defined number of ports */
     if(PortNumber > ARRAY_SIZE(ComPortAddress))
     {
         /* Fail if wrong/unsupported port used */
         return STATUS_INVALID_PARAMETER;
+    }
+
+    /* Check if serial port is set */
+    if(PortNumber == 0)
+    {
+        /* Check if port address supplied instead */
+        if(PortAddress)
+        {
+            /* Set custom port address */
+            ComPortAddress[PortNumber] = PtrToUlong(PortAddress);
+        }
+        else
+        {
+            /* Use COM1 by default */
+            PortNumber = 1;
+        }
     }
 
     /* Check if baud rate is set */

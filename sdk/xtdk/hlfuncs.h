@@ -39,6 +39,7 @@ XTCDECL
 XTSTATUS
 HlInitializeComPort(IN OUT PCPPORT Port,
                     IN ULONG PortNumber,
+                    IN PUCHAR PortAddress,
                     IN ULONG BaudRate);
 
 #endif /* __XTDK_HLFUNCS_H */

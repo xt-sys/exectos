@@ -22,12 +22,13 @@ BlComPortInitialize()
 {
     EFI_GUID LIPGuid = EFI_LOADED_IMAGE_PROTOCOL_GUID;
     PEFI_LOADED_IMAGE_PROTOCOL LoadedImage;
-    ULONG PortNumber, BaudRate;
+    ULONG PortAddress, PortNumber, BaudRate;
     PWCHAR Argument, CommandLine, LastArg;
     EFI_STATUS EfiStatus;
     XTSTATUS Status;
 
     /* Set default serial port options */
+    PortAddress = 0;
     PortNumber = 0;
     BaudRate = 0;
 
@@ -72,6 +73,37 @@ BlComPortInitialize()
                         Argument++;
                     }
 
+                    /* Check for some custom COM port (COM0 means non-default one) */
+                    if(PortNumber == 0)
+                    {
+                        /* Look for COM port address */
+                        if(RtlWideStringCompare(Argument, L",0x", 3) == 0)
+                        {
+                            /* COM port address provided */
+                            Argument += 3;
+                            while((*Argument >= '0' && *Argument <= '9') ||
+                                  (*Argument >= 'A' && *Argument <= 'F') ||
+                                  (*Argument >= 'a' && *Argument <= 'f'))
+                            {
+                                /* Get port address */
+                                PortAddress *= 16;
+                                if(*Argument >= '0' && *Argument <= '9')
+                                {
+                                    PortAddress += *Argument - '0';
+                                }
+                                else if(*Argument >= 'A' && *Argument <= 'F')
+                                {
+                                    PortAddress += *Argument - 'A' + 10;
+                                }
+                                else if(*Argument >= 'a' && *Argument <= 'f')
+                                {
+                                    PortAddress += *Argument - 'a' + 10;
+                                }
+                                Argument++;
+                            }
+                        }
+                    }
+
                     /* Look for additional COM port parameters */
                     if(*Argument == ',')
                     {
@@ -97,7 +129,7 @@ BlComPortInitialize()
     }
 
     /* Initialize COM port */
-    Status = HlInitializeComPort(&EfiSerialPort, PortNumber, BaudRate);
+    Status = HlInitializeComPort(&EfiSerialPort, PortNumber, UlongToPtr(PortAddress), BaudRate);
     if(Status != STATUS_SUCCESS)
     {
         /* Serial port initialization failed, mark as not ready */
