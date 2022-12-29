@@ -223,7 +223,8 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
         return Status;
     }
 
-    /* Iterate through all mappings */
+    /* Iterate through and map all the mappings*/
+    BlDbgPrint(L"Mapping and dumping EFI memory:\n");
     ListEntry = MemoryMappings->Flink;
     while(ListEntry != MemoryMappings)
     {
@@ -233,6 +234,10 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
         /* Check if virtual address is set */
         if(Mapping->VirtualAddress)
         {
+            /* Dump memory mapping */
+            BlDbgPrint(L"   Type=%02lu, PhysicalBase=0x%08lx, VirtualBase=0x%08lx, Pages=%lu\n", Mapping->MemoryType,
+                       Mapping->PhysicalAddress, Mapping->VirtualAddress, Mapping->NumberOfPages);
+
             /* Map memory */
             Status = BlMapVirtualMemory(MemoryMappings, (UINT_PTR)Mapping->VirtualAddress,
                                         (UINT_PTR)Mapping->PhysicalAddress, Mapping->NumberOfPages, PtePointer);
