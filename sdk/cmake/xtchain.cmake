@@ -77,8 +77,9 @@ function(set_imagebase MODULE IMAGEBASE)
     add_module_linker_flags(${MODULE} "/BASE:${IMAGEBASE}")
 endfunction()
 
-# This functions sets PE/COFF subsystem of the binary
+# This functions sets PE/COFF subsystem and XTOS version of the binary
 function(set_subsystem MODULE SUBSYSTEM)
     string(TOUPPER ${SUBSYSTEM} SUBSYSTEM)
     add_module_linker_flags(${MODULE} "/SUBSYSTEM:${SUBSYSTEM},6.03")
+    add_module_linker_flags(${MODULE} "/VERSION:6.03")
 endfunction()
