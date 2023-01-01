@@ -425,11 +425,14 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
     BlEfiPrint(L"XTLDR boot loader v%s\n", XTOS_VERSION);
 
     /* Early initialize COM port for debugging */
-    Status = BlComPortInitialize();
-    if(Status != STATUS_EFI_SUCCESS)
+    if(DEBUG)
     {
-        /* Initialization failed, try printing error to stdout and serial console */
-        BlEfiPrint(L"ERROR: Failed to initialize serial console\n");
+        Status = BlComPortInitialize();
+        if(Status != STATUS_EFI_SUCCESS)
+        {
+            /* Initialization failed, try printing error to stdout and serial console */
+            BlEfiPrint(L"ERROR: Failed to initialize serial console\n");
+        }
     }
 
     /* Check SecureBoot status */
