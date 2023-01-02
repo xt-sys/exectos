@@ -22,6 +22,6 @@ target_link_libraries(dummy libxtos)
 set_target_properties(dummy PROPERTIES SUFFIX .efi)
 set_install_target(dummy efi/boot/xtldr)
 
-# Set loader entrypoint, imagebase address, ordinals and subsystem
+# Set module entrypoint and subsystem
 set_entrypoint(dummy "BlXtLdrModuleMain")
 set_subsystem(dummy efi_boot_service_driver)

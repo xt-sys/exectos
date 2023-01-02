@@ -22,6 +22,6 @@ target_link_libraries(pecoff libxtos)
 set_target_properties(pecoff PROPERTIES SUFFIX .efi)
 set_install_target(pecoff efi/boot/xtldr)
 
-# Set loader entrypoint, imagebase address, ordinals and subsystem
+# Set module entrypoint and subsystem
 set_entrypoint(pecoff "BlXtLdrModuleMain")
 set_subsystem(pecoff efi_boot_service_driver)

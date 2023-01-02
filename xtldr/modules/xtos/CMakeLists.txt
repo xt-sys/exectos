@@ -22,6 +22,6 @@ target_link_libraries(xtos libxtos)
 set_target_properties(xtos PROPERTIES SUFFIX .efi)
 set_install_target(xtos efi/boot/xtldr)
 
-# Set loader entrypoint, imagebase address, ordinals and subsystem
+# Set module entrypoint and subsystem
 set_entrypoint(xtos "BlXtLdrModuleMain")
 set_subsystem(xtos efi_boot_service_driver)
