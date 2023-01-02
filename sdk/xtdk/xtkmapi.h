@@ -29,6 +29,7 @@
 #include "rtltypes.h"
 #include "ldrtypes.h"
 #include "hltypes.h"
+#include "iotypes.h"
 
 /* Architecture-specific low level data types headers */
 #include ARCH_HEADER(hltypes.h)
