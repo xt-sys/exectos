@@ -94,47 +94,6 @@ HlComPortGetByte(IN PCPPORT Port,
 }
 
 /**
- * Reads LSR from specified serial port.
- *
- * @param Port
- *        Address of COM port.
- *
- * @param Byte
- *        Value expected from the port.
- *
- * @return Byte read from COM port.
- *
- * @since XT 1.0
- */
-XTCDECL
-UCHAR
-HlComPortReadLsr(IN PCPPORT Port,
-                 IN UCHAR Byte)
-{
-    UCHAR Lsr, Msr;
-    STATIC UCHAR RingFlag;
-
-    /* Read the Line Status Register (LSR) */ 
-    Lsr = HlIoPortInByte(PtrToUshort(Port->Address + (ULONG)COMPORT_REG_LSR));
-
-    /* Check if expected byte is present */
-    if((Lsr & Byte) == 0)
-    {
-        /* Check Modem Status Register (MSR) for ring indicator */
-        Msr = HlIoPortInByte(PtrToUshort(Port->Address + (ULONG)COMPORT_REG_MSR));
-        RingFlag |= (Msr & COMPORT_MSR_RI) ? 1 : 2;
-        if(RingFlag == 3)
-        {
-            /* Ring indicator toggled, use modem control */
-            Port->Flags |= COMPORT_FLAG_MC;
-        }
-    }
-
-    /* Return byte read */
-    return Lsr;
-}
-
-/**
  * This routine writes a byte to the serial port.
  *
  * @param Port
@@ -192,6 +151,47 @@ HlComPortPutByte(IN PCPPORT Port,
 }
 
 /**
+ * Reads LSR from specified serial port.
+ *
+ * @param Port
+ *        Address of COM port.
+ *
+ * @param Byte
+ *        Value expected from the port.
+ *
+ * @return Byte read from COM port.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+UCHAR
+HlComPortReadLsr(IN PCPPORT Port,
+                 IN UCHAR Byte)
+{
+    UCHAR Lsr, Msr;
+    STATIC UCHAR RingFlag;
+
+    /* Read the Line Status Register (LSR) */
+    Lsr = HlIoPortInByte(PtrToUshort(Port->Address + (ULONG)COMPORT_REG_LSR));
+
+    /* Check if expected byte is present */
+    if((Lsr & Byte) == 0)
+    {
+        /* Check Modem Status Register (MSR) for ring indicator */
+        Msr = HlIoPortInByte(PtrToUshort(Port->Address + (ULONG)COMPORT_REG_MSR));
+        RingFlag |= (Msr & COMPORT_MSR_RI) ? 1 : 2;
+        if(RingFlag == 3)
+        {
+            /* Ring indicator toggled, use modem control */
+            Port->Flags |= COMPORT_FLAG_MC;
+        }
+    }
+
+    /* Return byte read */
+    return Lsr;
+}
+
+/**
  * This routine initializes the COM port.
  *
  * @param Port
@@ -217,9 +217,9 @@ HlInitializeComPort(IN OUT PCPPORT Port,
                     IN PUCHAR PortAddress,
                     IN ULONG BaudRate)
 {
-    PUCHAR Address;
-    UCHAR Byte = 0;
     USHORT Flags = 0;
+    UCHAR Byte = 0;
+    PUCHAR Address;
     ULONG Mode;
 
     /* We support only a pre-defined number of ports */
@@ -266,12 +266,13 @@ HlInitializeComPort(IN OUT PCPPORT Port,
     do
     {
         /* Check whether the 16450/16550 scratch register exists */
-        HlIoPortOutByte(PtrToUshort(Address + (ULONG)COMPROT_REG_SR), Byte);
-        if(HlIoPortInByte(PtrToUshort(Address + (ULONG)COMPROT_REG_SR)) != Byte)
+        HlIoPortOutByte(PtrToUshort(Address + (ULONG)COMPORT_REG_SR), Byte);
+        if(HlIoPortInByte(PtrToUshort(Address + (ULONG)COMPORT_REG_SR)) != Byte)
         {
             return STATUS_NOT_FOUND;
         }
-    } while(++Byte != 0);
+    }
+    while(++Byte != 0);
 
     /* Disable interrupts */
     HlIoPortOutByte(PtrToUshort(Address + (ULONG)COMPORT_REG_LCR), COMPORT_LSR_DIS);
@@ -297,19 +298,16 @@ HlInitializeComPort(IN OUT PCPPORT Port,
     HlIoPortOutByte(PtrToUshort(Address + (ULONG)COMPORT_REG_FCR),
                        COMPORT_FCR_ENABLE | COMPORT_FCR_RCVR_RESET | COMPORT_FCR_TXMT_RESET);
 
-    /* Enable loopback mode and test serial port */
-    HlIoPortOutByte(PtrToUshort(Address + (ULONG)COMPORT_REG_MCR), COMPORT_MCR_LOOP);
-    HlIoPortOutByte(PtrToUshort(Address + (ULONG)COMPORT_REG_RBR), COMPORT_MSR_TST);
-    if(HlIoPortInByte(PtrToUshort(Address + (ULONG)COMPORT_REG_RBR)) != COMPORT_MSR_TST)
-    {
-        return STATUS_IO_DEVICE_ERROR;
-    }
-
     /* Mark port as fully initialized */
     Flags |= COMPORT_FLAG_INIT;
 
-    /* Disable loopback mode and use port normally */
+    /* Make sure port works in Normal Operation Mode (NOM) */
     HlIoPortOutByte(PtrToUshort(Address + (ULONG)COMPORT_REG_MCR), COMPORT_MCR_NOM);
+
+    /* Read junk data out of the Receive Buffer Register (RBR) */
+    HlIoPortInByte(PtrToUshort(Port->Address + (ULONG)COMPORT_REG_RBR));
+
+    /* Store port details */
     Port->Address = Address;
     Port->Baud = BaudRate;
     Port->Flags = Flags;

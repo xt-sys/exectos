@@ -26,13 +26,13 @@ HlComPortGetByte(IN PCPPORT Port,
                  IN BOOLEAN Poll);
 
 XTCDECL
-UCHAR
-HlComPortReadLsr(IN PCPPORT Port,
+XTSTATUS
+HlComPortPutByte(IN PCPPORT Port,
                  IN UCHAR Byte);
 
 XTCDECL
-XTSTATUS 
-HlComPortPutByte(IN PCPPORT Port,
+UCHAR
+HlComPortReadLsr(IN PCPPORT Port,
                  IN UCHAR Byte);
 
 XTCDECL

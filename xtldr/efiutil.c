@@ -73,34 +73,30 @@ BlComPortInitialize()
                         Argument++;
                     }
 
-                    /* Check for some custom COM port (COM0 means non-default one) */
-                    if(PortNumber == 0)
+                    /* Check if custom COM port address supplied */
+                    if(PortNumber == 0 && RtlWideStringCompare(Argument, L":0x", 3) == 0)
                     {
-                        /* Look for COM port address */
-                        if(RtlWideStringCompare(Argument, L",0x", 3) == 0)
+                        /* COM port address provided */
+                        Argument += 3;
+                        while((*Argument >= '0' && *Argument <= '9') ||
+                              (*Argument >= 'A' && *Argument <= 'F') ||
+                              (*Argument >= 'a' && *Argument <= 'f'))
                         {
-                            /* COM port address provided */
-                            Argument += 3;
-                            while((*Argument >= '0' && *Argument <= '9') ||
-                                  (*Argument >= 'A' && *Argument <= 'F') ||
-                                  (*Argument >= 'a' && *Argument <= 'f'))
+                            /* Get port address */
+                            PortAddress *= 16;
+                            if(*Argument >= '0' && *Argument <= '9')
                             {
-                                /* Get port address */
-                                PortAddress *= 16;
-                                if(*Argument >= '0' && *Argument <= '9')
-                                {
-                                    PortAddress += *Argument - '0';
-                                }
-                                else if(*Argument >= 'A' && *Argument <= 'F')
-                                {
-                                    PortAddress += *Argument - 'A' + 10;
-                                }
-                                else if(*Argument >= 'a' && *Argument <= 'f')
-                                {
-                                    PortAddress += *Argument - 'a' + 10;
-                                }
-                                Argument++;
+                                PortAddress += *Argument - '0';
                             }
+                            else if(*Argument >= 'A' && *Argument <= 'F')
+                            {
+                                PortAddress += *Argument - 'A' + 10;
+                            }
+                            else if(*Argument >= 'a' && *Argument <= 'f')
+                            {
+                                PortAddress += *Argument - 'a' + 10;
+                            }
+                            Argument++;
                         }
                     }
 
@@ -126,6 +122,16 @@ BlComPortInitialize()
                 Argument = RtlWideStringTokenize(NULL, L" ", &LastArg);
             }
         }
+    }
+
+    /* Print debug message depending on port settings */
+    if(PortAddress)
+    {
+        BlEfiPrint(L"Initializing serial console at COM port address: %lx\n", PortAddress);
+    }
+    else
+    {
+        BlEfiPrint(L"Initializing serial console at port COM%d\n", PortNumber);
     }
 
     /* Initialize COM port */

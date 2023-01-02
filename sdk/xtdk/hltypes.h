@@ -88,7 +88,7 @@
 #define COMPORT_REG_MCR             0x04 /* Modem Control Register */
 #define COMPORT_REG_LSR             0x05 /* Line Status Register */
 #define COMPORT_REG_MSR             0x06 /* Modem Status Register */
-#define COMPROT_REG_SR              0x07 /* Scratch Register */
+#define COMPORT_REG_SR              0x07 /* Scratch Register */
 
 /* Serial (COM) port initial state */
 typedef struct _CPPORT
