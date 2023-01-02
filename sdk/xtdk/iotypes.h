@@ -13,9 +13,50 @@
 
 
 /* Number of PCI base address registers */
-#define PCI_TYPE0_ADDRESSES             6
-#define PCI_TYPE1_ADDRESSES             2
-#define PCI_TYPE2_ADDRESSES             5
+#define PCI_TYPE0_ADDRESSES                     6
+#define PCI_TYPE1_ADDRESSES                     2
+#define PCI_TYPE2_ADDRESSES                     5
+
+/* PCI maximum number of devices */
+#define PCI_MAX_BRIDGE_NUMBER                   255
+#define PCI_MAX_DEVICES                         32
+#define PCI_MAX_FUNCTION                        8
+
+/* Invalid PCI vendor ID */
+#define PCI_INVALID_VENDORID                    0xFFFF
+
+/* PCI common config header types */
+#define PCI_DEVICE_TYPE                         0x00
+#define PCI_BRIDGE_TYPE                         0x01
+#define PCI_CARDBUS_BRIDGE_TYPE                 0x02
+#define PCI_MULTIFUNCTION                       0x80
+
+/* PCI common config commands */
+#define PCI_ENABLE_IO_SPACE                     0x0001
+#define PCI_ENABLE_MEMORY_SPACE                 0x0002
+#define PCI_ENABLE_BUS_MASTER                   0x0004
+#define PCI_ENABLE_SPECIAL_CYCLES               0x0008
+#define PCI_ENABLE_WRITE_AND_INVALIDATE         0x0010
+#define PCI_ENABLE_VGA_COMPATIBLE_PALETTE       0x0020
+#define PCI_ENABLE_PARITY                       0x0040
+#define PCI_ENABLE_WAIT_CYCLE                   0x0080
+#define PCI_ENABLE_SERR                         0x0100
+#define PCI_ENABLE_FAST_BACK_TO_BACK            0x0200
+#define PCI_DISABLE_LEVEL_INTERRUPT             0x0400
+
+/* PCI common config statuses */
+#define PCI_STATUS_INTERRUPT_PENDING            0x0008
+#define PCI_STATUS_CAPABILITIES_LIST            0x0010
+#define PCI_STATUS_66MHZ_CAPABLE                0x0020
+#define PCI_STATUS_UDF_SUPPORTED                0x0040
+#define PCI_STATUS_FAST_BACK_TO_BACK            0x0080
+#define PCI_STATUS_DATA_PARITY_DETECTED         0x0100
+#define PCI_STATUS_DEVSEL                       0x0600
+#define PCI_STATUS_SIGNALED_TARGET_ABORT        0x0800
+#define PCI_STATUS_RECEIVED_TARGET_ABORT        0x1000
+#define PCI_STATUS_RECEIVED_MASTER_ABORT        0x2000
+#define PCI_STATUS_SIGNALED_SYSTEM_ERROR        0x4000
+#define PCI_STATUS_DETECTED_PARITY_ERROR        0x8000
 
 /* PCI and PCI-E common header structure */
 typedef struct _PCI_COMMON_HEADER {
@@ -94,5 +135,12 @@ typedef struct _PCI_COMMON_HEADER {
         } type2;
     } u;
 } PCI_COMMON_HEADER, *PPCI_COMMON_HEADER;
+
+/* PCI and PCI-E common config structure */
+typedef struct _PCI_COMMON_CONFIG
+{
+    PCI_COMMON_HEADER PciHeader;
+    UCHAR DeviceSpecific[192];
+} PCI_COMMON_CONFIG, *PPCI_COMMON_CONFIG;
 
 #endif /* __XTDK_IOTYPES_H */
