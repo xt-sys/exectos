@@ -34,6 +34,10 @@ EXTERN CPPORT EfiSerialPort;
 
 XTCDECL
 EFI_STATUS
+BlActivateSerialControllerIO();
+
+XTCDECL
+EFI_STATUS
 BlAddVirtualMemoryMapping(IN PLIST_ENTRY MemoryMappings,
                           IN PVOID VirtualAddress,
                           IN PVOID PhysicalAddress,
