@@ -10,50 +10,6 @@
 
 
 /**
- * Creates and switches to a new stack.
- *
- * @param StackPtr
- *        Supplies a pointer to memory area, where the stack will be created.
- *
- * @param StackSize
- *        Specifies a size (in bytes) of the new stack.
- *
- * @param Callback
- *        Supplies a pointer to a callback function that will be executed on top of new stack.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTCDECL
-VOID
-BlCreateStack(IN PVOID *StackPtr,
-              IN ULONG StackSize,
-              IN PVOID Callback)
-{
-    EFI_PHYSICAL_ADDRESS Address;
-    PVOID StackEnd;
-
-    /* Allocate pages for new stack and calculate its end */
-    BlEfiMemoryAllocatePages(EFI_SIZE_TO_PAGES(StackSize), &Address);
-    *StackPtr = (PVOID)(UINT_PTR)Address;
-    StackEnd = (PUINT8)*StackPtr + (StackSize - EFI_PAGE_SIZE);
-
-    /* Create new stack and switch to it immediatelly by calling callback function */
-    asm volatile("mov %1, %%rax\n"
-                 "mov %%rsp, %%rbx\n"
-                 "mov %0, %%rsp\n"
-                 "push %%rbp\n"
-                 "mov %%rsp, %%rbp\n"
-                 "push %%rbx\n"
-                 "sub $32, %%rsp\n"
-                 "call *%%rax\n"
-                 :
-                 : "m" (StackEnd), "m" (Callback)
-                 : "rax", "rbx");
-}
-
-/**
  * Builds the actual memory mapping page table and enables paging. This routine exits EFI boot services as well.
  *
  * @param MemoryMappings
@@ -84,7 +40,6 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
     PEFI_MEMORY_MAP MemoryMap;
     PLIST_ENTRY ListEntry;
     EFI_STATUS Status;
-    PVOID Stack;
 
     /* Allocate and zero-fill buffer for EFI memory map */
     BlEfiMemoryAllocatePool(sizeof(EFI_MEMORY_MAP), (PVOID*)&MemoryMap);
@@ -109,16 +64,6 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
     /* Assign and zero-fill memory used by page mappings */
     *PtePointer = (PVOID)(UINT_PTR)Address;
     RtlZeroMemory(*PtePointer, EFI_PAGE_SIZE);
-
-    /* Map the stack */
-    BlGetStackPointer(&Stack);
-    Status = BlAddVirtualMemoryMapping(MemoryMappings, Stack, Stack, EFI_SIZE_TO_PAGES(KERNEL_STACK_SIZE),
-                                       LoaderOsloaderStack);
-    if(Status != STATUS_EFI_SUCCESS)
-    {
-        /* Mapping the stack failed */
-        return Status;
-    }
 
     /* Map XTLDR code */
     Status = BlAddVirtualMemoryMapping(MemoryMappings, ImageProtocol->ImageBase, ImageProtocol->ImageBase,

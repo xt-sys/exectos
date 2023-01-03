@@ -74,12 +74,6 @@ BlConvertEfiMemoryType(IN EFI_MEMORY_TYPE EfiMemoryType);
 
 XTCDECL
 VOID
-BlCreateStack(IN PVOID *StackPtr,
-              IN ULONG StackSize,
-              IN PVOID Callback);
-
-XTCDECL
-VOID
 BlDbgPrint(IN PUINT16 Format,
            IN ...);
 
@@ -138,10 +132,6 @@ EFI_STATUS
 BlGetMemoryMap(OUT PEFI_MEMORY_MAP MemoryMap);
 
 XTCDECL
-VOID
-BlGetStackPointer(OUT PVOID *Stack);
-
-XTCDECL
 EFI_STATUS
 BlGetVirtualAddress(IN PLIST_ENTRY MemoryMappings,
                     IN PVOID PhysicalAddress,
@@ -184,10 +174,6 @@ BlOpenVolume(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
 XTCDECL
 EFI_STATUS
 BlRegisterXtLoaderProtocol();
-
-XTCDECL
-EFI_STATUS
-BlStartNewStack();
 
 XTCDECL
 EFI_STATUS

@@ -43,7 +43,6 @@ typedef struct _XT_BOOT_LOADER_PROTOCOL
     PBL_GET_VIRTUAL_ADDRESS GetVirtualAddress;
     PBL_INIT_VIRTUAL_MEMORY InitializeVirtualMemory;
     PBL_MAP_VIRTUAL_MEMORY MapVirtualMemory;
-    PBL_GET_STACK GetStack;
     PBL_DBG_PRINT DbgPrint;
     PBL_EFI_PRINT EfiPrint;
     PBL_CLOSE_VOLUME CloseVolume;

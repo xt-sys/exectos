@@ -10,50 +10,6 @@
 
 
 /**
- * Creates and switches to a new stack.
- *
- * @param StackPtr
- *        Supplies a pointer to memory area, where the stack will be created.
- *
- * @param StackSize
- *        Specifies a size (in bytes) of the new stack.
- *
- * @param Callback
- *        Supplies a pointer to a callback function that will be executed on top of new stack.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTCDECL
-VOID
-BlCreateStack(IN PVOID *StackPtr,
-              IN ULONG StackSize,
-              IN PVOID Callback)
-{
-    EFI_PHYSICAL_ADDRESS Address;
-    PVOID StackEnd;
-
-    /* Allocate pages for new stack and calculate its end */
-    BlEfiMemoryAllocatePages(EFI_SIZE_TO_PAGES(StackSize), &Address);
-    *StackPtr = (PVOID)(UINT_PTR)Address;
-    StackEnd = (PUINT8)*StackPtr + (StackSize - EFI_PAGE_SIZE);
-
-    /* Create new stack and switch to it immediatelly by calling callback function */
-    asm volatile("mov %1, %%eax\n"
-                 "mov %%esp, %%ebx\n"
-                 "mov %0, %%esp\n"
-                 "push %%ebp\n"
-                 "mov %%esp, %%ebp\n"
-                 "push %%ebx\n"
-                 "sub $32, %%esp\n"
-                 "call *%%eax\n"
-                 :
-                 : "m" (StackEnd), "m" (Callback)
-                 : "eax", "ebx");
-}
-
-/**
  * Builds the actual memory mapping page table and enables paging. This routine exits EFI boot services as well.
  *
  * @param MemoryMappings
@@ -87,7 +43,6 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
     PEFI_MEMORY_MAP MemoryMap;
     PLIST_ENTRY ListEntry;
     EFI_STATUS Status;
-    PVOID Stack;
     UINT Index;
 
     /* Prepare CPUID registers */
@@ -194,16 +149,6 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
 
         /* Next valid PFN address */
         Address += EFI_PAGE_SIZE;
-    }
-
-    /* Map the stack */
-    BlGetStackPointer(&Stack);
-    Status = BlAddVirtualMemoryMapping(MemoryMappings, Stack, Stack, EFI_SIZE_TO_PAGES(KERNEL_STACK_SIZE),
-                                       LoaderOsloaderStack);
-    if(Status != STATUS_EFI_SUCCESS)
-    {
-        /* Mapping the stack failed */
-        return Status;
     }
 
     /* Map XTLDR code */
