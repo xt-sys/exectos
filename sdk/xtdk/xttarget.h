@@ -19,12 +19,14 @@
 #if defined(__i386__) || defined(__i686__)
     #define _ARCH                      i686
     #define _ARCH_I686                 1
+    #define _ARCH_NAME                 "32-bit x86"
     #define _ARCH_IMAGE_MACHINE_TYPE   0x014C
     #define _XT32                      1
     #define EFI_ERROR_MASK             0x80000000
 #elif defined(__amd64__) || defined(__x86_64__)
     #define _ARCH                      amd64
     #define _ARCH_AMD64                1
+    #define _ARCH_NAME                 "64-bit x86"
     #define _ARCH_IMAGE_MACHINE_TYPE   0x8664
     #define _XT64                      1
     #define EFI_ERROR_MASK             0x8000000000000000
