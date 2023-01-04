@@ -9,6 +9,7 @@
 #ifndef __XTDK_XTCOMMON_H
 #define __XTDK_XTCOMMON_H
 
+#include "xtdefs.h"
 #include "xttypes.h"
 #include "xtstruct.h"
 
@@ -42,5 +43,12 @@ typedef struct _LIST_ENTRY64
     ULONGLONG Flink;
     ULONGLONG Blink;
 } LIST_ENTRY64, *PLIST_ENTRY64;
+
+/* 128-bit 16-byte aligned XMM register */
+typedef struct ALIGN(16) _M128
+{
+    ULONGLONG Low;
+    LONGLONG High;
+} M128, *PM128;
 
 #endif /* __XTDK_XTCOMMON_H */
