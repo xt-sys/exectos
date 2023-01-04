@@ -27,14 +27,29 @@ KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
     if(DEBUG && Parameters->LoaderInformation.DbgPrint)
     {
         /* Use loader's provided DbgPrint() routine for early printing to serial console */
-        LdrPrint = Parameters->LoaderInformation.DbgPrint;
+        LdrDbgPrint = Parameters->LoaderInformation.DbgPrint;
     }
+
+
+    /* Print some message to serial console and test kernel parameters */
+    LdrPrint(L"Hello world from ExectOS kernel!\n");
+    LdrPrint(L"\n\n------ Kernel parameters block ------\n"
+             L"Loader block size: %lu\n"
+             L"Loader block version: %lu\n"
+             L"EFI Revision: %lu\n"
+             L"EFI RunTime Revision: %lu\n\n",
+             Parameters->Size,
+             Parameters->Version,
+             Parameters->FirmwareInformation.EfiFirmware.EfiVersion,
+             ((PEFI_RUNTIME_SERVICES) Parameters->FirmwareInformation.EfiFirmware.EfiRuntimeServices)->Hdr.Revision
+            );
+
 
     /* Make sure kernel boot stack is initialized */
     if(!Parameters->KernelBootStack)
     {
         /* Initialize kernel boot stack */
-        LDRPRINT(L"Initializing kernel boot stack\n");
+        LdrPrint(L"Initializing kernel boot stack\n");
         Parameters->KernelBootStack = (ULONG_PTR)&KepKernelBootStackData[KERNEL_STACK_SIZE];
     }
 
@@ -42,25 +57,10 @@ KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
     if(!Parameters->KernelFaultStack)
     {
         /* Initialize kernel fault stack */
-        LDRPRINT(L"Initializing kernel fault stack\n");
+        LdrPrint(L"Initializing kernel fault stack\n");
         Parameters->KernelFaultStack = (ULONG_PTR)&KepKernelFaultStackData[KERNEL_STACK_SIZE];
     }
 
-    /* Print some message to serial console */
-    LDRPRINT(L"Hello world from ExectOS kernel!\n");
-
-    /* Test kernel parameters */
-    LDRPRINT(L"\n\n------ Kernel parameters block ------\n"
-             L"Loader block size: %lu\n"
-             L"Loader block version: %lu\n"
-             L"EFI Revision: %lu\n"
-             L"EFI RunTime Revision: %lu\n",
-             Parameters->Size,
-             Parameters->Version,
-             Parameters->FirmwareInformation.EfiFirmware.EfiVersion,
-             ((PEFI_RUNTIME_SERVICES) Parameters->FirmwareInformation.EfiFirmware.EfiRuntimeServices)->Hdr.Revision
-            );
-
-    /* Enter infinite kernel thread loop */
-    for(;;);
+    /* Save the kernel initialization block */
+    KeInitializationBlock = Parameters;
 }

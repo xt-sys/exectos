@@ -9,6 +9,9 @@
 #include <xtos.h>
 
 
+/* Kernel initialization block passed by boot loader */
+PKERNEL_INITIALIZATION_BLOCK KeInitializationBlock;
+
 /* Kernel own boot stack */
 UCHAR KepKernelBootStackData[KERNEL_STACK_SIZE] = {0};
 
@@ -16,4 +19,4 @@ UCHAR KepKernelBootStackData[KERNEL_STACK_SIZE] = {0};
 UCHAR KepKernelFaultStackData[KERNEL_STACK_SIZE] = {0};
 
 /* Pointer to boot loader provided DbgPrint() routine */
-VOID (*LdrPrint)(IN PWCHAR Format, IN ...) = NULL;
+VOID (*LdrDbgPrint)(IN PWCHAR Format, IN ...) = NULL;

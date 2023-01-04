@@ -12,6 +12,9 @@
 #include <xtkmapi.h>
 
 
+/* Kernel initialization block passed by boot loader */
+EXTERN PKERNEL_INITIALIZATION_BLOCK KeInitializationBlock;
+
 /* Kernel own boot stack */
 EXTERN UCHAR KepKernelBootStackData[KERNEL_STACK_SIZE];
 
@@ -19,6 +22,6 @@ EXTERN UCHAR KepKernelBootStackData[KERNEL_STACK_SIZE];
 EXTERN UCHAR KepKernelFaultStackData[KERNEL_STACK_SIZE];
 
 /* Pointer to boot loader provided DbgPrint() routine */
-EXTERN VOID (*LdrPrint)(IN PWCHAR Format, IN ...);
+EXTERN VOID (*LdrDbgPrint)(IN PWCHAR Format, IN ...);
 
 #endif /* __XTOSKRNL_GLOBALS_H */
