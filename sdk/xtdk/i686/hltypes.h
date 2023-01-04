@@ -14,6 +14,39 @@
 #include "xttypes.h"
 
 
+/* Control Register 0 constants */
+#define CR0_PE                                          0x00000001
+#define CR0_MP                                          0x00000002
+#define CR0_EM                                          0x00000004
+#define CR0_TS                                          0x00000008
+#define CR0_ET                                          0x00000010
+#define CR0_NE                                          0x00000020
+#define CR0_WP                                          0x00010000
+#define CR0_AM                                          0x00040000
+#define CR0_NW                                          0x20000000
+#define CR0_CD                                          0x40000000
+#define CR0_PG                                          0x80000000
+
+/* Control Register 4 constants */
+#define CR4_VME                                         0x00000001
+#define CR4_PVI                                         0x00000002
+#define CR4_TSD                                         0x00000004
+#define CR4_DE                                          0x00000008
+#define CR4_PSE                                         0x00000010
+#define CR4_PAE                                         0x00000020
+#define CR4_MCE                                         0x00000040
+#define CR4_PGE                                         0x00000080
+#define CR4_PCE                                         0x00000100
+#define CR4_FXSR                                        0x00000200
+#define CR4_XMMEXCPT                                    0x00000400
+#define CR4_RESERVED1                                   0x00001800
+#define CR4_VMXE                                        0x00002000
+#define CR4_SMXE                                        0x00004000
+#define CR4_RESERVED2                                   0x00018000
+#define CR4_XSAVE                                       0x00020000
+#define CR4_RESERVED3                                   0xFFFC0000
+
+/* CPUID features enumeration list */
 typedef enum _CPUID_FEATURES
 {
     CPUID_FEATURES_ECX_SSE3         = 1 << 0,
@@ -79,6 +112,7 @@ typedef enum _CPUID_FEATURES
     CPUID_FEATURES_EDX_PBE          = 1 << 31
 } CPUID_FEATURES, *PCPUID_FEATURES;
 
+/* CPUID requests */
 typedef enum _CPUID_REQUESTS
 {
     CPUID_GET_VENDOR_STRING,
@@ -87,6 +121,7 @@ typedef enum _CPUID_REQUESTS
     CPUID_GET_SERIAL
 } CPUID_REQUESTS, *PCPUID_REQUESTS;
 
+/* CPUID registers */
 typedef struct _CPUID_REGISTERS
 {
     UINT32 Leaf;

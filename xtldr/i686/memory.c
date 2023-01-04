@@ -206,13 +206,13 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
                                                           MemoryMap->DescriptorVersion, MemoryMap->Map);
 
     /* Enable Physical Address Extension (PAE) */
-    HlWriteControlRegister(4, HlReadControlRegister(4) | 0x00000020);
+    HlWriteControlRegister(4, HlReadControlRegister(4) | CR4_PAE);
 
     /* Write page mappings to CR3 */
     HlWriteControlRegister(3, (UINT_PTR)*PtePointer);
 
     /* Enable paging */
-    HlWriteControlRegister(0, HlReadControlRegister(0) | 0x80000000);
+    HlWriteControlRegister(0, HlReadControlRegister(0) | CR0_PG);
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
