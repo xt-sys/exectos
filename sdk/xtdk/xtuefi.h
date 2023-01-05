@@ -9,10 +9,10 @@
 #ifndef __XTDK_XTUEFI_H
 #define __XTDK_XTUEFI_H
 
+#include "xtbase.h"
 #include "xtdefs.h"
 #include "xttypes.h"
 #include "xtstruct.h"
-#include "xtcommon.h"
 
 
 /* EFI service signatures */

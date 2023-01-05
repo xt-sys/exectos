@@ -9,7 +9,7 @@
 #ifndef __XTDK_I686_MMTYPES_H
 #define __XTDK_I686_MMTYPES_H
 
-#include "xtcommon.h"
+#include "xtbase.h"
 
 
 /* Page Table entry structure definition (with PAE support) */

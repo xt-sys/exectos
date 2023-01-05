@@ -10,9 +10,9 @@
 #define __XTDK_XTIMAGE_H
 
 #include "xtdefs.h"
+#include "xtfw.h"
 #include "xtstruct.h"
 #include "xttypes.h"
-#include "xtfw.h"
 
 
 /* PE/COFF file image signatures */

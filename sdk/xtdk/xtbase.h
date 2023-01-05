@@ -1,17 +1,17 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            sdk/xtdk/xtcommon.h
- * DESCRIPTION:     Basic and common XT structures for kernel and user modes
+ * FILE:            sdk/xtdk/xtbase.h
+ * DESCRIPTION:     Basic and common native XT structures
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#ifndef __XTDK_XTCOMMON_H
-#define __XTDK_XTCOMMON_H
+#ifndef __XTDK_XTBASE_H
+#define __XTDK_XTBASE_H
 
 #include "xtdefs.h"
-#include "xttypes.h"
 #include "xtstruct.h"
+#include "xttypes.h"
 
 
 /* 128-bit buffer containing a unique identifier value */
@@ -51,4 +51,4 @@ typedef struct ALIGN(16) _M128
     LONGLONG High;
 } M128, *PM128;
 
-#endif /* __XTDK_XTCOMMON_H */
+#endif /* __XTDK_XTBASE_H */

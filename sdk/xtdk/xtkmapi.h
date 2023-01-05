@@ -19,7 +19,7 @@
 #include ARCH_HEADER(xtstruct.h)
 
 /* Architecture-independent XT API */
-#include "xtcommon.h"
+#include "xtbase.h"
 #include "xtdebug.h"
 #include "xtimage.h"
 #include "xtuefi.h"

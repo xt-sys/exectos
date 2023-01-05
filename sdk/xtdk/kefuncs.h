@@ -2,7 +2,7 @@
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
  * FILE:            sdk/xtdk/kefuncs.h
- * DESCRIPTION:     XTOS kernel services routines definitions
+ * DESCRIPTION:     XTOS kernel services routine definitions
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
