@@ -15,9 +15,6 @@
 #include <amd64/xtstruct.h>
 
 
-/* I/O port addresses for COM ports */
-extern ULONG ComPortAddress[];
-
 /* HAL library routines forward references */
 XTCDECL
 VOID
