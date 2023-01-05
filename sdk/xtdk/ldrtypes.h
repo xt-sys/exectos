@@ -9,7 +9,7 @@
 #ifndef __XTDK_LDRTYPES_H
 #define __XTDK_LDRTYPES_H
 
-#include "xtbase.h"
+#include <xtbase.h>
 
 
 /* Loader Data Table Entry Flags */

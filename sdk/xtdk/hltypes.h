@@ -9,7 +9,7 @@
 #ifndef __XTDK_HLTYPES_H
 #define __XTDK_HLTYPES_H
 
-#include "xttypes.h"
+#include <xttypes.h>
 
 
 /* Default serial port settings */

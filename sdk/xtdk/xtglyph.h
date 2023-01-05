@@ -9,7 +9,7 @@
 #ifndef __XTDK_XTGLYPH_H
 #define __XTDK_XTGLYPH_H
 
-#include "xttypes.h"
+#include <xttypes.h>
 
 
 CHAR XTGLYPH_EXECTOS_LOGO[] =

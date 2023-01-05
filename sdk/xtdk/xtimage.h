@@ -9,10 +9,10 @@
 #ifndef __XTDK_XTIMAGE_H
 #define __XTDK_XTIMAGE_H
 
-#include "xtdefs.h"
-#include "xtfw.h"
-#include "xtstruct.h"
-#include "xttypes.h"
+#include <xtdefs.h>
+#include <xtfw.h>
+#include <xtstruct.h>
+#include <xttypes.h>
 
 
 /* PE/COFF file image signatures */

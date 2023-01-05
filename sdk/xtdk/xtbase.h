@@ -9,9 +9,9 @@
 #ifndef __XTDK_XTBASE_H
 #define __XTDK_XTBASE_H
 
-#include "xtdefs.h"
-#include "xtstruct.h"
-#include "xttypes.h"
+#include <xtdefs.h>
+#include <xtstruct.h>
+#include <xttypes.h>
 
 
 /* 128-bit buffer containing a unique identifier value */

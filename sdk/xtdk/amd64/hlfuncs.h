@@ -9,9 +9,10 @@
 #ifndef __XTDK_AMD64_HLFUNCS_H
 #define __XTDK_AMD64_HLFUNCS_H
 
-#include "xtdefs.h"
-#include "xtstruct.h"
-#include "xttypes.h"
+#include <xtdefs.h>
+#include <xtstruct.h>
+#include <xttypes.h>
+#include <amd64/xtstruct.h>
 
 
 /* I/O port addresses for COM ports */

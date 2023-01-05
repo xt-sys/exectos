@@ -9,9 +9,9 @@
 #ifndef __XTDK_HLFUNCS_H
 #define __XTDK_HLFUNCS_H
 
-#include "xtdefs.h"
-#include "xtstruct.h"
-#include "xttypes.h"
+#include <xtdefs.h>
+#include <xtstruct.h>
+#include <xttypes.h>
 
 
 /* I/O port addresses for COM ports */

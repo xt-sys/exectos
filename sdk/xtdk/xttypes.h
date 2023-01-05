@@ -9,7 +9,7 @@
 #ifndef __XTDK_XTTYPES_H
 #define __XTDK_XTTYPES_H
 
-#include "xttarget.h"
+#include <xttarget.h>
 
 
 /* Standard C types */

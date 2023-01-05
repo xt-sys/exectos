@@ -9,9 +9,9 @@
 #ifndef __XTDK_RTLFUNCS_H
 #define __XTDK_RTLFUNCS_H
 
-#include "xtdefs.h"
-#include "xtstruct.h"
-#include "xttypes.h"
+#include <xtdefs.h>
+#include <xtstruct.h>
+#include <xttypes.h>
 
 
 XTAPI

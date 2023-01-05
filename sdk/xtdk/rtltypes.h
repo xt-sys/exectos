@@ -9,7 +9,7 @@
 #ifndef __XTDK_RTLTYPES_H
 #define __XTDK_RTLTYPES_H
 
-#include "xttypes.h"
+#include <xttypes.h>
 
 
 /* UUID string lengths */

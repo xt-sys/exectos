@@ -9,9 +9,9 @@
 #ifndef __XTDK_KEFUNCS_H
 #define __XTDK_KEFUNCS_H
 
-#include "xtdefs.h"
-#include "xtstruct.h"
-#include "xttypes.h"
+#include <xtdefs.h>
+#include <xtstruct.h>
+#include <xttypes.h>
 
 
 /* Kernel services routines forward references */

@@ -9,9 +9,9 @@
 #ifndef __XTDK_I686_HLTYPES_H
 #define __XTDK_I686_HLTYPES_H
 
-#include "xtdefs.h"
-#include "xtstruct.h"
-#include "xttypes.h"
+#include <xtdefs.h>
+#include <xtstruct.h>
+#include <xttypes.h>
 
 
 /* Serial port I/O addresses */

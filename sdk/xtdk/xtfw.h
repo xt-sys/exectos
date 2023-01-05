@@ -9,8 +9,8 @@
 #ifndef __XTDK_XTFW_H
 #define __XTDK_XTFW_H
 
-#include "xtbase.h"
-#include "xttypes.h"
+#include <xtbase.h>
+#include <xttypes.h>
 
 
 /* Version number of the current kernel initialization block */

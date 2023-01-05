@@ -9,7 +9,7 @@
 #ifndef __XTDK_AMD64_MMTYPES_H
 #define __XTDK_AMD64_MMTYPES_H
 
-#include "xtbase.h"
+#include <xtbase.h>
 
 
 /* Page Table entry structure definition */

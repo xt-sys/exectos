@@ -9,7 +9,7 @@
 #ifndef __XTDK_XTSTRUCT_H
 #define __XTDK_XTSTRUCT_H
 
-#include "xtdefs.h"
+#include <xtdefs.h>
 
 
 /* Structures forward references */

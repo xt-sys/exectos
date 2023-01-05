@@ -9,7 +9,7 @@
 #ifndef __XTDK_IOTYPES_H
 #define __XTDK_IOTYPES_H
 
-#include "xttypes.h"
+#include <xttypes.h>
 
 
 /* Number of PCI base address registers */
