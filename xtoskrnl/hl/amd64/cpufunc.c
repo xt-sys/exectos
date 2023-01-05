@@ -43,7 +43,9 @@ HlCpuId(IN OUT PCPUID_REGISTERS Registers)
     asm volatile("cpuid"
                  : "=a" (MaxLeaf)
                  : "a" (Registers->Leaf & 0x80000000)
-                 : "rbx", "rcx", "rdx");
+                 : "rbx",
+                   "rcx",
+                   "rdx");
 
     /* Check if CPU supports this command */
     if(Registers->Leaf > MaxLeaf)
@@ -55,11 +57,11 @@ HlCpuId(IN OUT PCPUID_REGISTERS Registers)
     /* Execute CPUID function */
     asm volatile("cpuid"
                  : "=a" (Registers->Eax),
-                 "=b" (Registers->Ebx),
-                 "=c" (Registers->Ecx),
-                 "=d" (Registers->Edx)
+                   "=b" (Registers->Ebx),
+                   "=c" (Registers->Ecx),
+                   "=d" (Registers->Edx)
                  : "a" (Registers->Leaf),
-                 "c" (Registers->SubLeaf));
+                   "c" (Registers->SubLeaf));
 
     /* Return TRUE */
     return TRUE;
@@ -183,7 +185,7 @@ HlIoPortOutByte(IN USHORT Port,
     asm volatile("outb %0, %1"
                  :
                  : "a"(Value),
-                 "Nd"(Port));
+                   "Nd"(Port));
 }
 
 /**
@@ -207,7 +209,7 @@ HlIoPortOutShort(IN USHORT Port,
     asm volatile("outw %0, %1"
                  :
                  : "a"(Value),
-                 "Nd"(Port));
+                   "Nd"(Port));
 }
 
 /**
@@ -231,7 +233,7 @@ HlIoPortOutLong(IN USHORT Port,
     asm volatile("outl %0, %1"
                  :
                  : "a"(Value),
-                 "Nd"(Port));
+                   "Nd"(Port));
 }
 
 /**
@@ -315,7 +317,7 @@ HlReadModelSpecificRegister(IN ULONG Register)
 
     asm volatile("rdmsr"
                  : "=a"(Low),
-                 "=d"(High)
+                   "=d"(High)
                  : "c"(Register));
 
     return ((ULONGLONG)High << 32) | Low;
@@ -335,8 +337,8 @@ HlReadTimeStampCounter()
     ULONGLONG Low, High;
 
     asm volatile("rdtsc"
-                 :"=a"(Low),
-                 "=d"(High));
+                 : "=a"(Low),
+                   "=d"(High));
 
     return ((ULONGLONG)High << 32) | Low;
 }
@@ -438,6 +440,6 @@ HlWriteModelSpecificRegister(IN ULONG Register,
     asm volatile("wrmsr"
                  :
                  : "c"(Register),
-                 "a"(Low),
-                 "d"(High));
+                   "a"(Low),
+                   "d"(High));
 }
