@@ -14,6 +14,9 @@
 #include "xttypes.h"
 
 
+/* Serial port I/O addresses */
+#define COMPORT_ADDRESSES                               {0x000, 0x3F8, 0x2F8, 0x3E8, 0x2E8, 0x5F8, 0x4F8, 0x5E8, 0x4E8}
+
 /* Control Register 0 constants */
 #define CR0_PE                                          0x00000001
 #define CR0_MP                                          0x00000002

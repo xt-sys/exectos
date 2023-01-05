@@ -9,9 +9,8 @@
 #include "xtkmapi.h"
 
 
-/* I/O port addresses for COM1 - COM8 (valid only for ia32 and amd64) */
-ULONG ComPortAddress[] = {0x000, 0x3F8, 0x2F8, 0x3E8, 0x2E8, 0x5F8, 0x4F8, 0x5E8, 0x4E8};
-
+/* COM port I/O addresses */
+ULONG ComPortAddress[] = COMPORT_ADDRESSES;
 
 /**
  * This routine gets a byte from serial port.
