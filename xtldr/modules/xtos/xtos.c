@@ -385,7 +385,8 @@ XtpLoadModule(IN PEFI_FILE_HANDLE SystemDir,
 
     /* Check PE/COFF image subsystem */
     XtPeCoffProtocol->GetSubSystem(*ImageContext, &SubSystem);
-    if(SubSystem != PECOFF_IMAGE_SUBSYSTEM_XT_NATIVE_APPLICATION &&
+    if(SubSystem != PECOFF_IMAGE_SUBSYSTEM_XT_NATIVE_KERNEL &&
+       SubSystem != PECOFF_IMAGE_SUBSYSTEM_XT_NATIVE_APPLICATION &&
        SubSystem != PECOFF_IMAGE_SUBSYSTEM_XT_NATIVE_DRIVER)
     {
         XtLdrProtocol->DbgPrint(L"WARNING: Loaded PE/COFF image with non-XT subsystem set\n");
