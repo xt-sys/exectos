@@ -50,7 +50,8 @@ typedef enum _LOADER_MEMORY_TYPE
 } LOADER_MEMORY_TYPE, *PLOADER_MEMORY_TYPE;
 
 /* Firmware types enumeration list */
-typedef enum _SYSTEM_FIRMWARE_TYPE {
+typedef enum _SYSTEM_FIRMWARE_TYPE
+{
     SystemFirmwareInvalid,
     SystemFirmwareUnknown,
     SystemFirmwareEfi,
