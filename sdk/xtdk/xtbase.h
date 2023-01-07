@@ -14,6 +14,9 @@
 #include <xttypes.h>
 
 
+/* Interrupt Request Level (IRQL) */
+typedef UCHAR KIRQL, *PKIRQL;
+
 /* 128-bit buffer containing a unique identifier value */
 typedef struct _GUID
 {

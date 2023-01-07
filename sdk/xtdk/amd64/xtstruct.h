@@ -13,5 +13,10 @@
 /* Architecture-related structures forward references */
 typedef struct _CPUID_REGISTERS CPUID_REGISTERS, *PCPUID_REGISTERS;
 typedef struct _HARDWARE_PTE HARDWARE_PTE, *PHARDWARE_PTE;
+typedef struct _KTSS KTSS, *PKTSS;
+
+/* Architecture-related unions forward references */
+typedef union _KGDTENTRY KGDTENTRY, *PKGDTENTRY;
+typedef union _KIDTENTRY KIDTENTRY, *PKIDTENTRY;
 
 #endif /* __XTDK_AMD64_XTSTRUCT_H */
