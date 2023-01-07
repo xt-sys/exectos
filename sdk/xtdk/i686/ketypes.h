@@ -9,6 +9,7 @@
 #ifndef __XTDK_I686_KETYPES_H
 #define __XTDK_I686_KETYPES_H
 
+#include <xtstruct.h>
 #include <xttypes.h>
 
 
@@ -27,6 +28,61 @@
 
 /* XTOS Kernel stack size */
 #define KERNEL_STACK_SIZE                 0x4000
+
+/* Kernel frames */
+#define KTRAP_FRAME_ALIGN                 0x08
+#define KTRAP_FRAME_SIZE                  sizeof(KTRAP_FRAME)
+#define NPX_FRAME_SIZE                    0x210
+
+/* Number of supported extensions */
+#define MAXIMUM_SUPPORTED_EXTENSION       512
+
+/* Size of 387 registers */
+#define SIZE_OF_80387_REGISTERS           80
+
+/* Floating point state storing structure */
+typedef struct _FLOATING_SAVE_AREA
+{
+    ULONG ControlWord;
+    ULONG StatusWord;
+    ULONG TagWord;
+    ULONG ErrorOffset;
+    ULONG ErrorSelector;
+    ULONG DataOffset;
+    ULONG DataSelector;
+    UCHAR RegisterArea[SIZE_OF_80387_REGISTERS];
+    ULONG Cr0NpxState;
+} FLOATING_SAVE_AREA, *PFLOATING_SAVE_AREA;
+
+/* Context frame structure definition */
+typedef struct _CONTEXT
+{
+    ULONG ContextFlags;
+    ULONG Dr0;
+    ULONG Dr1;
+    ULONG Dr2;
+    ULONG Dr3;
+    ULONG Dr6;
+    ULONG Dr7;
+    FLOATING_SAVE_AREA FloatSave;
+    ULONG SegGs;
+    ULONG SegFs;
+    ULONG SegEs;
+    ULONG SegDs;
+    ULONG Edi;
+    ULONG Esi;
+    ULONG Ebx;
+    ULONG Edx;
+    ULONG Ecx;
+    ULONG Eax;
+    ULONG Ebp;
+    ULONG Eip;
+    ULONG SegCs;
+    ULONG EFlags;
+    ULONG Esp;
+    ULONG SegSs;
+    UCHAR ExtendedRegisters[MAXIMUM_SUPPORTED_EXTENSION];
+} CONTEXT, *PCONTEXT;
 
 /* Global Descriptor Table (GDT) entry structure definition */
 typedef struct _KGDTENTRY
@@ -59,7 +115,8 @@ typedef struct _KGDTENTRY
 } KGDTENTRY, *PKGDTENTRY;
 
 /* Interrupt Descriptor Table (IDT) entry structure definition */
-typedef struct _KIDTENTRY {
+typedef struct _KIDTENTRY
+{
     USHORT Offset;
     USHORT Selector;
     USHORT Access;
@@ -67,13 +124,15 @@ typedef struct _KIDTENTRY {
 } KIDTENTRY, *PKIDTENTRY;
 
 /* Interrupt direction access map structure definition */
-typedef struct _KIIO_ACCESS_MAP {
+typedef struct _KIIO_ACCESS_MAP
+{
     UCHAR DirectionMap[IOPM_DIRECTION_MAP_SIZE];
     UCHAR IoMap[IOPM_FULL_SIZE];
 } KIIO_ACCESS_MAP, *PKIIO_ACCESS_MAP;
 
 /* Task State Segment (TSS) structure definition */
-typedef struct _KTSS {
+typedef struct _KTSS
+{
     USHORT Backlink;
     USHORT Reserved0;
     ULONG Esp0;
@@ -110,5 +169,51 @@ typedef struct _KTSS {
     KIIO_ACCESS_MAP IoMaps[IOPM_COUNT];
     UCHAR IntDirectionMap[IOPM_DIRECTION_MAP_SIZE];
 } KTSS, *PKTSS;
+
+/* Exception frame definition (not available on ia32) */
+typedef struct _KEXCEPTION_FRAME
+{
+    ULONG PlaceHolder;
+} KEXCEPTION_FRAME, *PKEXCEPTION_FRAME;
+
+/* Trap frame definition */
+typedef struct _KTRAP_FRAME
+{
+    ULONG DbgEbp;
+    ULONG DbgEip;
+    ULONG DbgArgMark;
+    ULONG DbgArgPointer;
+    ULONG TempSegCs;
+    ULONG TempEsp;
+    ULONG Dr0;
+    ULONG Dr1;
+    ULONG Dr2;
+    ULONG Dr3;
+    ULONG Dr6;
+    ULONG Dr7;
+    ULONG SegGs;
+    ULONG SegEs;
+    ULONG SegDs;
+    ULONG Edx;
+    ULONG Ecx;
+    ULONG Eax;
+    ULONG PreviousPreviousMode;
+    PEXCEPTION_REGISTRATION_RECORD ExceptionList;
+    ULONG SegFs;
+    ULONG Edi;
+    ULONG Esi;
+    ULONG Ebx;
+    ULONG Ebp;
+    ULONG ErrCode;
+    ULONG Eip;
+    ULONG SegCs;
+    ULONG EFlags;
+    ULONG HardwareEsp;
+    ULONG HardwareSegSs;
+    ULONG V86Es;
+    ULONG V86Ds;
+    ULONG V86Fs;
+    ULONG V86Gs;
+} KTRAP_FRAME, *PKTRAP_FRAME;
 
 #endif /* __XTDK_I686_KETYPES_H */

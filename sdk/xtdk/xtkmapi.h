@@ -7,10 +7,10 @@
  */
 
 /* Base XT headers */
-#include <xttarget.h>
-#include <xttypes.h>
 #include <xtdefs.h>
 #include <xtstatus.h>
+#include <xttarget.h>
+#include <xttypes.h>
 
 /* XT forward references */
 #include <xtstruct.h>
@@ -21,15 +21,16 @@
 /* Architecture-independent XT API */
 #include <xtbase.h>
 #include <xtdebug.h>
+#include <xtfw.h>
 #include <xtimage.h>
 #include <xtuefi.h>
-#include <xtfw.h>
 
 /* Low level data types headers */
-#include <rtltypes.h>
-#include <ldrtypes.h>
 #include <hltypes.h>
 #include <iotypes.h>
+#include <ketypes.h>
+#include <ldrtypes.h>
+#include <rtltypes.h>
 
 /* Architecture-specific low level data types headers */
 #include ARCH_HEADER(hltypes.h)
@@ -43,3 +44,6 @@
 
 /* Architecture specific XT routines*/
 #include ARCH_HEADER(hlfuncs.h)
+
+/* Callbacks */
+#include <kertptr.h>

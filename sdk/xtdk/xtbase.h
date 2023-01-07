@@ -17,6 +17,9 @@
 /* Interrupt Request Level (IRQL) */
 typedef UCHAR KIRQL, *PKIRQL;
 
+/* Processor modes */
+typedef CHAR KPROCESSOR_MODE, *PKPROCESSOR_MODE;
+
 /* 128-bit buffer containing a unique identifier value */
 typedef struct _GUID
 {
