@@ -12,6 +12,7 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/cpufunc.c
     ${XTOSKRNL_SOURCE_DIR}/ke/globals.c
     ${XTOSKRNL_SOURCE_DIR}/ke/krnlinit.c
+    ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/krnlinit.c
     ${XTOSKRNL_SOURCE_DIR}/rtl/memory.c
     ${XTOSKRNL_SOURCE_DIR}/rtl/plist.c
     ${XTOSKRNL_SOURCE_DIR}/rtl/string.c

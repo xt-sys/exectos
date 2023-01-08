@@ -9,7 +9,7 @@
 #ifndef __XTOSKRNL_GLOBALS_H
 #define __XTOSKRNL_GLOBALS_H
 
-#include <xtkmapi.h>
+#include <xtos.h>
 
 
 /* Kernel initialization block passed by boot loader */
