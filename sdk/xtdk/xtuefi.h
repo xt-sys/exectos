@@ -418,7 +418,7 @@ typedef enum _EFI_GRAPHICS_PIXEL_FORMAT
 } EFI_GRAPHICS_PIXEL_FORMAT, *PEFI_GRAPHICS_PIXEL_FORMAT;
 
 /* Enumeration of EFI GOP output BLT operations */
-typedef enum EFI_GRAPHICS_OUTPUT_BLT_OPERATION
+typedef enum _EFI_GRAPHICS_OUTPUT_BLT_OPERATION
 {
     EfiBltVideoFill,
     EfiBltVideoToBltBuffer,
