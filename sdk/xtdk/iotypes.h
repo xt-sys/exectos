@@ -59,7 +59,8 @@
 #define PCI_STATUS_DETECTED_PARITY_ERROR        0x8000
 
 /* PCI and PCI-E common header structure */
-typedef struct _PCI_COMMON_HEADER {
+typedef struct _PCI_COMMON_HEADER
+{
     USHORT VendorId;
     USHORT DeviceId;
     USHORT Command;
