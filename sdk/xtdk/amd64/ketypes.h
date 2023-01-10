@@ -241,7 +241,7 @@ typedef struct _KSWITCH_FRAME
     ULONG64 P4Home;
     ULONG64 P5Home;
     ULONG MxCsr;
-    UCHAR ApcBypass;
+    KIRQL ApcBypass;
     UCHAR Fill1[3];
     ULONG64 Rbp;
     ULONG64 Return;
@@ -255,8 +255,8 @@ typedef struct _KTRAP_FRAME
     ULONG64 P3Home;
     ULONG64 P4Home;
     ULONG64 P5;
-    CHAR PreviousMode;
-    UCHAR PreviousIrql;
+    KPROCESSOR_MODE PreviousMode;
+    KIRQL PreviousIrql;
     UCHAR FaultIndicator;
     UCHAR ExceptionActive;
     ULONG MxCsr;
