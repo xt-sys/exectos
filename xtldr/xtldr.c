@@ -46,14 +46,12 @@ BlLoadEfiModules()
     PEFI_LOADED_IMAGE_PROTOCOL LoadedImage;
     PEFI_FILE_HANDLE FsHandle, ModulesDir;
     EFI_HANDLE DiskHandle, ModuleHandle;
-    PEFI_HANDLE Handles;
     SIZE_T Length;
     EFI_STATUS Status;
-    UINT_PTR DirSize, ModulesCount;
+    UINT_PTR DirSize;
     CHAR Buffer[1024];
     WCHAR ModulePath[1024];
     PWCHAR ModuleName;
-    UINT Index;
 
     /* Open EFI volume */
     Status = BlOpenVolume(NULL, &DiskHandle, &FsHandle);
@@ -222,27 +220,6 @@ BlLoadEfiModules()
         /* Module loaded successfully */
         BlDbgPrint(L"OK\n");
     }
-
-    /* Get list of all handles */
-    Status = EfiSystemTable->BootServices->LocateHandleBuffer(AllHandles, NULL, NULL, &ModulesCount, &Handles);
-    if(Status != STATUS_EFI_SUCCESS)
-    {
-        /* Failed to get list of handles */
-        BlDbgPrint(L"WARNING: Unable to get a list of handles, some modules might not work properly\n");
-    }
-    else
-    {
-        /* Iterate through a list of handles */
-        BlDbgPrint(L"Starting services for %lu handles\n", ModulesCount);
-        for(Index = 0; Index < ModulesCount; Index++)
-        {
-            /* Start services for all loaded modules */
-            EfiSystemTable->BootServices->ConnectController(Handles[Index], NULL, NULL, TRUE);
-        }
-    }
-
-    /* Free memory */
-    BlEfiMemoryFreePool(Handles);
 
     /* Close directory and volume */
     ModulesDir->Close(ModulesDir);
