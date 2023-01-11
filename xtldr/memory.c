@@ -214,6 +214,7 @@ BlConvertEfiMemoryType(IN EFI_MEMORY_TYPE EfiMemoryType)
             break;
         case EfiBootServicesData:
         case EfiLoaderCode:
+        case EfiLoaderData:
             MemoryType = LoaderFirmwareTemporary;
             break;
         case EfiUnusableMemory:
