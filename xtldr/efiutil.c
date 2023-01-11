@@ -229,7 +229,7 @@ BlComPortInitialize()
     /* Print debug message depending on port settings */
     if(PortAddress)
     {
-        BlEfiPrint(L"Initializing serial console at COM port address: %lx\n", PortAddress);
+        BlEfiPrint(L"Initializing serial console at COM port address: 0x%lx\n", PortAddress);
     }
     else
     {
