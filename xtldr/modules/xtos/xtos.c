@@ -99,11 +99,19 @@ XtBootSystem(IN PXT_BOOT_PROTOCOL_PARAMETERS Parameters)
         Parameters->SystemPath = L"\\ExectOS";
     }
 
+    /* Check if kernel file is set */
     if(Parameters->KernelFile == NULL)
     {
         /* No kernel filename set, fallback to default */
         XtLdrProtocol->DbgPrint(L"WARNING: No kernel file specified, falling back to defaults\n");
         Parameters->KernelFile = L"xtoskrnl.exe";
+    }
+
+    /* Check if provided any kernel boot arguments */
+    if(Parameters->Arguments == NULL)
+    {
+        /* No argument supplied */
+        Parameters->Arguments = L"";
     }
 
     /* Print a debug message */
