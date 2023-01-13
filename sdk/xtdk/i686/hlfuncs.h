@@ -77,6 +77,23 @@ HlSetInterruptFlag();
 
 XTCDECL
 VOID
+HlStoreGlobalDescriptorTable(OUT PVOID Destination);
+
+XTCDECL
+VOID
+HlStoreInterruptDescriptorTable(OUT PVOID Destination);
+
+XTCDECL
+VOID
+HlStoreSegment(IN USHORT Segment,
+               OUT PVOID Destination);
+
+XTCDECL
+VOID
+HlStoreTaskRegister(OUT PVOID Destination);
+
+XTCDECL
+VOID
 HlWriteControlRegister(IN USHORT ControlRegister,
                        IN UINT_PTR Value);
 

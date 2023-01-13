@@ -97,7 +97,7 @@ HlInvalidateTlbEntry(PVOID Address)
 {
     asm volatile("invlpg (%0)"
                  :
-                 : "b"(Address)
+                 : "b" (Address)
                  : "memory");
 }
 
@@ -117,8 +117,8 @@ HlIoPortInByte(IN USHORT Port)
 {
     UCHAR Value;
     asm volatile("inb %1, %0"
-                 : "=a"(Value)
-                 : "Nd"(Port));
+                 : "=a" (Value)
+                 : "Nd" (Port));
     return Value;
 }
 
@@ -138,8 +138,8 @@ HlIoPortInShort(IN USHORT Port)
 {
     USHORT Value;
     asm volatile("inw %1, %0"
-                 : "=a"(Value)
-                 : "Nd"(Port));
+                 : "=a" (Value)
+                 : "Nd" (Port));
     return Value;
 }
 
@@ -159,8 +159,8 @@ HlIoPortInLong(IN USHORT Port)
 {
     ULONG Value;
     asm volatile("inl %1, %0"
-                 : "=a"(Value)
-                 : "Nd"(Port));
+                 : "=a" (Value)
+                 : "Nd" (Port));
     return Value;
 }
 
@@ -184,8 +184,8 @@ HlIoPortOutByte(IN USHORT Port,
 {
     asm volatile("outb %0, %1"
                  :
-                 : "a"(Value),
-                   "Nd"(Port));
+                 : "a" (Value),
+                   "Nd" (Port));
 }
 
 /**
@@ -208,8 +208,8 @@ HlIoPortOutShort(IN USHORT Port,
 {
     asm volatile("outw %0, %1"
                  :
-                 : "a"(Value),
-                   "Nd"(Port));
+                 : "a" (Value),
+                   "Nd" (Port));
 }
 
 /**
@@ -232,8 +232,8 @@ HlIoPortOutLong(IN USHORT Port,
 {
     asm volatile("outl %0, %1"
                  :
-                 : "a"(Value),
-                   "Nd"(Port));
+                 : "a" (Value),
+                   "Nd" (Port));
 }
 
 /**
@@ -329,7 +329,7 @@ HlReadTimeStampCounter()
     ULONGLONG Value;
 
     asm volatile("rdtsc"
-                 : "=A"(Value));
+                 : "=A" (Value));
 
     return Value;
 }
@@ -346,6 +346,116 @@ VOID
 HlSetInterruptFlag()
 {
     asm volatile("sti");
+}
+
+/**
+ * Stores GDT register into the given memory area.
+ *
+ * @param Destination
+ *        Supplies a pointer to the memory area where GDT will be stored.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+HlStoreGlobalDescriptorTable(OUT PVOID Destination)
+{
+    asm volatile("sgdt %0"
+                 :
+                 : "m" (*(PSHORT)Destination)
+                 : "memory");
+}
+
+/**
+ * Stores IDT register into the given memory area.
+ *
+ * @param Destination
+ *        Supplies a pointer to the memory area where IDT will be stored.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+HlStoreInterruptDescriptorTable(OUT PVOID Destination)
+{
+    asm volatile("sidt %0"
+                 :
+                 : "m" (*(PSHORT)Destination)
+                 : "memory");
+}
+
+/**
+ * Stores specified segment into the given memory area.
+ *
+ * @param Segment
+ *        Supplies a segment identification.
+ *
+ * @param Destination
+ *        Supplies a pointer to the memory area where segment data will be stored.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+HlStoreSegment(IN USHORT Segment,
+               OUT PVOID Destination)
+{
+    switch(Segment)
+    {
+        case SEGMENT_CS:
+            asm volatile("movl %%cs, %0"
+                         : "=r" (*(PUINT)Destination));
+            break;
+        case SEGMENT_DS:
+            asm volatile("movl %%ds, %0"
+                         : "=r" (*(PUINT)Destination));
+            break;
+        case SEGMENT_ES:
+            asm volatile("movl %%es, %0"
+                         : "=r" (*(PUINT)Destination));
+            break;
+        case SEGMENT_FS:
+            asm volatile("movl %%fs, %0"
+                         : "=r" (*(PUINT)Destination));
+            break;
+        case SEGMENT_GS:
+            asm volatile("movl %%gs, %0"
+                         : "=r" (*(PUINT)Destination));
+            break;
+        case SEGMENT_SS:
+            asm volatile("movl %%ss, %0"
+                         : "=r" (*(PUINT)Destination));
+            break;
+        default:
+            Destination = NULL;
+            break;
+    }
+}
+
+/**
+ * Stores TR into the given memory area.
+ *
+ * @param Destination
+ *        Supplies a pointer to the memory area where TR will be stores.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+HlStoreTaskRegister(OUT PVOID Destination)
+{
+    asm volatile("str %0"
+                 :
+                 : "m" (*(PULONG)Destination)
+                 : "memory");
 }
 
 /**
@@ -373,28 +483,28 @@ HlWriteControlRegister(IN USHORT ControlRegister,
             /* Write value to CR0 */
             asm volatile("mov %0, %%cr0"
                          :
-                         : "r"(Value)
+                         : "r" (Value)
                          : "memory");
             break;
         case 2:
             /* Write value to CR2 */
             asm volatile("mov %0, %%cr2"
                          :
-                         : "r"(Value)
+                         : "r" (Value)
                          : "memory");
             break;
         case 3:
             /* Write value to CR3 */
             asm volatile("mov %0, %%cr3"
                          :
-                         : "r"(Value)
+                         : "r" (Value)
                          : "memory");
             break;
         case 4:
             /* Write value to CR4 */
             asm volatile("mov %0, %%cr4"
                          :
-                         : "r"(Value)
+                         : "r" (Value)
                          : "memory");
             break;
     }

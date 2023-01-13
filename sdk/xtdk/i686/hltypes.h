@@ -49,6 +49,14 @@
 #define CR4_XSAVE                                       0x00020000
 #define CR4_RESERVED3                                   0xFFFC0000
 
+/* Segment defintions */
+#define SEGMENT_CS                                      0x2E
+#define SEGMENT_DS                                      0x3E
+#define SEGMENT_ES                                      0x26
+#define SEGMENT_SS                                      0x36
+#define SEGMENT_FS                                      0x64
+#define SEGMENT_GS                                      0x65
+
 /* CPUID features enumeration list */
 typedef enum _CPUID_FEATURES
 {
