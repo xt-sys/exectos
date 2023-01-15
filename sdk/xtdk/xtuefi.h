@@ -367,13 +367,13 @@ typedef enum _EFI_PCI_IO_PROTOCOL_OPERATION
 /* Enumeration of EFI PCI Root Bridge I/O protocol operations */
 typedef enum _EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL_OPERATION
 {
-  EfiPciOperationBusMasterRead,
-  EfiPciOperationBusMasterWrite,
-  EfiPciOperationBusMasterCommonBuffer,
-  EfiPciOperationBusMasterRead64,
-  EfiPciOperationBusMasterWrite64,
-  EfiPciOperationBusMasterCommonBuffer64,
-  EfiPciOperationMaximum
+    EfiPciOperationBusMasterRead,
+    EfiPciOperationBusMasterWrite,
+    EfiPciOperationBusMasterCommonBuffer,
+    EfiPciOperationBusMasterRead64,
+    EfiPciOperationBusMasterWrite64,
+    EfiPciOperationBusMasterCommonBuffer64,
+    EfiPciOperationMaximum
 } EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL_OPERATION, *PEFI_PCI_ROOT_BRIDGE_IO_PROTOCOL_OPERATION;
 
 /* Enumeration of EFI PCI I/O protocol attribute operations */
@@ -408,16 +408,6 @@ typedef enum _EFI_IO_OPERATION_TYPE
     EfiBusMasterCommonBuffer
 } EFI_IO_OPERATION_TYPE, *PEFI_IO_OPERATION_TYPE;
 
-/* Enumeration of EFI GOP pixel formats */
-typedef enum _EFI_GRAPHICS_PIXEL_FORMAT
-{
-    PixelRedGreenBlueReserved8BitPerColor,
-    PixelBlueGreenRedReserved8BitPerColor,
-    PixelBitMask,
-    PixelBltOnly,
-    PixelFormatMax
-} EFI_GRAPHICS_PIXEL_FORMAT, *PEFI_GRAPHICS_PIXEL_FORMAT;
-
 /* Enumeration of EFI GOP output BLT operations */
 typedef enum _EFI_GRAPHICS_OUTPUT_BLT_OPERATION
 {
@@ -428,14 +418,32 @@ typedef enum _EFI_GRAPHICS_OUTPUT_BLT_OPERATION
     EfiGraphicsOutputBltOperationMax
 } EFI_GRAPHICS_OUTPUT_BLT_OPERATION, *PEFI_GRAPHICS_OUTPUT_BLT_OPERATION;
 
+/* Enumeration of EFI GOP pixel formats */
+typedef enum _EFI_GRAPHICS_PIXEL_FORMAT
+{
+    PixelRedGreenBlueReserved8BitPerColor,
+    PixelBlueGreenRedReserved8BitPerColor,
+    PixelBitMask,
+    PixelBltOnly,
+    PixelFormatMax
+} EFI_GRAPHICS_PIXEL_FORMAT, *PEFI_GRAPHICS_PIXEL_FORMAT;
+
+/* Enumeration of EGI graphics protocols */
+typedef enum _EFI_GRAPHICS_PROTOCOL
+{
+    NONE,
+    GOP,
+    UGA
+} EFI_GRAPHICS_PROTOCOL, *PEFI_GRAPHICS_PROTOCOL;
+
 /* Enumeration of EFI UGA output BLT operations */
 typedef enum _EFI_UNIVERSA_GRAPHICS_BLT_OPERATION
 {
-  EfiUgaVideoFill,
-  EfiUgaVideoToBltBuffer,
-  EfiUgaBltBufferToVideo,
-  EfiUgaVideoToVideo,
-  EfiUgaBltMax
+    EfiUgaVideoFill,
+    EfiUgaVideoToBltBuffer,
+    EfiUgaBltBufferToVideo,
+    EfiUgaVideoToVideo,
+    EfiUgaBltMax
 } EFI_UNIVERSA_GRAPHICS_BLT_OPERATION, *PEFI_UNIVERSA_GRAPHICS_BLT_OPERATION;
 
 /* Enumeration of UART parity types */
