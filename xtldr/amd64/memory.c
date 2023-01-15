@@ -41,18 +41,6 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
     PLIST_ENTRY ListEntry;
     EFI_STATUS Status;
 
-    /* Allocate and zero-fill buffer for EFI memory map */
-    BlEfiMemoryAllocatePool(sizeof(EFI_MEMORY_MAP), (PVOID*)&MemoryMap);
-    RtlZeroMemory(MemoryMap, sizeof(EFI_MEMORY_MAP));
-
-    /* Get EFI memory map */
-    Status = BlGetMemoryMap(MemoryMap);
-    if(Status != STATUS_EFI_SUCCESS)
-    {
-        /* Unable to get memory map */
-        return Status;
-    }
-
     /* Allocate pages for PML4 */
     Status = BlEfiMemoryAllocatePages(1, &Address);
     if(Status != STATUS_EFI_SUCCESS)
@@ -111,8 +99,20 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
         ListEntry = ListEntry->Flink;
     }
 
-    /* Exit EFI Boot Services */
+    /* Allocate and zero-fill buffer for EFI memory map */
+    BlEfiMemoryAllocatePool(sizeof(EFI_MEMORY_MAP), (PVOID*)&MemoryMap);
+    RtlZeroMemory(MemoryMap, sizeof(EFI_MEMORY_MAP));
+
+    /* Get EFI memory map and prepare for exiting boot services */
     BlDbgPrint(L"Exiting EFI boot services\n");
+    Status = BlGetMemoryMap(MemoryMap);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Unable to get memory map */
+        return Status;
+    }
+
+    /* Exit EFI Boot Services */
     Status = EfiSystemTable->BootServices->ExitBootServices(EfiImageHandle, MemoryMap->MapKey);
     if(Status != STATUS_EFI_SUCCESS)
     {

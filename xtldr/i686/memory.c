@@ -197,8 +197,16 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
         ListEntry = ListEntry->Flink;
     }
 
-    /* Exit EFI Boot Services */
+    /* Get EFI memory map and prepare for exiting boot services */
     BlDbgPrint(L"Exiting EFI boot services\n");
+    Status = BlGetMemoryMap(MemoryMap);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Unable to get memory map */
+        return Status;
+    }
+
+    /* Exit EFI Boot Services */
     Status = EfiSystemTable->BootServices->ExitBootServices(EfiImageHandle, MemoryMap->MapKey);
     if(Status != STATUS_EFI_SUCCESS)
     {
