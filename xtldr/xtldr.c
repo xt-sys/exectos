@@ -21,9 +21,6 @@ PEFI_SYSTEM_TABLE EfiSystemTable;
 /* EFI Secure Boot status */
 INT_PTR EfiSecureBoot;
 
-/* New bootloader stack */
-PVOID EfiLoaderStack;
-
 /* Serial port configuration */
 CPPORT EfiSerialPort;
 
