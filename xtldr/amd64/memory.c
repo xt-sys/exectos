@@ -113,7 +113,12 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
 
     /* Exit EFI Boot Services */
     BlDbgPrint(L"Exiting EFI boot services\n");
-    EfiSystemTable->BootServices->ExitBootServices(EfiImageHandle, MemoryMap->MapKey);
+    Status = EfiSystemTable->BootServices->ExitBootServices(EfiImageHandle, MemoryMap->MapKey);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        BlDbgPrint(L"Failed to exit boot services (Status code: %lx)\n", Status);
+        return STATUS_EFI_ABORTED;
+    }
 
     /* No runtime services should touch boot services code, so get rid of it all at this point */
     EfiSystemTable->RuntimeServices->SetVirtualAddressMap(MemoryMap->MapSize, MemoryMap->DescriptorSize,

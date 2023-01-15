@@ -238,7 +238,11 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
 
     /* Enable paging */
     EfiSystemTable->BootServices->HandleProtocol(EfiImageHandle, &LoadedImageGuid, (PVOID*)&ImageProtocol);
-    XtLdrProtocol->EnablePaging(&MemoryMappings, VirtualAddress, ImageProtocol, &XtPageMap);
+    Status = XtLdrProtocol->EnablePaging(&MemoryMappings, VirtualAddress, ImageProtocol, &XtPageMap);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        return Status;
+    }
 
     /* Call XTOS kernel */
     XtLdrProtocol->DbgPrint(L"Booting the XTOS kernel\n");
