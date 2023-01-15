@@ -166,7 +166,7 @@ BlLoadEfiModules()
             }
             else
             {
-                BlDbgPrint(L"ERROR: Unable to load module\n");
+                BlDbgPrint(L"ERROR: Unable to load module (Status code: %lx)\n", Status);
             }
 
             /* Free memory and skip module */
