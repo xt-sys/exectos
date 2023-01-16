@@ -214,10 +214,6 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
         return STATUS_EFI_ABORTED;
     }
 
-    /* No runtime services should touch boot services code, so get rid of it all at this point */
-    EfiSystemTable->RuntimeServices->SetVirtualAddressMap(MemoryMap->MapSize, MemoryMap->DescriptorSize,
-                                                          MemoryMap->DescriptorVersion, MemoryMap->Map);
-
     /* Enable Physical Address Extension (PAE) */
     HlWriteControlRegister(4, HlReadControlRegister(4) | CR4_PAE);
 

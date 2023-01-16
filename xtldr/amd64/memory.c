@@ -120,10 +120,6 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
         return STATUS_EFI_ABORTED;
     }
 
-    /* No runtime services should touch boot services code, so get rid of it all at this point */
-    EfiSystemTable->RuntimeServices->SetVirtualAddressMap(MemoryMap->MapSize, MemoryMap->DescriptorSize,
-                                                          MemoryMap->DescriptorVersion, MemoryMap->Map);
-
     /* Write PML4 to CR3 */
     HlWriteControlRegister(3, (UINT_PTR)*PtePointer);
 
