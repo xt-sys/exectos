@@ -82,10 +82,24 @@ typedef struct _FIRMWARE_INFORMATION_BLOCK
     };
 } FIRMWARE_INFORMATION_BLOCK, *PFIRMWARE_INFORMATION_BLOCK;
 
+/* Boot Loader FrameBuffer information block */
+typedef struct _LOADER_GRAPHICS_INFORMATION_BLOCK
+{
+    BOOLEAN Initialized;
+    EFI_GRAPHICS_PROTOCOL Protocol;
+    PVOID Address;
+    UINT BufferSize;
+    UINT Width;
+    UINT Height;
+    UINT PixelsPerScanLine;
+    UINT BitsPerPixel;
+} LOADER_GRAPHICS_INFORMATION_BLOCK, *PLOADER_GRAPHICS_INFORMATION_BLOCK;
+
 /* Boot Loader information block */
 typedef struct _LOADER_INFORMATION_BLOCK
 {
     PVOID DbgPrint;
+    LOADER_GRAPHICS_INFORMATION_BLOCK FrameBuffer;
 } LOADER_INFORMATION_BLOCK, *PLOADER_INFORMATION_BLOCK;
 
 typedef struct _LOADER_MEMORY_MAPPING
