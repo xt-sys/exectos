@@ -9,7 +9,7 @@
 #include <xtbl.h>
 
 
-STATIC PUINT16 HexTable = L"0123456789abcdef";
+STATIC PUINT16 HexTable = L"0123456789ABCDEF";
 
 /**
  * Compares two strings without sensitivity to case.
