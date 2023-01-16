@@ -270,11 +270,13 @@ EFI_STATUS
 XtpInitializeLoaderBlock(IN PLIST_ENTRY MemoryMappings,
                          IN PVOID *VirtualAddress)
 {
+    EFI_GUID FrameBufGuid = XT_FRAMEBUFFER_PROTOCOL_GUID;
+    PXT_FRAMEBUFFER_PROTOCOL FrameBufProtocol;
     PKERNEL_INITIALIZATION_BLOCK LoaderBlock;
     EFI_PHYSICAL_ADDRESS Address;
     PVOID RuntimeServices;
     EFI_STATUS Status;
-    UINT BlockPages;
+    UINT BlockPages, FrameBufferPages;
 
     /* Calculate number of pages needed for initialization block */
     BlockPages = EFI_SIZE_TO_PAGES(sizeof(KERNEL_INITIALIZATION_BLOCK));
@@ -302,6 +304,24 @@ XtpInitializeLoaderBlock(IN PLIST_ENTRY MemoryMappings,
     /* Set LoaderInformation block properties */
     LoaderBlock->LoaderInformation.DbgPrint = XtLdrProtocol->DbgPrint;
 
+    /* Load FrameBuffer protocol */
+    Status = BlLoadXtProtocol((PVOID *)&FrameBufProtocol, &FrameBufGuid);
+    if(Status == STATUS_EFI_SUCCESS)
+    {
+        /* Make sure FrameBuffer is initialized */
+        FrameBufProtocol->Initialize();
+        FrameBufProtocol->PrintDisplayInformation();
+
+        /* Store information about FrameBuffer device */
+        FrameBufProtocol->GetDisplayInformation(&LoaderBlock->LoaderInformation.FrameBuffer);
+    }
+    else
+    {
+        /* No FrameBuffer available */
+        LoaderBlock->LoaderInformation.FrameBuffer.Initialized = FALSE;
+        LoaderBlock->LoaderInformation.FrameBuffer.Protocol = NONE;
+    }
+
     /* Attempt to find virtual address of the EFI Runtime Services */
     Status = XtLdrProtocol->GetVirtualAddress(MemoryMappings, &EfiSystemTable->RuntimeServices->Hdr, &RuntimeServices);
     if(Status == STATUS_EFI_SUCCESS)
@@ -323,6 +343,24 @@ XtpInitializeLoaderBlock(IN PLIST_ENTRY MemoryMappings,
 
     /* Calculate next valid virtual address */
     *VirtualAddress += (UINT_PTR)(BlockPages * EFI_PAGE_SIZE);
+
+    /* Check if framebuffer initialized */
+    if(LoaderBlock->LoaderInformation.FrameBuffer.Initialized)
+    {
+        /* Calculate pages needed to map framebuffer */
+        FrameBufferPages = EFI_SIZE_TO_PAGES(LoaderBlock->LoaderInformation.FrameBuffer.BufferSize);
+
+        /* Map frame buffer memory */
+        XtLdrProtocol->AddVirtualMemoryMapping(MemoryMappings, *VirtualAddress,
+                                               LoaderBlock->LoaderInformation.FrameBuffer.Address,
+                                               FrameBufferPages, LoaderFirmwarePermanent);
+
+        /* Rewrite framebuffer address by using virtual address */
+        LoaderBlock->LoaderInformation.FrameBuffer.Address = *VirtualAddress;
+
+        /* Calcualate next valid virtual address */
+        *VirtualAddress += (UINT_PTR)(FrameBufferPages * EFI_PAGE_SIZE);
+    }
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
