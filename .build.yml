@@ -9,3 +9,13 @@ pipeline:
     commands:
       - echo "charch ${platform} && ./configure.sh && cd build-${platform}-xtchain && ninja -v && ninja diskimg -v" > build.cmds
       - xtchain < build.cmds
+  publish:
+    image: codingworkshop/oscw-runner:latest
+    secrets:
+      - OSCW_ARTIFACTS_HOSTNAME
+      - OSCW_ARTIFACTS_USERNAME
+      - OSCW_ARTIFACTS_USERKEY
+    commands:
+      - tar -I 'gzip' -cpf ExectOS-$(date +'%Y%m%d')-${CI_COMMIT_SHA:0:10}-${platform}.tar.gz -C build-${platform}-xtchain/output/binaries .
+      - gzip -c build-${platform}-xtchain/output/disk.img > ExectOS-$(date +'%Y%m%d')-${CI_COMMIT_SHA:0:10}-${platform}.img.gz
+      - artifact_publish "ExectOS-$(date +'%Y%m%d')-${CI_COMMIT_SHA:0:10}-${platform}.*.gz" ExectOS
