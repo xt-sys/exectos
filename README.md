@@ -8,6 +8,9 @@
   <a href="https://ci.codingworkshop.eu.org/xt-sys/exectos">
     <img alt="Build Status" src="https://ci.codingworkshop.eu.org/api/badges/xt-sys/exectos/status.svg">
   </a>
+  <a href="https://artifacts.codingworkshop.eu.org/ExectOS">
+    <img alt="CI/CD Artifacts" src="https://img.shields.io/badge/Download-CI/CD-red">
+  </a>
   <a href="https://git.codingworkshop.eu.org/xt-sys/exectos/src/branch/master/COPYING.md">
     <img alt="License" src="https://img.shields.io/badge/License-GPLv3-blue.svg">
   </a>
