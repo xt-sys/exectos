@@ -11,7 +11,8 @@ set(XTOS_COMPATIBLE_BUILD "9600")
 
 # Set common XTOS version variables
 string(TIMESTAMP XTOS_VERSION_YEAR %Y)
-string(TIMESTAMP XTOS_VERSION_DATE "%d/%m/%Y %H:%M UTC" UTC)
+string(TIMESTAMP XTOS_VERSION_DATE "%Y%m%d")
+string(TIMESTAMP XTOS_VERSION_FULLDATE "%d/%m/%Y %H:%M UTC" UTC)
 
 # Set latest GIT revision
 set(XTOS_VERSION_HASH "unknown")

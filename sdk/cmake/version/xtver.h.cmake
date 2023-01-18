@@ -17,6 +17,7 @@
 
 #define XTOS_VERSION_ARCH                "@ARCH@"
 #define XTOS_VERSION_DATE                "@XTOS_VERSION_DATE@"
+#define XTOS_VERSION_FULLDATE            "@XTOS_VERSION_FULLDATE@"
 #define XTOS_VERSION_YEAR                "@XTOS_VERSION_YEAR@"
 
 #define XTOS_COMPATIBLE_MAJOR            @XTOS_COMPATIBLE_MAJOR@
