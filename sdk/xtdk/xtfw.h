@@ -88,11 +88,12 @@ typedef struct _LOADER_GRAPHICS_INFORMATION_BLOCK
     BOOLEAN Initialized;
     EFI_GRAPHICS_PROTOCOL Protocol;
     PVOID Address;
-    UINT BufferSize;
+    ULONG_PTR BufferSize;
     UINT Width;
     UINT Height;
     UINT PixelsPerScanLine;
     UINT BitsPerPixel;
+    UINT Pitch;
 } LOADER_GRAPHICS_INFORMATION_BLOCK, *PLOADER_GRAPHICS_INFORMATION_BLOCK;
 
 /* Boot Loader information block */

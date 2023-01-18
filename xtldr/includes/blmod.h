@@ -70,14 +70,15 @@ typedef struct _XT_FRAMEBUFFER_INFORMATION
         PEFI_GRAPHICS_OUTPUT_PROTOCOL GOP;
         PEFI_UNIVERSAL_GRAPHICS_ADAPTER_PROTOCOL UGA;
     } Adapter;
-    UINT32 HorizontalResolution;
-    UINT32 VerticalResolution;
-    UINT32 BitsPerPixel;
-    UINT32 BytesPerPixel;
-    UINT32 PixelsPerScanLine;
+    UINT HorizontalResolution;
+    UINT VerticalResolution;
+    UINT BitsPerPixel;
+    UINT BytesPerPixel;
+    UINT PixelsPerScanLine;
+    UINT Pitch;
     EFI_GRAPHICS_PIXEL_FORMAT PixelFormat;
     EFI_PHYSICAL_ADDRESS FrameBufferBase;
-    UINT_PTR FrameBufferSize;
+    ULONG_PTR FrameBufferSize;
 } XT_FRAMEBUFFER_INFORMATION, *PXT_FRAMEBUFFER_INFORMATION;
 
 /* EFI XT PE/COFF Image Protocol */

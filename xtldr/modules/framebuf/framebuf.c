@@ -68,12 +68,13 @@ FbGetDisplayInformation(OUT PLOADER_GRAPHICS_INFORMATION_BLOCK InformationBlock)
 {
     InformationBlock->Initialized = FrameBufferInfo.Initialized;
     InformationBlock->Protocol = FrameBufferInfo.Protocol;
-    InformationBlock->Address = (PVOID)(UINT_PTR)FrameBufferInfo.FrameBufferBase;
+    InformationBlock->Address = (PVOID)(ULONG_PTR)FrameBufferInfo.FrameBufferBase;
     InformationBlock->BufferSize = FrameBufferInfo.FrameBufferSize;
     InformationBlock->Width = FrameBufferInfo.HorizontalResolution;
     InformationBlock->Height = FrameBufferInfo.VerticalResolution;
     InformationBlock->BitsPerPixel = FrameBufferInfo.BitsPerPixel;
     InformationBlock->PixelsPerScanLine = FrameBufferInfo.PixelsPerScanLine;
+    InformationBlock->Pitch = FrameBufferInfo.Pitch;
 }
 
 /**
@@ -122,6 +123,7 @@ FbInitializeDisplay()
             FrameBufferInfo.BytesPerPixel = FrameBufferInfo.BitsPerPixel >> 3;
             FrameBufferInfo.PixelsPerScanLine = FrameBufferInfo.Adapter.GOP->Mode->Info->PixelsPerScanLine;
             FrameBufferInfo.PixelFormat = FrameBufferInfo.Adapter.GOP->Mode->Info->PixelFormat;
+            FrameBufferInfo.Pitch = FrameBufferInfo.PixelsPerScanLine * (FrameBufferInfo.BitsPerPixel / 8);
             FrameBufferInfo.FrameBufferBase = FrameBufferInfo.Adapter.GOP->Mode->FrameBufferBase;
             FrameBufferInfo.FrameBufferSize = FrameBufferInfo.Adapter.GOP->Mode->FrameBufferSize;
             FrameBufferInfo.Protocol = GOP;
@@ -166,6 +168,7 @@ FbInitializeDisplay()
                     FrameBufferInfo.BytesPerPixel = 4;
                     FrameBufferInfo.PixelsPerScanLine = FrameBufferInfo.HorizontalResolution;
                     FrameBufferInfo.PixelFormat = PixelBlueGreenRedReserved8BitPerColor;
+                    FrameBufferInfo.Pitch = FrameBufferInfo.PixelsPerScanLine * (FrameBufferInfo.BitsPerPixel / 8);
                     FrameBufferInfo.FrameBufferBase = 0;
                     FrameBufferInfo.FrameBufferSize = FrameBufferInfo.HorizontalResolution * 
                                                       FrameBufferInfo.VerticalResolution *
