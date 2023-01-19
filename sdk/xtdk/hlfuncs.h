@@ -15,6 +15,10 @@
 
 
 /* HAL library routines forward references */
+XTAPI
+VOID
+HlClearScreen(VOID);
+
 XTCDECL
 XTSTATUS
 HlComPortGetByte(IN PCPPORT Port,
@@ -32,11 +36,21 @@ UCHAR
 HlComPortReadLsr(IN PCPPORT Port,
                  IN UCHAR Byte);
 
+XTAPI
+VOID
+HlDrawPixel(IN ULONG PosX,
+            IN ULONG PosY,
+            IN ULONG Color);
+
 XTCDECL
 XTSTATUS
 HlInitializeComPort(IN OUT PCPPORT Port,
                     IN ULONG PortNumber,
                     IN PUCHAR PortAddress,
                     IN ULONG BaudRate);
+
+XTAPI
+XTSTATUS
+HlInitializeDisplay(VOID);
 
 #endif /* __XTDK_HLFUNCS_H */

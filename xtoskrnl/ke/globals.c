@@ -9,6 +9,9 @@
 #include <xtos.h>
 
 
+/* FrameBuffer information */
+HAL_FRAMEBUFFER_DATA HlpFrameBufferData;
+
 /* Kernel initialization block passed by boot loader */
 PKERNEL_INITIALIZATION_BLOCK KeInitializationBlock;
 

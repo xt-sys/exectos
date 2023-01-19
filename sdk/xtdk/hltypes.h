@@ -98,4 +98,16 @@ typedef struct _CPPORT
     USHORT Flags;
 } CPPORT, *PCPPORT;
 
+typedef struct _HAL_FRAMEBUFFER_DATA
+{
+    BOOLEAN Initialized;
+    PULONG Address;
+    ULONG_PTR BufferSize;
+    UINT Width;
+    UINT Height;
+    UINT PixelsPerScanLine;
+    UINT BitsPerPixel;
+    UINT Pitch;
+} HAL_FRAMEBUFFER_DATA, *PHAL_FRAMEBUFFER_DATA;
+
 #endif /* __XTDK_HLTYPES_H */
