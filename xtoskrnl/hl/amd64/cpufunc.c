@@ -237,6 +237,25 @@ HlIoPortOutLong(IN USHORT Port,
 }
 
 /**
+ * Loads Task Register (TR) with a segment selector that points to TSS.
+ *
+ * @param Source
+ *        Supplies the segment selector in the GDT describing the TSS.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+HlLoadTaskRegister(USHORT Source)
+{
+    asm volatile("ltr %0"
+                 :
+                 : "rm" (Source));
+}
+
+/**
  * Reads the specified CPU control register and returns its value.
  *
  * @param ControlRegister

@@ -60,6 +60,10 @@ HlIoPortOutLong(IN USHORT Port,
                 IN ULONG Value);
 
 XTCDECL
+VOID
+HlLoadTaskRegister(USHORT Source);
+
+XTCDECL
 ULONG_PTR
 HlReadControlRegister(IN USHORT ControlRegister);
 
