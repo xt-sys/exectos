@@ -1,6 +1,6 @@
 <p align=center>
   <a href="https://git.codingworkshop.eu.org/xt-sys/exectos">
-    <img alt="GIT Repository" src="https://img.shields.io/badge/Source-GIT-blueviolet">
+    <img alt="GIT Repository" src="https://img.shields.io/badge/Source-GIT-purple">
   </a>
   <a href="https://git.codingworkshop.eu.org/xt-sys/exectos/activity/monthly">
     <img alt="Commits" src="https://img.shields.io/github/commit-activity/m/xt-sys/exectos?label=Commits">
@@ -9,13 +9,13 @@
     <img alt="Build Status" src="https://ci.codingworkshop.eu.org/api/badges/xt-sys/exectos/status.svg">
   </a>
   <a href="https://artifacts.codingworkshop.eu.org/ExectOS">
-    <img alt="CI/CD Artifacts" src="https://img.shields.io/badge/Download-CI/CD-red">
+    <img alt="CI/CD Artifacts" src="https://img.shields.io/badge/Download-%F0%9F%A1%87-blueviolet">
   </a>
   <a href="https://git.codingworkshop.eu.org/xt-sys/exectos/src/branch/master/COPYING.md">
     <img alt="License" src="https://img.shields.io/badge/License-GPLv3-blue.svg">
   </a>
   <a href="https://github.com/sponsors/xt-sys/">
-    <img alt="Sponsors" src="https://img.shields.io/github/sponsors/xt-sys?color=yellow&label=Sponsors">
+    <img alt="Sponsor" src="https://img.shields.io/badge/Sponsor-%E2%9D%A4-red?logo=GitHub">
   </a>
   <a href="https://discord.com/invite/3zgjQDVmAe">
     <img alt="Discord" src="https://img.shields.io/discord/723186294540206100?label=Chat">
