@@ -237,6 +237,26 @@ HlIoPortOutLong(IN USHORT Port,
 }
 
 /**
+ * Loads the values in the source operand into the global descriptor table register (GDTR).
+ *
+ * @param Source
+ *        Specifies a memory location that contains the base address of GDT.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+HlLoadGlobalDescriptorTable(IN PVOID Source)
+{
+    asm volatile("lgdt %0"
+                 :
+                 : "m" (*(PSHORT)Source)
+                 : "memory");
+}
+
+/**
  * Loads Task Register (TR) with a segment selector that points to TSS.
  *
  * @param Source

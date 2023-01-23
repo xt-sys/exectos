@@ -61,6 +61,10 @@ HlIoPortOutLong(IN USHORT Port,
 
 XTCDECL
 VOID
+HlLoadGlobalDescriptorTable(IN PVOID Source);
+
+XTCDECL
+VOID
 HlLoadTaskRegister(USHORT Source);
 
 XTCDECL
