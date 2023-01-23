@@ -335,7 +335,9 @@ HlReadGSQuadWord(ULONG Offset)
     ULONGLONG Value;
 
     /* Read quadword from GS segment */
-    asm volatile("movq %%gs:%a[Offset], %q[Value]" : [Value] "=r" (Value) : [Offset] "ir" (Offset));
+    asm volatile("movq %%gs:%a[Offset], %q[Value]"
+                 : [Value] "=r" (Value)
+                 : [Offset] "ir" (Offset));
     return Value;
 }
 
