@@ -69,6 +69,10 @@ HlReadControlRegister(IN USHORT ControlRegister);
 
 XTCDECL
 ULONGLONG
+HlReadGSQuadWord(ULONG Offset);
+
+XTCDECL
+ULONGLONG
 HlReadModelSpecificRegister(IN ULONG Register);
 
 XTCDECL

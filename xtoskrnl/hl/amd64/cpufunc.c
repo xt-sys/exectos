@@ -319,6 +319,27 @@ HlReadControlRegister(IN USHORT ControlRegister)
 }
 
 /**
+ * Reads quadword from a memory location specified by an offset relative to the beginning of the GS segment.
+ *
+ * @param Offset
+ *        Specifies the offset from the beginning of GS segment.
+ *
+ * @return Returns the value read from the specified memory location relative to GS segment.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+ULONGLONG
+HlReadGSQuadWord(ULONG Offset)
+{
+    ULONGLONG Value;
+
+    /* Read quadword from GS segment */
+    asm volatile("movq %%gs:%a[Offset], %q[Value]" : [Value] "=r" (Value) : [Offset] "ir" (Offset));
+    return Value;
+}
+
+/**
  * Reads a 64-bit value from the requested Model Specific Register (MSR).
  *
  * @param Register
