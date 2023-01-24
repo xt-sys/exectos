@@ -66,7 +66,7 @@ HlLoadGlobalDescriptorTable(IN PVOID Source);
 XTCDECL
 VOID
 HlLoadSegment(IN USHORT Segment,
-              IN PVOID Source);
+              IN ULONG Source);
 
 XTCDECL
 VOID
