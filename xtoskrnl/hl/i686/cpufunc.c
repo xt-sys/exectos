@@ -257,6 +257,59 @@ HlLoadGlobalDescriptorTable(IN PVOID Source)
 }
 
 /**
+ * Loads source data into specified segment.
+ *
+ * @param Segment
+ *        Supplies a segment identification.
+ *
+ * @param Source
+ *        Supplies a pointer to the memory area containing data that will be loaded into specified segment.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+HlLoadSegment(IN USHORT Segment,
+              IN PVOID Source)
+{
+    switch(Segment)
+    {
+        case SEGMENT_CS:
+            asm volatile("movl %0, %%cs"
+                         :
+                         : "r" (Source));
+            break;
+        case SEGMENT_DS:
+            asm volatile("movl %0, %%ds"
+                         :
+                         : "r" (Source));
+            break;
+        case SEGMENT_ES:
+            asm volatile("movl %0, %%es"
+                         :
+                         : "r" (Source));
+            break;
+        case SEGMENT_FS:
+            asm volatile("movl %0, %%fs"
+                         :
+                         : "r" (Source));
+            break;
+        case SEGMENT_GS:
+            asm volatile("movl %0, %%gs"
+                         :
+                         : "r" (Source));
+            break;
+        case SEGMENT_SS:
+            asm volatile("movl %0, %%ss"
+                         :
+                         : "r" (Source));
+            break;
+    }
+}
+
+/**
  * Loads Task Register (TR) with a segment selector that points to TSS.
  *
  * @param Source
