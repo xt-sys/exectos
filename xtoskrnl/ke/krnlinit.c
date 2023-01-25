@@ -51,6 +51,9 @@ KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
     /* Initialize kernel stacks */
     KepInitializeStack(Parameters);
 
+    /* Architecture specific initialization */
+    KepArchInitialize();
+
     /* Switch boot stack alligning it to 4 byte boundary */
     KepSwitchBootStack(KeInitializationBlock->KernelBootStack & ~0x3);
 }

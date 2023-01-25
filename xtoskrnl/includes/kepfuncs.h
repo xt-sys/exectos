@@ -14,6 +14,10 @@
 
 XTAPI
 VOID
+KepArchInitialize(VOID);
+
+XTAPI
+VOID
 KepStartKernel(VOID);
 
 XTAPI

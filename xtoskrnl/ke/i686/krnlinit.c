@@ -10,6 +10,19 @@
 
 
 /**
+ * Performs architecture-specific initialization for the kernel executive.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KepArchInitialize(VOID)
+{
+}
+
+/**
  * This routine starts up the XT kernel. It is called after switching boot stack.
  *
  * @return This routine does not return any value.
