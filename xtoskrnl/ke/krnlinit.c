@@ -45,6 +45,9 @@ KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
             );
 
 
+    /* Save the kernel initialization block */
+    KeInitializationBlock = Parameters;
+
     /* Initialize kernel boot structures */
     KepInitializeBootStructures(Parameters);
 
@@ -81,7 +84,4 @@ KepInitializeBootStructures(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
         LdrPrint(L"Initializing kernel fault stack\n");
         Parameters->KernelFaultStack = (ULONG_PTR)&KepKernelFaultStackData[KERNEL_STACK_SIZE];
     }
-
-    /* Save the kernel initialization block */
-    KeInitializationBlock = Parameters;
 }
