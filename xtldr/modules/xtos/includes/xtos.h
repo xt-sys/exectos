@@ -12,6 +12,9 @@
 #include <blmod.h>
 
 
+/* EFI XT Loader Protocol */
+EXTERN PXT_BOOT_LOADER_PROTOCOL XtLdrProtocol;
+
 /* XTOS kernel entry point */
 typedef VOID (XTAPI *PXT_ENTRY_POINT)(IN PKERNEL_INITIALIZATION_BLOCK BootParameters);
 
@@ -26,6 +29,22 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
                 IN PXT_BOOT_PROTOCOL_PARAMETERS Parameters);
 
 XTCDECL
+VOID
+XtpInitializeGdtEntry(IN PKGDTENTRY Gdt,
+                      IN USHORT Selector,
+                      IN ULONGLONG Base,
+                      IN ULONG Limit,
+                      IN UCHAR Type,
+                      IN UCHAR Dpl,
+                      IN UCHAR SegmentMode);
+
+XTCDECL
+EFI_STATUS
+XtpInitializeDescriptors(IN PLIST_ENTRY MemoryMappings,
+                         IN PVOID *VirtualAddress,
+                         OUT PKGDTENTRY *Gdt);
+
+XTCDECL
 EFI_STATUS
 XtpInitializeLoaderBlock(IN PLIST_ENTRY MemoryMappings,
                          IN PVOID *VirtualAddress);
@@ -37,6 +56,16 @@ XtpLoadModule(IN PEFI_FILE_HANDLE BootDir,
               IN PVOID VirtualAddress,
               IN LOADER_MEMORY_TYPE MemoryType,
               OUT PPECOFF_IMAGE_CONTEXT *ImageContext);
+
+XTCDECL
+VOID
+XtpLoadProcessorContext(IN PKGDTENTRY Gdt);
+
+XTCDECL
+EFI_STATUS
+XtpSetProcessorContext(IN PLIST_ENTRY MemoryMappings,
+                       IN PVOID *VirtualAddress,
+                       OUT PKGDTENTRY *Gdt);
 
 XTCDECL
 EFI_STATUS
