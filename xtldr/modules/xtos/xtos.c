@@ -184,7 +184,9 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
     PEFI_LOADED_IMAGE_PROTOCOL ImageProtocol;
     PVOID VirtualAddress, VirtualMemoryArea;
     PXT_ENTRY_POINT KernelEntryPoint;
+    EFI_PHYSICAL_ADDRESS Address;
     LIST_ENTRY MemoryMappings;
+    ULONG KernelStackPages;
     EFI_STATUS Status;
 
     /* Initialize XTOS startup sequence */
@@ -235,6 +237,25 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
 
     /* Close boot directory handle */
     BootDir->Close(BootDir);
+
+    /* Calculate number of pages needed by kernel stack */
+    KernelStackPages = EFI_SIZE_TO_PAGES(KERNEL_STACK_SIZE);
+
+    /* Allocate memory for kernel startup stack */
+    XtLdrProtocol->DbgPrint(L"Initializing kernel startup stack\n");
+    Status = EfiSystemTable->BootServices->AllocatePages(AllocateAnyPages, EfiLoaderData, KernelStackPages, &Address);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Memory allocation failure */
+        XtLdrProtocol->DbgPrint(L"Failed to allocate %lu pages for kernel startup stack (Status Code: %lx)\n",
+                                KernelStackPages, Status);
+        return Status;
+    }
+
+    /* Map kernel startup stack and set next valid virtual address */
+    XtLdrProtocol->AddVirtualMemoryMapping(&MemoryMappings, VirtualAddress, (PVOID)(UINT_PTR)Address,
+                                           KernelStackPages, LoaderStartupKernelStack);
+    VirtualAddress += (KernelStackPages * EFI_PAGE_SIZE);
 
     /* Enable paging */
     EfiSystemTable->BootServices->HandleProtocol(EfiImageHandle, &LoadedImageGuid, (PVOID*)&ImageProtocol);
