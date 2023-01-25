@@ -48,15 +48,15 @@ KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
     /* Save the kernel initialization block */
     KeInitializationBlock = Parameters;
 
-    /* Initialize kernel boot structures */
-    KepInitializeBootStructures(Parameters);
+    /* Initialize kernel stacks */
+    KepInitializeStack(Parameters);
 
     /* Switch boot stack alligning it to 4 byte boundary */
     KepSwitchBootStack(KeInitializationBlock->KernelBootStack & ~0x3);
 }
 
 /**
- * Initializes boot structures needed by the kernel startup code.
+ * Initializes a stack needed by the kernel.
  *
  * @param Parameters
  *        Supplies a pointer to memory area containing parameters passed to kernel by bootloader.
@@ -67,7 +67,7 @@ KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
  */
 XTAPI
 VOID
-KepInitializeBootStructures(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
+KepInitializeStack(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
 {
     /* Make sure kernel boot stack is initialized */
     if(!Parameters->KernelBootStack)

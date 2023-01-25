@@ -18,7 +18,7 @@ KepStartKernel(VOID);
 
 XTAPI
 VOID
-KepInitializeBootStructures(IN PKERNEL_INITIALIZATION_BLOCK Parameters);
+KepInitializeStack(IN PKERNEL_INITIALIZATION_BLOCK Parameters);
 
 XTAPI
 VOID
