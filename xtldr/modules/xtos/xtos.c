@@ -178,8 +178,8 @@ EFI_STATUS
 XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
                 IN PXT_BOOT_PROTOCOL_PARAMETERS Parameters)
 {
-    PKERNEL_INITIALIZATION_BLOCK KernelParameters;
     EFI_GUID LoadedImageGuid = EFI_LOADED_IMAGE_PROTOCOL_GUID;
+    PKERNEL_INITIALIZATION_BLOCK KernelParameters;
     PPECOFF_IMAGE_CONTEXT ImageContext = NULL;
     PEFI_LOADED_IMAGE_PROTOCOL ImageProtocol;
     PVOID VirtualAddress, VirtualMemoryArea;
@@ -241,6 +241,8 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
     Status = XtLdrProtocol->EnablePaging(&MemoryMappings, VirtualAddress, ImageProtocol, &XtPageMap);
     if(Status != STATUS_EFI_SUCCESS)
     {
+        /* Failed to enable paging */
+        XtLdrProtocol->DbgPrint(L"Failed to enable paging (Status Code: %lx)\n", Status);
         return Status;
     }
 
