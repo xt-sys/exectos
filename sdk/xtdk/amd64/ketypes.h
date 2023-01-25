@@ -181,6 +181,14 @@ typedef struct ALIGN(16) _CONTEXT
     ULONG64 LastExceptionFromRip;
 } CONTEXT, *PCONTEXT;
 
+/* Pseudo 64-bit descriptor structure definition */
+typedef struct _KDESCRIPTOR
+{
+    USHORT Pad[3];
+    USHORT Limit;
+    PVOID Base;
+} KDESCRIPTOR, *PKDESCRIPTOR;
+
 /* Global Descriptor Table (GDT) entry union definition */
 typedef struct _KGDTENTRY
 {

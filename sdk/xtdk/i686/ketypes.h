@@ -139,6 +139,14 @@ typedef struct _CONTEXT
     UCHAR ExtendedRegisters[MAXIMUM_SUPPORTED_EXTENSION];
 } CONTEXT, *PCONTEXT;
 
+/* Pseudo descriptor structure definition */
+typedef struct _KDESCRIPTOR
+{
+    USHORT Pad;
+    USHORT Limit;
+    PVOID Base;
+} KDESCRIPTOR, *PKDESCRIPTOR;
+
 /* Global Descriptor Table (GDT) entry structure definition */
 typedef struct _KGDTENTRY
 {
