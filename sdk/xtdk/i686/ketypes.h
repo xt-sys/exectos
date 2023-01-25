@@ -55,6 +55,19 @@
 #define I686_INTERRUPT_GATE               0xE
 #define I686_TRAP_GATE                    0xF
 
+/* Interrupt request levels definitions */
+#define PASSIVE_LEVEL                     0
+#define LOW_LEVEL                         0
+#define APC_LEVEL                         1
+#define DISPATCH_LEVEL                    2
+#define CMCI_LEVEL                        5
+#define PROFILE_LEVEL                     27
+#define SYNC_LEVEL                        27
+#define CLOCK_LEVEL                       28
+#define IPI_LEVEL                         29
+#define POWER_LEVEL                       30
+#define HIGH_LEVEL                        31
+
 /* IOPM Definitions */
 #define IOPM_COUNT                        1
 #define IOPM_SIZE                         8192
