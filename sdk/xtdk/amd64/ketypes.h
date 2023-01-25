@@ -182,57 +182,50 @@ typedef struct ALIGN(16) _CONTEXT
 } CONTEXT, *PCONTEXT;
 
 /* Global Descriptor Table (GDT) entry union definition */
-typedef union _KGDTENTRY
+typedef struct _KGDTENTRY
 {
-    struct
+    USHORT LimitLow;
+    USHORT BaseLow;
+    union
     {
-        USHORT LimitLow;
-        USHORT BaseLow;
-        union
+        struct
         {
-            struct
-            {
-                UCHAR BaseMiddle;
-                UCHAR Flags1;
-                UCHAR Flags2;
-                UCHAR BaseHigh;
-            } Bytes;
-            struct {
-                ULONG BaseMiddle:8;
-                ULONG Type:5;
-                ULONG Dpl:2;
-                ULONG Present:1;
-                ULONG LimitHigh:4;
-                ULONG System:1;
-                ULONG LongMode:1;
-                ULONG DefaultBig:1;
-                ULONG Granularity:1;
-                ULONG BaseHigh:8;
-            } Bits;
-        };
-        ULONG BaseUpper;
-        ULONG MustBeZero;
+            UCHAR BaseMiddle;
+            UCHAR Flags1;
+            UCHAR Flags2;
+            UCHAR BaseHigh;
+        } Bytes;
+        struct
+        {
+            ULONG BaseMiddle:8;
+            ULONG Type:5;
+            ULONG Dpl:2;
+            ULONG Present:1;
+            ULONG LimitHigh:4;
+            ULONG System:1;
+            ULONG LongMode:1;
+            ULONG DefaultBig:1;
+            ULONG Granularity:1;
+            ULONG BaseHigh:8;
+        } Bits;
     };
-    ULONG64 Alignment;
+    ULONG BaseUpper;
+    ULONG MustBeZero;
 } KGDTENTRY, *PKGDTENTRY;
 
 /* Interrupt Descriptor Table (IDT) entry union definition */
-typedef union _KIDTENTRY
+typedef struct _KIDTENTRY
 {
-    struct
-    {
-        USHORT OffsetLow;
-        USHORT Selector;
-        USHORT IstIndex:3;
-        USHORT Reserved0:5;
-        USHORT Type:5;
-        USHORT Dpl:2;
-        USHORT Present:1;
-        USHORT OffsetMiddle;
-        ULONG OffsetHigh;
-        ULONG Reserved1;
-    };
-    ULONG64 Alignment;
+    USHORT OffsetLow;
+    USHORT Selector;
+    USHORT IstIndex:3;
+    USHORT Reserved0:5;
+    USHORT Type:5;
+    USHORT Dpl:2;
+    USHORT Present:1;
+    USHORT OffsetMiddle;
+    ULONG OffsetHigh;
+    ULONG Reserved1;
 } KIDTENTRY, *PKIDTENTRY;
 
 /* Task State Segment (TSS) structure definition */

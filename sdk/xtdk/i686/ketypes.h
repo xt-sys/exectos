@@ -155,7 +155,7 @@ typedef struct _KGDTENTRY
         } Bytes;
         struct
         {
-            ULONG BaseMid:8;
+            ULONG BaseMiddle:8;
             ULONG Type:5;
             ULONG Dpl:2;
             ULONG Present:1;
@@ -166,7 +166,7 @@ typedef struct _KGDTENTRY
             ULONG Granularity:1;
             ULONG BaseHigh:8;
         } Bits;
-    } HighWord;
+    };
 } KGDTENTRY, *PKGDTENTRY;
 
 /* Interrupt Descriptor Table (IDT) entry structure definition */
