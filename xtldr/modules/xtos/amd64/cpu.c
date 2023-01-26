@@ -99,6 +99,9 @@ XtpInitializeGdtEntry(IN PKGDTENTRY Gdt,
  * @param Gdt
  *        Supplies a pointer to memory area containing GDT to fill in.
  *
+ * @param Idt
+ *        Supplies a pointer to memory area containing IDT to fill in.
+ *
  * @return This routine returns a status code.
  *
  * @since XT 1.0
@@ -107,11 +110,14 @@ XTCDECL
 EFI_STATUS
 XtpInitializeDescriptors(IN PLIST_ENTRY MemoryMappings,
                          IN PVOID *VirtualAddress,
-                         OUT PKGDTENTRY *Gdt)
+                         OUT PKGDTENTRY *Gdt,
+                         OUT PKIDTENTRY *Idt)
 {
-    EFI_PHYSICAL_ADDRESS GdtAddress, TssAddress;
+    EFI_PHYSICAL_ADDRESS GdtAddress, IdtAddress, TssAddress;
+    KDESCRIPTOR OriginalIdt;
     PKTSS PhysicalTss, Tss;
     PKGDTENTRY GdtEntry;
+    PKIDTENTRY IdtEntry;
     EFI_STATUS Status;
 
     /* Print debug message */
@@ -175,6 +181,33 @@ XtpInitializeDescriptors(IN PLIST_ENTRY MemoryMappings,
     /* Set next valid virtual address */
     *VirtualAddress += (EFI_SIZE_TO_PAGES(128 * sizeof(KGDTENTRY)) * EFI_PAGE_SIZE);
 
+    /* Print debug message */
+    XtLdrProtocol->DbgPrint(L"Initializing Interrupt Descriptor Table (IDT)\n");
+
+    /* Allocate memory for IDT */
+    Status = XtLdrProtocol->AllocatePages(EFI_SIZE_TO_PAGES(256 * sizeof(KIDTENTRY)), &IdtAddress);
+    if (Status != STATUS_EFI_SUCCESS) {
+        /* Memory allocation failure */
+        XtLdrProtocol->DbgPrint(L"Failed to allocate pages for IDT (Status Code: %lx)\n", Status);
+        return Status;
+    }
+
+    /* Set IDT entry and fill it with zeroes */
+    IdtEntry = (PKIDTENTRY)(UINT_PTR)IdtAddress;
+    RtlZeroMemory(IdtEntry, EFI_SIZE_TO_PAGES(256 * sizeof(KIDTENTRY)) * EFI_PAGE_SIZE);
+
+    /* Stores IDT register into new IDT entry */
+    HlStoreInterruptDescriptorTable(&OriginalIdt.Limit);
+    RtlCopyMemory(IdtEntry, OriginalIdt.Base, OriginalIdt.Limit + 1);
+
+    /* Map IDT and set its virtual address */
+    Status = XtLdrProtocol->AddVirtualMemoryMapping(MemoryMappings, *VirtualAddress, IdtEntry,
+                                                    EFI_SIZE_TO_PAGES(256 * sizeof(KIDTENTRY)), LoaderMemoryData);
+    *Idt = (PKIDTENTRY)*VirtualAddress;
+
+    /* Set next valid virtual address */
+    *VirtualAddress += (EFI_SIZE_TO_PAGES(256 * sizeof(KIDTENTRY)) * EFI_PAGE_SIZE);
+
     /* Return success */
     return STATUS_EFI_SUCCESS;
 }
@@ -185,21 +218,29 @@ XtpInitializeDescriptors(IN PLIST_ENTRY MemoryMappings,
  * @param Gdt
  *        Supplies a pointer to memory area containing GDT to load.
  *
+ * @param Idt
+ *        Supplies a pointer to memory area containing IDT to load.
+ *
  * @return This routine does not return any value.
  *
  * @since XT 1.0
  */
 XTCDECL
 VOID
-XtpLoadProcessorContext(IN PKGDTENTRY Gdt)
+XtpLoadProcessorContext(IN PKGDTENTRY Gdt,
+                        IN PKIDTENTRY Idt)
 {
-    KDESCRIPTOR GdtDescriptor;
+    KDESCRIPTOR GdtDescriptor, IdtDescriptor;
 
     GdtDescriptor.Base = Gdt;
     GdtDescriptor.Limit = 128 * sizeof(KGDTENTRY) - 1;
 
-    /* Load GDT and TSS */
+    IdtDescriptor.Base = Idt;
+    IdtDescriptor.Limit = 256 * sizeof(KIDTENTRY) - 1;
+
+    /* Load GDT, IDT and TSS */
     HlLoadGlobalDescriptorTable(&GdtDescriptor.Limit);
+    HlLoadInterruptDescriptorTable(&IdtDescriptor.Limit);
     HlLoadTaskRegister((UINT32)KGDT_SYS_TSS);
 
     /* Re-enable IDE interrupts */
@@ -219,6 +260,9 @@ XtpLoadProcessorContext(IN PKGDTENTRY Gdt)
  * @param Gdt
  *        Supplies a pointer to memory area containing GDT to fill in.
  *
+ * @param Idt
+ *        Supplies a pointer to memory area containing IDT to fill in.
+ *
  * @return This routine returns a status code.
  *
  * @since XT 1.0
@@ -227,7 +271,8 @@ XTCDECL
 EFI_STATUS
 XtpSetProcessorContext(IN PLIST_ENTRY MemoryMappings,
                        IN PVOID *VirtualAddress,
-                       OUT PKGDTENTRY *Gdt)
+                       OUT PKGDTENTRY *Gdt,
+                       OUT PKIDTENTRY *Idt)
 {
     EFI_STATUS Status;
 
@@ -238,7 +283,7 @@ XtpSetProcessorContext(IN PLIST_ENTRY MemoryMappings,
     HlClearInterruptFlag();
 
     /* Initialize GDT */
-    Status = XtpInitializeDescriptors(MemoryMappings, VirtualAddress, Gdt);
+    Status = XtpInitializeDescriptors(MemoryMappings, VirtualAddress, Gdt, Idt);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* GDT initialization failure */

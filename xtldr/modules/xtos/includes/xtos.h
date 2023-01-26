@@ -42,7 +42,8 @@ XTCDECL
 EFI_STATUS
 XtpInitializeDescriptors(IN PLIST_ENTRY MemoryMappings,
                          IN PVOID *VirtualAddress,
-                         OUT PKGDTENTRY *Gdt);
+                         OUT PKGDTENTRY *Gdt,
+                         OUT PKIDTENTRY *Idt);
 
 XTCDECL
 EFI_STATUS
@@ -59,13 +60,15 @@ XtpLoadModule(IN PEFI_FILE_HANDLE BootDir,
 
 XTCDECL
 VOID
-XtpLoadProcessorContext(IN PKGDTENTRY Gdt);
+XtpLoadProcessorContext(IN PKGDTENTRY Gdt,
+                        IN PKIDTENTRY Idt);
 
 XTCDECL
 EFI_STATUS
 XtpSetProcessorContext(IN PLIST_ENTRY MemoryMappings,
                        IN PVOID *VirtualAddress,
-                       OUT PKGDTENTRY *Gdt);
+                       OUT PKGDTENTRY *Gdt,
+                       OUT PKIDTENTRY *Idt);
 
 XTCDECL
 EFI_STATUS
