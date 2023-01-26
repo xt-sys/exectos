@@ -257,6 +257,26 @@ HlLoadGlobalDescriptorTable(IN PVOID Source)
 }
 
 /**
+ * Loads the values in the source operand into the interrupt descriptor table register (IDTR).
+ *
+ * @param Source
+ *        Specifies a memory location that contains the base address of IDT.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+HlLoadInterruptDescriptorTable(IN PVOID Source)
+{
+    asm volatile("lidt %0"
+                 :
+                 : "m" (*(PSHORT)Source)
+                 : "memory");
+}
+
+/**
  * Loads source data into specified segment.
  *
  * @param Segment

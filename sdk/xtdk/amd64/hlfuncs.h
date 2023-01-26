@@ -65,6 +65,10 @@ HlLoadGlobalDescriptorTable(IN PVOID Source);
 
 XTCDECL
 VOID
+HlLoadInterruptDescriptorTable(IN PVOID Source);
+
+XTCDECL
+VOID
 HlLoadSegment(IN USHORT Segment,
               IN ULONG Source);
 
