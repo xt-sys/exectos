@@ -49,6 +49,9 @@ KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
     /* Initialize kernel stacks */
     KepInitializeStack(Parameters);
 
+    /* Initialize boot CPU */
+    ArInitializeProcessor();
+
     /* Architecture specific initialization */
     KepArchInitialize();
 

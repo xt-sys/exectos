@@ -12,6 +12,15 @@
 #include <xtos.h>
 
 
+/* Initial GDT */
+EXTERN KGDTENTRY ArInitialGdt[GDT_ENTRIES];
+
+/* Initial IDT */
+EXTERN KIDTENTRY ArInitialIdt[IDT_ENTRIES];
+
+/* Initial TSS */
+EXTERN KTSS ArInitialTss;
+
 /* FrameBuffer information */
 EXTERN HAL_FRAMEBUFFER_DATA HlpFrameBufferData;
 

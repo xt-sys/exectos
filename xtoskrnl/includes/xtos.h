@@ -11,4 +11,5 @@
 
 /* Kernel specific headers */
 #include "globals.h"
+#include "arpfuncs.h"
 #include "kepfuncs.h"

@@ -28,6 +28,10 @@ XTCDECL
 VOID
 ArHalt();
 
+XTAPI
+VOID
+ArInitializeProcessor(VOID);
+
 XTCDECL
 VOID
 ArInvalidateTlbEntry(IN PVOID Address);
