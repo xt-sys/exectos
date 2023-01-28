@@ -36,12 +36,10 @@ KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
     LdrPrint(L"\n\n------ Kernel parameters block ------\n"
              L"Loader block size: %lu\n"
              L"Loader block version: %lu\n"
-             L"EFI Revision: %lu\n"
-             L"EFI RunTime Revision: %lu\n\n",
+             L"EFI Revision: %lu\n",
              Parameters->Size,
              Parameters->Version,
-             Parameters->FirmwareInformation.EfiFirmware.EfiVersion,
-             ((PEFI_RUNTIME_SERVICES) Parameters->FirmwareInformation.EfiFirmware.EfiRuntimeServices)->Hdr.Revision
+             Parameters->FirmwareInformation.EfiFirmware.EfiVersion
             );
 
 
