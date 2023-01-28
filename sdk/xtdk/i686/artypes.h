@@ -46,6 +46,10 @@
 #define CR4_XSAVE                                       0x00020000
 #define CR4_RESERVED3                                   0xFFFC0000
 
+/* Descriptors size */
+#define GDT_ENTRIES                                     128
+#define IDT_ENTRIES                                     256
+
 /* Initial MXCSR control */
 #define INITIAL_MXCSR                                   0x1F80
 
