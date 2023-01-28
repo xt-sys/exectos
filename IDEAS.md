@@ -1,4 +1,4 @@
-# ExectOS Ideas
+## ExectOS Ideas
 This is a list of ideas that migh but not must be realized.
 
  - [ ] Move processor context initialization (GDT, IDT, LDT, PCR, TSS) from XTLDR to XTOSKRNL to simplify the XTOS boot

@@ -1,7 +1,7 @@
-# ExectOS Known Issues
+## ExectOS Known Issues
 This is a list of well known bugs that exists in all master branch builds.
 
-## XTLDR
+### XTLDR
  - [ ] In some specific scenarios (most probably EFI by Insyde) XTLDR cannot load modules. Calling the EFI's
        BootServices->LoadImage() fails with STATUS_EFI_NOT_FOUND (0x800000000000000E) status code. Possibly this is
        a bug in BlFindVolumeDevicePath() routine.
