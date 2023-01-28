@@ -54,7 +54,7 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
     CpuRegisters->Edx = 0;
 
     /* Get CPUID */
-    HlCpuId(CpuRegisters);
+    ArCpuId(CpuRegisters);
 
     /* Store PAE status from the CPUID results */
     if(!(CpuRegisters->Edx & CPUID_FEATURES_EDX_PAE))
@@ -215,13 +215,13 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
     }
 
     /* Enable Physical Address Extension (PAE) */
-    HlWriteControlRegister(4, HlReadControlRegister(4) | CR4_PAE);
+    ArWriteControlRegister(4, ArReadControlRegister(4) | CR4_PAE);
 
     /* Write page mappings to CR3 */
-    HlWriteControlRegister(3, (UINT_PTR)*PtePointer);
+    ArWriteControlRegister(3, (UINT_PTR)*PtePointer);
 
     /* Enable paging */
-    HlWriteControlRegister(0, HlReadControlRegister(0) | CR0_PG);
+    ArWriteControlRegister(0, ArReadControlRegister(0) | CR0_PG);
 
     /* Return success */
     return STATUS_EFI_SUCCESS;

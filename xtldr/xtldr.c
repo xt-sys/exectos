@@ -404,8 +404,8 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
     BlEfiPrint(L"System halted!");
     for(;;)
     {
-        HlClearInterruptFlag();
-        HlHalt();
+        ArClearInterruptFlag();
+        ArHalt();
     }
 
     /* Return success */

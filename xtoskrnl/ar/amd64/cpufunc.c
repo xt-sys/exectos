@@ -1,8 +1,8 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/hl/i686/cpufunc.c
- * DESCRIPTION:     Routines to provide access to special i686 CPU instructions
+ * FILE:            xtoskrnl/ar/amd64/cpufunc.c
+ * DESCRIPTION:     Routines to provide access to special AMD64 CPU instructions
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
@@ -18,7 +18,7 @@
  */
 XTCDECL
 VOID
-HlClearInterruptFlag()
+ArClearInterruptFlag()
 {
     asm volatile("cli");
 }
@@ -35,7 +35,7 @@ HlClearInterruptFlag()
  */
 XTCDECL
 BOOLEAN
-HlCpuId(IN OUT PCPUID_REGISTERS Registers)
+ArCpuId(IN OUT PCPUID_REGISTERS Registers)
 {
     UINT32 MaxLeaf;
 
@@ -76,7 +76,7 @@ HlCpuId(IN OUT PCPUID_REGISTERS Registers)
  */
 XTCDECL
 VOID
-HlHalt()
+ArHalt()
 {
     asm volatile("hlt");
 }
@@ -93,147 +93,12 @@ HlHalt()
  */
 XTCDECL
 VOID
-HlInvalidateTlbEntry(PVOID Address)
+ArInvalidateTlbEntry(IN PVOID Address)
 {
     asm volatile("invlpg (%0)"
                  :
                  : "b" (Address)
                  : "memory");
-}
-
-/**
- * Reads the 8-bit data from the specified I/O port.
- *
- * @param Port
- *        Specifies the address to read from, in the range of 0-0xFFFF.
- *
- * @return The value read from the port.
- *
- * @since XT 1.0
- */
-XTCDECL
-UCHAR
-HlIoPortInByte(IN USHORT Port)
-{
-    UCHAR Value;
-    asm volatile("inb %1, %0"
-                 : "=a" (Value)
-                 : "Nd" (Port));
-    return Value;
-}
-
-/**
- * Reads the 16-bit data from the specified I/O port.
- *
- * @param Port
- *        Specifies the address to read from, in the range of 0-0xFFFF.
- *
- * @return The value read from the port.
- *
- * @since XT 1.0
- */
-XTCDECL
-USHORT
-HlIoPortInShort(IN USHORT Port)
-{
-    USHORT Value;
-    asm volatile("inw %1, %0"
-                 : "=a" (Value)
-                 : "Nd" (Port));
-    return Value;
-}
-
-/**
- * Reads the 32-bit data from the specified I/O port.
- *
- * @param Port
- *        Specifies the address to read from, in the range of 0-0xFFFF.
- *
- * @return The value read from the port.
- *
- * @since XT 1.0
- */
-XTCDECL
-ULONG
-HlIoPortInLong(IN USHORT Port)
-{
-    ULONG Value;
-    asm volatile("inl %1, %0"
-                 : "=a" (Value)
-                 : "Nd" (Port));
-    return Value;
-}
-
-/**
- * Writes the 8-bit data to the specified I/O port.
- *
- * @param Port
- *        Specifies the address to write to, in the range of 0-0xFFFF.
- *
- * @param Value
- *        Supplies the value to write.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTCDECL
-VOID
-HlIoPortOutByte(IN USHORT Port,
-                IN UCHAR Value)
-{
-    asm volatile("outb %0, %1"
-                 :
-                 : "a" (Value),
-                   "Nd" (Port));
-}
-
-/**
- * Writes the 16-bit data to the specified I/O port.
- *
- * @param Port
- *        Specifies the address to write to, in the range of 0-0xFFFF.
- *
- * @param Value
- *        Supplies the value to write.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTCDECL
-VOID
-HlIoPortOutShort(IN USHORT Port,
-                 IN USHORT Value)
-{
-    asm volatile("outw %0, %1"
-                 :
-                 : "a" (Value),
-                   "Nd" (Port));
-}
-
-/**
- * Writes the 32-bit data to the specified I/O port.
- *
- * @param Port
- *        Specifies the address to write to, in the range of 0-0xFFFF.
- *
- * @param Value
- *        Supplies the value to write.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTCDECL
-VOID
-HlIoPortOutLong(IN USHORT Port,
-                IN ULONG Value)
-{
-    asm volatile("outl %0, %1"
-                 :
-                 : "a" (Value),
-                   "Nd" (Port));
 }
 
 /**
@@ -248,7 +113,7 @@ HlIoPortOutLong(IN USHORT Port,
  */
 XTCDECL
 VOID
-HlLoadGlobalDescriptorTable(IN PVOID Source)
+ArLoadGlobalDescriptorTable(IN PVOID Source)
 {
     asm volatile("lgdt %0"
                  :
@@ -268,7 +133,7 @@ HlLoadGlobalDescriptorTable(IN PVOID Source)
  */
 XTCDECL
 VOID
-HlLoadInterruptDescriptorTable(IN PVOID Source)
+ArLoadInterruptDescriptorTable(IN PVOID Source)
 {
     asm volatile("lidt %0"
                  :
@@ -291,7 +156,7 @@ HlLoadInterruptDescriptorTable(IN PVOID Source)
  */
 XTCDECL
 VOID
-HlLoadSegment(IN USHORT Segment,
+ArLoadSegment(IN USHORT Segment,
               IN ULONG Source)
 {
     switch(Segment)
@@ -341,7 +206,7 @@ HlLoadSegment(IN USHORT Segment,
  */
 XTCDECL
 VOID
-HlLoadTaskRegister(USHORT Source)
+ArLoadTaskRegister(USHORT Source)
 {
     asm volatile("ltr %0"
                  :
@@ -360,7 +225,7 @@ HlLoadTaskRegister(USHORT Source)
  */
 XTCDECL
 ULONG_PTR
-HlReadControlRegister(IN USHORT ControlRegister)
+ArReadControlRegister(IN USHORT ControlRegister)
 {
     ULONG_PTR Value;
 
@@ -395,6 +260,12 @@ HlReadControlRegister(IN USHORT ControlRegister)
                          :
                          : "memory");
             break;
+        case 8:
+            /* Read value from CR8 */
+            asm volatile("mov %%cr8, %0"
+                         : "=r" (Value)
+                         :
+                         : "memory");
         default:
             /* Invalid control register set */
             Value = 0;
@@ -402,6 +273,29 @@ HlReadControlRegister(IN USHORT ControlRegister)
     }
 
     /* Return value read from given CR register */
+    return Value;
+}
+
+/**
+ * Reads quadword from a memory location specified by an offset relative to the beginning of the GS segment.
+ *
+ * @param Offset
+ *        Specifies the offset from the beginning of GS segment.
+ *
+ * @return Returns the value read from the specified memory location relative to GS segment.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+ULONGLONG
+ArReadGSQuadWord(ULONG Offset)
+{
+    ULONGLONG Value;
+
+    /* Read quadword from GS segment */
+    asm volatile("movq %%gs:%a[Offset], %q[Value]"
+                 : [Value] "=r" (Value)
+                 : [Offset] "ir" (Offset));
     return Value;
 }
 
@@ -417,14 +311,16 @@ HlReadControlRegister(IN USHORT ControlRegister)
  */
 XTCDECL
 ULONGLONG
-HlReadModelSpecificRegister(IN ULONG Register)
+ArReadModelSpecificRegister(IN ULONG Register)
 {
-    ULONGLONG Value;
+    ULONG Low, High;
 
     asm volatile("rdmsr"
-                 : "=A" (Value)
+                 : "=a" (Low),
+                   "=d" (High)
                  : "c" (Register));
-    return Value;
+
+    return ((ULONGLONG)High << 32) | Low;
 }
 
 /**
@@ -436,14 +332,15 @@ HlReadModelSpecificRegister(IN ULONG Register)
  */
 XTCDECL
 ULONGLONG
-HlReadTimeStampCounter()
+ArReadTimeStampCounter()
 {
-    ULONGLONG Value;
+    ULONGLONG Low, High;
 
     asm volatile("rdtsc"
-                 : "=A" (Value));
+                 : "=a" (Low),
+                   "=d" (High));
 
-    return Value;
+    return ((ULONGLONG)High << 32) | Low;
 }
 
 /**
@@ -455,7 +352,7 @@ HlReadTimeStampCounter()
  */
 XTCDECL
 VOID
-HlSetInterruptFlag()
+ArSetInterruptFlag()
 {
     asm volatile("sti");
 }
@@ -472,7 +369,7 @@ HlSetInterruptFlag()
  */
 XTCDECL
 VOID
-HlStoreGlobalDescriptorTable(OUT PVOID Destination)
+ArStoreGlobalDescriptorTable(OUT PVOID Destination)
 {
     asm volatile("sgdt %0"
                  :
@@ -492,7 +389,7 @@ HlStoreGlobalDescriptorTable(OUT PVOID Destination)
  */
 XTCDECL
 VOID
-HlStoreInterruptDescriptorTable(OUT PVOID Destination)
+ArStoreInterruptDescriptorTable(OUT PVOID Destination)
 {
     asm volatile("sidt %0"
                  :
@@ -515,7 +412,7 @@ HlStoreInterruptDescriptorTable(OUT PVOID Destination)
  */
 XTCDECL
 VOID
-HlStoreSegment(IN USHORT Segment,
+ArStoreSegment(IN USHORT Segment,
                OUT PVOID Destination)
 {
     switch(Segment)
@@ -562,7 +459,7 @@ HlStoreSegment(IN USHORT Segment,
  */
 XTCDECL
 VOID
-HlStoreTaskRegister(OUT PVOID Destination)
+ArStoreTaskRegister(OUT PVOID Destination)
 {
     asm volatile("str %0"
                  :
@@ -585,7 +482,7 @@ HlStoreTaskRegister(OUT PVOID Destination)
  */
 XTCDECL
 VOID
-HlWriteControlRegister(IN USHORT ControlRegister,
+ArWriteControlRegister(IN USHORT ControlRegister,
                        IN UINT_PTR Value)
 {
     /* Write a value into specified control register */
@@ -595,28 +492,35 @@ HlWriteControlRegister(IN USHORT ControlRegister,
             /* Write value to CR0 */
             asm volatile("mov %0, %%cr0"
                          :
-                         : "r" (Value)
+                         : "r"(Value)
                          : "memory");
             break;
         case 2:
             /* Write value to CR2 */
             asm volatile("mov %0, %%cr2"
                          :
-                         : "r" (Value)
+                         : "r"(Value)
                          : "memory");
             break;
         case 3:
             /* Write value to CR3 */
             asm volatile("mov %0, %%cr3"
                          :
-                         : "r" (Value)
+                         : "r"(Value)
                          : "memory");
             break;
         case 4:
             /* Write value to CR4 */
             asm volatile("mov %0, %%cr4"
                          :
-                         : "r" (Value)
+                         : "r"(Value)
+                         : "memory");
+            break;
+        case 8:
+            /* Write value to CR8 */
+            asm volatile("mov %0, %%cr8"
+                         :
+                         : "r"(Value)
                          : "memory");
             break;
     }
@@ -637,11 +541,15 @@ HlWriteControlRegister(IN USHORT ControlRegister,
  */
 XTCDECL
 VOID
-HlWriteModelSpecificRegister(IN ULONG Register,
+ArWriteModelSpecificRegister(IN ULONG Register,
                              IN ULONGLONG Value)
 {
+    ULONG Low = Value & 0xFFFFFFFF;
+    ULONG High = Value >> 32;
+
     asm volatile("wrmsr"
                  :
                  : "c" (Register),
-                   "A" (Value));
+                   "a" (Low),
+                   "d" (High));
 }

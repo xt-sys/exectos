@@ -33,6 +33,7 @@
 #include <rtltypes.h>
 
 /* Architecture-specific low level data types headers */
+#include ARCH_HEADER(artypes.h)
 #include ARCH_HEADER(hltypes.h)
 #include ARCH_HEADER(ketypes.h)
 #include ARCH_HEADER(mmtypes.h)
@@ -43,6 +44,7 @@
 #include <rtlfuncs.h>
 
 /* Architecture specific XT routines*/
+#include ARCH_HEADER(arfuncs.h)
 #include ARCH_HEADER(hlfuncs.h)
 
 /* Callbacks */

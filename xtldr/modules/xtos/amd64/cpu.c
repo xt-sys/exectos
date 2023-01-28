@@ -197,7 +197,7 @@ XtpInitializeDescriptors(IN PLIST_ENTRY MemoryMappings,
     RtlZeroMemory(IdtEntry, EFI_SIZE_TO_PAGES(256 * sizeof(KIDTENTRY)) * EFI_PAGE_SIZE);
 
     /* Stores IDT register into new IDT entry */
-    HlStoreInterruptDescriptorTable(&OriginalIdt.Limit);
+    ArStoreInterruptDescriptorTable(&OriginalIdt.Limit);
     RtlCopyMemory(IdtEntry, OriginalIdt.Base, OriginalIdt.Limit + 1);
 
     /* Map IDT and set its virtual address */
@@ -239,9 +239,9 @@ XtpLoadProcessorContext(IN PKGDTENTRY Gdt,
     IdtDescriptor.Limit = 256 * sizeof(KIDTENTRY) - 1;
 
     /* Load GDT, IDT and TSS */
-    HlLoadGlobalDescriptorTable(&GdtDescriptor.Limit);
-    HlLoadInterruptDescriptorTable(&IdtDescriptor.Limit);
-    HlLoadTaskRegister((UINT32)KGDT_SYS_TSS);
+    ArLoadGlobalDescriptorTable(&GdtDescriptor.Limit);
+    ArLoadInterruptDescriptorTable(&IdtDescriptor.Limit);
+    ArLoadTaskRegister((UINT32)KGDT_SYS_TSS);
 
     /* Re-enable IDE interrupts */
     HlIoPortOutByte(0x376, 0);
@@ -280,7 +280,7 @@ XtpSetProcessorContext(IN PLIST_ENTRY MemoryMappings,
     XtLdrProtocol->DbgPrint(L"Setting processor context\n");
 
     /* Disable interrupts */
-    HlClearInterruptFlag();
+    ArClearInterruptFlag();
 
     /* Initialize GDT */
     Status = XtpInitializeDescriptors(MemoryMappings, VirtualAddress, Gdt, Idt);

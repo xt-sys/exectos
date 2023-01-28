@@ -17,22 +17,6 @@
 
 /* HAL library routines forward references */
 XTCDECL
-VOID
-HlClearInterruptFlag();
-
-XTCDECL
-BOOLEAN
-HlCpuId(IN OUT PCPUID_REGISTERS Registers);
-
-XTCDECL
-VOID
-HlHalt();
-
-XTCDECL
-VOID
-HlInvalidateTlbEntry(IN PVOID Address);
-
-XTCDECL
 UCHAR
 HlIoPortInByte(IN USHORT Port);
 
@@ -58,69 +42,5 @@ XTCDECL
 VOID
 HlIoPortOutLong(IN USHORT Port,
                 IN ULONG Value);
-
-XTCDECL
-VOID
-HlLoadGlobalDescriptorTable(IN PVOID Source);
-
-XTCDECL
-VOID
-HlLoadInterruptDescriptorTable(IN PVOID Source);
-
-XTCDECL
-VOID
-HlLoadSegment(IN USHORT Segment,
-              IN ULONG Source);
-
-XTCDECL
-VOID
-HlLoadTaskRegister(USHORT Source);
-
-XTCDECL
-ULONG_PTR
-HlReadControlRegister(IN USHORT ControlRegister);
-
-XTCDECL
-ULONGLONG
-HlReadGSQuadWord(ULONG Offset);
-
-XTCDECL
-ULONGLONG
-HlReadModelSpecificRegister(IN ULONG Register);
-
-XTCDECL
-ULONGLONG
-HlReadTimeStampCounter();
-
-XTCDECL
-VOID
-HlSetInterruptFlag();
-
-XTCDECL
-VOID
-HlStoreGlobalDescriptorTable(OUT PVOID Destination);
-
-XTCDECL
-VOID
-HlStoreInterruptDescriptorTable(OUT PVOID Destination);
-
-XTCDECL
-VOID
-HlStoreSegment(IN USHORT Segment,
-               OUT PVOID Destination);
-
-XTCDECL
-VOID
-HlStoreTaskRegister(OUT PVOID Destination);
-
-XTCDECL
-VOID
-HlWriteControlRegister(IN USHORT ControlRegister,
-                       IN UINT_PTR Value);
-
-XTCDECL
-VOID
-HlWriteModelSpecificRegister(IN ULONG Register,
-                             IN ULONGLONG Value);
 
 #endif /* __XTDK_AMD64_HLFUNCS_H */
