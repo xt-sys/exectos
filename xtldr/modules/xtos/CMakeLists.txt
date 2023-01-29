@@ -10,8 +10,7 @@ include_directories(
 # Specify list of source code files
 list(APPEND XTLDR_XTOS_SOURCE
     ${XTLDR_SOURCE_DIR}/blproto.c
-    ${XTLDR_XTOS_SOURCE_DIR}/xtos.c
-    ${XTLDR_XTOS_SOURCE_DIR}/${ARCH}/cpu.c)
+    ${XTLDR_XTOS_SOURCE_DIR}/xtos.c)
 
 # Link bootloader executable
 add_executable(xtos ${XTLDR_XTOS_SOURCE})

@@ -188,8 +188,6 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
     LIST_ENTRY MemoryMappings;
     ULONG KernelStackPages;
     EFI_STATUS Status;
-    PKGDTENTRY Gdt;
-    PKIDTENTRY Idt;
 
     /* Initialize XTOS startup sequence */
     XtLdrProtocol->DbgPrint(L"Initializing XTOS startup sequence\n");
@@ -259,15 +257,6 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
                                            KernelStackPages, LoaderStartupKernelStack);
     VirtualAddress += (KernelStackPages * EFI_PAGE_SIZE);
 
-    /* Set processor context */
-    Status = XtpSetProcessorContext(&MemoryMappings, &VirtualAddress, &Gdt, &Idt);
-    if(Status != STATUS_EFI_SUCCESS)
-    {
-        /* Failed to set processor context */
-        XtLdrProtocol->DbgPrint(L"Failed to set processor context (Status Code: %lx)\n", Status);
-        return Status;
-    }
-
     /* Enable paging */
     EfiSystemTable->BootServices->HandleProtocol(EfiImageHandle, &LoadedImageGuid, (PVOID*)&ImageProtocol);
     Status = XtLdrProtocol->EnablePaging(&MemoryMappings, VirtualAddress, ImageProtocol, &XtPageMap);
@@ -277,9 +266,6 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
         XtLdrProtocol->DbgPrint(L"Failed to enable paging (Status Code: %lx)\n", Status);
         return Status;
     }
-
-    /* Load processor context */
-    XtpLoadProcessorContext(Gdt, Idt);
 
     /* Call XTOS kernel */
     XtLdrProtocol->DbgPrint(L"Booting the XTOS kernel\n");
