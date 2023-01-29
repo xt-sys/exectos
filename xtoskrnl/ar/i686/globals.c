@@ -8,3 +8,12 @@
 
 #include "xtos.h"
 
+
+/* Initial GDT */
+KGDTENTRY ArInitialGdt[GDT_ENTRIES] = {0};
+
+/* Initial IDT */
+KIDTENTRY ArInitialIdt[IDT_ENTRIES] = {0};
+
+/* Initial TSS */
+KTSS ArInitialTss;
