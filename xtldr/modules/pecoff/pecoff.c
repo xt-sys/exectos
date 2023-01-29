@@ -450,9 +450,9 @@ PepRelocateLoadedImage(IN PPECOFF_IMAGE_CONTEXT Image)
     while(RelocationDir < RelocationEnd && RelocationDir->SizeOfBlock > 0)
     {
         /* Calculate number of relocations needed, address and type offset */
-        Count = (RelocationDir->SizeOfBlock - sizeof(PECOFF_IMAGE_BASE_RELOCATION)) / sizeof(UINT16);
-        Address = (UINT32*)((UINT8*)Image->Data + RelocationDir->VirtualAddress);
-        TypeOffset = (UINT16*)((UINT8*)RelocationDir + sizeof(PECOFF_IMAGE_BASE_RELOCATION));
+        Count = (RelocationDir->SizeOfBlock - sizeof(PECOFF_IMAGE_BASE_RELOCATION)) / sizeof(USHORT);
+        Address = (PUINT)((PUCHAR)Image->Data + RelocationDir->VirtualAddress);
+        TypeOffset = (PUSHORT)((PUCHAR)RelocationDir + sizeof(PECOFF_IMAGE_BASE_RELOCATION));
 
         /* Do relocations */
         while(Count--)
@@ -480,12 +480,12 @@ PepRelocateLoadedImage(IN PPECOFF_IMAGE_CONTEXT Image)
                         break;
                     case PECOFF_IMAGE_REL_BASED_DIR64:
                         /* 64-bit relocation */
-                        LongPtr = (UINT64*)((UINT8*)Address + Offset);
+                        LongPtr = (PULONGLONG)((PUCHAR)Address + Offset);
                         *LongPtr = *LongPtr - ImageBase + (UINT_PTR)Image->VirtualAddress;
                         break;
                     case PECOFF_IMAGE_REL_BASED_HIGHLOW:
                         /* 32-bit relocation of hight and low half of address */
-                        ShortPtr = (UINT32*)((UINT8*)Address + Offset);
+                        ShortPtr = (PUINT32)((PUCHAR)Address + Offset);
                         *ShortPtr = *ShortPtr - ImageBase + (UINT_PTR)Image->VirtualAddress;
                         break;
                     default:
@@ -496,8 +496,9 @@ PepRelocateLoadedImage(IN PPECOFF_IMAGE_CONTEXT Image)
             /* Increment the type offset */
             TypeOffset++;
         }
+
         /* Next relocation */
-        RelocationDir += RelocationDir->SizeOfBlock;
+        RelocationDir = (PPECOFF_IMAGE_BASE_RELOCATION)((PUCHAR)RelocationDir + RelocationDir->SizeOfBlock);
     }
 
     /* Return SUCCESS */
