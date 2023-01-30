@@ -9,8 +9,10 @@
 #ifndef __XTDK_I686_KETYPES_H
 #define __XTDK_I686_KETYPES_H
 
+#include <xtbase.h>
 #include <xtstruct.h>
 #include <xttypes.h>
+#include ARCH_HEADER(xtstruct.h)
 
 
 /* Selector masks */
@@ -30,6 +32,7 @@
 #define KGDT_R0_LDT                       0x0048
 #define KGDT_DF_TSS                       0x0050
 #define KGDT_NMI_TSS                      0x0058
+#define KGDT_VDBS                         0x0068
 
 /* GDT descriptor privilege levels */
 #define KGDT_DPL_SYSTEM                   0
@@ -44,6 +47,7 @@
 #define KGDT_DESCRIPTOR_CODE              0x08
 
 /* GDT descriptor type codes */
+#define KGDT_TYPE_NONE                    0x0
 #define KGDT_TYPE_CODE                    (0x10 | KGDT_DESCRIPTOR_CODE | KGDT_DESCRIPTOR_EXECUTE_READ)
 #define KGDT_TYPE_DATA                    (0x10 | KGDT_DESCRIPTOR_READ_WRITE)
 
@@ -278,5 +282,54 @@ typedef struct _KTRAP_FRAME
     ULONG V86Fs;
     ULONG V86Gs;
 } KTRAP_FRAME, *PKTRAP_FRAME;
+
+/* Special kernel registers structure definition */
+typedef struct _KSPECIAL_REGISTERS
+{
+    ULONG Cr0;
+    ULONG Cr2;
+    ULONG Cr3;
+    ULONG Cr4;
+    ULONG KernelDr0;
+    ULONG KernelDr1;
+    ULONG KernelDr2;
+    ULONG KernelDr3;
+    ULONG KernelDr6;
+    ULONG KernelDr7;
+    KDESCRIPTOR Gdtr;
+    KDESCRIPTOR Idtr;
+    USHORT Tr;
+    USHORT Ldtr;
+    ULONG Reserved[6];
+} KSPECIAL_REGISTERS, *PKSPECIAL_REGISTERS;
+
+/* Processor state frame structure definition */
+typedef struct _KPROCESSOR_STATE
+{
+    CONTEXT ContextFrame;
+    KSPECIAL_REGISTERS SpecialRegisters;
+} KPROCESSOR_STATE, *PKPROCESSOR_STATE;
+
+/* Processor Control Block (PRCB) structure definition */
+typedef struct _KPROCESSOR_CONTROL_BLOCK
+{
+    UCHAR Number;
+    ULONG_PTR SetMember;
+    KPROCESSOR_STATE ProcessorState;
+    ULONG_PTR MultiThreadProcessorSet;
+    PVOID DpcStack;
+} KPROCESSOR_CONTROL_BLOCK, *PKPROCESSOR_CONTROL_BLOCK;
+
+/* Processor Block structure definition */
+typedef struct _KPROCESSOR_BLOCK
+{
+    PKPROCESSOR_BLOCK Self;
+    PKPROCESSOR_CONTROL_BLOCK CurrentPrcb;
+    KIRQL Irql;
+    PKIDTENTRY IdtBase;
+    PKGDTENTRY GdtBase;
+    PKTSS TssBase;
+    KPROCESSOR_CONTROL_BLOCK Prcb;
+} KPROCESSOR_BLOCK, *PKPROCESSOR_BLOCK;
 
 #endif /* __XTDK_I686_KETYPES_H */

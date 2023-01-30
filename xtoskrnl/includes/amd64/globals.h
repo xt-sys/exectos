@@ -18,6 +18,9 @@ EXTERN KGDTENTRY ArInitialGdt[GDT_ENTRIES];
 /* Initial IDT */
 EXTERN KIDTENTRY ArInitialIdt[IDT_ENTRIES];
 
+/* Initial Processor Block */
+EXTERN KPROCESSOR_BLOCK ArInitialProcessorBlock;
+
 /* Initial TSS */
 EXTERN KTSS ArInitialTss;
 

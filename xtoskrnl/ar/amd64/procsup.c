@@ -20,25 +20,45 @@ XTAPI
 VOID
 ArInitializeProcessor(VOID)
 {
+    KDESCRIPTOR GdtDescriptor, IdtDescriptor;
+    PKPROCESSOR_BLOCK ProcessorBlock;
     PKGDTENTRY Gdt;
+    PKIDTENTRY Idt;
     PKTSS Tss;
-    KDESCRIPTOR GdtDescriptor;
 
     /* Use initial structures */
     Gdt = ArInitialGdt;
+    Idt = ArInitialIdt;
     Tss = &ArInitialTss;
 
-    /* Initialize GDT and TSS */
-    ArpInitializeGdt(Gdt);
-    ArpInitializeTss(Tss, Gdt);
+    /* Load processor block */
+    ProcessorBlock = CONTAIN_RECORD(&ArInitialProcessorBlock.Prcb, KPROCESSOR_BLOCK, Prcb);
 
-    /* Set GDT descriptor */
+    /* Initialize processor block */
+    ArpInitializeProcessorBlock(ProcessorBlock, Gdt, Idt, Tss, (PVOID)KeInitializationBlock->KernelFaultStack);
+
+    /* Initialize GDT and TSS */
+    ArpInitializeGdt(ProcessorBlock);
+    ArpInitializeTss(ProcessorBlock);
+
+    /* Set GDT and IDT descriptors */
     GdtDescriptor.Base = Gdt;
     GdtDescriptor.Limit = (GDT_ENTRIES * sizeof(PKGDTENTRY)) - 1;
+    IdtDescriptor.Base = Idt;
+    IdtDescriptor.Limit = (IDT_ENTRIES * sizeof(PKIDTENTRY)) - 1;
 
-    /* Load GDT and TSS */
+    /* Load GDT, IDT and TSS */
     ArLoadGlobalDescriptorTable(&GdtDescriptor.Limit);
-    ArLoadTaskRegister((UINT32)KGDT_SYS_TSS);
+    ArLoadInterruptDescriptorTable(&IdtDescriptor.Limit);
+    ArLoadTaskRegister((UINT)KGDT_SYS_TSS);
+
+    /* Set GS base */
+    ArWriteModelSpecificRegister(X86_MSR_GSBASE, (ULONGLONG)ProcessorBlock);
+    ArWriteModelSpecificRegister(X86_MSR_KERNEL_GSBASE, (ULONGLONG)ProcessorBlock);
+
+    /* Enter passive IRQ level */
+    ProcessorBlock->Irql = PASSIVE_LEVEL;
+    ArWriteControlRegister(8, PASSIVE_LEVEL);
 }
 
 /**
@@ -53,18 +73,123 @@ ArInitializeProcessor(VOID)
  */
 XTAPI
 VOID
-ArpInitializeGdt(IN PKGDTENTRY Gdt)
+ArpInitializeGdt(IN PKPROCESSOR_BLOCK ProcessorBlock)
 {
     /* Initialize GDT entries */
-    ArpInitializeGdtEntry(Gdt, KGDT_NULL, 0x0, 0x0, 0, KGDT_DPL_SYSTEM, 0);
-    ArpInitializeGdtEntry(Gdt, KGDT_R0_CODE, 0x0, 0x0, KGDT_TYPE_CODE, KGDT_DPL_SYSTEM, 0);
-    ArpInitializeGdtEntry(Gdt, KGDT_R0_DATA, 0x0, 0x0, KGDT_TYPE_DATA, KGDT_DPL_SYSTEM, 0);
-    ArpInitializeGdtEntry(Gdt, KGDT_R3_CODE, 0x0, 0x0, KGDT_TYPE_CODE, KGDT_DPL_USER, 0);
-    ArpInitializeGdtEntry(Gdt, KGDT_R3_DATA, 0x0, 0xFFFFFFFF, KGDT_TYPE_DATA, KGDT_DPL_USER, 2);
-    ArpInitializeGdtEntry(Gdt, KGDT_R3_CMCODE, 0x0, 0xFFFFFFFF, KGDT_TYPE_CODE, KGDT_DPL_USER, 2);
-    ArpInitializeGdtEntry(Gdt, KGDT_R3_CMTEB, 0x0, 0x0FFF, KGDT_TYPE_DATA, KGDT_DPL_USER, 2);
-    ArpInitializeGdtEntry(Gdt, KGDT_R0_LDT, 0, 0xFFFFFFFF, KGDT_TYPE_CODE, KGDT_DPL_SYSTEM, 0);
-    ArpInitializeGdtEntry(Gdt, KGDT_SYS_TSS, 0, sizeof(KTSS), AMD64_TSS, KGDT_DPL_SYSTEM, 0);
+    ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_NULL, 0x0, 0x0, KGDT_TYPE_NONE, KGDT_DPL_SYSTEM, 0);
+    ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_R0_CODE, 0x0, 0x0, KGDT_TYPE_CODE, KGDT_DPL_SYSTEM, 0);
+    ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_R0_DATA, 0x0, 0x0, KGDT_TYPE_DATA, KGDT_DPL_SYSTEM, 0);
+    ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_R3_CODE, 0x0, 0x0, KGDT_TYPE_CODE, KGDT_DPL_USER, 0);
+    ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_R3_DATA, 0x0, 0xFFFFFFFF, KGDT_TYPE_DATA, KGDT_DPL_USER, 2);
+    ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_R3_CMCODE, 0x0, 0xFFFFFFFF, KGDT_TYPE_CODE, KGDT_DPL_USER, 2);
+    ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_R3_CMTEB, 0x0, 0x0FFF, KGDT_TYPE_DATA, KGDT_DPL_USER, 2);
+    ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_R0_LDT, 0x0, 0xFFFFFFFF, KGDT_TYPE_CODE, KGDT_DPL_SYSTEM, 0);
+    ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_SYS_TSS, (ULONGLONG)ProcessorBlock->TssBase, sizeof(KTSS), AMD64_TSS, KGDT_DPL_SYSTEM, 0);
+}
+
+/**
+ * Initializes processor block.
+ *
+ * @param ProcessorBlock
+ *        Supplies a pointer to the processor block to initialize.
+ *
+ * @param Gdt
+ *        Supplies a pointer to the GDT for this processor block.
+ *
+ * @param Idt
+ *        Supplies a pointer to the IDT for this processor block.
+ *
+ * @param Tss
+ *        Supplies a pointer to the TSS for this processor block.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+ArpInitializeProcessorBlock(OUT PKPROCESSOR_BLOCK ProcessorBlock,
+                            IN PKGDTENTRY Gdt,
+                            IN PKIDTENTRY Idt,
+                            IN PKTSS Tss,
+                            IN PVOID DpcStack)
+{
+    /* Fill processor block with zeroes */
+    RtlZeroMemory(ProcessorBlock, sizeof(KPROCESSOR_BLOCK));
+
+    /* Set processor block and processor control block */
+    ProcessorBlock->Self = ProcessorBlock;
+    ProcessorBlock->CurrentPrcb = &ProcessorBlock->Prcb;
+
+    /* Set GDT, IDT and TSS descriptors */
+    ProcessorBlock->GdtBase = (PVOID)Gdt;
+    ProcessorBlock->IdtBase = Idt;
+    ProcessorBlock->TssBase = Tss;
+    ProcessorBlock->Prcb.RspBase = Tss->Rsp0;
+
+    /* Setup DPC stack */
+    ProcessorBlock->Prcb.DpcStack = DpcStack;
+
+    /* Setup processor control block */
+    ProcessorBlock->Prcb.Number = 0;
+    ProcessorBlock->Prcb.SetMember = 1ULL;
+    ProcessorBlock->Prcb.MultiThreadProcessorSet = 1ULL;
+
+    /* Clear DR6 and DR7 registers */
+    ProcessorBlock->Prcb.ProcessorState.SpecialRegisters.KernelDr6 = 0;
+    ProcessorBlock->Prcb.ProcessorState.SpecialRegisters.KernelDr7 = 0;
+
+    /* Set initial MXCSR register value */
+    ProcessorBlock->Prcb.MxCsr = INITIAL_MXCSR;
+}
+
+/**
+ * Initializes the kernel's Task State Segment (TSS).
+ *
+ * @param Tss
+ *        Supplies a pointer to the TSS to use.
+ *
+ * @param Gdt
+ *        Supplies a pointer to the GDT to use.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+ArpInitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock)
+{
+    PKGDTENTRY TssEntry;
+
+    /* Get TSS entry from GDT */
+    TssEntry = (PKGDTENTRY)(&(ProcessorBlock->GdtBase[KGDT_SYS_TSS / sizeof(KGDTENTRY)]));
+
+    /* Initialize TSS entry */
+    TssEntry->BaseLow = (ULONGLONG)ProcessorBlock->TssBase & 0xFFFF;
+    TssEntry->BaseUpper = (ULONGLONG)ProcessorBlock->TssBase >> 32;
+    TssEntry->LimitLow = (sizeof(KTSS) - 1) & 0xFFFF;
+    TssEntry->Bits.BaseMiddle = ((ULONGLONG)ProcessorBlock->TssBase >> 16) & 0xFF;
+    TssEntry->Bits.BaseHigh = ((ULONGLONG)ProcessorBlock->TssBase >> 24) & 0xFF;
+    TssEntry->Bits.LimitHigh = (sizeof(KTSS) - 1) >> 16;
+    TssEntry->Bits.DefaultBig = 0;
+    TssEntry->Bits.Dpl = 0;
+    TssEntry->Bits.Granularity = 0;
+    TssEntry->Bits.LongMode = 0;
+    TssEntry->Bits.Present = 1;
+    TssEntry->Bits.System = 0;
+    TssEntry->Bits.Type = AMD64_TSS;
+    TssEntry->MustBeZero = 0;
+
+    /* Fill TSS with zeroes */
+    RtlZeroMemory(ProcessorBlock->TssBase, sizeof(KTSS));
+
+    /* Setup I/O map and stacks for ring0 & traps */
+    ProcessorBlock->TssBase->IoMapBase = sizeof(KTSS);
+    ProcessorBlock->TssBase->Rsp0 = KeInitializationBlock->KernelBootStack;
+    ProcessorBlock->TssBase->Ist[1] = KeInitializationBlock->KernelFaultStack;
+    ProcessorBlock->TssBase->Ist[2] = KeInitializationBlock->KernelFaultStack;
+    ProcessorBlock->TssBase->Ist[3] = KeInitializationBlock->KernelFaultStack;
 }
 
 /**
@@ -97,13 +222,13 @@ ArpInitializeGdt(IN PKGDTENTRY Gdt)
  */
 XTAPI
 VOID
-ArpInitializeGdtEntry(IN PKGDTENTRY Gdt,
-                      IN USHORT Selector,
-                      IN ULONGLONG Base,
-                      IN ULONG Limit,
-                      IN UCHAR Type,
-                      IN UCHAR Dpl,
-                      IN UCHAR SegmentMode)
+ArpSetGdtEntry(IN PKGDTENTRY Gdt,
+               IN USHORT Selector,
+               IN ULONGLONG Base,
+               IN ULONG Limit,
+               IN UCHAR Type,
+               IN UCHAR Dpl,
+               IN UCHAR SegmentMode)
 {
     PKGDTENTRY GdtEntry;
     UCHAR Granularity;
@@ -122,7 +247,7 @@ ArpInitializeGdtEntry(IN PKGDTENTRY Gdt,
     }
 
     /* Get GDT entry */
-    GdtEntry = (PKGDTENTRY)((ULONG64)Gdt + (Selector & ~RPL_MASK));
+    GdtEntry = (PKGDTENTRY)((ULONGLONG)Gdt + (Selector & ~RPL_MASK));
 
     /* Set GDT descriptor base */
     GdtEntry->BaseLow = Base & 0xFFFF;
@@ -143,54 +268,4 @@ ArpInitializeGdtEntry(IN PKGDTENTRY Gdt,
     GdtEntry->Bits.System = 0;
     GdtEntry->Bits.Type = (Type & 0x1F);
     GdtEntry->MustBeZero = 0;
-}
-
-/**
- * Initializes the kernel's Task State Segment (TSS).
- *
- * @param Tss
- *        Supplies a pointer to the TSS to use.
- *
- * @param Gdt
- *        Supplies a pointer to the GDT to use.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTAPI
-VOID
-ArpInitializeTss(IN PKTSS Tss,
-                 IN PKGDTENTRY Gdt)
-{
-    PKGDTENTRY TssEntry;
-
-    /* Get TSS entry from GDT */
-    TssEntry = (PKGDTENTRY)(&(Gdt[KGDT_SYS_TSS / sizeof(KGDTENTRY)]));
-
-    /* Initialize TSS entry */
-    TssEntry->BaseLow = (ULONG64)Tss & 0xFFFF;
-    TssEntry->BaseUpper = (ULONG64)Tss >> 32;
-    TssEntry->LimitLow = (sizeof(KTSS) - 1) & 0xFFFF;
-    TssEntry->Bits.BaseMiddle = ((ULONG64)Tss >> 16) & 0xFF;
-    TssEntry->Bits.BaseHigh = ((ULONG64)Tss >> 24) & 0xFF;
-    TssEntry->Bits.LimitHigh = (sizeof(KTSS) - 1) >> 16;
-    TssEntry->Bits.DefaultBig = 0;
-    TssEntry->Bits.Dpl = 0;
-    TssEntry->Bits.Granularity = 0;
-    TssEntry->Bits.LongMode = 0;
-    TssEntry->Bits.Present = 1;
-    TssEntry->Bits.System = 0;
-    TssEntry->Bits.Type = AMD64_TSS;
-    TssEntry->MustBeZero = 0;
-
-    /* Fill TSS with zeroes */
-    RtlZeroMemory(Tss, sizeof(KTSS));
-
-    /* Setup I/O map and stacks for ring0 & traps */
-    Tss->IoMapBase = sizeof(KTSS);
-    Tss->Rsp0 = KeInitializationBlock->KernelBootStack;
-    Tss->Ist[1] = KeInitializationBlock->KernelFaultStack;
-    Tss->Ist[2] = KeInitializationBlock->KernelFaultStack;
-    Tss->Ist[3] = KeInitializationBlock->KernelFaultStack;
 }

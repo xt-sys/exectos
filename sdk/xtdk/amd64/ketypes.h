@@ -10,7 +10,9 @@
 #define __XTDK_AMD64_KETYPES_H
 
 #include <xtbase.h>
+#include <xtstruct.h>
 #include <xttypes.h>
+#include ARCH_HEADER(xtstruct.h)
 
 
 /* Selector masks */
@@ -41,6 +43,7 @@
 #define KGDT_DESCRIPTOR_CODE                      0x08
 
 /* GDT descriptor type codes */
+#define KGDT_TYPE_NONE                            0x0
 #define KGDT_TYPE_CODE                            (0x10 | KGDT_DESCRIPTOR_CODE | KGDT_DESCRIPTOR_EXECUTE_READ)
 #define KGDT_TYPE_DATA                            (0x10 | KGDT_DESCRIPTOR_READ_WRITE)
 
@@ -386,5 +389,75 @@ typedef struct _KTRAP_FRAME
     USHORT Fill3;
     ULONG CodePatchCycle;
 } KTRAP_FRAME, *PKTRAP_FRAME;
+
+/* Special kernel registers structure definition */
+typedef struct _KSPECIAL_REGISTERS
+{
+    ULONG64 Cr0;
+    ULONG64 Cr2;
+    ULONG64 Cr3;
+    ULONG64 Cr4;
+    ULONG64 KernelDr0;
+    ULONG64 KernelDr1;
+    ULONG64 KernelDr2;
+    ULONG64 KernelDr3;
+    ULONG64 KernelDr6;
+    ULONG64 KernelDr7;
+    KDESCRIPTOR Gdtr;
+    KDESCRIPTOR Idtr;
+    USHORT Tr;
+    USHORT Ldtr;
+    ULONG MxCsr;
+    ULONG64 DebugControl;
+    ULONG64 LastBranchToRip;
+    ULONG64 LastBranchFromRip;
+    ULONG64 LastExceptionToRip;
+    ULONG64 LastExceptionFromRip;
+    ULONG64 Cr8;
+    ULONG64 MsrGsBase;
+    ULONG64 MsrGsSwap;
+    ULONG64 MsrStar;
+    ULONG64 MsrLStar;
+    ULONG64 MsrCStar;
+    ULONG64 MsrSyscallMask;
+} KSPECIAL_REGISTERS, *PKSPECIAL_REGISTERS;
+
+/* Processor state frame structure definition */
+typedef struct _KPROCESSOR_STATE
+{
+    KSPECIAL_REGISTERS SpecialRegisters;
+    CONTEXT ContextFrame;
+} KPROCESSOR_STATE, *PKPROCESSOR_STATE;
+
+/* Processor Control Block (PRCB) structure definition */
+typedef struct _KPROCESSOR_CONTROL_BLOCK
+{
+    ULONG MxCsr;
+    UCHAR Number;
+    ULONG64 RspBase;
+    ULONG_PTR SetMember; // KAFFINITY
+    KPROCESSOR_STATE ProcessorState;
+    PVOID DpcStack;
+    ULONG_PTR MultiThreadProcessorSet; // KAFFINITY
+} KPROCESSOR_CONTROL_BLOCK, *PKPROCESSOR_CONTROL_BLOCK;
+
+/* Processor Block structure definition */
+typedef struct _KPROCESSOR_BLOCK
+{
+    union
+    {
+        struct
+        {
+            PKGDTENTRY GdtBase;
+            PKTSS TssBase;
+            PKPROCESSOR_BLOCK Self;
+            PKPROCESSOR_CONTROL_BLOCK CurrentPrcb;
+
+        };
+    };
+    PKIDTENTRY IdtBase;
+    KIRQL Irql;
+    KPROCESSOR_CONTROL_BLOCK Prcb;
+} KPROCESSOR_BLOCK, *PKPROCESSOR_BLOCK;
 
 #endif /* __XTDK_AMD64_KETYPES_H */
