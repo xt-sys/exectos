@@ -93,6 +93,10 @@ ArWriteControlRegister(IN USHORT ControlRegister,
 
 XTCDECL
 VOID
+ArWriteEflagsRegister(IN UINT_PTR Value);
+
+XTCDECL
+VOID
 ArWriteModelSpecificRegister(IN ULONG Register,
                              IN ULONGLONG Value);
 

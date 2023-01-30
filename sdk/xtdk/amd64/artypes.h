@@ -75,6 +75,13 @@
 #define X86_MSR_GSBASE                                  0xC0000101
 #define X86_MSR_KERNEL_GSBASE                           0xC0000102
 
+/* Processor features in the EFER MSR */
+#define X86_MSR_EFER_SCE                                (1 <<  0)
+#define X86_MSR_EFER_LME                                (1 <<  8)
+#define X86_MSR_EFER_LMA                                (1 << 10)
+#define X86_MSR_EFER_NXE                                (1 << 11)
+#define X86_MSR_EFER_SVME                               (1 << 12)
+
 /* CPUID features enumeration list */
 typedef enum _CPUID_FEATURES
 {

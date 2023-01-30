@@ -488,6 +488,26 @@ ArWriteControlRegister(IN USHORT ControlRegister,
 }
 
 /**
+ * Writes the specified value to the program status and control (EFLAGS) register.
+ *
+ * @param Value
+ *        The value to write to the EFLAGS register.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+ArWriteEflagsRegister(IN UINT_PTR Value)
+{
+    asm volatile("push %0\n"
+                 "popf"
+                 :
+                 : "rim" (Value));
+}
+
+/**
  * Writes a 64-bit value to the requested Model Specific Register (MSR).
  *
  * @param Register
