@@ -51,6 +51,29 @@
 #define KGDT_TYPE_CODE                    (0x10 | KGDT_DESCRIPTOR_CODE | KGDT_DESCRIPTOR_EXECUTE_READ)
 #define KGDT_TYPE_DATA                    (0x10 | KGDT_DESCRIPTOR_READ_WRITE)
 
+/* TSS Offsets */
+#define KTSS_ESP0                         0x04
+#define KTSS_CR3                          0x1C
+#define KTSS_EIP                          0x20
+#define KTSS_EFLAGS                       0x24
+#define KTSS_EAX                          0x28
+#define KTSS_ECX                          0x2C
+#define KTSS_EDX                          0x30
+#define KTSS_EBX                          0x34
+#define KTSS_ESP                          0x38
+#define KTSS_EBP                          0x3C
+#define KTSS_ESI                          0x40
+#define KTSS_EDI                          0x44
+#define KTSS_ES                           0x48
+#define KTSS_CS                           0x4C
+#define KTSS_SS                           0x50
+#define KTSS_DS                           0x54
+#define KTSS_FS                           0x58
+#define KTSS_GS                           0x5C
+#define KTSS_LDT                          0x60
+#define KTSS_IOMAPBASE                    0x66
+#define KTSS_IO_MAPS                      0x68
+
 /* I686 Segment Types */
 #define I686_TASK_GATE                    0x5
 #define I686_TSS                          0x9
