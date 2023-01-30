@@ -61,6 +61,20 @@
 #define SEGMENT_FS                                      0x64
 #define SEGMENT_GS                                      0x65
 
+/* MSR values */
+#define X86_MSR_SYSENTER_CS                             0x00000174
+#define X86_MSR_SYSENTER_ESP                            0x00000175
+#define X86_MSR_SYSENTER_EIP                            0x00000176
+#define X86_MSR_POWER_CONTROL                           0x000001FC
+#define X86_MSR_EFER                                    0xC0000080
+#define X86_MSR_STAR                                    0xC0000081
+#define X86_MSR_LSTAR                                   0xC0000082
+#define X86_MSR_CSTAR                                   0xC0000083
+#define X86_MSR_FMASK                                   0xC0000084
+#define X86_MSR_FSBASE                                  0xC0000100
+#define X86_MSR_GSBASE                                  0xC0000101
+#define X86_MSR_KERNEL_GSBASE                           0xC0000102
+
 /* CPUID features enumeration list */
 typedef enum _CPUID_FEATURES
 {
