@@ -190,7 +190,7 @@ ArpInitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock)
     ProcessorBlock->TssBase->IntDirectionMap[4] = 0x18;
 
     /* Set I/O map base and disable traps */
-    ProcessorBlock->TssBase->IoMapBase = 0x68;
+    ProcessorBlock->TssBase->IoMapBase = sizeof(KTSS);
     ProcessorBlock->TssBase->Flags = 0;
 
     /* Set LDT and SS */
