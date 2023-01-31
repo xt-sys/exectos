@@ -51,6 +51,16 @@
 #define KGDT_TYPE_CODE                    (0x10 | KGDT_DESCRIPTOR_CODE | KGDT_DESCRIPTOR_EXECUTE_READ)
 #define KGDT_TYPE_DATA                    (0x10 | KGDT_DESCRIPTOR_READ_WRITE)
 
+/* IDT access levels */
+#define KIDT_ACCESS_RING0                 0x00
+#define KIDT_ACCESS_RING3                 0x60
+
+/* IDT gate types */
+#define KIDT_TYPE_TASK                    0x05
+#define KIDT_TYPE_CALL                    0x0C
+#define KIDT_TYPE_INTERRUPT               0x0E
+#define KIDT_TYPE_TRAP                    0x0F
+
 /* TSS Offsets */
 #define KTSS_ESP0                         0x04
 #define KTSS_CR3                          0x1C
