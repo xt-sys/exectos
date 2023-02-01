@@ -11,6 +11,7 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/cpufunc.c
     ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/globals.c
     ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/procsup.c
+    ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/traps.c
     ${XTOSKRNL_SOURCE_DIR}/hl/cport.c
     ${XTOSKRNL_SOURCE_DIR}/hl/efifb.c
     ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/ioport.c

@@ -37,9 +37,10 @@ ArInitializeProcessor(VOID)
     /* Initialize processor block */
     ArpInitializeProcessorBlock(ProcessorBlock, Gdt, Idt, Tss, (PVOID)KeInitializationBlock->KernelFaultStack);
 
-    /* Initialize GDT and TSS */
+    /* Initialize GDT, IDT and TSS */
     ArpInitializeGdt(ProcessorBlock);
     ArpInitializeTss(ProcessorBlock);
+    ArpInitializeIdt(ProcessorBlock);
 
     /* Set GDT and IDT descriptors */
     GdtDescriptor.Base = Gdt;
@@ -87,6 +88,36 @@ ArpInitializeGdt(IN PKPROCESSOR_BLOCK ProcessorBlock)
     ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_DF_TSS, 0x20000, 0xFFFF, I686_TSS, KGDT_DPL_SYSTEM, 0);
     ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_NMI_TSS, 0x20000, 0xFFFF, KGDT_TYPE_CODE, KGDT_DPL_SYSTEM, 0);
     ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_VDBS, 0xB8000, 0x3FFF, KGDT_TYPE_DATA, KGDT_DPL_SYSTEM, 0);
+}
+
+/**
+ * Initializes the kernel's Interrupt Descriptor Table (GDT).
+ *
+ * @param ProcessorBlock
+ *        Supplies a pointer to the processor block to use.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+ArpInitializeIdt(IN PKPROCESSOR_BLOCK ProcessorBlock)
+{
+    UINT Vector;
+
+    /* Fill in all vectors */
+    for(Vector = 0; Vector < IDT_ENTRIES; Vector++)
+    {
+        /* Set the IDT to handle unexpected interrupts */
+        ArpSetIdtGate(ProcessorBlock->IdtBase, Vector, ArpHandleTrapFF, KGDT_R0_CODE, 0, KIDT_INTERRUPT | KIDT_ACCESS_RING0);
+    }
+
+    /* Setup IDT handlers for known interrupts and traps */
+    ArpSetIdtGate(ProcessorBlock->IdtBase, 0x02, ArpHandleTrap02, KGDT_R0_CODE, 0, KIDT_INTERRUPT | KIDT_ACCESS_RING0);
+    ArpSetIdtGate(ProcessorBlock->IdtBase, 0x08, ArpHandleTrap08, KGDT_R0_CODE, 0, KIDT_INTERRUPT | KIDT_ACCESS_RING0);
+    ArpSetIdtGate(ProcessorBlock->IdtBase, 0x0D, ArpHandleTrap0D, KGDT_R0_CODE, 0, KIDT_INTERRUPT | KIDT_ACCESS_RING0);
+    ArpSetIdtGate(ProcessorBlock->IdtBase, 0x0E, ArpHandleTrap0E, KGDT_R0_CODE, 0, KIDT_INTERRUPT | KIDT_ACCESS_RING0);
 }
 
 /**
@@ -325,6 +356,47 @@ ArpSetGdtEntry(IN PKGDTENTRY Gdt,
     GdtEntry->Bits.Present = (Type != 0);
     GdtEntry->Bits.System = 0;
     GdtEntry->Bits.Type = (Type & 0x1F);
+}
+
+/**
+ * Fills in a call, interrupt, task or trap gate entry.
+ *
+ * @param Idt
+ *        Supplies a pointer to IDT structure, where gate is located.
+ *
+ * @param Vector
+ *        Supplies a gate vector pointing to the interrupt gate in the IDT
+ *
+ * @param Handler
+ *        Supplies a pointer to the interrupt handler of the specified gate.
+ *
+ * @param Selector
+ *        Supplies the code selector the gate should run in.
+ *
+ * @param Ist
+ *        Supplies the interrupt stack table entry the gate should run in.
+ *
+ * @param Access
+ *        Supplies the gate access rights.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+ArpSetIdtGate(IN PKIDTENTRY Idt,
+              IN USHORT Vector,
+              IN PVOID Handler,
+              IN USHORT Selector,
+              IN USHORT Ist,
+              IN USHORT Access)
+{
+    /* Setup the gate */
+    Idt[Vector].Offset = (USHORT)((ULONG)Handler & 0xFFFF);
+    Idt[Vector].ExtendedOffset = (USHORT)((ULONG)Handler >> 16);
+    Idt[Vector].Access = 0x8000 | (Access << 8);
+    Idt[Vector].Selector = Selector;
 }
 
 /**

@@ -12,9 +12,33 @@
 #include <xtos.h>
 
 
+XTCDECL
+VOID
+ArpHandleTrap02();
+
+XTCDECL
+VOID
+ArpHandleTrap08();
+
+XTCDECL
+VOID
+ArpHandleTrap0D();
+
+XTCDECL
+VOID
+ArpHandleTrap0E();
+
+XTCDECL
+VOID
+ArpHandleTrapFF();
+
 XTAPI
 VOID
 ArpInitializeGdt(IN PKPROCESSOR_BLOCK ProcessorBlock);
+
+XTAPI
+VOID
+ArpInitializeIdt(IN PKPROCESSOR_BLOCK ProcessorBlock);
 
 XTAPI
 VOID
@@ -41,6 +65,15 @@ ArpSetGdtEntry(IN PKGDTENTRY Gdt,
                IN UCHAR Type,
                IN UCHAR Dpl,
                IN UCHAR SegmentMode);
+
+XTAPI
+VOID
+ArpSetIdtGate(IN PKIDTENTRY Idt,
+              IN USHORT Vector,
+              IN PVOID Handler,
+              IN USHORT Selector,
+              IN USHORT Ist,
+              IN USHORT Access);
 
 XTAPI
 VOID
