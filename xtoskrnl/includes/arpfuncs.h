@@ -32,7 +32,7 @@ XTAPI
 VOID
 ArpSetGdtEntry(IN PKGDTENTRY Gdt,
                IN USHORT Selector,
-               IN ULONGLONG Base,
+               IN ULONG_PTR Base,
                IN ULONG Limit,
                IN UCHAR Type,
                IN UCHAR Dpl,

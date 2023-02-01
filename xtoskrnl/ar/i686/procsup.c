@@ -2,7 +2,7 @@
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
  * FILE:            xtoskrnl/ar/i686/procsup.c
- * DESCRIPTION:     AMD64 processor functionality support
+ * DESCRIPTION:     I686 processor functionality support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
@@ -62,8 +62,8 @@ ArInitializeProcessor(VOID)
 /**
  * Initializes the kernel's Global Descriptor Table (GDT).
  *
- * @param Gdt
- *        Supplies a pointer to the GDT to use.
+ * @param ProcessorBlock
+ *        Supplies a pointer to the processor block to use.
  *
  * @return This routine does not return any value.
  *
@@ -75,15 +75,15 @@ ArpInitializeGdt(IN PKPROCESSOR_BLOCK ProcessorBlock)
 {
     /* Initialize GDT entries */
     ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_NULL, 0x0, 0x0, KGDT_TYPE_NONE, KGDT_DPL_SYSTEM, 0);
-    ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_R0_CODE, 0x0, 0xFF, KGDT_TYPE_CODE, KGDT_DPL_SYSTEM, 2);
-    ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_R0_DATA, 0x0, 0xFF, KGDT_TYPE_DATA, KGDT_DPL_SYSTEM, 2);
-    ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_R3_CODE, 0x0, 0xFF, KGDT_TYPE_CODE, KGDT_DPL_USER, 2);
-    ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_R3_DATA, 0x0, 0xFF, KGDT_TYPE_DATA, KGDT_DPL_USER, 2);
+    ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_R0_CODE, 0x0, 0xFFFFFFFF, KGDT_TYPE_CODE, KGDT_DPL_SYSTEM, 2);
+    ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_R0_DATA, 0x0, 0xFFFFFFFF, KGDT_TYPE_DATA, KGDT_DPL_SYSTEM, 2);
+    ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_R3_CODE, 0x0, 0xFFFFFFFF, KGDT_TYPE_CODE, KGDT_DPL_USER, 2);
+    ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_R3_DATA, 0x0, 0xFFFFFFFF, KGDT_TYPE_DATA, KGDT_DPL_USER, 2);
     ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_R3_TEB, 0x0, 0xFFF, KGDT_TYPE_DATA | KGDT_DESCRIPTOR_ACCESSED, KGDT_DPL_USER, 2);
     ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_R0_LDT, 0x0, 0x0, KGDT_TYPE_NONE, KGDT_DPL_SYSTEM, 0);
     ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_VDM_TILE, 0x0400, 0xFFFF, KGDT_TYPE_DATA, KGDT_DPL_USER, 0);
-    ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_R0_PCR, (ULONGLONG)ProcessorBlock, sizeof(KPROCESSOR_BLOCK), KGDT_TYPE_DATA, KGDT_DPL_SYSTEM, 2);
-    ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_SYS_TSS, (ULONGLONG)ProcessorBlock->TssBase, sizeof(KTSS) - 1, I686_TSS, KGDT_DPL_SYSTEM, 0);
+    ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_R0_PCR, (ULONG_PTR)ProcessorBlock, sizeof(KPROCESSOR_BLOCK), KGDT_TYPE_DATA, KGDT_DPL_SYSTEM, 2);
+    ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_SYS_TSS, (ULONG_PTR)ProcessorBlock->TssBase, sizeof(KTSS) - 1, I686_TSS, KGDT_DPL_SYSTEM, 0);
     ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_DF_TSS, 0x20000, 0xFFFF, I686_TSS, KGDT_DPL_SYSTEM, 0);
     ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_NMI_TSS, 0x20000, 0xFFFF, KGDT_TYPE_CODE, KGDT_DPL_SYSTEM, 0);
     ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_VDBS, 0xB8000, 0x3FFF, KGDT_TYPE_DATA, KGDT_DPL_SYSTEM, 0);
@@ -144,11 +144,8 @@ ArpInitializeProcessorBlock(OUT PKPROCESSOR_BLOCK ProcessorBlock,
 /**
  * Initializes the kernel's Task State Segment (TSS).
  *
- * @param Tss
- *        Supplies a pointer to the TSS to use.
- *
- * @param Gdt
- *        Supplies a pointer to the GDT to use.
+ * @param ProcessorBlock
+ *        Supplies a pointer to the processor block to use.
  *
  * @return This routine does not return any value.
  *
@@ -230,7 +227,7 @@ XTAPI
 VOID
 ArpSetGdtEntry(IN PKGDTENTRY Gdt,
                IN USHORT Selector,
-               IN ULONGLONG Base,
+               IN ULONG_PTR Base,
                IN ULONG Limit,
                IN UCHAR Type,
                IN UCHAR Dpl,
@@ -253,19 +250,19 @@ ArpSetGdtEntry(IN PKGDTENTRY Gdt,
     }
 
     /* Get GDT entry */
-    GdtEntry = (PKGDTENTRY)((ULONGLONG)Gdt + (Selector & ~RPL_MASK));
+    GdtEntry = (PKGDTENTRY)((ULONG_PTR)Gdt + (Selector & ~RPL_MASK));
 
     /* Set GDT descriptor base */
-    GdtEntry->BaseLow = Base & 0xFFFF;
-    GdtEntry->Bits.BaseMiddle = (Base >> 16) & 0xFF;
-    GdtEntry->Bits.BaseHigh = (Base >> 24) & 0xFF;
+    GdtEntry->BaseLow = (Base & 0xFFFF);
+    GdtEntry->Bytes.BaseMiddle = ((Base >> 16) & 0xFF);
+    GdtEntry->Bytes.BaseHigh = ((Base >> 24) & 0xFF);
 
     /* Set descriptor limit */
-    GdtEntry->LimitLow = Limit & 0xFFFF;
-    GdtEntry->Bits.LimitHigh = (Limit >> 16) & 0xF;
+    GdtEntry->LimitLow = (Limit & 0xFFFF);
+    GdtEntry->Bits.LimitHigh = ((Limit >> 16) & 0xF);
 
     /* Initialize GDT entry */
-    GdtEntry->Bits.DefaultBig = (SegmentMode & 2);
+    GdtEntry->Bits.DefaultBig = !!(SegmentMode & 2);
     GdtEntry->Bits.Dpl = (Dpl & 0x3);
     GdtEntry->Bits.Granularity = Granularity;
     GdtEntry->Bits.Reserved0 = 0;

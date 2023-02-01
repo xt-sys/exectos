@@ -76,10 +76,10 @@ VOID
 ArpInitializeGdt(IN PKPROCESSOR_BLOCK ProcessorBlock)
 {
     /* Initialize GDT entries */
-    ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_NULL, 0x0, 0x0, KGDT_TYPE_NONE, KGDT_DPL_SYSTEM, 0);
-    ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_R0_CODE, 0x0, 0x0, KGDT_TYPE_CODE, KGDT_DPL_SYSTEM, 0);
-    ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_R0_DATA, 0x0, 0x0, KGDT_TYPE_DATA, KGDT_DPL_SYSTEM, 0);
-    ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_R3_CODE, 0x0, 0x0, KGDT_TYPE_CODE, KGDT_DPL_USER, 0);
+    ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_NULL, 0x0, 0x0, KGDT_TYPE_NONE, KGDT_DPL_SYSTEM, 1);
+    ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_R0_CODE, 0x0, 0x0, KGDT_TYPE_CODE, KGDT_DPL_SYSTEM, 1);
+    ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_R0_DATA, 0x0, 0x0, KGDT_TYPE_DATA, KGDT_DPL_SYSTEM, 1);
+    ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_R3_CODE, 0x0, 0x0, KGDT_TYPE_CODE, KGDT_DPL_USER, 1);
     ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_R3_DATA, 0x0, 0xFFFFFFFF, KGDT_TYPE_DATA, KGDT_DPL_USER, 2);
     ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_R3_CMCODE, 0x0, 0xFFFFFFFF, KGDT_TYPE_CODE, KGDT_DPL_USER, 2);
     ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_R3_CMTEB, 0x0, 0x0FFF, KGDT_TYPE_DATA, KGDT_DPL_USER, 2);
@@ -224,7 +224,7 @@ XTAPI
 VOID
 ArpSetGdtEntry(IN PKGDTENTRY Gdt,
                IN USHORT Selector,
-               IN ULONGLONG Base,
+               IN ULONG_PTR Base,
                IN ULONG Limit,
                IN UCHAR Type,
                IN UCHAR Dpl,
@@ -247,12 +247,12 @@ ArpSetGdtEntry(IN PKGDTENTRY Gdt,
     }
 
     /* Get GDT entry */
-    GdtEntry = (PKGDTENTRY)((ULONGLONG)Gdt + (Selector & ~RPL_MASK));
+    GdtEntry = (PKGDTENTRY)((ULONG_PTR)Gdt + (Selector & ~RPL_MASK));
 
     /* Set GDT descriptor base */
     GdtEntry->BaseLow = Base & 0xFFFF;
-    GdtEntry->Bits.BaseMiddle = (Base >> 16) & 0xFF;
-    GdtEntry->Bits.BaseHigh = (Base >> 24) & 0xFF;
+    GdtEntry->Bytes.BaseMiddle = (Base >> 16) & 0xFF;
+    GdtEntry->Bytes.BaseHigh = (Base >> 24) & 0xFF;
     GdtEntry->BaseUpper = Base >> 32;
 
     /* Set descriptor limit */
@@ -260,10 +260,10 @@ ArpSetGdtEntry(IN PKGDTENTRY Gdt,
     GdtEntry->Bits.LimitHigh = (Limit >> 16) & 0xF;
 
     /* Initialize GDT entry */
-    GdtEntry->Bits.DefaultBig = (SegmentMode & 2);
+    GdtEntry->Bits.DefaultBig = !!(SegmentMode & 2);
     GdtEntry->Bits.Dpl = (Dpl & 0x3);
     GdtEntry->Bits.Granularity = Granularity;
-    GdtEntry->Bits.LongMode = (SegmentMode & 1);
+    GdtEntry->Bits.LongMode = !!(SegmentMode & 1);
     GdtEntry->Bits.Present = (Type != 0);
     GdtEntry->Bits.System = 0;
     GdtEntry->Bits.Type = (Type & 0x1F);
