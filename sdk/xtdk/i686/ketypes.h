@@ -26,7 +26,7 @@
 #define KGDT_R3_CODE                      0x0018
 #define KGDT_R3_DATA                      0x0020
 #define KGDT_SYS_TSS                      0x0028
-#define KGDT_R0_PCR                       0x0030
+#define KGDT_R0_PRCB                      0x0030
 #define KGDT_R3_TEB                       0x0038
 #define KGDT_VDM_TILE                     0x0040
 #define KGDT_R0_LDT                       0x0048
