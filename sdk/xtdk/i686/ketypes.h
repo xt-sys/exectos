@@ -56,10 +56,10 @@
 #define KIDT_ACCESS_RING3                 0x60
 
 /* IDT gate types */
-#define KIDT_TYPE_TASK                    0x05
-#define KIDT_TYPE_CALL                    0x0C
-#define KIDT_TYPE_INTERRUPT               0x0E
-#define KIDT_TYPE_TRAP                    0x0F
+#define KIDT_TASK                         0x05
+#define KIDT_CALL                         0x0C
+#define KIDT_INTERRUPT                    0x0E
+#define KIDT_TRAP                         0x0F
 
 /* TSS Offsets */
 #define KTSS_ESP0                         0x04

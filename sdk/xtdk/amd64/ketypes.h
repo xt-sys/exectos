@@ -47,6 +47,15 @@
 #define KGDT_TYPE_CODE                            (0x10 | KGDT_DESCRIPTOR_CODE | KGDT_DESCRIPTOR_EXECUTE_READ)
 #define KGDT_TYPE_DATA                            (0x10 | KGDT_DESCRIPTOR_READ_WRITE)
 
+/* IDT access levels */
+#define KIDT_ACCESS_RING0                         0x0
+#define KIDT_ACCESS_RING3                         0x3
+
+/* IDT Interrupt Stack Table entries */
+#define KIDT_IST_RESERVED                         0
+#define KIDT_IST_PANIC                            1
+#define KIDT_IST_MCA                              2
+
 /* AMD64 Segment Types */
 #define AMD64_TASK_GATE                           0x5
 #define AMD64_TSS                                 0x9
