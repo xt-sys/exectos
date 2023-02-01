@@ -44,9 +44,9 @@ ArInitializeProcessor(VOID)
 
     /* Set GDT and IDT descriptors */
     GdtDescriptor.Base = Gdt;
-    GdtDescriptor.Limit = (GDT_ENTRIES * sizeof(PKGDTENTRY)) - 1;
+    GdtDescriptor.Limit = (GDT_ENTRIES * sizeof(KGDTENTRY)) - 1;
     IdtDescriptor.Base = Idt;
-    IdtDescriptor.Limit = (IDT_ENTRIES * sizeof(PKIDTENTRY)) - 1;
+    IdtDescriptor.Limit = (IDT_ENTRIES * sizeof(KIDTENTRY)) - 1;
 
     /* Load GDT, IDT and TSS */
     ArLoadGlobalDescriptorTable(&GdtDescriptor.Limit);
