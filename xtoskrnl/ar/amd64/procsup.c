@@ -191,27 +191,6 @@ XTAPI
 VOID
 ArpInitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock)
 {
-    PKGDTENTRY TssEntry;
-
-    /* Get TSS entry from GDT */
-    TssEntry = (PKGDTENTRY)(&(ProcessorBlock->GdtBase[KGDT_SYS_TSS / sizeof(KGDTENTRY)]));
-
-    /* Initialize TSS entry */
-    TssEntry->BaseLow = (ULONGLONG)ProcessorBlock->TssBase & 0xFFFF;
-    TssEntry->BaseUpper = (ULONGLONG)ProcessorBlock->TssBase >> 32;
-    TssEntry->LimitLow = (sizeof(KTSS) - 1) & 0xFFFF;
-    TssEntry->Bits.BaseMiddle = ((ULONGLONG)ProcessorBlock->TssBase >> 16) & 0xFF;
-    TssEntry->Bits.BaseHigh = ((ULONGLONG)ProcessorBlock->TssBase >> 24) & 0xFF;
-    TssEntry->Bits.LimitHigh = (sizeof(KTSS) - 1) >> 16;
-    TssEntry->Bits.DefaultBig = 0;
-    TssEntry->Bits.Dpl = 0;
-    TssEntry->Bits.Granularity = 0;
-    TssEntry->Bits.LongMode = 0;
-    TssEntry->Bits.Present = 1;
-    TssEntry->Bits.System = 0;
-    TssEntry->Bits.Type = AMD64_TSS;
-    TssEntry->MustBeZero = 0;
-
     /* Fill TSS with zeroes */
     RtlZeroMemory(ProcessorBlock->TssBase, sizeof(KTSS));
 
