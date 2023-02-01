@@ -197,9 +197,8 @@ ArpInitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock)
     /* Setup I/O map and stacks for ring0 & traps */
     ProcessorBlock->TssBase->IoMapBase = sizeof(KTSS);
     ProcessorBlock->TssBase->Rsp0 = KeInitializationBlock->KernelBootStack;
-    ProcessorBlock->TssBase->Ist[1] = KeInitializationBlock->KernelFaultStack;
-    ProcessorBlock->TssBase->Ist[2] = KeInitializationBlock->KernelFaultStack;
-    ProcessorBlock->TssBase->Ist[3] = KeInitializationBlock->KernelFaultStack;
+    ProcessorBlock->TssBase->Ist[KIDT_IST_PANIC] = KeInitializationBlock->KernelFaultStack;
+    ProcessorBlock->TssBase->Ist[KIDT_IST_MCA] = KeInitializationBlock->KernelFaultStack;
 }
 
 /**
