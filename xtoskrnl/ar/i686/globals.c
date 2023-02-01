@@ -20,3 +20,7 @@ KPROCESSOR_BLOCK ArInitialProcessorBlock;
 
 /* Initial TSS */
 KTSS ArInitialTss;
+
+/* Double Fault and NMI task gates */
+UCHAR ArpDoubleFaultTss[KTSS_IO_MAPS];
+UCHAR ArpNonMaskableInterruptTss[KTSS_IO_MAPS];

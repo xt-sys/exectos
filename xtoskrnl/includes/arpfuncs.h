@@ -30,6 +30,10 @@ ArpInitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock);
 
 XTAPI
 VOID
+ArpSetDoubleFaultTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock);
+
+XTAPI
+VOID
 ArpSetGdtEntry(IN PKGDTENTRY Gdt,
                IN USHORT Selector,
                IN ULONG_PTR Base,
@@ -37,5 +41,9 @@ ArpSetGdtEntry(IN PKGDTENTRY Gdt,
                IN UCHAR Type,
                IN UCHAR Dpl,
                IN UCHAR SegmentMode);
+
+XTAPI
+VOID
+ArpSetNonMaskableInterruptTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock);
 
 #endif /* __XTOSKRNL_ARPFUNCS_H */

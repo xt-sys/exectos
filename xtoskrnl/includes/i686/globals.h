@@ -24,4 +24,8 @@ EXTERN KPROCESSOR_BLOCK ArInitialProcessorBlock;
 /* Initial TSS */
 EXTERN KTSS ArInitialTss;
 
+/* Double Fault and NMI task gates */
+EXTERN UCHAR ArpDoubleFaultTss[KTSS_IO_MAPS];
+EXTERN UCHAR ArpNonMaskableInterruptTss[KTSS_IO_MAPS];
+
 #endif /* __XTOSKRNL_I686_GLOBALS_H */

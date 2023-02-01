@@ -193,6 +193,62 @@ ArpInitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock)
     /* Set LDT and SS */
     ProcessorBlock->TssBase->LDT = KGDT_R0_LDT;
     ProcessorBlock->TssBase->Ss0 = KGDT_R0_DATA;
+
+    /* Initialize task gates for DoubleFault trap */
+    ArpSetDoubleFaultTssEntry(ProcessorBlock);
+    ArpSetNonMaskableInterruptTssEntry(ProcessorBlock);
+}
+
+/**
+ * Initializes the DoubleFault TSS entry in the Global Descriptor Table.
+ *
+ * @param ProcessorBlock
+ *        Supplies a pointer to the processor block to use.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+ArpSetDoubleFaultTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock)
+{
+    PKGDTENTRY TaskGateEntry, TssEntry;
+    PKTSS Tss;
+
+    /* Setup task gate for DoubleFault trap */
+    TaskGateEntry = (PKGDTENTRY)&ProcessorBlock->IdtBase[8];
+    TaskGateEntry->Bits.Dpl = 0;
+    TaskGateEntry->Bits.Present = 1;
+    TaskGateEntry->Bits.Type = I686_TASK_GATE;
+    ((PKIDTENTRY)TaskGateEntry)->Selector = KGDT_DF_TSS;
+
+    /* Initialize DoubleFault TSS and set initial state */
+    Tss = (PKTSS)ArpDoubleFaultTss;
+    Tss->IoMapBase = sizeof(KTSS);
+    Tss->Flags = 0;
+    Tss->LDT = KGDT_R0_LDT;
+    Tss->CR3 = ArReadControlRegister(3);
+    Tss->Esp = KeInitializationBlock->KernelFaultStack;
+    Tss->Esp0 = KeInitializationBlock->KernelFaultStack;
+    Tss->Eip = PtrToUlong(ArpHandleTrap08);
+    Tss->Cs = KGDT_R0_CODE;
+    Tss->Ds = KGDT_R3_DATA | RPL_MASK;
+    Tss->Es = KGDT_R3_DATA | RPL_MASK;
+    Tss->Fs = KGDT_R0_PCR;
+    Tss->Ss0 = KGDT_R0_DATA;
+    ArStoreSegment(SEGMENT_SS, (PVOID)&Tss->Ss);
+
+    /* Setup DoubleFault TSS entry in Global Descriptor Table */
+    TssEntry = (PKGDTENTRY)(&(ProcessorBlock->GdtBase[KGDT_DF_TSS / sizeof(KGDTENTRY)]));
+    TssEntry->BaseLow = ((ULONG_PTR)Tss & 0xFFFF);
+    TssEntry->Bytes.BaseMiddle = ((ULONG_PTR)Tss >> 16);
+    TssEntry->Bytes.BaseHigh = ((ULONG_PTR)Tss >> 24);
+    TssEntry->LimitLow = sizeof(KTSS) - 1;
+    TssEntry->Bits.LimitHigh = 0;
+    TssEntry->Bits.Dpl = 0;
+    TssEntry->Bits.Present = 1;
+    TssEntry->Bits.Type = I686_TSS;
 }
 
 /**
@@ -269,4 +325,55 @@ ArpSetGdtEntry(IN PKGDTENTRY Gdt,
     GdtEntry->Bits.Present = (Type != 0);
     GdtEntry->Bits.System = 0;
     GdtEntry->Bits.Type = (Type & 0x1F);
+}
+
+/**
+ * Initializes the Non-Maskable Interrupt TSS entry in the Global Descriptor Table.
+ *
+ * @param ProcessorBlock
+ *        Supplies a pointer to the processor block to use.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+ArpSetNonMaskableInterruptTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock)
+{
+    PKGDTENTRY TaskGateEntry, TssEntry;
+    PKTSS Tss;
+
+    /* Setup task gate for NMI */
+    TaskGateEntry = (PKGDTENTRY)&ProcessorBlock->IdtBase[2];
+    TaskGateEntry->Bits.Dpl = 0;
+    TaskGateEntry->Bits.Present = 1;
+    TaskGateEntry->Bits.Type = I686_TASK_GATE;
+    ((PKIDTENTRY)TaskGateEntry)->Selector = KGDT_NMI_TSS;
+
+    /* Initialize NMI TSS and set initial state */
+    Tss = (PKTSS)ArpNonMaskableInterruptTss;
+    Tss->IoMapBase = sizeof(KTSS);
+    Tss->Flags = 0;
+    Tss->LDT = KGDT_R0_LDT;
+    Tss->CR3 = ArReadControlRegister(3);
+    Tss->Esp = KeInitializationBlock->KernelFaultStack;
+    Tss->Esp0 = KeInitializationBlock->KernelFaultStack;
+    Tss->Eip = PtrToUlong(ArpHandleTrap02);
+    Tss->Cs = KGDT_R0_CODE;
+    Tss->Ds = KGDT_R3_DATA | RPL_MASK;
+    Tss->Es = KGDT_R3_DATA | RPL_MASK;
+    Tss->Fs = KGDT_R0_PCR;
+    ArStoreSegment(SEGMENT_SS, (PVOID)&Tss->Ss);
+
+    /* Setup NMI TSS entry in Global Descriptor Table */
+    TssEntry = (PKGDTENTRY)(&(ProcessorBlock->GdtBase[KGDT_NMI_TSS / sizeof(KGDTENTRY)]));
+    TssEntry->BaseLow = ((ULONG_PTR)Tss & 0xFFFF);
+    TssEntry->Bytes.BaseMiddle = ((ULONG_PTR)Tss >> 16);
+    TssEntry->Bytes.BaseHigh = ((ULONG_PTR)Tss >> 24);
+    TssEntry->LimitLow = sizeof(KTSS) - 1;
+    TssEntry->Bits.LimitHigh = 0;
+    TssEntry->Bits.Dpl = 0;
+    TssEntry->Bits.Present = 1;
+    TssEntry->Bits.Type = I686_TSS;
 }
