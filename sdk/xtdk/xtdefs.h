@@ -30,8 +30,9 @@
 #define NULL                                   ((PVOID) 0)
 #define NULL64                                 ((VOID * PVOID) 0)
 
-/* Preprocessor macro for defining a structure alignment */
-#define ALIGN(x)                               __declspec(align(x))
+/* Preprocessor macros for defining a structure alignment and packing */
+#define ALIGN(x)                               __attribute__((aligned(x)))
+#define PACK                                   __attribute__((packed))
 
 /* Macro for calculating size of an array */
 #define ARRAY_SIZE(x)                          (sizeof(x) / sizeof(*x))
