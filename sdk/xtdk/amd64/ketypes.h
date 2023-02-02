@@ -444,25 +444,21 @@ typedef struct _KPROCESSOR_CONTROL_BLOCK
     ULONG MxCsr;
     UCHAR Number;
     ULONG64 RspBase;
-    ULONG_PTR SetMember; // KAFFINITY
+    ULONG_PTR SetMember;
     KPROCESSOR_STATE ProcessorState;
     PVOID DpcStack;
-    ULONG_PTR MultiThreadProcessorSet; // KAFFINITY
+    ULONG_PTR MultiThreadProcessorSet;
 } KPROCESSOR_CONTROL_BLOCK, *PKPROCESSOR_CONTROL_BLOCK;
 
 /* Processor Block structure definition */
 typedef struct _KPROCESSOR_BLOCK
 {
-    union
+    struct
     {
-        struct
-        {
-            PKGDTENTRY GdtBase;
-            PKTSS TssBase;
-            PKPROCESSOR_BLOCK Self;
-            PKPROCESSOR_CONTROL_BLOCK CurrentPrcb;
-
-        };
+        PKGDTENTRY GdtBase;
+        PKTSS TssBase;
+        PKPROCESSOR_BLOCK Self;
+        PKPROCESSOR_CONTROL_BLOCK CurrentPrcb;
     };
     PKIDTENTRY IdtBase;
     KIRQL Irql;
