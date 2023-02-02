@@ -51,10 +51,10 @@ typedef struct _LIST_ENTRY64
 } LIST_ENTRY64, *PLIST_ENTRY64;
 
 /* 128-bit 16-byte aligned XMM register */
-typedef struct ALIGN(16) _M128
+typedef struct _M128
 {
     ULONGLONG Low;
     LONGLONG High;
-} M128, *PM128;
+} ALIGN(16) M128, *PM128;
 
 #endif /* __XTDK_XTBASE_H */

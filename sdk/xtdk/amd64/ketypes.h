@@ -119,7 +119,7 @@ typedef struct _FLOATING_SAVE_AREA
 } FLOATING_SAVE_AREA, *PFLOATING_SAVE_AREA;
 
 /* Context frame structure definition */
-typedef struct ALIGN(16) _CONTEXT
+typedef struct _CONTEXT
 {
     ULONG64 P1Home;
     ULONG64 P2Home;
@@ -191,7 +191,7 @@ typedef struct ALIGN(16) _CONTEXT
     ULONG64 LastBranchFromRip;
     ULONG64 LastExceptionToRip;
     ULONG64 LastExceptionFromRip;
-} CONTEXT, *PCONTEXT;
+} ALIGN(16) CONTEXT, *PCONTEXT;
 
 /* Pseudo 64-bit descriptor structure definition */
 typedef struct _KDESCRIPTOR
@@ -259,7 +259,7 @@ typedef struct _KTSS
     ULONG64 Reserved1;
     USHORT Reserved2;
     USHORT IoMapBase;
-} KTSS, *PKTSS;
+} PACK KTSS, *PKTSS;
 
 /* Exception frame definition */
 typedef struct _KEXCEPTION_FRAME
