@@ -54,7 +54,7 @@ ArInitializeProcessor(VOID)
     ArLoadTaskRegister((UINT)KGDT_SYS_TSS);
 
     /* Load FS segment */
-    ArLoadSegment(SEGMENT_FS, KGDT_R0_PRCB);
+    ArLoadSegment(SEGMENT_FS, KGDT_R0_PB);
 
     /* Enter passive IRQ level */
     ProcessorBlock->Irql = PASSIVE_LEVEL;
@@ -81,7 +81,7 @@ ArpInitializeGdt(IN PKPROCESSOR_BLOCK ProcessorBlock)
     ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_R3_CODE, 0x0, 0xFFFFFFFF, KGDT_TYPE_CODE, KGDT_DPL_USER, 2);
     ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_R3_DATA, 0x0, 0xFFFFFFFF, KGDT_TYPE_DATA, KGDT_DPL_USER, 2);
     ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_SYS_TSS, (ULONG_PTR)ProcessorBlock->TssBase, sizeof(KTSS) - 1, I686_TSS, KGDT_DPL_SYSTEM, 0);
-    ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_R0_PRCB, (ULONG_PTR)ProcessorBlock, sizeof(KPROCESSOR_BLOCK), KGDT_TYPE_DATA, KGDT_DPL_SYSTEM, 2);
+    ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_R0_PB, (ULONG_PTR)ProcessorBlock, sizeof(KPROCESSOR_BLOCK), KGDT_TYPE_DATA, KGDT_DPL_SYSTEM, 2);
     ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_R3_TEB, 0x0, 0xFFF, KGDT_TYPE_DATA | KGDT_DESCRIPTOR_ACCESSED, KGDT_DPL_USER, 2);
     ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_VDM_TILE, 0x0400, 0xFFFF, KGDT_TYPE_DATA, KGDT_DPL_USER, 0);
     ArpSetGdtEntry(ProcessorBlock->GdtBase, KGDT_R0_LDT, 0x0, 0x0, KGDT_TYPE_NONE, KGDT_DPL_SYSTEM, 0);
@@ -272,7 +272,7 @@ ArpSetDoubleFaultTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock)
     Tss->Cs = KGDT_R0_CODE;
     Tss->Ds = KGDT_R3_DATA | RPL_MASK;
     Tss->Es = KGDT_R3_DATA | RPL_MASK;
-    Tss->Fs = KGDT_R0_PRCB;
+    Tss->Fs = KGDT_R0_PB;
     Tss->Ss0 = KGDT_R0_DATA;
     ArStoreSegment(SEGMENT_SS, (PVOID)&Tss->Ss);
 
@@ -441,7 +441,7 @@ ArpSetNonMaskableInterruptTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock)
     Tss->Cs = KGDT_R0_CODE;
     Tss->Ds = KGDT_R3_DATA | RPL_MASK;
     Tss->Es = KGDT_R3_DATA | RPL_MASK;
-    Tss->Fs = KGDT_R0_PRCB;
+    Tss->Fs = KGDT_R0_PB;
     ArStoreSegment(SEGMENT_SS, (PVOID)&Tss->Ss);
 
     /* Setup NMI TSS entry in Global Descriptor Table */
