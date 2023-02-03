@@ -29,6 +29,7 @@
 #define KGDT_SYS_TSS                              0x0040
 #define KGDT_R3_CMTEB                             0x0050
 #define KGDT_R0_LDT                               0x0060
+#define KGDT_ALIAS                                0x0070
 
 /* GDT descriptor privilege levels */
 #define KGDT_DPL_SYSTEM                           0

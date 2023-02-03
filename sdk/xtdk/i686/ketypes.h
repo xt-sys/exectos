@@ -33,6 +33,7 @@
 #define KGDT_DF_TSS                       0x0050
 #define KGDT_NMI_TSS                      0x0058
 #define KGDT_VDBS                         0x0068
+#define KGDT_ALIAS                        0x0070
 
 /* GDT descriptor privilege levels */
 #define KGDT_DPL_SYSTEM                   0
