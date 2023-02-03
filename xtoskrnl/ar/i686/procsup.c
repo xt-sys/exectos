@@ -187,18 +187,6 @@ XTAPI
 VOID
 ArpInitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock)
 {
-    PKGDTENTRY TssEntry;
-
-    /* Get TSS entry from GDT */
-    TssEntry = (PKGDTENTRY)(&(ProcessorBlock->GdtBase[KGDT_SYS_TSS / sizeof(KGDTENTRY)]));
-
-    /* Initialize TSS entry */
-    TssEntry->Bits.Dpl = 0;
-    TssEntry->Bits.Present = 1;
-    TssEntry->Bits.Type = I686_TSS;
-    TssEntry->LimitLow = sizeof(KTSS) - 1;
-    TssEntry->Bits.LimitHigh = 0;
-
     /* Clear I/O map */
     RtlFillMemory(ProcessorBlock->TssBase->IoMaps[0].IoMap, IOPM_FULL_SIZE, 0xFF);
 
