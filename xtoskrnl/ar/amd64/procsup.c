@@ -53,13 +53,16 @@ ArInitializeProcessor(VOID)
     ArLoadInterruptDescriptorTable(&IdtDescriptor.Limit);
     ArLoadTaskRegister((UINT)KGDT_SYS_TSS);
 
-    /* Set GS base */
-    ArWriteModelSpecificRegister(X86_MSR_GSBASE, (ULONGLONG)ProcessorBlock);
-    ArWriteModelSpecificRegister(X86_MSR_KERNEL_GSBASE, (ULONGLONG)ProcessorBlock);
-
     /* Enter passive IRQ level */
     ProcessorBlock->Irql = PASSIVE_LEVEL;
     ArWriteControlRegister(8, PASSIVE_LEVEL);
+
+    /* Initialize segment registers */
+    ArpInitializeSegments();
+
+    /* Set GS base */
+    ArWriteModelSpecificRegister(X86_MSR_GSBASE, (ULONGLONG)ProcessorBlock);
+    ArWriteModelSpecificRegister(X86_MSR_KERNEL_GSBASE, (ULONGLONG)ProcessorBlock);
 }
 
 /**
@@ -190,6 +193,30 @@ ArpInitializeProcessorBlock(OUT PKPROCESSOR_BLOCK ProcessorBlock,
 
     /* Set initial MXCSR register value */
     ProcessorBlock->Prcb.MxCsr = INITIAL_MXCSR;
+}
+
+/**
+ * Initializes segment registers.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+ArpInitializeSegments(VOID)
+{
+    asm volatile("mov %0, %%ax\n"
+                 "mov %%ax, %%fs\n"
+                 "mov %1, %%ax\n"
+                 "mov %%ax, %%ds\n"
+                 "mov %%ax, %%es\n"
+                 "mov %%ax, %%gs\n"
+                 "swapgs\n"
+                 "mov %%ax, %%gs\n"
+                 :
+                 : "i" (KGDT_R3_CMTEB | RPL_MASK),
+                   "i" (KGDT_R3_DATA | RPL_MASK));
 }
 
 /**

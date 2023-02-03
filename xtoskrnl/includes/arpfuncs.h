@@ -118,6 +118,10 @@ ArpInitializeProcessorBlock(OUT PKPROCESSOR_BLOCK ProcessorBlock,
 
 XTAPI
 VOID
+ArpInitializeSegments(VOID);
+
+XTAPI
+VOID
 ArpInitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock);
 
 XTAPI
