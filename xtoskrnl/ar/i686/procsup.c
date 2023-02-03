@@ -115,10 +115,27 @@ ArpInitializeIdt(IN PKPROCESSOR_BLOCK ProcessorBlock)
     }
 
     /* Setup IDT handlers for known interrupts and traps */
+    ArpSetIdtGate(ProcessorBlock->IdtBase, 0x00, ArpHandleTrap00, KGDT_R0_CODE, 0, KIDT_INTERRUPT | KIDT_ACCESS_RING0);
+    ArpSetIdtGate(ProcessorBlock->IdtBase, 0x01, ArpHandleTrap01, KGDT_R0_CODE, 0, KIDT_INTERRUPT | KIDT_ACCESS_RING0);
     ArpSetIdtGate(ProcessorBlock->IdtBase, 0x02, ArpHandleTrap02, KGDT_R0_CODE, 0, KIDT_INTERRUPT | KIDT_ACCESS_RING0);
+    ArpSetIdtGate(ProcessorBlock->IdtBase, 0x03, ArpHandleTrap03, KGDT_R0_CODE, 0, KIDT_INTERRUPT | KIDT_ACCESS_RING3);
+    ArpSetIdtGate(ProcessorBlock->IdtBase, 0x04, ArpHandleTrap04, KGDT_R0_CODE, 0, KIDT_INTERRUPT | KIDT_ACCESS_RING3);
+    ArpSetIdtGate(ProcessorBlock->IdtBase, 0x05, ArpHandleTrap05, KGDT_R0_CODE, 0, KIDT_INTERRUPT | KIDT_ACCESS_RING0);
+    ArpSetIdtGate(ProcessorBlock->IdtBase, 0x06, ArpHandleTrap06, KGDT_R0_CODE, 0, KIDT_INTERRUPT | KIDT_ACCESS_RING0);
+    ArpSetIdtGate(ProcessorBlock->IdtBase, 0x07, ArpHandleTrap07, KGDT_R0_CODE, 0, KIDT_INTERRUPT | KIDT_ACCESS_RING0);
     ArpSetIdtGate(ProcessorBlock->IdtBase, 0x08, ArpHandleTrap08, KGDT_R0_CODE, 0, KIDT_INTERRUPT | KIDT_ACCESS_RING0);
+    ArpSetIdtGate(ProcessorBlock->IdtBase, 0x09, ArpHandleTrap09, KGDT_R0_CODE, 0, KIDT_INTERRUPT | KIDT_ACCESS_RING0);
+    ArpSetIdtGate(ProcessorBlock->IdtBase, 0x0A, ArpHandleTrap0A, KGDT_R0_CODE, 0, KIDT_INTERRUPT | KIDT_ACCESS_RING0);
+    ArpSetIdtGate(ProcessorBlock->IdtBase, 0x0B, ArpHandleTrap0B, KGDT_R0_CODE, 0, KIDT_INTERRUPT | KIDT_ACCESS_RING0);
+    ArpSetIdtGate(ProcessorBlock->IdtBase, 0x0C, ArpHandleTrap0C, KGDT_R0_CODE, 0, KIDT_INTERRUPT | KIDT_ACCESS_RING0);
     ArpSetIdtGate(ProcessorBlock->IdtBase, 0x0D, ArpHandleTrap0D, KGDT_R0_CODE, 0, KIDT_INTERRUPT | KIDT_ACCESS_RING0);
     ArpSetIdtGate(ProcessorBlock->IdtBase, 0x0E, ArpHandleTrap0E, KGDT_R0_CODE, 0, KIDT_INTERRUPT | KIDT_ACCESS_RING0);
+    ArpSetIdtGate(ProcessorBlock->IdtBase, 0x10, ArpHandleTrap10, KGDT_R0_CODE, 0, KIDT_INTERRUPT | KIDT_ACCESS_RING0);
+    ArpSetIdtGate(ProcessorBlock->IdtBase, 0x11, ArpHandleTrap11, KGDT_R0_CODE, 0, KIDT_INTERRUPT | KIDT_ACCESS_RING0);
+    ArpSetIdtGate(ProcessorBlock->IdtBase, 0x12, ArpHandleTrap12, KGDT_R0_CODE, 0, KIDT_INTERRUPT | KIDT_ACCESS_RING0);
+    ArpSetIdtGate(ProcessorBlock->IdtBase, 0x13, ArpHandleTrap13, KGDT_R0_CODE, 0, KIDT_INTERRUPT | KIDT_ACCESS_RING0);
+    ArpSetIdtGate(ProcessorBlock->IdtBase, 0x2C, ArpHandleTrap2C, KGDT_R0_CODE, 0, KIDT_INTERRUPT | KIDT_ACCESS_RING3);
+    ArpSetIdtGate(ProcessorBlock->IdtBase, 0x2D, ArpHandleTrap2D, KGDT_R0_CODE, 0, KIDT_INTERRUPT | KIDT_ACCESS_RING3);
 }
 
 /**
