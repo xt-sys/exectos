@@ -142,6 +142,25 @@ ArLoadInterruptDescriptorTable(IN PVOID Source)
 }
 
 /**
+ * Loads the value in the source operand into the MXCSR register
+ *
+ * @param Source
+ *        Supplies a source value to be loaded into the MXCSR register.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+ArLoadMxcsrRegister(IN ULONG Source)
+{
+    asm volatile("ldmxcsr %0"
+                 :
+                 : "m" (Source));
+}
+
+/**
  * Loads source data into specified segment.
  *
  * @param Segment

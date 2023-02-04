@@ -66,6 +66,9 @@ ArInitializeProcessor(VOID)
 
     /* Initialize processor registers */
     ArpInitializeProcessorRegisters();
+
+    /* Identify processor */
+    ArpIdentifyProcessor();
 }
 
 /**
@@ -254,6 +257,9 @@ ArpInitializeProcessorRegisters(VOID)
     PatAttributes = (PAT_TYPE_WB << 0) | (PAT_TYPE_USWC << 8) | (PAT_TYPE_WEAK_UC << 16) | (PAT_TYPE_STRONG_UC << 24) |
                     (PAT_TYPE_WB << 32) | (PAT_TYPE_USWC << 40) | (PAT_TYPE_WEAK_UC << 48) | (PAT_TYPE_STRONG_UC << 56);
     ArWriteModelSpecificRegister(X86_MSR_PAT, PatAttributes);
+
+    /* Initialize MXCSR register */
+    ArLoadMxcsrRegister(INITIAL_MXCSR);
 }
 
 /**

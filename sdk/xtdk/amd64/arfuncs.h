@@ -46,6 +46,10 @@ ArLoadInterruptDescriptorTable(IN PVOID Source);
 
 XTCDECL
 VOID
+ArLoadMxcsrRegister(IN ULONG Source);
+
+XTCDECL
+VOID
 ArLoadSegment(IN USHORT Segment,
               IN ULONG Source);
 
