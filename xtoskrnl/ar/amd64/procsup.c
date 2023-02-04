@@ -71,6 +71,12 @@ ArInitializeProcessor(VOID)
     ArpIdentifyProcessor();
 }
 
+XTAPI
+VOID
+ArpIdentifyProcessor(VOID)
+{
+}
+
 /**
  * Initializes the kernel's Global Descriptor Table (GDT).
  *

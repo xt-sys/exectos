@@ -110,6 +110,10 @@ ArpHandleTrapFF();
 
 XTAPI
 VOID
+ArpIdentifyProcessor(VOID);
+
+XTAPI
+VOID
 ArpInitializeGdt(IN PKPROCESSOR_BLOCK ProcessorBlock);
 
 XTAPI

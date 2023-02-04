@@ -53,11 +53,20 @@ ArInitializeProcessor(VOID)
     ArLoadInterruptDescriptorTable(&IdtDescriptor.Limit);
     ArLoadTaskRegister((UINT)KGDT_SYS_TSS);
 
+    /* Enter passive IRQ level */
+    ProcessorBlock->Irql = PASSIVE_LEVEL;
+
     /* Load FS segment */
     ArLoadSegment(SEGMENT_FS, KGDT_R0_PB);
 
-    /* Enter passive IRQ level */
-    ProcessorBlock->Irql = PASSIVE_LEVEL;
+    /* Identify processor */
+    ArpIdentifyProcessor();
+}
+
+XTAPI
+VOID
+ArpIdentifyProcessor(VOID)
+{
 }
 
 /**
