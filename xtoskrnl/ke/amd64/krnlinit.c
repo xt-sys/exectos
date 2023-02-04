@@ -20,21 +20,9 @@ XTAPI
 VOID
 KepArchInitialize(VOID)
 {
-    /* Enable global paging support */
-    ArWriteControlRegister(4, ArReadControlRegister(4) | CR4_PGE);
-
-    /* Enable write-protection */
-    ArWriteControlRegister(0, ArReadControlRegister(0) | CR0_WP);
-
-    /* Set alignment mask */
-    ArWriteControlRegister(0, ArReadControlRegister(0) | CR0_AM);
-
     /* Re-enable IDE interrupts */
     HlIoPortOutByte(0x376, 0);
     HlIoPortOutByte(0x3F6, 0);
-
-    /* Set system call extensions (SCE) flag in EFER MSR */
-    ArWriteModelSpecificRegister(X86_MSR_EFER, ArReadModelSpecificRegister(X86_MSR_EFER) | X86_MSR_EFER_SCE);
 }
 
 /**

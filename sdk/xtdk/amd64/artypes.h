@@ -82,6 +82,25 @@
 #define X86_MSR_EFER_NXE                                (1 << 11)
 #define X86_MSR_EFER_SVME                               (1 << 12)
 
+/* X86 EFLAG bit masks definitions */
+#define X86_EFLAGS_CF_MASK                              0x00000001
+#define X86_EFLAGS_PF_MASK                              0x00000004
+#define X86_EFALGS_AF_MASK                              0x00000010
+#define X86_EFLAGS_ZF_MASK                              0x00000040
+#define X86_EFLAGS_SF_MASK                              0x00000080
+#define X86_EFLAGS_TF_MASK                              0x00000100
+#define X86_EFLAGS_IF_MASK                              0x00000200
+#define X86_EFLAGS_DF_MASK                              0x00000400
+#define X86_EFLAGS_OF_MASK                              0x00000800
+#define X86_EFLAGS_IOPL_MASK                            0x00003000
+#define X86_EFLAGS_NT_MASK                              0x00004000
+#define X86_EFLAGS_RF_MASK                              0x00010000
+#define X86_EFLAGS_VM_MASK                              0x00020000
+#define X86_EFLAGS_AC_MASK                              0x00040000
+#define X86_EFLAGS_VIF_MASK                             0x00080000
+#define X86_EFLAGS_VIP_MASK                             0x00100000
+#define X86_EFLAGS_ID_MASK                              0x00200000
+
 /* CPUID features enumeration list */
 typedef enum _CPUID_FEATURES
 {

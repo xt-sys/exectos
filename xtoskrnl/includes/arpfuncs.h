@@ -14,6 +14,14 @@
 
 XTCDECL
 VOID
+ArpHandleSystemCall32();
+
+XTCDECL
+VOID
+ArpHandleSystemCall64();
+
+XTCDECL
+VOID
 ArpHandleTrap00();
 
 XTCDECL
@@ -115,6 +123,10 @@ ArpInitializeProcessorBlock(OUT PKPROCESSOR_BLOCK ProcessorBlock,
                             IN PKIDTENTRY Idt,
                             IN PKTSS Tss,
                             IN PVOID DpcStack);
+
+XTAPI
+VOID
+ArpInitializeProcessorRegisters(VOID);
 
 XTAPI
 VOID

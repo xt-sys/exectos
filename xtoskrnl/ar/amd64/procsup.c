@@ -63,6 +63,9 @@ ArInitializeProcessor(VOID)
     /* Set GS base */
     ArWriteModelSpecificRegister(X86_MSR_GSBASE, (ULONGLONG)ProcessorBlock);
     ArWriteModelSpecificRegister(X86_MSR_KERNEL_GSBASE, (ULONGLONG)ProcessorBlock);
+
+    /* Initialize processor registers */
+    ArpInitializeProcessorRegisters();
 }
 
 /**
@@ -193,6 +196,57 @@ ArpInitializeProcessorBlock(OUT PKPROCESSOR_BLOCK ProcessorBlock,
 
     /* Set initial MXCSR register value */
     ProcessorBlock->Prcb.MxCsr = INITIAL_MXCSR;
+}
+
+/**
+ * Initializes processor registers and other boot structures.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+ArpInitializeProcessorRegisters(VOID)
+{
+    /* Enable FXSAVE restore */
+    ArWriteControlRegister(4, ArReadControlRegister(4) | CR4_FXSR);
+
+    /* Enable XMMI exceptions */
+    ArWriteControlRegister(4, ArReadControlRegister(4) | CR4_XMMEXCPT);
+
+    /* Set debugger extension */
+    ArWriteControlRegister(4, ArReadControlRegister(4) | CR4_DE);
+
+    /* Enable global paging support */
+    ArWriteControlRegister(4, ArReadControlRegister(4) | CR4_PGE);
+
+    /* Enable large pages */
+    ArWriteControlRegister(4, ArReadControlRegister(4) | CR4_PSE);
+
+    /* Enable write-protection */
+    ArWriteControlRegister(0, ArReadControlRegister(0) | CR0_WP);
+
+    /* Set alignment mask */
+    ArWriteControlRegister(0, ArReadControlRegister(0) | CR0_AM);
+
+    /* Disable FPU monitoring */
+    ArWriteControlRegister(0, ArReadControlRegister(0) & ~CR0_MP);
+
+    /* Disable x87 FPU exceptions */
+    ArWriteControlRegister(0, ArReadControlRegister(0) & ~CR0_NE);
+
+    /* Initialize system calls MSR */
+    ArWriteModelSpecificRegister(X86_MSR_STAR, (((ULONG64)KGDT_R3_CMCODE | RPL_MASK) << 48) | ((ULONG64)KGDT_R0_CODE << 32));
+    ArWriteModelSpecificRegister(X86_MSR_CSTAR, (ULONG64)&ArpHandleSystemCall32);
+    ArWriteModelSpecificRegister(X86_MSR_LSTAR, (ULONG64)&ArpHandleSystemCall64);
+    ArWriteModelSpecificRegister(X86_MSR_FMASK, X86_EFLAGS_IF_MASK | X86_EFLAGS_TF_MASK);
+
+    /* Enable system call extensions (SCE) in EFER MSR */
+    ArWriteModelSpecificRegister(X86_MSR_EFER, ArReadModelSpecificRegister(X86_MSR_EFER) | X86_MSR_EFER_SCE);
+
+    /* Enable No-Execute (NXE) in EFER MSR */
+    ArWriteModelSpecificRegister(X86_MSR_EFER, ArReadModelSpecificRegister(X86_MSR_EFER) | X86_MSR_EFER_NXE);
 }
 
 /**

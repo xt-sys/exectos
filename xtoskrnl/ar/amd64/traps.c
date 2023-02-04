@@ -9,6 +9,20 @@
 #include <xtos.h>
 
 
+XTCDECL
+VOID
+ArpHandleSystemCall32()
+{
+    LdrPrint(L"Handled 32-bit system call!\n");
+}
+
+XTCDECL
+VOID
+ArpHandleSystemCall64()
+{
+    LdrPrint(L"Handled 64-bit system call!\n");
+}
+
 /**
  * Handles the trap 0x00 when a Divide By Zero exception occurs.
  *
