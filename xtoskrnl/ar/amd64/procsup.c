@@ -209,6 +209,8 @@ XTAPI
 VOID
 ArpInitializeProcessorRegisters(VOID)
 {
+    ULONGLONG PatAttributes;
+
     /* Enable FXSAVE restore */
     ArWriteControlRegister(4, ArReadControlRegister(4) | CR4_FXSR);
 
@@ -247,6 +249,11 @@ ArpInitializeProcessorRegisters(VOID)
 
     /* Enable No-Execute (NXE) in EFER MSR */
     ArWriteModelSpecificRegister(X86_MSR_EFER, ArReadModelSpecificRegister(X86_MSR_EFER) | X86_MSR_EFER_NXE);
+
+    /* Initialize Page Attribute Table */
+    PatAttributes = (PAT_TYPE_WB << 0) | (PAT_TYPE_USWC << 8) | (PAT_TYPE_WEAK_UC << 16) | (PAT_TYPE_STRONG_UC << 24) |
+                    (PAT_TYPE_WB << 32) | (PAT_TYPE_USWC << 40) | (PAT_TYPE_WEAK_UC << 48) | (PAT_TYPE_STRONG_UC << 56);
+    ArWriteModelSpecificRegister(X86_MSR_PAT, PatAttributes);
 }
 
 /**

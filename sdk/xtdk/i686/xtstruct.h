@@ -12,11 +12,11 @@
 #include <xtdefs.h>
 
 
-/* Architecture-related enumeration lists forward references */
+/* Architecture-specific enumeration lists forward references */
 typedef enum _CPUID_FEATURES CPUID_FEATURES, *PCPUID_FEATURES;
 typedef enum _CPUID_REQUESTS CPUID_REQUESTS, *PCPUID_REQUESTS;
 
-/* Architecture-related structures forward references */
+/* Architecture-specific structures forward references */
 typedef struct _CONTEXT CONTEXT, *PCONTEXT;
 typedef struct _CPUID_REGISTERS CPUID_REGISTERS, *PCPUID_REGISTERS;
 typedef struct _FLOATING_SAVE_AREA FLOATING_SAVE_AREA, *PFLOATING_SAVE_AREA;

@@ -53,6 +53,14 @@
 /* Initial MXCSR control */
 #define INITIAL_MXCSR                                   0x1F80
 
+/* Page Attributes Table types */
+#define PAT_TYPE_STRONG_UC                              0ULL
+#define PAT_TYPE_USWC                                   1ULL
+#define PAT_TYPE_WT                                     4ULL
+#define PAT_TYPE_WP                                     5ULL
+#define PAT_TYPE_WB                                     6ULL
+#define PAT_TYPE_WEAK_UC                                7ULL
+
 /* Segment defintions */
 #define SEGMENT_CS                                      0x2E
 #define SEGMENT_DS                                      0x3E
@@ -66,6 +74,7 @@
 #define X86_MSR_SYSENTER_ESP                            0x00000175
 #define X86_MSR_SYSENTER_EIP                            0x00000176
 #define X86_MSR_POWER_CONTROL                           0x000001FC
+#define X86_MSR_PAT                                     0x00000277
 #define X86_MSR_EFER                                    0xC0000080
 #define X86_MSR_STAR                                    0xC0000081
 #define X86_MSR_LSTAR                                   0xC0000082
