@@ -22,10 +22,6 @@ KepStartKernel(VOID);
 
 XTAPI
 VOID
-KepInitializeStack(IN PKERNEL_INITIALIZATION_BLOCK Parameters);
-
-XTAPI
-VOID
 KepSwitchBootStack(IN ULONG_PTR Stack);
 
 #endif /* __XTOSKRNL_KEPFUNCS_H */

@@ -19,12 +19,6 @@ EXTERN HAL_FRAMEBUFFER_DATA HlpFrameBufferData;
 /* Kernel initialization block passed by boot loader */
 EXTERN PKERNEL_INITIALIZATION_BLOCK KeInitializationBlock;
 
-/* Kernel own boot stack */
-EXTERN UCHAR KepKernelBootStackData[KERNEL_STACK_SIZE];
-
-/* Kernel own fault stack */
-EXTERN UCHAR KepKernelFaultStackData[KERNEL_STACK_SIZE];
-
 /* Pointer to boot loader provided DbgPrint() routine */
 EXTERN VOID (*LdrDbgPrint)(IN PWCHAR Format, IN ...);
 

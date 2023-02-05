@@ -15,11 +15,5 @@ HAL_FRAMEBUFFER_DATA HlpFrameBufferData;
 /* Kernel initialization block passed by boot loader */
 PKERNEL_INITIALIZATION_BLOCK KeInitializationBlock;
 
-/* Kernel own boot stack */
-UCHAR KepKernelBootStackData[KERNEL_STACK_SIZE] = {0};
-
-/* Kernel own fault stack */
-UCHAR KepKernelFaultStackData[KERNEL_STACK_SIZE] = {0};
-
 /* Pointer to boot loader provided DbgPrint() routine */
 VOID (*LdrDbgPrint)(IN PWCHAR Format, IN ...) = NULL;

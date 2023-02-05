@@ -22,6 +22,7 @@ ArInitializeProcessor(VOID)
 {
     KDESCRIPTOR GdtDescriptor, IdtDescriptor;
     PKPROCESSOR_BLOCK ProcessorBlock;
+    PVOID KernelFaultStack;
     PKGDTENTRY Gdt;
     PKIDTENTRY Idt;
     PKTSS Tss;
@@ -30,12 +31,13 @@ ArInitializeProcessor(VOID)
     Gdt = ArInitialGdt;
     Idt = ArInitialIdt;
     Tss = &ArInitialTss;
+    KernelFaultStack = &ArKernelFaultStack;
 
     /* Load processor block */
     ProcessorBlock = CONTAIN_RECORD(&ArInitialProcessorBlock.Prcb, KPROCESSOR_BLOCK, Prcb);
 
     /* Initialize processor block */
-    ArpInitializeProcessorBlock(ProcessorBlock, Gdt, Idt, Tss, (PVOID)KeInitializationBlock->KernelFaultStack);
+    ArpInitializeProcessorBlock(ProcessorBlock, Gdt, Idt, Tss, KernelFaultStack);
 
     /* Initialize GDT, IDT and TSS */
     ArpInitializeGdt(ProcessorBlock);
@@ -275,8 +277,8 @@ ArpSetDoubleFaultTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock)
     Tss->Flags = 0;
     Tss->LDT = KGDT_R0_LDT;
     Tss->CR3 = ArReadControlRegister(3);
-    Tss->Esp = KeInitializationBlock->KernelFaultStack;
-    Tss->Esp0 = KeInitializationBlock->KernelFaultStack;
+    Tss->Esp = (ULONG_PTR)&ArKernelFaultStack;
+    Tss->Esp0 = (ULONG_PTR)&ArKernelFaultStack;
     Tss->Eip = PtrToUlong(ArpHandleTrap08);
     Tss->Cs = KGDT_R0_CODE;
     Tss->Ds = KGDT_R3_DATA | RPL_MASK;
@@ -444,8 +446,8 @@ ArpSetNonMaskableInterruptTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock)
     Tss->Flags = 0;
     Tss->LDT = KGDT_R0_LDT;
     Tss->CR3 = ArReadControlRegister(3);
-    Tss->Esp = KeInitializationBlock->KernelFaultStack;
-    Tss->Esp0 = KeInitializationBlock->KernelFaultStack;
+    Tss->Esp = (ULONG_PTR)&ArKernelFaultStack;
+    Tss->Esp0 = (ULONG_PTR)&ArKernelFaultStack;
     Tss->Eip = PtrToUlong(ArpHandleTrap02);
     Tss->Cs = KGDT_R0_CODE;
     Tss->Ds = KGDT_R3_DATA | RPL_MASK;

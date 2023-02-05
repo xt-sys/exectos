@@ -20,3 +20,9 @@ KPROCESSOR_BLOCK ArInitialProcessorBlock;
 
 /* Initial TSS */
 KTSS ArInitialTss;
+
+/* Initial kernel boot stack */
+UCHAR ArKernelBootStack[KERNEL_STACK_SIZE] = {0};
+
+/* Initial kernel fault stack */
+UCHAR ArKernelFaultStack[KERNEL_STACK_SIZE] = {0};

@@ -24,4 +24,10 @@ EXTERN KPROCESSOR_BLOCK ArInitialProcessorBlock;
 /* Initial TSS */
 EXTERN KTSS ArInitialTss;
 
+/* Kernel own boot stack */
+EXTERN UCHAR ArKernelBootStack[KERNEL_STACK_SIZE];
+
+/* Kernel own fault stack */
+EXTERN UCHAR ArKernelFaultStack[KERNEL_STACK_SIZE];
+
 #endif /* __XTOSKRNL_AMD64_GLOBALS_H */

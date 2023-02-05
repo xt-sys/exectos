@@ -46,9 +46,6 @@ KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
     /* Save the kernel initialization block */
     KeInitializationBlock = Parameters;
 
-    /* Initialize kernel stacks */
-    KepInitializeStack(Parameters);
-
     /* Architecture specific initialization */
     KepArchInitialize();
 
@@ -56,36 +53,5 @@ KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
     ArInitializeProcessor();
 
     /* Switch boot stack alligning it to 4 byte boundary */
-    KepSwitchBootStack(KeInitializationBlock->KernelBootStack & ~0x3);
-}
-
-/**
- * Initializes a stack needed by the kernel.
- *
- * @param Parameters
- *        Supplies a pointer to memory area containing parameters passed to kernel by bootloader.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTAPI
-VOID
-KepInitializeStack(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
-{
-    /* Make sure kernel boot stack is initialized */
-    if(!Parameters->KernelBootStack)
-    {
-        /* Initialize kernel boot stack */
-        LdrPrint(L"Initializing kernel boot stack\n");
-        Parameters->KernelBootStack = (ULONG_PTR)&KepKernelBootStackData[KERNEL_STACK_SIZE];
-    }
-
-    /* Make sure kernel fault stack is initialized */
-    if(!Parameters->KernelFaultStack)
-    {
-        /* Initialize kernel fault stack */
-        LdrPrint(L"Initializing kernel fault stack\n");
-        Parameters->KernelFaultStack = (ULONG_PTR)&KepKernelFaultStackData[KERNEL_STACK_SIZE];
-    }
+    KepSwitchBootStack((ULONG_PTR)&ArKernelBootStack & ~0x3);
 }

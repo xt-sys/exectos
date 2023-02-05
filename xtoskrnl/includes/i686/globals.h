@@ -28,4 +28,10 @@ EXTERN KTSS ArInitialTss;
 EXTERN UCHAR ArpDoubleFaultTss[KTSS_IO_MAPS];
 EXTERN UCHAR ArpNonMaskableInterruptTss[KTSS_IO_MAPS];
 
+/* Kernel own boot stack */
+EXTERN UCHAR ArKernelBootStack[KERNEL_STACK_SIZE];
+
+/* Kernel own fault stack */
+EXTERN UCHAR ArKernelFaultStack[KERNEL_STACK_SIZE];
+
 #endif /* __XTOSKRNL_I686_GLOBALS_H */

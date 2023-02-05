@@ -22,6 +22,7 @@ ArInitializeProcessor(VOID)
 {
     KDESCRIPTOR GdtDescriptor, IdtDescriptor;
     PKPROCESSOR_BLOCK ProcessorBlock;
+    PVOID KernelFaultStack;
     PKGDTENTRY Gdt;
     PKIDTENTRY Idt;
     PKTSS Tss;
@@ -30,12 +31,13 @@ ArInitializeProcessor(VOID)
     Gdt = ArInitialGdt;
     Idt = ArInitialIdt;
     Tss = &ArInitialTss;
+    KernelFaultStack = &ArKernelFaultStack;
 
     /* Load processor block */
     ProcessorBlock = CONTAIN_RECORD(&ArInitialProcessorBlock.Prcb, KPROCESSOR_BLOCK, Prcb);
 
     /* Initialize processor block */
-    ArpInitializeProcessorBlock(ProcessorBlock, Gdt, Idt, Tss, (PVOID)KeInitializationBlock->KernelFaultStack);
+    ArpInitializeProcessorBlock(ProcessorBlock, Gdt, Idt, Tss, KernelFaultStack);
 
     /* Initialize GDT, IDT and TSS */
     ArpInitializeGdt(ProcessorBlock);
@@ -314,9 +316,9 @@ ArpInitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock)
 
     /* Setup I/O map and stacks for ring0 & traps */
     ProcessorBlock->TssBase->IoMapBase = sizeof(KTSS);
-    ProcessorBlock->TssBase->Rsp0 = KeInitializationBlock->KernelBootStack;
-    ProcessorBlock->TssBase->Ist[KIDT_IST_PANIC] = KeInitializationBlock->KernelFaultStack;
-    ProcessorBlock->TssBase->Ist[KIDT_IST_MCA] = KeInitializationBlock->KernelFaultStack;
+    ProcessorBlock->TssBase->Rsp0 = (ULONG_PTR)&ArKernelBootStack;
+    ProcessorBlock->TssBase->Ist[KIDT_IST_PANIC] = (ULONG_PTR)&ArKernelFaultStack;
+    ProcessorBlock->TssBase->Ist[KIDT_IST_MCA] = (ULONG_PTR)&ArKernelFaultStack;
 }
 
 /**

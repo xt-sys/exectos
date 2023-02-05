@@ -24,3 +24,9 @@ KTSS ArInitialTss;
 /* Double Fault and NMI task gates */
 UCHAR ArpDoubleFaultTss[KTSS_IO_MAPS];
 UCHAR ArpNonMaskableInterruptTss[KTSS_IO_MAPS];
+
+/* Initial kernel boot stack */
+UCHAR ArKernelBootStack[KERNEL_STACK_SIZE] = {0};
+
+/* Initial kernel fault stack */
+UCHAR ArKernelFaultStack[KERNEL_STACK_SIZE] = {0};
