@@ -20,12 +20,6 @@ XTAPI
 VOID
 KepArchInitialize(VOID)
 {
-    /* Clear EFLAGS register */
-    ArWriteEflagsRegister(0);
-
-    /* Enable write-protection */
-    ArWriteControlRegister(0, ArReadControlRegister(0) | CR0_WP);
-
     /* Re-enable IDE interrupts */
     HlIoPortOutByte(0x376, 0);
     HlIoPortOutByte(0x3F6, 0);

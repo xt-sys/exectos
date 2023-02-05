@@ -58,8 +58,14 @@ ArInitializeProcessor(VOID)
     /* Enter passive IRQ level */
     ProcessorBlock->Irql = PASSIVE_LEVEL;
 
+    /* Initialize segment registers */
+    ArpInitializeSegments();
+
     /* Load FS segment */
     ArLoadSegment(SEGMENT_FS, KGDT_R0_PB);
+
+    /* Initialize processor registers */
+    ArpInitializeProcessorRegisters();
 
     /* Identify processor */
     ArpIdentifyProcessor();
@@ -207,6 +213,39 @@ ArpInitializeProcessorBlock(OUT PKPROCESSOR_BLOCK ProcessorBlock,
     /* Clear DR6 and DR7 registers */
     ProcessorBlock->Prcb.ProcessorState.SpecialRegisters.KernelDr6 = 0;
     ProcessorBlock->Prcb.ProcessorState.SpecialRegisters.KernelDr7 = 0;
+}
+
+/**
+ * Initializes processor registers and other boot structures.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+ArpInitializeProcessorRegisters(VOID)
+{
+    /* Clear EFLAGS register */
+    ArWriteEflagsRegister(0);
+
+    /* Enable write-protection */
+    ArWriteControlRegister(0, ArReadControlRegister(0) | CR0_WP);
+}
+
+/**
+ * Initializes segment registers.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+ArpInitializeSegments(VOID)
+{
+    ArLoadSegment(SEGMENT_DS, KGDT_R3_DATA | RPL_MASK);
+    ArLoadSegment(SEGMENT_ES, KGDT_R3_DATA | RPL_MASK);
 }
 
 /**
