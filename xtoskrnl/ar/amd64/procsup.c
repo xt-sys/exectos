@@ -73,6 +73,14 @@ ArInitializeProcessor(VOID)
     ArpIdentifyProcessor();
 }
 
+/**
+ * Identifies processor type (vendor, model, stepping) as well as looks for available CPU features and stores them
+ * in Processor Control Block (PRCB).
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
 XTAPI
 VOID
 ArpIdentifyProcessor(VOID)
