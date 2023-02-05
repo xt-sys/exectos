@@ -239,12 +239,6 @@ ArpInitializeProcessorRegisters(VOID)
     /* Set debugger extension */
     ArWriteControlRegister(4, ArReadControlRegister(4) | CR4_DE);
 
-    /* Enable global paging support */
-    ArWriteControlRegister(4, ArReadControlRegister(4) | CR4_PGE);
-
-    /* Enable large pages */
-    ArWriteControlRegister(4, ArReadControlRegister(4) | CR4_PSE);
-
     /* Enable write-protection */
     ArWriteControlRegister(0, ArReadControlRegister(0) | CR0_WP);
 
