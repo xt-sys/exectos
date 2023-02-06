@@ -85,6 +85,7 @@ XTAPI
 VOID
 ArpIdentifyProcessor(VOID)
 {
+    UNIMPLEMENTED;
 }
 
 /**
