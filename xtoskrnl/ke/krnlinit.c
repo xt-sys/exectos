@@ -46,12 +46,12 @@ KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
     /* Save the kernel initialization block */
     KeInitializationBlock = Parameters;
 
-    /* Architecture specific initialization */
-    KepArchInitialize();
-
     /* Initialize boot CPU */
     ArInitializeProcessor();
 
-    /* Switch boot stack alligning it to 4 byte boundary */
+    /* Architecture specific kernel initialization */
+    KepArchInitialize();
+
+    /* Switch boot stack aligning it to 4 byte boundary */
     KepSwitchBootStack((ULONG_PTR)&ArKernelBootStack & ~0x3);
 }
