@@ -58,6 +58,10 @@ ULONG_PTR
 ArReadControlRegister(IN USHORT ControlRegister);
 
 XTCDECL
+ULONG
+ArReadFSDualWord(ULONG Offset);
+
+XTCDECL
 ULONGLONG
 ArReadModelSpecificRegister(IN ULONG Register);
 

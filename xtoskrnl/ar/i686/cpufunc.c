@@ -271,6 +271,27 @@ ArReadControlRegister(IN USHORT ControlRegister)
 }
 
 /**
+ * Reads dualword from a memory location specified by an offset relative to the beginning of the FS segment.
+ *
+ * @param Offset
+ *        Specifies the offset from the beginning of FS segment.
+ *
+ * @return Returns the value read from the specified memory location relative to FS segment.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+ULONG
+ArReadFSDualWord(ULONG Offset)
+{
+    ULONG Value;
+    asm volatile("movl %%fs:%a[Offset], %k[Value]"
+                 : [Value] "=r" (Value)
+                 : [Offset] "ir" (Offset));
+    return Value;
+}
+
+/**
  * Reads a 64-bit value from the requested Model Specific Register (MSR).
  *
  * @param Register
