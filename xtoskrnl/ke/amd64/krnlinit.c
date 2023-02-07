@@ -36,7 +36,7 @@ XTAPI
 VOID
 KepStartKernel(VOID)
 {
-    LdrPrint(L"Hello from new kernel stack!\n");
+    DebugPrint(L"Hello from new kernel stack!\n");
     for(;;);
 }
 

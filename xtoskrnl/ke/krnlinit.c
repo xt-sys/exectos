@@ -27,13 +27,13 @@ KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
     if(DEBUG && Parameters->LoaderInformation.DbgPrint)
     {
         /* Use loader's provided DbgPrint() routine for early printing to serial console */
-        LdrDbgPrint = Parameters->LoaderInformation.DbgPrint;
+        KeDbgPrint = Parameters->LoaderInformation.DbgPrint;
     }
 
 
     /* Print some message to serial console and test kernel parameters */
-    LdrPrint(L"Hello world from ExectOS kernel!\n");
-    LdrPrint(L"\n\n------ Kernel parameters block ------\n"
+    DebugPrint(L"Hello world from ExectOS kernel!\n");
+    DebugPrint(L"\n\n------ Kernel parameters block ------\n"
              L"Loader block size: %lu\n"
              L"Loader block version: %lu\n"
              L"EFI Revision: %lu\n",

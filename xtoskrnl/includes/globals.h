@@ -16,10 +16,10 @@
 /* FrameBuffer information */
 EXTERN HAL_FRAMEBUFFER_DATA HlpFrameBufferData;
 
+/* Pointer to boot loader provided DbgPrint() routine */
+EXTERN VOID (*KeDbgPrint)(IN PWCHAR Format, IN ...);
+
 /* Kernel initialization block passed by boot loader */
 EXTERN PKERNEL_INITIALIZATION_BLOCK KeInitializationBlock;
-
-/* Pointer to boot loader provided DbgPrint() routine */
-EXTERN VOID (*LdrDbgPrint)(IN PWCHAR Format, IN ...);
 
 #endif /* __XTOSKRNL_GLOBALS_H */
