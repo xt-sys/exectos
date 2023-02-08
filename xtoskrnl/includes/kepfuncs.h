@@ -21,6 +21,10 @@ PKPROCESSOR_CONTROL_BLOCK
 KeGetCurrentProcessorControlBlock(VOID);
 
 XTAPI
+PKTHREAD
+KeGetCurrentThread(VOID);
+
+XTAPI
 VOID
 KepArchInitialize(VOID);
 

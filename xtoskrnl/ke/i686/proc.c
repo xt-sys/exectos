@@ -37,3 +37,10 @@ KeGetCurrentProcessorControlBlock(VOID)
 {
     return (PKPROCESSOR_CONTROL_BLOCK)ArReadFSDualWord(FIELD_OFFSET(KPROCESSOR_BLOCK, Prcb));
 }
+
+XTAPI
+PKTHREAD
+KeGetCurrentThread(VOID)
+{
+    return (PKTHREAD)ArReadFSDualWord(FIELD_OFFSET(KPROCESSOR_BLOCK, Prcb.CurrentThread));
+}

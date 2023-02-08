@@ -37,3 +37,17 @@ KeGetCurrentProcessorControlBlock(VOID)
 {
     return (PKPROCESSOR_CONTROL_BLOCK)ArReadGSQuadWord(FIELD_OFFSET(KPROCESSOR_BLOCK, Prcb));
 }
+
+/**
+ * Gets address of current kernel's thread object.
+ *
+ * @return This routine returns address of current kernel's thread object.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PKTHREAD
+KeGetCurrentThread(VOID)
+{
+    return (PKTHREAD)ArReadGSQuadWord(FIELD_OFFSET(KPROCESSOR_BLOCK, Prcb.CurrentThread));
+}
