@@ -91,6 +91,18 @@ RtlStringToWideString(OUT PWCHAR Destination,
                       IN CONST PUCHAR *Source,
                       IN SIZE_T Length);
 
+XTFASTCALL
+ULONG
+RtlUlongByteSwap(IN ULONG Source);
+
+XTFASTCALL
+ULONGLONG
+RtlUlonglongByteSwap(IN ULONGLONG Source);
+
+XTFASTCALL
+USHORT
+RtlUshortByteSwap(IN USHORT Source);
+
 XTCDECL
 INT
 RtlWideStringCompare(IN CONST PWCHAR String1,
