@@ -347,6 +347,7 @@ typedef struct _KPROCESSOR_STATE
 /* Processor Control Block (PRCB) structure definition */
 typedef struct _KPROCESSOR_CONTROL_BLOCK
 {
+    PKTHREAD CurrentThread;
     UCHAR Number;
     ULONG_PTR SetMember;
     KPROCESSOR_STATE ProcessorState;

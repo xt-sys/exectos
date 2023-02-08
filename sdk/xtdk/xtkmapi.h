@@ -30,6 +30,7 @@
 #include <iotypes.h>
 #include <ketypes.h>
 #include <ldrtypes.h>
+#include <pstypes.h>
 #include <rtltypes.h>
 
 /* Architecture-specific low level data types headers */

@@ -17,3 +17,9 @@ VOID (*KeDbgPrint)(IN PWCHAR Format, IN ...) = NULL;
 
 /* Kernel initialization block passed by boot loader */
 PKERNEL_INITIALIZATION_BLOCK KeInitializationBlock;
+
+/* Kernel initial process */
+EPROCESS KeInitialProcess;
+
+/* Kernel initial thread */
+ETHREAD KeInitialThread;

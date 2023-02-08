@@ -22,4 +22,10 @@ EXTERN VOID (*KeDbgPrint)(IN PWCHAR Format, IN ...);
 /* Kernel initialization block passed by boot loader */
 EXTERN PKERNEL_INITIALIZATION_BLOCK KeInitializationBlock;
 
+/* Kernel initial process */
+EXTERN EPROCESS KeInitialProcess;
+
+/* Kernel initial thread */
+EXTERN ETHREAD KeInitialThread;
+
 #endif /* __XTOSKRNL_GLOBALS_H */

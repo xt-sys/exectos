@@ -18,6 +18,14 @@
 /* Maximum number of exception parameters */
 #define EXCEPTION_MAXIMUM_PARAMETERS 15
 
+/* APC Types */
+typedef enum _MODE
+{
+    KernelMode,
+    UserMode,
+    MaximumMode
+} MODE, *PMODE;
+
 /* Exception disposition return values */
 typedef enum _EXCEPTION_DISPOSITION
 {
@@ -41,8 +49,30 @@ typedef struct _EXCEPTION_RECORD
 /* Exception registration record  structure definition */
 typedef struct _EXCEPTION_REGISTRATION_RECORD
 {
-  PEXCEPTION_REGISTRATION_RECORD Next;
-  PEXCEPTION_ROUTINE Handler;
+    PEXCEPTION_REGISTRATION_RECORD Next;
+    PEXCEPTION_ROUTINE Handler;
 } EXCEPTION_REGISTRATION_RECORD, *PEXCEPTION_REGISTRATION_RECORD;
+
+/* APC state structure definition */
+typedef struct _KAPC_STATE
+{
+    LIST_ENTRY ApcListHead[MaximumMode];
+    PKPROCESS Process;
+    BOOLEAN KernelApcInProgress;
+    BOOLEAN KernelApcPending;
+    BOOLEAN UserApcPending;
+} KAPC_STATE, *PKAPC_STATE;
+
+/* Process control block structure definition */
+typedef struct _KPROCESS
+{
+    INT PlaceHolder;
+} KPROCESS, *PKPROCESS;
+
+/* Thread control block structure definition */
+typedef struct _KTHREAD
+{
+    KAPC_STATE ApcState;
+} KTHREAD, *PKTHREAD;
 
 #endif /* __XTDK_KEFUNCS_H */

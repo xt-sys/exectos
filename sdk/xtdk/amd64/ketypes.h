@@ -444,6 +444,7 @@ typedef struct _KPROCESSOR_CONTROL_BLOCK
 {
     ULONG MxCsr;
     UCHAR Number;
+    PKTHREAD CurrentThread;
     ULONG64 RspBase;
     ULONG_PTR SetMember;
     KPROCESSOR_STATE ProcessorState;
