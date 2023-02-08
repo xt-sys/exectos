@@ -214,6 +214,10 @@ ArpInitializeProcessorBlock(OUT PKPROCESSOR_BLOCK ProcessorBlock,
     ProcessorBlock->Prcb.ProcessorState.SpecialRegisters.KernelDr6 = 0;
     ProcessorBlock->Prcb.ProcessorState.SpecialRegisters.KernelDr7 = 0;
 
+    /* Set current process and thread */
+    ProcessorBlock->Prcb.CurrentThread = &KeInitialThread.ThreadControlBlock;
+    ProcessorBlock->Prcb.CurrentThread->ApcState.Process = &KeInitialProcess.ProcessControlBlock;
+
     /* Set initial MXCSR register value */
     ProcessorBlock->Prcb.MxCsr = INITIAL_MXCSR;
 }

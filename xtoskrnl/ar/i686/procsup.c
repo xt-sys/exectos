@@ -214,6 +214,10 @@ ArpInitializeProcessorBlock(OUT PKPROCESSOR_BLOCK ProcessorBlock,
     /* Clear DR6 and DR7 registers */
     ProcessorBlock->Prcb.ProcessorState.SpecialRegisters.KernelDr6 = 0;
     ProcessorBlock->Prcb.ProcessorState.SpecialRegisters.KernelDr7 = 0;
+
+    /* Set current process and thread */
+    ProcessorBlock->Prcb.CurrentThread = &KeInitialThread.ThreadControlBlock;
+    ProcessorBlock->Prcb.CurrentThread->ApcState.Process = &KeInitialProcess.ProcessControlBlock;
 }
 
 /**
