@@ -13,6 +13,14 @@
 
 
 XTAPI
+PKPROCESSOR_BLOCK
+KeGetCurrentProcessorBlock(VOID);
+
+XTAPI
+PKPROCESSOR_CONTROL_BLOCK
+KeGetCurrentProcessorControlBlock(VOID);
+
+XTAPI
 VOID
 KepArchInitialize(VOID);
 
