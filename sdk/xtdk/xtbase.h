@@ -50,6 +50,28 @@ typedef struct _LIST_ENTRY64
     ULONGLONG Blink;
 } LIST_ENTRY64, *PLIST_ENTRY64;
 
+/* Single linked list structure definition */
+typedef struct _SINGLE_LIST_ENTRY
+{
+    PSINGLE_LIST_ENTRY Next;
+} SINGLE_LIST_ENTRY, *PSINGLE_LIST_ENTRY;
+
+/* Header for a sequenced single linked list union definition */
+typedef union _SINGLE_LIST_HEADER
+{
+    ULONGLONG Alignment;
+    union
+    {
+        struct
+        {
+            SINGLE_LIST_ENTRY Next;
+            USHORT Depth;
+            USHORT Sequence;
+        };
+        ULONGLONG Region;
+    };
+} SINGLE_LIST_HEADER, *PSINGLE_LIST_HEADER;
+
 /* 128-bit 16-byte aligned XMM register */
 typedef struct _M128
 {
