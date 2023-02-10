@@ -85,7 +85,69 @@ XTAPI
 VOID
 ArpIdentifyProcessor(VOID)
 {
+    PKPROCESSOR_CONTROL_BLOCK Prcb;
+    CPUID_REGISTERS CpuRegisters;
+    CPUID_SIGNATURE CpuSignature;
+
+    /* Not fully implemented yet */
     UNIMPLEMENTED;
+
+    /* Get current processor control block */
+    Prcb = KeGetCurrentProcessorControlBlock();
+
+    /* Get CPU vendor by issueing CPUID instruction */
+    RtlZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
+    CpuRegisters.Leaf = CPUID_GET_VENDOR_STRING;
+    ArCpuId(&CpuRegisters);
+
+    /* Store CPU vendor in processor control block */
+    Prcb->CpuId.Vendor = CpuRegisters.Ebx;
+    Prcb->CpuId.VendorName[0] = CpuRegisters.Ebx;
+    Prcb->CpuId.VendorName[4] = CpuRegisters.Edx;
+    Prcb->CpuId.VendorName[8] = CpuRegisters.Ecx;
+    Prcb->CpuId.VendorName[12] = '\0';
+
+    /* Get CPU features */
+    RtlZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
+    CpuRegisters.Leaf = CPUID_GET_CPU_FEATURES;
+    ArCpuId(&CpuRegisters);
+
+    /* Store CPU signature in processor control block */
+    CpuSignature = *(PCPUID_SIGNATURE)&CpuRegisters.Eax;
+    Prcb->CpuId.Family = CpuSignature.Family;
+    Prcb->CpuId.Model = CpuSignature.Model;
+    Prcb->CpuId.Stepping = CpuSignature.Stepping;
+
+    /* CPU vendor specific quirks */
+    if(Prcb->CpuId.Vendor == CPU_VENDOR_AMD)
+    {
+        /* AMD CPU */
+        Prcb->CpuId.Family = Prcb->CpuId.Family + CpuSignature.ExtendedFamily;
+        if(Prcb->CpuId.Model == 0xF)
+        {
+            Prcb->CpuId.Model = Prcb->CpuId.Model + (CpuSignature.ExtendedModel << 4);
+        }
+    }
+    else if(Prcb->CpuId.Vendor == CPU_VENDOR_INTEL)
+    {
+        /* Intel CPU */
+        if(Prcb->CpuId.Family == 0xF)
+        {
+            Prcb->CpuId.Family = Prcb->CpuId.Family + CpuSignature.ExtendedFamily;
+        }
+
+        if((Prcb->CpuId.Family == 0xF) || (Prcb->CpuId.Family == 0x6))
+        {
+            Prcb->CpuId.Model = Prcb->CpuId.Model + (CpuSignature.ExtendedModel << 4);
+        }
+    }
+    else
+    {
+        /* Unknown CPU vendor */
+        Prcb->CpuId.Vendor = CPU_VENDOR_UNKNOWN;
+    }
+
+    /* TODO: Store a list of CPU features in processor control block */
 }
 
 /**
