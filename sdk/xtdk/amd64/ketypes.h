@@ -13,6 +13,7 @@
 #include <xtstruct.h>
 #include <xttypes.h>
 #include ARCH_HEADER(xtstruct.h)
+#include ARCH_HEADER(artypes.h)
 
 
 /* Selector masks */
@@ -449,6 +450,7 @@ typedef struct _KPROCESSOR_CONTROL_BLOCK
     PKTHREAD NextThread;
     ULONG64 RspBase;
     ULONG_PTR SetMember;
+    CPU_IDENTIFICATION CpuId;
     KPROCESSOR_STATE ProcessorState;
     PVOID DpcStack;
     ULONG_PTR MultiThreadProcessorSet;

@@ -110,6 +110,14 @@
 #define X86_EFLAGS_VIP_MASK                             0x00100000
 #define X86_EFLAGS_ID_MASK                              0x00200000
 
+/* CPU vendor enumeration list */
+typedef enum _CPU_VENDOR
+{
+    CPU_VENDOR_AMD = 0x68747541,
+    CPU_VENDOR_INTEL = 0x756e6547,
+    CPU_VENDOR_UNKNOWN = 0xFFFFFFFF
+} CPU_VENDOR, *PCPU_VENDOR;
+
 /* CPUID features enumeration list */
 typedef enum _CPUID_FEATURES
 {
@@ -185,6 +193,16 @@ typedef enum _CPUID_REQUESTS
     CPUID_GET_SERIAL
 } CPUID_REQUESTS, *PCPUID_REQUESTS;
 
+/* Processor identification information */
+typedef struct _CPU_IDENTIFICATION
+{
+    USHORT Family;
+    USHORT Model;
+    USHORT Stepping;
+    CPU_VENDOR Vendor;
+    UCHAR VendorName[13];
+} CPU_IDENTIFICATION, *PCPU_IDENTIFICATION;
+
 /* CPUID registers */
 typedef struct _CPUID_REGISTERS
 {
@@ -195,5 +213,17 @@ typedef struct _CPUID_REGISTERS
     UINT32 Ecx;
     UINT32 Edx;
 } CPUID_REGISTERS, *PCPUID_REGISTERS;
+
+/* CPU signature read from CPUID structure definition */
+typedef struct _CPUID_SIGNATURE
+{
+    ULONG Stepping:4;
+    ULONG Model:4;
+    ULONG Family:4;
+    ULONG Unused1:4;
+    ULONG ExtendedModel:4;
+    ULONG ExtendedFamily:8;
+    ULONG Unused2:4;
+} CPU_SIGNATURE, *PCPU_SIGNATURE;
 
 #endif /* __XTDK_AMD64_ARTYPES_H */
