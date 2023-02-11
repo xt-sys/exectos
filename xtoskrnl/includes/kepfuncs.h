@@ -10,30 +10,7 @@
 #define __XTOSKRNL_KEPFUNCS_H
 
 #include <xtos.h>
+#include ARCH_HEADER(kepfuncs.h)
 
-
-XTAPI
-PKPROCESSOR_BLOCK
-KeGetCurrentProcessorBlock(VOID);
-
-XTAPI
-PKPROCESSOR_CONTROL_BLOCK
-KeGetCurrentProcessorControlBlock(VOID);
-
-XTAPI
-PKTHREAD
-KeGetCurrentThread(VOID);
-
-XTAPI
-VOID
-KepArchInitialize(VOID);
-
-XTAPI
-VOID
-KepStartKernel(VOID);
-
-XTAPI
-VOID
-KepSwitchBootStack(IN ULONG_PTR Stack);
 
 #endif /* __XTOSKRNL_KEPFUNCS_H */
