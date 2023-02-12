@@ -14,6 +14,113 @@
 #include <xttypes.h>
 
 
+XTFASTCALL
+CHAR
+RtlAtomicCompareExchange8(IN VOLATILE PCHAR Address,
+                          IN CHAR Comperand,
+                          IN CHAR Exchange);
+
+XTFASTCALL
+SHORT
+RtlAtomicCompareExchange16(IN VOLATILE PSHORT Address,
+                           IN SHORT Comperand,
+                           IN SHORT Exchange);
+
+XTFASTCALL
+LONG
+RtlAtomicCompareExchange32(IN VOLATILE PLONG Address,
+                           IN LONG Comperand,
+                           IN LONG Exchange);
+
+XTFASTCALL
+LONGLONG
+RtlAtomicCompareExchange64(IN VOLATILE PLONGLONG Address,
+                           IN LONGLONG Comperand,
+                           IN LONGLONG Exchange);
+
+XTFASTCALL
+PVOID
+RtlAtomicCompareExchangePointer(IN VOLATILE PVOID *Address,
+                                IN PVOID Comperand,
+                                IN PVOID Exchange);
+
+XTFASTCALL
+CHAR
+RtlAtomicDecrement8(IN VOLATILE PCHAR Address);
+
+XTFASTCALL
+SHORT
+RtlAtomicDecrement16(IN VOLATILE PSHORT Address);
+
+XTFASTCALL
+LONG
+RtlAtomicDecrement32(IN VOLATILE PLONG Address);
+
+XTFASTCALL
+LONGLONG
+RtlAtomicDecrement64(IN VOLATILE PLONGLONG Address);
+
+XTFASTCALL
+CHAR
+RtlAtomicExchange8(IN VOLATILE PCHAR Address,
+                   IN CHAR Exchange);
+
+XTFASTCALL
+SHORT
+RtlAtomicExchange16(IN VOLATILE PSHORT Address,
+                    IN SHORT Exchange);
+
+XTFASTCALL
+LONG
+RtlAtomicExchange32(IN VOLATILE PLONG Address,
+                    IN LONG Exchange);
+
+XTFASTCALL
+LONGLONG
+RtlAtomicExchange64(IN VOLATILE PLONGLONG Address,
+                    IN LONGLONG Exchange);
+
+XTFASTCALL
+CHAR
+RtlAtomicExchangeAdd8(IN VOLATILE PCHAR Address,
+                      IN CHAR Value);
+
+XTFASTCALL
+SHORT
+RtlAtomicExchangeAdd16(IN VOLATILE PSHORT Address,
+                       IN SHORT Value);
+
+XTFASTCALL
+LONG
+RtlAtomicExchangeAdd32(IN VOLATILE PLONG Address,
+                       IN LONG Value);
+
+XTFASTCALL
+LONGLONG
+RtlAtomicExchangeAdd64(IN VOLATILE PLONGLONG Address,
+                       IN LONGLONG Value);
+
+XTFASTCALL
+PVOID
+RtlAtomicExchangePointer(IN VOLATILE PVOID *Address,
+                         IN PVOID Exchange);
+
+XTFASTCALL
+CHAR
+RtlAtomicIncrement8(IN VOLATILE PCHAR Address);
+
+XTFASTCALL
+SHORT
+RtlAtomicIncrement16(IN VOLATILE PSHORT Address);
+
+XTFASTCALL
+LONG
+RtlAtomicIncrement32(IN VOLATILE PLONG Address);
+
+XTFASTCALL
+LONGLONG
+RtlAtomicIncrement64(IN VOLATILE PLONGLONG Address);
+
 XTAPI
 SIZE_T
 RtlCompareMemory(IN PCVOID LeftBuffer,
