@@ -10,6 +10,90 @@
 
 
 /**
+ * Performs an atomic bitwise AND operation on the 8-bit value.
+ *
+ * @param Address
+ *        Supplies the address of the value on which the bitwise AND operation is to be performed.
+ *
+ * @param Mask
+ *        Supplies the mask with which the bitwise AND operation is to be performed
+ *
+ * @return This routine returns the initial value at the given address.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+CHAR
+RtlAtomicAnd8(IN VOLATILE PCHAR Address,
+              IN CHAR Mask)
+{
+    return __sync_fetch_and_and(Address, Mask);
+}
+
+/**
+ * Performs an atomic bitwise AND operation on the 16-bit value.
+ *
+ * @param Address
+ *        Supplies the address of the value on which the bitwise AND operation is to be performed.
+ *
+ * @param Mask
+ *        Supplies the mask with which the bitwise AND operation is to be performed
+ *
+ * @return This routine returns the initial value at the given address.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+SHORT
+RtlAtomicAnd16(IN VOLATILE PSHORT Address,
+               IN SHORT Mask)
+{
+    return __sync_fetch_and_and(Address, Mask);
+}
+
+/**
+ * Performs an atomic bitwise AND operation on the 32-bit value.
+ *
+ * @param Address
+ *        Supplies the address of the value on which the bitwise AND operation is to be performed.
+ *
+ * @param Mask
+ *        Supplies the mask with which the bitwise AND operation is to be performed
+ *
+ * @return This routine returns the initial value at the given address.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+LONG
+RtlAtomicAnd32(IN VOLATILE PLONG Address,
+               IN LONG Mask)
+{
+    return __sync_fetch_and_and(Address, Mask);
+}
+
+/**
+ * Performs an atomic bitwise AND operation on the 64-bit value.
+ *
+ * @param Address
+ *        Supplies the address of the value on which the bitwise AND operation is to be performed.
+ *
+ * @param Mask
+ *        Supplies the mask with which the bitwise AND operation is to be performed
+ *
+ * @return This routine returns the initial value at the given address.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+LONGLONG
+RtlAtomicAnd64(IN VOLATILE PLONGLONG Address,
+               IN LONGLONG Mask)
+{
+    return __sync_fetch_and_and(Address, Mask);
+}
+
+/**
  * Performs atomically compare exchange operation on the 8-bit value.
  *
  * @param Address
@@ -457,4 +541,172 @@ LONGLONG
 RtlAtomicIncrement64(IN VOLATILE PLONGLONG Address)
 {
     return __sync_add_and_fetch(Address, 1);
+}
+
+/**
+ * Performs an atomic bitwise OR operation on the 8-bit value.
+ *
+ * @param Address
+ *        Supplies the address of the value on which the bitwise OR operation is to be performed.
+ *
+ * @param Mask
+ *        Supplies the mask with which the bitwise OR operation is to be performed
+ *
+ * @return This routine returns the initial value at the given address.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+CHAR
+RtlAtomicOr8(IN VOLATILE PCHAR Address,
+             IN CHAR Mask)
+{
+    return __sync_fetch_and_or(Address, Mask);
+}
+
+/**
+ * Performs an atomic bitwise OR operation on the 16-bit value.
+ *
+ * @param Address
+ *        Supplies the address of the value on which the bitwise OR operation is to be performed.
+ *
+ * @param Mask
+ *        Supplies the mask with which the bitwise OR operation is to be performed
+ *
+ * @return This routine returns the initial value at the given address.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+SHORT
+RtlAtomicOr16(IN VOLATILE PSHORT Address,
+              IN SHORT Mask)
+{
+    return __sync_fetch_and_or(Address, Mask);
+}
+
+/**
+ * Performs an atomic bitwise OR operation on the 32-bit value.
+ *
+ * @param Address
+ *        Supplies the address of the value on which the bitwise OR operation is to be performed.
+ *
+ * @param Mask
+ *        Supplies the mask with which the bitwise OR operation is to be performed
+ *
+ * @return This routine returns the initial value at the given address.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+LONG
+RtlAtomicOr32(IN VOLATILE PLONG Address,
+              IN LONG Mask)
+{
+    return __sync_fetch_and_or(Address, Mask);
+}
+
+/**
+ * Performs an atomic bitwise OR operation on the 64-bit value.
+ *
+ * @param Address
+ *        Supplies the address of the value on which the bitwise OR operation is to be performed.
+ *
+ * @param Mask
+ *        Supplies the mask with which the bitwise OR operation is to be performed
+ *
+ * @return This routine returns the initial value at the given address.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+LONGLONG
+RtlAtomicOr64(IN VOLATILE PLONGLONG Address,
+              IN LONGLONG Mask)
+{
+    return __sync_fetch_and_or(Address, Mask);
+}
+
+/**
+ * Performs an atomic bitwise XOR operation on the 8-bit value.
+ *
+ * @param Address
+ *        Supplies the address of the value on which the bitwise XOR operation is to be performed.
+ *
+ * @param Mask
+ *        Supplies the mask with which the bitwise XOR operation is to be performed
+ *
+ * @return This routine returns the initial value at the given address.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+CHAR
+RtlAtomicXor8(IN VOLATILE PCHAR Address,
+              IN CHAR Mask)
+{
+    return __sync_fetch_and_xor(Address, Mask);
+}
+
+/**
+ * Performs an atomic bitwise XOR operation on the 16-bit value.
+ *
+ * @param Address
+ *        Supplies the address of the value on which the bitwise XOR operation is to be performed.
+ *
+ * @param Mask
+ *        Supplies the mask with which the bitwise XOR operation is to be performed
+ *
+ * @return This routine returns the initial value at the given address.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+SHORT
+RtlAtomicXor16(IN VOLATILE PSHORT Address,
+               IN SHORT Mask)
+{
+    return __sync_fetch_and_xor(Address, Mask);
+}
+
+/**
+ * Performs an atomic bitwise XOR operation on the 32-bit value.
+ *
+ * @param Address
+ *        Supplies the address of the value on which the bitwise XOR operation is to be performed.
+ *
+ * @param Mask
+ *        Supplies the mask with which the bitwise XOR operation is to be performed
+ *
+ * @return This routine returns the initial value at the given address.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+LONG
+RtlAtomicXor32(IN VOLATILE PLONG Address,
+               IN LONG Mask)
+{
+    return __sync_fetch_and_xor(Address, Mask);
+}
+
+/**
+ * Performs an atomic bitwise XOR operation on the 64-bit value.
+ *
+ * @param Address
+ *        Supplies the address of the value on which the bitwise XOR operation is to be performed.
+ *
+ * @param Mask
+ *        Supplies the mask with which the bitwise XOR operation is to be performed
+ *
+ * @return This routine returns the initial value at the given address.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+LONGLONG
+RtlAtomicXor64(IN VOLATILE PLONGLONG Address,
+               IN LONGLONG Mask)
+{
+    return __sync_fetch_and_xor(Address, Mask);
 }

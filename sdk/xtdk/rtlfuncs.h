@@ -16,6 +16,26 @@
 
 XTFASTCALL
 CHAR
+RtlAtomicAnd8(IN VOLATILE PCHAR Address,
+              IN CHAR Mask);
+
+XTFASTCALL
+SHORT
+RtlAtomicAnd16(IN VOLATILE PSHORT Address,
+               IN SHORT Mask);
+
+XTFASTCALL
+LONG
+RtlAtomicAnd32(IN VOLATILE PLONG Address,
+               IN LONG Mask);
+
+XTFASTCALL
+LONGLONG
+RtlAtomicAnd64(IN VOLATILE PLONGLONG Address,
+               IN LONGLONG Mask);
+
+XTFASTCALL
+CHAR
 RtlAtomicCompareExchange8(IN VOLATILE PCHAR Address,
                           IN CHAR Comperand,
                           IN CHAR Exchange);
@@ -120,6 +140,46 @@ RtlAtomicIncrement32(IN VOLATILE PLONG Address);
 XTFASTCALL
 LONGLONG
 RtlAtomicIncrement64(IN VOLATILE PLONGLONG Address);
+
+XTFASTCALL
+CHAR
+RtlAtomicOr8(IN VOLATILE PCHAR Address,
+             IN CHAR Mask);
+
+XTFASTCALL
+SHORT
+RtlAtomicOr16(IN VOLATILE PSHORT Address,
+              IN SHORT Mask);
+
+XTFASTCALL
+LONG
+RtlAtomicOr32(IN VOLATILE PLONG Address,
+              IN LONG Mask);
+
+XTFASTCALL
+LONGLONG
+RtlAtomicOr64(IN VOLATILE PLONGLONG Address,
+              IN LONGLONG Mask);
+
+XTFASTCALL
+CHAR
+RtlAtomicXor8(IN VOLATILE PCHAR Address,
+              IN CHAR Mask);
+
+XTFASTCALL
+SHORT
+RtlAtomicXor16(IN VOLATILE PSHORT Address,
+               IN SHORT Mask);
+
+XTFASTCALL
+LONG
+RtlAtomicXor32(IN VOLATILE PLONG Address,
+               IN LONG Mask);
+
+XTFASTCALL
+LONGLONG
+RtlAtomicXor64(IN VOLATILE PLONGLONG Address,
+               IN LONGLONG Mask);
 
 XTAPI
 SIZE_T
