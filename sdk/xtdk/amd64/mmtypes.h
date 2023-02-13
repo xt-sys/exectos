@@ -12,6 +12,11 @@
 #include <xtbase.h>
 
 
+/* Pages related definitions */
+#define MM_PAGE_MASK                               0xFFF
+#define MM_PAGE_SHIFT                              12
+#define MM_PAGE_SIZE                               4096
+
 /* Page Table entry structure definition */
 typedef struct _HARDWARE_PTE
 {

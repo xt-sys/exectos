@@ -52,8 +52,14 @@
 /* Macro that yields field type in the structure */
 #define FIELD_TYPE(Structure, Field)           (((Structure*)0)->Field)
 
+/* Macro that page-aligns a virtual address */
+#define PAGE_ALIGN(VirtualAddress)             ((PVOID)((ULONG_PTR)VirtualAddress & ~MM_PAGE_MASK))
+
+/* Macro that returns offset of the virtual address */
+#define PAGE_OFFSET(VirtualAddress)            ((ULONG)((ULONG_PTR)VirtualAddress & MM_PAGE_MASK))
+
 /* Macro for rounding down */
-#define ROUND_DOWN(X, Alignment)               ((X) & ~((Alignment) - 1l))
+#define ROUND_DOWN(X, Alignment)               ((X) & ~((Alignment) - 1))
 
 /* Macro for rounding up */
 #define ROUND_UP(X, Alignment)                 ROUND_DOWN((X) + (Alignment - 1), Alignment)
@@ -62,6 +68,9 @@
 #define SIGNATURE16(A, B)                      ((A) | (B << 8))
 #define SIGNATURE32(A, B, C, D)                (SIGNATURE16(A, B) | (SIGNATURE16(C, D) << 16))
 #define SIGNATURE64(A, B, C, D, E, F, G, H)    (SIGNATURE32(A, B, C, D) | ((UINT64)(SIGNATURE32(E, F, G, H)) << 32))
+
+/* XT size to pages conversion macro */
+#define SIZE_TO_PAGES(Size)                    (((Size) >> MM_PAGE_SHIFT) + (((Size) & (MM_PAGE_MASK)) ? 1 : 0))
 
 /* Variadic ABI functions */
 typedef __builtin_va_list VA_LIST;
