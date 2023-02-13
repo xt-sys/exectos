@@ -57,11 +57,15 @@ typedef struct _SINGLE_LIST_ENTRY
 } SINGLE_LIST_ENTRY, *PSINGLE_LIST_ENTRY;
 
 /* Header for a sequenced single linked list union definition */
-typedef struct _SINGLE_LIST_HEADER
+typedef union _SINGLE_LIST_HEADER
 {
-    SINGLE_LIST_ENTRY Next;
-    USHORT Depth;
-    USHORT Sequence;
+    ULONGLONG Alignment;
+    struct
+    {
+        SINGLE_LIST_ENTRY Next;
+        USHORT Depth;
+        USHORT Sequence;
+    };
 } SINGLE_LIST_HEADER, *PSINGLE_LIST_HEADER;
 
 /* 128-bit 16-byte aligned XMM register */

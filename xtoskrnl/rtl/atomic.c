@@ -476,6 +476,23 @@ RtlAtomicExchangePointer(IN VOLATILE PVOID *Address,
 }
 
 /**
+ * Removes all entries from single linked list.
+ *
+ * @param Header
+ *        Supplies a pointer to the header of linked list.
+ *
+ * @return This routine returns a pointer to the original list, or NULL if the list was already empty.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+PSINGLE_LIST_ENTRY
+RtlAtomicFlushSingleList(IN PSINGLE_LIST_HEADER Header)
+{
+    return (PSINGLE_LIST_ENTRY)RtlAtomicExchange64((PLONGLONG)&Header->Alignment, (LONGLONG)NULL);
+}
+
+/**
  * Performs atomically increment of the 8-bit value.
  *
  * @param Address
@@ -625,6 +642,89 @@ RtlAtomicOr64(IN VOLATILE PLONGLONG Address,
               IN LONGLONG Mask)
 {
     return __sync_fetch_and_or(Address, Mask);
+}
+
+/**
+ * Removes and returns the first entry from single linked list.
+ *
+ * @param Header
+ *        Supplies a pointer to the header of a single linked list.
+ *
+ * @return This routine returns a pointer to the removed element, or NULL if the list was empty.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+PSINGLE_LIST_ENTRY
+RtlAtomicPopEntrySingleList(IN PSINGLE_LIST_HEADER Header)
+{
+    PSINGLE_LIST_ENTRY ListHead, FirstEntry, NextEntry;
+
+    /* Save header and first entry */
+    ListHead = (PVOID)Header;
+    FirstEntry = ListHead->Next;
+    do
+    {
+        /* Check if list is not empty */
+        if(!FirstEntry)
+        {
+            /* Empty list */
+            return NULL;
+        }
+
+        /* Update link */
+        NextEntry = FirstEntry;
+
+        /* Compare and exchange */
+        FirstEntry = (PVOID)RtlAtomicCompareExchange64((PLONGLONG)ListHead,
+                                                       (LONGLONG)FirstEntry->Next,
+                                                       (LONGLONG)FirstEntry);
+    } while(FirstEntry != NextEntry);
+
+    /* Return removed element */
+    return FirstEntry;
+}
+
+/**
+ * Inserts new entry at the beginning of single linked list.
+ *
+ * @param Header
+ *        Supplies a pointer to the header of linked list.
+ *
+ * @param Entry
+ *        Supplies a pointer to entry, that will be inserted into linked list.
+ *
+ * @return This routine returns a pointer to original heading, or NULL if the list was originally empty.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+PSINGLE_LIST_ENTRY
+RtlAtomicPushEntrySingleList(IN PSINGLE_LIST_HEADER Header,
+                             IN PSINGLE_LIST_ENTRY Entry)
+{
+    PSINGLE_LIST_ENTRY ListHead, ListEntry, FirstEntry, NextEntry;
+
+    /* Save header and new entry */
+    ListHead = (PVOID)Header;
+    ListEntry = (PVOID)Entry;
+
+    /* Save next link in new first element */
+    FirstEntry = ListHead->Next;
+    do
+    {
+        /* Update links */
+        ListEntry->Next = FirstEntry;
+        NextEntry = FirstEntry;
+
+        /* Compare and exchange */
+        FirstEntry = (PVOID)RtlAtomicCompareExchange64((PLONGLONG)ListHead,
+                                                       (LONGLONG)ListEntry,
+                                                       (LONGLONG)FirstEntry);
+    } while(FirstEntry != NextEntry);
+
+    /* Return original first element */
+    return FirstEntry;
 }
 
 /**

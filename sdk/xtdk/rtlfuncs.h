@@ -126,6 +126,10 @@ RtlAtomicExchangePointer(IN VOLATILE PVOID *Address,
                          IN PVOID Exchange);
 
 XTFASTCALL
+PSINGLE_LIST_ENTRY
+RtlAtomicFlushSingleList(IN PSINGLE_LIST_HEADER Header);
+
+XTFASTCALL
 CHAR
 RtlAtomicIncrement8(IN VOLATILE PCHAR Address);
 
@@ -160,6 +164,15 @@ XTFASTCALL
 LONGLONG
 RtlAtomicOr64(IN VOLATILE PLONGLONG Address,
               IN LONGLONG Mask);
+
+XTFASTCALL
+PSINGLE_LIST_ENTRY
+RtlAtomicPopEntrySingleList(IN PSINGLE_LIST_HEADER Header);
+
+XTFASTCALL
+PSINGLE_LIST_ENTRY
+RtlAtomicPushEntrySingleList(IN PSINGLE_LIST_HEADER Header,
+                             IN PSINGLE_LIST_ENTRY Entry);
 
 XTFASTCALL
 CHAR
