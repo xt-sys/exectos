@@ -48,7 +48,9 @@
 
 /* XT status code definitions */
 #define STATUS_SUCCESS                                                     ((XTSTATUS) 0x00000000L)
+#define STATUS_NOT_IMPLEMENTED                                             ((XTSTATUS) 0xC0000002L)
 #define STATUS_INVALID_PARAMETER                                           ((XTSTATUS) 0xC000000DL)
+#define STATUS_INSUFFICIENT_RESOURCES                                      ((XTSTATUS) 0xC000009AL)
 #define STATUS_DEVICE_NOT_READY                                            ((XTSTATUS) 0xC00000A3L)
 #define STATUS_IO_DEVICE_ERROR                                             ((XTSTATUS) 0xC0000185L)
 #define STATUS_NOT_FOUND                                                   ((XTSTATUS) 0xC0000225L)
