@@ -133,6 +133,7 @@
 
 /* Size of 387 registers */
 #define SIZE_OF_80387_REGISTERS           80
+#define SIZE_OF_FX_REGISTERS              128
 
 /* Floating point state storing structure */
 typedef struct _FLOATING_SAVE_AREA
@@ -147,6 +148,50 @@ typedef struct _FLOATING_SAVE_AREA
     UCHAR RegisterArea[SIZE_OF_80387_REGISTERS];
     ULONG Cr0NpxState;
 } FLOATING_SAVE_AREA, *PFLOATING_SAVE_AREA;
+
+/* Data for FNSAVE/FRSTOR instructions structure definition */
+typedef struct _FNSAVE_FORMAT
+{
+    ULONG ControlWord;
+    ULONG StatusWord;
+    ULONG TagWord;
+    ULONG ErrorOffset;
+    ULONG ErrorSelector;
+    ULONG DataOffset;
+    ULONG DataSelector;
+    UCHAR RegisterArea[SIZE_OF_80387_REGISTERS];
+} FNSAVE_FORMAT, *PFNSAVE_FORMAT;
+
+/* Data for FXSAVE/FXRSTOR instructions structure definition */
+typedef struct _FXSAVE_FORMAT
+{
+    USHORT ControlWord;
+    USHORT StatusWord;
+    USHORT TagWord;
+    USHORT ErrorOpcode;
+    ULONG ErrorOffset;
+    ULONG ErrorSelector;
+    ULONG DataOffset;
+    ULONG DataSelector;
+    ULONG MXCsr;
+    ULONG MXCsrMask;
+    UCHAR RegisterArea[SIZE_OF_FX_REGISTERS];
+    UCHAR Reserved3[SIZE_OF_FX_REGISTERS];
+    UCHAR Reserved4[224];
+    UCHAR Align16Byte[8];
+} FXSAVE_FORMAT, *PFXSAVE_FORMAT;
+
+/* Floating save area structure definition */
+typedef struct _FX_SAVE_AREA
+{
+    union
+    {
+        FNSAVE_FORMAT FnArea;
+        FXSAVE_FORMAT FxArea;
+    } U;
+    ULONG NpxSavedCpu;
+    ULONG Cr0NpxState;
+} FX_SAVE_AREA, *PFX_SAVE_AREA;
 
 /* Context frame structure definition */
 typedef struct _CONTEXT
