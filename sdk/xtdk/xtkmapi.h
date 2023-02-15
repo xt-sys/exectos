@@ -47,6 +47,7 @@
 /* Architecture specific XT routines*/
 #include ARCH_HEADER(arfuncs.h)
 #include ARCH_HEADER(hlfuncs.h)
+#include ARCH_HEADER(rtlfuncs.h)
 
 /* Callbacks */
 #include <kertptr.h>

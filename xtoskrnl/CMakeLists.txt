@@ -26,7 +26,8 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/rtl/memory.c
     ${XTOSKRNL_SOURCE_DIR}/rtl/plist.c
     ${XTOSKRNL_SOURCE_DIR}/rtl/string.c
-    ${XTOSKRNL_SOURCE_DIR}/rtl/widestr.c)
+    ${XTOSKRNL_SOURCE_DIR}/rtl/widestr.c
+    ${XTOSKRNL_SOURCE_DIR}/rtl/${ARCH}/dispatch.c)
 
 # Set module definition SPEC file
 set_specfile(xtoskrnl.spec)
