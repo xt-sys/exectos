@@ -75,4 +75,15 @@ typedef struct _M128
     LONGLONG High;
 } ALIGN(16) M128, *PM128;
 
+/* Dispatcher object header structure definition */
+typedef struct _DISPATCHER_HEADER
+{
+    UCHAR Type;
+    UCHAR Absolute;
+    UCHAR Inserted;
+    BOOLEAN DebugActive;
+    LONG SignalState;
+    LIST_ENTRY WaitListHead;
+} DISPATCHER_HEADER, *PDISPATCHER_HEADER;
+
 #endif /* __XTDK_XTBASE_H */
