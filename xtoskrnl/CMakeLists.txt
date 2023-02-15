@@ -21,6 +21,7 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/krnlinit.c
     ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/proc.c
     ${XTOSKRNL_SOURCE_DIR}/mm/kpools.c
+    ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/pages.c
     ${XTOSKRNL_SOURCE_DIR}/rtl/atomic.c
     ${XTOSKRNL_SOURCE_DIR}/rtl/byteswap.c
     ${XTOSKRNL_SOURCE_DIR}/rtl/memory.c
