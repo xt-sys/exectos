@@ -72,6 +72,10 @@ typedef struct _KPROCESS
 /* Thread control block structure definition */
 typedef struct _KTHREAD
 {
+    PVOID InitialStack;
+    PVOID KernelStack;
+    PVOID StackBase;
+    PVOID StackLimit;
     KAPC_STATE ApcState;
 } KTHREAD, *PKTHREAD;
 
