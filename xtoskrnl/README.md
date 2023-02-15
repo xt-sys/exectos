@@ -10,6 +10,7 @@ This is a list of them:
  * Ar - Architecture library
  * Hl - Hardware Abstraction Layer (HAL)
  * Ke - Core kernel library
+ * Mm - Memory manager
  * Rtl - Runtime library
 
 ### AR: Architecture Library
@@ -26,6 +27,10 @@ the system and applications may run.
 ### KE: Kernel Library
 The kernel implements its core functionality that everything else in the system depends upon. This includes basic
 low-level operations such as routing hardware interrupts.
+
+### MM: Memory Manager
+Memory Manager is one of core subsystems. It manages virtual memory, controls memory protection and the paging of memory
+in and out of physical memory to secondary storage. It also implements a general-purpose allocator of physical memory.
 
 ### RTL: Runtime Library
 This is a required static copy of C runtime objects. It includes many utility functions that can be used by native
