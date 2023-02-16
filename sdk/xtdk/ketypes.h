@@ -9,7 +9,6 @@
 #ifndef __XTDK_KETYPES_H
 #define __XTDK_KETYPES_H
 
-#include <kertptr.h>
 #include <xtstruct.h>
 #include <xttarget.h>
 #include <xttypes.h>
