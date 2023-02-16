@@ -20,6 +20,9 @@ typedef UCHAR KIRQL, *PKIRQL;
 /* Processor modes */
 typedef CHAR KPROCESSOR_MODE, *PKPROCESSOR_MODE;
 
+/* Spin locks synchronization mechanism */
+typedef ULONG_PTR KSPIN_LOCK, *PKSPIN_LOCK;
+
 /* 128-bit buffer containing a unique identifier value */
 typedef struct _GUID
 {
