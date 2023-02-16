@@ -12,9 +12,19 @@
 #include <xtdefs.h>
 #include <xtstruct.h>
 #include <xttypes.h>
+#include <ketypes.h>
 
 
 /* Kernel services routines forward references */
+XTAPI
+VOID
+KeInitializeTimer(OUT PKTIMER Timer);
+
+XTAPI
+VOID
+KeInitializeTimerEx(OUT PKTIMER Timer,
+                    IN KTIMER_TYPE Type);
+
 XTAPI
 VOID
 KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters);

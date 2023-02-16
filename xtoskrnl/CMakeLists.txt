@@ -18,6 +18,7 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/ioport.c
     ${XTOSKRNL_SOURCE_DIR}/ke/globals.c
     ${XTOSKRNL_SOURCE_DIR}/ke/krnlinit.c
+    ${XTOSKRNL_SOURCE_DIR}/ke/timer.c
     ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/krnlinit.c
     ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/proc.c
     ${XTOSKRNL_SOURCE_DIR}/mm/kpools.c
