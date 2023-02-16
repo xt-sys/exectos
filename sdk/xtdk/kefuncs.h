@@ -18,6 +18,12 @@
 /* Kernel services routines forward references */
 XTAPI
 VOID
+KeInitializeSemaphore(IN PKSEMAPHORE Semaphore,
+                      IN LONG Count,
+                      IN LONG Limit);
+
+XTAPI
+VOID
 KeInitializeSpinLock(IN PKSPIN_LOCK SpinLock);
 
 XTAPI
