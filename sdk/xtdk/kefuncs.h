@@ -18,6 +18,10 @@
 /* Kernel services routines forward references */
 XTAPI
 VOID
+KeInitializeSpinLock(IN PKSPIN_LOCK SpinLock);
+
+XTAPI
+VOID
 KeInitializeTimer(OUT PKTIMER Timer);
 
 XTAPI
