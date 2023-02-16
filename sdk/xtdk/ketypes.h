@@ -9,9 +9,11 @@
 #ifndef __XTDK_KETYPES_H
 #define __XTDK_KETYPES_H
 
+#include <xtbase.h>
 #include <xtstruct.h>
 #include <xttarget.h>
 #include <xttypes.h>
+#include ARCH_HEADER(ketypes.h)
 
 
 /* Maximum number of exception parameters */
