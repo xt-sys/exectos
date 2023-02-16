@@ -10,7 +10,7 @@
 
 
 /**
- * Initializes a spinlock.
+ * Initializes a kernel spinlock object.
  *
  * @param SpinLock
  *        Supplies a pointer to a kernel spin lock.
