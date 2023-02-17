@@ -17,6 +17,9 @@
 /* Interrupt Request Level (IRQL) */
 typedef UCHAR KIRQL, *PKIRQL;
 
+/* Kernel priority */
+typedef LONG KPRIORITY, *PKPRIORITY;
+
 /* Processor modes */
 typedef CHAR KPROCESSOR_MODE, *PKPROCESSOR_MODE;
 
