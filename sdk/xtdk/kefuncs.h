@@ -18,6 +18,17 @@
 /* Kernel services routines forward references */
 XTAPI
 VOID
+KeInitializeApc(IN PKAPC Apc,
+                IN PKTHREAD Thread,
+                IN KAPC_ENVIRONMENT Environment,
+                IN PKKERNEL_ROUTINE KernelRoutine,
+                IN PKRUNDOWN_ROUTINE RundownRoutine,
+                IN PKNORMAL_ROUTINE NormalRoutine,
+                IN KPROCESSOR_MODE ApcMode,
+                IN PVOID Context);
+
+XTAPI
+VOID
 KeInitializeSemaphore(IN PKSEMAPHORE Semaphore,
                       IN LONG Count,
                       IN LONG Limit);

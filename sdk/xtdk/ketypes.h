@@ -17,7 +17,7 @@
 
 
 /* Maximum number of exception parameters */
-#define EXCEPTION_MAXIMUM_PARAMETERS 15
+#define EXCEPTION_MAXIMUM_PARAMETERS                15
 
 /* Exception disposition return values */
 typedef enum _EXCEPTION_DISPOSITION
@@ -171,11 +171,14 @@ typedef struct _KPROCESS
 typedef struct _KTHREAD
 {
     DISPATCHER_HEADER Header;
+    LIST_ENTRY MutantListHead;
     PVOID InitialStack;
     PVOID KernelStack;
     PVOID StackBase;
     PVOID StackLimit;
+    KSPIN_LOCK ThreadLock;
     KAPC_STATE ApcState;
+    UCHAR ApcStateIndex;
 } KTHREAD, *PKTHREAD;
 
 #endif /* __XTDK_KEFUNCS_H */

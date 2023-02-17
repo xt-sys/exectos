@@ -4,6 +4,7 @@
 @ cdecl HlIoPortOutByte(ptr long)
 @ cdecl HlIoPortOutLong(ptr long)
 @ cdecl HlIoPortOutShort(ptr long)
+@ stdcall KeInitializeApc(ptr ptr long ptr ptr ptr long ptr)
 @ stdcall KeInitializeSemaphore(ptr long long)
 @ stdcall KeInitializeSpinLock(ptr)
 @ stdcall KeInitializeTimer(ptr)
