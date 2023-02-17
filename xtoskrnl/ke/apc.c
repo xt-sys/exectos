@@ -16,7 +16,7 @@
  *        Supplies a pointer to the APC object.
  *
  * @param Thread
- *        Suppliws a pointer to the thread object.
+ *        Supplies a pointer to the thread object.
  *
  * @param Environment
  *        Specifies an environment in which the APC will run.
