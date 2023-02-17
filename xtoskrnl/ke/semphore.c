@@ -39,3 +39,51 @@ KeInitializeSemaphore(IN PKSEMAPHORE Semaphore,
     /* Initialize semaphore wait list */
     RtlInitializeListHead(&Semaphore->Header.WaitListHead);
 }
+
+/**
+ * Reads semaphore's current signal state.
+ *
+ * @param Semaphore
+ *        Supplies a pointer to a semaphore object.
+ *
+ * @return This routine returns the current signal state of the semaphore.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+LONG
+KeReadSemaphoreState(IN PKSEMAPHORE Semaphore)
+{
+    /* Return semaphore's signal state */
+    return Semaphore->Header.SignalState;
+}
+
+/**
+ * Releases a semaphore.
+ *
+ * @param Semaphore
+ *        Supplies a pointer to a semaphore object.
+ *
+ * @param Increment
+ *        Specifies the priority increment value of the semaphore.
+ *
+ * @param Adjustment
+ *        Specifies adjustment value added to the semaphore's initial count value.
+ *
+ * @param Wait
+ *        Determines whether release of the semaphore will be followed by a kernel wait routine call or not.
+ *
+ * @return This routine returns a previous signal state of the semaphore.
+ *
+ * @since NT 3.5
+ */
+XTAPI
+LONG
+KeReleaseSemaphore(IN PKSEMAPHORE Semaphore,
+                   IN KPRIORITY Increment,
+                   IN LONG Adjustment,
+                   IN BOOLEAN Wait)
+{
+    UNIMPLEMENTED;
+    return 0;
+}

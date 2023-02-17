@@ -8,6 +8,8 @@
 @ stdcall KeInitializeSpinLock(ptr)
 @ stdcall KeInitializeTimer(ptr)
 @ stdcall KeInitializeTimerEx(ptr long)
+@ stdcall KeReadSemaphoreState(ptr)
+@ stdcall KeReleaseSemaphore(ptr long long long)
 @ stdcall RtlCompareMemory(ptr ptr long)
 @ stdcall RtlCopyMemory(ptr ptr long)
 @ stdcall RtlFillMemory(ptr long long)

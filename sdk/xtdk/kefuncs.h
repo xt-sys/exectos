@@ -36,6 +36,17 @@ KeInitializeTimerEx(OUT PKTIMER Timer,
                     IN KTIMER_TYPE Type);
 
 XTAPI
+LONG
+KeReadSemaphoreState(IN PKSEMAPHORE Semaphore);
+
+XTAPI
+LONG
+KeReleaseSemaphore(IN PKSEMAPHORE Semaphore,
+                   IN KPRIORITY Increment,
+                   IN LONG Adjustment,
+                   IN BOOLEAN Wait);
+
+XTAPI
 VOID
 KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters);
 
