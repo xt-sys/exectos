@@ -19,6 +19,21 @@
 /* Maximum number of exception parameters */
 #define EXCEPTION_MAXIMUM_PARAMETERS                15
 
+/* APC pending state length */
+#define KAPC_STATE_LENGTH                           (FIELD_OFFSET(KAPC_STATE, UserApcPending) + sizeof(BOOLEAN))
+
+/* Kernel service descriptor tables count */
+#define KSERVICE_TABLES_COUNT                       4
+
+/* Timer length */
+#define KTIMER_LENGTH                               (FIELD_OFFSET(KTIMER, Period) + sizeof(LONG))
+
+/* Kernel builtin wait blocks */
+#define EVENT_WAIT_BLOCK                            2
+#define KTHREAD_WAIT_BLOCK                          3
+#define KTIMER_WAIT_BLOCK                           3
+#define SEMAPHORE_WAIT_BLOCK                        2
+
 /* Exception disposition return values */
 typedef enum _EXCEPTION_DISPOSITION
 {
@@ -88,6 +103,8 @@ typedef EXCEPTION_DISPOSITION (*PEXCEPTION_ROUTINE)(IN PEXCEPTION_RECORD Excepti
 typedef VOID (*PKNORMAL_ROUTINE)(IN PVOID NormalContext, IN PVOID SystemArgument1, IN PVOID SystemArgument2);
 typedef VOID (*PKKERNEL_ROUTINE)(IN PKAPC Apc, IN OUT PKNORMAL_ROUTINE *NormalRoutine, IN OUT PVOID *NormalContext, IN OUT PVOID *SystemArgument1, IN OUT PVOID *SystemArgument2);
 typedef VOID (*PKRUNDOWN_ROUTINE)(IN PKAPC Apc);
+typedef VOID (*PKSTART_ROUTINE)(IN PVOID StartContext);
+typedef VOID (*PKSYSTEM_ROUTINE)(IN PKSTART_ROUTINE StartRoutine, IN PVOID StartContext);
 
 /* Exception record structure definition */
 typedef struct _EXCEPTION_RECORD
@@ -138,6 +155,12 @@ typedef struct _KAPC_STATE
     BOOLEAN UserApcPending;
 } KAPC_STATE, *PKAPC_STATE;
 
+/* Event gate structure definition */
+typedef struct _KGATE
+{
+    DISPATCHER_HEADER Header;
+} KGATE, *PKGATE;
+
 /* Semaphore object structure definition */
 typedef struct _KSEMAPHORE
 {
@@ -152,6 +175,25 @@ typedef struct _KSPIN_LOCK_QUEUE
     PKSPIN_LOCK Lock;
 } KSPIN_LOCK_QUEUE, *PKSPIN_LOCK_QUEUE;
 
+/* Queue object structure definition */
+typedef struct _KQUEUE
+{
+    DISPATCHER_HEADER Header;
+    LIST_ENTRY EntryListHead;
+    ULONG CurrentCount;
+    ULONG MaximumCount;
+    LIST_ENTRY ThreadListHead;
+} KQUEUE, *PKQUEUE;
+
+/* Kernel service table descriptor */
+typedef struct _KSERVICE_DESCRIPTOR_TABLE
+{
+    PULONG_PTR Base;
+    PULONG Count;
+    ULONG Limit;
+    PUCHAR Number;
+} KSERVICE_DESCRIPTOR_TABLE, *PKSERVICE_DESCRIPTOR_TABLE;
+
 /* Timer object structure definition */
 typedef struct _KTIMER
 {
@@ -161,10 +203,33 @@ typedef struct _KTIMER
     LONG Period;
 } KTIMER, *PKTIMER;
 
+/* Wait block structure definition */
+typedef struct _KWAIT_BLOCK
+{
+    LIST_ENTRY WaitListEntry;
+    PKTHREAD Thread;
+    PVOID Object;
+    PKWAIT_BLOCK *NextWaitBlock;
+    USHORT WaitKey;
+    UCHAR WaitType;
+    UCHAR SpareByte;
+    LONG SpareLong;
+} KWAIT_BLOCK, *PKWAIT_BLOCK;
+
 /* Process control block structure definition */
 typedef struct _KPROCESS
 {
-    INT PlaceHolder;
+    union
+    {
+        struct
+        {
+            LONG AutoAlignment:1;
+            LONG DisableBoost:1;
+            LONG DisableQuantum:1;
+            LONG ReservedFlags:29;
+        };
+        LONG ProcessFlags;
+    };
 } KPROCESS, *PKPROCESS;
 
 /* Thread control block structure definition */
@@ -177,8 +242,72 @@ typedef struct _KTHREAD
     PVOID StackBase;
     PVOID StackLimit;
     KSPIN_LOCK ThreadLock;
-    KAPC_STATE ApcState;
+    volatile UCHAR State;
+    union
+    {
+        KAPC_STATE ApcState;
+        struct
+        {
+            UCHAR ApcStateFill[KAPC_STATE_LENGTH];
+            BOOLEAN ApcQueueable;
+            VOLATILE UCHAR NextProcessor;
+            VOLATILE UCHAR DeferredProcessor;
+            UCHAR AdjustReason;
+            SCHAR AdjustIncrement;
+        };
+    };
+    KSPIN_LOCK ApcQueueLock;
+    LONG_PTR WaitStatus;
+    union
+    {
+        PKWAIT_BLOCK WaitBlockList;
+        PKGATE GateObject;
+    };
+    BOOLEAN Alertable;
+    BOOLEAN WaitNext;
+    UCHAR WaitReason;
+    SCHAR Priority;
+    UCHAR StackSwap;
+    VOLATILE UCHAR SwapBusy;
+    BOOLEAN Alerted[MaximumMode];
+    union
+    {
+        LIST_ENTRY WaitListEntry;
+        SINGLE_LIST_ENTRY SwapListEntry;
+    };
+    PKQUEUE Queue;
+    PVOID EnvironmentBlock;
+    union
+    {
+        KTIMER Timer;
+        struct
+        {
+            UCHAR TimerFill[KTIMER_LENGTH];
+            union
+            {
+                struct
+                {
+                    LONG AutoAlignment:1;
+                    LONG DisableBoost:1;
+                    LONG ReservedFlags:30;
+                };
+                LONG ThreadFlags;
+            };
+        };
+    };
+    KWAIT_BLOCK WaitBlock[KTHREAD_WAIT_BLOCK + 1];
+    LIST_ENTRY QueueListEntry;
+    PKTRAP_FRAME TrapFrame;
+    PVOID CallbackStack;
+    PVOID ServiceTable;
+    ULONG KernelLimit;
     UCHAR ApcStateIndex;
+    BOOLEAN StackResident;
+    PKPROCESS Process;
+    PKAPC_STATE ApcStatePointer[2];
+    KAPC_STATE SavedApcState;
+    KAPC SuspendApc;
+    KSEMAPHORE SuspendSemaphore;
 } KTHREAD, *PKTHREAD;
 
 #endif /* __XTDK_KEFUNCS_H */
