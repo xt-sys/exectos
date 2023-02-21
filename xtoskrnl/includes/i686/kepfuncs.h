@@ -25,6 +25,17 @@ PKTHREAD
 KeGetCurrentThread(VOID);
 
 XTAPI
+XTSTATUS
+KeInitializeThread(IN PKTHREAD Thread,
+                   IN PVOID Stack,
+                   IN PKSYSTEM_ROUTINE SystemRoutine,
+                   IN PKSTART_ROUTINE StartRoutine,
+                   IN PVOID StartContext,
+                   IN PCONTEXT Context,
+                   IN PVOID EnvironmentBlock,
+                   IN PKPROCESS Process);
+
+XTAPI
 VOID
 KepArchInitialize(VOID);
 
