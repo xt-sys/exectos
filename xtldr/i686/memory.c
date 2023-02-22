@@ -168,7 +168,7 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
         return Status;
     }
 
-    /* Iterate through and map all the mappings*/
+    /* Iterate through and map all the mappings */
     BlDbgPrint(L"Mapping and dumping EFI memory:\n");
     ListEntry = MemoryMappings->Flink;
     while(ListEntry != MemoryMappings)
@@ -196,6 +196,9 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
         /* Take next element */
         ListEntry = ListEntry->Flink;
     }
+
+    /* Zero-fill buffer for EFI memory map */
+    RtlZeroMemory(MemoryMap, sizeof(EFI_MEMORY_MAP));
 
     /* Get EFI memory map and prepare for exiting boot services */
     BlDbgPrint(L"Exiting EFI boot services\n");
