@@ -416,7 +416,8 @@ PepRelocateLoadedImage(IN PPECOFF_IMAGE_CONTEXT Image)
     if(Image->PeHeader->FileHeader.Characteristics & PECOFF_IMAGE_FILE_RELOCS_STRIPPED)
     {
         /* No relocation information found */
-        return STATUS_EFI_UNSUPPORTED;
+        XtLdrProtocol->DbgPrint(L"WARNING: PE/COFF image is stripped and contains no information about relocations\n");
+        return STATUS_EFI_SUCCESS;
     }
 
     /* Set relocation data directory */
