@@ -197,6 +197,9 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
         ListEntry = ListEntry->Flink;
     }
 
+    /* Map zero page as well */
+    BlMapVirtualMemory(MemoryMappings, 0, 0, 1, PtePointer);
+
     /* Zero-fill buffer for EFI memory map */
     RtlZeroMemory(MemoryMap, sizeof(EFI_MEMORY_MAP));
 
