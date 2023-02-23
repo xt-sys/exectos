@@ -20,3 +20,6 @@ EPROCESS KeInitialProcess;
 
 /* Kernel initial thread */
 ETHREAD KeInitialThread;
+
+/* Kernel service descriptor table */
+KSERVICE_DESCRIPTOR_TABLE KeServiceDescriptorTable[KSERVICE_TABLES_COUNT];

@@ -30,6 +30,14 @@ KepArchInitialize(VOID);
 
 XTAPI
 VOID
+KepInitializeThreadContext(IN PKTHREAD Thread,
+                           IN PKSYSTEM_ROUTINE SystemRoutine,
+                           IN PKSTART_ROUTINE StartRoutine,
+                           IN PVOID StartContext,
+                           IN PCONTEXT ContextRecord);
+
+XTAPI
+VOID
 KepStartKernel(VOID);
 
 XTAPI

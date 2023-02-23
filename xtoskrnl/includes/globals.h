@@ -28,4 +28,7 @@ EXTERN EPROCESS KeInitialProcess;
 /* Kernel initial thread */
 EXTERN ETHREAD KeInitialThread;
 
+/* Kernel service descriptor table */
+EXTERN KSERVICE_DESCRIPTOR_TABLE KeServiceDescriptorTable[KSERVICE_TABLES_COUNT];
+
 #endif /* __XTOSKRNL_GLOBALS_H */

@@ -16,6 +16,11 @@
 #include ARCH_HEADER(ketypes.h)
 
 
+/* Exception types and handling mechanisms */
+#define EXCEPTION_CONTINUE_SEARCH                   0x00
+#define EXCEPTION_EXECUTE_HANDLER                   0x01
+#define EXCEPTION_CONTINUE_EXECUTION                0xFF
+
 /* Maximum number of exception parameters */
 #define EXCEPTION_MAXIMUM_PARAMETERS                15
 
@@ -33,6 +38,14 @@
 #define KTHREAD_WAIT_BLOCK                          3
 #define KTIMER_WAIT_BLOCK                           3
 #define SEMAPHORE_WAIT_BLOCK                        2
+
+/* Adjust reason */
+typedef enum _ADJUST_REASON
+{
+    AdjustNone = 0,
+    AdjustUnwait = 1,
+    AdjustBoost = 2
+} ADJUST_REASON, *PADJUST_REASON;
 
 /* Exception disposition return values */
 typedef enum _EXCEPTION_DISPOSITION
@@ -83,6 +96,19 @@ typedef enum _KOBJECTS
     MaximumKernelObject = 25
 } KOBJECTS, *PKOBJECTS;
 
+/* Thread state */
+typedef enum _KTHREAD_STATE
+{
+    Initialized,
+    Ready,
+    Running,
+    Standby,
+    Terminated,
+    Waiting,
+    Transition,
+    DeferredReady
+} KTHREAD_STATE, *PKTHREAD_STATE;
+
 /* Timer type */
 typedef enum _KTIMER_TYPE
 {
@@ -97,6 +123,13 @@ typedef enum _MODE
     UserMode,
     MaximumMode
 } MODE, *PMODE;
+
+/* Wait type */
+typedef enum _WAIT_TYPE
+{
+    WaitAll,
+    WaitAny
+} WAIT_TYPE, *PWAIT_TYPE;
 
 /* Kernel routine callbacks */
 typedef EXCEPTION_DISPOSITION (*PEXCEPTION_ROUTINE)(IN PEXCEPTION_RECORD ExceptionRecord, IN PVOID EstablisherFrame, IN OUT PCONTEXT ContextRecord, IN OUT PVOID DispatcherContext);

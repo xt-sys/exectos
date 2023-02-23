@@ -13,3 +13,6 @@
 #include "globals.h"
 #include "arpfuncs.h"
 #include "kepfuncs.h"
+
+#include ARCH_HEADER(arpfuncs.h)
+#include ARCH_HEADER(kepfuncs.h)
