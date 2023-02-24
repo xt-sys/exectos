@@ -12,11 +12,11 @@
 /**
  * Initializes the thread.
  *
+ * @param Process
+ *        Supplies a pointer to the process that owns the thread.
+ *
  * @param Thread
  *        Supplies a pointer to thread that will be initialized.
- *
- * @param Stack
- *        Supplies a pointer to the stack of the thread.
  *
  * @param SystemRoutine
  *        Supplies a pointer to the routine called during first scheduling.
@@ -33,8 +33,8 @@
  * @param EnvironmentBlock
  *        Supplies a pointer to the environment block of the thread.
  *
- * @param Process
- *        Supplies a pointer to the process that owns the thread.
+ * @param Stack
+ *        Supplies a pointer to the stack of the thread.
  *
  * @return This routine returns a status code.
  *
@@ -42,14 +42,14 @@
  */
 XTAPI
 XTSTATUS
-KeInitializeThread(IN PKTHREAD Thread,
-                   IN PVOID Stack,
+KeInitializeThread(IN PKPROCESS Process,
+                   IN OUT PKTHREAD Thread,
                    IN PKSYSTEM_ROUTINE SystemRoutine,
                    IN PKSTART_ROUTINE StartRoutine,
                    IN PVOID StartContext,
                    IN PCONTEXT Context,
                    IN PVOID EnvironmentBlock,
-                   IN PKPROCESS Process)
+                   IN PVOID Stack)
 {
     PKWAIT_BLOCK TimerWaitBlock;
     BOOLEAN Allocation;

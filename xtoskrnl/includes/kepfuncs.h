@@ -22,14 +22,14 @@ KeInitializeProcess(IN OUT PKPROCESS Process,
 
 XTAPI
 XTSTATUS
-KeInitializeThread(IN PKTHREAD Thread,
-                   IN PVOID Stack,
+KeInitializeThread(IN PKPROCESS Process,
+                   IN OUT PKTHREAD Thread,
                    IN PKSYSTEM_ROUTINE SystemRoutine,
                    IN PKSTART_ROUTINE StartRoutine,
                    IN PVOID StartContext,
                    IN PCONTEXT Context,
                    IN PVOID EnvironmentBlock,
-                   IN PKPROCESS Process);
+                   IN PVOID Stack);
 
 XTAPI
 VOID
