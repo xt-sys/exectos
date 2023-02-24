@@ -13,6 +13,14 @@
 
 
 XTAPI
+VOID
+KeInitializeProcess(IN OUT PKPROCESS Process,
+                    IN KPRIORITY Priority,
+                    IN KAFFINITY Affinity,
+                    IN PULONG_PTR DirectoryTable,
+                    IN BOOLEAN Alignment);
+
+XTAPI
 XTSTATUS
 KeInitializeThread(IN PKTHREAD Thread,
                    IN PVOID Stack,

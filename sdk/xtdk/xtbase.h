@@ -14,6 +14,9 @@
 #include <xttypes.h>
 
 
+/* Kernel affinity */
+typedef ULONG_PTR KAFFINITY, *PKAFFINITY;
+
 /* Interrupt Request Level (IRQL) */
 typedef UCHAR KIRQL, *PKIRQL;
 

@@ -30,6 +30,14 @@
 #define NULL                                   ((PVOID) 0)
 #define NULL64                                 ((VOID * PVOID) 0)
 
+/* Type limits */
+#define MINCHAR                                0x80
+#define MAXCHAR                                0x7F
+#define MINSHORT                               0x8000
+#define MAXSHORT                               0x7FFF
+#define MINLONG                                0x80000000
+#define MAXLONG                                0x7FFFFFFF
+
 /* Preprocessor macros for defining a structure alignment and packing */
 #define ALIGN(x)                               __attribute__((aligned(x)))
 #define PACK                                   __attribute__((packed))

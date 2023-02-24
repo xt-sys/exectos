@@ -39,6 +39,10 @@
 #define KTIMER_WAIT_BLOCK                           3
 #define SEMAPHORE_WAIT_BLOCK                        2
 
+/* Quantum values */
+#define READY_SKIP_QUANTUM                          2
+#define THREAD_QUANTUM                              6
+
 /* Adjust reason */
 typedef enum _ADJUST_REASON
 {
@@ -95,6 +99,17 @@ typedef enum _KOBJECTS
     ThreadedDpcObject = 24,
     MaximumKernelObject = 25
 } KOBJECTS, *PKOBJECTS;
+
+/* Process states */
+typedef enum _KPROCESS_STATE
+{
+    ProcessInMemory,
+    ProcessOutOfMemory,
+    ProcessInTransition,
+    ProcessOutTransition,
+    ProcessInSwap,
+    ProcessOutSwap
+} KPROCESS_STATE, *PKPROCESS_STATE;
 
 /* Thread state */
 typedef enum _KTHREAD_STATE
@@ -252,6 +267,13 @@ typedef struct _KWAIT_BLOCK
 /* Process control block structure definition */
 typedef struct _KPROCESS
 {
+    DISPATCHER_HEADER Header;
+    LIST_ENTRY ProfileListHead;
+    ULONG_PTR DirectoryTable[2];
+    USHORT IopmOffset;
+    LIST_ENTRY ReadyListHead;
+    LIST_ENTRY ThreadListHead;
+    KAFFINITY Affinity;
     union
     {
         struct
@@ -263,6 +285,10 @@ typedef struct _KPROCESS
         };
         LONG ProcessFlags;
     };
+    SCHAR BasePriority;
+    SCHAR Quantum;
+    UCHAR State;
+    ULONG_PTR StackCount;
 } KPROCESS, *PKPROCESS;
 
 /* Thread control block structure definition */
