@@ -124,8 +124,16 @@ KeInitializeThread(IN PKPROCESS Process,
     Thread->StackBase = Stack;
     Thread->StackLimit = Stack - KERNEL_STACK_SIZE;
 
-    /* Initialize thread context */
-    KepInitializeThreadContext(Thread, SystemRoutine, StartRoutine, StartContext, Context);
+    __try
+    {
+        /* Initialize thread context */
+        KepInitializeThreadContext(Thread, SystemRoutine, StartRoutine, StartContext, Context);
+    }
+    __except(EXCEPTION_EXECUTE_HANDLER)
+    {
+        /* Failed to initialize thread context */
+        return STATUS_UNSUCCESSFUL;
+    }
 
     /* Mark thread as initialized and run it */
     Thread->State = Initialized;
