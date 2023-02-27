@@ -13,7 +13,7 @@
 #include <xtstruct.h>
 #include <xttarget.h>
 #include <xttypes.h>
-#include ARCH_HEADER(ketypes.h)
+#include ARCH_HEADER(xtstruct.h)
 
 
 /* Exception types and handling mechanisms */
@@ -42,6 +42,12 @@
 /* Quantum values */
 #define READY_SKIP_QUANTUM                          2
 #define THREAD_QUANTUM                              6
+
+/* Thread priority levels */
+#define THREAD_LOW_PRIORITY                         0
+#define THREAD_LOW_REALTIME_PRIORITY                16
+#define THREAD_HIGH_PRIORITY                        31
+#define THREAD_MAXIMUM_PRIORITY                     32
 
 /* Adjust reason */
 typedef enum _ADJUST_REASON
@@ -148,6 +154,7 @@ typedef enum _WAIT_TYPE
 
 /* Kernel routine callbacks */
 typedef EXCEPTION_DISPOSITION (*PEXCEPTION_ROUTINE)(IN PEXCEPTION_RECORD ExceptionRecord, IN PVOID EstablisherFrame, IN OUT PCONTEXT ContextRecord, IN OUT PVOID DispatcherContext);
+typedef VOID (*PKDEFERRED_ROUTINE)(IN PKDPC Dpc, IN PVOID DeferredContext, IN PVOID SystemArgument1, IN PVOID SystemArgument2);
 typedef VOID (*PKNORMAL_ROUTINE)(IN PVOID NormalContext, IN PVOID SystemArgument1, IN PVOID SystemArgument2);
 typedef VOID (*PKKERNEL_ROUTINE)(IN PKAPC Apc, IN OUT PKNORMAL_ROUTINE *NormalRoutine, IN OUT PVOID *NormalContext, IN OUT PVOID *SystemArgument1, IN OUT PVOID *SystemArgument2);
 typedef VOID (*PKRUNDOWN_ROUTINE)(IN PKAPC Apc);
@@ -185,6 +192,30 @@ typedef struct _KAPC
     KPROCESSOR_MODE ApcMode;
     BOOLEAN Inserted;
 } KAPC, *PKAPC;
+
+/* Deferred Procedure Call (DPC) object structure definition */
+typedef struct _KDPC
+{
+    UCHAR Type;
+    UCHAR Importance;
+    UCHAR Number;
+    UCHAR Expedite;
+    LIST_ENTRY DpcListEntry;
+    PKDEFERRED_ROUTINE DeferredRoutine;
+    PVOID DeferredContext;
+    PVOID SystemArgument1;
+    PVOID SystemArgument2;
+    PVOID DpcData;
+} KDPC, *PKDPC;
+
+/* DPC data structure definition */
+typedef struct _KDPC_DATA
+{
+    LIST_ENTRY DpcListHead;
+    KSPIN_LOCK DpcLock;
+    VOLATILE ULONG DpcQueueDepth;
+    ULONG DpcCount;
+} KDPC_DATA, *PKDPC_DATA;
 
 /* Exception registration record  structure definition */
 typedef struct _EXCEPTION_REGISTRATION_RECORD
@@ -271,6 +302,7 @@ typedef struct _KPROCESS
     LIST_ENTRY ProfileListHead;
     ULONG_PTR DirectoryTable[2];
     USHORT IopmOffset;
+    VOLATILE KAFFINITY ActiveProcessors;
     LIST_ENTRY ReadyListHead;
     LIST_ENTRY ThreadListHead;
     KAFFINITY Affinity;
@@ -355,6 +387,7 @@ typedef struct _KTHREAD
         };
     };
     KWAIT_BLOCK WaitBlock[KTHREAD_WAIT_BLOCK + 1];
+    KIRQL WaitIrql;
     LIST_ENTRY QueueListEntry;
     PKTRAP_FRAME TrapFrame;
     PVOID CallbackStack;
@@ -363,6 +396,7 @@ typedef struct _KTHREAD
     UCHAR ApcStateIndex;
     BOOLEAN StackResident;
     PKPROCESS Process;
+    KAFFINITY Affinity;
     PKAPC_STATE ApcStatePointer[2];
     KAPC_STATE SavedApcState;
     KAPC SuspendApc;

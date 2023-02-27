@@ -12,6 +12,7 @@
 #include <xtbase.h>
 #include <xtstruct.h>
 #include <xttypes.h>
+#include <potypes.h>
 #include ARCH_HEADER(xtstruct.h)
 #include ARCH_HEADER(artypes.h)
 
@@ -401,7 +402,11 @@ typedef struct _KPROCESSOR_CONTROL_BLOCK
     CPU_IDENTIFICATION CpuId;
     KPROCESSOR_STATE ProcessorState;
     ULONG_PTR MultiThreadProcessorSet;
+    KDPC_DATA DpcData[2];
     PVOID DpcStack;
+    VOLATILE ULONG_PTR TimerRequest;
+    SINGLE_LIST_ENTRY DeferredReadyListHead;
+    PROCESSOR_POWER_STATE PowerState;
 } KPROCESSOR_CONTROL_BLOCK, *PKPROCESSOR_CONTROL_BLOCK;
 
 /* Processor Block structure definition */

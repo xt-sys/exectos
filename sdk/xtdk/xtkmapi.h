@@ -30,6 +30,7 @@
 #include <iotypes.h>
 #include <ketypes.h>
 #include <ldrtypes.h>
+#include <potypes.h>
 #include <pstypes.h>
 #include <rtltypes.h>
 
