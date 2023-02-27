@@ -6,7 +6,7 @@
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>>
+#include <xtos.h>
 
 
 /**
