@@ -551,3 +551,20 @@ ArWriteModelSpecificRegister(IN ULONG Register,
                  : "c" (Register),
                    "A" (Value));
 }
+
+/**
+ * Yields a current thread running on the processor.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+ArYieldProcessor()
+{
+    asm volatile("pause"
+                 :
+                 :
+                 : "memory");
+}

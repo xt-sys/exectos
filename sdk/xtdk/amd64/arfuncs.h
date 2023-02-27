@@ -108,4 +108,8 @@ VOID
 ArWriteModelSpecificRegister(IN ULONG Register,
                              IN ULONGLONG Value);
 
+XTCDECL
+VOID
+ArYieldProcessor();
+
 #endif /* __XTDK_AMD64_ARFUNCS_H */

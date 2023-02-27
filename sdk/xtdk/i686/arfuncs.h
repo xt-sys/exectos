@@ -104,4 +104,8 @@ VOID
 ArWriteModelSpecificRegister(IN ULONG Register,
                              IN ULONGLONG Value);
 
+XTCDECL
+VOID
+ArYieldProcessor();
+
 #endif /* __XTDK_I686_ARFUNCS_H */
