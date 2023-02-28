@@ -153,13 +153,13 @@ typedef enum _WAIT_TYPE
 } WAIT_TYPE, *PWAIT_TYPE;
 
 /* Kernel routine callbacks */
-typedef EXCEPTION_DISPOSITION (*PEXCEPTION_ROUTINE)(IN PEXCEPTION_RECORD ExceptionRecord, IN PVOID EstablisherFrame, IN OUT PCONTEXT ContextRecord, IN OUT PVOID DispatcherContext);
-typedef VOID (*PKDEFERRED_ROUTINE)(IN PKDPC Dpc, IN PVOID DeferredContext, IN PVOID SystemArgument1, IN PVOID SystemArgument2);
-typedef VOID (*PKNORMAL_ROUTINE)(IN PVOID NormalContext, IN PVOID SystemArgument1, IN PVOID SystemArgument2);
-typedef VOID (*PKKERNEL_ROUTINE)(IN PKAPC Apc, IN OUT PKNORMAL_ROUTINE *NormalRoutine, IN OUT PVOID *NormalContext, IN OUT PVOID *SystemArgument1, IN OUT PVOID *SystemArgument2);
-typedef VOID (*PKRUNDOWN_ROUTINE)(IN PKAPC Apc);
-typedef VOID (*PKSTART_ROUTINE)(IN PVOID StartContext);
-typedef VOID (*PKSYSTEM_ROUTINE)(IN PKSTART_ROUTINE StartRoutine, IN PVOID StartContext);
+typedef EXCEPTION_DISPOSITION (XTCDECL *PEXCEPTION_ROUTINE)(IN PEXCEPTION_RECORD ExceptionRecord, IN PVOID EstablisherFrame, IN OUT PCONTEXT ContextRecord, IN OUT PVOID DispatcherContext);
+typedef VOID (XTCDECL *PKDEFERRED_ROUTINE)(IN PKDPC Dpc, IN PVOID DeferredContext, IN PVOID SystemArgument1, IN PVOID SystemArgument2);
+typedef VOID (XTAPI *PKNORMAL_ROUTINE)(IN PVOID NormalContext, IN PVOID SystemArgument1, IN PVOID SystemArgument2);
+typedef VOID (XTAPI *PKKERNEL_ROUTINE)(IN PKAPC Apc, IN OUT PKNORMAL_ROUTINE *NormalRoutine, IN OUT PVOID *NormalContext, IN OUT PVOID *SystemArgument1, IN OUT PVOID *SystemArgument2);
+typedef VOID (XTAPI *PKRUNDOWN_ROUTINE)(IN PKAPC Apc);
+typedef VOID (XTCDECL *PKSTART_ROUTINE)(IN PVOID StartContext);
+typedef VOID (XTCDECL *PKSYSTEM_ROUTINE)(IN PKSTART_ROUTINE StartRoutine, IN PVOID StartContext);
 
 /* Exception record structure definition */
 typedef struct _EXCEPTION_RECORD
