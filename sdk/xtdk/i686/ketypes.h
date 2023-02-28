@@ -324,6 +324,14 @@ typedef struct _KEXCEPTION_FRAME
     ULONG PlaceHolder;
 } KEXCEPTION_FRAME, *PKEXCEPTION_FRAME;
 
+/* Switch frame definition */
+typedef struct _KSWITCH_FRAME
+{
+    PVOID ExceptionList;
+    BOOLEAN ApcBypass;
+    PVOID ReturnAddress;
+} KSWITCH_FRAME, *PKSWITCH_FRAME;
+
 /* Trap frame definition */
 typedef struct _KTRAP_FRAME
 {
