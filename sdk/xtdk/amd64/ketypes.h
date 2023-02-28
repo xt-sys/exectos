@@ -464,12 +464,16 @@ typedef struct _KPROCESSOR_CONTROL_BLOCK
 /* Processor Block structure definition */
 typedef struct _KPROCESSOR_BLOCK
 {
-    struct
+    union
     {
-        PKGDTENTRY GdtBase;
-        PKTSS TssBase;
-        PKPROCESSOR_BLOCK Self;
-        PKPROCESSOR_CONTROL_BLOCK CurrentPrcb;
+        THREAD_INFORMATION_BLOCK ThreadInformationBlock;
+        struct
+        {
+            PKGDTENTRY GdtBase;
+            PKTSS TssBase;
+            PKPROCESSOR_BLOCK Self;
+            PKPROCESSOR_CONTROL_BLOCK CurrentPrcb;
+        };
     };
     PKIDTENTRY IdtBase;
     KIRQL Irql;

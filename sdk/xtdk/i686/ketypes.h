@@ -420,6 +420,7 @@ typedef struct _KPROCESSOR_CONTROL_BLOCK
 /* Processor Block structure definition */
 typedef struct _KPROCESSOR_BLOCK
 {
+    THREAD_INFORMATION_BLOCK ThreadInformationBlock;
     PKPROCESSOR_BLOCK Self;
     PKPROCESSOR_CONTROL_BLOCK CurrentPrcb;
     KIRQL Irql;

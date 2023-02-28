@@ -295,6 +295,17 @@ typedef struct _KWAIT_BLOCK
     LONG SpareLong;
 } KWAIT_BLOCK, *PKWAIT_BLOCK;
 
+/* XT Thread Information Block (TIB) definition */
+typedef struct _THREAD_INFORMATION_BLOCK
+{
+    PEXCEPTION_REGISTRATION_RECORD ExceptionList;
+    PVOID StackBase;
+    PVOID StackLimit;
+    PVOID SubSystemTib;
+    PVOID ArbitraryUserPointer;
+    PTHREAD_INFORMATION_BLOCK Self;
+} THREAD_INFORMATION_BLOCK, *PTHREAD_INFORMATION_BLOCK;
+
 /* Process control block structure definition */
 typedef struct _KPROCESS
 {
