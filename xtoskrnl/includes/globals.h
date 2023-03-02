@@ -10,7 +10,6 @@
 #define __XTOSKRNL_GLOBALS_H
 
 #include <xtos.h>
-#include ARCH_HEADER(globals.h)
 
 
 /* FrameBuffer information */
