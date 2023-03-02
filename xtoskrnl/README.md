@@ -11,6 +11,7 @@ This is a list of them:
  * Hl - Hardware Abstraction Layer (HAL)
  * Ke - Core kernel library
  * Mm - Memory manager
+ * Po - Plug&Play and Power Manager
  * Rtl - Runtime library
 
 ### AR: Architecture Library
@@ -31,6 +32,10 @@ low-level operations such as routing hardware interrupts.
 ### MM: Memory Manager
 Memory Manager is one of core subsystems. It manages virtual memory, controls memory protection and the paging of memory
 in and out of physical memory to secondary storage. It also implements a general-purpose allocator of physical memory.
+
+### PO: Plug&Play and Power Manager
+This subsystem deals with power events, such as power-off, stand-by, or hibernate. It also handles Plug&Play and
+supports device detection and installation at boot time. It is responsible for starting and stopping devices on demand.
 
 ### RTL: Runtime Library
 This is a required static copy of C runtime objects. It includes many utility functions that can be used by native
