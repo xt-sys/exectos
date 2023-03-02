@@ -72,6 +72,39 @@ ArInitializeProcessor(VOID)
 }
 
 /**
+ * Updates an existing i686 GDT entry with new base address.
+ *
+ * @param Gdt
+ *        Supplies a pointer to the GDT.
+ *
+ * @param Selector
+ *        Specifies a segment selector of the GDT entry.
+ *
+ * @param Base
+ *        Specifies a base address value of the descriptor.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+ArSetGdtEntryBase(IN PKGDTENTRY Gdt,
+                  IN USHORT Selector,
+                  IN ULONG_PTR Base)
+{
+    PKGDTENTRY GdtEntry;
+
+    /* Get GDT entry */
+    GdtEntry = (PKGDTENTRY)((ULONG_PTR)Gdt + (Selector & ~RPL_MASK));
+
+    /* Set new GDT descriptor base */
+    GdtEntry->BaseLow = (Base & 0xFFFF);
+    GdtEntry->Bytes.BaseMiddle = ((Base >> 16) & 0xFF);
+    GdtEntry->Bytes.BaseHigh = ((Base >> 24) & 0xFF);
+}
+
+/**
  * Identifies processor type (vendor, model, stepping) as well as looks for available CPU features and stores them
  * in Processor Control Block (PRCB).
  *
@@ -416,7 +449,7 @@ ArpSetDoubleFaultTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock)
 }
 
 /**
- * Fills in an AMD64 GDT entry.
+ * Fills in an i686 GDT entry.
  *
  * @param Gdt
  *        Supplies a pointer to the GDT.

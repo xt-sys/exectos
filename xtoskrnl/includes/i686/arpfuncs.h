@@ -12,6 +12,12 @@
 #include <xtos.h>
 
 
+XTAPI
+VOID
+ArSetGdtEntryBase(IN PKGDTENTRY Gdt,
+                  IN USHORT Selector,
+                  IN ULONG_PTR Base);
+
 XTCDECL
 VOID
 ArpHandleTrap00();

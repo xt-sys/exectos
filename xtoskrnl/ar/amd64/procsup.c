@@ -74,6 +74,40 @@ ArInitializeProcessor(VOID)
 }
 
 /**
+ * Updates an existing AMD64 GDT entry with new base address.
+ *
+ * @param Gdt
+ *        Supplies a pointer to the GDT.
+ *
+ * @param Selector
+ *        Specifies a segment selector of the GDT entry.
+ *
+ * @param Base
+ *        Specifies a base address value of the descriptor.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+ArSetGdtEntryBase(IN PKGDTENTRY Gdt,
+                  IN USHORT Selector,
+                  IN ULONG_PTR Base)
+{
+    PKGDTENTRY GdtEntry;
+
+    /* Get GDT entry */
+    GdtEntry = (PKGDTENTRY)((ULONG_PTR)Gdt + (Selector & ~RPL_MASK));
+
+    /* Set new GDT descriptor base */
+    GdtEntry->BaseLow = (Base & 0xFFFF);
+    GdtEntry->Bytes.BaseMiddle = ((Base >> 16) & 0xFF);
+    GdtEntry->Bytes.BaseHigh = ((Base >> 24) & 0xFF);
+    GdtEntry->BaseUpper = (Base >> 32);
+}
+
+/**
  * Identifies processor type (vendor, model, stepping) as well as looks for available CPU features and stores them
  * in Processor Control Block (PRCB).
  *
@@ -450,14 +484,14 @@ ArpSetGdtEntry(IN PKGDTENTRY Gdt,
     GdtEntry = (PKGDTENTRY)((ULONG_PTR)Gdt + (Selector & ~RPL_MASK));
 
     /* Set GDT descriptor base */
-    GdtEntry->BaseLow = Base & 0xFFFF;
-    GdtEntry->Bytes.BaseMiddle = (Base >> 16) & 0xFF;
-    GdtEntry->Bytes.BaseHigh = (Base >> 24) & 0xFF;
-    GdtEntry->BaseUpper = Base >> 32;
+    GdtEntry->BaseLow = (Base & 0xFFFF);
+    GdtEntry->Bytes.BaseMiddle = ((Base >> 16) & 0xFF);
+    GdtEntry->Bytes.BaseHigh = ((Base >> 24) & 0xFF);
+    GdtEntry->BaseUpper = (Base >> 32);
 
     /* Set descriptor limit */
-    GdtEntry->LimitLow = Limit & 0xFFFF;
-    GdtEntry->Bits.LimitHigh = (Limit >> 16) & 0xF;
+    GdtEntry->LimitLow = (Limit & 0xFFFF);
+    GdtEntry->Bits.LimitHigh = ((Limit >> 16) & 0xF);
 
     /* Initialize GDT entry */
     GdtEntry->Bits.DefaultBig = !!(SegmentMode & 2);
