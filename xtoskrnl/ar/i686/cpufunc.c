@@ -102,7 +102,7 @@ ArInvalidateTlbEntry(PVOID Address)
 }
 
 /**
- * Loads the values in the source operand into the global descriptor table register (GDTR).
+ * Loads the value in the source operand into the global descriptor table register (GDTR).
  *
  * @param Source
  *        Specifies a memory location that contains the base address of GDT.
@@ -122,7 +122,7 @@ ArLoadGlobalDescriptorTable(IN PVOID Source)
 }
 
 /**
- * Loads the values in the source operand into the interrupt descriptor table register (IDTR).
+ * Loads the value in the source operand into the interrupt descriptor table register (IDTR).
  *
  * @param Source
  *        Specifies a memory location that contains the base address of IDT.
@@ -139,6 +139,25 @@ ArLoadInterruptDescriptorTable(IN PVOID Source)
                  :
                  : "m" (*(PSHORT)Source)
                  : "memory");
+}
+
+/**
+ * Loads the value in the source operand into the local descriptor table register (LDTR).
+ *
+ * @param Source
+ *        Specifies a selector value.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+ArLoadLocalDescriptorTable(IN USHORT Source)
+{
+    asm volatile("lldtw %0"
+                 :
+                 : "g" (Source));
 }
 
 /**

@@ -46,6 +46,10 @@ ArLoadInterruptDescriptorTable(IN PVOID Source);
 
 XTCDECL
 VOID
+ArLoadLocalDescriptorTable(IN USHORT Source);
+
+XTCDECL
+VOID
 ArLoadMxcsrRegister(IN ULONG Source);
 
 XTCDECL
