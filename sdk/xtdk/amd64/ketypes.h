@@ -67,6 +67,27 @@
 #define AMD64_INTERRUPT_GATE                      0xE
 #define AMD64_TRAP_GATE                           0xF
 
+/* EFlags bits definitions */
+#define EFLAGS_CF_MASK                            0x00000001L
+#define EFLAGS_PF_MASK                            0x00000004L
+#define EFLAGS_AF_MASK                            0x00000010L
+#define EFLAGS_ZF_MASK                            0x00000040L
+#define EFLAGS_SF_MASK                            0x00000080L
+#define EFLAGS_TF                                 0x00000100L
+#define EFLAGS_INTERRUPT_MASK                     0x00000200L
+#define EFLAGS_DF_MASK                            0x00000400L
+#define EFLAGS_OF_MASK                            0x00000800L
+#define EFLAGS_IOPL_MASK                          0x00003000L
+#define EFLAGS_NT                                 0x00004000L
+#define EFLAGS_SIGN_MASK                          0x00008000L
+#define EFLAGS_RF                                 0x00010000L
+#define EFLAGS_V86_MASK                           0x00020000L
+#define EFLAGS_ALIGN_CHECK                        0x00040000L
+#define EFLAGS_VIF                                0x00080000L
+#define EFLAGS_VIP                                0x00100000L
+#define EFLAGS_ID_MASK                            0x00200000L
+#define EFLAGS_USER_SANITIZE                      0x003F4DD7L
+
 /* Interrupt request levels definitions */
 #define PASSIVE_LEVEL                             0
 #define LOW_LEVEL                                 0
@@ -309,8 +330,7 @@ typedef struct _KSWITCH_FRAME
     ULONG64 P4Home;
     ULONG64 P5Home;
     ULONG MxCsr;
-    KIRQL ApcBypass;
-    UCHAR Fill1[3];
+    UCHAR Reserved[4];
     ULONG64 Rbp;
     ULONG64 Return;
 } KSWITCH_FRAME, *PKSWITCH_FRAME;
@@ -455,6 +475,7 @@ typedef struct _KPROCESSOR_CONTROL_BLOCK
     KPROCESSOR_STATE ProcessorState;
     KDPC_DATA DpcData[2];
     PVOID DpcStack;
+    VOLATILE BOOLEAN DpcRoutineActive;
     VOLATILE ULONG_PTR TimerRequest;
     ULONG_PTR MultiThreadProcessorSet;
     SINGLE_LIST_ENTRY DeferredReadyListHead;
@@ -478,6 +499,13 @@ typedef struct _KPROCESSOR_BLOCK
     PKIDTENTRY IdtBase;
     KIRQL Irql;
     KPROCESSOR_CONTROL_BLOCK Prcb;
+    ULONG ContextSwitches;
 } KPROCESSOR_BLOCK, *PKPROCESSOR_BLOCK;
+
+/* Thread Environment Block (TEB) structure definition */
+typedef struct _THREAD_ENVIRONMENT_BLOCK
+{
+    THREAD_INFORMATION_BLOCK InformationBlock;
+} THREAD_ENVIRONMENT_BLOCK, *PTHREAD_ENVIRONMENT_BLOCK;
 
 #endif /* __XTDK_AMD64_KETYPES_H */

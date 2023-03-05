@@ -359,6 +359,7 @@ typedef struct _KTHREAD
         };
     };
     KSPIN_LOCK ApcQueueLock;
+    ULONG ContextSwitches;
     LONG_PTR WaitStatus;
     union
     {
@@ -378,7 +379,8 @@ typedef struct _KTHREAD
         SINGLE_LIST_ENTRY SwapListEntry;
     };
     PKQUEUE Queue;
-    PVOID EnvironmentBlock;
+    SHORT SpecialApcDisable;
+    PTHREAD_ENVIRONMENT_BLOCK EnvironmentBlock;
     union
     {
         KTIMER Timer;
@@ -398,6 +400,7 @@ typedef struct _KTHREAD
         };
     };
     KWAIT_BLOCK WaitBlock[KTHREAD_WAIT_BLOCK + 1];
+    UCHAR NpxState;
     KIRQL WaitIrql;
     LIST_ENTRY QueueListEntry;
     PKTRAP_FRAME TrapFrame;
