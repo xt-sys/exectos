@@ -75,6 +75,15 @@ typedef enum _KAPC_ENVIRONMENT
     InsertApcEnvironment
 } KAPC_ENVIRONMENT, *PKAPC_ENVIRONMENT;
 
+/* DPC importance enumeration list */
+typedef enum _KDPC_IMPORTANCE
+{
+    LowImportance,
+    MediumImportance,
+    HighImportance,
+    MediumHighImportance
+} KDPC_IMPORTANCE, *PKDPC_IMPORTANCE;
+
 /* Kernel objects */
 typedef enum _KOBJECTS
 {

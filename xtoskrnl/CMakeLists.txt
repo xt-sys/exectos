@@ -17,6 +17,7 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/hl/globals.c
     ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/ioport.c
     ${XTOSKRNL_SOURCE_DIR}/ke/apc.c
+    ${XTOSKRNL_SOURCE_DIR}/ke/dpc.c
     ${XTOSKRNL_SOURCE_DIR}/ke/globals.c
     ${XTOSKRNL_SOURCE_DIR}/ke/kprocess.c
     ${XTOSKRNL_SOURCE_DIR}/ke/krnlinit.c
