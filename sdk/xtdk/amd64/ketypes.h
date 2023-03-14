@@ -88,6 +88,14 @@
 #define EFLAGS_ID_MASK                            0x00200000L
 #define EFLAGS_USER_SANITIZE                      0x003F4DD7L
 
+/* Context control flags */
+#define CONTEXT_ARCHITECTURE                      0x00100000
+#define CONTEXT_CONTROL                           (CONTEXT_ARCHITECTURE | 0x01)
+#define CONTEXT_INTEGER                           (CONTEXT_ARCHITECTURE | 0x02)
+#define CONTEXT_SEGMENTS                          (CONTEXT_ARCHITECTURE | 0x04)
+#define CONTEXT_FLOATING_POINT                    (CONTEXT_ARCHITECTURE | 0x08)
+#define CONTEXT_DEBUG_REGISTERS                   (CONTEXT_ARCHITECTURE | 0x10)
+
 /* Interrupt request levels definitions */
 #define PASSIVE_LEVEL                             0
 #define LOW_LEVEL                                 0
@@ -321,6 +329,17 @@ typedef struct _KEXCEPTION_FRAME
     ULONG64 Return;
 } KEXCEPTION_FRAME, *PKEXCEPTION_FRAME;
 
+/* Thread start frame definition */
+typedef struct _KSTART_FRAME
+{
+    ULONG64 P1Home;
+    ULONG64 P2Home;
+    ULONG64 P3Home;
+    ULONG64 P4Home;
+    ULONG64 Reserved;
+    ULONG64 Return;
+} KSTART_FRAME, *PKSTART_FRAME;
+
 /* Switch frame definition */
 typedef struct _KSWITCH_FRAME
 {
@@ -421,6 +440,16 @@ typedef struct _KTRAP_FRAME
     USHORT Fill3;
     ULONG CodePatchCycle;
 } KTRAP_FRAME, *PKTRAP_FRAME;
+
+/* Thread initialization frame definition */
+typedef struct _KTHREAD_INIT_FRAME
+{
+    KSWITCH_FRAME SwitchFrame;
+    KSTART_FRAME StartFrame;
+    KEXCEPTION_FRAME ExceptionFrame;
+    KTRAP_FRAME TrapFrame;
+    FLOATING_SAVE_AREA NpxFrame;
+} KTHREAD_INIT_FRAME, *PKTHREAD_INIT_FRAME;
 
 /* Special kernel registers structure definition */
 typedef struct _KSPECIAL_REGISTERS

@@ -39,5 +39,83 @@ KepInitializeThreadContext(IN PKTHREAD Thread,
                            IN PVOID StartContext,
                            IN PCONTEXT ContextRecord)
 {
-    UNIMPLEMENTED;
+    PKTHREAD_INIT_FRAME ThreadFrame;
+
+    /* Set initial thread frame */
+    ThreadFrame = (PKTHREAD_INIT_FRAME)Thread->InitialStack - sizeof(KTHREAD_INIT_FRAME);
+
+    /* Fill floating point save area with zeroes */
+    RtlZeroMemory(&ThreadFrame->NpxFrame, sizeof(FLOATING_SAVE_AREA));
+
+    /* Check if context provided for this thread */
+    if(ContextRecord)
+    {
+        /* Fill exception and trap frames with zeroes */
+        RtlZeroMemory(&ThreadFrame->ExceptionFrame, sizeof(KEXCEPTION_FRAME));
+        RtlZeroMemory(&ThreadFrame->TrapFrame, sizeof(KTRAP_FRAME));
+
+        /* Disable debug registers and enable context registers */
+        ContextRecord->ContextFlags &= ~CONTEXT_DEBUG_REGISTERS | CONTEXT_CONTROL;
+
+        /* Align the stack and reserve space for 4 parameters and return value */
+        ContextRecord->Rsp = (ContextRecord->Rsp & ~15) - 40;
+
+        /* Set CS and SS segments for user mode */
+        ContextRecord->SegCs = KGDT_R3_CODE | RPL_MASK;
+        ContextRecord->SegSs = KGDT_R3_DATA | RPL_MASK;
+
+        /* This is user mode thread */
+        Thread->PreviousMode = UserMode;
+
+        /* Enable floating point state */
+        Thread->NpxState = 1;
+
+        /* Set initial floating point state */
+        ThreadFrame->NpxFrame.ControlWord = 0x27F;
+        ThreadFrame->NpxFrame.StatusWord = 0;
+        ThreadFrame->NpxFrame.TagWord = 0xFFFF;
+        ThreadFrame->NpxFrame.ErrorOffset = 0;
+        ThreadFrame->NpxFrame.ErrorSelector = 0;
+        ThreadFrame->NpxFrame.ErrorOpcode = 0;
+        ThreadFrame->NpxFrame.DataOffset = 0;
+        ThreadFrame->NpxFrame.DataSelector = 0;
+
+        /* Clear DR6 and DR7 registers */
+        ThreadFrame->TrapFrame.Dr6 = 0;
+        ThreadFrame->TrapFrame.Dr7 = 0;
+
+        /* Set initial MXCSR register value */
+        ThreadFrame->TrapFrame.MxCsr = INITIAL_MXCSR;
+
+        /* Initialize exception frame */
+        ThreadFrame->ExceptionFrame.P1Home = (ULONG64)StartContext;
+        ThreadFrame->ExceptionFrame.P2Home = (ULONG64)StartRoutine;
+        ThreadFrame->ExceptionFrame.P3Home = (ULONG64)SystemRoutine;
+        ThreadFrame->ExceptionFrame.P4Home = (ULONG64)SystemRoutine;
+    }
+    else
+    {
+        /* This is kernel mode thread */
+        Thread->PreviousMode = KernelMode;
+
+        /* Disable floating point state */
+        Thread->NpxState = 0;
+
+        /* Set thread startup frame return information */
+        ThreadFrame->StartFrame.Return = (ULONG64)NULL;
+    }
+
+    /* Initialize thread startup information */
+    ThreadFrame->StartFrame.P1Home = (ULONG64)StartContext;
+    ThreadFrame->StartFrame.P2Home = (ULONG64)StartRoutine;
+    ThreadFrame->StartFrame.P3Home = (ULONG64)SystemRoutine;
+    ThreadFrame->StartFrame.P4Home = (ULONG64)SystemRoutine;
+
+    /* Initialize switch frame */
+    ThreadFrame->SwitchFrame.Rbp = (ULONG64)&ThreadFrame->TrapFrame + 128;
+    ThreadFrame->SwitchFrame.MxCsr = INITIAL_MXCSR;
+
+    /* Set thread stack */
+    Thread->InitialStack = &ThreadFrame->NpxFrame;
+    Thread->KernelStack = &ThreadFrame->SwitchFrame;
 }

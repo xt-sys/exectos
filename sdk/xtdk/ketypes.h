@@ -388,6 +388,7 @@ typedef struct _KTHREAD
         SINGLE_LIST_ENTRY SwapListEntry;
     };
     PKQUEUE Queue;
+    CHAR PreviousMode;
     SHORT SpecialApcDisable;
     PTHREAD_ENVIRONMENT_BLOCK EnvironmentBlock;
     union
