@@ -72,13 +72,7 @@ KepInitializeThreadContext(IN PKTHREAD Thread,
 
         /* Set initial floating point state */
         ThreadFrame->NpxFrame.ControlWord = 0x27F;
-        ThreadFrame->NpxFrame.StatusWord = 0;
         ThreadFrame->NpxFrame.TagWord = 0xFFFF;
-        ThreadFrame->NpxFrame.ErrorOffset = 0;
-        ThreadFrame->NpxFrame.ErrorSelector = 0;
-        ThreadFrame->NpxFrame.ErrorOpcode = 0;
-        ThreadFrame->NpxFrame.DataOffset = 0;
-        ThreadFrame->NpxFrame.DataSelector = 0;
 
         /* Clear DR6 and DR7 registers */
         ThreadFrame->TrapFrame.Dr6 = 0;
