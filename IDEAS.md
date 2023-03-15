@@ -7,3 +7,7 @@ This is a list of ideas that migh but not must be realized.
        the addressable virtual memory from 256TB to 128PB.
  - [ ] Find graphics card from all PCI devices and identify its framebuffer address when GOP is not supported by UEFI
        firmware and UGA has to be used instead.
+
+### XTOSKRNL
+ - [ ] Implement mechanism for detecting CPU features and checking hardware requirements. If CPU does not meet
+       requirements, it should cause a kernel panic before any non-supported instruction is being used.
