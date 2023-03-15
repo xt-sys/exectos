@@ -88,7 +88,11 @@ typedef struct _M128
 typedef struct _DISPATCHER_HEADER
 {
     UCHAR Type;
-    UCHAR Absolute;
+    union
+    {
+        UCHAR Absolute;
+        UCHAR NpxIrql;
+    };
     UCHAR Inserted;
     BOOLEAN DebugActive;
     LONG SignalState;

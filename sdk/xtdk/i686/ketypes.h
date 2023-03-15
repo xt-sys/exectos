@@ -191,8 +191,8 @@ typedef struct _SIMD_SAVE_AREA
     ULONG ErrorSelector;
     ULONG DataOffset;
     ULONG DataSelector;
-    ULONG MXCsr;
-    ULONG MXCsrMask;
+    ULONG MxCsr;
+    ULONG MxCsrMask;
     UCHAR RegisterArea[SIZE_OF_FX_REGISTERS];
     UCHAR Reserved3[SIZE_OF_FX_REGISTERS];
     UCHAR Reserved4[224];
@@ -379,7 +379,7 @@ typedef struct _KTRAP_FRAME
     ULONG Edx;
     ULONG Ecx;
     ULONG Eax;
-    ULONG PreviousPreviousMode;
+    ULONG PreviousMode;
     PEXCEPTION_REGISTRATION_RECORD ExceptionList;
     ULONG SegFs;
     ULONG Edi;
