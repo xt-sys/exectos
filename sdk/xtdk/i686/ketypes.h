@@ -368,7 +368,7 @@ typedef struct _KSWITCH_FRAME
 {
     PVOID ExceptionList;
     PVOID Reserved;
-    PVOID ReturnAddress;
+    PVOID Return;
 } KSWITCH_FRAME, *PKSWITCH_FRAME;
 
 /* Trap frame definition */
