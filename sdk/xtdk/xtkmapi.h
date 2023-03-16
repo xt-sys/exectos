@@ -26,6 +26,7 @@
 #include <xtuefi.h>
 
 /* Low level data types headers */
+#include <extypes.h>
 #include <hltypes.h>
 #include <iotypes.h>
 #include <ketypes.h>
