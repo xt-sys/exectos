@@ -18,6 +18,10 @@
 /* Kernel services routines forward references */
 XTAPI
 VOID
+KeClearEvent(IN PKEVENT Event);
+
+XTAPI
+VOID
 KeInitializeApc(IN PKAPC Apc,
                 IN PKTHREAD Thread,
                 IN KAPC_ENVIRONMENT Environment,
@@ -26,6 +30,12 @@ KeInitializeApc(IN PKAPC Apc,
                 IN PKNORMAL_ROUTINE NormalRoutine,
                 IN KPROCESSOR_MODE ApcMode,
                 IN PVOID Context);
+
+XTAPI
+VOID
+KeInitializeEvent(OUT PKEVENT Event,
+                  IN KEVENT_TYPE EventType,
+                  IN BOOLEAN InitialState);
 
 XTAPI
 VOID
@@ -56,6 +66,12 @@ KeReleaseSemaphore(IN PKSEMAPHORE Semaphore,
                    IN KPRIORITY Increment,
                    IN LONG Adjustment,
                    IN BOOLEAN Wait);
+
+XTAPI
+LONG
+KeSetEvent(IN PKEVENT Event,
+           IN KPRIORITY Increment,
+           IN BOOLEAN Wait);
 
 XTAPI
 VOID

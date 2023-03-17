@@ -84,6 +84,13 @@ typedef enum _KDPC_IMPORTANCE
     MediumHighImportance
 } KDPC_IMPORTANCE, *PKDPC_IMPORTANCE;
 
+/* Event types list */
+typedef enum _KEVENT_TYPE
+{
+    NotificationEvent,
+    SynchronizationEvent
+} KEVENT_TYPE, *PKEVENT_TYPE;
+
 /* Kernel objects */
 typedef enum _KOBJECTS
 {
@@ -225,6 +232,12 @@ typedef struct _KDPC_DATA
     VOLATILE ULONG DpcQueueDepth;
     ULONG DpcCount;
 } KDPC_DATA, *PKDPC_DATA;
+
+/* Event object structure definition */
+typedef struct _KEVENT
+{
+    DISPATCHER_HEADER Header;
+} KEVENT, *PKEVENT;
 
 /* Exception registration record  structure definition */
 typedef struct _EXCEPTION_REGISTRATION_RECORD
