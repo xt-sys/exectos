@@ -42,6 +42,7 @@
 #include ARCH_HEADER(mmtypes.h)
 
 /* XT routines */
+#include <exfuncs.h>
 #include <hlfuncs.h>
 #include <kefuncs.h>
 #include <mmfuncs.h>

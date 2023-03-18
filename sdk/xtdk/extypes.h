@@ -11,6 +11,7 @@
 
 #include <xtbase.h>
 #include <xttypes.h>
+#include <ketypes.h>
 
 
 /* Executive rundown protection structure definition */
@@ -22,5 +23,12 @@ typedef struct _EX_RUNDOWN_REFERENCE
         PVOID Ptr;
     };
 } EX_RUNDOWN_REFERENCE, *PEX_RUNDOWN_REFERENCE;
+
+/* Executive rundown wait block definition */
+typedef struct _EX_RUNDOWN_WAIT_BLOCK
+{
+    ULONG_PTR Count;
+    KEVENT WakeEvent;
+} EX_RUNDOWN_WAIT_BLOCK, *PEX_RUNDOWN_WAIT_BLOCK;
 
 #endif /* __XTDK_EXTYPES_H */
