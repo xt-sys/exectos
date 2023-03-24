@@ -57,6 +57,18 @@ KeInitializeTimerEx(OUT PKTIMER Timer,
                     IN KTIMER_TYPE Type);
 
 XTAPI
+VOID
+KePanic(IN ULONG Code);
+
+XTAPI
+VOID
+KePanicEx(IN ULONG Code,
+          IN ULONG_PTR Parameter1,
+          IN ULONG_PTR Parameter2,
+          IN ULONG_PTR Parameter3,
+          IN ULONG_PTR Parameter4);
+
+XTAPI
 LONG
 KeReadSemaphoreState(IN PKSEMAPHORE Semaphore);
 
