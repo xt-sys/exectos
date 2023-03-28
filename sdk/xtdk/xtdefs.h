@@ -13,18 +13,19 @@
 /* Routines and arguments modifiers */
 #define IN
 #define OUT
-#define XTAPI                                   __stdcall
-#define XTCDECL                                 __cdecl
-#define XTFASTCALL                              __fastcall
-#define XTINLINE                                __inline
+#define XTAPI                                  __stdcall
+#define XTCDECL                                __cdecl
+#define XTFASTCALL                             __fastcall
+#define XTINLINE                               __inline
+#define XTASSEMBLY                             __declspec(naked)
 
 /* Variable modifiers */
-#define CONST                                   const
-#define EXTERN                                  extern
-#define STRUCT                                  struct
-#define STATIC                                  static
-#define UNION                                   union
-#define VOLATILE                                volatile
+#define CONST                                  const
+#define EXTERN                                 extern
+#define STRUCT                                 struct
+#define STATIC                                 static
+#define UNION                                  union
+#define VOLATILE                               volatile
 
 /* NULL values */
 #define NULL                                   ((PVOID) 0)
