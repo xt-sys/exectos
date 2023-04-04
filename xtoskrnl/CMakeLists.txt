@@ -36,6 +36,7 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/rtl/atomic.c
     ${XTOSKRNL_SOURCE_DIR}/rtl/byteswap.c
     ${XTOSKRNL_SOURCE_DIR}/rtl/intrin.c
+    ${XTOSKRNL_SOURCE_DIR}/rtl/ioreg.c
     ${XTOSKRNL_SOURCE_DIR}/rtl/memory.c
     ${XTOSKRNL_SOURCE_DIR}/rtl/plist.c
     ${XTOSKRNL_SOURCE_DIR}/rtl/string.c
