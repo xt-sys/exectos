@@ -194,6 +194,18 @@ LONGLONG
 RtlAtomicXor64(IN VOLATILE PLONGLONG Address,
                IN LONGLONG Mask);
 
+XTFASTCALL
+USHORT
+RtlByteSwap16(IN USHORT Source);
+
+XTFASTCALL
+ULONG
+RtlByteSwap32(IN ULONG Source);
+
+XTFASTCALL
+ULONGLONG
+RtlByteSwap64(IN ULONGLONG Source);
+
 XTAPI
 SIZE_T
 RtlCompareMemory(IN PCVOID LeftBuffer,
@@ -280,18 +292,6 @@ INT
 RtlStringToWideString(OUT PWCHAR Destination,
                       IN CONST PUCHAR *Source,
                       IN SIZE_T Length);
-
-XTFASTCALL
-ULONG
-RtlUlongByteSwap(IN ULONG Source);
-
-XTFASTCALL
-ULONGLONG
-RtlUlonglongByteSwap(IN ULONGLONG Source);
-
-XTFASTCALL
-USHORT
-RtlUshortByteSwap(IN USHORT Source);
 
 XTCDECL
 INT

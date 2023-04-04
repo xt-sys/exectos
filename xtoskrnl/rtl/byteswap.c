@@ -10,6 +10,24 @@
 
 
 /**
+ * This routine converts endianness on 16bit value.
+ *
+ * @param Source
+ *        Supplies a value to swap bytes.
+ *
+ * @return Swapped 16bit value.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+USHORT
+RtlByteSwap16(IN USHORT Source)
+{
+    return (USHORT)(((Source >> 8) & 0x00FF) |
+                    ((Source << 8) & 0xFF00));
+}
+
+/**
  * This routine converts endianness on 32bit value.
  *
  * @param Source
@@ -17,11 +35,11 @@
  *
  * @return Swapped 32bit value.
  *
- * @since NT 4.0
+ * @since XT 1.0
  */
 XTFASTCALL
 ULONG
-RtlUlongByteSwap(IN ULONG Source)
+RtlByteSwap32(IN ULONG Source)
 {
     return (ULONG)(((Source >> 24) & 0x000000FF) |
                    ((Source >> 8)  & 0x0000FF00) |
@@ -37,11 +55,11 @@ RtlUlongByteSwap(IN ULONG Source)
  *
  * @return Swapped 64bit value.
  *
- * @since NT 4.0
+ * @since XT 1.0
  */
 XTFASTCALL
 ULONGLONG
-RtlUlonglongByteSwap(IN ULONGLONG Source)
+RtlByteSwap64(IN ULONGLONG Source)
 {
     return (ULONGLONG)(((Source >> 56) & 0x00000000000000FF) |
                        ((Source >> 40) & 0x000000000000FF00) |
@@ -51,22 +69,4 @@ RtlUlonglongByteSwap(IN ULONGLONG Source)
                        ((Source << 24) & 0x0000FF0000000000) |
                        ((Source << 40) & 0x00FF000000000000) |
                        ((Source << 56) & 0xFF00000000000000));
-}
-
-/**
- * This routine converts endianness on 16bit value.
- *
- * @param Source
- *        Supplies a value to swap bytes.
- *
- * @return Swapped 16bit value.
- *
- * @since NT 4.0
- */
-XTFASTCALL
-USHORT
-RtlUshortByteSwap(IN USHORT Source)
-{
-    return (USHORT)(((Source >> 8) & 0x00FF) |
-                    ((Source << 8) & 0xFF00));
 }
