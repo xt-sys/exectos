@@ -21,12 +21,12 @@ UCHAR
 HlIoPortInByte(IN USHORT Port);
 
 XTCDECL
-USHORT
-HlIoPortInShort(IN USHORT Port);
-
-XTCDECL
 ULONG
 HlIoPortInLong(IN USHORT Port);
+
+XTCDECL
+USHORT
+HlIoPortInShort(IN USHORT Port);
 
 XTCDECL
 VOID
@@ -35,12 +35,12 @@ HlIoPortOutByte(IN USHORT Port,
 
 XTCDECL
 VOID
-HlIoPortOutShort(IN USHORT Port,
-                 IN USHORT Value);
+HlIoPortOutLong(IN USHORT Port,
+                IN ULONG Value);
 
 XTCDECL
 VOID
-HlIoPortOutLong(IN USHORT Port,
-                IN ULONG Value);
+HlIoPortOutShort(IN USHORT Port,
+                 IN USHORT Value);
 
 #endif /* __XTDK_AMD64_HLFUNCS_H */
