@@ -17,7 +17,7 @@
 #define XTCDECL                                __cdecl
 #define XTFASTCALL                             __fastcall
 #define XTINLINE                               __inline
-#define XTASSEMBLY                             __declspec(naked)
+#define XTASSEMBLY                             __attribute__((naked))
 
 /* Variable modifiers */
 #define CONST                                  const
