@@ -105,4 +105,4 @@ detailed information check the COPYING.md file.
  * GitLab Mirror: https://gitlab.com/xt-sys/exectos
 
 # Contact
- * Discord Server: https://discord.gg/3zgjQDVmAe
+ * Discord Server: https://discord.com/invite/zBzJ5qMGX7
