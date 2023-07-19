@@ -5,8 +5,8 @@
   <a href="https://git.codingworkshop.eu.org/xt-sys/exectos/activity/monthly">
     <img alt="Commits" src="https://img.shields.io/github/commit-activity/m/xt-sys/exectos?label=Commits">
   </a>
-  <a href="https://ci.codingworkshop.eu.org/xt-sys/exectos">
-    <img alt="Build Status" src="https://ci.codingworkshop.eu.org/api/badges/xt-sys/exectos/status.svg">
+  <a href="https://git.codingworkshop.eu.org/xt-sys/exectos/actions">
+    <img alt="Build Status" src="https://codingworkshop.eu.org/actions.php?project=xt-sys/exectos">
   </a>
   <a href="https://artifacts.codingworkshop.eu.org/ExectOS">
     <img alt="CI/CD Artifacts" src="https://img.shields.io/badge/Download-%F0%9F%A1%87-blueviolet">
