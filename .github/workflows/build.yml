@@ -1,0 +1,31 @@
+name: Builds
+run-name: ${{ github.actor }} runs Gitea Actions
+on: [push]
+
+jobs:
+  ExectOS:
+    strategy:
+      matrix:
+        arch: [amd64, i686]
+    runs-on: oscw
+    container:
+      image: codingworkshop/oscw-runner:latest
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Build ExectOS
+        run: |
+          echo "charch ${{ matrix.arch }} && ./configure.sh && cd build-${{ matrix.arch }}-xtchain && ninja -v && ninja diskimg -v" > build.cmds
+          xtchain < build.cmds
+      - name: Publish binaries
+        if: ${{ github.ref == 'refs/heads/master' }}
+        env:
+          OSCW_ARTIFACTS_HOSTNAME: ${{ secrets.OSCW_ARTIFACTS_HOSTNAME }}
+          OSCW_ARTIFACTS_USERNAME: ${{ secrets.OSCW_ARTIFACTS_USERNAME }}
+          OSCW_ARTIFACTS_USERKEY: ${{ secrets.OSCW_ARTIFACTS_USERKEY }}
+        run: |
+          tar -I 'gzip' -cpf ExectOS-$(date +'%Y%m%d')-${GITHUB_SHA:0:10}-${{ matrix.arch }}.tar.gz -C build-${{ matrix.arch }}-xtchain/output/binaries .
+          gzip -c build-${{ matrix.arch }}-xtchain/output/disk.img > ExectOS-$(date +'%Y%m%d')-${GITHUB_SHA:0:10}-${{ matrix.arch }}.img.gz
+          artifact_publish "ExectOS-$(date +'%Y%m%d')-${GITHUB_SHA:0:10}-${{ matrix.arch }}.*.gz" ExectOS
