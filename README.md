@@ -14,6 +14,9 @@
   <a href="https://git.codingworkshop.eu.org/xt-sys/exectos/src/branch/master/COPYING.md">
     <img alt="License" src="https://img.shields.io/badge/License-GPLv3-blue.svg">
   </a>
+  <a href="https://codeium.com/">
+    <img alt="Codeium" src="https://img.shields.io/badge/Powered%20By-Codeium-09B6A2?logo=Codeium">
+  </a>
   <a href="https://github.com/sponsors/xt-sys/">
     <img alt="Sponsor" src="https://img.shields.io/badge/Sponsor-%E2%9D%A4-red?logo=GitHub">
   </a>
