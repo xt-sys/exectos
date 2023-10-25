@@ -69,10 +69,10 @@ design, it requires a modern EFI enabled hardware. It is not possible currently 
 | xtldr       | XTOS boot loader source code                             |
 
 # Build
-XTOS can be built only by using XTChain, a special toolchain prepared for compiling XT software. Currently, there is
-only a Linux version available, so a Linux distribution or WSL is needed. If XTChain is already installed and
-available, then building ExectOS is quiet easy. First, open a terminal or WSL console and type the following command
-to launch XTChain build console:
+XTOS can be built only by using [XTChain](https://git.codingworkshop.eu.org/xt-sys/xtchain), a special toolchain
+prepared for compiling XT software. Currently, there is only a Linux version available, so a Linux distribution or WSL
+is needed. If XTChain is already installed and available, then building ExectOS is quiet easy. First, open a terminal
+or WSL console and type the following command to launch XTChain build console:
 ```
 xtchain
 ```
@@ -96,11 +96,11 @@ ninja diskimg
 # Contributing
 There is a ton of work to do in ExectOS and we appreciate any help. If you are interested in writing features,
 porting drivers, fixing bugs, writing tests, creating documentation, or helping out in any other way, we would
-love the help. More details on how to contrubite can be found it CONTRIBUTING.md file.
+love the help. More details on how to contrubite can be found it [CONTRIBUTING.md](CONTRIBUTING.md) file.
 
 # Licensing
 ExectOS is licensed to the public under the terms of the GNU General Public License, version 3. For more
-detailed information check the COPYING.md file.
+detailed information check the [COPYING.md](COPYING.md) file.
 
 # GIT Mirrors
  * Main GIT Repository: https://git.codingworkshop.eu.org/xt-sys/exectos
