@@ -10,8 +10,8 @@
 #define __XTLDR_XTBL_H
 
 #include <xtkmapi.h>
-#include <blmod.h>
 #include <xtver.h>
+#include <blmod.h>
 
 
 /* EFI Image Handle */

@@ -9,6 +9,9 @@
 /* XT Development Kit */
 #include <xtkmapi.h>
 
+/* XT OS version */
+#include <xtver.h>
+
 /* Kernel specific headers */
 #include "globals.h"
 #include "arpfuncs.h"
