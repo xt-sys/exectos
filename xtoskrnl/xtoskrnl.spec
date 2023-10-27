@@ -1,3 +1,6 @@
+@ fastcall ExAcquireRundownProtection(ptr)
+@ fastcall ExInitializeRundownProtection(ptr)
+@ fastcall ExReleaseRundownProtection(ptr)
 @ cdecl HlIoPortInByte(ptr)
 @ cdecl HlIoPortInLong(ptr)
 @ cdecl HlIoPortInShort(ptr)
