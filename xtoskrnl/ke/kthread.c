@@ -52,8 +52,6 @@ KeInitializeThread(IN PKPROCESS Process,
                    IN PVOID Stack)
 {
     PKWAIT_BLOCK TimerWaitBlock;
-    BOOLEAN Allocation;
-    XTSTATUS Status;
     ULONG Index;
 
     /* Initialize thread dispatcher header */
