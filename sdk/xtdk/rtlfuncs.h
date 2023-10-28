@@ -14,6 +14,27 @@
 #include <xttypes.h>
 
 
+/* Routines used by XTLDR */
+XTCDECL
+VOID
+RtlInitializeListHead(IN PLIST_ENTRY ListHead);
+
+XTCDECL
+VOID
+RtlInsertHeadList(IN OUT PLIST_ENTRY ListHead,
+                  IN PLIST_ENTRY Entry);
+
+XTCDECL
+VOID
+RtlInsertTailList(IN OUT PLIST_ENTRY ListHead,
+                  IN PLIST_ENTRY Entry);
+
+XTCDECL
+VOID
+RtlRemoveEntryList(IN PLIST_ENTRY Entry);
+
+
+/* Runtime Library routines forward references */
 XTAPI
 SIZE_T
 RtlCompareMemory(IN PCVOID LeftBuffer,
