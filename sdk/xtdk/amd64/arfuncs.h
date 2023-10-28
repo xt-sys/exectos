@@ -21,8 +21,16 @@ VOID
 ArClearInterruptFlag();
 
 XTCDECL
+BOOLEAN
+ArCpuId(IN OUT PCPUID_REGISTERS Registers);
+
+XTCDECL
 VOID
 ArHalt();
+
+XTCDECL
+ULONG_PTR
+ArReadControlRegister(IN USHORT ControlRegister);
 
 XTCDECL
 VOID
