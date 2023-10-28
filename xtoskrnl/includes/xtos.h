@@ -14,7 +14,6 @@
 
 /* Kernel specific headers */
 #include "globals.h"
-#include "ar.h"
 #include "hl.h"
 #include "ke.h"
 #include "po.h"
