@@ -16,10 +16,12 @@
 #include "globals.h"
 #include "hl.h"
 #include "ke.h"
+#include "mm.h"
 #include "po.h"
 #include "rtl.h"
 
 #include ARCH_HEADER(globals.h)
 #include ARCH_HEADER(ar.h)
 #include ARCH_HEADER(ke.h)
+#include ARCH_HEADER(mm.h)
 #include ARCH_HEADER(rtl.h)

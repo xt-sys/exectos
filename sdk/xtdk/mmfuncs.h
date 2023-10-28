@@ -12,15 +12,5 @@
 #include <xtbase.h>
 
 
-XTAPI
-XTSTATUS
-MmAllocateKernelStack(IN PVOID *Stack,
-                      IN BOOLEAN LargeStack,
-                      IN UCHAR SystemNode);
-
-XTAPI
-VOID
-MmFreeKernelStack(IN PVOID Stack,
-                  IN BOOLEAN LargeStack);
 
 #endif /* __XTDK_MMFUNCS_H */

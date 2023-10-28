@@ -12,9 +12,5 @@
 #include <xtbase.h>
 
 
-XTFASTCALL
-VOID
-MmZeroPages(IN PVOID Address,
-            IN ULONG Size);
 
 #endif /* __XTDK_AMD64_MMFUNCS_H */
