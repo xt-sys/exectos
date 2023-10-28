@@ -14,10 +14,10 @@
 
 /* Kernel specific headers */
 #include "globals.h"
-#include "arpfuncs.h"
-#include "kepfuncs.h"
-#include "popfuncs.h"
+#include "ar.h"
+#include "ke.h"
+#include "po.h"
 
 #include ARCH_HEADER(globals.h)
-#include ARCH_HEADER(arpfuncs.h)
-#include ARCH_HEADER(kepfuncs.h)
+#include ARCH_HEADER(ar.h)
+#include ARCH_HEADER(ke.h)

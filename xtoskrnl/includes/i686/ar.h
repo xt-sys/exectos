@@ -1,13 +1,13 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/includes/i686/arpfuncs.h
+ * FILE:            xtoskrnl/includes/i686/ar.h
  * DESCRIPTION:     Private i686 routine definitions for architecture library
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#ifndef __XTOSKRNL_I686_ARPFUNCS_H
-#define __XTOSKRNL_I686_ARPFUNCS_H
+#ifndef __XTOSKRNL_I686_AR_H
+#define __XTOSKRNL_I686_AR_H
 
 #include <xtos.h>
 
@@ -165,4 +165,4 @@ XTAPI
 VOID
 ArpSetNonMaskableInterruptTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock);
 
-#endif /* __XTOSKRNL_I686_ARPFUNCS_H */
+#endif /* __XTOSKRNL_I686_AR_H */

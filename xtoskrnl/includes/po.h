@@ -1,13 +1,13 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/includes/popfuncs.h
+ * FILE:            xtoskrnl/includes/po.h
  * DESCRIPTION:     Private routine definitions for kernel power manager
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#ifndef __XTOSKRNL_POPFUNCS_H
-#define __XTOSKRNL_POPFUNCS_H
+#ifndef __XTOSKRNL_PO_H
+#define __XTOSKRNL_PO_H
 
 #include <xtos.h>
 
@@ -20,4 +20,4 @@ XTFASTCALL
 VOID
 PopIdle0Function(IN PPROCESSOR_POWER_STATE PowerState);
 
-#endif /* __XTOSKRNL_POPFUNCS_H */
+#endif /* __XTOSKRNL_PO_H */

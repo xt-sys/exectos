@@ -1,13 +1,13 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/includes/kepfuncs.h
+ * FILE:            xtoskrnl/includes/ke.h
  * DESCRIPTION:     Private routine definitions for kernel services
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#ifndef __XTOSKRNL_KEPFUNCS_H
-#define __XTOSKRNL_KEPFUNCS_H
+#ifndef __XTOSKRNL_KE_H
+#define __XTOSKRNL_KE_H
 
 #include <xtos.h>
 
@@ -53,4 +53,4 @@ KepSuspendThread(IN PVOID NormalContext,
                  IN PVOID SystemArgument1,
                  IN PVOID SystemArgument2);
 
-#endif /* __XTOSKRNL_KEPFUNCS_H */
+#endif /* __XTOSKRNL_KE_H */

@@ -1,13 +1,13 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/includes/amd64/kepfuncs.h
+ * FILE:            xtoskrnl/includes/amd64/ke.h
  * DESCRIPTION:     Private AMD64 routine definitions for kernel services
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#ifndef __XTOSKRNL_AMD64_KEPFUNCS_H
-#define __XTOSKRNL_AMD64_KEPFUNCS_H
+#ifndef __XTOSKRNL_AMD64_KE_H
+#define __XTOSKRNL_AMD64_KE_H
 
 #include <xtos.h>
 
@@ -44,4 +44,4 @@ XTAPI
 VOID
 KepSwitchBootStack(IN ULONG_PTR Stack);
 
-#endif /* __XTOSKRNL_AMD64_KEPFUNCS_H */
+#endif /* __XTOSKRNL_AMD64_KE_H */
