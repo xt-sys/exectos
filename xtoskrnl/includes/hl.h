@@ -24,6 +24,11 @@ HlComPortGetByte(IN PCPPORT Port,
                  IN BOOLEAN Poll);
 
 XTCDECL
+XTSTATUS
+HlComPortPutByte(IN PCPPORT Port,
+                 IN UCHAR Byte);
+
+XTCDECL
 UCHAR
 HlComPortReadLsr(IN PCPPORT Port,
                  IN UCHAR Byte);
@@ -33,6 +38,13 @@ VOID
 HlDrawPixel(IN ULONG PosX,
             IN ULONG PosY,
             IN ULONG Color);
+
+XTCDECL
+XTSTATUS
+HlInitializeComPort(IN OUT PCPPORT Port,
+                    IN ULONG PortNumber,
+                    IN PUCHAR PortAddress,
+                    IN ULONG BaudRate);
 
 XTAPI
 XTSTATUS
