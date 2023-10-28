@@ -14,9 +14,5 @@
 #include <xttypes.h>
 
 
-XTAPI
-VOID
-RtlGetStackLimits(OUT PULONG_PTR StackBase,
-                  OUT PULONG_PTR StackLimit);
 
 #endif /* __XTDK_AMD64_RTLFUNCS_H */
