@@ -29,6 +29,12 @@ KeInitializeApc(IN PKAPC Apc,
 
 XTAPI
 VOID
+KeInitializeDpc(IN PKDPC Dpc,
+                IN PKDEFERRED_ROUTINE DpcRoutine,
+                IN PVOID DpcContext);
+
+XTAPI
+VOID
 KeInitializeSemaphore(IN PKSEMAPHORE Semaphore,
                       IN LONG Count,
                       IN LONG Limit);
@@ -36,6 +42,12 @@ KeInitializeSemaphore(IN PKSEMAPHORE Semaphore,
 XTAPI
 VOID
 KeInitializeSpinLock(IN PKSPIN_LOCK SpinLock);
+
+XTAPI
+VOID
+KeInitializeThreadedDpc(IN PKDPC Dpc,
+                        IN PKDEFERRED_ROUTINE DpcRoutine,
+                        IN PVOID DpcContext);
 
 XTAPI
 VOID

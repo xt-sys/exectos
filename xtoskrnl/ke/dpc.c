@@ -43,6 +43,39 @@ KeInitializeDpc(IN PKDPC Dpc,
 }
 
 /**
+ * Initializes Deferred Procedure Call (DPC) object.
+ *
+ * @param Dpc
+ *        Supplies a pointer to the DPC being initialized.
+ *
+ * @param DpcRoutine
+ *        Supplies a pointer to the DPC routine being called on object removal.
+ *
+ * @param DpcContext
+ *        Supplies a pointer to memory area containing context data for DPC routine.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since NT 5.2
+ */
+XTAPI
+VOID
+KeInitializeThreadedDpc(IN PKDPC Dpc,
+                        IN PKDEFERRED_ROUTINE DpcRoutine,
+                        IN PVOID DpcContext)
+{
+    /* Initialize threaded DPC */
+    Dpc->Type = ThreadedDpcObject;
+    Dpc->Number = 0;
+    Dpc->Importance = MediumImportance;
+
+    /* Initialize DPC routine and context data */
+    Dpc->DeferredContext = DpcContext;
+    Dpc->DeferredRoutine = DpcRoutine;
+    Dpc->DpcData = NULL;
+}
+
+/**
  * Retires the expired DPC objects found in the DPC list.
  *
  * @param Prcb
