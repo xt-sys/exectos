@@ -91,3 +91,24 @@ KepRetireDpcList(IN PKPROCESSOR_CONTROL_BLOCK Prcb)
 {
     UNIMPLEMENTED;
 }
+
+/**
+ * Sets the target processor number for DPC.
+ *
+ * @param Dpc
+ *        Supplies a pointer to the DPC object.
+ *
+ * @param Number
+ *        Supplies the target processor number.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since NT 4.0
+ */
+XTAPI
+VOID
+KeSetTargetProcessorDpc(IN PKDPC Dpc,
+                        IN CCHAR Number)
+{
+    Dpc->Number = MAXIMUM_PROCESSORS + Number;
+}

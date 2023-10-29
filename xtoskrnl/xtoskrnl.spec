@@ -16,6 +16,7 @@
 @ stdcall KeInitializeTimerEx(ptr long)
 @ stdcall KeReadSemaphoreState(ptr)
 @ stdcall KeReleaseSemaphore(ptr long long long)
+@ stdcall KeSetTargetProcessorDpc(ptr long)
 @ stdcall RtlCompareMemory(ptr ptr long)
 @ stdcall RtlCopyMemory(ptr ptr long)
 @ stdcall RtlFillMemory(ptr long long)

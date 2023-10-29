@@ -69,4 +69,9 @@ KeReleaseSemaphore(IN PKSEMAPHORE Semaphore,
                    IN LONG Adjustment,
                    IN BOOLEAN Wait);
 
+XTAPI
+VOID
+KeSetTargetProcessorDpc(IN PKDPC Dpc,
+                        IN CCHAR Number);
+
 #endif /* __XTDK_KEFUNCS_H */
