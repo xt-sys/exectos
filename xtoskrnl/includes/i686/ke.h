@@ -2,7 +2,7 @@
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
  * FILE:            xtoskrnl/includes/i686/ke.h
- * DESCRIPTION:     Private i686 routine definitions for kernel services
+ * DESCRIPTION:     XTOS kernel services routine definitions specific to i686 architecture
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
@@ -12,6 +12,7 @@
 #include <xtos.h>
 
 
+/* I686 specific Kernel services routines forward references */
 XTAPI
 PKPROCESSOR_BLOCK
 KeGetCurrentProcessorBlock(VOID);

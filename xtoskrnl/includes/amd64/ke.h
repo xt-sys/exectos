@@ -2,7 +2,7 @@
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
  * FILE:            xtoskrnl/includes/amd64/ke.h
- * DESCRIPTION:     Private AMD64 routine definitions for kernel services
+ * DESCRIPTION:     XTOS kernel services routine definitions specific to AMD64 architecture
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
@@ -12,6 +12,7 @@
 #include <xtos.h>
 
 
+/* AMD64 specific Kernel services routines forward references */
 XTAPI
 PKPROCESSOR_BLOCK
 KeGetCurrentProcessorBlock(VOID);

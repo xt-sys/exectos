@@ -2,7 +2,7 @@
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
  * FILE:            xtoskrnl/includes/rtl.h
- * DESCRIPTION:     Private routine definitions for runtime library
+ * DESCRIPTION:     XT runtime library routines
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
@@ -12,6 +12,7 @@
 #include <xtos.h>
 
 
+/* Runtime Library routines forward references */
 XTFASTCALL
 CHAR
 RtlAtomicAnd8(IN VOLATILE PCHAR Address,

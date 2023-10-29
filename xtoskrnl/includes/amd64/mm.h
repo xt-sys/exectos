@@ -12,6 +12,7 @@
 #include <xtos.h>
 
 
+/* AMD64 Memory Manager routines forward references */
 XTFASTCALL
 VOID
 MmZeroPages(IN PVOID Address,

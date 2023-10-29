@@ -12,6 +12,7 @@
 #include <xtos.h>
 
 
+/* I686 Memory Manager routines forward references */
 XTFASTCALL
 VOID
 MmZeroPages(IN PVOID Address,

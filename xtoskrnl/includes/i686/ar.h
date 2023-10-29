@@ -2,7 +2,7 @@
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
  * FILE:            xtoskrnl/includes/i686/ar.h
- * DESCRIPTION:     Private i686 routine definitions for architecture library
+ * DESCRIPTION:     I686 architecture library routines
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
@@ -12,6 +12,7 @@
 #include <xtos.h>
 
 
+/* I686 architecture library routines forward references */
 XTCDECL
 VOID
 ArClearInterruptFlag();

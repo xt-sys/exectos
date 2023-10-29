@@ -45,11 +45,8 @@
 #include <exfuncs.h>
 #include <hlfuncs.h>
 #include <kefuncs.h>
-#include <mmfuncs.h>
 #include <rtlfuncs.h>
 
 /* Architecture specific XT routines*/
 #include ARCH_HEADER(arfuncs.h)
 #include ARCH_HEADER(hlfuncs.h)
-#include ARCH_HEADER(mmfuncs.h)
-#include ARCH_HEADER(rtlfuncs.h)

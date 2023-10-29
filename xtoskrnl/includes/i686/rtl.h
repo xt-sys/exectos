@@ -12,6 +12,7 @@
 #include <xtos.h>
 
 
+/* Runtime Library routines specific to I686 forward references */
 XTAPI
 VOID
 RtlGetStackLimits(OUT PULONG_PTR StackBase,

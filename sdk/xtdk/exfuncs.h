@@ -13,6 +13,7 @@
 #include <xttypes.h>
 
 
+/* Kernel Executive routines forward references */
 XTFASTCALL
 BOOLEAN
 ExAcquireRundownProtection(IN PEX_RUNDOWN_REFERENCE Descriptor);

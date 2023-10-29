@@ -2,7 +2,7 @@
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
  * FILE:            xtoskrnl/includes/ke.h
- * DESCRIPTION:     Private routine definitions for kernel services
+ * DESCRIPTION:     XTOS kernel services routine definitions
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
@@ -12,6 +12,7 @@
 #include <xtos.h>
 
 
+/* Kernel services routines forward references */
 XTAPI
 VOID
 KeClearEvent(IN PKEVENT Event);

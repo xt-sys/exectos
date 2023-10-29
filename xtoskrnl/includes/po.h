@@ -2,7 +2,7 @@
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
  * FILE:            xtoskrnl/includes/po.h
- * DESCRIPTION:     Private routine definitions for kernel power manager
+ * DESCRIPTION:     Power manager subsystem routines
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
@@ -12,6 +12,7 @@
 #include <xtos.h>
 
 
+/* Power Manager routines forward references */
 XTAPI
 VOID
 PoInitializeProcessorControlBlock(IN OUT PKPROCESSOR_CONTROL_BLOCK Prcb);

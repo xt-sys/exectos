@@ -2,7 +2,7 @@
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
  * FILE:            xtoskrnl/includes/hl.h
- * DESCRIPTION:     Private routine definitions for hardware abstraction layer
+ * DESCRIPTION:     XT hardware abstraction layer routines
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
@@ -12,6 +12,7 @@
 #include <xtos.h>
 
 
+/* HAL library routines forward references */
 XTAPI
 VOID
 HlClearScreen(VOID);

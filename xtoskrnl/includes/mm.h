@@ -2,7 +2,7 @@
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
  * FILE:            xtoskrnl/includes/mm.h
- * DESCRIPTION:     Private routine definitions for memory manager
+ * DESCRIPTION:     Memory manager routines
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
@@ -12,6 +12,7 @@
 #include <xtos.h>
 
 
+/* Memory Manager routines forward references */
 XTAPI
 XTSTATUS
 MmAllocateKernelStack(IN PVOID *Stack,

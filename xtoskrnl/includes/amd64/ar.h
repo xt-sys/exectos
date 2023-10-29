@@ -2,7 +2,7 @@
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
  * FILE:            xtoskrnl/includes/amd64/ar.h
- * DESCRIPTION:     Private AMD64 routine definitions for architecture library
+ * DESCRIPTION:     AMD64 architecture library routines
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
@@ -11,6 +11,8 @@
 
 #include <xtos.h>
 
+
+/* AMD64 architecture library routines forward references */
 XTCDECL
 VOID
 ArClearInterruptFlag();
