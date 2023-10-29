@@ -14,6 +14,16 @@
 
 XTAPI
 VOID
+KeClearEvent(IN PKEVENT Event);
+
+XTAPI
+VOID
+KeInitializeEvent(OUT PKEVENT Event,
+                  IN KEVENT_TYPE EventType,
+                  IN BOOLEAN InitialState);
+
+XTAPI
+VOID
 KeInitializeProcess(IN OUT PKPROCESS Process,
                     IN KPRIORITY Priority,
                     IN KAFFINITY Affinity,
@@ -33,7 +43,29 @@ KeInitializeThread(IN PKPROCESS Process,
 
 XTAPI
 VOID
+KePanic(IN ULONG Code);
+
+XTAPI
+VOID
+KePanicEx(IN ULONG Code,
+          IN ULONG_PTR Parameter1,
+          IN ULONG_PTR Parameter2,
+          IN ULONG_PTR Parameter3,
+          IN ULONG_PTR Parameter4);
+
+XTAPI
+LONG
+KeSetEvent(IN PKEVENT Event,
+           IN KPRIORITY Increment,
+           IN BOOLEAN Wait);
+
+XTAPI
+VOID
 KeStartThread(IN PKTHREAD Thread);
+
+XTAPI
+VOID
+KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters);
 
 XTAPI
 VOID
