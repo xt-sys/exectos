@@ -46,7 +46,7 @@ RtlInterlockedCompareExchangePointer(IN VOLATILE PVOID *Destination,
  */
 XTFASTCALL
 LONG_PTR
-RtlInterlockedDecrementLongPtr(IN VOLATILE PLONG_PTR Addend)
+RtlInterlockedDecrement64(IN VOLATILE PLONG_PTR Addend)
 {
     return (LONG_PTR)__sync_sub_and_fetch(Addend, 1);
 }

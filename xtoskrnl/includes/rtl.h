@@ -231,7 +231,7 @@ RtlInterlockedCompareExchangePointer(IN VOLATILE PVOID *Destination,
 
 XTFASTCALL
 LONG_PTR
-RtlInterlockedDecrementLongPtr(IN VOLATILE PLONG_PTR Addend);
+RtlInterlockedDecrement64(IN VOLATILE PLONG_PTR Addend);
 
 XTFASTCALL
 PVOID

@@ -100,7 +100,7 @@ ExReleaseRundownProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
         {
             WaitBlock = (PEX_RUNDOWN_WAIT_BLOCK)(CurrentValue & ~0x1);
 
-            if(!RtlInterlockedDecrementLongPtr((PLONG_PTR)&WaitBlock->Count))
+            if(!RtlInterlockedDecrement64((PLONG_PTR)&WaitBlock->Count))
             {
                 KeSetEvent(&WaitBlock->WakeEvent, 0, FALSE);
             }
