@@ -21,4 +21,15 @@ XTFASTCALL
 VOID
 PopIdle0Function(IN PPROCESSOR_POWER_STATE PowerState);
 
+XTAPI
+VOID
+PopPerfIdle(PPROCESSOR_POWER_STATE PowerState);
+
+XTAPI
+VOID
+PopPerfIdleDpc(IN PKDPC Dpc,
+               IN PVOID DeferredContext,
+               IN PVOID SystemArgument1,
+               IN PVOID SystemArgument2);
+
 #endif /* __XTOSKRNL_PO_H */
