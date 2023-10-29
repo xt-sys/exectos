@@ -42,7 +42,7 @@ ExAcquireRundownProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
         NewValue = CurrentValue + 2;
 
         /* Exchange the value */
-        NewValue = (ULONG_PTR)RtlInterlockedCompareExchangePointer(&Descriptor->Ptr, (PVOID)NewValue,
+        NewValue = (ULONG_PTR)RtlAtomicCompareExchangePointer(&Descriptor->Ptr, (PVOID)NewValue,
                                                                    (PVOID)CurrentValue);
 
         /* Make sure protection acquired */
@@ -100,7 +100,7 @@ ExReleaseRundownProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
         {
             WaitBlock = (PEX_RUNDOWN_WAIT_BLOCK)(CurrentValue & ~0x1);
 
-            if(!RtlInterlockedDecrement64((PLONG_PTR)&WaitBlock->Count))
+            if(!RtlAtomicDecrement64((PLONG_PTR)&WaitBlock->Count))
             {
                 KeSetEvent(&WaitBlock->WakeEvent, 0, FALSE);
             }
@@ -113,7 +113,7 @@ ExReleaseRundownProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
             NewValue = CurrentValue - 2;
 
             /* Exchange the value */
-            NewValue = (ULONG_PTR)RtlInterlockedCompareExchangePointer(&Descriptor->Ptr, (PVOID)NewValue,
+            NewValue = (ULONG_PTR)RtlAtomicCompareExchangePointer(&Descriptor->Ptr, (PVOID)NewValue,
                                                                        (PVOID)CurrentValue);
 
             if(NewValue == CurrentValue)

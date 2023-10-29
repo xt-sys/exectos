@@ -223,21 +223,6 @@ VOID
 RtlInsertTailList(IN OUT PLIST_ENTRY ListHead,
                   IN PLIST_ENTRY Entry);
 
-XTFASTCALL
-PVOID
-RtlInterlockedCompareExchangePointer(IN VOLATILE PVOID *Destination,
-                                     IN PVOID Comperand,
-                                     IN PVOID Exchange);
-
-XTFASTCALL
-LONG_PTR
-RtlInterlockedDecrement64(IN VOLATILE PLONG_PTR Addend);
-
-XTFASTCALL
-PVOID
-RtlInterlockedExchangePointer(IN VOLATILE PVOID *Destination,
-                              IN PVOID Value);
-
 XTCDECL
 BOOLEAN
 RtlListEmpty(PLIST_ENTRY ListHead);

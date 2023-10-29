@@ -472,6 +472,7 @@ PVOID
 RtlAtomicExchangePointer(IN VOLATILE PVOID *Address,
                          IN PVOID Exchange)
 {
+    __sync_synchronize();
     return (PVOID)__sync_lock_test_and_set(Address, Exchange);
 }
 
