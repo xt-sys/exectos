@@ -73,7 +73,7 @@ RtlAtomicAnd32(IN VOLATILE PLONG Address,
 }
 
 /**
- * Performs an atomic bitwise AND operation on the 64-bit value.
+ * Performs an atomic bitwise AND operation on the 32-bit or 64-bit value depending or architecture.
  *
  * @param Address
  *        Supplies the address of the value on which the bitwise AND operation is to be performed.
@@ -86,9 +86,9 @@ RtlAtomicAnd32(IN VOLATILE PLONG Address,
  * @since XT 1.0
  */
 XTFASTCALL
-LONGLONG
-RtlAtomicAnd64(IN VOLATILE PLONGLONG Address,
-               IN LONGLONG Mask)
+LONG_PTR
+RtlAtomicAnd64(IN VOLATILE PLONG_PTR Address,
+               IN LONG_PTR Mask)
 {
     return __sync_fetch_and_and(Address, Mask);
 }
@@ -169,7 +169,7 @@ RtlAtomicCompareExchange32(IN VOLATILE PLONG Address,
 }
 
 /**
- * Performs atomically compare exchange operation on the 64-bit value.
+ * Performs atomically compare exchange operation on the 32-bit or 64-bit value depending or architecture.
  *
  * @param Address
  *        Supplies the address of the value to compare and potentially exchange.
@@ -185,10 +185,10 @@ RtlAtomicCompareExchange32(IN VOLATILE PLONG Address,
  * @since XT 1.0
  */
 XTFASTCALL
-LONGLONG
-RtlAtomicCompareExchange64(IN VOLATILE PLONGLONG Address,
-                           IN LONGLONG Comperand,
-                           IN LONGLONG Exchange)
+LONG_PTR
+RtlAtomicCompareExchange64(IN VOLATILE PLONG_PTR Address,
+                           IN LONG_PTR Comperand,
+                           IN LONG_PTR Exchange)
 {
     return __sync_val_compare_and_swap(Address, Comperand, Exchange);
 }
@@ -270,7 +270,7 @@ RtlAtomicDecrement32(IN VOLATILE PLONG Address)
 }
 
 /**
- * Performs atomically decrement of the 64-bit value.
+ * Performs atomically decrement of the 32-bit or 64-bit value depending or architecture.
  *
  * @param Address
  *        Supplies the address of the value to decrement.
@@ -280,8 +280,8 @@ RtlAtomicDecrement32(IN VOLATILE PLONG Address)
  * @since XT 1.0
  */
 XTFASTCALL
-LONGLONG
-RtlAtomicDecrement64(IN VOLATILE PLONGLONG Address)
+LONG_PTR
+RtlAtomicDecrement64(IN VOLATILE PLONG_PTR Address)
 {
     return __sync_sub_and_fetch(Address, 1);
 }
@@ -350,7 +350,7 @@ RtlAtomicExchange32(IN VOLATILE PLONG Address,
 }
 
 /**
- * Performs atomically operation on the 64-bit value.
+ * Performs atomically operation on the 32-bit or 64-bit value depending or architecture.
  *
  * @param Address
  *        Supplies the address of the value to exchange with.
@@ -363,9 +363,9 @@ RtlAtomicExchange32(IN VOLATILE PLONG Address,
  * @since XT 1.0
  */
 XTFASTCALL
-LONGLONG
-RtlAtomicExchange64(IN VOLATILE PLONGLONG Address,
-                    IN LONGLONG Exchange)
+LONG_PTR
+RtlAtomicExchange64(IN VOLATILE PLONG_PTR Address,
+                    IN LONG_PTR Exchange)
 {
     return __sync_lock_test_and_set(Address, Exchange);
 }
@@ -434,7 +434,7 @@ RtlAtomicExchangeAdd32(IN VOLATILE PLONG Address,
 }
 
 /**
- * Performs atomically addition of the 64-bit value.
+ * Performs atomically addition of the 32-bit or 64-bit value depending or architecture.
  *
  * @param Address
  *        Supplies the address of the original value.
@@ -447,9 +447,9 @@ RtlAtomicExchangeAdd32(IN VOLATILE PLONG Address,
  * @since XT 1.0
  */
 XTFASTCALL
-LONGLONG
-RtlAtomicExchangeAdd64(IN VOLATILE PLONGLONG Address,
-                       IN LONGLONG Value)
+LONG_PTR
+RtlAtomicExchangeAdd64(IN VOLATILE PLONG_PTR Address,
+                       IN LONG_PTR Value)
 {
     return __sync_fetch_and_add(Address, Value);
 }
@@ -490,7 +490,7 @@ XTFASTCALL
 PSINGLE_LIST_ENTRY
 RtlAtomicFlushSingleList(IN PSINGLE_LIST_HEADER Header)
 {
-    return (PSINGLE_LIST_ENTRY)RtlAtomicExchange64((PLONGLONG)&Header->Alignment, (LONGLONG)NULL);
+    return (PSINGLE_LIST_ENTRY)RtlAtomicExchange64((PLONG_PTR)&Header->Alignment, (LONGLONG)NULL);
 }
 
 /**
@@ -545,7 +545,7 @@ RtlAtomicIncrement32(IN VOLATILE PLONG Address)
 }
 
 /**
- * Performs atomically increment of the 64-bit value.
+ * Performs atomically increment of the 32-bit or 64-bit value depending or architecture.
  *
  * @param Address
  *        Supplies the address of the value to increment.
@@ -555,8 +555,8 @@ RtlAtomicIncrement32(IN VOLATILE PLONG Address)
  * @since XT 1.0
  */
 XTFASTCALL
-LONGLONG
-RtlAtomicIncrement64(IN VOLATILE PLONGLONG Address)
+LONG_PTR
+RtlAtomicIncrement64(IN VOLATILE PLONG_PTR Address)
 {
     return __sync_add_and_fetch(Address, 1);
 }
@@ -625,7 +625,7 @@ RtlAtomicOr32(IN VOLATILE PLONG Address,
 }
 
 /**
- * Performs an atomic bitwise OR operation on the 64-bit value.
+ * Performs an atomic bitwise OR operation on the 32-bit or 64-bit value depending or architecture.
  *
  * @param Address
  *        Supplies the address of the value on which the bitwise OR operation is to be performed.
@@ -638,9 +638,9 @@ RtlAtomicOr32(IN VOLATILE PLONG Address,
  * @since XT 1.0
  */
 XTFASTCALL
-LONGLONG
-RtlAtomicOr64(IN VOLATILE PLONGLONG Address,
-              IN LONGLONG Mask)
+LONG_PTR
+RtlAtomicOr64(IN VOLATILE PLONG_PTR Address,
+              IN LONG_PTR Mask)
 {
     return __sync_fetch_and_or(Address, Mask);
 }
@@ -677,9 +677,9 @@ RtlAtomicPopEntrySingleList(IN PSINGLE_LIST_HEADER Header)
         NextEntry = FirstEntry;
 
         /* Compare and exchange */
-        FirstEntry = (PVOID)RtlAtomicCompareExchange64((PLONGLONG)ListHead,
-                                                       (LONGLONG)FirstEntry->Next,
-                                                       (LONGLONG)FirstEntry);
+        FirstEntry = (PVOID)RtlAtomicCompareExchange64((PLONG_PTR)ListHead,
+                                                       (LONG_PTR)FirstEntry->Next,
+                                                       (LONG_PTR)FirstEntry);
     } while(FirstEntry != NextEntry);
 
     /* Return removed element */
@@ -719,9 +719,9 @@ RtlAtomicPushEntrySingleList(IN PSINGLE_LIST_HEADER Header,
         NextEntry = FirstEntry;
 
         /* Compare and exchange */
-        FirstEntry = (PVOID)RtlAtomicCompareExchange64((PLONGLONG)ListHead,
-                                                       (LONGLONG)ListEntry,
-                                                       (LONGLONG)FirstEntry);
+        FirstEntry = (PVOID)RtlAtomicCompareExchange64((PLONG_PTR)ListHead,
+                                                       (LONG_PTR)ListEntry,
+                                                       (LONG_PTR)FirstEntry);
     } while(FirstEntry != NextEntry);
 
     /* Return original first element */
@@ -792,7 +792,7 @@ RtlAtomicXor32(IN VOLATILE PLONG Address,
 }
 
 /**
- * Performs an atomic bitwise XOR operation on the 64-bit value.
+ * Performs an atomic bitwise XOR operation on the 32-bit or 64-bit value depending or architecture.
  *
  * @param Address
  *        Supplies the address of the value on which the bitwise XOR operation is to be performed.
@@ -805,9 +805,9 @@ RtlAtomicXor32(IN VOLATILE PLONG Address,
  * @since XT 1.0
  */
 XTFASTCALL
-LONGLONG
-RtlAtomicXor64(IN VOLATILE PLONGLONG Address,
-               IN LONGLONG Mask)
+LONG_PTR
+RtlAtomicXor64(IN VOLATILE PLONG_PTR Address,
+               IN LONG_PTR Mask)
 {
     return __sync_fetch_and_xor(Address, Mask);
 }

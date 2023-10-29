@@ -29,9 +29,9 @@ RtlAtomicAnd32(IN VOLATILE PLONG Address,
                IN LONG Mask);
 
 XTFASTCALL
-LONGLONG
-RtlAtomicAnd64(IN VOLATILE PLONGLONG Address,
-               IN LONGLONG Mask);
+LONG_PTR
+RtlAtomicAnd64(IN VOLATILE PLONG_PTR Address,
+               IN LONG_PTR Mask);
 
 XTFASTCALL
 CHAR
@@ -52,10 +52,10 @@ RtlAtomicCompareExchange32(IN VOLATILE PLONG Address,
                            IN LONG Exchange);
 
 XTFASTCALL
-LONGLONG
-RtlAtomicCompareExchange64(IN VOLATILE PLONGLONG Address,
-                           IN LONGLONG Comperand,
-                           IN LONGLONG Exchange);
+LONG_PTR
+RtlAtomicCompareExchange64(IN VOLATILE PLONG_PTR Address,
+                           IN LONG_PTR Comperand,
+                           IN LONG_PTR Exchange);
 
 XTFASTCALL
 PVOID
@@ -76,8 +76,8 @@ LONG
 RtlAtomicDecrement32(IN VOLATILE PLONG Address);
 
 XTFASTCALL
-LONGLONG
-RtlAtomicDecrement64(IN VOLATILE PLONGLONG Address);
+LONG_PTR
+RtlAtomicDecrement64(IN VOLATILE PLONG_PTR Address);
 
 XTFASTCALL
 CHAR
@@ -95,9 +95,9 @@ RtlAtomicExchange32(IN VOLATILE PLONG Address,
                     IN LONG Exchange);
 
 XTFASTCALL
-LONGLONG
-RtlAtomicExchange64(IN VOLATILE PLONGLONG Address,
-                    IN LONGLONG Exchange);
+LONG_PTR
+RtlAtomicExchange64(IN VOLATILE PLONG_PTR Address,
+                    IN LONG_PTR Exchange);
 
 XTFASTCALL
 CHAR
@@ -115,9 +115,9 @@ RtlAtomicExchangeAdd32(IN VOLATILE PLONG Address,
                        IN LONG Value);
 
 XTFASTCALL
-LONGLONG
-RtlAtomicExchangeAdd64(IN VOLATILE PLONGLONG Address,
-                       IN LONGLONG Value);
+LONG_PTR
+RtlAtomicExchangeAdd64(IN VOLATILE PLONG_PTR Address,
+                       IN LONG_PTR Value);
 
 XTFASTCALL
 PVOID
@@ -141,8 +141,8 @@ LONG
 RtlAtomicIncrement32(IN VOLATILE PLONG Address);
 
 XTFASTCALL
-LONGLONG
-RtlAtomicIncrement64(IN VOLATILE PLONGLONG Address);
+LONG_PTR
+RtlAtomicIncrement64(IN VOLATILE PLONG_PTR Address);
 
 XTFASTCALL
 CHAR
@@ -160,9 +160,9 @@ RtlAtomicOr32(IN VOLATILE PLONG Address,
               IN LONG Mask);
 
 XTFASTCALL
-LONGLONG
-RtlAtomicOr64(IN VOLATILE PLONGLONG Address,
-              IN LONGLONG Mask);
+LONG_PTR
+RtlAtomicOr64(IN VOLATILE PLONG_PTR Address,
+              IN LONG_PTR Mask);
 
 XTFASTCALL
 PSINGLE_LIST_ENTRY
@@ -189,9 +189,9 @@ RtlAtomicXor32(IN VOLATILE PLONG Address,
                IN LONG Mask);
 
 XTFASTCALL
-LONGLONG
-RtlAtomicXor64(IN VOLATILE PLONGLONG Address,
-               IN LONGLONG Mask);
+LONG_PTR
+RtlAtomicXor64(IN VOLATILE PLONG_PTR Address,
+               IN LONG_PTR Mask);
 
 XTFASTCALL
 USHORT
