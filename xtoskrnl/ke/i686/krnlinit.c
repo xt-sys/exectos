@@ -18,7 +18,7 @@
  */
 XTAPI
 VOID
-KepArchInitialize(VOID)
+KepInitializeMachine(VOID)
 {
     /* Re-enable IDE interrupts */
     HlIoPortOutByte(0x376, 0);
@@ -36,7 +36,9 @@ XTAPI
 VOID
 KepStartKernel(VOID)
 {
-    DebugPrint(L"Hello from new kernel stack!\n");
+    /* Print debug message */
+    DebugPrint(L"Starting ExectOS ...\n");
+
     for(;;);
 }
 

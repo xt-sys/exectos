@@ -27,7 +27,7 @@ KeGetCurrentThread(VOID);
 
 XTAPI
 VOID
-KepArchInitialize(VOID);
+KepInitializeMachine(VOID);
 
 XTAPI
 VOID
