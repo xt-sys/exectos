@@ -233,6 +233,11 @@ XTFASTCALL
 LONG_PTR
 RtlInterlockedDecrementLongPtr(IN VOLATILE PLONG_PTR Addend);
 
+XTFASTCALL
+PVOID
+RtlInterlockedExchangePointer(IN VOLATILE PVOID *Destination,
+                              IN PVOID Value);
+
 XTCDECL
 BOOLEAN
 RtlListEmpty(PLIST_ENTRY ListHead);

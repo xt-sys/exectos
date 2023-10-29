@@ -50,3 +50,25 @@ RtlInterlockedDecrementLongPtr(IN VOLATILE PLONG_PTR Addend)
 {
     return (LONG_PTR)__sync_sub_and_fetch(Addend, 1);
 }
+
+/**
+ * Performs an atomic assignment of the value to the pointer variable.
+ *
+ * @param Destination
+ *        Supplies a pointer to the variable to be set.
+ *
+ * @param Value
+ *        Supplies a value to set.
+ *
+ * @return This routine returns the initial value of the pointer variable.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+PVOID
+RtlInterlockedExchangePointer(IN VOLATILE PVOID *Destination,
+                              IN PVOID Value)
+{
+    __sync_synchronize();
+    return (void *)__sync_lock_test_and_set(Destination, Value);
+}
