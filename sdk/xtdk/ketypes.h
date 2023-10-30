@@ -170,7 +170,7 @@ typedef enum _WAIT_TYPE
 
 /* Kernel routine callbacks */
 typedef EXCEPTION_DISPOSITION (XTCDECL *PEXCEPTION_ROUTINE)(IN PEXCEPTION_RECORD ExceptionRecord, IN PVOID EstablisherFrame, IN OUT PCONTEXT ContextRecord, IN OUT PVOID DispatcherContext);
-typedef VOID (XTCDECL *PKDEFERRED_ROUTINE)(IN PKDPC Dpc, IN PVOID DeferredContext, IN PVOID SystemArgument1, IN PVOID SystemArgument2);
+typedef VOID (XTAPI *PKDEFERRED_ROUTINE)(IN PKDPC Dpc, IN PVOID DeferredContext, IN PVOID SystemArgument1, IN PVOID SystemArgument2);
 typedef VOID (XTAPI *PKNORMAL_ROUTINE)(IN PVOID NormalContext, IN PVOID SystemArgument1, IN PVOID SystemArgument2);
 typedef VOID (XTAPI *PKKERNEL_ROUTINE)(IN PKAPC Apc, IN OUT PKNORMAL_ROUTINE *NormalRoutine, IN OUT PVOID *NormalContext, IN OUT PVOID *SystemArgument1, IN OUT PVOID *SystemArgument2);
 typedef VOID (XTAPI *PKRUNDOWN_ROUTINE)(IN PKAPC Apc);
