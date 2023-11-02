@@ -27,6 +27,10 @@ KeGetCurrentThread(VOID);
 
 XTAPI
 VOID
+KepInitializeKernel(VOID);
+
+XTAPI
+VOID
 KepInitializeMachine(VOID);
 
 XTAPI

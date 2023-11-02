@@ -10,6 +10,45 @@
 
 
 /**
+ * This routine initializes XT kernel.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KepInitializeKernel(VOID)
+{
+    PKPROCESSOR_CONTROL_BLOCK Prcb;
+    ULONG_PTR PageDirectory[2];
+    PKTHREAD CurrentThread;
+
+    /* Get processor control block and current thread */
+    Prcb = KeGetCurrentProcessorControlBlock();
+    CurrentThread = KeGetCurrentThread();
+
+    /* Initialize CPU power state structures */
+    PoInitializeProcessorControlBlock(Prcb);
+
+    /* Initialize Idle process */
+    RtlInitializeListHead(&KepProcessListHead);
+    PageDirectory[0] = 0;
+    PageDirectory[1] = 0;
+    KeInitializeProcess(CurrentThread->ApcState.Process, 0, 0xFFFFFFFF, PageDirectory, FALSE);
+    CurrentThread->ApcState.Process->Quantum = MAXCHAR;
+
+    /* Initialize Idle thread */
+    KeInitializeThread(CurrentThread->ApcState.Process, CurrentThread, NULL, NULL, NULL, NULL, NULL, Prcb->DpcStack);
+    CurrentThread->NextProcessor = Prcb->Number;
+    CurrentThread->Priority = THREAD_HIGH_PRIORITY;
+    CurrentThread->State = Running;
+    CurrentThread->Affinity = (ULONG_PTR)1 << Prcb->Number;
+    CurrentThread->WaitIrql = DISPATCH_LEVEL;
+    CurrentThread->ApcState.Process->ActiveProcessors |= (ULONG_PTR)1 << Prcb->Number;
+}
+
+/**
  * Performs architecture-specific initialization for the kernel executive.
  *
  * @return This routine does not return any value.
@@ -39,6 +78,11 @@ KepStartKernel(VOID)
     /* Print debug message */
     DebugPrint(L"Starting ExectOS ...\n");
 
+    /* Initialize XTOS kernel */
+    KepInitializeKernel();
+
+    /* Enter infinite loop */
+    DebugPrint(L"KepStartKernel() finished. Entering infinite loop.\n");
     for(;;);
 }
 
