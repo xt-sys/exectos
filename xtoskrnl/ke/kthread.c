@@ -52,7 +52,12 @@ KeInitializeThread(IN PKPROCESS Process,
                    IN PVOID Stack)
 {
     PKWAIT_BLOCK TimerWaitBlock;
+    BOOLEAN Allocation;
+    XTSTATUS Status;
     ULONG Index;
+
+    /* No stack allocation was done yet */
+    Allocation = FALSE;
 
     /* Initialize thread dispatcher header */
     Thread->Header.Type = ThreadObject;
@@ -118,6 +123,21 @@ KeInitializeThread(IN PKPROCESS Process,
     /* Initialize Thread Environment Block*/
     Thread->EnvironmentBlock = EnvironmentBlock;
 
+    /* Make sure there is a valid stack available */
+    if(!Stack)
+    {
+        /* Allocate new stack */
+        Status = MmAllocateKernelStack(&Stack, FALSE, 0);
+        if(Status != STATUS_SUCCESS || !Stack)
+        {
+            /* Stack allocation failed */
+            return STATUS_INSUFFICIENT_RESOURCES;
+        }
+
+        /* Mark allocation as successful */
+        Allocation = TRUE;
+    }
+
     Thread->InitialStack = Stack;
     Thread->StackBase = Stack;
     Thread->StackLimit = Stack - KERNEL_STACK_SIZE;
@@ -129,7 +149,16 @@ KeInitializeThread(IN PKPROCESS Process,
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
     {
-        /* Failed to initialize thread context */
+        /* Failed to initialize thread context, check stack allocation */
+        if(Allocation)
+        {
+            /* Deallocate stack */
+            MmFreeKernelStack(Stack, FALSE);
+            Thread->InitialStack = NULL;
+            Thread->StackBase = NULL;
+        }
+
+        /* Thread initialization failed */
         return STATUS_UNSUCCESSFUL;
     }
 
