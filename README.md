@@ -38,7 +38,7 @@ ExectOS is a preemptive, reentrant multitasking operating system that implements
 from NT architecture. It is modular, and consists of two main layers: microkernel and user modes. Its' kernel mode has
 full access to the hardware and system resources and runs code in a protected memory area. It consists of executive
 services, which is itself made up on many modules that do specific tasks, a kernel and drivers. Unlike the NT, system
-does not feature a separate hardware abstraction layer (HAL) between the physical hardware and the rest of the OS.
+does not feature a separate Hardware Abstraction Layer (HAL) between the physical hardware and the rest of the OS.
 Instead, XT architecture integrates a hardware specific code with the kernel. The user mode is made up of subsystems
 and it has been designed to run applications written for many different types of operating systems. This allows to
 implement any environment subsystem to support applications that are strictly written to the corresponding standard
