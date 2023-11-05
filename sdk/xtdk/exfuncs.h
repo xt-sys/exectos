@@ -20,10 +20,22 @@ ExAcquireRundownProtection(IN PEX_RUNDOWN_REFERENCE Descriptor);
 
 XTFASTCALL
 VOID
+ExCompleteRundownProtection(IN PEX_RUNDOWN_REFERENCE Descriptor);
+
+XTFASTCALL
+VOID
 ExInitializeRundownProtection(IN PEX_RUNDOWN_REFERENCE Descriptor);
 
 XTFASTCALL
 VOID
+ExReInitializeRundownProtection(IN PEX_RUNDOWN_REFERENCE Descriptor);
+
+XTFASTCALL
+VOID
 ExReleaseRundownProtection(IN PEX_RUNDOWN_REFERENCE Descriptor);
+
+XTFASTCALL
+VOID
+ExWaitForRundownProtectionRelease(IN PEX_RUNDOWN_REFERENCE Descriptor);
 
 #endif /* __XTDK_EXFUNCS_H */

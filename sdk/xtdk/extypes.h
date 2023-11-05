@@ -14,6 +14,9 @@
 #include <ketypes.h>
 
 
+/* Rundown protection flags */
+#define EX_RUNDOWN_ACTIVE                               0x1
+
 /* Executive rundown protection structure definition */
 typedef struct _EX_RUNDOWN_REFERENCE
 {

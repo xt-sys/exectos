@@ -1,6 +1,10 @@
+# XTOS exports
 @ fastcall ExAcquireRundownProtection(ptr)
+@ fastcall ExCompleteRundownProtection(ptr)
 @ fastcall ExInitializeRundownProtection(ptr)
+@ fastcall ExReInitializeRundownProtection(ptr)
 @ fastcall ExReleaseRundownProtection(ptr)
+@ fastcall ExWaitForRundownProtectionRelease(ptr)
 @ cdecl HlIoPortInByte(ptr)
 @ cdecl HlIoPortInLong(ptr)
 @ cdecl HlIoPortInShort(ptr)
@@ -30,3 +34,7 @@
 @ cdecl RtlWideStringLength(wstr long)
 @ cdecl RtlWideStringTokenize(wstr wstr wstr)
 @ stdcall RtlZeroMemory(ptr long)
+
+
+# NT compatibilty layer exports
+@ fastcall ExRundownCompleted(ptr) ExCompleteRundownProtection

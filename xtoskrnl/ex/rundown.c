@@ -58,6 +58,23 @@ ExAcquireRundownProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
 }
 
 /**
+ * Marks the rundown descriptor as completed.
+ *
+ * @param Descriptor
+ *        Supplies a pointer to the descriptor to be completed.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since NT 5.1
+ */
+XTFASTCALL
+VOID
+ExCompleteRundownProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
+{
+    RtlAtomicExchangePointer(&Descriptor->Ptr, (PVOID)EX_RUNDOWN_ACTIVE);
+}
+
+/**
  * Initializes the rundown protection descriptor.
  *
  * @param Descriptor
@@ -73,6 +90,23 @@ ExInitializeRundownProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
 {
     /* Reset descriptor counter */
     Descriptor->Count = 0;
+}
+
+/**
+ * Reinitializes the rundown protection structure after it has been completed.
+ *
+ * @param Descriptor
+ *        Supplies a pointer to the descriptor to be reinitialized.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since NT 5.1
+ */
+XTFASTCALL
+VOID
+ExReInitializeRundownProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
+{
+    RtlAtomicExchangePointer(&Descriptor->Ptr, NULL);
 }
 
 /**
@@ -124,4 +158,21 @@ ExReleaseRundownProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
             CurrentValue = NewValue;
         }
     }
+}
+
+/**
+ * Waits until rundown protection calls are completed.
+ *
+ * @param Descriptor
+ *        Supplies a pointer to the rundown block descriptor.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since NT 5.1
+ */
+XTFASTCALL
+VOID
+ExWaitForRundownProtectionRelease(IN PEX_RUNDOWN_REFERENCE Descriptor)
+{
+    UNIMPLEMENTED;
 }
