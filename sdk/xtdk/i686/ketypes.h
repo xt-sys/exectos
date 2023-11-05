@@ -162,6 +162,9 @@
 /* Number of supported extensions */
 #define MAXIMUM_SUPPORTED_EXTENSION       512
 
+/* Return address size pushed by 'call' instruction */
+#define KRETURN_ADDRESS_SIZE              0x4
+
 /* Size of 387 registers */
 #define SIZE_OF_80387_REGISTERS           80
 #define SIZE_OF_FX_REGISTERS              128

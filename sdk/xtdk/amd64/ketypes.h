@@ -133,6 +133,9 @@
 #define KTRAP_FRAME_ALIGN                 0x10
 #define KTRAP_FRAME_SIZE                  sizeof(KTRAP_FRAME)
 
+/* Return address size pushed by 'call' instruction */
+#define KRETURN_ADDRESS_SIZE              0x8
+
 /* Size of legacy 387 registers */
 #define SIZE_OF_80387_REGISTERS           80
 

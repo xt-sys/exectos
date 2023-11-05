@@ -105,6 +105,6 @@ KepSwitchBootStack(IN ULONG_PTR Stack)
                  "jmp KepStartKernel\n"
                  :
                  : "m" (Stack),
-                   "i" (FLOATING_SAVE_AREA_SIZE | KEXCEPTION_FRAME_SIZE | KSWITCH_FRAME_SIZE),
+                   "i" (FLOATING_SAVE_AREA_SIZE | KEXCEPTION_FRAME_SIZE | KSWITCH_FRAME_SIZE | KRETURN_ADDRESS_SIZE),
                    "p" (KepStartKernel));
 }

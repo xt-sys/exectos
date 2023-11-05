@@ -106,7 +106,7 @@ KepSwitchBootStack(IN ULONG_PTR Stack)
                  "jmp _KepStartKernel@0\n"
                  :
                  : "m" (Stack),
-                   "i" (KTRAP_FRAME_ALIGN | KTRAP_FRAME_SIZE | NPX_FRAME_SIZE),
+                   "i" (KTRAP_FRAME_ALIGN | KTRAP_FRAME_SIZE | NPX_FRAME_SIZE | KRETURN_ADDRESS_SIZE),
                    "i" (CR0_EM | CR0_MP | CR0_TS),
                    "p" (KepStartKernel));
 }
