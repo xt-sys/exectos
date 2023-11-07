@@ -139,6 +139,11 @@
 /* Size of legacy 387 registers */
 #define SIZE_OF_80387_REGISTERS           80
 
+/* NPX state definitions */
+#define NPX_STATE_UNUSED                  0x0
+#define NPX_STATE_SCRUB                   0x1
+#define NPX_STATE_SWITCH                  0x2
+
 /* Floating point state storing structure */
 typedef struct _FLOATING_SAVE_AREA
 {
@@ -352,7 +357,8 @@ typedef struct _KSWITCH_FRAME
     ULONG64 P4Home;
     ULONG64 P5Home;
     ULONG MxCsr;
-    UCHAR Reserved[4];
+    KIRQL ApcBypass;
+    UCHAR Reserved[3];
     ULONG64 Rbp;
     ULONG64 Return;
 } KSWITCH_FRAME, *PKSWITCH_FRAME;

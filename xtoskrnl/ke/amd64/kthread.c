@@ -42,7 +42,7 @@ KepInitializeThreadContext(IN PKTHREAD Thread,
     PKTHREAD_INIT_FRAME ThreadFrame;
 
     /* Set initial thread frame */
-    ThreadFrame = (PKTHREAD_INIT_FRAME)Thread->InitialStack - sizeof(KTHREAD_INIT_FRAME);
+    ThreadFrame = ((PKTHREAD_INIT_FRAME)Thread->InitialStack) - 1;
 
     /* Fill floating point save area with zeroes */
     RtlZeroMemory(&ThreadFrame->NpxFrame, sizeof(FLOATING_SAVE_AREA));
@@ -68,7 +68,7 @@ KepInitializeThreadContext(IN PKTHREAD Thread,
         Thread->PreviousMode = UserMode;
 
         /* Enable floating point state */
-        Thread->NpxState = 1;
+        Thread->NpxState = NPX_STATE_SCRUB;
 
         /* Set initial floating point state */
         ThreadFrame->NpxFrame.ControlWord = 0x27F;
@@ -93,9 +93,9 @@ KepInitializeThreadContext(IN PKTHREAD Thread,
         Thread->PreviousMode = KernelMode;
 
         /* Disable floating point state */
-        Thread->NpxState = 0;
+        Thread->NpxState = NPX_STATE_UNUSED;
 
-        /* Set thread startup frame return information */
+        /* Set thread start address */
         ThreadFrame->StartFrame.Return = (ULONG64)NULL;
     }
 
@@ -106,10 +106,10 @@ KepInitializeThreadContext(IN PKTHREAD Thread,
     ThreadFrame->StartFrame.P4Home = (ULONG64)SystemRoutine;
 
     /* Initialize switch frame */
-    ThreadFrame->SwitchFrame.Rbp = (ULONG64)&ThreadFrame->TrapFrame + 128;
+    ThreadFrame->SwitchFrame.ApcBypass = APC_LEVEL;
     ThreadFrame->SwitchFrame.MxCsr = INITIAL_MXCSR;
+    ThreadFrame->SwitchFrame.Rbp = (ULONG64)&ThreadFrame->TrapFrame;
 
     /* Set thread stack */
-    Thread->InitialStack = &ThreadFrame->NpxFrame;
     Thread->KernelStack = &ThreadFrame->SwitchFrame;
 }
