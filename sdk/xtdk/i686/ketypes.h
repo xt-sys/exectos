@@ -169,8 +169,12 @@
 #define SIZE_OF_80387_REGISTERS           80
 #define SIZE_OF_FX_REGISTERS              128
 
+/* NPX state definitions */
+#define NPX_STATE_LOADED                  0x0
+#define NPX_STATE_UNLOADED                0xA
+
 /* Floating point state storing structure */
-typedef struct _FLOATING_SAVE_AREA
+typedef struct _FN_SAVE_FORMAT
 {
     ULONG ControlWord;
     ULONG StatusWord;
@@ -181,10 +185,10 @@ typedef struct _FLOATING_SAVE_AREA
     ULONG DataSelector;
     UCHAR RegisterArea[SIZE_OF_80387_REGISTERS];
     ULONG Cr0NpxState;
-} FLOATING_SAVE_AREA, *PFLOATING_SAVE_AREA;
+} FN_SAVE_FORMAT, *PFN_SAVE_FORMAT;
 
 /* Data for FXSAVE/FXRSTOR instructions structure definition */
-typedef struct _SIMD_SAVE_AREA
+typedef struct _FX_SAVE_FORMAT
 {
     USHORT ControlWord;
     USHORT StatusWord;
@@ -200,15 +204,15 @@ typedef struct _SIMD_SAVE_AREA
     UCHAR Reserved3[SIZE_OF_FX_REGISTERS];
     UCHAR Reserved4[224];
     UCHAR Align16Byte[8];
-} SIMD_SAVE_AREA, *PSIMD_SAVE_AREA;
+} FX_SAVE_FORMAT, *PFX_SAVE_FORMAT;
 
 /* Floating save area structure definition */
 typedef struct _FX_SAVE_AREA
 {
     union
     {
-        FLOATING_SAVE_AREA FnArea;
-        SIMD_SAVE_AREA FxArea;
+        FN_SAVE_FORMAT FnArea;
+        FX_SAVE_FORMAT FxArea;
     };
     ULONG NpxSavedCpu;
     ULONG Cr0NpxState;
@@ -224,7 +228,7 @@ typedef struct _CONTEXT
     ULONG Dr3;
     ULONG Dr6;
     ULONG Dr7;
-    FLOATING_SAVE_AREA FloatSave;
+    FN_SAVE_FORMAT FloatSave;
     ULONG SegGs;
     ULONG SegFs;
     ULONG SegEs;
@@ -357,7 +361,7 @@ typedef struct _KSTART_FRAME
 typedef struct _KSWITCH_FRAME
 {
     PVOID ExceptionList;
-    PVOID Reserved;
+    BOOLEAN ApcBypassDisabled;
     PVOID Return;
 } KSWITCH_FRAME, *PKSWITCH_FRAME;
 
@@ -366,8 +370,8 @@ typedef struct _KTRAP_FRAME
 {
     ULONG DbgEbp;
     ULONG DbgEip;
-    ULONG DbgArgMark;
-    ULONG DbgArgPointer;
+    ULONG DbgMark;
+    ULONG DbgPointer;
     ULONG TempSegCs;
     ULONG TempEsp;
     ULONG Dr0;

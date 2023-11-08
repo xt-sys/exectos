@@ -40,13 +40,13 @@ KepInitializeThreadContext(IN PKTHREAD Thread,
                            IN PCONTEXT ContextRecord)
 {
     PKTHREAD_INIT_FRAME ThreadFrame;
-    PSIMD_SAVE_AREA SimdSaveArea;
+    PFX_SAVE_FORMAT FxSaveFormat;
 
     /* Set initial thread frame */
-    ThreadFrame = (PKTHREAD_INIT_FRAME)Thread->InitialStack - sizeof(KTHREAD_INIT_FRAME);
+    ThreadFrame = ((PKTHREAD_INIT_FRAME)Thread->InitialStack) - sizeof(KTHREAD_INIT_FRAME);
 
     /* Fill floating point save area with zeroes */
-    RtlZeroMemory(&ThreadFrame->NpxFrame, sizeof(FLOATING_SAVE_AREA));
+    RtlZeroMemory(&ThreadFrame->NpxFrame, sizeof(FX_SAVE_AREA));
 
     /* Check if context provided for this thread */
     if(ContextRecord)
@@ -58,19 +58,20 @@ KepInitializeThreadContext(IN PKTHREAD Thread,
         ContextRecord->ContextFlags &= ~CONTEXT_DEBUG_REGISTERS | CONTEXT_CONTROL;
 
         /* This is user mode thread */
+        ThreadFrame->StartFrame.UserMode = TRUE;
         Thread->PreviousMode = UserMode;
 
         /* Disable coprocessor floating point state */
-        Thread->NpxState = CR0_TS | CR0_MP;
+        Thread->NpxState = NPX_STATE_UNLOADED;
         Thread->Header.NpxIrql = PASSIVE_LEVEL;
 
         /* Set initial floating point state */
+        FxSaveFormat = (PFX_SAVE_FORMAT)ContextRecord->ExtendedRegisters;
+        FxSaveFormat->ControlWord = 0x27F;
+        FxSaveFormat->MxCsr = 0x1F80;
+        ContextRecord->FloatSave.Cr0NpxState = 0;
         ThreadFrame->NpxFrame.Cr0NpxState = 0;
         ThreadFrame->NpxFrame.NpxSavedCpu = 0;
-        SimdSaveArea = (PSIMD_SAVE_AREA)ContextRecord->ExtendedRegisters;
-        SimdSaveArea->ControlWord = 0x27F;
-        SimdSaveArea->MxCsr = 0x1F80;
-        ContextRecord->FloatSave.Cr0NpxState = 0;
 
         /* Clear DR6 and DR7 registers */
         ThreadFrame->TrapFrame.Dr6 = 0;
@@ -84,23 +85,24 @@ KepInitializeThreadContext(IN PKTHREAD Thread,
         ThreadFrame->TrapFrame.SegEs |= RPL_MASK;
         ThreadFrame->TrapFrame.HardwareSegSs |= RPL_MASK;
 
-        /* Set kernel mode thread in the trap frame */
+        /* Set debug mark in the trap frame */
+        ThreadFrame->TrapFrame.DbgMark = 0x8BADF00D;
+
+        /* Set user mode thread in the trap frame */
         ThreadFrame->TrapFrame.PreviousMode = UserMode;
     }
     else
     {
         /* This is kernel mode thread */
+        ThreadFrame->StartFrame.UserMode = FALSE;
         Thread->PreviousMode = KernelMode;
 
         /* Disable coprocessor floating point state */
-        Thread->NpxState = CR0_TS | CR0_MP;
+        Thread->NpxState = NPX_STATE_UNLOADED;
 
         /* Set initial floating point state */
         ThreadFrame->NpxFrame.FxArea.ControlWord = 0x27F;
         ThreadFrame->NpxFrame.FxArea.MxCsr = 0x1F80;
-
-        /* Mark as kernel mode thread in the start frame */
-        ThreadFrame->StartFrame.UserMode = FALSE;
     }
 
     /* Initialize thread startup information */
@@ -109,6 +111,7 @@ KepInitializeThreadContext(IN PKTHREAD Thread,
     ThreadFrame->StartFrame.SystemRoutine = SystemRoutine;
 
     /* Initialize switch frame */
+    ThreadFrame->SwitchFrame.ApcBypassDisabled = TRUE;
     ThreadFrame->SwitchFrame.ExceptionList = (PEXCEPTION_REGISTRATION_RECORD) - 1;
 
     /* Set thread stack */
