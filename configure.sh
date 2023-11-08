@@ -37,5 +37,6 @@ if [ ${?} -ne 0 ]; then
     echo "Configure script failed."
     exit 1
 else
+	echo "${ARCH}" > ${EXECTOS_BINARY_DIR}/build.arch
     echo "Configure script completed. Enter '${EXECTOS_BINARY_DIR}' directory and execute 'ninja' to build ExectOS."
 fi
