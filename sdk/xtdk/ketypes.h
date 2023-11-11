@@ -276,6 +276,13 @@ typedef struct _KSPIN_LOCK_QUEUE
     PKSPIN_LOCK Lock;
 } KSPIN_LOCK_QUEUE, *PKSPIN_LOCK_QUEUE;
 
+/* Per processor lock queue handle structure definition */
+typedef struct _KLOCK_QUEUE_HANDLE
+{
+    KSPIN_LOCK_QUEUE LockQueue;
+    KIRQL OldIrql;
+} KLOCK_QUEUE_HANDLE, *PKLOCK_QUEUE_HANDLE;
+
 /* Queue object structure definition */
 typedef struct _KQUEUE
 {
