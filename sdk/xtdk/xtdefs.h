@@ -38,6 +38,7 @@
 #define MAXSHORT                               0x7FFF
 #define MINLONG                                0x80000000
 #define MAXLONG                                0x7FFFFFFF
+#define MAXULONG                               0xFFFFFFFF
 
 /* Preprocessor macros for defining a structure alignment and packing */
 #define ALIGN(x)                               __attribute__((aligned(x)))
