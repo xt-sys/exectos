@@ -40,7 +40,8 @@ KeInitializeThread(IN PKPROCESS Process,
                    IN PVOID StartContext,
                    IN PCONTEXT Context,
                    IN PVOID EnvironmentBlock,
-                   IN PVOID Stack);
+                   IN PVOID Stack,
+                   IN BOOLEAN StartThread);
 
 XTAPI
 VOID

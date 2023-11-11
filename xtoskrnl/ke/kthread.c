@@ -49,7 +49,8 @@ KeInitializeThread(IN PKPROCESS Process,
                    IN PVOID StartContext,
                    IN PCONTEXT Context,
                    IN PVOID EnvironmentBlock,
-                   IN PVOID Stack)
+                   IN PVOID Stack,
+                   IN BOOLEAN StartThread)
 {
     PKWAIT_BLOCK TimerWaitBlock;
     BOOLEAN Allocation;
@@ -164,7 +165,13 @@ KeInitializeThread(IN PKPROCESS Process,
 
     /* Mark thread as initialized and run it */
     Thread->State = Initialized;
-    KeStartThread(Thread);
+
+    /* Check if thread should be started */
+    if(StartThread)
+    {
+        /* Start thread */
+        KeStartThread(Thread);
+    }
 
     /* Return success */
     return STATUS_SUCCESS;

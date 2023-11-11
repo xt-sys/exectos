@@ -22,11 +22,15 @@ KepInitializeKernel(VOID)
 {
     PKPROCESSOR_CONTROL_BLOCK Prcb;
     ULONG_PTR PageDirectory[2];
+    PKPROCESS CurrentProcess;
     PKTHREAD CurrentThread;
 
     /* Get processor control block and current thread */
     Prcb = KeGetCurrentProcessorControlBlock();
     CurrentThread = KeGetCurrentThread();
+
+    /* Get current process */
+    CurrentProcess = CurrentThread->ApcState.Process;
 
     /* Initialize CPU power state structures */
     PoInitializeProcessorControlBlock(Prcb);
@@ -35,17 +39,17 @@ KepInitializeKernel(VOID)
     RtlInitializeListHead(&KepProcessListHead);
     PageDirectory[0] = 0;
     PageDirectory[1] = 0;
-    KeInitializeProcess(CurrentThread->ApcState.Process, 0, 0xFFFFFFFF, PageDirectory, FALSE);
-    CurrentThread->ApcState.Process->Quantum = MAXCHAR;
+    KeInitializeProcess(CurrentProcess, 0, 0xFFFFFFFF, PageDirectory, FALSE);
+    CurrentProcess->Quantum = MAXCHAR;
 
     /* Initialize Idle thread */
-    KeInitializeThread(CurrentThread->ApcState.Process, CurrentThread, NULL, NULL, NULL, NULL, NULL, Prcb->DpcStack);
+    KeInitializeThread(CurrentProcess, CurrentThread, NULL, NULL, NULL, NULL, NULL, Prcb->DpcStack, TRUE);
     CurrentThread->NextProcessor = Prcb->Number;
     CurrentThread->Priority = THREAD_HIGH_PRIORITY;
     CurrentThread->State = Running;
     CurrentThread->Affinity = (ULONG_PTR)1 << Prcb->Number;
     CurrentThread->WaitIrql = DISPATCH_LEVEL;
-    CurrentThread->ApcState.Process->ActiveProcessors |= (ULONG_PTR)1 << Prcb->Number;
+    CurrentProcess->ActiveProcessors |= (ULONG_PTR)1 << Prcb->Number;
 }
 
 /**
