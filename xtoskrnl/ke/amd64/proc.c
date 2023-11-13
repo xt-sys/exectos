@@ -39,11 +39,11 @@ KeGetCurrentProcessorControlBlock(VOID)
 }
 
 /**
- * Gets address of current kernel's thread object.
+ * Gets the current thread running on the currently executing processor.
  *
- * @return This routine returns address of current kernel's thread object.
+ * @return This routine returns the address of the current thread object.
  *
- * @since XT 1.0
+ * @since NT 3.5
  */
 XTAPI
 PKTHREAD

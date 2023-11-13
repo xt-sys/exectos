@@ -35,9 +35,16 @@ XTAPI
 PKPROCESSOR_CONTROL_BLOCK
 KeGetCurrentProcessorControlBlock(VOID)
 {
-    return (PKPROCESSOR_CONTROL_BLOCK)ArReadFSDualWord(FIELD_OFFSET(KPROCESSOR_BLOCK, Prcb));
+    return (PKPROCESSOR_CONTROL_BLOCK)ArReadFSDualWord(FIELD_OFFSET(KPROCESSOR_BLOCK, CurrentPrcb));
 }
 
+/**
+ * Gets the current thread running on the currently executing processor.
+ *
+ * @return This routine returns the address of the current thread object.
+ *
+ * @since NT 3.5
+ */
 XTAPI
 PKTHREAD
 KeGetCurrentThread(VOID)
