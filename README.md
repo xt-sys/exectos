@@ -86,11 +86,11 @@ chbuild [DEBUG|RELEASE]
 Once the sources are configured, enter the build directory and compile the source code:
 ```
 cd build
-ninja
+xbuild
 ```
 It is also possible to build a disk image ready to use with QEMU with the following command:
 ```
-ninja diskimg
+xbuild diskimg
 ```
 
 # Contributing

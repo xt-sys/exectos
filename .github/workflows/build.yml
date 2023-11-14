@@ -17,7 +17,7 @@ jobs:
           fetch-depth: 0
       - name: Build ExectOS
         run: |
-          echo "charch ${{ matrix.arch }} && ./configure.sh && cd build-${{ matrix.arch }}-xtchain && ninja -v && ninja diskimg -v" > build.cmds
+          echo "charch ${{ matrix.arch }} && ./configure.sh && cd build-${{ matrix.arch }}-xtchain && xbuild -v && xbuild diskimg -v" > build.cmds
           xtchain < build.cmds
       - name: Publish binaries
         if: ${{ github.ref == 'refs/heads/master' }}
