@@ -43,6 +43,10 @@ KepInitializeThreadContext(IN PKTHREAD Thread,
 
 XTAPI
 VOID
+KepSaveProcessorState(OUT PKPROCESSOR_STATE CpuState);
+
+XTAPI
+VOID
 KepStartKernel(VOID);
 
 XTAPI

@@ -51,3 +51,41 @@ KeGetCurrentThread(VOID)
 {
     return (PKTHREAD)ArReadFSDualWord(FIELD_OFFSET(KPROCESSOR_BLOCK, Prcb.CurrentThread));
 }
+
+/**
+ * Saves the current processor state.
+ *
+ * @param State
+ *        Supplies a pointer to the processor state structure.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KepSaveProcessorState(OUT PKPROCESSOR_STATE CpuState)
+{
+    /* Save CR registers */
+    CpuState->SpecialRegisters.Cr0 = ArReadControlRegister(0);
+    CpuState->SpecialRegisters.Cr2 = ArReadControlRegister(2);
+    CpuState->SpecialRegisters.Cr3 = ArReadControlRegister(3);
+    CpuState->SpecialRegisters.Cr4 = ArReadControlRegister(4);
+
+    /* Save DR registers */
+    CpuState->SpecialRegisters.KernelDr0 = ArReadDebugRegister(0);
+    CpuState->SpecialRegisters.KernelDr1 = ArReadDebugRegister(1);
+    CpuState->SpecialRegisters.KernelDr2 = ArReadDebugRegister(2);
+    CpuState->SpecialRegisters.KernelDr3 = ArReadDebugRegister(3);
+    CpuState->SpecialRegisters.KernelDr6 = ArReadDebugRegister(6);
+    CpuState->SpecialRegisters.KernelDr7 = ArReadDebugRegister(7);
+
+    /* Save XMM control/status register */
+    CpuState->SpecialRegisters.MxCsr = ArReadMxCsrRegister();
+
+    /* Save GDT, IDT, LDT and TaskRegister */
+    ArStoreGlobalDescriptorTable(&CpuState->SpecialRegisters.Gdtr.Limit);
+    ArStoreInterruptDescriptorTable(&CpuState->SpecialRegisters.Idtr.Limit);
+    ArStoreLocalDescriptorTable(&CpuState->SpecialRegisters.Ldtr);
+    ArStoreTaskRegister(&CpuState->SpecialRegisters.Tr);
+}

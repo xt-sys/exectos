@@ -35,6 +35,9 @@ KepInitializeKernel(VOID)
     /* Initialize CPU power state structures */
     PoInitializeProcessorControlBlock(Prcb);
 
+    /* Save processor state */
+    KepSaveProcessorState(&Prcb->ProcessorState);
+
     /* Initialize Idle process */
     RtlInitializeListHead(&KepProcessListHead);
     PageDirectory[0] = 0;
