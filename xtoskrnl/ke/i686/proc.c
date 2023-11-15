@@ -80,9 +80,6 @@ KepSaveProcessorState(OUT PKPROCESSOR_STATE CpuState)
     CpuState->SpecialRegisters.KernelDr6 = ArReadDebugRegister(6);
     CpuState->SpecialRegisters.KernelDr7 = ArReadDebugRegister(7);
 
-    /* Save XMM control/status register */
-    CpuState->SpecialRegisters.MxCsr = ArReadMxCsrRegister();
-
     /* Save GDT, IDT, LDT and TaskRegister */
     ArStoreGlobalDescriptorTable(&CpuState->SpecialRegisters.Gdtr.Limit);
     ArStoreInterruptDescriptorTable(&CpuState->SpecialRegisters.Idtr.Limit);
