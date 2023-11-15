@@ -630,6 +630,19 @@ ArWriteControlRegister(IN USHORT ControlRegister,
     }
 }
 
+/**
+ * Writes a value to the specified CPU debug register.
+ *
+ * @param DebugRegister
+ *        Supplies a number of a debug register for write operation.
+ *
+ * @param Value
+ *        Suplies a value to write to the specified DR register.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
 XTCDECL
 VOID
 ArWriteDebugRegister(IN USHORT DebugRegister,
