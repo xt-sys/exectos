@@ -51,6 +51,9 @@ KepInitializeThreadContext(IN PKTHREAD Thread,
     /* Check if context provided for this thread */
     if(ContextRecord)
     {
+        /* User mode thread needs further initialization, this is not completed */
+        UNIMPLEMENTED;
+
         /* Fill trap frame with zeroes */
         RtlZeroMemory(&ThreadFrame->TrapFrame, sizeof(KTRAP_FRAME));
 
