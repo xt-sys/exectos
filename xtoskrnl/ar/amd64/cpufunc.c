@@ -315,6 +315,75 @@ ArReadControlRegister(IN USHORT ControlRegister)
 }
 
 /**
+ * Reads the specified CPU debug register and returns its value.
+ *
+ * @param DebugRegister
+ *        Supplies a number of a debug register to read from.
+ *
+ * @return The value stored in the specified debug register.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+ULONG_PTR
+ArReadDebugRegister(IN USHORT DebugRegister)
+{
+    ULONG_PTR Value;
+
+    /* Read a value from specified DR register */
+    switch(DebugRegister)
+    {
+        case 0:
+            /* Read value from DR0 */
+            asm volatile("mov %%dr0, %0"
+                         : "=r" (Value));
+            break;
+        case 1:
+            /* Read value from DR1 */
+            asm volatile("mov %%dr1, %0"
+                         : "=r" (Value));
+            break;
+        case 2:
+            /* Read value from DR2 */
+            asm volatile("mov %%dr2, %0"
+                         : "=r" (Value));
+            break;
+        case 3:
+            /* Read value from DR3 */
+            asm volatile("mov %%dr3, %0"
+                         : "=r" (Value));
+            break;
+        case 4:
+            /* Read value from DR4 */
+            asm volatile("mov %%dr4, %0"
+                         : "=r" (Value));
+            break;
+        case 5:
+            /* Read value from DR5 */
+            asm volatile("mov %%dr5, %0"
+                         : "=r" (Value));
+            break;
+        case 6:
+            /* Read value from DR6 */
+            asm volatile("mov %%dr6, %0"
+                         : "=r" (Value));
+            break;
+        case 7:
+            /* Read value from DR7 */
+            asm volatile("mov %%dr7, %0"
+                         : "=r" (Value));
+            break;
+        default:
+            /* Invalid debug register set */
+            Value = 0;
+            break;
+    }
+
+    /* Return value read from given DR register */
+    return Value;
+}
+
+/**
  * Reads quadword from a memory location specified by an offset relative to the beginning of the GS segment.
  *
  * @param Offset
@@ -359,6 +428,20 @@ ArReadModelSpecificRegister(IN ULONG Register)
                  : "c" (Register));
 
     return ((ULONGLONG)High << 32) | Low;
+}
+
+/**
+ * Reads the contents of the MXCSR control/status register.
+ *
+ * @return This routine returns the contents of the MXCSR register as a 32-bit unsigned integer value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+UINT
+ArReadMxCsrRegister()
+{
+    return __builtin_ia32_stmxcsr();
 }
 
 /**
@@ -410,8 +493,8 @@ VOID
 ArStoreGlobalDescriptorTable(OUT PVOID Destination)
 {
     asm volatile("sgdt %0"
+                 : "=m" (*(PSHORT)Destination)
                  :
-                 : "m" (*(PSHORT)Destination)
                  : "memory");
 }
 
@@ -430,8 +513,28 @@ VOID
 ArStoreInterruptDescriptorTable(OUT PVOID Destination)
 {
     asm volatile("sidt %0"
+                 : "=m" (*(PSHORT)Destination)
                  :
-                 : "m" (*(PSHORT)Destination)
+                 : "memory");
+}
+
+/**
+ * Stores LDT register into the given memory area.
+ *
+ * @param Destination
+ *        Supplies a pointer to the memory area where LDT will be stored.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+ArStoreLocalDescriptorTable(OUT PVOID Destination)
+{
+    asm volatile("sldt %0"
+                 : "=m" (*(PSHORT)Destination)
+                 :
                  : "memory");
 }
 
@@ -500,8 +603,8 @@ VOID
 ArStoreTaskRegister(OUT PVOID Destination)
 {
     asm volatile("str %0"
+                 : "=m" (*(PULONG)Destination)
                  :
-                 : "m" (*(PULONG)Destination)
                  : "memory");
 }
 
@@ -561,6 +664,78 @@ ArWriteControlRegister(IN USHORT ControlRegister,
                          : "r"(Value)
                          : "memory");
             break;
+    }
+}
+
+/**
+ * Writes a value to the specified CPU debug register.
+ *
+ * @param DebugRegister
+ *        Supplies a number of a debug register for write operation.
+ *
+ * @param Value
+ *        Suplies a value to write to the specified DR register.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+ArWriteDebugRegister(IN USHORT DebugRegister,
+                     IN UINT_PTR Value)
+{
+    /* Write a value into specified debug register */
+    switch(DebugRegister)
+    {
+        case 0:
+            /* Write value to DR0 */
+            asm volatile("mov %0, %%dr0"
+                         :
+                         : "r" (Value)
+                         : "memory");
+        case 1:
+            /* Write value to DR1 */
+            asm volatile("mov %0, %%dr1"
+                         :
+                         : "r" (Value)
+                         : "memory");
+        case 2:
+            /* Write value to DR2 */
+            asm volatile("mov %0, %%dr2"
+                         :
+                         : "r" (Value)
+                         : "memory");
+        case 3:
+            /* Write value to DR3 */
+            asm volatile("mov %0, %%dr3"
+                         :
+                         : "r" (Value)
+                         : "memory");
+        case 4:
+            /* Write value to DR4 */
+            asm volatile("mov %0, %%dr4"
+                         :
+                         : "r" (Value)
+                         : "memory");
+        case 5:
+            /* Write value to DR5 */
+            asm volatile("mov %0, %%dr5"
+                         :
+                         : "r" (Value)
+                         : "memory");
+        case 6:
+            /* Write value to DR6 */
+            asm volatile("mov %0, %%dr6"
+                         :
+                         : "r" (Value)
+                         : "memory");
+        case 7:
+            /* Write value to DR7 */
+            asm volatile("mov %0, %%dr7"
+                         :
+                         : "r" (Value)
+                         : "memory");
     }
 }
 

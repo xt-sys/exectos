@@ -59,12 +59,20 @@ ULONG_PTR
 ArReadControlRegister(IN USHORT ControlRegister);
 
 XTCDECL
+ULONG_PTR
+ArReadDebugRegister(IN USHORT DebugRegister);
+
+XTCDECL
 ULONG
 ArReadFSDualWord(ULONG Offset);
 
 XTCDECL
 ULONGLONG
 ArReadModelSpecificRegister(IN ULONG Register);
+
+XTCDECL
+UINT
+ArReadMxCsrRegister();
 
 XTCDECL
 ULONGLONG
@@ -90,6 +98,10 @@ ArStoreInterruptDescriptorTable(OUT PVOID Destination);
 
 XTCDECL
 VOID
+ArStoreLocalDescriptorTable(OUT PVOID Destination);
+
+XTCDECL
+VOID
 ArStoreSegment(IN USHORT Segment,
                OUT PVOID Destination);
 
@@ -101,6 +113,11 @@ XTCDECL
 VOID
 ArWriteControlRegister(IN USHORT ControlRegister,
                        IN UINT_PTR Value);
+
+XTCDECL
+VOID
+ArWriteDebugRegister(IN USHORT DebugRegister,
+                     IN UINT_PTR Value);
 
 XTCDECL
 VOID
