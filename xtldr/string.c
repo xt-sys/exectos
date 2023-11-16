@@ -9,8 +9,6 @@
 #include <xtbl.h>
 
 
-STATIC PUINT16 HexTable = L"0123456789ABCDEF";
-
 /**
  * Compares two strings without sensitivity to case.
  *
@@ -375,7 +373,7 @@ BlpStringPrintUnsigned32(IN VOID PutChar(IN USHORT Character),
     *--Pointer = 0;
     do
     {
-        *--Pointer = HexTable[Number % Base];
+        *--Pointer = EfiHexTable[Number % Base];
     } while(Pointer >= Buffer && (Number /= Base));
 
     /* Calculate number length */
@@ -432,7 +430,7 @@ BlpStringPrintUnsigned64(IN VOID PutChar(IN USHORT Character),
     *--Pointer = 0;
     do
     {
-        *--Pointer = HexTable[Number % Base];
+        *--Pointer = EfiHexTable[Number % Base];
     } while(Pointer >= Buffer && (Number /= Base));
 
     /* Calculate number length */

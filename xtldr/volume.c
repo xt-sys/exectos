@@ -9,9 +9,6 @@
 #include <xtbl.h>
 
 
-/* List of available block devices */
-LIST_ENTRY BlBlockDevices;
-
 /**
  * This routine closes an EFI volume handle.
  *
@@ -67,7 +64,7 @@ BlEnumerateEfiBlockDevices()
 
     /* Initialize list entries */
     RtlInitializeListHead(&BlockDevices);
-    RtlInitializeListHead(&BlBlockDevices);
+    RtlInitializeListHead(&EfiBlockDevices);
 
     /* Discover EFI block devices and store them in linked list */
     Status = BlpDiscoverEfiBlockDevices(&BlockDevices);
@@ -184,7 +181,7 @@ BlEnumerateEfiBlockDevices()
             BlockDevice->PartitionGuid = PartitionGuid;
 
             /* Add block device to global list */
-            RtlInsertTailList(&BlBlockDevices, &BlockDevice->ListEntry);
+            RtlInsertTailList(&EfiBlockDevices, &BlockDevice->ListEntry);
         }
 
         /* Get next entry from linked list */
@@ -366,8 +363,8 @@ BlGetVolumeDevicePath(IN PUCHAR SystemPath,
     }
 
     /* Look for block device corresponding to dissected ARC path */
-    ListEntry = BlBlockDevices.Flink;
-    while(ListEntry != &BlBlockDevices)
+    ListEntry = EfiBlockDevices.Flink;
+    while(ListEntry != &EfiBlockDevices)
     {
         /* Check if this is the volume we are looking for */
         Device = CONTAIN_RECORD(ListEntry, EFI_BLOCK_DEVICE, ListEntry);

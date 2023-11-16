@@ -9,22 +9,6 @@
 #include <xtbl.h>
 
 
-/* EFI Image Handle */
-EFI_HANDLE EfiImageHandle;
-
-/* XT Boot Loader protocol */
-XT_BOOT_LOADER_PROTOCOL EfiLdrProtocol;
-
-/* EFI System Table */
-PEFI_SYSTEM_TABLE EfiSystemTable;
-
-/* EFI Secure Boot status */
-INT_PTR EfiSecureBoot;
-
-/* Serial port configuration */
-CPPORT EfiSerialPort;
-
-
 /**
  * This routine loads XTLDR EFI modules.
  *

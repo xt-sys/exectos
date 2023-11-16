@@ -15,6 +15,7 @@ list(APPEND XTLDR_SOURCE
     ${XTLDR_SOURCE_DIR}/blproto.c
     ${XTLDR_SOURCE_DIR}/console.c
     ${XTLDR_SOURCE_DIR}/efiutil.c
+    ${XTLDR_SOURCE_DIR}/globals.c
     ${XTLDR_SOURCE_DIR}/memory.c
     ${XTLDR_SOURCE_DIR}/string.c
     ${XTLDR_SOURCE_DIR}/system.c

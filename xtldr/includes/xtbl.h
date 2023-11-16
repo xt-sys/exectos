@@ -14,6 +14,12 @@
 #include <blmod.h>
 
 
+/* List of available block devices */
+EXTERN LIST_ENTRY EfiBlockDevices;
+
+/* XT Boot Loader hex table */
+EXTERN PUINT16 EfiHexTable;
+
 /* EFI Image Handle */
 EXTERN EFI_HANDLE EfiImageHandle;
 
