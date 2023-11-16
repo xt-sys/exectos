@@ -74,4 +74,12 @@ VOID
 KeSetTargetProcessorDpc(IN PKDPC Dpc,
                         IN CCHAR Number);
 
+XTAPI
+VOID
+KeSignalCallDpcDone(IN PVOID SystemArgument);
+
+XTAPI
+BOOLEAN
+KeSignalCallDpcSynchronize(IN PVOID SystemArgument);
+
 #endif /* __XTDK_KEFUNCS_H */

@@ -76,23 +76,6 @@ KeInitializeThreadedDpc(IN PKDPC Dpc,
 }
 
 /**
- * Retires the expired DPC objects found in the DPC list.
- *
- * @param Prcb
- *        Supplies apointer to the Prcessor Control Block (PRCB).
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTFASTCALL
-VOID
-KepRetireDpcList(IN PKPROCESSOR_CONTROL_BLOCK Prcb)
-{
-    UNIMPLEMENTED;
-}
-
-/**
  * Sets the target processor number for DPC.
  *
  * @param Dpc
@@ -111,4 +94,58 @@ KeSetTargetProcessorDpc(IN PKDPC Dpc,
                         IN CCHAR Number)
 {
     Dpc->Number = MAXIMUM_PROCESSORS + Number;
+}
+
+/**
+ * Decrements the DPC call barier.
+ *
+ * @param SystemArgument
+ *        Supplies an address of the DPC call barrier.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since NT 5.2
+ */
+XTAPI
+VOID
+KeSignalCallDpcDone(IN PVOID SystemArgument)
+{
+    RtlAtomicDecrement32(SystemArgument);
+}
+
+/**
+ * Decrements the DPC call reverse barier.
+ *
+ * @param SystemArgument
+ *        Supplies an address of the DPC call barrier.
+ *
+ * @return This routine returns TRUE if just one processor is waiting on the barrier, FALSE if more.
+ *
+ * @since NT 5.2
+ */
+XTAPI
+BOOLEAN
+KeSignalCallDpcSynchronize(IN PVOID SystemArgument)
+{
+    UNIMPLEMENTED;
+
+    /* SMP not yet implemented, return TRUE */
+    return TRUE;
+}
+
+/**
+ * Retires the expired DPC objects found in the DPC list.
+ *
+ * @param Prcb
+ *        Supplies apointer to the Prcessor Control Block (PRCB).
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+VOID
+KepRetireDpcList(IN PKPROCESSOR_CONTROL_BLOCK Prcb)
+{
+    UNIMPLEMENTED;
 }
