@@ -216,7 +216,7 @@
 /* EFI Processor StatusFlag bits */
 #define EFI_PROCESSOR_AS_BSP_BIT                           0x00000001
 #define EFI_PROCESSOR_ENABLED_BIT                          0x00000002
-#define EFI_ROCESSOR_HEALTH_STATUS_BIT                     0x00000004
+#define EFI_PROCESSOR_HEALTH_STATUS_BIT                    0x00000004
 
 /* EFI list of failed CPUs termination */
 #define EFI_PROCESSOR_END_OF_LIST                          0xFFFFFFFF
