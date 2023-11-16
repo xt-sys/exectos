@@ -213,6 +213,12 @@
 #define EFI_SIMPLE_NETWORK_RECEIVE_PROMISCUOUS             0x08
 #define EFI_SIMPLE_NETWORK_RECEIVE_PROMISCUOUS_MULTICAST   0x10
 
+/* EFI task priority levels */
+#define EFI_TPL_APPLICATION                                4
+#define EFI_TPL_CALLBACK                                   8
+#define EFI_TPL_NOTIFY                                     16
+#define EFI_TPL_HIGH_LEVEL                                 31
+
 /* EFI Processor StatusFlag bits */
 #define EFI_PROCESSOR_AS_BSP_BIT                           0x00000001
 #define EFI_PROCESSOR_ENABLED_BIT                          0x00000002
