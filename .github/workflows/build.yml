@@ -30,4 +30,4 @@ jobs:
           tar -I 'gzip' -cpf ExectOS-$(date +'%Y%m%d')-${GITHUB_SHA:0:10}-${{ matrix.arch }}-lib.tar.gz -C build-${{ matrix.arch }}-xtchain/output/library .
           tar -I 'gzip' -cpf ExectOS-$(date +'%Y%m%d')-${GITHUB_SHA:0:10}-${{ matrix.arch }}-sym.tar.gz -C build-${{ matrix.arch }}-xtchain/output/symbols .
           gzip -c build-${{ matrix.arch }}-xtchain/output/disk.img > ExectOS-$(date +'%Y%m%d')-${GITHUB_SHA:0:10}-${{ matrix.arch }}.img.gz
-          artifact_publish "ExectOS-$(date +'%Y%m%d')-${GITHUB_SHA:0:10}-${{ matrix.arch }}.*.gz" ExectOS
+          artifact_publish "ExectOS-$(date +'%Y%m%d')-${GITHUB_SHA:0:10}-${{ matrix.arch }}*.gz" ExectOS
