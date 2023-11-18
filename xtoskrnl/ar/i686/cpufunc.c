@@ -68,6 +68,26 @@ ArCpuId(IN OUT PCPUID_REGISTERS Registers)
 }
 
 /**
+ * Gets the address of the current stack register.
+ *
+ * @return This routine returns the current stack pointer.
+ *
+ * @since XT 1.0
+ */
+XTASSEMBLY
+XTCDECL
+ULONG_PTR
+ArGetStackPointer()
+{
+    /* Get current stack pointer */
+    asm volatile("mov %%esp, %%eax\n"
+                 "ret\n"
+                  :
+                  :
+                  :);
+}
+
+/**
  * Halts the central processing unit (CPU).
  *
  * @return This routine does not return any value.
