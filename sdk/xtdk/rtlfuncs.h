@@ -29,6 +29,19 @@ VOID
 RtlInsertTailList(IN OUT PLIST_ENTRY ListHead,
                   IN PLIST_ENTRY Entry);
 
+XTAPI
+UCHAR
+RtlReadRegisterByte(IN VOLATILE PVOID Register);
+
+XTAPI
+ULONG
+RtlReadRegisterLong(IN VOLATILE PVOID Register);
+
+XTAPI
+USHORT
+RtlReadRegisterShort(IN VOLATILE PVOID Register);
+
+
 XTCDECL
 VOID
 RtlRemoveEntryList(IN PLIST_ENTRY Entry);
@@ -104,6 +117,21 @@ PWCHAR
 RtlWideStringTokenize(IN PWCHAR String,
                       IN CONST PWCHAR Delimiter,
                       IN OUT PWCHAR *SavePtr);
+
+XTAPI
+VOID
+RtlWriteRegisterByte(IN VOLATILE PVOID Register,
+                     IN UCHAR Value);
+
+XTAPI
+VOID
+RtlWriteRegisterLong(IN VOLATILE PVOID Register,
+                     IN ULONG Value);
+
+XTAPI
+VOID
+RtlWriteRegisterShort(IN VOLATILE PVOID Register,
+                      IN USHORT Value);
 
 XTAPI
 VOID
