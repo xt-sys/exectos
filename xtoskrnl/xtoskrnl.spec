@@ -29,12 +29,18 @@
 @ stdcall RtlMoveMemory(ptr ptr long)
 @ stdcall RtlSameMemory(ptr ptr long)
 @ stdcall RtlSetMemory(ptr long long)
+@ stdcall RtlReadRegisterByte(ptr)
+@ stdcall RtlReadRegisterLong(ptr)
+@ stdcall RtlReadRegisterShort(ptr)
 @ cdecl RtlStringLength(str long)
 @ cdecl RtlStringToWideString(wstr str long)
 @ cdecl RtlWideStringCompare(wstr wstr long)
 @ cdecl RtlWideStringConcatenate(wstr wstr long)
 @ cdecl RtlWideStringLength(wstr long)
 @ cdecl RtlWideStringTokenize(wstr wstr wstr)
+@ stdcall RtlWriteRegisterByte(ptr long)
+@ stdcall RtlWriteRegisterLong(ptr long)
+@ stdcall RtlWriteRegisterShort(ptr long)
 @ stdcall RtlZeroMemory(ptr long)
 
 
