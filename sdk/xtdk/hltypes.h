@@ -90,6 +90,43 @@
 #define COMPORT_REG_MSR             0x06 /* Modem Status Register */
 #define COMPORT_REG_SR              0x07 /* Scratch Register */
 
+/* APIC Register Address Map */
+typedef enum _APIC_REGISTER
+{
+    APIC_ID                       = 0x02, /* APIC ID Register */
+    APIC_VER                      = 0x03, /* APIC Version Register */
+    APIC_TPR                      = 0x08, /* Task Priority Register */
+    APIC_APR                      = 0x09, /* Arbitration Priority Register */
+    APIC_PPR                      = 0x0A, /* Processor Priority Register (R) */
+    APIC_EOI                      = 0x0B, /* EOI Register */
+    APIC_RRR                      = 0x0C, /* Remote Read Register */
+    APIC_LDR                      = 0x0D, /* Logical Destination Register */
+    APIC_DFR                      = 0x0E, /* Destination Format Register */
+    APIC_SIVR                     = 0x0F, /* Spurious Interrupt Vector Register */
+    APIC_ISR                      = 0x10, /* Interrupt Service Register*/
+    APIC_TMR                      = 0x18, /* Trigger Mode Register */
+    APIC_IRR                      = 0x20, /* Interrupt Request Register */
+    APIC_ESR                      = 0x28, /* Error Status Register */
+    APIC_ICR0                     = 0x30, /* Interrupt Command Register */
+    APIC_ICR1                     = 0x31, /* Interrupt Command Register */
+    APIC_TMRLVTR                  = 0x32, /* Timer Local Vector Table */
+    APIC_THRMLVTR                 = 0x33, /* Thermal Local Vector Table */
+    APIC_PCLVTR                   = 0x34, /* Performance Counter Local Vector Table */
+    APIC_LINT0                    = 0x35, /* LINT0 Local Vector Table */
+    APIC_LINT1                    = 0x36, /* LINT1 Local Vector Table */
+    APIC_ERRLVTR                  = 0x37, /* Error Local Vector Table */
+    APIC_TICR                     = 0x38, /* Initial Count Register for Timer */
+    APIC_TCCR                     = 0x39, /* Current Count Register for Timer */
+    APIC_TDCR                     = 0x3E, /* Timer Divide Configuration Register */
+    APIC_EAFR                     = 0x40, /* extended APIC Feature register */
+    APIC_EACR                     = 0x41, /* Extended APIC Control Register */
+    APIC_SEOI                     = 0x42, /* Specific End Of Interrupt Register */
+    APIC_EXT0LVTR                 = 0x50, /* Extended Interrupt 0 Local Vector Table */
+    APIC_EXT1LVTR                 = 0x51, /* Extended Interrupt 1 Local Vector Table */
+    APIC_EXT2LVTR                 = 0x52, /* Extended Interrupt 2 Local Vector Table */
+    APIC_EXT3LVTR                 = 0x53  /* Extended Interrupt 3 Local Vector Table */
+} APIC_REGISTER, *PAPIC_REGISTER;
+
 /* Serial (COM) port initial state */
 typedef struct _CPPORT
 {
