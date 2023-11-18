@@ -21,9 +21,9 @@
  */
 XTAPI
 UCHAR
-RtlReadRegisterByte(IN VOLATILE PUCHAR Register)
+RtlReadRegisterByte(IN VOLATILE PVOID Register)
 {
-    return *Register;
+    return *((VOLATILE PUCHAR)Register);
 }
 
 /**
@@ -38,9 +38,9 @@ RtlReadRegisterByte(IN VOLATILE PUCHAR Register)
  */
 XTAPI
 ULONG
-RtlReadRegisterLong(IN VOLATILE PULONG Register)
+RtlReadRegisterLong(IN VOLATILE PVOID Register)
 {
-    return *Register;
+    return *((VOLATILE PULONG)Register);
 }
 
 /**
@@ -55,9 +55,9 @@ RtlReadRegisterLong(IN VOLATILE PULONG Register)
  */
 XTAPI
 USHORT
-RtlReadRegisterShort(IN VOLATILE PUSHORT Register)
+RtlReadRegisterShort(IN VOLATILE PVOID Register)
 {
-    return *Register;
+    return *((VOLATILE PUSHORT)Register);
 }
 
 /**
@@ -75,10 +75,10 @@ RtlReadRegisterShort(IN VOLATILE PUSHORT Register)
  */
 XTAPI
 VOID
-RtlWriteRegisterByte(IN PUSHORT Register,
+RtlWriteRegisterByte(IN VOLATILE PVOID Register,
                      IN UCHAR Value)
 {
-    HlIoPortOutByte((USHORT)(ULONG_PTR)Register, Value);
+    *((VOLATILE PUCHAR)Register) = Value;
 }
 
 /**
@@ -96,10 +96,10 @@ RtlWriteRegisterByte(IN PUSHORT Register,
  */
 XTAPI
 VOID
-RtlWriteRegisterLong(IN PUSHORT Register,
+RtlWriteRegisterLong(IN VOLATILE PVOID Register,
                      IN ULONG Value)
 {
-    HlIoPortOutLong((USHORT)(ULONG_PTR)Register, Value);
+    *((VOLATILE PULONG)Register) = Value;
 }
 
 /**
@@ -117,8 +117,8 @@ RtlWriteRegisterLong(IN PUSHORT Register,
  */
 XTAPI
 VOID
-RtlWriteRegisterShort(IN PUSHORT Register,
+RtlWriteRegisterShort(IN VOLATILE PVOID Register,
                       IN USHORT Value)
 {
-    HlIoPortOutShort((USHORT)(ULONG_PTR)Register, Value);
+    *((VOLATILE PUSHORT)Register) = Value;
 }
