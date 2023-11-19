@@ -28,7 +28,7 @@ add_custom_target(testkvm
                                           -drive file=${EXECTOS_SOURCE_DIR}/sdk/ovmf/ovmf_vars_${ARCH}.fd,if=pflash,format=raw,unit=1
                                           -hda ${EXECTOS_BINARY_DIR}/output/disk.img
                                           -boot menu=on -d int -M smm=off -no-reboot -no-shutdown -serial stdio
-                  VERBATIM)
+                  VERBATIM USES_TERMINAL)
 
 # This target starts up a QEMU+OVMF virtual machine using TCG accelerator
 add_custom_target(testtcg
@@ -39,4 +39,4 @@ add_custom_target(testtcg
                                           -drive file=${EXECTOS_SOURCE_DIR}/sdk/ovmf/ovmf_vars_${ARCH}.fd,if=pflash,format=raw,unit=1
                                           -hda ${EXECTOS_BINARY_DIR}/output/disk.img
                                           -boot menu=on -d int -M smm=off -no-reboot -no-shutdown -serial stdio
-                  VERBATIM)
+                  VERBATIM USES_TERMINAL)
