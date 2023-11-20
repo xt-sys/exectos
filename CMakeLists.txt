@@ -50,6 +50,9 @@ include(sdk/cmake/qemu.cmake)
 include(sdk/cmake/version.cmake)
 include(sdk/cmake/xtchain.cmake)
 
+# Enable compilers
+enable_language(ASM C CXX)
+
 # Add project specific definitions
 add_definitions(-D__XTOS__)
 add_definitions(-DXTOS_SOURCE_DIR="${EXECTOS_SOURCE_DIR}")
