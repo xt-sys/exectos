@@ -51,4 +51,13 @@ XTAPI
 XTSTATUS
 HlInitializeDisplay(VOID);
 
+XTFASTCALL
+ULONG
+HlReadApicRegister(IN APIC_REGISTER Register);
+
+XTFASTCALL
+VOID
+HlWriteApicRegister(IN APIC_REGISTER Register,
+                    IN ULONG Value);
+
 #endif /* __XTOSKRNL_HL_H */
