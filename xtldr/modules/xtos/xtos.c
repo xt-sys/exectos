@@ -229,6 +229,21 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
 
     /* Setup and map kernel initialization block */
     Status = XtpInitializeLoaderBlock(&MemoryMappings, &VirtualAddress);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to setup kernel initialization block */
+        XtLdrProtocol->DbgPrint(L"Failed to setup kernel initialization block (Status Code: %lx)\n", Status);
+        return Status;
+    }
+
+    /* Find and map APIC base address */
+    Status = XtpInitializeApicBase(&MemoryMappings);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to setup kernel initialization block */
+        XtLdrProtocol->DbgPrint(L"Failed to initialize APIC (Status Code: %lx)\n", Status);
+        return Status;
+    }
 
     /* Get kernel entry point */
     XtPeCoffProtocol->GetEntryPoint(ImageContext, (PVOID)&KernelEntryPoint);
@@ -251,6 +266,47 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
     KernelEntryPoint(KernelParameters);
 
     /* Return success */
+    return STATUS_EFI_SUCCESS;
+}
+
+/**
+ * Checks if APIC is present in the system and finds its base address.
+ *
+ * @param MemoryMappings
+ *        Supplies a pointer to linked list containing all memory mappings.
+ *
+ * @return This routine returns an EFI status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+XtpInitializeApicBase(IN PLIST_ENTRY MemoryMappings)
+{
+    PCPUID_REGISTERS CpuRegisters = NULL;
+    PVOID ApicBaseAddress;
+
+    /* Get CPU features list */
+    CpuRegisters->Leaf = CPUID_GET_CPU_FEATURES;
+    CpuRegisters->SubLeaf = 0;
+    CpuRegisters->Eax = 0;
+    CpuRegisters->Ebx = 0;
+    CpuRegisters->Ecx = 0;
+    CpuRegisters->Edx = 0;
+    ArCpuId(CpuRegisters);
+
+    /* Check if APIC is present */
+    if((CpuRegisters->Edx & CPUID_FEATURES_EDX_APIC) == 0)
+    {
+        /* APIC is not supported by the CPU */
+        return STATUS_EFI_UNSUPPORTED;
+    }
+
+    /* Get APIC base address */
+    ApicBaseAddress = (PVOID)((UINT_PTR)ArReadModelSpecificRegister(0x1B) & 0xFFFFF000);
+
+    /* Map APIC base address */
+    XtLdrProtocol->AddVirtualMemoryMapping(MemoryMappings, (PVOID)APIC_BASE, ApicBaseAddress, 1, LoaderFirmwarePermanent);
     return STATUS_EFI_SUCCESS;
 }
 

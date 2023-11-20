@@ -31,6 +31,10 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
 
 XTCDECL
 EFI_STATUS
+XtpInitializeApicBase(IN PLIST_ENTRY MemoryMappings);
+
+XTCDECL
+EFI_STATUS
 XtpInitializeLoaderBlock(IN PLIST_ENTRY MemoryMappings,
                          IN PVOID *VirtualAddress);
 

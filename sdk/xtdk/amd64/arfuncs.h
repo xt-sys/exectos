@@ -33,6 +33,10 @@ ULONG_PTR
 ArReadControlRegister(IN USHORT ControlRegister);
 
 XTCDECL
+ULONGLONG
+ArReadModelSpecificRegister(IN ULONG Register);
+
+XTCDECL
 VOID
 ArWriteControlRegister(IN USHORT ControlRegister,
                        IN UINT_PTR Value);

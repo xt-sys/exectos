@@ -14,6 +14,9 @@
 #include <xttypes.h>
 
 
+/* APIC base address */
+#define APIC_BASE                                       0xFFFE0000
+
 /* Serial port I/O addresses */
 #define COMPORT_ADDRESSES                               {0x000, 0x3F8, 0x2F8, 0x3E8, 0x2E8, 0x5F8, 0x4F8, 0x5E8, 0x4E8}
 
