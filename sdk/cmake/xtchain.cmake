@@ -11,7 +11,7 @@ endif()
 
 # Set build optimisation
 if(BUILD_TYPE STREQUAL "DEBUG")
-    add_compiler_flags("/Zi")
+    add_compiler_ccxxflags("/Zi")
     add_compiler_ccxxflags("-Ob0 -Od")
     add_linker_flags("/DEBUG /INCREMENTAL /OPT:NOREF /OPT:NOICF /PDBSOURCEPATH:build")
 else()
@@ -38,10 +38,10 @@ add_compiler_ccxxflags("-Gy")
 add_compiler_ccxxflags("-EHa")
 
 # Control warnings levels
-add_compiler_flags("-W3 -w14115")
-add_compiler_flags("-wd4200 -wd4214 -wd4244 -wd4290 -wd4800")
-add_compiler_flags("-we4013 -we4020 -we4022 -we4028 -we4047 -we4098 -we4101 -we4113 -we4129 -we4133")
-add_compiler_flags("-we4163 -we4189 -we4229 -we4311 -we4312 -we4313 -we4477 -we4603 -we4700 -we4715 -we4716")
+add_compiler_ccxxflags("-W3 -w14115")
+add_compiler_ccxxflags("-wd4200 -wd4214 -wd4244 -wd4290 -wd4800")
+add_compiler_ccxxflags("-we4013 -we4020 -we4022 -we4028 -we4047 -we4098 -we4101 -we4113 -we4129 -we4133")
+add_compiler_ccxxflags("-we4163 -we4189 -we4229 -we4311 -we4312 -we4313 -we4477 -we4603 -we4700 -we4715 -we4716")
 
 # Disable warnings about specific features
 add_compiler_ccxxflags("-nostdinc -Wno-char-subscripts -Wno-incompatible-library-redeclaration -Wno-microsoft-anon-tag")
@@ -53,6 +53,9 @@ set(CMAKE_PDB_OUTPUT_DIRECTORY "${EXECTOS_BINARY_DIR}/output/symbols")
 
 # Set linker flags
 add_linker_flags("${HOTPATCH_LINKER_FLAG} /LARGEADDRESSAWARE /IGNORE:4039 /IGNORE:4104 /MANIFEST:NO /NODEFAULTLIB /SAFESEH:NO")
+
+# Set LLVM MASM assembler options
+set(CMAKE_ASM_COMPILE_OBJECT "<CMAKE_ASM_COMPILER> ${CMAKE_ASM_FLAGS} -D__ASM__ /nologo /Fo <OBJECT> /c /Ta <SOURCE>")
 
 # Set runtime library
 set(CMAKE_MSVC_RUNTIME_LIBRARY "")
