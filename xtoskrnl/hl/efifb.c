@@ -86,7 +86,7 @@ HlDrawPixel(IN ULONG PositionX,
  */
 XTAPI
 XTSTATUS
-HlInitializeDisplay(VOID)
+HlInitializeFrameBuffer(VOID)
 {
     /* Check if display already initialized */
     if(HlpFrameBufferData.Initialized)

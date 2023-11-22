@@ -49,7 +49,7 @@ HlInitializeComPort(IN OUT PCPPORT Port,
 
 XTAPI
 XTSTATUS
-HlInitializeDisplay(VOID);
+HlInitializeFrameBuffer(VOID);
 
 XTFASTCALL
 ULONG
