@@ -19,6 +19,10 @@ KeClearEvent(IN PKEVENT Event);
 
 XTAPI
 VOID
+KeHaltSystem();
+
+XTAPI
+VOID
 KeInitializeEvent(OUT PKEVENT Event,
                   IN KEVENT_TYPE EventType,
                   IN BOOLEAN InitialState);

@@ -10,6 +10,27 @@
 
 
 /**
+ * Halts the system.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KeHaltSystem()
+{
+    /* Enter infinite loop */
+    for(;;)
+    {
+        /* Halt system */
+        ArClearInterruptFlag();
+        ArHalt();
+    }
+
+}
+
+/**
  * Crashes the system upon detecting a fatal error in which either it is unable to recover or continue to run system.
  *
  * @param Code

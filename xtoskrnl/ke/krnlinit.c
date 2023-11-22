@@ -32,12 +32,7 @@ KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
        KeInitializationBlock->ProtocolVersion != BOOT_PROTOCOL_VERSION)
     {
         /* Kernel and boot loader version mismatch */
-        for(;;)
-        {
-            /* Halt system */
-            ArClearInterruptFlag();
-            ArHalt();
-        }
+        KeHaltSystem();
     }
 
     /* Check if debugging enabled and if boot loader provided routine for debug printing */
