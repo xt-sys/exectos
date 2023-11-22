@@ -352,8 +352,9 @@ XtpInitializeLoaderBlock(IN PLIST_ENTRY MemoryMappings,
     RtlZeroMemory(LoaderBlock, sizeof(KERNEL_INITIALIZATION_BLOCK));
 
     /* Set basic loader block properties */
-    LoaderBlock->Size = sizeof(KERNEL_INITIALIZATION_BLOCK);
-    LoaderBlock->Version = INITIALIZATION_BLOCK_VERSION;
+    LoaderBlock->BlockSize = sizeof(KERNEL_INITIALIZATION_BLOCK);
+    LoaderBlock->BlockVersion = INITIALIZATION_BLOCK_VERSION;
+    LoaderBlock->ProtocolVersion = BOOT_PROTOCOL_VERSION;
 
     /* Set LoaderInformation block properties */
     LoaderBlock->LoaderInformation.DbgPrint = XtLdrProtocol->DbgPrint;

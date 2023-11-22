@@ -82,9 +82,6 @@ XTAPI
 VOID
 KepStartKernel(VOID)
 {
-    /* Print debug message */
-    DebugPrint(L"Starting ExectOS ...\n");
-
     /* Initialize XTOS kernel */
     KepInitializeKernel();
 

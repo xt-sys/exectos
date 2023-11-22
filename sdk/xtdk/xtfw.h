@@ -16,6 +16,9 @@
 /* Version number of the current kernel initialization block */
 #define INITIALIZATION_BLOCK_VERSION                            1
 
+/* Version number of the current XTOS loader protocol */
+#define BOOT_PROTOCOL_VERSION                                   1
+
 /* Memory allocation structures */
 typedef enum _LOADER_MEMORY_TYPE
 {
@@ -115,11 +118,12 @@ typedef struct _LOADER_MEMORY_MAPPING
 /* Loader provided information needed by the kernel to initialize */
 typedef struct _KERNEL_INITIALIZATION_BLOCK
 {
+    ULONG BlockSize;
+    ULONG BlockVersion;
+    ULONG ProtocolVersion;
     LIST_ENTRY LoadOrderListHead;
     LIST_ENTRY MemoryDescriptorListHead;
     LIST_ENTRY BootDriverListHead;
-    ULONG Size;
-    ULONG Version;
     LOADER_INFORMATION_BLOCK LoaderInformation;
     FIRMWARE_INFORMATION_BLOCK FirmwareInformation;
 } KERNEL_INITIALIZATION_BLOCK, *PKERNEL_INITIALIZATION_BLOCK;
