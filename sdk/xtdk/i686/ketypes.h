@@ -470,7 +470,7 @@ typedef struct _KPROCESSOR_BLOCK
     THREAD_INFORMATION_BLOCK ThreadInformationBlock;
     PKPROCESSOR_BLOCK Self;
     PKPROCESSOR_CONTROL_BLOCK CurrentPrcb;
-    KIRQL Irql;
+    KRUNLEVEL RunLevel;
     PKIDTENTRY IdtBase;
     PKGDTENTRY GdtBase;
     PKTSS TssBase;

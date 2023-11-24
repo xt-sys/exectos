@@ -17,14 +17,14 @@
 /* Kernel affinity */
 typedef ULONG_PTR KAFFINITY, *PKAFFINITY;
 
-/* Interrupt Request Level (IRQL) */
-typedef UCHAR KIRQL, *PKIRQL;
-
 /* Kernel priority */
 typedef LONG KPRIORITY, *PKPRIORITY;
 
 /* Processor modes */
 typedef CHAR KPROCESSOR_MODE, *PKPROCESSOR_MODE;
+
+/* Interrupt Request Run Level (IRQL) */
+typedef UCHAR KRUNLEVEL, *PKRUNLEVEL;
 
 /* Spin locks synchronization mechanism */
 typedef ULONG_PTR KSPIN_LOCK, *PKSPIN_LOCK;

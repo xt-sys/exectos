@@ -361,7 +361,7 @@ typedef struct _KSWITCH_FRAME
     ULONG64 P4Home;
     ULONG64 P5Home;
     ULONG MxCsr;
-    KIRQL ApcBypass;
+    KRUNLEVEL ApcBypass;
     UCHAR Reserved[3];
     ULONG64 Rbp;
     ULONG64 Return;
@@ -376,7 +376,7 @@ typedef struct _KTRAP_FRAME
     ULONG64 P4Home;
     ULONG64 P5;
     KPROCESSOR_MODE PreviousMode;
-    KIRQL PreviousIrql;
+    KRUNLEVEL PreviousRunLevel;
     UCHAR FaultIndicator;
     UCHAR ExceptionActive;
     ULONG MxCsr;
@@ -539,7 +539,7 @@ typedef struct _KPROCESSOR_BLOCK
         };
     };
     PKIDTENTRY IdtBase;
-    KIRQL Irql;
+    KRUNLEVEL RunLevel;
     KPROCESSOR_CONTROL_BLOCK Prcb;
     ULONG ContextSwitches;
 } KPROCESSOR_BLOCK, *PKPROCESSOR_BLOCK;

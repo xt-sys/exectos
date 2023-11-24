@@ -280,7 +280,7 @@ typedef struct _KSPIN_LOCK_QUEUE
 typedef struct _KLOCK_QUEUE_HANDLE
 {
     KSPIN_LOCK_QUEUE LockQueue;
-    KIRQL OldIrql;
+    KRUNLEVEL OldRunLevel;
 } KLOCK_QUEUE_HANDLE, *PKLOCK_QUEUE_HANDLE;
 
 /* Queue object structure definition */
@@ -431,7 +431,7 @@ typedef struct _KTHREAD
     };
     KWAIT_BLOCK WaitBlock[KTHREAD_WAIT_BLOCK + 1];
     UCHAR NpxState;
-    KIRQL WaitIrql;
+    KRUNLEVEL WaitRunLevel;
     LIST_ENTRY QueueListEntry;
     PKTRAP_FRAME TrapFrame;
     PVOID CallbackStack;

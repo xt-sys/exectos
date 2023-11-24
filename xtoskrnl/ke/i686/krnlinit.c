@@ -51,7 +51,7 @@ KepInitializeKernel(VOID)
     CurrentThread->Priority = THREAD_HIGH_PRIORITY;
     CurrentThread->State = Running;
     CurrentThread->Affinity = (ULONG_PTR)1 << Prcb->Number;
-    CurrentThread->WaitIrql = DISPATCH_LEVEL;
+    CurrentThread->WaitRunLevel = DISPATCH_LEVEL;
     CurrentProcess->ActiveProcessors |= (ULONG_PTR)1 << Prcb->Number;
 }
 
