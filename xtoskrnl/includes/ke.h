@@ -19,11 +19,11 @@ KeClearEvent(IN PKEVENT Event);
 
 XTFASTCALL
 KRUNLEVEL
-KeGetCurrentRunLevel();
+KeGetCurrentRunLevel(VOID);
 
 XTAPI
 VOID
-KeHaltSystem();
+KeHaltSystem(VOID);
 
 XTAPI
 VOID

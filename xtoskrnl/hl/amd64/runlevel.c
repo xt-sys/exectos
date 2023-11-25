@@ -18,7 +18,7 @@
  */
 XTFASTCALL
 KRUNLEVEL
-HlGetRunLevel()
+HlGetRunLevel(VOID)
 {
     return (KRUNLEVEL)ArReadControlRegister(8);
 }

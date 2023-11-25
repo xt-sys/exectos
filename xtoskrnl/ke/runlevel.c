@@ -18,7 +18,7 @@
  */
 XTFASTCALL
 KRUNLEVEL
-KeGetCurrentRunLevel()
+KeGetCurrentRunLevel(VOID)
 {
     return HlGetRunLevel();
 }

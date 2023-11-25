@@ -18,7 +18,7 @@
  */
 XTFASTCALL
 KRUNLEVEL
-HlGetRunLevel()
+HlGetRunLevel(VOID)
 {
     return HlpTransformApicTprToRunLevel(HlReadApicRegister(APIC_TPR));
 }

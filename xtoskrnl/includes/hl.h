@@ -42,7 +42,7 @@ HlDrawPixel(IN ULONG PosX,
 
 XTFASTCALL
 KRUNLEVEL
-HlGetRunLevel();
+HlGetRunLevel(VOID);
 
 
 XTCDECL

@@ -18,7 +18,7 @@
  */
 XTAPI
 VOID
-KeHaltSystem()
+KeHaltSystem(VOID)
 {
     /* Enter infinite loop */
     for(;;)
