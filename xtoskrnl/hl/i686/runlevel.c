@@ -54,7 +54,7 @@ XTFASTCALL
 KRUNLEVEL
 HlpTransformApicTprToRunLevel(IN UCHAR Tpr)
 {
-    KRUNLEVEL TransformationTable[16] =
+    STATIC KRUNLEVEL TransformationTable[16] =
     {
         PASSIVE_LEVEL,
         PASSIVE_LEVEL,
@@ -92,7 +92,7 @@ XTFASTCALL
 UCHAR
 HlpTransformRunLevelToApicTpr(IN KRUNLEVEL RunLevel)
 {
-    UCHAR TransformationTable[32] =
+    STATIC UCHAR TransformationTable[32] =
     {
         APIC_VECTOR_ZERO,
         APIC_VECTOR_APC,
