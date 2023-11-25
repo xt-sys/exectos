@@ -113,6 +113,7 @@
 #define DEVICE5_LEVEL                             10
 #define DEVICE6_LEVEL                             11
 #define DEVICE7_LEVEL                             12
+#define SYNC_LEVEL                                12
 #define CLOCK_LEVEL                               13
 #define IPI_LEVEL                                 14
 #define DRS_LEVEL                                 14
