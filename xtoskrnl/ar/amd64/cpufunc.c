@@ -324,6 +324,7 @@ ArReadControlRegister(IN USHORT ControlRegister)
                          : "=r" (Value)
                          :
                          : "memory");
+            break;
         default:
             /* Invalid control register set */
             Value = 0;
