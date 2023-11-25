@@ -17,6 +17,10 @@ XTAPI
 VOID
 KeClearEvent(IN PKEVENT Event);
 
+XTFASTCALL
+KRUNLEVEL
+KeGetCurrentRunLevel();
+
 XTAPI
 VOID
 KeHaltSystem();
@@ -47,6 +51,10 @@ KeInitializeThread(IN PKPROCESS Process,
                    IN PVOID Stack,
                    IN BOOLEAN StartThread);
 
+XTFASTCALL
+VOID
+KeLowerRunLevel(IN KRUNLEVEL RunLevel);
+
 XTAPI
 VOID
 KePanic(IN ULONG Code);
@@ -58,6 +66,10 @@ KePanicEx(IN ULONG Code,
           IN ULONG_PTR Parameter2,
           IN ULONG_PTR Parameter3,
           IN ULONG_PTR Parameter4);
+
+XTFASTCALL
+KRUNLEVEL
+KeRaiseRunLevel(IN KRUNLEVEL RunLevel);
 
 XTAPI
 LONG

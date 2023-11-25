@@ -40,6 +40,11 @@ HlDrawPixel(IN ULONG PosX,
             IN ULONG PosY,
             IN ULONG Color);
 
+XTFASTCALL
+KRUNLEVEL
+HlGetRunLevel();
+
+
 XTCDECL
 XTSTATUS
 HlInitializeComPort(IN OUT PCPPORT Port,
@@ -57,7 +62,19 @@ HlReadApicRegister(IN APIC_REGISTER Register);
 
 XTFASTCALL
 VOID
+HlSetRunLevel(IN KRUNLEVEL RunLevel);
+
+XTFASTCALL
+VOID
 HlWriteApicRegister(IN APIC_REGISTER Register,
                     IN ULONG Value);
+
+XTFASTCALL
+KRUNLEVEL
+HlpTransformApicTprToRunLevel(IN UCHAR Tpr);
+
+XTFASTCALL
+UCHAR
+HlpTransformRunLevelToApicTpr(IN KRUNLEVEL RunLevel);
 
 #endif /* __XTOSKRNL_HL_H */
