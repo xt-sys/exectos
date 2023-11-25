@@ -135,6 +135,13 @@
 #define APC_LEVEL                         1
 #define DISPATCH_LEVEL                    2
 #define CMCI_LEVEL                        5
+#define DEVICE1_LEVEL                     6
+#define DEVICE2_LEVEL                     7
+#define DEVICE3_LEVEL                     8
+#define DEVICE4_LEVEL                     9
+#define DEVICE5_LEVEL                     10
+#define DEVICE6_LEVEL                     11
+#define DEVICE7_LEVEL                     12
 #define PROFILE_LEVEL                     27
 #define SYNC_LEVEL                        27
 #define CLOCK_LEVEL                       28
