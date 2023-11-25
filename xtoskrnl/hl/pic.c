@@ -1,8 +1,8 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/hl/apic.c
- * DESCRIPTION:     Advanced Programmable Interrupt Controller (APIC) support
+ * FILE:            xtoskrnl/hl/pic.c
+ * DESCRIPTION:     Programmable Interrupt Controller (PIC) support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
