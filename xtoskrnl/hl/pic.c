@@ -23,7 +23,7 @@ XTFASTCALL
 ULONG
 HlReadApicRegister(IN APIC_REGISTER Register)
 {
-    return RtlReadRegisterLong((PULONG)APIC_BASE + (Register << 4));
+    return RtlReadRegisterLong((PULONG)(APIC_BASE + (Register << 4)));
 }
 
 /**
@@ -44,5 +44,5 @@ VOID
 HlWriteApicRegister(IN APIC_REGISTER Register,
                     IN ULONG Value)
 {
-    RtlWriteRegisterLong((PULONG)APIC_BASE + (Register << 4), Value);
+    RtlWriteRegisterLong((PULONG)(APIC_BASE + (Register << 4)), Value);
 }
