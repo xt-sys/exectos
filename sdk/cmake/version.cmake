@@ -17,7 +17,7 @@ string(TIMESTAMP XTOS_VERSION_FULLDATE "%d/%m/%Y %H:%M UTC" UTC)
 # Set latest GIT revision
 set(XTOS_VERSION_HASH "unknown")
 if(EXISTS "${EXECTOS_SOURCE_DIR}/.git")
-        execute_process(COMMAND git describe --abbrev=7 --long --always
+        execute_process(COMMAND git describe --abbrev=10 --long --always
         WORKING_DIRECTORY ${EXECTOS_SOURCE_DIR}
         OUTPUT_VARIABLE XTOS_VERSION_HASH
         OUTPUT_STRIP_TRAILING_WHITESPACE)
