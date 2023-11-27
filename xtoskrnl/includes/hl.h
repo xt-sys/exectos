@@ -69,6 +69,22 @@ VOID
 HlWriteApicRegister(IN APIC_REGISTER Register,
                     IN ULONG Value);
 
+XTAPI
+BOOLEAN
+HlpCheckX2ApicSupport(VOID);
+
+XTCDECL
+VOID
+HlpHandleApicSpuriousService();
+
+XTCDECL
+VOID
+HlpHandlePicSpuriousService();
+
+XTAPI
+VOID
+HlpInitializeApic();
+
 XTFASTCALL
 KRUNLEVEL
 HlpTransformApicTprToRunLevel(IN UCHAR Tpr);

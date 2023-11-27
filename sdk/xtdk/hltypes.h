@@ -101,14 +101,14 @@ typedef enum _APIC_REGISTER
     APIC_EOI                      = 0x0B, /* EOI Register */
     APIC_RRR                      = 0x0C, /* Remote Read Register */
     APIC_LDR                      = 0x0D, /* Logical Destination Register */
-    APIC_DFR                      = 0x0E, /* Destination Format Register */
+    APIC_DFR                      = 0x0E, /* Destination Format Register (not available in extended mode) */
     APIC_SIVR                     = 0x0F, /* Spurious Interrupt Vector Register */
     APIC_ISR                      = 0x10, /* Interrupt Service Register*/
     APIC_TMR                      = 0x18, /* Trigger Mode Register */
     APIC_IRR                      = 0x20, /* Interrupt Request Register */
     APIC_ESR                      = 0x28, /* Error Status Register */
     APIC_ICR0                     = 0x30, /* Interrupt Command Register */
-    APIC_ICR1                     = 0x31, /* Interrupt Command Register */
+    APIC_ICR1                     = 0x31, /* Interrupt Command Register (not available in extended mode) */
     APIC_TMRLVTR                  = 0x32, /* Timer Local Vector Table */
     APIC_THRMLVTR                 = 0x33, /* Thermal Local Vector Table */
     APIC_PCLVTR                   = 0x34, /* Performance Counter Local Vector Table */
@@ -126,6 +126,13 @@ typedef enum _APIC_REGISTER
     APIC_EXT2LVTR                 = 0x52, /* Extended Interrupt 2 Local Vector Table */
     APIC_EXT3LVTR                 = 0x53  /* Extended Interrupt 3 Local Vector Table */
 } APIC_REGISTER, *PAPIC_REGISTER;
+
+/* APIC mode list */
+typedef enum _HAL_APIC_MODE
+{
+    APIC_MODE_COMPAT,
+    APIC_MODE_X2APIC
+} HAL_APIC_MODE, *PHAL_APIC_MODE;
 
 /* Serial (COM) port initial state */
 typedef struct _CPPORT

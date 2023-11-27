@@ -17,7 +17,8 @@
 
 /* APIC base addresses */
 #define APIC_BASE                                       0xFFFFFFFFFFFE0000
-#define APIC_MSR_BASE                                   0x0000001B
+#define APIC_LAPIC_MSR_BASE                             0x0000001B
+#define APIC_X2APIC_MSR_BASE                            0x00000800
 
 /* APIC vector definitions */
 #define APIC_VECTOR_ZERO                                0x00
@@ -68,5 +69,53 @@
 
 /* Serial port I/O addresses */
 #define COMPORT_ADDRESSES                               {0x000, 0x3F8, 0x2F8, 0x3E8, 0x2E8, 0x5F8, 0x4F8, 0x5E8, 0x4E8}
+
+/* APIC Base Register */
+typedef union _APIC_BASE_REGISTER
+{
+    ULONGLONG LongLong;
+    struct
+    {
+        ULONGLONG Reserved1:8;
+        ULONGLONG BootStrapProcessor:1;
+        ULONGLONG Reserved2:1;
+        ULONGLONG ExtendedMode:1;
+        ULONGLONG Enable:1;
+        ULONGLONG BaseAddress:40;
+        ULONGLONG Reserved3:12;
+    };
+} APIC_BASE_REGISTER, *PAPIC_BASE_REGISTER;
+
+/* APIC Local Vector Table (LVT) Register */
+typedef union _APIC_LVT_REGISTER
+{
+    ULONG Long;
+    struct
+    {
+        ULONG Vector:8;
+        ULONG MessageType:3;
+        ULONG Reserved1:1;
+        ULONG DeliveryStatus:1;
+        ULONG Reserved2:1;
+        ULONG RemoteIRR:1;
+        ULONG TriggerMode:1;
+        ULONG Mask:1;
+        ULONG TimerMode:1;
+        ULONG Reserved3:13;
+    };
+} APIC_LVT_REGISTER, *PAPIC_LVT_REGISTER;
+
+/* APIC Spurious Register */
+typedef union _APIC_SPURIOUS_REGISTER
+{
+    ULONG Long;
+    struct
+    {
+        ULONG Vector:8;
+        ULONG SoftwareEnable:1;
+        ULONG CoreChecking:1;
+        ULONG Reserved:22;
+    };
+} APIC_SPURIOUS_REGISTER, *PAPIC_SPURIOUS_REGISTER;
 
 #endif /* __XTDK_AMD64_HLTYPES_H */

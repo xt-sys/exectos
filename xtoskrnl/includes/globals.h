@@ -12,6 +12,9 @@
 #include <xtos.h>
 
 
+/* APIC mode */
+EXTERN HAL_APIC_MODE HlpApicMode;
+
 /* FrameBuffer information */
 EXTERN HAL_FRAMEBUFFER_DATA HlpFrameBufferData;
 
