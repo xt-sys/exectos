@@ -83,7 +83,7 @@ HlpHandlePicSpuriousService();
 
 XTAPI
 VOID
-HlpInitializeApic();
+HlpInitializeApic(VOID);
 
 XTFASTCALL
 KRUNLEVEL

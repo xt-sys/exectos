@@ -140,7 +140,7 @@ HlpHandlePicSpuriousService()
  */
 XTAPI
 VOID
-HlpInitializeApic()
+HlpInitializeApic(VOID)
 {
     APIC_BASE_REGISTER BaseRegister;
     APIC_LVT_REGISTER LvtRegister;
