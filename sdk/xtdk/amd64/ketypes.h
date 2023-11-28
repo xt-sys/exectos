@@ -550,6 +550,7 @@ typedef struct _KPROCESSOR_BLOCK
     KRUNLEVEL RunLevel;
     KPROCESSOR_CONTROL_BLOCK Prcb;
     ULONG ContextSwitches;
+    ULONG StallScaleFactor;
 } KPROCESSOR_BLOCK, *PKPROCESSOR_BLOCK;
 
 /* Thread Environment Block (TEB) structure definition */
