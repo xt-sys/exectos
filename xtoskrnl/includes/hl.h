@@ -85,6 +85,10 @@ XTAPI
 VOID
 HlpInitializeApic(VOID);
 
+XTAPI
+VOID
+HlInitializeProcessor(VOID);
+
 XTFASTCALL
 KRUNLEVEL
 HlpTransformApicTprToRunLevel(IN UCHAR Tpr);

@@ -75,6 +75,9 @@
 /* Serial port I/O addresses */
 #define COMPORT_ADDRESSES                               {0x000, 0x3F8, 0x2F8, 0x3E8, 0x2E8, 0x5F8, 0x4F8, 0x5E8, 0x4E8}
 
+/* Initial stall factor */
+#define INITIAL_STALL_FACTOR                            100
+
 /* APIC Base Register */
 typedef union _APIC_BASE_REGISTER
 {
@@ -122,5 +125,15 @@ typedef union _APIC_SPURIOUS_REGISTER
         ULONG Reserved:22;
     };
 } APIC_SPURIOUS_REGISTER, *PAPIC_SPURIOUS_REGISTER;
+
+/* Processor identity structure */
+typedef struct _HAL_PROCESSOR_IDENTITY
+{
+    UCHAR ProcessorId;
+    UCHAR LApicId;
+    BOOLEAN Bsp;
+    BOOLEAN Started;
+    PKPROCESSOR_BLOCK ProcessorBlock;
+} HAL_PROCESSOR_IDENTITY, *PHAL_PROCESSOR_IDENTITY;
 
 #endif /* __XTDK_I686_HLTYPES_H */

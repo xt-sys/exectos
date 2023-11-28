@@ -9,8 +9,14 @@
 #include <xtos.h>
 
 
+/* Active processors count */
+KAFFINITY HlpActiveProcessors;
+
 /* APIC mode */
 HAL_APIC_MODE HlpApicMode;
 
 /* FrameBuffer information */
 HAL_FRAMEBUFFER_DATA HlpFrameBufferData;
+
+/* Processors identity table */
+HAL_PROCESSOR_IDENTITY HlpProcessorsIdentity[MAXIMUM_PROCESSORS] = {{0}};
