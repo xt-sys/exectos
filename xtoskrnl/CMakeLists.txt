@@ -31,6 +31,7 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/ke/semphore.c
     ${XTOSKRNL_SOURCE_DIR}/ke/spinlock.c
     ${XTOSKRNL_SOURCE_DIR}/ke/timer.c
+    ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/irqs.c
     ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/krnlinit.c
     ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/kthread.c
     ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/proc.c

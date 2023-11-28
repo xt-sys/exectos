@@ -79,6 +79,11 @@ KeSetEvent(IN PKEVENT Event,
 
 XTAPI
 VOID
+KeSetInterruptHandler(IN ULONG Vector,
+                      IN PVOID Handler);
+
+XTAPI
+VOID
 KeStartThread(IN PKTHREAD Thread);
 
 XTAPI

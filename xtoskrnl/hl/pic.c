@@ -176,7 +176,7 @@ HlpInitializeApic()
         HlWriteApicRegister(APIC_LDR, (1UL << CpuNumber) << 24);
     }
 
-    /* Set the spurious interrupt vector and register interrupt handlers */
+    /* Set the spurious interrupt vector */
     SpuriousRegister.Long = HlReadApicRegister(APIC_SIVR);
     SpuriousRegister.Vector = APIC_VECTOR_SPURIOUS;
     SpuriousRegister.SoftwareEnable = 1;
@@ -217,4 +217,8 @@ HlpInitializeApic()
 
     /* Clear errors after enabling vectors */
     HlWriteApicRegister(APIC_ESR, 0);
+
+    /* Register interrupt handlers once the APIC initialization is done */
+    KeSetInterruptHandler(APIC_VECTOR_SPURIOUS, HlpHandleApicSpuriousService);
+    KeSetInterruptHandler(PIC1_VECTOR_SPURIOUS, HlpHandlePicSpuriousService);
 }

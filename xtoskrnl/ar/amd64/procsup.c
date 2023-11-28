@@ -539,8 +539,8 @@ ArpSetIdtGate(IN PKIDTENTRY Idt,
               IN USHORT Access)
 {
     /* Setup the gate */
-    Idt[Vector].OffsetLow = (ULONG_PTR)Handler;
-    Idt[Vector].OffsetMiddle = ((ULONG_PTR)Handler >> 16);
+    Idt[Vector].OffsetLow = ((ULONG_PTR)Handler & 0xFFFF);
+    Idt[Vector].OffsetMiddle = (((ULONG_PTR)Handler >> 16) & 0xFFFF);
     Idt[Vector].OffsetHigh = (ULONG_PTR)Handler >> 32;
     Idt[Vector].Dpl = Access;
     Idt[Vector].IstIndex = Ist;
