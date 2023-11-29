@@ -1,8 +1,8 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/hl/cpu.c
- * DESCRIPTION:     HAL Processor support
+ * FILE:            xtoskrnl/hl/x86/cpu.c
+ * DESCRIPTION:     HAL x86 (i686/AMD64) processor support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 

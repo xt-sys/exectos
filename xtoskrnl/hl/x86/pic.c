@@ -1,8 +1,8 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/hl/pic.c
- * DESCRIPTION:     Programmable Interrupt Controller (PIC) support
+ * FILE:            xtoskrnl/hl/x86/pic.c
+ * DESCRIPTION:     Programmable Interrupt Controller (PIC) for x86 (i686/AMD64) support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
