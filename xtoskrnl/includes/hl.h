@@ -12,10 +12,6 @@
 #include <xtos.h>
 
 /* HAL library routines forward references */
-XTCDECL
-VOID
-HlDisablePic(VOID);
-
 XTAPI
 VOID
 HlClearScreen(VOID);
@@ -60,44 +56,11 @@ XTSTATUS
 HlInitializeFrameBuffer(VOID);
 
 XTFASTCALL
-ULONG
-HlReadApicRegister(IN APIC_REGISTER Register);
-
-XTFASTCALL
 VOID
 HlSetRunLevel(IN KRUNLEVEL RunLevel);
-
-XTFASTCALL
-VOID
-HlWriteApicRegister(IN APIC_REGISTER Register,
-                    IN ULONG Value);
-
-XTAPI
-BOOLEAN
-HlpCheckX2ApicSupport(VOID);
-
-XTCDECL
-VOID
-HlpHandleApicSpuriousService();
-
-XTCDECL
-VOID
-HlpHandlePicSpuriousService();
-
-XTAPI
-VOID
-HlpInitializeApic(VOID);
 
 XTAPI
 VOID
 HlInitializeProcessor(VOID);
-
-XTFASTCALL
-KRUNLEVEL
-HlpTransformApicTprToRunLevel(IN UCHAR Tpr);
-
-XTFASTCALL
-UCHAR
-HlpTransformRunLevelToApicTpr(IN KRUNLEVEL RunLevel);
 
 #endif /* __XTOSKRNL_HL_H */
