@@ -4,10 +4,25 @@
  * FILE:            xtoskrnl/hl/x86/pic.c
  * DESCRIPTION:     Programmable Interrupt Controller (PIC) for x86 (i686/AMD64) support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ *                  Jozef Nagy <schkwve@gmail.com>
  */
 
 #include <xtos.h>
 
+/**
+ * Disables the 8259 PIC.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+HlDisablePic(VOID)
+{
+    HlIoPortOutByte(PIC1_DATA_PORT, 0xFF);
+    HlIoPortOutByte(PIC2_DATA_PORT, 0xFF);
+}
 
 /**
  * Reads from the APIC register.

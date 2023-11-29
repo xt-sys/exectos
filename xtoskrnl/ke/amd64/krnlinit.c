@@ -69,6 +69,9 @@ KepInitializeMachine(VOID)
     /* Re-enable IDE interrupts */
     HlIoPortOutByte(0x376, 0);
     HlIoPortOutByte(0x3F6, 0);
+
+    /* Disable the legacy PIC */
+    HlDisablePic();
 }
 
 /**

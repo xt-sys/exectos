@@ -11,8 +11,11 @@
 
 #include <xtos.h>
 
-
 /* HAL library routines forward references */
+XTCDECL
+VOID
+HlDisablePic(VOID);
+
 XTAPI
 VOID
 HlClearScreen(VOID);
