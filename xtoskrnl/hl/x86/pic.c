@@ -9,8 +9,9 @@
 
 #include <xtos.h>
 
+
 /**
- * Disables the 8259 PIC.
+ * Disables the legacy 8259 Programmable Interrupt Controller (PIC).
  *
  * @return This routine does not return any value.
  *
