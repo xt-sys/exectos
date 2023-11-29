@@ -72,6 +72,12 @@ KepInitializeMachine(VOID)
 
 	/* Disable the legacy PIC */
     HlDisablePic();
+
+    /* Initialize frame buffer */
+    HlInitializeFrameBuffer();
+
+    /* Initialize processor */
+    HlInitializeProcessor();
 }
 
 /**
