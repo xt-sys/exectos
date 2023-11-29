@@ -1,13 +1,13 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/includes/amd64/ar.h
+ * FILE:            xtoskrnl/includes/amd64/ari.h
  * DESCRIPTION:     AMD64 architecture library routines
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#ifndef __XTOSKRNL_AMD64_AR_H
-#define __XTOSKRNL_AMD64_AR_H
+#ifndef __XTOSKRNL_AMD64_ARI_H
+#define __XTOSKRNL_AMD64_ARI_H
 
 #include <xtos.h>
 
@@ -288,4 +288,4 @@ ArpSetIdtGate(IN PKIDTENTRY Idt,
               IN USHORT Ist,
               IN USHORT Access);
 
-#endif /* __XTOSKRNL_AMD64_AR_H */
+#endif /* __XTOSKRNL_AMD64_ARI_H */

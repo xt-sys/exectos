@@ -1,13 +1,13 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/includes/i686/ke.h
+ * FILE:            xtoskrnl/includes/i686/kei.h
  * DESCRIPTION:     XTOS kernel services routine definitions specific to i686 architecture
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#ifndef __XTOSKRNL_I686_KE_H
-#define __XTOSKRNL_I686_KE_H
+#ifndef __XTOSKRNL_I686_KEI_H
+#define __XTOSKRNL_I686_KEI_H
 
 #include <xtos.h>
 
@@ -53,4 +53,4 @@ XTAPI
 VOID
 KepSwitchBootStack(IN ULONG_PTR Stack);
 
-#endif /* __XTOSKRNL_I686_KE_H */
+#endif /* __XTOSKRNL_I686_KEI_H */

@@ -1,13 +1,13 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/includes/po.h
+ * FILE:            xtoskrnl/includes/poi.h
  * DESCRIPTION:     Power manager subsystem routines
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#ifndef __XTOSKRNL_PO_H
-#define __XTOSKRNL_PO_H
+#ifndef __XTOSKRNL_POI_H
+#define __XTOSKRNL_POI_H
 
 #include <xtos.h>
 
@@ -32,4 +32,4 @@ PopPerfIdleDpc(IN PKDPC Dpc,
                IN PVOID SystemArgument1,
                IN PVOID SystemArgument2);
 
-#endif /* __XTOSKRNL_PO_H */
+#endif /* __XTOSKRNL_POI_H */

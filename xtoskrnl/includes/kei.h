@@ -1,13 +1,13 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/includes/ke.h
+ * FILE:            xtoskrnl/includes/kei.h
  * DESCRIPTION:     XTOS kernel services routine definitions
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#ifndef __XTOSKRNL_KE_H
-#define __XTOSKRNL_KE_H
+#ifndef __XTOSKRNL_KEI_H
+#define __XTOSKRNL_KEI_H
 
 #include <xtos.h>
 
@@ -112,4 +112,4 @@ KepSuspendThread(IN PVOID NormalContext,
                  IN PVOID SystemArgument1,
                  IN PVOID SystemArgument2);
 
-#endif /* __XTOSKRNL_KE_H */
+#endif /* __XTOSKRNL_KEI_H */

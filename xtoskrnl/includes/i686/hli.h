@@ -1,13 +1,13 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/includes/amd64/hl.h
- * DESCRIPTION:     XT hardware abstraction layer routines specific to AMD64 architecture
+ * FILE:            xtoskrnl/includes/i686/hli.h
+ * DESCRIPTION:     XT hardware abstraction layer routines specific to i686 architecture
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#ifndef __XTOSKRNL_AMD64_HL_H
-#define __XTOSKRNL_AMD64_HL_H
+#ifndef __XTOSKRNL_I686_HLI_H
+#define __XTOSKRNL_I686_HLI_H
 
 #include <xtos.h>
 
@@ -50,4 +50,4 @@ XTFASTCALL
 UCHAR
 HlpTransformRunLevelToApicTpr(IN KRUNLEVEL RunLevel);
 
-#endif /* __XTOSKRNL_AMD64_HL_H */
+#endif /* __XTOSKRNL_I686_HLI_H */

@@ -1,13 +1,13 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/includes/amd64/ke.h
+ * FILE:            xtoskrnl/includes/amd64/kei.h
  * DESCRIPTION:     XTOS kernel services routine definitions specific to AMD64 architecture
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#ifndef __XTOSKRNL_AMD64_KE_H
-#define __XTOSKRNL_AMD64_KE_H
+#ifndef __XTOSKRNL_AMD64_KEI_H
+#define __XTOSKRNL_AMD64_KEI_H
 
 #include <xtos.h>
 
@@ -53,4 +53,4 @@ XTAPI
 VOID
 KepSwitchBootStack(IN ULONG_PTR Stack);
 
-#endif /* __XTOSKRNL_AMD64_KE_H */
+#endif /* __XTOSKRNL_AMD64_KEI_H */

@@ -1,13 +1,13 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/includes/rtl.h
+ * FILE:            xtoskrnl/includes/rtli.h
  * DESCRIPTION:     XT runtime library routines
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#ifndef __XTOSKRNL_RTL_H
-#define __XTOSKRNL_RTL_H
+#ifndef __XTOSKRNL_RTLI_H
+#define __XTOSKRNL_RTLI_H
 
 #include <xtos.h>
 
@@ -235,4 +235,4 @@ XTCDECL
 VOID
 RtlRemoveEntryList(IN PLIST_ENTRY Entry);
 
-#endif /* __XTOSKRNL_RTL_H */
+#endif /* __XTOSKRNL_RTLI_H */

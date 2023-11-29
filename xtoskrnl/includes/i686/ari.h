@@ -1,13 +1,13 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/includes/i686/ar.h
+ * FILE:            xtoskrnl/includes/i686/ari.h
  * DESCRIPTION:     I686 architecture library routines
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#ifndef __XTOSKRNL_I686_AR_H
-#define __XTOSKRNL_I686_AR_H
+#ifndef __XTOSKRNL_I686_ARI_H
+#define __XTOSKRNL_I686_ARI_H
 
 #include <xtos.h>
 
@@ -284,4 +284,4 @@ XTAPI
 VOID
 ArpSetNonMaskableInterruptTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock);
 
-#endif /* __XTOSKRNL_I686_AR_H */
+#endif /* __XTOSKRNL_I686_ARI_H */

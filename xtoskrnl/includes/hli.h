@@ -1,13 +1,13 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/includes/hl.h
+ * FILE:            xtoskrnl/includes/hli.h
  * DESCRIPTION:     XT hardware abstraction layer routines
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#ifndef __XTOSKRNL_HL_H
-#define __XTOSKRNL_HL_H
+#ifndef __XTOSKRNL_HLI_H
+#define __XTOSKRNL_HLI_H
 
 #include <xtos.h>
 
@@ -63,4 +63,4 @@ XTAPI
 VOID
 HlInitializeProcessor(VOID);
 
-#endif /* __XTOSKRNL_HL_H */
+#endif /* __XTOSKRNL_HLI_H */
