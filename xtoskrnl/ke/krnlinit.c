@@ -43,8 +43,8 @@ KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
     }
 
     /* Announce kernel startup */
-    DebugPrint(L"Starting ExectOS v%d.%d (%s-%s-%s-%s / %s %s)\n",
-               XTOS_VERSION_MAJOR, XTOS_VERSION_MINOR, XTOS_VERSION_DATE,
+    DebugPrint(L"Starting ExectOS v%d.%d for %s (%s-%s-%s-%s / %s %s)\n",
+               XTOS_VERSION_MAJOR, XTOS_VERSION_MINOR, _ARCH_NAME, XTOS_VERSION_DATE,
                XTOS_VERSION_BUILD, XTOS_VERSION_ARCH, XTOS_VERSION_HASH,
                XTOS_COMPILER_NAME, XTOS_COMPILER_VERSION);
 
