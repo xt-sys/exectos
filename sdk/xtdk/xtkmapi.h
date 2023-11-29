@@ -21,6 +21,7 @@
 /* Architecture-independent XT API */
 #include <xtbase.h>
 #include <xtdebug.h>
+#include <xtguid.h>
 #include <xtfw.h>
 #include <xtimage.h>
 #include <xtuefi.h>
