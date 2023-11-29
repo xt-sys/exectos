@@ -13,12 +13,14 @@
 /* Preprocessor macros for including arch-specific headers */
 #define _ARCH_STRINGIZE(x)             _INCL_STRINGIZE(x)
 #define _INCL_STRINGIZE(x)             #x
+#define ARCH_COMMON(header)            _ARCH_STRINGIZE(../_ARCH_COMMON/header)
 #define ARCH_HEADER(header)            _ARCH_STRINGIZE(_ARCH/header)
 
 /* Architecture specific definitions */
 #if defined(__i386__) || defined(__i686__)
     #define _ARCH                                   i686
     #define _ARCH_I686                              1
+    #define _ARCH_COMMON                            x86
     #define _ARCH_NAME                              "32-bit x86"
     #define _ARCH_IMAGE_MACHINE_TYPE                0x014C
     #define _XT32                                   1
@@ -31,6 +33,7 @@
 #elif defined(__amd64__) || defined(__x86_64__)
     #define _ARCH                                   amd64
     #define _ARCH_AMD64                             1
+    #define _ARCH_COMMON                            x86
     #define _ARCH_NAME                              "64-bit x86"
     #define _ARCH_IMAGE_MACHINE_TYPE                0x8664
     #define _XT64                                   1
