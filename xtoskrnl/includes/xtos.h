@@ -22,6 +22,7 @@
 
 #include ARCH_HEADER(globals.h)
 #include ARCH_HEADER(ar.h)
+#include ARCH_HEADER(hl.h)
 #include ARCH_HEADER(ke.h)
 #include ARCH_HEADER(mm.h)
 #include ARCH_HEADER(rtl.h)
