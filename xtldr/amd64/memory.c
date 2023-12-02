@@ -119,6 +119,14 @@ BlEnablePaging(IN PLIST_ENTRY MemoryMappings,
     Status = EfiSystemTable->BootServices->ExitBootServices(EfiImageHandle, MemoryMap->MapKey);
     if(Status != STATUS_EFI_SUCCESS)
     {
+        /* Retry as UEFI spec says to do it twice */
+        Status = EfiSystemTable->BootServices->ExitBootServices(EfiImageHandle, MemoryMap->MapKey);
+    }
+
+    /* Check if exitted boot services successfully */
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to exit boot services */
         BlDbgPrint(L"Failed to exit boot services (Status code: %lx)\n", Status);
         return STATUS_EFI_ABORTED;
     }
