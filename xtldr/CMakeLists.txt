@@ -38,5 +38,6 @@ set_target_properties(xtldr PROPERTIES OUTPUT_NAME ${BINARY_NAME} SUFFIX .efi)
 set_install_target(xtldr efi/boot)
 
 # Set loader entrypoint and subsystem
+set_imagebase(xtldr ${BASEADDRESS_XTLDR})
 set_entrypoint(xtldr "BlStartXtLoader")
 set_subsystem(xtldr efi_application)
