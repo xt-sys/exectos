@@ -48,6 +48,6 @@
 #include <kefuncs.h>
 #include <rtlfuncs.h>
 
-/* Architecture specific XT routines*/
+/* Architecture specific XT routines */
 #include ARCH_HEADER(arfuncs.h)
 #include ARCH_HEADER(hlfuncs.h)
