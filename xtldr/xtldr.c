@@ -116,7 +116,7 @@ BlLoadEfiModules()
 
         /* Set correct path to the module file */
         RtlCopyMemory(ModulePath, ModulesDirPath, sizeof(ModulePath) / sizeof(WCHAR));
-        RtlWideStringConcatenate(ModulePath, ModuleName, 0);
+        RtlConcatenateWideString(ModulePath, ModuleName, 0);
 
         /* Find valid device path */
         Status = BlFindVolumeDevicePath(DevicePath, ModulePath, &VolumeDevicePath);

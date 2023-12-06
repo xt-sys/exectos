@@ -19,17 +19,17 @@
  *        Wide string to be compared.
  *
  * @param Length
- *        Maximum number of characters to compare. If no limit set, it compares whole strings.
+ *        Maximum number of characters to compare. If no limit set, it compares whole wide strings.
  *
  * @return Integral value indicating the relationship between the wide strings.
  *
  * @since XT 1.0
  */
 XTCDECL
-INT
-RtlWideStringCompare(IN CONST PWCHAR String1,
+SIZE_T
+RtlCompareWideString(IN CONST PWCHAR String1,
                      IN CONST PWCHAR String2,
-                     IN CONST SIZE_T Length)
+                     IN SIZE_T Length)
 {
     SIZE_T Index;
 
@@ -42,22 +42,89 @@ RtlWideStringCompare(IN CONST PWCHAR String1,
             break;
         }
 
-        /* Check if string characters are equal */
+        /* Check if wide string characters are equal */
         if(String1[Index] != String2[Index])
         {
             /* Different characters found */
             return String1[Index] < String2[Index] ? -1 : 1;
         }
 
-        /* Check if end of string reached */
+        /* Check if end of wide string reached */
         if(!String1[Index] || !String2[Index])
         {
-            /* Equal strings until the end of one of them */
+            /* Equal wide strings until the end of one of them */
             return 0;
         }
     }
 
-    /* Strings are equal */
+    /* Wide strings are equal */
+    return 0;
+}
+
+/**
+ * Compares at most specified number of characters of two C wide strings, while ignoring differences in case.
+ *
+ * @param String1
+ *        Wide string to be compared.
+ *
+ * @param String2
+ *        Wide string to be compared.
+ *
+ * @param Length
+ *        Maximum number of characters to compare. If no limit set, it compares whole wide strings.
+ *
+ * @return Integral value indicating the relationship between the wide strings.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+SIZE_T
+RtlCompareWideStringInsensitive(IN CONST PWCHAR String1,
+                                IN CONST PWCHAR String2,
+                                IN SIZE_T Length)
+{
+    WCHAR Character1;
+    WCHAR Character2;
+    ULONG Index = 0;
+
+    /* Iterate through the wide strings */
+    while(String1[Index] != '\0' && String2[Index] != '\0')
+    {
+        /* Check if length limit reached */
+        if(Index != 0 && Index == Length)
+        {
+            /* Skip checking next characters */
+            break;
+        }
+
+        /* Get the characters */
+        Character1 = String1[Index];
+        Character2 = String2[Index];
+
+        /* Lowercase wide string1 character if needed */
+        if(String1[Index] >= 'A' && String1[Index] <= 'Z')
+        {
+            Character1 = String1[Index] - 'A' + 'a';
+        }
+
+        /* Lowercase wide string2 character if needed */
+        if(String2[Index] >= 'A' && String2[Index] <= 'Z')
+        {
+            Character2 = String2[Index] - 'A' + 'a';
+        }
+
+        /* Compare the characters */
+        if(Character1 != Character2)
+        {
+            /* Wide strings are not equal */
+            return Character1 > Character2 ? 1 : -1;
+        }
+
+        /* Get next character */
+        Index++;
+    }
+
+    /* Wide strings are equal */
     return 0;
 }
 
@@ -79,7 +146,7 @@ RtlWideStringCompare(IN CONST PWCHAR String1,
  */
 XTCDECL
 PWCHAR
-RtlWideStringConcatenate(OUT PWCHAR Destination,
+RtlConcatenateWideString(OUT PWCHAR Destination,
                          IN PWCHAR Source,
                          IN SIZE_T Count)
 {
@@ -121,48 +188,6 @@ RtlWideStringConcatenate(OUT PWCHAR Destination,
 }
 
 /**
- * Calculates the length of a given wide string.
- *
- * @param String
- *        Pointer to the null-terminated wide string to be examined.
- *
- * @param MaxLength
- *        Maximum number of wide characters to examine. If no limit set, it examines whole string.
- *
- * @return The length of the null-terminated wide string.
- *
- * @since: XT 1.0
- */
-XTCDECL
-SIZE_T
-RtlWideStringLength(IN CONST PWCHAR String,
-                    IN SIZE_T MaxLength)
-{
-    SIZE_T Length;
-
-    /* Check if NULL pointer passed */
-    if(String == NULL)
-    {
-        return 0;
-    }
-
-    /* Iterate through the wide string */
-    for(Length = 0; ; Length++)
-    {
-
-        /* Check if NULL found or max length limit reached */
-        if((Length != 0 && Length == MaxLength) || !String[Length])
-        {
-            /* Finish examination */
-            break;
-        }
-    }
-
-    /* Return wide string length */
-    return Length;
-}
-
-/**
  * Finds the next token in a null-terminated wide string.
  *
  * @param String
@@ -180,7 +205,7 @@ RtlWideStringLength(IN CONST PWCHAR String,
  */
 XTCDECL
 PWCHAR
-RtlWideStringTokenize(IN PWCHAR String,
+RtlTokenizeWideString(IN PWCHAR String,
                       IN CONST PWCHAR Delimiter,
                       IN OUT PWCHAR *SavePtr)
 {
@@ -230,4 +255,46 @@ RtlWideStringTokenize(IN PWCHAR String,
         }
         while(SpanChar != L'\0');
     }
+}
+
+/**
+ * Calculates the length of a given wide string.
+ *
+ * @param String
+ *        Pointer to the null-terminated wide string to be examined.
+ *
+ * @param MaxLength
+ *        Maximum number of wide characters to examine. If no limit set, it examines whole string.
+ *
+ * @return The length of the null-terminated wide string.
+ *
+ * @since: XT 1.0
+ */
+XTCDECL
+SIZE_T
+RtlWideStringLength(IN CONST PWCHAR String,
+                    IN SIZE_T MaxLength)
+{
+    SIZE_T Length;
+
+    /* Check if NULL pointer passed */
+    if(String == NULL)
+    {
+        return 0;
+    }
+
+    /* Iterate through the wide string */
+    for(Length = 0; ; Length++)
+    {
+
+        /* Check if NULL found or max length limit reached */
+        if((Length != 0 && Length == MaxLength) || !String[Length])
+        {
+            /* Finish examination */
+            break;
+        }
+    }
+
+    /* Return wide string length */
+    return Length;
 }

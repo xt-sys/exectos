@@ -10,6 +10,125 @@
 
 
 /**
+ * Compares at most specified number of characters of two C strings.
+ *
+ * @param String1
+ *        String to be compared.
+ *
+ * @param String2
+ *        String to be compared.
+ *
+ * @param Length
+ *        Maximum number of characters to compare. If no limit set, it compares whole strings.
+ *
+ * @return Integral value indicating the relationship between the strings.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+SIZE_T
+RtlCompareString(IN CONST PCHAR String1,
+                 IN CONST PCHAR String2,
+                 IN SIZE_T Length)
+{
+    SIZE_T Index;
+
+    /* Iterate through the strings */
+    for(Index = 0; ; Index++) {
+        /* Check if length limit reached */
+        if(Index != 0 && Index == Length)
+        {
+            /* Skip checking next characters */
+            break;
+        }
+
+        /* Check if string characters are equal */
+        if(String1[Index] != String2[Index])
+        {
+            /* Different characters found */
+            return String1[Index] < String2[Index] ? -1 : 1;
+        }
+
+        /* Check if end of string reached */
+        if(!String1[Index] || !String2[Index])
+        {
+            /* Equal strings until the end of one of them */
+            return 0;
+        }
+    }
+
+    /* Strings are equal */
+    return 0;
+}
+
+/**
+ * Compares at most specified number of characters of two C strings, while ignoring differences in case.
+ *
+ * @param String1
+ *        String to be compared.
+ *
+ * @param String2
+ *        String to be compared.
+ *
+ * @param Length
+ *        Maximum number of characters to compare. If no limit set, it compares whole strings.
+ *
+ * @return Integral value indicating the relationship between the strings.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+SIZE_T
+RtlCompareStringInsensitive(IN CONST PCHAR String1,
+                            IN CONST PCHAR String2,
+                            IN SIZE_T Length)
+{
+    CHAR Character1;
+    CHAR Character2;
+    ULONG Index = 0;
+
+    /* Iterate through the strings */
+    while(String1[Index] != '\0' && String2[Index] != '\0')
+    {
+        /* Check if length limit reached */
+        if(Index != 0 && Index == Length)
+        {
+            /* Skip checking next characters */
+            break;
+        }
+
+        /* Get the characters */
+        Character1 = String1[Index];
+        Character2 = String2[Index];
+
+        /* Lowercase string1 character if needed */
+        if(String1[Index] >= 'A' && String1[Index] <= 'Z')
+        {
+            Character1 = String1[Index] - 'A' + 'a';
+        }
+
+        /* Lowercase string2 character if needed */
+        if(String2[Index] >= 'A' && String2[Index] <= 'Z')
+        {
+            Character2 = String2[Index] - 'A' + 'a';
+        }
+
+        /* Compare the characters */
+        if(Character1 != Character2)
+        {
+            /* Strings are not equal */
+            return Character1 > Character2 ? 1 : -1;
+        }
+
+        /* Get next character */
+        Index++;
+    }
+
+    /* Strings are equal */
+    return 0;
+}
+
+/**
  * Calculates the length of a given string.
  *
  * @param String
@@ -24,7 +143,7 @@
  */
 XTCDECL
 SIZE_T
-RtlStringLength(IN CONST PUCHAR String,
+RtlStringLength(IN CONST PCHAR String,
                 IN SIZE_T MaxLength)
 {
     SIZE_T Length;
@@ -47,7 +166,7 @@ RtlStringLength(IN CONST PUCHAR String,
         }
     }
 
-    /* Return wide string length */
+    /* Return string length */
     return Length;
 }
 
@@ -68,12 +187,12 @@ RtlStringLength(IN CONST PUCHAR String,
  * @since XT 1.0
  */
 XTCDECL
-INT
+SIZE_T
 RtlStringToWideString(OUT PWCHAR Destination,
-                      IN CONST PUCHAR *Source,
+                      IN CONST PCHAR *Source,
                       IN SIZE_T Length)
 {
-    PUCHAR LocalSource = *Source;
+    PCHAR LocalSource = *Source;
     SIZE_T Count = Length;
 
     if(Destination == NULL)
@@ -83,7 +202,7 @@ RtlStringToWideString(OUT PWCHAR Destination,
 
     while(Count)
     {
-        if((*Destination = (UCHAR)*LocalSource) == 0)
+        if((*Destination = *LocalSource) == 0)
         {
             LocalSource = NULL;
             break;

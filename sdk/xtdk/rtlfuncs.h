@@ -54,6 +54,36 @@ RtlCompareMemory(IN PCVOID LeftBuffer,
                  IN PCVOID RightBuffer,
                  IN SIZE_T Length);
 
+XTCDECL
+SIZE_T
+RtlCompareString(IN CONST PCHAR String1,
+                 IN CONST PCHAR String2,
+                 IN SIZE_T Length);
+
+XTCDECL
+SIZE_T
+RtlCompareStringInsensitive(IN CONST PCHAR String1,
+                            IN CONST PCHAR String2,
+                            IN SIZE_T Length);
+
+XTCDECL
+SIZE_T
+RtlCompareWideString(IN CONST PWCHAR String1,
+                     IN CONST PWCHAR String2,
+                     IN SIZE_T Length);
+
+XTCDECL
+SIZE_T
+RtlCompareWideStringInsensitive(IN CONST PWCHAR String1,
+                                IN CONST PWCHAR String2,
+                                IN SIZE_T Length);
+
+XTCDECL
+PWCHAR
+RtlConcatenateWideString(OUT PWCHAR Destination,
+                         IN PWCHAR Source,
+                         IN SIZE_T Count);
+
 XTAPI
 VOID
 RtlCopyMemory(OUT PVOID Destination,
@@ -86,37 +116,25 @@ RtlSetMemory(OUT PVOID Destination,
 
 XTCDECL
 SIZE_T
-RtlStringLength(IN CONST PUCHAR String,
+RtlStringLength(IN CONST PCHAR String,
                 IN SIZE_T MaxLength);
 
 XTCDECL
-INT
+SIZE_T
 RtlStringToWideString(OUT PWCHAR Destination,
-                      IN CONST PUCHAR *Source,
+                      IN CONST PCHAR *Source,
                       IN SIZE_T Length);
 
 XTCDECL
-INT
-RtlWideStringCompare(IN CONST PWCHAR String1,
-                     IN CONST PWCHAR String2,
-                     IN CONST SIZE_T Length);
-
-XTCDECL
 PWCHAR
-RtlWideStringConcatenate(OUT PWCHAR Destination,
-                         IN PWCHAR Source,
-                         IN SIZE_T Count);
+RtlTokenizeWideString(IN PWCHAR String,
+                      IN CONST PWCHAR Delimiter,
+                      IN OUT PWCHAR *SavePtr);
 
 XTCDECL
 SIZE_T
 RtlWideStringLength(IN CONST PWCHAR String,
                     IN SIZE_T MaxLength);
-
-XTCDECL
-PWCHAR
-RtlWideStringTokenize(IN PWCHAR String,
-                      IN CONST PWCHAR Delimiter,
-                      IN OUT PWCHAR *SavePtr);
 
 XTAPI
 VOID

@@ -132,7 +132,7 @@ XtBootSystem(IN PXT_BOOT_PROTOCOL_PARAMETERS Parameters)
     }
 
     /* System path has to point to the boot directory */
-    RtlWideStringConcatenate(Parameters->SystemPath, L"\\Boot", 0);
+    RtlConcatenateWideString(Parameters->SystemPath, L"\\Boot", 0);
 
     /* Open XTOS system boot directory */
     Status = FsHandle->Open(FsHandle, &BootDir, Parameters->SystemPath, EFI_FILE_MODE_READ, 0);

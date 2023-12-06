@@ -146,19 +146,19 @@ BlComPortInitialize()
             CommandLine = (PWCHAR)LoadedImage->LoadOptions;
 
             /* Find command in command line */
-            Argument = RtlWideStringTokenize(CommandLine, L" ", &LastArg);
+            Argument = RtlTokenizeWideString(CommandLine, L" ", &LastArg);
 
             /* Iterate over all arguments passed to boot loader */
             while(Argument != NULL)
             {
                 /* Check if this is DEBUG parameter */
-                if(RtlWideStringCompare(Argument, L"DEBUG=", 6) == 0)
+                if(RtlCompareWideString(Argument, L"DEBUG=", 6) == 0)
                 {
                     /* Skip to the argument value */
                     Argument += 6;
 
                     /* Make sure COM port is being used */
-                    if(RtlWideStringCompare(Argument, L"COM", 3))
+                    if(RtlCompareWideString(Argument, L"COM", 3))
                     {
                         /* Invalid debug port specified */
                         BlEfiPrint(L"ERROR: Invalid debug port specified, falling back to defaults\n");
@@ -176,7 +176,7 @@ BlComPortInitialize()
                     }
 
                     /* Check if custom COM port address supplied */
-                    if(PortNumber == 0 && RtlWideStringCompare(Argument, L":0x", 3) == 0)
+                    if(PortNumber == 0 && RtlCompareWideString(Argument, L":0x", 3) == 0)
                     {
                         /* COM port address provided */
                         Argument += 3;
@@ -221,7 +221,7 @@ BlComPortInitialize()
                 }
 
                 /* Take next argument */
-                Argument = RtlWideStringTokenize(NULL, L" ", &LastArg);
+                Argument = RtlTokenizeWideString(NULL, L" ", &LastArg);
             }
         }
     }
@@ -349,7 +349,7 @@ BlEfiPrint(IN PUINT16 Format,
     BlStringPrint(BlConsolePutChar, Format, Arguments);
 
     /* Print to serial console only if not running under OVMF */
-    if(RtlWideStringCompare(EfiSystemTable->FirmwareVendor, L"EDK II", 6) != 0)
+    if(RtlCompareWideString(EfiSystemTable->FirmwareVendor, L"EDK II", 6) != 0)
     {
         /* Check if debugging enabled and if EFI serial port is fully initialized */
         if(DEBUG && (EfiSerialPort.Flags & COMPORT_FLAG_INIT))
