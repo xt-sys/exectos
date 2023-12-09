@@ -132,6 +132,18 @@ RtlTokenizeWideString(IN PWCHAR String,
                       IN OUT PWCHAR *SavePtr);
 
 XTCDECL
+PCHAR
+RtlTrimLeftString(IN CONST PCHAR String);
+
+XTCDECL
+PCHAR
+RtlTrimRightString(IN CONST PCHAR String);
+
+XTCDECL
+PCHAR
+RtlTrimString(IN CONST PCHAR String);
+
+XTCDECL
 SIZE_T
 RtlWideStringLength(IN CONST PWCHAR String,
                     IN SIZE_T MaxLength);

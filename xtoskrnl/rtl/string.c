@@ -218,3 +218,83 @@ RtlStringToWideString(OUT PWCHAR Destination,
 
     return Length - Count;
 }
+
+/**
+ * Removes certain characters from a beginning of the string.
+ *
+ * @param String
+ *        Pointer to the null-terminated string to be trimmed.
+ *
+ * @return This routine returns a pointer to the left-trimmed string.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+PCHAR
+RtlTrimLeftString(IN CONST PCHAR String)
+{
+    PCHAR Start;
+
+    /* Initialize pointer */
+    Start = String;
+
+    /* Skip all leading whitespaces */
+    while(*Start == ' ' || *Start == '\n' || *Start == '\t' || *Start == '\r' || *Start == '\v' || *Start == '\f')
+    {
+        /* Advance to the next character */
+        Start++;
+    }
+
+    /* Return left-trimmed string */
+    return Start;
+}
+
+/**
+ * Removes certain characters from the end of the string.
+ *
+ * @param String
+ *        Pointer to the null-terminated string to be trimmed.
+ *
+ * @return This routine returns a pointer to the right-trimmed string.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+PCHAR
+RtlTrimRightString(IN CONST PCHAR String)
+{
+    PCHAR End;
+
+    /* Find end of the string */
+    End = String + RtlStringLength(String, 0);
+
+    /* Skip all trailing whitespaces */
+    while((End != String) && (*End == ' ' || *End == '\n' || *End == '\t' || *End == '\r' || *End == '\v' || *End == '\f'))
+    {
+        /* Move to the previous character */
+        End--;
+    }
+
+    /* Terminate the string */
+    *End = 0;
+
+    /* Return right-trimmed string */
+    return String;
+}
+
+/**
+ * Removes certain characters from the beginning and the end of the string.
+ *
+ * @param String
+ *        Pointer to the null-terminated string to be trimmed.
+ *
+ * @return This routine returns a pointer to the trimmed string.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+PCHAR
+RtlTrimString(IN CONST PCHAR String)
+{
+    return RtlTrimLeftString(RtlTrimRightString(String));
+}
