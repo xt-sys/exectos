@@ -227,6 +227,46 @@
 /* EFI list of failed CPUs termination */
 #define EFI_PROCESSOR_END_OF_LIST                          0xFFFFFFFF
 
+/* EFI text background color definitions */
+#define EFI_TEXT_BGCOLOR_BLACK                             0x00
+#define EFI_TEXT_BGCOLOR_BLUE                              0x10
+#define EFI_TEXT_BGCOLOR_GREEN                             0x20
+#define EFI_TEXT_BGCOLOR_CYAN                              0x30
+#define EFI_TEXT_BGCOLOR_RED                               0x40
+#define EFI_TEXT_BGCOLOR_MAGENTA                           0x50
+#define EFI_TEXT_BGCOLOR_BROWN                             0x60
+#define EFI_TEXT_BGCOLOR_LIGHTGRAY                         0x70
+
+/* EFI text foreground color definitions */
+#define EFI_TEXT_FGCOLOR_BLACK                             0x00
+#define EFI_TEXT_FGCOLOR_BLUE                              0x01
+#define EFI_TEXT_FGCOLOR_GREEN                             0x02
+#define EFI_TEXT_FGCOLOR_CYAN                              0x03
+#define EFI_TEXT_FGCOLOR_RED                               0x04
+#define EFI_TEXT_FGCOLOR_MAGENTA                           0x05
+#define EFI_TEXT_FGCOLOR_BROWN                             0x06
+#define EFI_TEXT_FGCOLOR_LIGHTGRAY                         0x07
+#define EFI_TEXT_FGCOLOR_DARKGRAY                          0x08
+#define EFI_TEXT_FGCOLOR_LIGHTBLUE                         0x09
+#define EFI_TEXT_FGCOLOR_LIGHTGREEN                        0x0A
+#define EFI_TEXT_FGCOLOR_LIGHTCYAN                         0x0B
+#define EFI_TEXT_FGCOLOR_LIGHTRED                          0x0C
+#define EFI_TEXT_FGCOLOR_LIGHTMAGENTA                      0x0D
+#define EFI_TEXT_FGCOLOR_YELLOW                            0x0E
+#define EFI_TEXT_FGCOLOR_WHITE                             0x0F
+
+/* EFI text box character definitions */
+#define EFI_TEXT_BOX_HORIZONTAL                            0x2500
+#define EFI_TEXT_BOX_VERTICAL                              0x2502
+#define EFI_TEXT_BOX_DOWN_RIGHT                            0x250C
+#define EFI_TEXT_BOX_DOWN_LEFT                             0x2510
+#define EFI_TEXT_BOX_UP_RIGHT                              0x2518
+#define EFI_TEXT_BOX_UP_LEFT                               0x2514
+#define EFI_TEXT_BOX_VERTICAL_RIGHT                        0x251C
+#define EFI_TEXT_BOX_VERTICAL_LEFT                         0x2524
+#define EFI_TEXT_BOX_FULL_BLOCK                            0x2588
+#define EFI_TEXT_BOX_LIGHT_BLOCK                           0x2591
+
 /* EFI protocols GUIDs */
 #define EFI_BLOCK_IO_PROTOCOL_GUID                         {0x964E5B21, 0x6459, 0x11D2, {0x8E, 0x39, 0x00, 0xA0, 0xC9, 0x69, 0x72, 0x3B}}
 #define EFI_BLOCK_IO2_PROTOCOL_GUID                        {0xA77B2472, 0xE282, 0x4E9F, {0xA2, 0x45, 0xC2, 0xC0, 0xE2, 0x7B, 0xBC, 0xC1}}
