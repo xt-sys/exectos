@@ -40,9 +40,10 @@
 #define MAXLONG                                0x7FFFFFFF
 #define MAXULONG                               0xFFFFFFFF
 
-/* Preprocessor macros for defining a structure alignment and packing */
+/* Preprocessor macros for defining a structure alignment, packing and segment */
 #define ALIGN(x)                               __attribute__((aligned(x)))
 #define PACK                                   __attribute__((packed))
+#define SEGMENT(segment)                       __attribute__((section(segment)))
 
 /* Macro for calculating size of an array */
 #define ARRAY_SIZE(x)                          (sizeof(x) / sizeof(*x))
