@@ -80,6 +80,24 @@ function(set_imagebase MODULE IMAGEBASE)
     add_module_linker_flags(${MODULE} "/BASE:${IMAGEBASE}")
 endfunction()
 
+# This function enables or disables map file generation for specified module
+function(set_linker_map MODULE STATE)
+    if(NOT ${ARGC} EQUAL 2)
+        message(FATAL_ERROR "Invalid number of arguments passed to set_ordinals() function")
+    endif()
+    if(STATE STREQUAL "TRUE")
+        add_module_linker_flags(${MODULE} "/MAP:${CMAKE_CURRENT_BINARY_DIR}/${MODULE}.map")
+    endif()
+endfunction()
+
+# This function enables or disables binary ordinals export for specified module
+function(set_ordinals MODULE STATE)
+    if(NOT ${ARGC} EQUAL 2)
+        message(FATAL_ERROR "Invalid number of arguments passed to set_ordinals() function")
+    endif()
+    set_module_property(${MODULE} ENABLE_EXPORTS ${STATE})
+endfunction()
+
 # This functions sets PE/COFF subsystem and XTOS version of the binary
 function(set_subsystem MODULE SUBSYSTEM)
     string(TOUPPER ${SUBSYSTEM} SUBSYSTEM)

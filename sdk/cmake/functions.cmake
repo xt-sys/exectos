@@ -88,14 +88,6 @@ function(set_install_target TARGET DESTINATION)
     install(TARGETS ${TARGET} DESTINATION ${EXECTOS_BINARY_DIR}/output/binaries/${DESTINATION})
 endfunction()
 
-# This function enables or disables binary ordinals export for specified module
-function(set_ordinals MODULE STATE)
-    if(NOT ${ARGC} EQUAL 2)
-        message(FATAL_ERROR "Invalid number of arguments passed to set_ordinals() function")
-    endif()
-    set_module_property(${MODULE} ENABLE_EXPORTS ${STATE})
-endfunction()
-
 # This function is responsible for compiling module SPEC file
 function(set_specfile SPECFILE)
     if(NOT ${ARGC} EQUAL 1)
