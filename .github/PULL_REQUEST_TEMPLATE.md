@@ -17,3 +17,6 @@ _Use a TODO when your pull request is Work in Progress._
 - [ ] 
 - [ ] 
 - [ ]
+
+## Agreements
+- [ ] I have read the Contributors License Agreement and I consent to those terms.
