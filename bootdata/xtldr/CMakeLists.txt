@@ -1,1 +1,1 @@
-set_install_file(xtldr.ini efi/boot)
+set_install_file(xtldr.ini efi/boot/xtldr)

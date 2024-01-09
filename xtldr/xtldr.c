@@ -2,216 +2,161 @@
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
  * FILE:            xtldr/xtldr.c
- * DESCRIPTION:     UEFI XT Bootloader
+ * DESCRIPTION:     XTOS UEFI Boot Loader
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtbl.h>
+#include <xtldr.h>
 
 
 /**
- * This routine loads XTLDR EFI modules.
+ * Initializes EFI Boot Loader (XTLDR).
  *
- * @return This routine returns status code.
+ * @return This routine does not return any value.
  *
  * @since XT 1.0
  */
 XTCDECL
-EFI_STATUS
-BlLoadEfiModules()
+VOID
+BlInitializeBootLoader()
 {
-    CONST PWCHAR ModulesDirPath = L"\\EFI\\BOOT\\XTLDR\\";
-    EFI_GUID DevicePathGuid = EFI_DEVICE_PATH_PROTOCOL_GUID;
-    EFI_GUID LIPGuid = EFI_LOADED_IMAGE_PROTOCOL_GUID;
-    PEFI_DEVICE_PATH_PROTOCOL VolumeDevicePath, DevicePath;
+    EFI_GUID LipGuid = EFI_LOADED_IMAGE_PROTOCOL_GUID;
     PEFI_LOADED_IMAGE_PROTOCOL LoadedImage;
-    PEFI_FILE_HANDLE FsHandle, ModulesDir;
-    EFI_HANDLE DiskHandle, ModuleHandle;
-    SIZE_T Length;
+    EFI_HANDLE Handle;
     EFI_STATUS Status;
-    UINT_PTR DirSize;
-    CHAR Buffer[1024];
-    WCHAR ModulePath[1024];
-    PWCHAR ModuleName;
 
-    /* Open EFI volume */
-    Status = BlOpenVolume(NULL, &DiskHandle, &FsHandle);
-    if(Status != STATUS_EFI_SUCCESS)
+    /* Set current XTLDR's EFI BootServices status */
+    BlpStatus.BootServices = TRUE;
+
+    /* Initialize console */
+    BlInitializeConsole();
+
+    /* Print XTLDR version */
+    BlConsolePrint(L"XTLDR boot loader v%s\n", XTOS_VERSION);
+
+    /* Initialize XTLDR configuration linked lists */
+    RtlInitializeListHead(&BlpBootProtocols);
+    RtlInitializeListHead(&BlpConfig);
+    RtlInitializeListHead(&BlpLoadedModules);
+
+    /* Store SecureBoot status */
+    BlpStatus.SecureBoot = BlGetSecureBootStatus();
+
+    /* Check if debug is enabled */
+    if(DEBUG)
     {
-        /* Failed to open a volume */
-        return Status;
+        /* Attempt to open EFI LoadedImage protocol */
+        Status = BlOpenProtocol(&Handle, (PVOID *)&LoadedImage, &LipGuid);
+        if(Status == STATUS_EFI_SUCCESS)
+        {
+            /* Protocol opened successfully, print useful debug information */
+            BlConsolePrint(L"\n---------- BOOTLOADER DEBUG ----------\n"
+                           L"Pointer Size      : %d\n"
+                           L"Image Base Address: 0x%lx\n"
+                           L"Image Base Size   : 0x%lx\n"
+                           L"Image Revision    : 0x%lx\n"
+                           L"--------------------------------------\n",
+                           sizeof(PVOID),
+                           LoadedImage->ImageBase,
+                           LoadedImage->ImageSize,
+                           LoadedImage->Revision);
+            BlSleepExecution(3000);
+        }
     }
-
-    /* Open EFI/BOOT/XTLDR directory, which contains all the modules and close the FS immediately */
-    Status = FsHandle->Open(FsHandle, &ModulesDir, ModulesDirPath, EFI_FILE_MODE_READ, 0);
-    FsHandle->Close(FsHandle);
-
-    /* Check if modules directory opened successfully */
-    if(Status == STATUS_EFI_NOT_FOUND)
-    {
-        /* Directory not found, nothing to load */
-        BlDbgPrint(L"WARNING: Boot loader directory (EFI/BOOT/XTLDR) not found\n");
-
-        /* Close volume */
-        BlCloseVolume(DiskHandle);
-        return STATUS_EFI_SUCCESS;
-    }
-    else if(Status != STATUS_EFI_SUCCESS)
-    {
-        /* Failed to open directory */
-        BlDbgPrint(L"ERROR: Unable to open XTLDR directory (EFI/BOOT/XTLDR)\n");
-        BlCloseVolume(DiskHandle);
-        return Status;
-    }
-
-    /* Open EFI device path protocol */
-    Status = EfiSystemTable->BootServices->HandleProtocol(DiskHandle, &DevicePathGuid, (PVOID *)&DevicePath);
-    if(Status != STATUS_EFI_SUCCESS)
-    {
-        /* Close volume */
-        BlCloseVolume(DiskHandle);
-        return Status;
-    }
-
-    /* Iterate through files inside XTLDR directory */
-    while(TRUE)
-    {
-        /* Read directory */
-        DirSize = sizeof(Buffer);
-        Status = ModulesDir->Read(ModulesDir, &DirSize, Buffer);
-        if(Status != STATUS_EFI_SUCCESS)
-        {
-            /* Failed to read directory */
-            BlDbgPrint(L"\n");
-
-            /* Close directory and volume */
-            ModulesDir->Close(ModulesDir);
-            BlCloseVolume(DiskHandle);
-            return Status;
-        }
-
-        /* Check if read anything */
-        if(DirSize == 0)
-        {
-            /* Already read all contents, break loop execution */
-            break;
-        }
-
-        /* Take filename and its length */
-        ModuleName = ((PEFI_FILE_INFO)Buffer)->FileName;
-        Length = RtlWideStringLength(ModuleName, 0);
-
-        /* Make sure we deal with .EFI executable file */
-        if(Length < 4 || ModuleName[Length - 4] != '.' ||
-           (ModuleName[Length - 3] != 'E' && ModuleName[Length - 3] != 'e') ||
-           (ModuleName[Length - 2] != 'F' && ModuleName[Length - 2] != 'f') ||
-           (ModuleName[Length - 1] != 'I' && ModuleName[Length - 1] != 'i'))
-        {
-            /* Skip non .EFI file */
-            continue;
-        }
-
-        /* Print debug message */
-        BlDbgPrint(L"Loading module '%S' ... ", ModuleName);
-
-        /* Set correct path to the module file */
-        RtlCopyMemory(ModulePath, ModulesDirPath, sizeof(ModulePath) / sizeof(WCHAR));
-        RtlConcatenateWideString(ModulePath, ModuleName, 0);
-
-        /* Find valid device path */
-        Status = BlFindVolumeDevicePath(DevicePath, ModulePath, &VolumeDevicePath);
-        if(Status != STATUS_EFI_SUCCESS)
-        {
-            /* Failed to set path */
-            BlDbgPrint(L"FAIL\n");
-            BlDbgPrint(L"ERROR: Unable to set valid device path\n");
-
-            /* Close directory and volume */
-            ModulesDir->Close(ModulesDir);
-            BlCloseVolume(DiskHandle);
-            return Status;
-        }
-
-        /* Load the module into memory */
-        Status = EfiSystemTable->BootServices->LoadImage(FALSE, EfiImageHandle, VolumeDevicePath,
-                                                         NULL, 0, &ModuleHandle);
-        if(Status != STATUS_EFI_SUCCESS)
-        {
-            /* Module failed */
-            BlDbgPrint(L"FAIL\n");
-
-            /* Check if caused by secure boot */
-            if(Status == STATUS_EFI_ACCESS_DENIED && EfiSecureBoot >= 1)
-            {
-                BlDbgPrint(L"ERROR: SecureBoot signature validation failed\n");
-            }
-            else
-            {
-                BlDbgPrint(L"ERROR: Unable to load module (Status code: %lx)\n", Status);
-            }
-
-            /* Free memory and skip module */
-            BlEfiMemoryFreePool(VolumeDevicePath);
-            continue;
-        }
-
-        /* Free memory */
-        BlEfiMemoryFreePool(VolumeDevicePath);
-
-        /* Access module interface for further module type check */
-        Status = EfiSystemTable->BootServices->OpenProtocol(ModuleHandle, &LIPGuid, (PVOID *)&LoadedImage,
-                                                            EfiImageHandle, NULL, EFI_OPEN_PROTOCOL_GET_PROTOCOL);
-        if(Status != STATUS_EFI_SUCCESS)
-        {
-            /* Failed to open protocol */
-            BlDbgPrint(L"FAIL\n");
-            BlDbgPrint(L"ERROR: Unable to access module interface\n");
-
-            /* Skip to the next module */
-            continue;
-        }
-
-        /* Some firmwares do not allow to start drivers which are not of 'boot system driver' type, so check it */
-        if(LoadedImage->ImageCodeType != EfiBootServicesCode)
-        {
-            /* Different type set, probably 'runtime driver', refuse to load it */
-            BlDbgPrint(L"FAIL\n");
-            BlDbgPrint(L"ERROR: Loaded module is not a boot system driver\n");
-
-            /* Close protocol and skip module */
-            EfiSystemTable->BootServices->CloseProtocol(LoadedImage, &LIPGuid, LoadedImage, NULL);
-            continue;
-        }
-
-        /* Close loaded image protocol */
-        EfiSystemTable->BootServices->CloseProtocol(LoadedImage, &LIPGuid, LoadedImage, NULL);
-
-        /* Start the module */
-        Status = EfiSystemTable->BootServices->StartImage(ModuleHandle, NULL, NULL);
-        if(Status != STATUS_EFI_SUCCESS)
-        {
-            /* Module failed */
-            BlDbgPrint(L"FAIL\n");
-            BlDbgPrint(L"ERROR: Unable to start module\n");
-
-            /* Skip module */
-            continue;
-        }
-
-        /* Module loaded successfully */
-        BlDbgPrint(L"OK\n");
-    }
-
-    /* Close directory and volume */
-    ModulesDir->Close(ModulesDir);
-    BlCloseVolume(DiskHandle);
-
-    /* Return success */
-    return STATUS_EFI_SUCCESS;
 }
 
 /**
- * This routine attempts to start XT Operating System.
+ * Initializes a list of operating systems for XTLDR boot menu.
+ *
+ * @param MenuEntries
+ *        Supplies a pointer to memory area where operating systems list will be stored.
+ *
+ * @param EntriesCount
+ *        Supplies a pointer to memory area where number of menu entries will be stored.
+ *
+ * @param DefaultId
+ *        Supplies a pointer to memory area where ID of default menu entry will be stored.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+BlInitializeBootMenuList(OUT PXTBL_BOOTMENU_ITEM MenuEntries,
+                         OUT PULONG EntriesCount,
+                         OUT PULONG DefaultId)
+{
+    PWCHAR DefaultMenuEntry, MenuEntryName;
+    PLIST_ENTRY MenuEntrySectionList, MenuEntryList;
+    PXTBL_CONFIG_SECTION MenuEntrySection;
+    PXTBL_CONFIG_ENTRY MenuEntryOption;
+    PXTBL_BOOTMENU_ITEM OsList;
+    ULONG DefaultOS, NumberOfEntries;
+
+    /* Set default values */
+    DefaultOS = 0;
+    NumberOfEntries = 0;
+    OsList = NULL;
+
+    /* Get default menu entry from configuration */
+    DefaultMenuEntry = BlGetConfigValue(L"DEFAULT");
+
+    /* Iterate through all menu sections */
+    MenuEntrySectionList = BlpMenuList->Flink;
+    while(MenuEntrySectionList != BlpMenuList)
+    {
+        /* NULLify menu entry name */
+        MenuEntryName = NULL;
+
+        /* Get menu section */
+        MenuEntrySection = CONTAIN_RECORD(MenuEntrySectionList, XTBL_CONFIG_SECTION, Flink);
+
+        /* Check if this is the default menu entry */
+        if(RtlCompareWideStringInsensitive(MenuEntrySection->SectionName, DefaultMenuEntry, 0) == 0)
+        {
+            /* Set default OS ID */
+            DefaultOS = NumberOfEntries;
+        }
+
+        /* Iterate through all entry parameters */
+        MenuEntryList = MenuEntrySection->Options.Flink;
+        while(MenuEntryList != &MenuEntrySection->Options)
+        {
+            /* Get menu entry parameter */
+            MenuEntryOption = CONTAIN_RECORD(MenuEntryList, XTBL_CONFIG_ENTRY, Flink);
+
+            /* Check if this is the menu entry display name */
+            if(RtlCompareWideStringInsensitive(MenuEntryOption->Name, L"SYSTEMNAME", 0) == 0)
+            {
+                /* Set menu entry display name */
+                MenuEntryName = MenuEntryOption->Value;
+            }
+
+            /* Get next parameter for this menu entry */
+            MenuEntryList = MenuEntryList->Flink;
+        }
+
+        /* Add OS to the boot menu list */
+        OsList[NumberOfEntries].EntryName = MenuEntryName;
+        OsList[NumberOfEntries].Options = &MenuEntrySection->Options;
+
+        /* Get next menu entry */
+        MenuEntrySectionList = MenuEntrySectionList->Flink;
+        NumberOfEntries++;
+    }
+
+    /* Set return values */
+    *DefaultId = DefaultOS;
+    *EntriesCount = NumberOfEntries;
+    MenuEntries = OsList;
+}
+
+/**
+ * Loads all necessary modules and invokes boot protocol.
+ *
+ * @param OptionsList
+ *        Supplies a pointer to list of options associated with chosen boot menu entry.
  *
  * @return This routine returns a status code.
  *
@@ -219,88 +164,116 @@ BlLoadEfiModules()
  */
 XTCDECL
 EFI_STATUS
-BlLoadXtSystem()
+BlInvokeBootProtocol(IN PLIST_ENTRY OptionsList)
 {
-    EFI_GUID ProtocolGuid = XT_XTOS_BOOT_PROTOCOL_GUID;
-    XT_BOOT_PROTOCOL_PARAMETERS BootParameters;
-    PXT_BOOT_PROTOCOL BootProtocol;
-    PUCHAR ArcName, SystemPath;
+    XTBL_BOOT_PARAMETERS BootParameters;
+    PXTBL_BOOT_PROTOCOL BootProtocol;
+    PLIST_ENTRY OptionsListEntry;
+    PXTBL_CONFIG_ENTRY Option;
+    EFI_GUID BootProtocolGuid;
+    SIZE_T ModuleListLength;
+    PWCHAR ModulesList;
+    EFI_HANDLE Handle;
     EFI_STATUS Status;
-    PCHAR ArcPath;
-    SIZE_T Length;
 
-    /* Set ARC path */
-    ArcPath = "multi(0)disk(0)rdisk(0)partition(1)/ExectOS";
+    /* Initialize boot parameters and a list of modules */
+    RtlZeroMemory(&BootParameters, sizeof(XTBL_BOOT_PARAMETERS));
+    ModulesList = NULL;
 
-    /* Zero boot parameters structure to NULLify all pointers */
-    RtlZeroMemory(&BootParameters, sizeof(XT_BOOT_PROTOCOL_PARAMETERS));
-
-    /* Get boot volume path */
-    Status = BlGetVolumeDevicePath((PUCHAR)ArcPath, &BootParameters.DevicePath, &ArcName, &SystemPath);
-    if(Status != STATUS_EFI_SUCCESS)
+    /* Iterate through all options provided by boot menu entry and propagate boot parameters */
+    OptionsListEntry = OptionsList->Flink;
+    while(OptionsListEntry != OptionsList)
     {
-        /* Failed to find volume */
-        BlDbgPrint(L"ERROR: Unable to find volume device path\n");
-        return Status;
+        /* Get option */
+        Option = CONTAIN_RECORD(OptionsListEntry, XTBL_CONFIG_ENTRY, Flink);
+
+        /* Look for boot protocol and modules list */
+        if(RtlCompareWideStringInsensitive(Option->Name, L"BOOTMODULES", 0) == 0)
+        {
+            /* Check a length of modules list */
+            ModuleListLength = RtlWideStringLength(Option->Value, 0);
+
+            Status = BlMemoryAllocatePool(sizeof(PWCHAR) * ModuleListLength, (PVOID *)&ModulesList);
+            if(Status != STATUS_EFI_SUCCESS)
+            {
+                /* Failed to allocate memory, print error message and return status code */
+                BlDebugPrint(L"ERROR: Memory allocation failure (Status Code: 0x%lx)\n", Status);
+                return STATUS_EFI_OUT_OF_RESOURCES;
+            }
+
+            /* Make a copy of modules list */
+            RtlCopyMemory(ModulesList, Option->Value, sizeof(PWCHAR) * ModuleListLength);
+        }
+        else if(RtlCompareWideStringInsensitive(Option->Name, L"SYSTEMTYPE", 0) == 0)
+        {
+            /* Boot protocol found */
+            BootParameters.SystemType = Option->Value;
+        }
+        else if(RtlCompareWideStringInsensitive(Option->Name, L"SYSTEMPATH", 0) == 0)
+        {
+            /* System path found, get volume device path */
+            Status = BlGetVolumeDevicePath((PWCHAR)Option->Value, &BootParameters.DevicePath, &BootParameters.ArcName, &BootParameters.SystemPath);
+            if(Status != STATUS_EFI_SUCCESS)
+            {
+                /* Failed to find volume */
+                BlDebugPrint(L"ERROR: Failed to find volume device path (Status Code: 0x%lx)\n", Status);
+                return Status;
+            }
+        }
+        else if(RtlCompareWideStringInsensitive(Option->Name, L"KERNELFILE", 0) == 0)
+        {
+            /* Kernel file name found */
+            BootParameters.KernelFile = Option->Value;
+        }
+        else if(RtlCompareWideStringInsensitive(Option->Name, L"INITRDFILE", 0) == 0)
+        {
+            /* Initrd file name found */
+            BootParameters.InitrdFile = Option->Value;
+        }
+        else if(RtlCompareWideStringInsensitive(Option->Name, L"HALFILE", 0) == 0)
+        {
+            /* Hal file name found */
+            BootParameters.HalFile = Option->Value;
+        }
+        else if(RtlCompareWideStringInsensitive(Option->Name, L"PARAMETERS", 0) == 0)
+        {
+            /* Kernel parameters found */
+            BootParameters.Parameters = Option->Value;
+        }
+
+        /* Move to the next option entry */
+        OptionsListEntry = OptionsListEntry->Flink;
     }
 
-    /* Store ARC name in boot parameters */
-    Length = RtlStringLength(ArcName, 0);
-    BlEfiMemoryAllocatePool(Length + 1, (PVOID *)&BootParameters.ArcName);
-    RtlStringToWideString(BootParameters.ArcName, &ArcName, Length * 2);
+    /* Load all necessary modules */
+    Status = BlLoadModules(ModulesList);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to load modules, print error message and return status code */
+        BlDebugPrint(L"ERROR: Failed to load XTLDR modules (Status Code: 0x%lx)\n", Status);
+        return STATUS_EFI_NOT_READY;
+    }
 
-    /* Store system path in boot parameters */
-    Length = RtlStringLength(SystemPath, 0);
-    BlEfiMemoryAllocatePool(Length + 1, (PVOID *)&BootParameters.SystemPath);
-    RtlStringToWideString(BootParameters.SystemPath, &SystemPath, Length + 1);
+    /* Attempt to get boot protocol GUID */
+    Status = BlFindBootProtocol(BootParameters.SystemType, &BootProtocolGuid);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to get boot protocol GUID */
+        BlDebugPrint(L"ERROR: Unable to find appropriate boot protocol (Status Code: 0x%lx)\n", Status);
+        return STATUS_EFI_UNSUPPORTED;
+    }
 
-    /* Open the XT boot protocol */
-    Status = BlLoadXtProtocol((PVOID *)&BootProtocol, &ProtocolGuid);
+    /* Open boot protocol */
+    Status = BlOpenProtocol(&Handle, (PVOID *)&BootProtocol, &BootProtocolGuid);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to open boot protocol */
-        BlDbgPrint(L"ERROR: Unable to load boot protocol\n");
-        return STATUS_EFI_PROTOCOL_ERROR;
+        BlDebugPrint(L"ERROR: Failed to open boot protocol (Status Code: 0x%lx)\n", Status);
+        return Status;
     }
 
-    /* Boot operating system */
+    /* Boot Operating System */
     return BootProtocol->BootSystem(&BootParameters);
-}
-
-/**
- * This routine registers XTLDR protocol for further usage by modules.
- *
- * @return This routine returns status code.
- *
- * @since XT 1.0
- */
-XTCDECL
-EFI_STATUS
-BlRegisterXtLoaderProtocol()
-{
-    EFI_GUID Guid = XT_BOOT_LOADER_PROTOCOL_GUID;
-    EFI_HANDLE Handle = NULL;
-
-    /* Set all routines available via loader protocol */
-    EfiLdrProtocol.AddVirtualMemoryMapping = BlAddVirtualMemoryMapping;
-    EfiLdrProtocol.AllocatePages = BlEfiMemoryAllocatePages;
-    EfiLdrProtocol.AllocatePool = BlEfiMemoryAllocatePool;
-    EfiLdrProtocol.FreePages = BlEfiMemoryFreePages;
-    EfiLdrProtocol.FreePool = BlEfiMemoryFreePool;
-    EfiLdrProtocol.EnablePaging = BlEnablePaging;
-    EfiLdrProtocol.GetMemoryMap = BlGetMemoryMap;
-    EfiLdrProtocol.GetVirtualAddress = BlGetVirtualAddress;
-    EfiLdrProtocol.InitializeVirtualMemory = BlInitializeVirtualMemory;
-    EfiLdrProtocol.MapVirtualMemory = BlMapVirtualMemory;
-    EfiLdrProtocol.DbgPrint = BlDbgPrint;
-    EfiLdrProtocol.EfiPrint = BlEfiPrint;
-    EfiLdrProtocol.CloseVolume = BlCloseVolume;
-    EfiLdrProtocol.OpenVolume = BlOpenVolume;
-
-    /* Register loader protocol */
-    BlDbgPrint(L"Registering XT loader protocol\n");
-    return EfiSystemTable->BootServices->InstallProtocolInterface(&Handle, &Guid, EFI_NATIVE_INTERFACE,
-                                                                  &EfiLdrProtocol);
 }
 
 /**
@@ -327,71 +300,101 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
     EfiImageHandle = ImageHandle;
     EfiSystemTable = SystemTable;
 
-    /* Initialize EFI console */
-    BlConsoleInitialize();
-    BlEfiPrint(L"XTLDR boot loader v%s\n", XTOS_VERSION);
+    /* Initialize XTLDR and */
+    BlInitializeBootLoader();
 
-    /* Early initialize COM port for debugging */
+    /* Parse configuration options passed from UEFI shell */
+    Status = BlpParseCommandLine();
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to parse command line options */
+        BlDisplayErrorDialog(L"XTLDR", L"Failed to parse command line parameters.");
+    }
+
+    /* Attempt to early initialize debug console */
     if(DEBUG)
     {
-        Status = BlComPortInitialize();
+        Status = BlpInitializeDebugConsole();
         if(Status != STATUS_EFI_SUCCESS)
         {
-            /* Initialization failed, try printing error to stdout and serial console */
-            BlEfiPrint(L"ERROR: Failed to initialize serial console\n");
+            /* Initialization failed, notify user on stdout */
+            BlDisplayErrorDialog(L"XTLDR", L"Failed to initialize debug console.");
         }
     }
 
-    /* Check SecureBoot status */
-    EfiSecureBoot = BlEfiGetSecureBootStatus();
+    /* Load XTLDR configuration file */
+    Status = BlpLoadConfiguration();
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to load/parse config file */
+        BlDisplayErrorDialog(L"XTLDR", L"Failed to load and parse configuration file ");
+    }
 
-    /* Print firmware information */
-    BlDbgPrint(L"UEFI v%d.%d (%S 0x%08x), SecureBoot %S\n", EfiSystemTable->Hdr.Revision >> 16,
-               EfiSystemTable->Hdr.Revision & 0xFFFF, EfiSystemTable->FirmwareVendor, EfiSystemTable->FirmwareRevision,
-               EfiSecureBoot == 0 ? L"DISABLED" : EfiSecureBoot > 0 ? L"ENABLED" : L"SETUP");
+    /* Reinitialize debug console if it was not initialized earlier */
+    if(DEBUG)
+    {
+        Status = BlpInitializeDebugConsole();
+        if(Status != STATUS_EFI_SUCCESS)
+        {
+            /* Initialization failed, notify user on stdout */
+            BlDisplayErrorDialog(L"XTLDR", L"Failed to initialize debug console.");
+        }
+    }
 
     /* Disable watchdog timer */
     Status = EfiSystemTable->BootServices->SetWatchdogTimer(0, 0x10000, 0, NULL);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to disable the timer, print message */
-        BlDbgPrint(L"WARNING: Failed to disable watchdog timer\n");
+        BlDebugPrint(L"WARNING: Failed to disable watchdog timer (Status Code: 0x%lx)\n", Status);
     }
 
-    /* Register loader protocol */
-    Status = BlRegisterXtLoaderProtocol();
+    /* Install loader protocol */
+    Status = BlpInstallXtLoaderProtocol();
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to register loader protocol */
-        BlDbgPrint(L"ERROR: Failed to register XTLDR loader protocol\n");
+        BlDebugPrint(L"ERROR: Failed to register XTLDR loader protocol (Status Code: 0x%lx)\n", Status);
+        return Status;
     }
 
-    /* Load XTLDR modules */
-    Status = BlLoadEfiModules();
+    /* Load boot loader modules */
+    Status = BlLoadModules(BlGetConfigValue(L"MODULES"));
     if(Status != STATUS_EFI_SUCCESS)
     {
-        BlDbgPrint(L"ERROR: Failed to load XTLDR modules\n");
+        /* Failed to load modules */
+        BlDebugPrint(L"ERROR: Failed to load XTLDR modules (Status Code: 0x%lx)\n", Status);
+        BlDisplayErrorDialog(L"XTLDR", L"Failed to load some XTLDR modules.");
     }
 
     /* Discover and enumerate EFI block devices */
-    BlEnumerateEfiBlockDevices();
-
-    /* Boot XTOS */
-    Status = BlLoadXtSystem();
+    Status = BlEnumerateBlockDevices();
     if(Status != STATUS_EFI_SUCCESS)
     {
-        /* Boot process failed */
-        BlEfiPrint(L"Failed to start XT OS (Status code: %lx)!\n", Status);
+        /* Failed to enumerate block devices */
+        BlDebugPrint(L"ERROR: Failed to discover and enumerate block devices (Status Code: 0x%lx)\n", Status);
+        return Status;
     }
 
-    /* Infinite bootloader loop */
-    BlEfiPrint(L"System halted!");
-    for(;;)
+    /* Main boot loader loop */
+    while(TRUE)
     {
-        ArClearInterruptFlag();
-        ArHalt();
+        /* Check if custom boot menu registered */
+        if(BlpStatus.BootMenu != NULL)
+        {
+            /* Display alternative boot menu */
+            BlpStatus.BootMenu();
+        }
+        else
+        {
+            /* Display default boot menu */
+            BlDisplayBootMenu();
+        }
+
+        /* Fallback to shell, if boot menu returned */
+        BlStartLoaderShell();
     }
 
-    /* Return success */
-    return STATUS_EFI_SUCCESS;
+    /* This point should be never reached, if this happen return error code */
+    return STATUS_EFI_LOAD_ERROR;
 }

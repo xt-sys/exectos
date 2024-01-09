@@ -1,4 +1,4 @@
-## XT Loader (XTLDR)
+## XT Boot Loader (XTLDR)
 The XTLDR, or XTOS Boot Loader, is an EFI (Extensible Firmware Interface) boot loader specifically designed for XTOS.
 As an EFI boot loader, XTLDR operates exclusively with EFI-based hardware and is not compatible with non-EFI systems,
 like old and deprecated BIOS.

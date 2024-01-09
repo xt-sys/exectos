@@ -2,73 +2,17 @@
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
  * FILE:            xtldr/string.c
- * DESCRIPTION:     EFI string operations support
+ * DESCRIPTION:     EFI string manipulation support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtbl.h>
+#include <xtldr.h>
 
-
-/**
- * Compares two strings without sensitivity to case.
- *
- * @param String1
- *        First string to be compared.
- *
- * @param String2
- *        Second string to be compared.
- *
- * @return This routine returns a value indicating the relationship between the two strings.
- *
- * @since XT 1.0
- */
-XTCDECL
-INT
-BlStringCompareInsensitive(IN PUCHAR String1,
-                           IN PUCHAR String2)
-{
-    UCHAR Character1;
-    UCHAR Character2;
-    ULONG Index = 0;
-
-    /* Iterate through the strings */
-    while(String1[Index] != '\0' && String2[Index] != '\0')
-    {
-        /* Get the characters */
-        Character1 = String1[Index];
-        Character2 = String2[Index];
-
-        /* Lowercase string1 character if needed */
-        if(String1[Index] >= 'A' && String1[Index] <= 'Z')
-        {
-            Character1 = String1[Index] - 'A' + 'a';
-        }
-
-        /* Lowercase string2 character if needed */
-        if(String2[Index] >= 'A' && String2[Index] <= 'Z')
-        {
-            Character2 = String2[Index] - 'A' + 'a';
-        }
-
-        /* Compare the characters */
-        if(Character1 != Character2)
-        {
-            /* Strings are not equal */
-            return Character1 > Character2 ? 1 : -1;
-        }
-
-        /* Get next character */
-        Index++;
-    }
-
-    /* Strings are equal */
-    return 0;
-}
 
 /**
  * This routine formats the input string and prints it using specified routine.
  *
- * @param PutChar
+ * @param PrintCharRoutine
  *        Pointer to the routine that writes an input data to specific device.
  *
  * @param Format
@@ -83,9 +27,9 @@ BlStringCompareInsensitive(IN PUCHAR String1,
  */
 XTCDECL
 VOID
-BlStringPrint(IN VOID PutChar(IN USHORT Character),
-              IN PUINT16 Format,
-              IN VA_LIST Arguments)
+BlpStringPrint(IN IN BLPRINTCHAR PrintCharRoutine,
+               IN PUINT16 Format,
+               IN VA_LIST Arguments)
 {
     PEFI_GUID Guid;
     PUCHAR String;
@@ -102,20 +46,20 @@ BlStringPrint(IN VOID PutChar(IN USHORT Character),
                 {
                     case L'b':
                         /* Boolean */
-                        BlpStringFormat(PutChar, L"%s", VA_ARG(Arguments, INT32) ? "TRUE" : "FALSE");
+                        BlpStringFormat(PrintCharRoutine, L"%s", VA_ARG(Arguments, INT32) ? "TRUE" : "FALSE");
                         break;
                     case L'c':
                         /* Character */
-                        PutChar(VA_ARG(Arguments, INT));
+                        PrintCharRoutine(VA_ARG(Arguments, INT));
                         break;
                     case L'd':
                         /* Signed 32-bit integer */
-                        BlpStringPrintSigned32(PutChar, VA_ARG(Arguments, INT32), 10);
+                        BlpStringPrintSigned32(PrintCharRoutine, VA_ARG(Arguments, INT32), 10);
                         break;
                     case L'g':
                         /* EFI GUID */
                         Guid = VA_ARG(Arguments, PEFI_GUID);
-                        BlpStringFormat(PutChar, L"%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x", Guid->Data1,
+                        BlpStringFormat(PrintCharRoutine, L"%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x", Guid->Data1,
                                         Guid->Data2, Guid->Data3, Guid->Data4[0], Guid->Data4[1], Guid->Data4[2],
                                         Guid->Data4[3], Guid->Data4[4], Guid->Data4[5], Guid->Data4[6], Guid->Data4[7]);
                         break;
@@ -125,48 +69,48 @@ BlStringPrint(IN VOID PutChar(IN USHORT Character),
                         {
                             case L'd':
                                 /* Signed 64-bit integer */
-                                BlpStringPrintSigned64(PutChar, VA_ARG(Arguments, INT_PTR), 10);
+                                BlpStringPrintSigned64(PrintCharRoutine, VA_ARG(Arguments, INT_PTR), 10);
                                 break;
                             case L'u':
                                 /* Unsigned 64-bit integer */
-                                BlpStringPrintUnsigned64(PutChar, VA_ARG(Arguments, UINT_PTR), 10, 0);
+                                BlpStringPrintUnsigned64(PrintCharRoutine, VA_ARG(Arguments, UINT_PTR), 10, 0);
                                 break;
                             case L'x':
                                 /* Unsigned 64-bit hexadecimal integer */
-                                BlpStringPrintUnsigned64(PutChar, VA_ARG(Arguments, UINT_PTR), 16, 0);
+                                BlpStringPrintUnsigned64(PrintCharRoutine, VA_ARG(Arguments, UINT_PTR), 16, 0);
                                 break;
                             default:
                                 /* Unknown by default */
-                                PutChar(L'?');
+                                PrintCharRoutine(L'?');
                                 break;
                         }
                         break;
                     case L'p':
                         /* Pointer address */
-                        BlpStringPrintUnsigned64(PutChar, VA_ARG(Arguments, UINT_PTR), 16, 0);
+                        BlpStringPrintUnsigned64(PrintCharRoutine, VA_ARG(Arguments, UINT_PTR), 16, 0);
                         break;
                     case L's':
                         /* String of characters */
                         String = VA_ARG(Arguments, PUCHAR);
                         while(*String)
                         {
-                            PutChar(*String++);
+                            PrintCharRoutine(*String++);
                         }
                         break;
                     case L'S':
                         WideString = VA_ARG(Arguments, PWCHAR);
                         while(*WideString)
                         {
-                            PutChar((UCHAR)*WideString++);
+                            PrintCharRoutine((UCHAR)*WideString++);
                         }
                         break;
                     case L'u':
                         /* Unsigned 32-bit integer */
-                        BlpStringPrintUnsigned32(PutChar, VA_ARG(Arguments, UINT32), 10, 0);
+                        BlpStringPrintUnsigned32(PrintCharRoutine, VA_ARG(Arguments, UINT32), 10, 0);
                         break;
                     case L'x':
                         /* Unsigned 32-bit hexadecimal integer */
-                        BlpStringPrintUnsigned32(PutChar, VA_ARG(Arguments, UINT32), 16, 0);
+                        BlpStringPrintUnsigned32(PrintCharRoutine, VA_ARG(Arguments, UINT32), 16, 0);
                         break;
                     case L'0':
                         /* Zero padded numbers */
@@ -176,7 +120,7 @@ BlStringPrint(IN VOID PutChar(IN USHORT Character),
                         {
                             case L'd':
                                 /* Zero-padded, signed 32-bit integer */
-                                BlpStringPrintSigned32(PutChar, VA_ARG(Arguments, INT32), 10);
+                                BlpStringPrintSigned32(PrintCharRoutine, VA_ARG(Arguments, INT32), 10);
                                 break;
                             case L'l':
                                 /* 64-bit numbers */
@@ -184,43 +128,43 @@ BlStringPrint(IN VOID PutChar(IN USHORT Character),
                                 {
                                     case L'd':
                                         /* Zero-padded, signed 64-bit integer */
-                                        BlpStringPrintSigned64(PutChar, VA_ARG(Arguments, INT_PTR), 10);
+                                        BlpStringPrintSigned64(PrintCharRoutine, VA_ARG(Arguments, INT_PTR), 10);
                                         break;
                                     case L'u':
                                         /* Zero-padded, unsigned 64-bit integer */
-                                        BlpStringPrintUnsigned64(PutChar, VA_ARG(Arguments, UINT_PTR), 10, PaddingCount);
+                                        BlpStringPrintUnsigned64(PrintCharRoutine, VA_ARG(Arguments, UINT_PTR), 10, PaddingCount);
                                         break;
                                     case L'x':
                                         /* Zero-padded, unsigned  64-bit hexadecimal integer */
-                                        BlpStringPrintUnsigned64(PutChar, VA_ARG(Arguments, UINT_PTR), 16, PaddingCount);
+                                        BlpStringPrintUnsigned64(PrintCharRoutine, VA_ARG(Arguments, UINT_PTR), 16, PaddingCount);
                                         break;
                                     default:
                                         /* Unknown by default */
-                                        PutChar(L'?');
+                                        PrintCharRoutine(L'?');
                                         break;
                                 }
                                 break;
                             case L'u':
                                 /* Zero-padded, unsigned 32-bit integer */
-                                BlpStringPrintUnsigned32(PutChar, VA_ARG(Arguments, UINT32), 10, PaddingCount);
+                                BlpStringPrintUnsigned32(PrintCharRoutine, VA_ARG(Arguments, UINT32), 10, PaddingCount);
                                 break;
                             case L'x':
                                 /* Zero-padded, unsigned 32-bit hexadecimal integer */
-                                BlpStringPrintUnsigned32(PutChar, VA_ARG(Arguments, UINT32), 16, PaddingCount);
+                                BlpStringPrintUnsigned32(PrintCharRoutine, VA_ARG(Arguments, UINT32), 16, PaddingCount);
                                 break;
                             default:
                                 /* Unknown by default */
-                                PutChar(L'?');
+                                PrintCharRoutine(L'?');
                                 break;
                         }
                         break;
                     case L'%':
                         /* Percent character */
-                        PutChar(L'%');
+                        PrintCharRoutine(L'%');
                         break;
                     default:
                         /* Unknown by default */
-                        PutChar(L'?');
+                        PrintCharRoutine(L'?');
                         break;
                 }
                 break;
@@ -229,12 +173,12 @@ BlStringPrint(IN VOID PutChar(IN USHORT Character),
                 break;
             case L'\n':
                 /* New line together with carriage return */
-                PutChar(L'\r');
-                PutChar(L'\n');
+                PrintCharRoutine(L'\r');
+                PrintCharRoutine(L'\n');
                 break;
             default:
                 /* Put character by default */
-                PutChar(*Format);
+                PrintCharRoutine(*Format);
                 break;
         }
     }
@@ -243,7 +187,7 @@ BlStringPrint(IN VOID PutChar(IN USHORT Character),
 /**
  * This routine formats the input string and prints it using specified routine.
  *
- * @param PutChar
+ * @param PrintCharRoutine
  *        Pointer to the routine that writes an input data to specific device.
  *
  * @param Format
@@ -258,7 +202,7 @@ BlStringPrint(IN VOID PutChar(IN USHORT Character),
  */
 XTCDECL
 VOID
-BlpStringFormat(IN VOID PutChar(IN USHORT Character),
+BlpStringFormat(IN BLPRINTCHAR PrintCharRoutine,
                 IN PUINT16 Format,
                 IN ...)
 {
@@ -268,7 +212,7 @@ BlpStringFormat(IN VOID PutChar(IN USHORT Character),
     VA_START(Arguments, Format);
 
     /* Format and print the string to the desired output */
-    BlStringPrint(PutChar, Format, Arguments);
+    BlpStringPrint(PrintCharRoutine, Format, Arguments);
 
     /* Clean up the va_list */
     VA_END(Arguments);
@@ -277,7 +221,7 @@ BlpStringFormat(IN VOID PutChar(IN USHORT Character),
 /**
  * This routine converts 32-bit integer as string and prints it using specified routine.
  *
- * @param PutChar
+ * @param PrintCharRoutine
  *        Pointer to the routine that writes an input data to specific device.
  *
  * @param Number
@@ -292,25 +236,25 @@ BlpStringFormat(IN VOID PutChar(IN USHORT Character),
  */
 XTCDECL
 VOID
-BlpStringPrintSigned32(IN VOID PutChar(IN USHORT Character),
-                       IN INT32 Number,
-                       IN UINT32 Base)
+BlpStringPrintSigned32(IN BLPRINTCHAR PrintCharRoutine,
+                       IN INT Number,
+                       IN UINT Base)
 {
     /* Print - (minus) if this is negative value */
     if(Number < 0)
     {
-        PutChar(L'-');
+        PrintCharRoutine(L'-');
         Number *= -1;
     }
 
     /* Print the integer value */
-    BlpStringPrintUnsigned32(PutChar, Number, Base, 0);
+    BlpStringPrintUnsigned32(PrintCharRoutine, Number, Base, 0);
 }
 
 /**
  * This routine converts 64-bit integer as string and prints it using specified routine.
  *
- * @param PutChar
+ * @param PrintCharRoutine
  *        Pointer to the routine that writes an input data to specific device.
  *
  * @param Number
@@ -325,25 +269,25 @@ BlpStringPrintSigned32(IN VOID PutChar(IN USHORT Character),
  */
 XTCDECL
 VOID
-BlpStringPrintSigned64(IN VOID PutChar(IN USHORT Character),
+BlpStringPrintSigned64(IN BLPRINTCHAR PrintCharRoutine,
                        IN INT_PTR Number,
                        IN UINT_PTR Base)
 {
     /* Print - (minus) if this is negative value */
     if(Number < 0)
     {
-        PutChar(L'-');
+        PrintCharRoutine(L'-');
         Number *= -1;
     }
 
     /* Print the integer value */
-    BlpStringPrintUnsigned64(PutChar, Number, Base, 0);
+    BlpStringPrintUnsigned64(PrintCharRoutine, Number, Base, 0);
 }
 
 /**
  * This routine converts 32-bit unsigned integer as string and prints it using specified routine.
  *
- * @param PutChar
+ * @param PrintCharRoutine
  *        Pointer to the routine that writes an input data to specific device.
  *
  * @param Number
@@ -361,23 +305,27 @@ BlpStringPrintSigned64(IN VOID PutChar(IN USHORT Character),
  */
 XTCDECL
 VOID
-BlpStringPrintUnsigned32(IN VOID PutChar(IN USHORT Character),
-                         IN UINT32 Number,
-                         IN UINT32 Base,
-                         IN UINT32 Padding)
+BlpStringPrintUnsigned32(IN BLPRINTCHAR PrintCharRoutine,
+                         IN UINT Number,
+                         IN UINT Base,
+                         IN UINT Padding)
 {
-    UINT32 Buffer[20];
-    PUINT32 Pointer = Buffer + ARRAY_SIZE(Buffer);
+    UINT Buffer[20];
+    UINT NumberLength;
+    PUINT Pointer;
+
+    /* Set pointer to the end of buffer */
+    Pointer = Buffer + ARRAY_SIZE(Buffer);
 
     /* Convert value to specified base system */
     *--Pointer = 0;
     do
     {
-        *--Pointer = EfiHexTable[Number % Base];
+        *--Pointer = BlpHexTable[Number % Base];
     } while(Pointer >= Buffer && (Number /= Base));
 
     /* Calculate number length */
-    UINT32 NumberLength = ARRAY_SIZE(Buffer) - (Pointer - Buffer) - 1;
+    NumberLength = ARRAY_SIZE(Buffer) - (Pointer - Buffer) - 1;
 
     /* Check if leading zeros are needed */
     if(NumberLength < Padding)
@@ -386,21 +334,21 @@ BlpStringPrintUnsigned32(IN VOID PutChar(IN USHORT Character),
         while(Padding--)
         {
             /* Write leading zeroes */
-            PutChar(L'0');
+            PrintCharRoutine(L'0');
         }
     }
 
     /* Print value to the console */
     for(; *Pointer; ++Pointer)
     {
-        PutChar(*Pointer);
+        PrintCharRoutine(*Pointer);
     }
 }
 
 /**
  * This routine converts 64-bit unsigned integer as string and prints it using specified routine.
  *
- * @param PutChar
+ * @param PrintCharRoutine
  *        Pointer to the routine that writes an input data to specific device.
  *
  * @param Number
@@ -418,23 +366,27 @@ BlpStringPrintUnsigned32(IN VOID PutChar(IN USHORT Character),
  */
 XTCDECL
 VOID
-BlpStringPrintUnsigned64(IN VOID PutChar(IN USHORT Character),
+BlpStringPrintUnsigned64(IN BLPRINTCHAR PrintCharRoutine,
                          IN UINT_PTR Number,
                          IN UINT_PTR Base,
                          IN UINT_PTR Padding)
 {
     UINT16 Buffer[20];
-    PUINT16 Pointer = Buffer + ARRAY_SIZE(Buffer);
+    UINT_PTR NumberLength;
+    PUINT16 Pointer;
+
+    /* Set pointer to the end of buffer */
+    Pointer = Buffer + ARRAY_SIZE(Buffer);
 
     /* Convert value to specified base system */
     *--Pointer = 0;
     do
     {
-        *--Pointer = EfiHexTable[Number % Base];
+        *--Pointer = BlpHexTable[Number % Base];
     } while(Pointer >= Buffer && (Number /= Base));
 
     /* Calculate number length */
-    UINT_PTR NumberLength = ARRAY_SIZE(Buffer) - (Pointer - Buffer) - 1;
+    NumberLength = ARRAY_SIZE(Buffer) - (Pointer - Buffer) - 1;
 
     /* Check if leading zeros are needed */
     if(NumberLength < Padding)
@@ -443,14 +395,14 @@ BlpStringPrintUnsigned64(IN VOID PutChar(IN USHORT Character),
         while(Padding--)
         {
             /* Write leading zeroes */
-            PutChar(L'0');
+            PrintCharRoutine(L'0');
         }
     }
 
     /* Print value to the console */
     for(; *Pointer; ++Pointer)
     {
-        PutChar(*Pointer);
+        PrintCharRoutine(*Pointer);
     }
 }
 

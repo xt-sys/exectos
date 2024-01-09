@@ -29,4 +29,7 @@
 #define XTOS_COMPILER_NAME               "@CMAKE_C_COMPILER_ID@"
 #define XTOS_COMPILER_VERSION            "@CMAKE_C_COMPILER_VERSION@"
 
+#define XTLDR_VERSION_MAJOR              @XTLDR_VERSION_MAJOR@
+#define XTLDR_VERSION_MINOR              @XTLDR_VERSION_MINOR@
+
 #endif /* __XTGEN_XTVER_H */

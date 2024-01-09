@@ -1,3 +1,5 @@
-add_subdirectory(framebuf)
-add_subdirectory(pecoff)
-add_subdirectory(xtos)
+add_subdirectory(beep)
+add_subdirectory(dummy)
+add_subdirectory(fb_o)
+add_subdirectory(pecoff_o)
+add_subdirectory(xtos_o)
