@@ -7,14 +7,14 @@
 
 ## ExectOS Information
  - ExectOS Version (or commit ref):
- - System Architecture (eg. i686, amd64...):
+ - System Architecture (eg. i686, amd64, ...):
  - Hypervisor Information (use `[X]`):
    - [ ] Bare metal
    - [ ] Bochs
    - [ ] Hyper-V
    - [ ] Qemu (KVM)
+   - [ ] Qemu (TCG)
    - [ ] VirtualBox
-   - [ ] VirtualPC
    - [ ] VmWare
    - [ ] Other
 
