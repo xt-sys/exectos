@@ -37,7 +37,6 @@ XtEnablePaging(IN PLIST_ENTRY MemoryMappings,
 {
     PLOADER_MEMORY_MAPPING Mapping;
     EFI_PHYSICAL_ADDRESS Address;
-    PEFI_MEMORY_MAP MemoryMap;
     PLIST_ENTRY ListEntry, ModulesList, ModulesListEntry;
     PXTBL_MODULE_INFO ModuleInfo;
     EFI_STATUS Status;
@@ -120,39 +119,12 @@ XtEnablePaging(IN PLIST_ENTRY MemoryMappings,
     /* Map zero page as well */
     XtMapVirtualMemory(MemoryMappings, 0, 0, 1, PtePointer);
 
-    /* Allocate and zero-fill buffer for EFI memory map */
-    XtLdrProtocol->Memory.AllocatePool(sizeof(EFI_MEMORY_MAP), (PVOID*)&MemoryMap);
-    RtlZeroMemory(MemoryMap, sizeof(EFI_MEMORY_MAP));
-
-    /* Get EFI memory map and prepare for exiting boot services */
-    XtLdrProtocol->Debug.Print(L"Exiting EFI boot services\n");
-    Status = XtLdrProtocol->Memory.GetMemoryMap(MemoryMap);
-    if(Status != STATUS_EFI_SUCCESS)
-    {
-        /* Unable to get memory map */
-        return Status;
-    }
-
     /* Exit EFI Boot Services */
-    Status = XtLdrProtocol->Util.ExitBootServices(MemoryMap->MapKey);
-
-    /* Check if exitted boot services successfully */
+    XtLdrProtocol->Debug.Print(L"Exiting EFI boot services\n");
+    Status = XtLdrProtocol->Util.ExitBootServices();
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to exit boot services */
-        Status = XtLdrProtocol->Memory.GetMemoryMap(MemoryMap);
-        if(Status != STATUS_EFI_SUCCESS)
-        {
-            /* Unable to get memory map */
-            return Status;
-        }
-
-        Status = XtLdrProtocol->Util.ExitBootServices(MemoryMap->MapKey);
-    }
-
-    /* Check if exitted boot services successfully */
-    if(Status != STATUS_EFI_SUCCESS)
-    {
         XtLdrProtocol->Console.Print(L"Failed to exit boot services (Status code: %lx)\n", Status);
         return STATUS_EFI_ABORTED;
     }

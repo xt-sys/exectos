@@ -85,7 +85,7 @@ BlEnumerateBlockDevices();
 
 XTCDECL
 EFI_STATUS
-BlExitBootServices(IN UINT_PTR MapKey);
+BlExitBootServices();
 
 XTCDECL
 EFI_STATUS

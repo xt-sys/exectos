@@ -12,32 +12,54 @@
 /**
  * Exits EFI boot services.
  *
- * @param MapKey
- *        Identifies the current memory map of the system.
- *
  * @return This routine returns status code.
  *
  * @since XT 1.0
  */
 XTCDECL
 EFI_STATUS
-BlExitBootServices(IN UINT_PTR MapKey)
+BlExitBootServices()
 {
+    PEFI_MEMORY_MAP MemoryMap;
     EFI_STATUS Status;
+    ULONG Counter;
 
-    /* Attempt to exit boot services */
-    Status = EfiSystemTable->BootServices->ExitBootServices(EfiImageHandle, MapKey);
+    /* Boot Services might be partially shutdown, so mark them as unavailable */
+    BlpStatus.BootServices = FALSE;
+
+    /* Allocate buffer for EFI memory map */
+    Status = BlMemoryAllocatePool(sizeof(EFI_MEMORY_MAP), (PVOID*)&MemoryMap);
     if(Status != STATUS_EFI_SUCCESS)
     {
-        /* Retry as UEFI spec says to do it twice */
-        Status = EfiSystemTable->BootServices->ExitBootServices(EfiImageHandle, MapKey);
+        /* Memory allocation failure */
+        BlDebugPrint(L"ERROR: Memory allocation failure (Status Code: 0x%lx)\n", Status);
+        return Status;
     }
 
-    /* Make sure boot services were successfully exited */
-    if(Status == STATUS_EFI_SUCCESS)
+    /* Zero fill the buffer and initialize counter */
+    RtlZeroMemory(MemoryMap, sizeof(EFI_MEMORY_MAP));
+    Counter = 0xFF;
+
+    /* Attempt to exit boot services */
+    while(Counter > 0)
     {
-        /* Mark EFI Boot Services as no longer available */
-        BlpStatus.BootServices = FALSE;
+        /* Get memory map each time as it can change between two calls */
+        Status = BlGetMemoryMap(MemoryMap);
+        if(Status != STATUS_EFI_SUCCESS)
+        {
+            /* Failed to get new memory map */
+            return Status;
+        }
+
+        /* Exit boot services */
+        Status = EfiSystemTable->BootServices->ExitBootServices(EfiImageHandle, MemoryMap->MapKey);
+        if(Status == STATUS_EFI_SUCCESS)
+        {
+            break;
+        }
+
+        /* Decrement counter */
+        Counter--;
     }
 
     /* Return EFI status code */

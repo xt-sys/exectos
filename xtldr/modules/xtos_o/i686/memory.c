@@ -218,36 +218,9 @@ XtEnablePaging(IN PLIST_ENTRY MemoryMappings,
     /* Map zero page as well */
     XtMapVirtualMemory(MemoryMappings, 0, 0, 1, PtePointer);
 
-    /* Zero-fill buffer for EFI memory map */
-    RtlZeroMemory(MemoryMap, sizeof(EFI_MEMORY_MAP));
-
-    /* Get EFI memory map and prepare for exiting boot services */
-    XtLdrProtocol->Debug.Print(L"Exiting EFI boot services\n");
-    Status = XtLdrProtocol->Memory.GetMemoryMap(MemoryMap);
-    if(Status != STATUS_EFI_SUCCESS)
-    {
-        /* Unable to get memory map */
-        return Status;
-    }
-
     /* Exit EFI Boot Services */
-    Status = XtLdrProtocol->Util.ExitBootServices(MemoryMap->MapKey);
-
-    /* Check if exitted boot services successfully */
-    if(Status != STATUS_EFI_SUCCESS)
-    {
-        /* Failed to exit boot services */
-        Status = XtLdrProtocol->Memory.GetMemoryMap(MemoryMap);
-        if(Status != STATUS_EFI_SUCCESS)
-        {
-            /* Unable to get memory map */
-            return Status;
-        }
-
-        Status = XtLdrProtocol->Util.ExitBootServices(MemoryMap->MapKey);
-    }
-
-    /* Check if exitted boot services successfully */
+    XtLdrProtocol->Debug.Print(L"Exiting EFI boot services\n");
+    Status = XtLdrProtocol->Util.ExitBootServices();
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to exit boot services */
