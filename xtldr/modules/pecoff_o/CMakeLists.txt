@@ -14,7 +14,7 @@ list(APPEND XTLDR_PECOFF_O_SOURCE
 add_executable(pecoff_o ${XTLDR_PECOFF_O_SOURCE})
 
 # Add linker libraries
-target_link_libraries(pecoff_o libxtos libxtldr)
+target_link_libraries(pecoff_o libxtldr)
 
 # Set proper binary name and install target
 set_target_properties(pecoff_o PROPERTIES SUFFIX .efi)

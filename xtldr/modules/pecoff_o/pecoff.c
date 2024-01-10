@@ -283,7 +283,7 @@ PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
     }
 
     /* Copy all sections */
-    RtlCopyMemory(ImageData->Data, Data, ImageData->PeHeader->OptionalHeader.SizeOfHeaders);
+    XtLdrProtocol->Memory.CopyMemory(ImageData->Data, Data, ImageData->PeHeader->OptionalHeader.SizeOfHeaders);
 
     /* Find section header */
     SectionHeader = (PPECOFF_IMAGE_SECTION_HEADER)((PUCHAR)&ImageData->PeHeader->OptionalHeader +
@@ -308,16 +308,16 @@ PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
         if(SectionSize > 0 && SectionHeader[Index].PointerToRawData != 0)
         {
             /* Copy section */
-            RtlCopyMemory((PUINT8)ImageData->Data + SectionHeader[Index].VirtualAddress,
-                          Data + SectionHeader[Index].PointerToRawData, SectionSize);
+            XtLdrProtocol->Memory.CopyMemory((PUINT8)ImageData->Data + SectionHeader[Index].VirtualAddress,
+                                             Data + SectionHeader[Index].PointerToRawData, SectionSize);
         }
 
         /* Check if raw size is shorter than virtual size */
         if(SectionSize < SectionHeader[Index].Misc.VirtualSize)
         {
             /* Fill remaining space with zeroes */
-            RtlZeroMemory((PUINT8)ImageData->Data + SectionHeader[Index].VirtualAddress + SectionSize,
-                         SectionHeader[Index].Misc.VirtualSize - SectionSize);
+            XtLdrProtocol->Memory.ZeroMemory((PUINT8)ImageData->Data + SectionHeader[Index].VirtualAddress + SectionSize,
+                                             SectionHeader[Index].Misc.VirtualSize - SectionSize);
         }
     }
 
