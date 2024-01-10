@@ -578,9 +578,12 @@ BlpInstallXtLoaderProtocol()
     BlpLdrProtocol.Disk.ReadFile = BlReadFile;
     BlpLdrProtocol.Memory.AllocatePages = BlMemoryAllocatePages;
     BlpLdrProtocol.Memory.AllocatePool = BlMemoryAllocatePool;
+    BlpLdrProtocol.Memory.CopyMemory = RtlCopyMemory;
     BlpLdrProtocol.Memory.FreePages = BlMemoryFreePages;
     BlpLdrProtocol.Memory.FreePool = BlMemoryFreePool;
     BlpLdrProtocol.Memory.GetMemoryMap = BlGetMemoryMap;
+    BlpLdrProtocol.Memory.SetMemory = RtlSetMemory;
+    BlpLdrProtocol.Memory.ZeroMemory = RtlZeroMemory;
     BlpLdrProtocol.Protocol.Close = BlCloseProtocol;
     BlpLdrProtocol.Protocol.GetModulesList = BlGetModulesList;
     BlpLdrProtocol.Protocol.Open = BlOpenProtocol;
