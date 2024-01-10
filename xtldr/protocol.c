@@ -223,7 +223,7 @@ BlLoadModule(IN PWCHAR ModuleName)
 
     /* Setup PE/COFF EFI image headers */
     DosHeader = (PPECOFF_IMAGE_DOS_HEADER)ModuleData;
-    PeHeader = (PPECOFF_IMAGE_PE_HEADER)(ModuleData + DosHeader->e_lfanew);
+    PeHeader = (PPECOFF_IMAGE_PE_HEADER)(ModuleData + DosHeader->PeHeaderOffset);
     SectionHeader = (PPECOFF_IMAGE_SECTION_HEADER)((PUCHAR)&PeHeader->OptionalHeader +
                                                    PeHeader->FileHeader.SizeOfOptionalHeader);
 

@@ -231,7 +231,7 @@ PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
 
     /* Extract DOS and PE headers */
     ImageData->DosHeader = (PPECOFF_IMAGE_DOS_HEADER)Data;
-    ImageData->PeHeader = (PPECOFF_IMAGE_PE_HEADER)((PUINT8)Data + ImageData->DosHeader->e_lfanew);
+    ImageData->PeHeader = (PPECOFF_IMAGE_PE_HEADER)((PUINT8)Data + ImageData->DosHeader->PeHeaderOffset);
 
     /* Validate headers */
     Status = PepValidateImageHeaders(ImageData->DosHeader, ImageData->PeHeader, ImageData->FileSize);
@@ -541,7 +541,7 @@ PepValidateImageHeaders(IN PPECOFF_IMAGE_DOS_HEADER DosHeader,
     }
 
     /* Validate DOS header */
-    if(DosHeader->e_magic != PECOFF_IMAGE_DOS_SIGNATURE)
+    if(DosHeader->Magic != PECOFF_IMAGE_DOS_SIGNATURE)
     {
         XtLdrProtocol->Debug.Print(L"WARNING: Invalid DOS signature found\n");
         return STATUS_EFI_INCOMPATIBLE_VERSION;
