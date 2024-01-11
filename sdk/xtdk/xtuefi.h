@@ -15,6 +15,51 @@
 #include <xtstruct.h>
 
 
+/* EFI ACPI Small Item Descriptor Name */
+#define EFI_ACPI_SMALL_IRQ_DESCRIPTOR_NAME                          0x04
+#define EFI_ACPI_SMALL_DMA_DESCRIPTOR_NAME                          0x05
+#define EFI_ACPI_SMALL_START_DEPENDENT_DESCRIPTOR_NAME              0x06
+#define EFI_ACPI_SMALL_END_DEPENDENT_DESCRIPTOR_NAME                0x07
+#define EFI_ACPI_SMALL_IO_PORT_DESCRIPTOR_NAME                      0x08
+#define EFI_ACPI_SMALL_FIXED_IO_PORT_DESCRIPTOR_NAME                0x09
+#define EFI_ACPI_SMALL_VENDOR_DEFINED_DESCRIPTOR_NAME               0x0E
+#define EFI_ACPI_SMALL_END_TAG_DESCRIPTOR_NAME                      0x0F
+
+/* EFI ACPI Large Item Descriptor Name */
+#define EFI_ACPI_LARGE_24_BIT_MEMORY_RANGE_DESCRIPTOR_NAME          0x01
+#define EFI_ACPI_LARGE_VENDOR_DEFINED_DESCRIPTOR_NAME               0x04
+#define EFI_ACPI_LARGE_32_BIT_MEMORY_RANGE_DESCRIPTOR_NAME          0x05
+#define EFI_ACPI_LARGE_32_BIT_FIXED_MEMORY_RANGE_DESCRIPTOR_NAME    0x06
+#define EFI_ACPI_LARGE_DWORD_ADDRESS_SPACE_DESCRIPTOR_NAME          0x07
+#define EFI_ACPI_LARGE_WORD_ADDRESS_SPACE_DESCRIPTOR_NAME           0x08
+#define EFI_ACPI_LARGE_EXTENDED_IRQ_DESCRIPTOR_NAME                 0x09
+#define EFI_ACPI_LARGE_QWORD_ADDRESS_SPACE_DESCRIPTOR_NAME          0x0A
+
+/* EFI ACPI Small Item Descriptor Values */
+#define EFI_ACPI_IRQ_NOFLAG_DESCRIPTOR                              0x22
+#define EFI_ACPI_IRQ_DESCRIPTOR                                     0x23
+#define EFI_ACPI_DMA_DESCRIPTOR                                     0x2A
+#define EFI_ACPI_START_DEPENDENT_DESCRIPTOR                         0x30
+#define EFI_ACPI_START_DEPENDENT_EX_DESCRIPTOR                      0x31
+#define EFI_ACPI_END_DEPENDENT_DESCRIPTOR                           0x38
+#define EFI_ACPI_IO_PORT_DESCRIPTOR                                 0x47
+#define EFI_ACPI_FIXED_LOCATION_IO_PORT_DESCRIPTOR                  0x4B
+#define EFI_ACPI_END_TAG_DESCRIPTOR                                 0x79
+
+/* EFI ACPI Large Item Descriptor Values */
+#define EFI_ACPI_24_BIT_MEMORY_RANGE_DESCRIPTOR                     0x81
+#define EFI_ACPI_32_BIT_MEMORY_RANGE_DESCRIPTOR                     0x85
+#define EFI_ACPI_32_BIT_FIXED_MEMORY_RANGE_DESCRIPTOR               0x86
+#define EFI_ACPI_ADDRESS32_SPACE_DESCRIPTOR                         0x87
+#define EFI_ACPI_ADDRESS16_SPACE_DESCRIPTOR                         0x88
+#define EFI_ACPI_EXTENDED_INTERRUPT_DESCRIPTOR                      0x89
+#define EFI_ACPI_ADDRESS64_SPACE_DESCRIPTOR                         0x8A
+
+/* EFI ACPI Resource Types */
+#define EFI_ACPI_ADDRESS_SPACE_TYPE_MEMORY                          0x00
+#define EFI_ACPI_ADDRESS_SPACE_TYPE_IO                              0x01
+#define EFI_ACPI_ADDRESS_SPACE_TYPE_BUS_NUMBER                      0x02
+
 /* EFI service signatures */
 #define EFI_BOOT_SERVICES_SIGNATURE                        0x56524553544f4f42
 #define EFI_RUNTIME_SERVICES_SIGNATURE                     0x56524553544e5552
