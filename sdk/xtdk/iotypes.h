@@ -170,21 +170,6 @@ typedef struct _PCI_COMMON_CONFIG
     UCHAR DeviceSpecific[192];
 } PCI_COMMON_CONFIG, *PPCI_COMMON_CONFIG;
 
-/* PCI device independent region structure */
-typedef struct _PCI_DEVICE_INDEPENDENT_REGION
-{
-    USHORT VendorId;
-    USHORT DeviceId;
-    USHORT Command;
-    USHORT Status;
-    UCHAR RevisionID;
-    UCHAR ClassCode[3];
-    UCHAR CacheLineSize;
-    UCHAR LaytencyTimer;
-    UCHAR HeaderType;
-    UCHAR BIST;
-} PCI_DEVICE_INDEPENDENT_REGION, *PPCI_DEVICE_INDEPENDENT_REGION;
-
 /* PCI device header type region structure */
 typedef struct _PCI_DEVICE_HEADER_TYPE_REGION
 {
@@ -199,6 +184,21 @@ typedef struct _PCI_DEVICE_HEADER_TYPE_REGION
     UCHAR MinGnt;
     UCHAR MaxLat;
 } PCI_DEVICE_HEADER_TYPE_REGION, *PPCI_DEVICE_HEADER_TYPE_REGION;
+
+/* PCI device independent region structure */
+typedef struct _PCI_DEVICE_INDEPENDENT_REGION
+{
+    USHORT VendorId;
+    USHORT DeviceId;
+    USHORT Command;
+    USHORT Status;
+    UCHAR RevisionID;
+    UCHAR ClassCode[3];
+    UCHAR CacheLineSize;
+    UCHAR LaytencyTimer;
+    UCHAR HeaderType;
+    UCHAR BIST;
+} PCI_DEVICE_INDEPENDENT_REGION, *PPCI_DEVICE_INDEPENDENT_REGION;
 
 /* PCI device type 0 structure */
 typedef struct _PCI_TYPE0_DEVICE

@@ -1165,6 +1165,21 @@ typedef struct _EFI_CONTROLLER_DEVICE_PATH
     UINT32 Controller;
 } EFI_CONTROLLER_DEVICE_PATH, *PEFI_CONTROLLER_DEVICE_PATH;
 
+/* ACPI address space descriptor */
+typedef struct _EFI_ACPI_ADDRESS_SPACE_DESCRIPTOR
+{
+    UCHAR SpaceDescriptor;
+    USHORT Length;
+    UCHAR ResourceType;
+    UCHAR GeneralFlags;
+    UCHAR TypeSpecificFlag;
+    ULONGLONG Granularity;
+    ULONGLONG AddressRangeMin;
+    ULONGLONG AddressRangeMax;
+    ULONGLONG TranslationOffset;
+    ULONGLONG AddressLength;
+} EFI_ACPI_ADDRESS_SPACE_DESCRIPTOR, *PEFI_ACPI_ADDRESS_SPACE_DESCRIPTOR;
+
 /* ACPI device path node */
 typedef struct _EFI_ACPI_HID_DEVICE_PATH
 {
