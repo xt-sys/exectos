@@ -58,6 +58,32 @@
 #define PCI_STATUS_SIGNALED_SYSTEM_ERROR        0x4000
 #define PCI_STATUS_DETECTED_PARITY_ERROR        0x8000
 
+/* PCI bridge control registers */
+typedef struct _PCI_BRIDGE_CONTROL_REGISTER
+{
+    UINT Bar[2];
+    UCHAR PrimaryBus;
+    UCHAR SecondaryBus;
+    UCHAR SubordinateBus;
+    UCHAR SecondaryLatencyTimer;
+    UCHAR IoBase;
+    UCHAR IoLimit;
+    USHORT SecondaryStatus;
+    USHORT MemoryBase;
+    USHORT MemoryLimit;
+    USHORT PrefetchableMemoryBase;
+    USHORT PrefetchableMemoryLimit;
+    UINT PrefetchableBaseUpper32;
+    UINT PrefetchableLimitUpper32;
+    USHORT IoBaseUpper16;
+    USHORT IoLimitUpper16;
+    UINT Reserved;
+    UINT ExpansionRomBAR;
+    UCHAR InterruptLine;
+    UCHAR InterruptPin;
+    USHORT BridgeControl;
+} PCI_BRIDGE_CONTROL_REGISTER, *PPCI_BRIDGE_CONTROL_REGISTER;
+
 /* PCI and PCI-E common header structure */
 typedef struct _PCI_COMMON_HEADER
 {
@@ -143,5 +169,49 @@ typedef struct _PCI_COMMON_CONFIG
     PCI_COMMON_HEADER PciHeader;
     UCHAR DeviceSpecific[192];
 } PCI_COMMON_CONFIG, *PPCI_COMMON_CONFIG;
+
+/* PCI device independent region structure */
+typedef struct _PCI_DEVICE_INDEPENDENT_REGION
+{
+    USHORT VendorId;
+    USHORT DeviceId;
+    USHORT Command;
+    USHORT Status;
+    UCHAR RevisionID;
+    UCHAR ClassCode[3];
+    UCHAR CacheLineSize;
+    UCHAR LaytencyTimer;
+    UCHAR HeaderType;
+    UCHAR BIST;
+} PCI_DEVICE_INDEPENDENT_REGION, *PPCI_DEVICE_INDEPENDENT_REGION;
+
+/* PCI device header type region structure */
+typedef struct _PCI_DEVICE_HEADER_TYPE_REGION
+{
+    UINT Bar[6];
+    UINT CISPtr;
+    USHORT SubsystemVendorID;
+    USHORT SubsystemID;
+    UINT ExpansionRomBar;
+    UINT Reserved[2];
+    UCHAR InterruptLine;
+    UCHAR InterruptPin;
+    UCHAR MinGnt;
+    UCHAR MaxLat;
+} PCI_DEVICE_HEADER_TYPE_REGION, *PPCI_DEVICE_HEADER_TYPE_REGION;
+
+/* PCI device type 0 structure */
+typedef struct _PCI_TYPE0_DEVICE
+{
+    PCI_DEVICE_INDEPENDENT_REGION Hdr;
+    PCI_DEVICE_HEADER_TYPE_REGION Device;
+} PCI_TYPE0_DEVICE, *PPCI_TYPE0_DEVICE;
+
+/* PCI device type 1 structure */
+typedef struct _PCI_TYPE1_DEVICE
+{
+    PCI_DEVICE_INDEPENDENT_REGION Hdr;
+    PCI_BRIDGE_CONTROL_REGISTER Bridge;
+} PCI_TYPE1_DEVICE, *PPCI_TYPE1_DEVICE;
 
 #endif /* __XTDK_IOTYPES_H */
