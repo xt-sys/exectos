@@ -137,6 +137,11 @@ BlInitializeConsole();
 
 XTCDECL
 EFI_STATUS
+BlInstallProtocol(IN PVOID Interface,
+                  IN PEFI_GUID Guid);
+
+XTCDECL
+EFI_STATUS
 BlInvokeBootProtocol(IN PLIST_ENTRY OptionsList);
 
 XTCDECL
@@ -207,6 +212,10 @@ VOID
 BlReadKeyStroke(OUT PEFI_INPUT_KEY Key);
 
 XTCDECL
+EFI_STATUS
+BlRebootSystem();
+
+XTCDECL
 VOID
 BlRegisterBootMenu(PVOID BootMenuRoutine);
 
@@ -214,11 +223,6 @@ XTCDECL
 EFI_STATUS
 BlRegisterBootProtocol(IN PWCHAR SystemType,
                        IN PEFI_GUID BootProtocolGuid);
-
-XTCDECL
-EFI_STATUS
-BlInstallProtocol(IN PVOID Interface,
-                  IN PEFI_GUID Guid);
 
 XTCDECL
 VOID
@@ -241,6 +245,10 @@ XTCDECL
 VOID
 BlSetCursorPosition(IN ULONGLONG PosX,
                     IN ULONGLONG PosY);
+
+XTCDECL
+EFI_STATUS
+BlShutdownSystem();
 
 XTCDECL
 VOID
