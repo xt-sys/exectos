@@ -212,7 +212,13 @@ BlDisplayBootMenu()
                                                   L" \n"
                                                   L"Press ENTER key to boot the highlighted boot menu entry.\n"
                                                   L"Press 'e' key to edit the highlighted menu entry.\n"
-                                                  L"Press 's' key to exit into XTLDR shell (advanced mode).\n");
+                                                  L"Press 's' key to exit into XTLDR shell (enters advanced mode).\n"
+                                                  L" \n"
+                                                  L"F1 shows this help, F11 reboots the machine and F12 turns it off.\n"
+                                                  L" \n"
+                                                  L" \n"
+                                                  L"XTLDR is a part of the ExectOS Operating System.\n"
+                                                  L"Visit https://exectos.eu.org/ for more information.");
 
                     /* Break from boot menu event loop to redraw whole boot menu */
                     break;
