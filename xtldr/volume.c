@@ -613,7 +613,7 @@ BlpDiscoverEfiBlockDevices(OUT PLIST_ENTRY BlockDevices)
     EFI_STATUS Status;
 
     /* Locate handles which support the disk I/O interface */
-    Status = EfiSystemTable->BootServices->LocateHandleBuffer(ByProtocol, &IoGuid, NULL, &HandlesCount, &Handles);
+    Status = BlLocateProtocolHandles(&Handles, &HandlesCount, &IoGuid);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to locate handles */
@@ -629,8 +629,7 @@ BlpDiscoverEfiBlockDevices(OUT PLIST_ENTRY BlockDevices)
 
         /* Open I/O protocol for given handle */
         Io = NULL;
-        Status = EfiSystemTable->BootServices->OpenProtocol(Handles[Index], &IoGuid, (PVOID *)&Io, EfiImageHandle,
-                                                            NULL, EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
+        Status = BlOpenProtocolHandle(Handles[Index], (PVOID *)&Io, &IoGuid);
         if(Status != STATUS_EFI_SUCCESS || Io == NULL)
         {
             /* Failed to open I/O protocol, skip it */

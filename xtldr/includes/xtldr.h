@@ -149,6 +149,12 @@ BlLoadModules(IN PWCHAR ModulesList);
 
 XTCDECL
 EFI_STATUS
+BlLocateProtocolHandles(OUT PEFI_HANDLE *Handles,
+                        OUT PUINT_PTR Count,
+                        IN PEFI_GUID ProtocolGuid);
+
+XTCDECL
+EFI_STATUS
 BlMemoryAllocatePages(IN UINT64 Pages,
                       OUT PEFI_PHYSICAL_ADDRESS Memory);
 
@@ -177,6 +183,12 @@ EFI_STATUS
 BlOpenProtocol(OUT PEFI_HANDLE Handle,
                OUT PVOID *ProtocolHandler,
                IN PEFI_GUID ProtocolGuid);
+
+XTCDECL
+EFI_STATUS
+BlOpenProtocolHandle(IN EFI_HANDLE Handle,
+                     OUT PVOID *ProtocolHandler,
+                     IN PEFI_GUID ProtocolGuid);
 
 XTCDECL
 VOID

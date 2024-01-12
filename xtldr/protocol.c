@@ -398,7 +398,32 @@ BlLoadModules(IN PWCHAR ModulesList)
 }
 
 /**
- * This routine locates and opens the requested XT Boot Loader or EFI protocol.
+ * Returns an array of handles that support the requested protocol.
+ *
+ * @param Handles
+ *        Supplies the address where a pointer to all handles found for the protocol interface.
+ *
+ * @param Count
+ *        Provides a number of the returned handles.
+ *
+ * @param ProtocolGuid
+ *        Supplies a pointer to the unique protocol GUID.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+BlLocateProtocolHandles(OUT PEFI_HANDLE *Handles,
+                        OUT PUINT_PTR Count,
+                        IN PEFI_GUID ProtocolGuid)
+{
+    return EfiSystemTable->BootServices->LocateHandleBuffer(ByProtocol, ProtocolGuid, NULL, Count, Handles);
+}
+
+/**
+ * Locates and opens the requested XT Boot Loader or EFI protocol.
  *
  * @param Handle
  *        Supplies the address where a pointer to the handle for the protocol interface.
@@ -425,7 +450,7 @@ BlOpenProtocol(OUT PEFI_HANDLE Handle,
     UINT Index;
 
     /* Try to locate the handles */
-    Status = EfiSystemTable->BootServices->LocateHandleBuffer(ByProtocol, ProtocolGuid, NULL, &Count, &Handles);
+    Status = BlLocateProtocolHandles(&Handles, &Count, ProtocolGuid);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Unable to get handles */
@@ -439,9 +464,7 @@ BlOpenProtocol(OUT PEFI_HANDLE Handle,
         for(Index = 0; Index < Count; Index++)
         {
             /* Try to open protocol */
-            Status = EfiSystemTable->BootServices->OpenProtocol(Handles[Index], ProtocolGuid,
-                                                                ProtocolHandler, EfiImageHandle, NULL,
-                                                                EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
+            Status = BlOpenProtocolHandle(Handles[Index], ProtocolHandler, ProtocolGuid);
 
             /* Check if successfully opened the loader protocol */
             if(Status == STATUS_EFI_SUCCESS)
@@ -465,6 +488,32 @@ BlOpenProtocol(OUT PEFI_HANDLE Handle,
 
     /* Return success */
 	return STATUS_EFI_SUCCESS;
+}
+
+/**
+ * Opens the requested XT Boot Loader or EFI protocol, if it is supported by the handle.
+ *
+ * @param Handle
+ *        Supplies a handle for the protocol interface that is being opened.
+ *
+ * @param ProtocolHandler
+ *        Supplies the address where a pointer to the opened protocol is returned.
+ *
+ * @param ProtocolGuid
+ *        Supplies a pointer to the unique protocol GUID.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+BlOpenProtocolHandle(IN EFI_HANDLE Handle,
+                     OUT PVOID *ProtocolHandler,
+                     IN PEFI_GUID ProtocolGuid)
+{
+    return EfiSystemTable->BootServices->OpenProtocol(Handle, ProtocolGuid, ProtocolHandler, EfiImageHandle,
+                                                      NULL, EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
 }
 
 /**
@@ -586,8 +635,10 @@ BlpInstallXtLoaderProtocol()
     BlpLdrProtocol.Memory.ZeroMemory = RtlZeroMemory;
     BlpLdrProtocol.Protocol.Close = BlCloseProtocol;
     BlpLdrProtocol.Protocol.GetModulesList = BlGetModulesList;
-    BlpLdrProtocol.Protocol.Open = BlOpenProtocol;
     BlpLdrProtocol.Protocol.Install = BlInstallProtocol;
+    BlpLdrProtocol.Protocol.LocateHandles = BlLocateProtocolHandles;
+    BlpLdrProtocol.Protocol.Open = BlOpenProtocol;
+    BlpLdrProtocol.Protocol.OpenHandle = BlOpenProtocolHandle;
     BlpLdrProtocol.Tui.DisplayErrorDialog = BlDisplayErrorDialog;
     BlpLdrProtocol.Tui.DisplayInfoDialog = BlDisplayInfoDialog;
     BlpLdrProtocol.Tui.DisplayInputDialog = BlDisplayInputDialog;
