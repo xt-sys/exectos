@@ -217,6 +217,24 @@ BlDisplayBootMenu()
                     /* Break from boot menu event loop to redraw whole boot menu */
                     break;
                 }
+                else if(Key.ScanCode == 0x15)
+                {
+                    /* F11 key pressed, reboot the machine */
+                    BlRebootSystem();
+                    BlDisplayErrorDialog(L"XTLDR", L"Failed to reboot the machine!");
+
+                    /* Break from boot menu event loop to redraw whole boot menu */
+                    break;
+                }
+                else if(Key.ScanCode == 0x16)
+                {
+                    /* F12 key pressed, shutdown the machine */
+                    BlShutdownSystem();
+                    BlDisplayErrorDialog(L"XTLDR", L"Failed to shutdown the machine!");
+
+                    /* Break from boot menu event loop to redraw whole boot menu */
+                    break;
+                }
                 else if(Key.UnicodeChar == 0x65)
                 {
                     /* 'e' key pressed, edit the highlighted entry */
