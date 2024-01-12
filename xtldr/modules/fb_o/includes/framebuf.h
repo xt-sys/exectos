@@ -76,4 +76,8 @@ EFI_STATUS
 BlXtLdrModuleMain(IN EFI_HANDLE ImageHandle,
                   IN PEFI_SYSTEM_TABLE SystemTable);
 
+XTCDECL
+EFI_STATUS
+XtLdrTestGetFramebufferAddress(OUT PULONG *Address);
+
 #endif /* __XTLDR_MODULES_FRAMEBUF_H */

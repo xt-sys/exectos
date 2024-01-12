@@ -197,6 +197,7 @@ VOID
 FbPrintDisplayInformation()
 {
     PWCHAR DriverName = NULL;
+    PULONG Address;
 
     /* Make sure frame buffer is initialized */
     if(!FrameBufferInfo.Initialized)
@@ -208,6 +209,7 @@ FbPrintDisplayInformation()
 
     /* Get display driver name */
     FbGetDisplayDriver(DriverName);
+    XtLdrTestGetFramebufferAddress(&Address);
 
     /* Print video information */
     XtLdrProtocol->Debug.Print(L"XTLDR Framebuffer information:\n"
@@ -221,6 +223,7 @@ FbPrintDisplayInformation()
                                FrameBufferInfo.HorizontalResolution, FrameBufferInfo.VerticalResolution,
                                FrameBufferInfo.BitsPerPixel, FrameBufferInfo.PixelFormat,
                                FrameBufferInfo.PixelsPerScanLine);
+    XtLdrProtocol->Debug.Print(L"   Hardware FB Address: 0x%lx\n", Address);
 }
 
 /**
@@ -259,4 +262,76 @@ XtLdrModuleMain(IN EFI_HANDLE ImageHandle,
 
     /* Register XTOS boot protocol */
     return XtLdrProtocol->Protocol.Install(&XtFramebufferProtocol, &Guid);
+}
+
+XTCDECL
+EFI_STATUS
+XtLdrTestGetFramebufferAddress(OUT PULONG *Address)
+{
+    EFI_GUID PciIoGuid = EFI_PCI_IO_PROTOCOL_GUID;
+    PEFI_PCI_IO_PROTOCOL Io;
+    UINT_PTR HandlesCount;
+    EFI_HANDLE *Handles;
+    EFI_STATUS Status;
+    UINT Index;
+    Handles = NULL;
+    PEFI_ACPI_ADDRESS_SPACE_DESCRIPTOR BarInfo;
+    PVOID Addr;
+    UINT64 Size = 0;
+    PCI_TYPE0_DEVICE Pci;
+
+    Status = XtLdrProtocol->Protocol.LocateHandles(&Handles, &HandlesCount, &PciIoGuid);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        XtLdrProtocol->Debug.Print(L"ERROR: Failed to get handles (Status Code: 0x%lx)\n", Status);
+        return Status;
+    }
+
+    for(Index = 0; Index < HandlesCount; Index++)
+    {
+        Status = XtLdrProtocol->Protocol.OpenHandle(Handles[Index], (PVOID *)&Io, &PciIoGuid);
+
+        if(Status != STATUS_EFI_SUCCESS)
+        {
+            XtLdrProtocol->Debug.Print(L"ERROR: Failed to open protocol (Status Code: 0x%lx)\n", Status);
+            continue;
+        }
+
+        Status = Io->Pci.Read(Io, EfiPciIoWidthUint32, 0, sizeof(Pci) / sizeof(UINT32), &Pci);
+        if(Status != STATUS_EFI_SUCCESS)
+        {
+            XtLdrProtocol->Debug.Print(L"ERROR: Failed to read class (Status Code: 0x%lx)\n", Status);
+        }
+
+        XtLdrProtocol->Debug.Print(L"Found device class: %u:%u.%u\n", Pci.Hdr.ClassCode[0], Pci.Hdr.ClassCode[1], Pci.Hdr.ClassCode[2]);
+
+        if(Pci.Hdr.ClassCode[2] != 0x03)
+        {
+            XtLdrProtocol->Protocol.Close(Handles[Index], &PciIoGuid);
+            continue;
+        }
+
+        for(UINT Bars = 0; Bars < 6; Bars++)
+        {
+            Status = Io->GetBarAttributes(Io, Bars, NULL, (VOID **)&BarInfo);
+            if(Status != STATUS_EFI_SUCCESS)
+            {
+                continue;
+            }
+
+            if(BarInfo->SpaceDescriptor == EFI_ACPI_ADDRESS64_SPACE_DESCRIPTOR &&
+               BarInfo->ResourceType == EFI_ACPI_ADDRESS_SPACE_TYPE_MEMORY)
+            {
+                if(BarInfo->AddressLength > Size)
+                {
+                    Addr = (PVOID)(ULONG_PTR)(BarInfo->AddressRangeMin << 16);
+                    Size = BarInfo->AddressLength;
+                }
+            }
+        }
+    }
+
+    *Address = (PULONG)Addr;
+
+    return STATUS_EFI_SUCCESS;
 }

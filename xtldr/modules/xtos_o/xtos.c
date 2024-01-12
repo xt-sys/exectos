@@ -369,6 +369,7 @@ XtpInitializeLoaderBlock(IN PLIST_ENTRY MemoryMappings,
 
         /* Store information about FrameBuffer device */
         FrameBufProtocol->GetDisplayInformation(&LoaderBlock->LoaderInformation.FrameBuffer);
+        FrameBufProtocol->PrintDisplayInformation();
     }
     else
     {
