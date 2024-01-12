@@ -646,6 +646,8 @@ BlpInstallXtLoaderProtocol()
     BlpLdrProtocol.Tui.UpdateProgressBar = BlUpdateProgressBar;
     BlpLdrProtocol.Util.ExitBootServices = BlExitBootServices;
     BlpLdrProtocol.Util.GetSecureBootStatus = BlGetSecureBootStatus;
+    BlpLdrProtocol.Util.RebootSystem = BlRebootSystem;
+    BlpLdrProtocol.Util.ShutdownSystem = BlShutdownSystem;
     BlpLdrProtocol.Util.SleepExecution = BlSleepExecution;
     BlpLdrProtocol.Util.WaitForEfiEvent = BlWaitForEfiEvent;
 

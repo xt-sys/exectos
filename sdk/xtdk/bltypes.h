@@ -98,6 +98,7 @@ typedef EFI_STATUS (*PBL_LOCATE_PROTOCOL_HANDLES)(OUT PEFI_HANDLE *Handles, OUT 
 typedef EFI_STATUS (*PBL_OPEN_VOLUME)(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath, OUT PEFI_HANDLE DiskHandle, OUT PEFI_FILE_HANDLE *FsHandle);
 typedef EFI_STATUS (*PBL_OPEN_PROTOCOL)(OUT PEFI_HANDLE Handle, OUT PVOID *ProtocolHandler, IN PEFI_GUID ProtocolGuid);
 typedef EFI_STATUS (*PBL_OPEN_PROTOCOL_HANDLE)(IN EFI_HANDLE Handle, OUT PVOID *ProtocolHandler, IN PEFI_GUID ProtocolGuid);
+typedef EFI_STATUS (*PBL_POWER_SYSTEM)();
 typedef EFI_STATUS (*PBL_READ_FILE)(IN PEFI_FILE_HANDLE DirHandle, IN CONST PWCHAR FileName, OUT PVOID *FileData, OUT PSIZE_T FileSize);
 typedef EFI_STATUS (*PBL_REGISTER_BOOT_PROTOCOL)(IN PWCHAR SystemType, IN PEFI_GUID BootProtocolGuid);
 typedef VOID (*PBL_REGISTER_XT_BOOT_MENU)(PVOID BootMenuRoutine);
@@ -291,6 +292,8 @@ typedef struct _XTBL_LOADER_PROTOCOL
     {
         PBL_EXIT_BOOT_SERVICES ExitBootServices;
         PBL_GET_SECURE_BOOT_STATUS GetSecureBootStatus;
+        PBL_POWER_SYSTEM RebootSystem;
+        PBL_POWER_SYSTEM ShutdownSystem;
         PBL_SLEEP_EXECUTION SleepExecution;
         PBL_WAIT_FOR_EFI_EVENT WaitForEfiEvent;
     } Util;

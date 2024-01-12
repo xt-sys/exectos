@@ -100,6 +100,36 @@ BlGetSecureBootStatus()
 }
 
 /**
+ * Reboots the machine.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+BlRebootSystem()
+{
+    /* Reboot machine */
+    return EfiSystemTable->RuntimeServices->ResetSystem(EfiResetCold, STATUS_EFI_SUCCESS, 0, NULL);
+}
+
+/**
+ * Shuts down the machine.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+BlShutdownSystem()
+{
+    /* Shutdown machine */
+    return EfiSystemTable->RuntimeServices->ResetSystem(EfiResetShutdown, STATUS_EFI_SUCCESS, 0, NULL);
+}
+
+/**
  * Puts the system to sleep for the specified number of milliseconds.
  *
  * @param Milliseconds
