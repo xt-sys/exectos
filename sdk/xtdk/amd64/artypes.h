@@ -39,6 +39,7 @@
 #define CR4_PCE                                         0x00000100
 #define CR4_FXSR                                        0x00000200
 #define CR4_XMMEXCPT                                    0x00000400
+#define CR4_LA57                                        0x00001000
 #define CR4_RESERVED1                                   0x00001800
 #define CR4_VMXE                                        0x00002000
 #define CR4_SMXE                                        0x00004000
