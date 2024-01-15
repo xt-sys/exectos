@@ -46,7 +46,7 @@ BlGetConfigValue(IN CONST PWCHAR ConfigName)
             ValueLength = RtlWideStringLength(ConfigEntry->Value, 0);
 
             /* Allocate memory for value */
-            Status = BlMemoryAllocatePool(ValueLength * sizeof(WCHAR), (PVOID *)&Value);
+            Status = BlAllocateMemoryPool(ValueLength * sizeof(WCHAR), (PVOID *)&Value);
             if(Status != STATUS_EFI_SUCCESS)
             {
                 /* Memory allocation failure, return NULL */
@@ -265,15 +265,15 @@ BlpParseCommandLine(VOID)
                 }
 
                 /* Allocate memory for new option */
-                Status = BlMemoryAllocatePool(sizeof(XTBL_CONFIG_ENTRY), (PVOID*)&Option);
+                Status = BlAllocateMemoryPool(sizeof(XTBL_CONFIG_ENTRY), (PVOID*)&Option);
                 if(Status == STATUS_EFI_SUCCESS)
                 {
                     /* Allocate more memory for option name */
-                    Status = BlMemoryAllocatePool(sizeof(PWCHAR) * (KeyLength + 1), (PVOID*)&Option->Name);
+                    Status = BlAllocateMemoryPool(sizeof(PWCHAR) * (KeyLength + 1), (PVOID*)&Option->Name);
                     if(Status == STATUS_EFI_SUCCESS)
                     {
                         /* Allocate even more memory for option value */
-                        Status = BlMemoryAllocatePool(sizeof(PWCHAR) * (ValueLength + 1), (PVOID*)&Option->Value);
+                        Status = BlAllocateMemoryPool(sizeof(PWCHAR) * (ValueLength + 1), (PVOID*)&Option->Value);
                     }
                 }
                 if(Status != STATUS_EFI_SUCCESS)
@@ -386,11 +386,11 @@ BlpParseConfigFile(IN CONST PCHAR RawConfig,
             SectionLength = RtlStringLength(SectionName, 0);
 
             /* Allocate memory for new section */
-            Status = BlMemoryAllocatePool(sizeof(XTBL_CONFIG_SECTION), (PVOID*)&Section);
+            Status = BlAllocateMemoryPool(sizeof(XTBL_CONFIG_SECTION), (PVOID*)&Section);
             if(Status == STATUS_EFI_SUCCESS)
             {
                 /* Allocate more memory for section name */
-                Status = BlMemoryAllocatePool(sizeof(PWCHAR) * (SectionLength + 1), (PVOID*)&Section->SectionName);
+                Status = BlAllocateMemoryPool(sizeof(PWCHAR) * (SectionLength + 1), (PVOID*)&Section->SectionName);
             }
             if(Status != STATUS_EFI_SUCCESS)
             {
@@ -456,15 +456,15 @@ BlpParseConfigFile(IN CONST PCHAR RawConfig,
             ValueLength = RtlStringLength(Value, 0);
 
             /* Allocate memory for new option */
-            Status = BlMemoryAllocatePool(sizeof(XTBL_CONFIG_ENTRY), (PVOID*)&Option);
+            Status = BlAllocateMemoryPool(sizeof(XTBL_CONFIG_ENTRY), (PVOID*)&Option);
             if(Status == STATUS_EFI_SUCCESS)
             {
                 /* Allocate more memory for option name */
-                Status = BlMemoryAllocatePool(sizeof(PWCHAR) * (KeyLength + 1), (PVOID*)&Option->Name);
+                Status = BlAllocateMemoryPool(sizeof(PWCHAR) * (KeyLength + 1), (PVOID*)&Option->Name);
                 if(Status == STATUS_EFI_SUCCESS)
                 {
                     /* Allocate even more memory for option value */
-                    Status = BlMemoryAllocatePool(sizeof(PWCHAR) * (ValueLength + 1), (PVOID*)&Option->Value);
+                    Status = BlAllocateMemoryPool(sizeof(PWCHAR) * (ValueLength + 1), (PVOID*)&Option->Value);
                 }
             }
             if(Status != STATUS_EFI_SUCCESS)

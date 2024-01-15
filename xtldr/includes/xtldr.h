@@ -20,6 +20,16 @@ typedef VOID (BLPRINTCHAR)(IN USHORT Character);
 
 /* XTLDR routines forward references */
 XTCDECL
+EFI_STATUS
+BlAllocateMemoryPages(IN UINT64 Pages,
+                      OUT PEFI_PHYSICAL_ADDRESS Memory);
+
+XTCDECL
+EFI_STATUS
+BlAllocateMemoryPool(IN UINT_PTR Size,
+                     OUT PVOID *Memory);
+
+XTCDECL
 VOID
 BlClearConsoleLine(IN ULONGLONG LineNo);
 
@@ -99,6 +109,15 @@ BlFindVolumeDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL FsHandle,
                        OUT PEFI_DEVICE_PATH_PROTOCOL* DevicePath);
 
 XTCDECL
+EFI_STATUS
+BlFreeMemoryPages(IN UINT64 Pages,
+                  IN EFI_PHYSICAL_ADDRESS Memory);
+
+XTCDECL
+EFI_STATUS
+BlFreeMemoryPool(IN PVOID Memory);
+
+XTCDECL
 PWCHAR
 BlGetConfigValue(IN CONST PWCHAR ConfigName);
 
@@ -157,25 +176,6 @@ EFI_STATUS
 BlLocateProtocolHandles(OUT PEFI_HANDLE *Handles,
                         OUT PUINT_PTR Count,
                         IN PEFI_GUID ProtocolGuid);
-
-XTCDECL
-EFI_STATUS
-BlMemoryAllocatePages(IN UINT64 Pages,
-                      OUT PEFI_PHYSICAL_ADDRESS Memory);
-
-XTCDECL
-EFI_STATUS
-BlMemoryAllocatePool(IN UINT_PTR Size,
-                     OUT PVOID *Memory);
-
-XTCDECL
-EFI_STATUS
-BlMemoryFreePages(IN UINT64 Pages,
-                  IN EFI_PHYSICAL_ADDRESS Memory);
-
-XTCDECL
-EFI_STATUS
-BlMemoryFreePool(IN PVOID Memory);
 
 XTCDECL
 EFI_STATUS

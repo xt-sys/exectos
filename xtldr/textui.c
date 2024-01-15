@@ -452,7 +452,7 @@ BlDisplayInputDialog(IN PWCHAR Caption,
 
     /* Get initial input text length and allocate a buffer */
     BufferLength = RtlWideStringLength(*InputFieldText, 0);
-    Status = BlMemoryAllocatePool(BufferLength * sizeof(WCHAR), (PVOID *)&InputFieldBuffer);
+    Status = BlAllocateMemoryPool(BufferLength * sizeof(WCHAR), (PVOID *)&InputFieldBuffer);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Memory allocation failure, print error message and return */
@@ -1213,7 +1213,7 @@ BlpDrawDialogMessage(IN PXTBL_DIALOG_HANDLE Handle,
 
     /* Allocate memory for dialog box message */
     Length = RtlWideStringLength(Message, 0);
-    Status = BlMemoryAllocatePool(Length * sizeof(WCHAR), (PVOID *)&Msg);
+    Status = BlAllocateMemoryPool(Length * sizeof(WCHAR), (PVOID *)&Msg);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Memory allocation failure, print debug message and return */

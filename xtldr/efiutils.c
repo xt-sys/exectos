@@ -28,7 +28,7 @@ BlExitBootServices()
     BlpStatus.BootServices = FALSE;
 
     /* Allocate buffer for EFI memory map */
-    Status = BlMemoryAllocatePool(sizeof(EFI_MEMORY_MAP), (PVOID*)&MemoryMap);
+    Status = BlAllocateMemoryPool(sizeof(EFI_MEMORY_MAP), (PVOID*)&MemoryMap);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Memory allocation failure */

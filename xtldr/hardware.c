@@ -31,7 +31,7 @@ BlpActivateSerialIOController()
 
     /* Allocate memory for single EFI_HANDLE, what should be enough in most cases */
     PciHandleSize = sizeof(EFI_HANDLE);
-    Status = BlMemoryAllocatePool(PciHandleSize, (PVOID*)&PciHandle);
+    Status = BlAllocateMemoryPool(PciHandleSize, (PVOID*)&PciHandle);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Memory allocation failure */
@@ -43,8 +43,8 @@ BlpActivateSerialIOController()
     if(Status == STATUS_EFI_BUFFER_TOO_SMALL)
     {
         /* Reallocate more memory as requested by UEFI */
-        BlMemoryFreePool(PciHandle);
-        Status = BlMemoryAllocatePool(PciHandleSize, (PVOID*)&PciHandle);
+        BlFreeMemoryPool(PciHandle);
+        Status = BlAllocateMemoryPool(PciHandleSize, (PVOID*)&PciHandle);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory reallocation failure */

@@ -193,7 +193,7 @@ BlInvokeBootProtocol(IN PLIST_ENTRY OptionsList)
             /* Check a length of modules list */
             ModuleListLength = RtlWideStringLength(Option->Value, 0);
 
-            Status = BlMemoryAllocatePool(sizeof(PWCHAR) * ModuleListLength, (PVOID *)&ModulesList);
+            Status = BlAllocateMemoryPool(sizeof(PWCHAR) * ModuleListLength, (PVOID *)&ModulesList);
             if(Status != STATUS_EFI_SUCCESS)
             {
                 /* Failed to allocate memory, print error message and return status code */

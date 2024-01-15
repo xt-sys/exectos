@@ -210,7 +210,7 @@ BlLoadModule(IN PWCHAR ModuleName)
     }
 
     /* Allocate memory for module information block */
-    Status = BlMemoryAllocatePool(sizeof(XTBL_MODULE_INFO), (PVOID*)&ModuleInfo);
+    Status = BlAllocateMemoryPool(sizeof(XTBL_MODULE_INFO), (PVOID*)&ModuleInfo);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to allocate memory */
@@ -251,7 +251,7 @@ BlLoadModule(IN PWCHAR ModuleName)
                 }
 
                 /* Allocate memory for module dependency */
-                Status = BlMemoryAllocatePool(sizeof(XTBL_MODULE_DEPS), (PVOID*)&ModuleDependencies);
+                Status = BlAllocateMemoryPool(sizeof(XTBL_MODULE_DEPS), (PVOID*)&ModuleDependencies);
                 if(Status == STATUS_EFI_SUCCESS)
                 {
                     /* Memory allocated successfully, store module's dependency */
@@ -574,7 +574,7 @@ BlRegisterBootProtocol(IN PWCHAR SystemType,
     }
 
     /* Create new boot protocol entry */
-    Status = BlMemoryAllocatePool(sizeof(XTBL_BOOT_PROTOCOL), (PVOID *)&ProtocolEntry);
+    Status = BlAllocateMemoryPool(sizeof(XTBL_BOOT_PROTOCOL), (PVOID *)&ProtocolEntry);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Memory allocation failure */
@@ -625,11 +625,11 @@ BlpInstallXtLoaderProtocol()
     BlpLdrProtocol.Disk.CloseVolume = BlCloseVolume;
     BlpLdrProtocol.Disk.OpenVolume = BlOpenVolume;
     BlpLdrProtocol.Disk.ReadFile = BlReadFile;
-    BlpLdrProtocol.Memory.AllocatePages = BlMemoryAllocatePages;
-    BlpLdrProtocol.Memory.AllocatePool = BlMemoryAllocatePool;
+    BlpLdrProtocol.Memory.AllocatePages = BlAllocateMemoryPages;
+    BlpLdrProtocol.Memory.AllocatePool = BlAllocateMemoryPool;
     BlpLdrProtocol.Memory.CopyMemory = RtlCopyMemory;
-    BlpLdrProtocol.Memory.FreePages = BlMemoryFreePages;
-    BlpLdrProtocol.Memory.FreePool = BlMemoryFreePool;
+    BlpLdrProtocol.Memory.FreePages = BlFreeMemoryPages;
+    BlpLdrProtocol.Memory.FreePool = BlFreeMemoryPool;
     BlpLdrProtocol.Memory.GetMemoryMap = BlGetMemoryMap;
     BlpLdrProtocol.Memory.SetMemory = RtlSetMemory;
     BlpLdrProtocol.Memory.ZeroMemory = RtlZeroMemory;

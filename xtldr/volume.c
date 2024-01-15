@@ -166,7 +166,7 @@ BlEnumerateBlockDevices()
         if(DriveType != XTBL_BOOT_DEVICE_UNKNOWN)
         {
             /* Allocate memory for block device */
-            Status = BlMemoryAllocatePool(sizeof(EFI_BLOCK_DEVICE), (PVOID *)&BlockDevice);
+            Status = BlAllocateMemoryPool(sizeof(EFI_BLOCK_DEVICE), (PVOID *)&BlockDevice);
             if(Status != STATUS_EFI_SUCCESS)
             {
                 BlDebugPrint(L"ERROR: Failed to allocate memory pool for block device (Status Code: 0x%lx)\n", Status);
@@ -248,7 +248,7 @@ BlFindVolumeDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL FsHandle,
     FsPathLength = RtlWideStringLength(FileSystemPath, 0) * sizeof(WCHAR);
 
     /* Allocate memory pool for device path */
-    Status = BlMemoryAllocatePool(FsPathLength + DevicePathLength + sizeof(EFI_DEVICE_PATH_PROTOCOL),
+    Status = BlAllocateMemoryPool(FsPathLength + DevicePathLength + sizeof(EFI_DEVICE_PATH_PROTOCOL),
                                      (PVOID *)DevicePath);
     if(Status != STATUS_EFI_SUCCESS)
     {
@@ -516,7 +516,7 @@ BlReadFile(IN PEFI_FILE_HANDLE DirHandle,
     ReadSize = sizeof(EFI_FILE_INFO) + 32;
 
     /* Allocate necessary amount of memory */
-    Status = BlMemoryAllocatePool(ReadSize, (PVOID *)&FileInfo);
+    Status = BlAllocateMemoryPool(ReadSize, (PVOID *)&FileInfo);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Memory allocation failure */
@@ -529,8 +529,8 @@ BlReadFile(IN PEFI_FILE_HANDLE DirHandle,
     if(Status == STATUS_EFI_BUFFER_TOO_SMALL)
     {
         /* Buffer is too small, but EFI tells the required size, so reallocate */
-        BlMemoryFreePool(&FileInfo);
-        Status = BlMemoryAllocatePool(ReadSize, (PVOID *)&FileInfo);
+        BlFreeMemoryPool(&FileInfo);
+        Status = BlAllocateMemoryPool(ReadSize, (PVOID *)&FileInfo);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory allocation failure */
@@ -547,7 +547,7 @@ BlReadFile(IN PEFI_FILE_HANDLE DirHandle,
     {
         /* Unable to get file information */
         FileHandle->Close(FileHandle);
-        BlMemoryFreePool(&FileInfo);
+        BlFreeMemoryPool(&FileInfo);
         return Status;
     }
 
@@ -556,12 +556,12 @@ BlReadFile(IN PEFI_FILE_HANDLE DirHandle,
     Pages = EFI_SIZE_TO_PAGES(FileInfo->FileSize);
 
     /* Allocate pages */
-    Status = BlMemoryAllocatePages(Pages, &Address);
+    Status = BlAllocateMemoryPages(Pages, &Address);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Pages allocation failure */
         FileHandle->Close(FileHandle);
-        BlMemoryFreePool(&FileInfo);
+        BlFreeMemoryPool(&FileInfo);
         return Status;
     }
 
@@ -576,14 +576,14 @@ BlReadFile(IN PEFI_FILE_HANDLE DirHandle,
     {
         /* Failed to read data */
         FileHandle->Close(FileHandle);
-        BlMemoryFreePool(&FileInfo);
-        BlMemoryFreePages(Pages, (EFI_PHYSICAL_ADDRESS)(UINT_PTR)*FileData);
+        BlFreeMemoryPool(&FileInfo);
+        BlFreeMemoryPages(Pages, (EFI_PHYSICAL_ADDRESS)(UINT_PTR)*FileData);
         return Status;
     }
 
     /* Close handle and free memory */
     FileHandle->Close(FileHandle);
-    BlMemoryFreePool(&FileInfo);
+    BlFreeMemoryPool(&FileInfo);
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
@@ -657,7 +657,7 @@ BlpDiscoverEfiBlockDevices(OUT PLIST_ENTRY BlockDevices)
         }
 
         /* Allocate memory for block device */
-        Status = BlMemoryAllocatePool(sizeof(*BlockDevice), (PVOID *)&BlockDevice);
+        Status = BlAllocateMemoryPool(sizeof(*BlockDevice), (PVOID *)&BlockDevice);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory allocation failure */
@@ -674,7 +674,7 @@ BlpDiscoverEfiBlockDevices(OUT PLIST_ENTRY BlockDevices)
     }
 
     /* Free handles buffer */
-    BlMemoryFreePool(Handles);
+    BlFreeMemoryPool(Handles);
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
@@ -838,7 +838,7 @@ BlpDissectVolumeArcPath(IN PWCHAR SystemPath,
     /* Store ARC name if possible */
     if(ArcName)
     {
-        BlMemoryAllocatePool(ArcLength * sizeof(WCHAR), (PVOID *)&LocalArcName);
+        BlAllocateMemoryPool(ArcLength * sizeof(WCHAR), (PVOID *)&LocalArcName);
         RtlCopyMemory(LocalArcName, SystemPath, ArcLength * sizeof(WCHAR));
         LocalArcName[ArcLength] = '\0';
         *ArcName = LocalArcName;
@@ -888,7 +888,7 @@ BlpDuplicateDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath)
     }
 
     /* Allocate memory for the new device path */
-    Status = BlMemoryAllocatePool(Length, (PVOID *)&DevicePathClone);
+    Status = BlAllocateMemoryPool(Length, (PVOID *)&DevicePathClone);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to allocate memory */
