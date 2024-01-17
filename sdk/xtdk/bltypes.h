@@ -92,9 +92,13 @@ typedef EFI_STATUS (*PBL_FREE_POOL)(IN PVOID Memory);
 typedef EFI_STATUS (*PBL_GET_MEMORY_MAP)(OUT PEFI_MEMORY_MAP MemoryMap);
 typedef PLIST_ENTRY (*PBL_GET_MODULES_LIST)();
 typedef INT_PTR (*PBL_GET_SECURE_BOOT_STATUS)();
+typedef VOID (*PBL_INITIALIZE_PAGE_MAP)(OUT PXTBL_PAGE_MAPPING PageMap, IN SHORT PageMapLevel, IN PVOID *MemoryMapAddress);
 typedef EFI_STATUS (*PBL_INSTALL_XT_PROTOCOL)(IN PVOID Interface, IN PEFI_GUID Guid);
 typedef EFI_STATUS (*PBL_INVOKE_BOOT_PROTOCOL)(IN PLIST_ENTRY OptionsList);
 typedef EFI_STATUS (*PBL_LOCATE_PROTOCOL_HANDLES)(OUT PEFI_HANDLE *Handles, OUT PUINT_PTR Count, IN PEFI_GUID ProtocolGuid);
+typedef EFI_STATUS (*PBL_MAP_EFI_MEMORY)(IN OUT PXTBL_PAGE_MAPPING PageMap, IN OUT PVOID *MemoryMapAddress);
+typedef EFI_STATUS (*PBL_MAP_PAGE)(IN PXTBL_PAGE_MAPPING PageMap, IN UINT_PTR VirtualAddress, IN UINT_PTR PhysicalAddress, IN UINT NumberOfPages);
+typedef EFI_STATUS (*PBL_MAP_VIRTUAL_MEMORY)(IN OUT PXTBL_PAGE_MAPPING PageMap, IN PVOID VirtualAddress, IN PVOID PhysicalAddress, IN UINT NumberOfPages, IN LOADER_MEMORY_TYPE MemoryType);
 typedef EFI_STATUS (*PBL_OPEN_VOLUME)(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath, OUT PEFI_HANDLE DiskHandle, OUT PEFI_FILE_HANDLE *FsHandle);
 typedef EFI_STATUS (*PBL_OPEN_PROTOCOL)(OUT PEFI_HANDLE Handle, OUT PVOID *ProtocolHandler, IN PEFI_GUID ProtocolGuid);
 typedef EFI_STATUS (*PBL_OPEN_PROTOCOL_HANDLE)(IN EFI_HANDLE Handle, OUT PVOID *ProtocolHandler, IN PEFI_GUID ProtocolGuid);
@@ -191,6 +195,15 @@ typedef struct _XTBL_MODULE_INFO
     PEFI_IMAGE_UNLOAD UnloadModule;
 } XTBL_MODULE_INFO, *PXTBL_MODULE_INFO;
 
+/* Boot Loader page mapping information */
+typedef struct _XTBL_PAGE_MAPPING
+{
+    LIST_ENTRY MemoryMap;
+    PVOID PtePointer;
+    PVOID MemoryMapAddress;
+    SHORT PageMapLevel;
+} XTBL_PAGE_MAPPING, *PXTBL_PAGE_MAPPING;
+
 /* XTLDR Status data */
 typedef struct _XTBL_STATUS
 {
@@ -268,6 +281,10 @@ typedef struct _XTBL_LOADER_PROTOCOL
         PBL_FREE_PAGES FreePages;
         PBL_FREE_POOL FreePool;
         PBL_GET_MEMORY_MAP GetMemoryMap;
+        PBL_INITIALIZE_PAGE_MAP InitializePageMap;
+        PBL_MAP_EFI_MEMORY MapEfiMemory;
+        PBL_MAP_PAGE MapPage;
+        PBL_MAP_VIRTUAL_MEMORY MapVirtualMemory;
         PBL_SET_MEMORY SetMemory;
         PBL_ZERO_MEMORY ZeroMemory;
     } Memory;

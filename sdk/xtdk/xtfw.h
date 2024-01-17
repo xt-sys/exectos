@@ -111,6 +111,7 @@ typedef struct _LOADER_INFORMATION_BLOCK
     LOADER_GRAPHICS_INFORMATION_BLOCK FrameBuffer;
 } LOADER_INFORMATION_BLOCK, *PLOADER_INFORMATION_BLOCK;
 
+/* Boot Loader memory mapping information */
 typedef struct _LOADER_MEMORY_MAPPING
 {
     LIST_ENTRY ListEntry;

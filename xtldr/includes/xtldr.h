@@ -155,6 +155,12 @@ VOID
 BlInitializeConsole();
 
 XTCDECL
+VOID
+BlInitializePageMap(OUT PXTBL_PAGE_MAPPING PageMap,
+                    IN SHORT PageMapLevel,
+                    IN PVOID *MemoryMapAddress);
+
+XTCDECL
 EFI_STATUS
 BlInstallProtocol(IN PVOID Interface,
                   IN PEFI_GUID Guid);
@@ -176,6 +182,26 @@ EFI_STATUS
 BlLocateProtocolHandles(OUT PEFI_HANDLE *Handles,
                         OUT PUINT_PTR Count,
                         IN PEFI_GUID ProtocolGuid);
+
+XTCDECL
+EFI_STATUS
+BlMapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
+               IN OUT PVOID *DesiredVirtualAddress);
+
+XTCDECL
+EFI_STATUS
+BlMapPage(IN PXTBL_PAGE_MAPPING PageMap,
+          IN UINT_PTR VirtualAddress,
+          IN UINT_PTR PhysicalAddress,
+          IN UINT NumberOfPages);
+
+XTCDECL
+EFI_STATUS
+BlMapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
+                   IN PVOID VirtualAddress,
+                   IN PVOID PhysicalAddress,
+                   IN UINT NumberOfPages,
+                   IN LOADER_MEMORY_TYPE MemoryType);
 
 XTCDECL
 EFI_STATUS
@@ -355,6 +381,17 @@ BOOLEAN
 BlpFindParentBlockDevice(IN PLIST_ENTRY BlockDevices,
                          IN PEFI_BLOCK_DEVICE_DATA ChildNode,
                          OUT PEFI_BLOCK_DEVICE_DATA ParentNode);
+
+XTCDECL
+LOADER_MEMORY_TYPE
+BlpGetLoaderMemoryType(IN EFI_MEMORY_TYPE EfiMemoryType);
+
+XTCDECL
+EFI_STATUS
+BlpGetNextPageTable(IN PXTBL_PAGE_MAPPING PageMap,
+                    IN PHARDWARE_PTE PageTable,
+                    IN SIZE_T Entry,
+                    OUT PHARDWARE_PTE *NextPageTable);
 
 XTCDECL
 EFI_STATUS
