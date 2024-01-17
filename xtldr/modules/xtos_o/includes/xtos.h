@@ -51,10 +51,9 @@ XtConvertEfiMemoryType(IN EFI_MEMORY_TYPE EfiMemoryType);
 
 XTCDECL
 EFI_STATUS
-XtEnablePaging(IN PLIST_ENTRY MemoryMappings,
+XtEnablePaging(IN PXTBL_PAGE_MAPPING PageMap,
                IN PVOID VirtualAddress,
-               IN PEFI_LOADED_IMAGE_PROTOCOL ImageProtocol,
-               IN PVOID *PtePointer);
+               IN PEFI_LOADED_IMAGE_PROTOCOL ImageProtocol);
 
 XTCDECL
 EFI_STATUS
@@ -83,11 +82,11 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
 
 XTCDECL
 EFI_STATUS
-XtpInitializeApicBase(IN PLIST_ENTRY MemoryMappings);
+XtpInitializeApicBase(IN PXTBL_PAGE_MAPPING PageMap);
 
 XTCDECL
 EFI_STATUS
-XtpInitializeLoaderBlock(IN PLIST_ENTRY MemoryMappings,
+XtpInitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
                          IN PVOID *VirtualAddress,
                          IN PXTBL_BOOT_PARAMETERS Parameters);
 

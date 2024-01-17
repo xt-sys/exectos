@@ -22,9 +22,6 @@ PXTBL_EXECUTABLE_IMAGE_PROTOCOL XtPeCoffProtocol;
 /* XTOS Boot Protocol */
 XTBL_BOOT_PROTOCOL XtBootProtocol;
 
-/* XTOS Page Map */
-PVOID XtPageMap;
-
 /**
  * Starts the operating system according to the provided parameters using XTOS boot protocol.
  *
@@ -182,27 +179,28 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
     PEFI_LOADED_IMAGE_PROTOCOL ImageProtocol;
     PVOID VirtualAddress, VirtualMemoryArea;
     PXT_ENTRY_POINT KernelEntryPoint;
-    LIST_ENTRY MemoryMappings;
     EFI_HANDLE ProtocolHandle;
     EFI_STATUS Status;
+    XTBL_PAGE_MAPPING PageMap;
 
     /* Initialize XTOS startup sequence */
     XtLdrProtocol->Debug.Print(L"Initializing XTOS startup sequence\n");
 
+XtLdrProtocol->Debug.Print(L"DUPA1\n");
     /* Set base virtual memory area for the kernel mappings */
     VirtualMemoryArea = (PVOID)KSEG0_BASE;
     VirtualAddress = (PVOID)(KSEG0_BASE + KSEG0_KERNEL_BASE);
 
-    /* Initialize memory mapping linked list */
-    RtlInitializeListHead(&MemoryMappings);
-
     /* Initialize virtual memory mappings */
-    Status = XtInitializeVirtualMemory(&MemoryMappings, &VirtualMemoryArea);
+    XtLdrProtocol->Memory.InitializePageMap(&PageMap, 3, VirtualMemoryArea);
+XtLdrProtocol->Debug.Print(L"DUPA2\n");
+
+    Status = XtLdrProtocol->Memory.MapEfiMemory(&PageMap, NULL);
     if(Status != STATUS_EFI_SUCCESS)
     {
-        /* Failed to initialize virtual memory */
         return Status;
     }
+XtLdrProtocol->Debug.Print(L"DUPA3\n");
 
     /* Load the kernel */
     Status = XtpLoadModule(BootDir, Parameters->KernelFile, VirtualAddress, LoaderSystemCode, &ImageContext);
@@ -213,7 +211,7 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
     }
 
     /* Add kernel image memory mapping */
-    Status = XtAddVirtualMemoryMapping(&MemoryMappings, ImageContext->VirtualAddress,
+    Status = XtLdrProtocol->Memory.MapVirtualMemory(&PageMap, ImageContext->VirtualAddress,
                                                     ImageContext->PhysicalAddress, ImageContext->ImagePages, 0);
     if(Status != STATUS_EFI_SUCCESS)
     {
@@ -227,7 +225,7 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
     KernelParameters = (PKERNEL_INITIALIZATION_BLOCK)VirtualAddress;
 
     /* Setup and map kernel initialization block */
-    Status = XtpInitializeLoaderBlock(&MemoryMappings, &VirtualAddress, Parameters);
+    Status = XtpInitializeLoaderBlock(&PageMap, &VirtualAddress, Parameters);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to setup kernel initialization block */
@@ -236,7 +234,7 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
     }
 
     /* Find and map APIC base address */
-    Status = XtpInitializeApicBase(&MemoryMappings);
+    Status = XtpInitializeApicBase(&PageMap);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to setup kernel initialization block */
@@ -252,7 +250,7 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
 
     /* Enable paging */
     XtLdrProtocol->Protocol.Open(&ProtocolHandle, (PVOID*)&ImageProtocol, &LoadedImageGuid);
-    Status = XtEnablePaging(&MemoryMappings, VirtualAddress, ImageProtocol, &XtPageMap);
+    Status = XtEnablePaging(&PageMap, VirtualAddress, ImageProtocol);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to enable paging */
@@ -280,7 +278,7 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
  */
 XTCDECL
 EFI_STATUS
-XtpInitializeApicBase(IN PLIST_ENTRY MemoryMappings)
+XtpInitializeApicBase(IN PXTBL_PAGE_MAPPING PageMap)
 {
     PCPUID_REGISTERS CpuRegisters = NULL;
     PVOID ApicBaseAddress;
@@ -305,7 +303,7 @@ XtpInitializeApicBase(IN PLIST_ENTRY MemoryMappings)
     ApicBaseAddress = (PVOID)((UINT_PTR)ArReadModelSpecificRegister(0x1B) & 0xFFFFF000);
 
     /* Map APIC base address */
-    XtAddVirtualMemoryMapping(MemoryMappings, (PVOID)APIC_BASE, ApicBaseAddress, 1, LoaderFirmwarePermanent);
+    XtLdrProtocol->Memory.MapVirtualMemory(PageMap, (PVOID)APIC_BASE, ApicBaseAddress, 1, LoaderFirmwarePermanent);
     return STATUS_EFI_SUCCESS;
 }
 
@@ -324,7 +322,7 @@ XtpInitializeApicBase(IN PLIST_ENTRY MemoryMappings)
  */
 XTCDECL
 EFI_STATUS
-XtpInitializeLoaderBlock(IN PLIST_ENTRY MemoryMappings,
+XtpInitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
                          IN PVOID *VirtualAddress,
                          IN PXTBL_BOOT_PARAMETERS Parameters)
 {
@@ -369,7 +367,7 @@ XtpInitializeLoaderBlock(IN PLIST_ENTRY MemoryMappings,
 
         /* Store information about FrameBuffer device */
         FrameBufProtocol->GetDisplayInformation(&LoaderBlock->LoaderInformation.FrameBuffer);
-        FrameBufProtocol->PrintDisplayInformation();
+        // FrameBufProtocol->PrintDisplayInformation();
     }
     else
     {
@@ -400,7 +398,7 @@ XtpInitializeLoaderBlock(IN PLIST_ENTRY MemoryMappings,
     RtlCopyMemory(&LoaderBlock->KernelParameters, Parameters->Parameters, RtlWideStringLength(Parameters->Parameters, 0));
 
     /* Map kernel initialization block */
-    XtAddVirtualMemoryMapping(MemoryMappings, *VirtualAddress, (PVOID)LoaderBlock,
+    XtLdrProtocol->Memory.MapVirtualMemory(PageMap, *VirtualAddress, (PVOID)LoaderBlock,
                                            BlockPages, LoaderSystemBlock);
 
     /* Calculate next valid virtual address */
@@ -413,7 +411,7 @@ XtpInitializeLoaderBlock(IN PLIST_ENTRY MemoryMappings,
         FrameBufferPages = EFI_SIZE_TO_PAGES(LoaderBlock->LoaderInformation.FrameBuffer.BufferSize);
 
         /* Map frame buffer memory */
-        XtAddVirtualMemoryMapping(MemoryMappings, *VirtualAddress,
+        XtLdrProtocol->Memory.MapVirtualMemory(PageMap, *VirtualAddress,
                                                LoaderBlock->LoaderInformation.FrameBuffer.Address,
                                                FrameBufferPages, LoaderFirmwarePermanent);
 

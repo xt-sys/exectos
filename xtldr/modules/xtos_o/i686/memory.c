@@ -30,10 +30,9 @@
  */
 XTCDECL
 EFI_STATUS
-XtEnablePaging(IN PLIST_ENTRY MemoryMappings,
+XtEnablePaging(IN PXTBL_PAGE_MAPPING PageMap,
                IN PVOID VirtualAddress,
-               IN PEFI_LOADED_IMAGE_PROTOCOL ImageProtocol,
-               IN PVOID *PtePointer)
+               IN PEFI_LOADED_IMAGE_PROTOCOL ImageProtocol)
 {
     UINT_PTR PhysicalAddress, DescriptorCount;
     EFI_PHYSICAL_ADDRESS Address, PDPTAddress = 0;
@@ -137,16 +136,16 @@ XtEnablePaging(IN PLIST_ENTRY MemoryMappings,
     }
 
     /* Set and zero memory used by page mappings and CR3 */
-    *PtePointer = (PVOID)(UINT_PTR)PDPTAddress;
-    RtlZeroMemory(*PtePointer, EFI_PAGE_SIZE);
+    PageMap->PtePointer = (PVOID)(UINT_PTR)PDPTAddress;
+    RtlZeroMemory(PageMap->PtePointer, EFI_PAGE_SIZE);
     RtlZeroMemory((PVOID)Address, EFI_PAGE_SIZE * 4);
 
     /* Set the page directory into the PDPT and mark it present */
     for(Index = 0; Index < 4; Index++)
     {
         /* Set paging entry settings */
-        ((PHARDWARE_PTE)*PtePointer)[Index].PageFrameNumber = Address / EFI_PAGE_SIZE;
-        ((PHARDWARE_PTE)*PtePointer)[Index].Valid = 1;
+        ((PHARDWARE_PTE)PageMap->PtePointer)[Index].PageFrameNumber = Address / EFI_PAGE_SIZE;
+        ((PHARDWARE_PTE)PageMap->PtePointer)[Index].Valid = 1;
 
         /* Next valid PFN address */
         Address += EFI_PAGE_SIZE;
@@ -161,7 +160,7 @@ XtEnablePaging(IN PLIST_ENTRY MemoryMappings,
         ModuleInfo = CONTAIN_RECORD(ModulesListEntry, XTBL_MODULE_INFO, Flink);
 
         /* Map module code */
-        XtAddVirtualMemoryMapping(MemoryMappings, ModuleInfo->ModuleBase, ModuleInfo->ModuleBase,
+        XtLdrProtocol->Memory.MapVirtualMemory(PageMap, ModuleInfo->ModuleBase, ModuleInfo->ModuleBase,
                                   EFI_SIZE_TO_PAGES(ModuleInfo->ModuleSize), LoaderFirmwareTemporary);
 
         if(Status != STATUS_EFI_SUCCESS)
@@ -175,11 +174,11 @@ XtEnablePaging(IN PLIST_ENTRY MemoryMappings,
     }
 
     /* Map XTLDR code */
-    XtAddVirtualMemoryMapping(MemoryMappings, ImageProtocol->ImageBase, ImageProtocol->ImageBase,
+    XtLdrProtocol->Memory.MapVirtualMemory(PageMap, ImageProtocol->ImageBase, ImageProtocol->ImageBase,
                                        EFI_SIZE_TO_PAGES(ImageProtocol->ImageSize), LoaderFirmwareTemporary);
 
     /* Add page mapping itself to memory mapping */
-    Status = XtAddVirtualMemoryMapping(MemoryMappings, NULL, *PtePointer, 1, LoaderMemoryData);
+    Status = XtLdrProtocol->Memory.MapVirtualMemory(PageMap, NULL, PageMap->PtePointer, 1, LoaderMemoryData);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Mapping PD failed */
@@ -188,8 +187,8 @@ XtEnablePaging(IN PLIST_ENTRY MemoryMappings,
 
     /* Iterate through and map all the mappings */
     XtLdrProtocol->Debug.Print(L"Mapping and dumping EFI memory:\n");
-    ListEntry = MemoryMappings->Flink;
-    while(ListEntry != MemoryMappings)
+    ListEntry = PageMap->MemoryMap.Flink;
+    while(ListEntry != &PageMap->MemoryMap)
     {
         /* Take mapping from the list */
         Mapping = CONTAIN_RECORD(ListEntry, LOADER_MEMORY_MAPPING, ListEntry);
@@ -202,8 +201,8 @@ XtEnablePaging(IN PLIST_ENTRY MemoryMappings,
                                        Mapping->PhysicalAddress, Mapping->VirtualAddress, Mapping->NumberOfPages);
 
             /* Map memory */
-            Status = XtMapVirtualMemory(MemoryMappings, (UINT_PTR)Mapping->VirtualAddress,
-                                        (UINT_PTR)Mapping->PhysicalAddress, Mapping->NumberOfPages, PtePointer);
+            Status = XtLdrProtocol->Memory.MapPage(PageMap, (UINT_PTR)Mapping->VirtualAddress,
+                                        (UINT_PTR)Mapping->PhysicalAddress, Mapping->NumberOfPages);
             if(Status != STATUS_EFI_SUCCESS)
             {
                 /* Memory mapping failed */
@@ -216,7 +215,7 @@ XtEnablePaging(IN PLIST_ENTRY MemoryMappings,
     }
 
     /* Map zero page as well */
-    XtMapVirtualMemory(MemoryMappings, 0, 0, 1, PtePointer);
+    XtLdrProtocol->Memory.MapPage(PageMap, 0, 0, 1);
 
     /* Exit EFI Boot Services */
     XtLdrProtocol->Debug.Print(L"Exiting EFI boot services\n");
@@ -232,102 +231,10 @@ XtEnablePaging(IN PLIST_ENTRY MemoryMappings,
     ArWriteControlRegister(4, ArReadControlRegister(4) | CR4_PAE);
 
     /* Write page mappings to CR3 */
-    ArWriteControlRegister(3, (UINT_PTR)*PtePointer);
+    ArWriteControlRegister(3, (UINT_PTR)PageMap->PtePointer);
 
     /* Enable paging */
     ArWriteControlRegister(0, ArReadControlRegister(0) | CR0_PG);
-
-    /* Return success */
-    return STATUS_EFI_SUCCESS;
-}
-
-/**
- * This routine does the actual virtual memory mapping.
- *
- * @param MemoryMappings
- *        Supplies a pointer to linked list containing all memory mappings.
- *
- * @param VirtualAddress
- *        Supplies a virtual address of the mapping.
- *
- * @param PhysicalAddress
- *        Supplies a physical address of the mapping.
- *
- * @param NumberOfPages
- *        Supplies a number of the pages of the mapping.
- *
- * @param PaeExtension
- *        Specifies whether Physical Address Extension (PAE) is supported by the hardware.
- *
- * @param PtePointer
- *        Supplies a pointer to an array of pointers to page table entries.
- *
- * @return This routine returns a status code.
- *
- * @since XT 1.0
- */
-XTCDECL
-EFI_STATUS
-XtMapVirtualMemory(IN PLIST_ENTRY MemoryMappings,
-                   IN UINT_PTR VirtualAddress,
-                   IN UINT_PTR PhysicalAddress,
-                   IN UINT NumberOfPages,
-                   IN OUT PVOID *PtePointer)
-{
-    EFI_PHYSICAL_ADDRESS Address;
-    UINT_PTR PageFrameNumber;
-    PHARDWARE_PTE PageTable, PageDirectory;
-    EFI_STATUS Status;
-    unsigned int PdIndex, PtIndex;
-
-    /* Set the PFN */
-    PageFrameNumber = PhysicalAddress >> EFI_PAGE_SHIFT;
-
-    /* Do the recursive mapping */
-    while(NumberOfPages > 0)
-    {
-        /* Find Page Directory and calculate indices from a virtual address */
-        PageDirectory = (PHARDWARE_PTE)(UINT_PTR)(((PHARDWARE_PTE)(*PtePointer))[VirtualAddress >> 30].PageFrameNumber * EFI_PAGE_SIZE);
-        PdIndex = (VirtualAddress >> 21) & 0x1FF;
-        PtIndex = (VirtualAddress & 0x1FF000) >> 12;
-
-        /* Validate Page Directory */
-        if(!PageDirectory[PdIndex].Valid) {
-            /* Allocate pages for new page table */
-            Status = XtLdrProtocol->Memory.AllocatePages(1, &Address);
-            if(Status != STATUS_EFI_SUCCESS) {
-                /* Memory allocation failure */
-                return Status;
-            }
-
-            /* Fill allocated memory with zeros */
-            RtlZeroMemory((PVOID)(UINT_PTR)Address, EFI_PAGE_SIZE);
-
-            /* Set paging entry settings */
-            PageDirectory[PdIndex].PageFrameNumber = Address / EFI_PAGE_SIZE;
-            PageDirectory[PdIndex].Valid = 1;
-            PageDirectory[PdIndex].Write = 1;
-
-            /* Set page table */
-            PageTable = (PHARDWARE_PTE)(UINT_PTR)Address;
-        }
-        else
-        {
-            /* Set page table */
-            PageTable = (PHARDWARE_PTE)(UINT_PTR)(PageDirectory[PdIndex].PageFrameNumber * EFI_PAGE_SIZE);
-        }
-        /* Set page table settings */
-        PageTable[PtIndex].PageFrameNumber = PageFrameNumber;
-        PageTable[PtIndex].Valid = 1;
-        PageTable[PtIndex].Write = 1;
-
-        /* Take next virtual address and PFN */
-        VirtualAddress += EFI_PAGE_SIZE;
-        PageFrameNumber++;
-
-        /* Decrease number of pages left */
-        NumberOfPages--;
-    }
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
