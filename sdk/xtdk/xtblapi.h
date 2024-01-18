@@ -46,5 +46,6 @@
 #include ARCH_HEADER(hlfuncs.h)
 
 /* Boot Manager specific structures */
+#include <bltarget.h>
 #include <bltypes.h>
 #include <blfuncs.h>

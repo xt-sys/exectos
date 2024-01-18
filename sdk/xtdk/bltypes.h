@@ -16,27 +16,10 @@
 #include ARCH_HEADER(xtstruct.h)
 
 
-/* Architecture specific definitions */
-#if defined(__i386__) || defined(__i686__)
-    #define XTBL_ARCH_LOADER_DIRECTORY_PATH                         L"\\EFI\\BOOT\\XTLDR32\\"
-    #define XTBL_ARCH_MODULES_DIRECTORY_PATH                        L"\\EFI\\BOOT\\XTLDR32\\MODULES\\"
-    #define XTBL_ARCH_THEMES_DIRECTORY_PATH                         L"\\EFI\\BOOT\\XTLDR32\\THEMES\\"
-#elif defined(__amd64__) || defined(__x86_64__)
-    #define XTBL_ARCH_LOADER_DIRECTORY_PATH                         L"\\EFI\\BOOT\\XTLDR64\\"
-    #define XTBL_ARCH_MODULES_DIRECTORY_PATH                        L"\\EFI\\BOOT\\XTLDR64\\MODULES\\"
-    #define XTBL_ARCH_THEMES_DIRECTORY_PATH                         L"\\EFI\\BOOT\\XTLDR64\\THEMES\\"
-#else
-    #error Unknown architecture
-#endif
-
 /* XTLDR directories */
 #define XTBL_LOADER_DIRECTORY_PATH                                  L"\\EFI\\BOOT\\XTLDR\\"
 #define XTBL_MODULES_DIRECTORY_PATH                                 L"\\EFI\\BOOT\\XTLDR\\MODULES\\"
 #define XTBL_THEMES_DIRECTORY_PATH                                  L"\\EFI\\BOOT\\XTLDR\\THEMES\\"
-
-/* XTLDR module segment macros */
-#define XTBL_MODDEPS                                                SEGMENT(".moddeps") CONST WCHAR XtBlpDeps[][8]
-#define XTBL_MODINFO                                                SEGMENT(".modinfo") CONST WCHAR XtBlpInfo[]
 
 /* EFI XT boot devices */
 #define XTBL_BOOT_DEVICE_UNKNOWN                                    0x00
