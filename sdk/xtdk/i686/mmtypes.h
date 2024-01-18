@@ -22,7 +22,7 @@ typedef enum _PAGE_SIZE
 {
     Size4K,
     Size2M,
-    Size1G
+    Size4M
 } PAGE_SIZE, *PPAGE_SIZE;
 
 /* Page Table entry structure definition (with PAE support) */
