@@ -160,11 +160,14 @@ BlGetMemoryMap(OUT PEFI_MEMORY_MAP MemoryMap)
  * @param PageMap
  *        Supplies a pointer to the page mapping structure.
  *
+ * @param MemoryMapAddress
+ *        Supplies an address of the mapped virtual memory area.
+ *
  * @param PageMapLevel
  *        Specifies a number of of paging structures levels.
  *
- * @param MemoryMapAddress
- *        Supplies an address of the mapped virtual memory area.
+ * @param PageSize
+ *        Specifies a page size (currently it has no effect).
  *
  * @return This routine does not return any value.
  *
