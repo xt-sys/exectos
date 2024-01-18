@@ -186,21 +186,18 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
     /* Initialize XTOS startup sequence */
     XtLdrProtocol->Debug.Print(L"Initializing XTOS startup sequence\n");
 
-XtLdrProtocol->Debug.Print(L"DUPA1\n");
     /* Set base virtual memory area for the kernel mappings */
     VirtualMemoryArea = (PVOID)KSEG0_BASE;
     VirtualAddress = (PVOID)(KSEG0_BASE + KSEG0_KERNEL_BASE);
 
     /* Initialize virtual memory mappings */
-    XtLdrProtocol->Memory.InitializePageMap(&PageMap, 3, VirtualMemoryArea);
-XtLdrProtocol->Debug.Print(L"DUPA2\n");
+    XtLdrProtocol->Memory.InitializePageMap(&PageMap, VirtualMemoryArea, 3, Size4K);
 
     Status = XtLdrProtocol->Memory.MapEfiMemory(&PageMap, NULL);
     if(Status != STATUS_EFI_SUCCESS)
     {
         return Status;
     }
-XtLdrProtocol->Debug.Print(L"DUPA3\n");
 
     /* Load the kernel */
     Status = XtpLoadModule(BootDir, Parameters->KernelFile, VirtualAddress, LoaderSystemCode, &ImageContext);

@@ -157,8 +157,9 @@ BlInitializeConsole();
 XTCDECL
 VOID
 BlInitializePageMap(OUT PXTBL_PAGE_MAPPING PageMap,
+                    IN PVOID *MemoryMapAddress,
                     IN SHORT PageMapLevel,
-                    IN PVOID *MemoryMapAddress);
+                    IN PAGE_SIZE PageSize);
 
 XTCDECL
 EFI_STATUS

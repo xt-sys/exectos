@@ -173,15 +173,17 @@ BlGetMemoryMap(OUT PEFI_MEMORY_MAP MemoryMap)
 XTCDECL
 VOID
 BlInitializePageMap(OUT PXTBL_PAGE_MAPPING PageMap,
+                    IN PVOID *MemoryMapAddress,
                     IN SHORT PageMapLevel,
-                    IN PVOID *MemoryMapAddress)
+                    IN PAGE_SIZE PageSize)
 {
     /* Initialize memory mappings */
     RtlInitializeListHead(&PageMap->MemoryMap);
 
-    /* Set page map level and memory map address */
-    PageMap->PageMapLevel = PageMapLevel;
+    /* Set page map size/level and memory map address */
     PageMap->MemoryMapAddress = &MemoryMapAddress;
+    PageMap->PageMapLevel = PageMapLevel;
+    PageMap->PageSize = PageSize;
 }
 
 /**

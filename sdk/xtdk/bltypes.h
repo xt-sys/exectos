@@ -2,7 +2,7 @@
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
  * FILE:            sdk/xtdk/bltypes.h
- * DESCRIPTION:     XT Boot Manager structures definitions
+ * DESCRIPTION:     XT Boot Loader structures definitions
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
@@ -10,8 +10,10 @@
 #define __XTDK_BLTYPES_H
 
 #include <xttypes.h>
+#include <xtstruct.h>
 #include <xtuefi.h>
 #include <hltypes.h>
+#include ARCH_HEADER(xtstruct.h)
 
 
 /* Architecture specific definitions */
@@ -92,7 +94,7 @@ typedef EFI_STATUS (*PBL_FREE_POOL)(IN PVOID Memory);
 typedef EFI_STATUS (*PBL_GET_MEMORY_MAP)(OUT PEFI_MEMORY_MAP MemoryMap);
 typedef PLIST_ENTRY (*PBL_GET_MODULES_LIST)();
 typedef INT_PTR (*PBL_GET_SECURE_BOOT_STATUS)();
-typedef VOID (*PBL_INITIALIZE_PAGE_MAP)(OUT PXTBL_PAGE_MAPPING PageMap, IN SHORT PageMapLevel, IN PVOID *MemoryMapAddress);
+typedef VOID (*PBL_INITIALIZE_PAGE_MAP)(OUT PXTBL_PAGE_MAPPING PageMap, IN PVOID *MemoryMapAddress, IN SHORT PageMapLevel, IN PAGE_SIZE PageSize);
 typedef EFI_STATUS (*PBL_INSTALL_XT_PROTOCOL)(IN PVOID Interface, IN PEFI_GUID Guid);
 typedef EFI_STATUS (*PBL_INVOKE_BOOT_PROTOCOL)(IN PLIST_ENTRY OptionsList);
 typedef EFI_STATUS (*PBL_LOCATE_PROTOCOL_HANDLES)(OUT PEFI_HANDLE *Handles, OUT PUINT_PTR Count, IN PEFI_GUID ProtocolGuid);
@@ -202,6 +204,7 @@ typedef struct _XTBL_PAGE_MAPPING
     PVOID PtePointer;
     PVOID MemoryMapAddress;
     SHORT PageMapLevel;
+    PAGE_SIZE PageSize;
 } XTBL_PAGE_MAPPING, *PXTBL_PAGE_MAPPING;
 
 /* XTLDR Status data */
