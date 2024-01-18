@@ -16,6 +16,7 @@
 typedef enum _CPU_VENDOR CPU_VENDOR, *PCPU_VENDOR;
 typedef enum _CPUID_FEATURES CPUID_FEATURES, *PCPUID_FEATURES;
 typedef enum _CPUID_REQUESTS CPUID_REQUESTS, *PCPUID_REQUESTS;
+typedef enum _PAGE_SIZE PAGE_SIZE, *PPAGE_SIZE;
 
 /* Architecture-specific structures forward references */
 typedef struct _CONTEXT CONTEXT, *PCONTEXT;

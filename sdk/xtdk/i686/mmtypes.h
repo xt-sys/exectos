@@ -17,6 +17,14 @@
 #define MM_PAGE_SHIFT                              12
 #define MM_PAGE_SIZE                               4096
 
+/* Page size enumeration list */
+typedef enum _PAGE_SIZE
+{
+    Size4K,
+    Size2M,
+    Size1G
+} PAGE_SIZE, *PPAGE_SIZE;
+
 /* Page Table entry structure definition (with PAE support) */
 typedef struct _HARDWARE_PTE
 {
