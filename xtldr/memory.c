@@ -160,9 +160,6 @@ BlGetMemoryMap(OUT PEFI_MEMORY_MAP MemoryMap)
  * @param PageMap
  *        Supplies a pointer to the page mapping structure.
  *
- * @param MemoryMapAddress
- *        Supplies an address of the mapped virtual memory area.
- *
  * @param PageMapLevel
  *        Specifies a number of of paging structures levels.
  *
@@ -176,7 +173,6 @@ BlGetMemoryMap(OUT PEFI_MEMORY_MAP MemoryMap)
 XTCDECL
 VOID
 BlInitializePageMap(OUT PXTBL_PAGE_MAPPING PageMap,
-                    IN PVOID *MemoryMapAddress,
                     IN SHORT PageMapLevel,
                     IN PAGE_SIZE PageSize)
 {
@@ -184,7 +180,6 @@ BlInitializePageMap(OUT PXTBL_PAGE_MAPPING PageMap,
     RtlInitializeListHead(&PageMap->MemoryMap);
 
     /* Set page map size/level and memory map address */
-    PageMap->MemoryMapAddress = &MemoryMapAddress;
     PageMap->PageMapLevel = PageMapLevel;
     PageMap->PageSize = PageSize;
 }
@@ -195,9 +190,8 @@ BlInitializePageMap(OUT PXTBL_PAGE_MAPPING PageMap,
  * @param PageMap
  *        Supplies a pointer to the page mapping structure.
  *
- * @param DesiredVirtualAddress
- *        Supplies a desired virtual address, where EFI memory will be mapped.
- *        If not specified, memory map address will be used.
+ * @param MemoryMapAddress
+ *        Supplies a virtual address, where EFI memory will be mapped.
  *
  * @return This routine returns a status code.
  *
@@ -206,7 +200,7 @@ BlInitializePageMap(OUT PXTBL_PAGE_MAPPING PageMap,
 XTCDECL
 EFI_STATUS
 BlMapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
-               IN OUT PVOID *DesiredVirtualAddress)
+               IN OUT PVOID *MemoryMapAddress)
 {
     PEFI_MEMORY_DESCRIPTOR Descriptor;
     LOADER_MEMORY_TYPE MemoryType;
@@ -216,17 +210,8 @@ BlMapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
     EFI_STATUS Status;
     SIZE_T Index;
 
-    /* Set initial virtual address */
-    if(*DesiredVirtualAddress != NULL)
-    {
-        /* Set virtual address as specified in argument */
-        VirtualAddress = *DesiredVirtualAddress;
-    }
-    else
-    {
-        /* Otherwise, set virtual address as specified in page map */
-        VirtualAddress = PageMap->MemoryMapAddress;
-    }
+    /* Set virtual address as specified in argument */
+    VirtualAddress = *MemoryMapAddress;
 
     /* Allocate and zero-fill buffer for EFI memory map */
     BlAllocateMemoryPool(sizeof(EFI_MEMORY_MAP), (PVOID*)&MemoryMap);
@@ -288,7 +273,8 @@ BlMapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
         }
     }
 
-    /* Return success */
+    /* Store next valid virtual address and return success */
+    *MemoryMapAddress = VirtualAddress;
     return STATUS_EFI_SUCCESS;
 }
 
