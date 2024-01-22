@@ -11,7 +11,7 @@ list(APPEND XTLDR_DUMMY_SOURCE
     ${XTLDR_DUMMY_SOURCE_DIR}/dummy.c
     ${XTLDR_DUMMY_SOURCE_DIR}/globals.c)
 
-# Link bootloader executable
+# Link module executable
 add_executable(dummy ${XTLDR_DUMMY_SOURCE})
 
 # Add linker libraries

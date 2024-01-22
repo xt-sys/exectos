@@ -11,7 +11,7 @@ list(APPEND XTLDR_BEEP_SOURCE
     ${XTLDR_BEEP_SOURCE_DIR}/beep.c
     ${XTLDR_BEEP_SOURCE_DIR}/globals.c)
 
-# Link bootloader executable
+# Link module executable
 add_executable(beep ${XTLDR_BEEP_SOURCE})
 
 # Add linker libraries
