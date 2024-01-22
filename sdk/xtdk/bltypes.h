@@ -195,6 +195,8 @@ typedef struct _XTBL_STATUS
     PBL_XT_BOOT_MENU BootMenu;
     BOOLEAN BootServices;
     ULONG DebugPort;
+    PVOID LoaderBase;
+    ULONGLONG LoaderSize;
     INT_PTR SecureBoot;
     CPPORT SerialPort;
 } XTBL_STATUS, *PXTBL_STATUS;

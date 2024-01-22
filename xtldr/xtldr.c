@@ -42,12 +42,16 @@ BlInitializeBootLoader()
     /* Store SecureBoot status */
     BlpStatus.SecureBoot = BlGetSecureBootStatus();
 
-    /* Check if debug is enabled */
-    if(DEBUG)
+    /* Attempt to open EFI LoadedImage protocol */
+    Status = BlOpenProtocol(&Handle, (PVOID *)&LoadedImage, &LipGuid);
+    if(Status == STATUS_EFI_SUCCESS)
     {
-        /* Attempt to open EFI LoadedImage protocol */
-        Status = BlOpenProtocol(&Handle, (PVOID *)&LoadedImage, &LipGuid);
-        if(Status == STATUS_EFI_SUCCESS)
+        /* Store boot loader image base and size */
+        BlpStatus.LoaderBase = LoadedImage->ImageBase;
+        BlpStatus.LoaderSize = LoadedImage->ImageSize;
+
+        /* Check if debug is enabled */
+        if(DEBUG)
         {
             /* Protocol opened successfully, print useful debug information */
             BlConsolePrint(L"\n---------- BOOTLOADER DEBUG ----------\n"
@@ -62,6 +66,9 @@ BlInitializeBootLoader()
                            LoadedImage->Revision);
             BlSleepExecution(3000);
         }
+
+        /* Close EFI LoadedImage protocol */
+        BlCloseProtocol(&Handle, &LipGuid);
     }
 }
 
