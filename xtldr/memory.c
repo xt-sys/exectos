@@ -339,6 +339,17 @@ BlMapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
         Mapping2 = CONTAIN_RECORD(ListEntry, LOADER_MEMORY_MAPPING, ListEntry);
         PhysicalAddress2End = (PUINT8)Mapping2->PhysicalAddress + (Mapping2->NumberOfPages * EFI_PAGE_SIZE) - 1 ;
 
+        /* Check if new mapping is a subset of an existing mapping */
+        if(Mapping1->PhysicalAddress >= Mapping2->PhysicalAddress && PhysicalAddressEnd <= PhysicalAddress2End)
+        {
+            /* Make sure it's memory type is the same */
+            if(Mapping1->MemoryType == Mapping2->MemoryType)
+            {
+                /* It is already mapped */
+                return STATUS_EFI_SUCCESS;
+            }
+        }
+
         /* Check if they overlap */
         if(PhysicalAddressEnd > Mapping2->PhysicalAddress && PhysicalAddressEnd <= PhysicalAddress2End)
         {
