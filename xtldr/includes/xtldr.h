@@ -180,6 +180,13 @@ BlInvokeBootProtocol(IN PLIST_ENTRY OptionsList);
 
 XTCDECL
 EFI_STATUS
+BlLoadEfiImage(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
+               IN PVOID ImageData,
+               IN SIZE_T ImageSize,
+               OUT PEFI_HANDLE ImageHandle);
+
+XTCDECL
+EFI_STATUS
 BlLoadModule(IN PWCHAR ModuleName);
 
 XTCDECL
@@ -288,6 +295,10 @@ BlShutdownSystem();
 XTCDECL
 VOID
 BlSleepExecution(IN ULONG_PTR Milliseconds);
+
+XTCDECL
+EFI_STATUS
+BlStartEfiImage(IN EFI_HANDLE ImageHandle);
 
 XTCDECL
 VOID

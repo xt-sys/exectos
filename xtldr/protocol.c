@@ -287,8 +287,7 @@ BlLoadModule(IN PWCHAR ModuleName)
     ModuleDevicePath[1].Header.SubType = EFI_END_ENTIRE_DP;
 
     /* Load EFI image */
-    Status = EfiSystemTable->BootServices->LoadImage(FALSE, EfiImageHandle, (PEFI_DEVICE_PATH_PROTOCOL)ModuleDevicePath,
-                                                     ModuleData, ModuleSize, &ModuleHandle);
+    Status = BlLoadEfiImage((PEFI_DEVICE_PATH_PROTOCOL)ModuleDevicePath, ModuleData, ModuleSize, &ModuleHandle);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Check if caused by secure boot */
@@ -337,7 +336,7 @@ BlLoadModule(IN PWCHAR ModuleName)
     EfiSystemTable->BootServices->CloseProtocol(LoadedImage, &LIPGuid, LoadedImage, NULL);
 
     /* Start EFI image */
-    Status = EfiSystemTable->BootServices->StartImage(ModuleHandle, NULL, NULL);
+    Status = BlStartEfiImage(ModuleHandle);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to start module image */
@@ -651,9 +650,11 @@ BlpInstallXtLoaderProtocol()
     BlpLdrProtocol.Tui.UpdateProgressBar = BlUpdateProgressBar;
     BlpLdrProtocol.Util.ExitBootServices = BlExitBootServices;
     BlpLdrProtocol.Util.GetSecureBootStatus = BlGetSecureBootStatus;
+    BlpLdrProtocol.Util.LoadEfiImage = BlLoadEfiImage;
     BlpLdrProtocol.Util.RebootSystem = BlRebootSystem;
     BlpLdrProtocol.Util.ShutdownSystem = BlShutdownSystem;
     BlpLdrProtocol.Util.SleepExecution = BlSleepExecution;
+    BlpLdrProtocol.Util.StartEfiImage = BlStartEfiImage;
     BlpLdrProtocol.Util.WaitForEfiEvent = BlWaitForEfiEvent;
 
     /* Register XTLDR loader protocol */

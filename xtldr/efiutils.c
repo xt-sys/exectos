@@ -100,6 +100,36 @@ BlGetSecureBootStatus()
 }
 
 /**
+ * Loads an EFI image into memory.
+ *
+ * @param DevicePath
+ *        Specifies a device path from which the image is loaded.
+ *
+ * @param ImageData
+ *        Supplies a pointer to the memory are containing a copy of the EFI image.
+ *
+ * @param ImageSize
+ *        Supplies the size (in bytes) of the EFI image.
+ *
+ * @param ImageHandle
+ *        Supplies a pointer to the memory area, where an EFI_image handle will be stored.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+BlLoadEfiImage(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
+               IN PVOID ImageData,
+               IN SIZE_T ImageSize,
+               OUT PEFI_HANDLE ImageHandle)
+{
+    /* Load EFI image */
+    return EfiSystemTable->BootServices->LoadImage(FALSE, EfiImageHandle, DevicePath, ImageData, ImageSize, ImageHandle);
+}
+
+/**
  * Reboots the machine.
  *
  * @return This routine returns a status code.
@@ -144,6 +174,23 @@ VOID
 BlSleepExecution(IN ULONG_PTR Milliseconds)
 {
     EfiSystemTable->BootServices->Stall(Milliseconds * 1000);
+}
+
+/**
+ * Executes a loaded EFI image entry point.
+ *
+ * @param ImageHandle
+ *        Provides a handle of loaded image, that will be started.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+BlStartEfiImage(IN EFI_HANDLE ImageHandle)
+{
+    return EfiSystemTable->BootServices->StartImage(ImageHandle, NULL, NULL);
 }
 
 /**
