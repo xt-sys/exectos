@@ -205,5 +205,6 @@ XtLdrModuleMain(IN EFI_HANDLE ImageHandle,
     /* Play the tune set in the configuration */
     BpPlayTune(XtLdrProto->Config.GetValue(L"TUNE"));
 
+	/* Return success */
     return STATUS_EFI_SUCCESS;
 }
