@@ -10,6 +10,123 @@
 
 
 /**
+ * Maps boot loader related code and builds page map.
+ *
+ * @param PageMap
+ *        Supplies a pointer to the page mapping structure.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap)
+{
+    PLIST_ENTRY ListEntry, ModulesList, ModulesListEntry;
+    PLOADER_MEMORY_MAPPING Mapping;
+    PXTBL_MODULE_INFO ModuleInfo;
+    EFI_PHYSICAL_ADDRESS Address;
+    EFI_STATUS Status;
+
+    /* Allocate pages for the Page Map */
+    Status = BlAllocateMemoryPages(1, &Address);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Memory allocation failure */
+        return Status;
+    }
+
+    /* Assign and zero-fill memory used by page mappings */
+    PageMap->PtePointer = (PVOID)(UINT_PTR)Address;
+    RtlZeroMemory(PageMap->PtePointer, EFI_PAGE_SIZE);
+
+    /* Add page mapping itself to memory mapping */
+    Status = BlMapVirtualMemory(PageMap, NULL, PageMap->PtePointer, 1, LoaderMemoryData);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* PML mapping failed */
+        return Status;
+    }
+
+    /* Get list of XTLDR modules */
+    ModulesList = BlGetModulesList();
+    ModulesListEntry = ModulesList->Flink;
+    while(ModulesListEntry != ModulesList)
+    {
+        /* Get module info */
+        ModuleInfo = CONTAIN_RECORD(ModulesListEntry, XTBL_MODULE_INFO, Flink);
+
+        /* Map module code */
+        Status = BlMapVirtualMemory(PageMap, ModuleInfo->ModuleBase, ModuleInfo->ModuleBase,
+                                    EFI_SIZE_TO_PAGES(ModuleInfo->ModuleSize), LoaderFirmwareTemporary);
+
+        /* Check if mapping succeeded */
+        if(Status != STATUS_EFI_SUCCESS)
+        {
+            /* Mapping module code failed */
+            return Status;
+        }
+
+        /* Get next module */
+        ModulesListEntry = ModulesListEntry->Flink;
+    }
+
+    /* Make sure boot loader image base and size are set */
+    if(BlpStatus.LoaderBase && BlpStatus.LoaderSize)
+    {
+        /* Map boot loader code as well */
+        Status = BlMapVirtualMemory(PageMap, BlpStatus.LoaderBase, BlpStatus.LoaderBase,
+                                    EFI_SIZE_TO_PAGES(BlpStatus.LoaderSize), LoaderFirmwareTemporary);
+        if(Status != STATUS_EFI_SUCCESS)
+        {
+            /* Mapping boot loader code failed */
+            return Status;
+        }
+    }
+    else
+    {
+        /* Boot loader image information re not available */
+        return STATUS_EFI_PROTOCOL_ERROR;
+    }
+
+    /* Iterate through and map all the mappings*/
+    BlDebugPrint(L"Mapping and dumping EFI memory:\n");
+    ListEntry = PageMap->MemoryMap.Flink;
+    while(ListEntry != &PageMap->MemoryMap)
+    {
+        /* Take mapping from the list */
+        Mapping = CONTAIN_RECORD(ListEntry, LOADER_MEMORY_MAPPING, ListEntry);
+
+        /* Check if virtual address is set */
+        if(Mapping->VirtualAddress)
+        {
+            /* Dump memory mapping */
+            BlDebugPrint(L"   Type=%02lu, PhysicalBase=0x%016lx, VirtualBase=0x%016lx, Pages=%lu\n", Mapping->MemoryType,
+                         Mapping->PhysicalAddress, Mapping->VirtualAddress, Mapping->NumberOfPages);
+
+            /* Map memory */
+            Status = BlMapPage(PageMap, (UINT_PTR)Mapping->VirtualAddress,
+                                        (UINT_PTR)Mapping->PhysicalAddress, Mapping->NumberOfPages);
+            if(Status != STATUS_EFI_SUCCESS)
+            {
+                /* Memory mapping failed */
+                return Status;
+            }
+        }
+
+        /* Take next element */
+        ListEntry = ListEntry->Flink;
+    }
+
+    /* Finally, map zero page */
+    BlMapPage(PageMap, 0, 0, 1);
+
+    /* Return success */
+    return STATUS_EFI_SUCCESS;
+}
+
+/**
  * Does the actual virtual memory mapping.
  *
  * @param PageMap
