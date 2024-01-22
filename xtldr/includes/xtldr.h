@@ -39,6 +39,11 @@ BlClearConsoleScreen();
 
 XTCDECL
 EFI_STATUS
+BlCloseProtocol(IN PEFI_HANDLE Handle,
+                IN PEFI_GUID ProtocolGuid);
+
+XTCDECL
+EFI_STATUS
 BlCloseVolume(IN PEFI_HANDLE VolumeHandle);
 
 XTCDECL
