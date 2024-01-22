@@ -30,6 +30,10 @@ BlAllocateMemoryPool(IN UINT_PTR Size,
                      OUT PVOID *Memory);
 
 XTCDECL
+EFI_STATUS
+BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap);
+
+XTCDECL
 VOID
 BlClearConsoleLine(IN ULONGLONG LineNo);
 
