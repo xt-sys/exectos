@@ -51,9 +51,7 @@ XtConvertEfiMemoryType(IN EFI_MEMORY_TYPE EfiMemoryType);
 
 XTCDECL
 EFI_STATUS
-XtEnablePaging(IN PXTBL_PAGE_MAPPING PageMap,
-               IN PVOID VirtualAddress,
-               IN PEFI_LOADED_IMAGE_PROTOCOL ImageProtocol);
+XtEnablePaging(IN PXTBL_PAGE_MAPPING PageMap);
 
 XTCDECL
 EFI_STATUS

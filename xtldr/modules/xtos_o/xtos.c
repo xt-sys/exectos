@@ -247,7 +247,7 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
 
     /* Enable paging */
     XtLdrProtocol->Protocol.Open(&ProtocolHandle, (PVOID*)&ImageProtocol, &LoadedImageGuid);
-    Status = XtEnablePaging(&PageMap, VirtualAddress, ImageProtocol);
+    Status = XtEnablePaging(&PageMap);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to enable paging */
