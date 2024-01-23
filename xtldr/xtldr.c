@@ -200,7 +200,7 @@ BlInvokeBootProtocol(IN PLIST_ENTRY OptionsList)
             /* Check a length of modules list */
             ModuleListLength = RtlWideStringLength(Option->Value, 0);
 
-            Status = BlAllocateMemoryPool(sizeof(PWCHAR) * ModuleListLength, (PVOID *)&ModulesList);
+            Status = BlAllocateMemoryPool(sizeof(WCHAR) * (ModuleListLength + 1), (PVOID *)&ModulesList);
             if(Status != STATUS_EFI_SUCCESS)
             {
                 /* Failed to allocate memory, print error message and return status code */
@@ -209,7 +209,7 @@ BlInvokeBootProtocol(IN PLIST_ENTRY OptionsList)
             }
 
             /* Make a copy of modules list */
-            RtlCopyMemory(ModulesList, Option->Value, sizeof(PWCHAR) * ModuleListLength);
+            RtlCopyMemory(ModulesList, Option->Value, sizeof(WCHAR) * (ModuleListLength + 1));
         }
         else if(RtlCompareWideStringInsensitive(Option->Name, L"SYSTEMTYPE", 0) == 0)
         {
@@ -219,7 +219,7 @@ BlInvokeBootProtocol(IN PLIST_ENTRY OptionsList)
         else if(RtlCompareWideStringInsensitive(Option->Name, L"SYSTEMPATH", 0) == 0)
         {
             /* System path found, get volume device path */
-            Status = BlGetVolumeDevicePath((PWCHAR)Option->Value, &BootParameters.DevicePath,
+            Status = BlGetVolumeDevicePath(Option->Value, &BootParameters.DevicePath,
                                            &BootParameters.ArcName, &BootParameters.SystemPath);
             if(Status != STATUS_EFI_SUCCESS)
             {
