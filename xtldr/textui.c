@@ -139,7 +139,7 @@ BlDisplayBootMenu()
                     if(Status != STATUS_SUCCESS)
                     {
                         /* Failed to boot OS */
-                        BlDebugPrint(L"ERROR: Failed to boot OS '%S' (Status Code: 0x%lx)\n",
+                        BlDebugPrint(L"ERROR: Failed to boot '%S' (Status Code: 0x%lx)\n",
                                      MenuEntries[HighligtedEntryId].EntryName, Status);
                         BlDisplayErrorDialog(L"XTLDR", L"Failed to startup the selected Operating System.");
                     }
@@ -283,7 +283,7 @@ BlDisplayBootMenu()
                     if(Status != STATUS_SUCCESS)
                     {
                         /* Failed to boot OS */
-                        BlDebugPrint(L"ERROR: Failed to boot OS '%S' (Status Code: 0x%lx)\n",
+                        BlDebugPrint(L"ERROR: Failed to boot '%S' (Status Code: 0x%lx)\n",
                                      MenuEntries[HighligtedEntryId].EntryName, Status);
                         BlDisplayErrorDialog(L"XTLDR", L"Failed to startup the selected Operating System.");
                     }
