@@ -16,6 +16,11 @@
 #define XTBL_MODDEPS                                                SEGMENT(".moddeps") CONST WCHAR XtBlpDeps[][8]
 #define XTBL_MODINFO                                                SEGMENT(".modinfo") CONST WCHAR XtBlpInfo[]
 
+/* XTLDR directories */
+#define XTBL_LOADER_DIRECTORY_PATH                                  L"\\EFI\\BOOT\\XTLDR\\"
+#define XTBL_MODULES_DIRECTORY_PATH                                 L"\\EFI\\BOOT\\XTLDR\\MODULES\\"
+#define XTBL_THEMES_DIRECTORY_PATH                                  L"\\EFI\\BOOT\\XTLDR\\THEMES\\"
+
 /* Architecture specific definitions */
 #if defined(__i386__) || defined(__i686__)
     #define XTBL_ARCH_LOADER_DIRECTORY_PATH                         L"\\EFI\\BOOT\\XTLDR32\\"

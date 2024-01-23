@@ -16,11 +16,6 @@
 #include ARCH_HEADER(xtstruct.h)
 
 
-/* XTLDR directories */
-#define XTBL_LOADER_DIRECTORY_PATH                                  L"\\EFI\\BOOT\\XTLDR\\"
-#define XTBL_MODULES_DIRECTORY_PATH                                 L"\\EFI\\BOOT\\XTLDR\\MODULES\\"
-#define XTBL_THEMES_DIRECTORY_PATH                                  L"\\EFI\\BOOT\\XTLDR\\THEMES\\"
-
 /* EFI XT boot devices */
 #define XTBL_BOOT_DEVICE_UNKNOWN                                    0x00
 #define XTBL_BOOT_DEVICE_CDROM                                      0x01
