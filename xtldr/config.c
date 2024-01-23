@@ -148,7 +148,7 @@ BlpLoadConfiguration()
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to load configuration */
-        BlDebugPrint(L"Failed to load FS0:/EFI/BOOT/XTLDR.INI configuration file (Status Code: 0x%lx)\n", Status);
+        BlDebugPrint(L"Failed to load FS0:/EFI/BOOT/XTLDR/XTLDR.INI configuration file (Status Code: 0x%lx)\n", Status);
         return Status;
     }
 
@@ -157,7 +157,7 @@ BlpLoadConfiguration()
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to parse configuration */
-        BlDebugPrint(L"Failed to parse FS0:/EFI/BOOT/XTLDR.INI configuration file (Status Code: 0x%lx)\n", Status);
+        BlDebugPrint(L"Failed to parse FS0:/EFI/BOOT/XTLDR/XTLDR.INI configuration file (Status Code: 0x%lx)\n", Status);
         return Status;
     }
 
