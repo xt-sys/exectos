@@ -13,6 +13,6 @@
 
 
 /* XTLDR protocol handler */
-EXTERN PXTBL_LOADER_PROTOCOL XtLdrProto;
+EXTERN PXTBL_LOADER_PROTOCOL XtLdrProtocol;
 
 #endif/* __XTLDR_BEEP_GLOBALS_H */

@@ -51,7 +51,7 @@ XtLdrModuleMain(IN EFI_HANDLE ImageHandle,
     EFI_STATUS Status;
 
     /* Open the XTLDR protocol */
-    Status = BlGetXtLdrProtocol(SystemTable, ImageHandle, &XtLdrProto);
+    Status = BlGetXtLdrProtocol(SystemTable, ImageHandle, &XtLdrProtocol);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to open the protocol, return error */
@@ -62,8 +62,8 @@ XtLdrModuleMain(IN EFI_HANDLE ImageHandle,
     BlpDummyProtocol.BootSystem = BlBootDummyOS;
 
     /* Register XTOS boot protocol */
-    XtLdrProto->Boot.RegisterProtocol(L"XTOS", &DummyGuid);
+    XtLdrProtocol->Boot.RegisterProtocol(L"XTOS", &DummyGuid);
 
     /* Register DUMMY protocol as XTOS boot protocol */
-    return XtLdrProto->Protocol.Install(&BlpDummyProtocol, &DummyGuid);
+    return XtLdrProtocol->Protocol.Install(&BlpDummyProtocol, &DummyGuid);
 }

@@ -126,7 +126,7 @@ BpPlayTune(IN PWCHAR Arguments)
             }
 
             /* Wait for duration time */
-            XtLdrProto->Util.SleepExecution(60000 * Duration / Tempo);
+            XtLdrProtocol->Util.SleepExecution(60000 * Duration / Tempo);
 
             /* Reset pitch and duration */
             Pitch = -1;
@@ -195,7 +195,7 @@ XtLdrModuleMain(IN EFI_HANDLE ImageHandle,
     EFI_STATUS Status;
 
     /* Open the XTLDR protocol */
-    Status = BlGetXtLdrProtocol(SystemTable, ImageHandle, &XtLdrProto);
+    Status = BlGetXtLdrProtocol(SystemTable, ImageHandle, &XtLdrProtocol);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to open the protocol, return error */
@@ -203,7 +203,7 @@ XtLdrModuleMain(IN EFI_HANDLE ImageHandle,
     }
 
     /* Play the tune set in the configuration */
-    BpPlayTune(XtLdrProto->Config.GetValue(L"TUNE"));
+    BpPlayTune(XtLdrProtocol->Config.GetValue(L"TUNE"));
 
 	/* Return success */
     return STATUS_EFI_SUCCESS;

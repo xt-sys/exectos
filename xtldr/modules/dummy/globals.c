@@ -10,7 +10,7 @@
 
 
 /* XTLDR protocol handler */
-PXTBL_LOADER_PROTOCOL XtLdrProto;
+PXTBL_LOADER_PROTOCOL XtLdrProtocol;
 
 /* Dummy Boot Protocol handler */
 XTBL_BOOT_PROTOCOL BlpDummyProtocol;

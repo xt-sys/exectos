@@ -13,7 +13,7 @@
 
 
 /* XTLDR protocol handler */
-EXTERN PXTBL_LOADER_PROTOCOL XtLdrProto;
+EXTERN PXTBL_LOADER_PROTOCOL XtLdrProtocol;
 
 /* Dummy Boot Protocol handler */
 EXTERN XTBL_BOOT_PROTOCOL BlpDummyProtocol;
