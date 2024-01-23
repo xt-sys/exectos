@@ -132,6 +132,11 @@ BlGetConfigValue(IN CONST PWCHAR ConfigName);
 
 XTCDECL
 EFI_STATUS
+BlGetEfiPath(IN PWCHAR SystemPath,
+             OUT PWCHAR *EfiPath);
+
+XTCDECL
+EFI_STATUS
 BlGetMemoryMap(OUT PEFI_MEMORY_MAP MemoryMap);
 
 XTCDECL

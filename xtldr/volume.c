@@ -277,6 +277,56 @@ BlFindVolumeDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL FsHandle,
 }
 
 /**
+ * Creates a copy of the system path with EFI standard directory separators.
+ *
+ * @param SystemPath
+ *        Supplies a pointer to the system path.
+ *
+ * @param EfiPath
+ *        Supplies a pointer to the memory area, where EFI path will be stored.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+BlGetEfiPath(IN PWCHAR SystemPath,
+             OUT PWCHAR *EfiPath)
+{
+    SIZE_T Index, PathLength;
+    EFI_STATUS Status;
+
+    /* Get system path length */
+    PathLength = RtlWideStringLength(SystemPath, 0);
+
+    /* Allocate memory for storing EFI path */
+    Status = BlAllocateMemoryPool(sizeof(WCHAR) * (PathLength + 1), (PVOID *)EfiPath);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to allocate memory, print error message and return status code */
+        BlDebugPrint(L"ERROR: Memory allocation failure (Status Code: 0x%lx)\n", Status);
+        return STATUS_EFI_OUT_OF_RESOURCES;
+    }
+
+    /* Make a copy of SystemPath string */
+    RtlCopyMemory(*EfiPath, SystemPath, sizeof(WCHAR) * (PathLength + 1));
+
+    /* Replace directory separator if needed to comply with EFI standard */
+    for(Index = 0; Index < PathLength; Index++)
+    {
+        if((*EfiPath)[Index] == L'/')
+        {
+            /* Replace '/' with '\' */
+            (*EfiPath)[Index] = L'\\';
+        }
+    }
+
+    /* Return success */
+    return STATUS_EFI_SUCCESS;
+}
+
+/**
  * Finds a volume device path based on the specified ARC name or UUID.
  *
  * @param SystemPath

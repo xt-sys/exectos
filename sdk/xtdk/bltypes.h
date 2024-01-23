@@ -105,6 +105,7 @@ typedef struct _XTBL_BOOT_PARAMETERS
 {
     PEFI_DEVICE_PATH_PROTOCOL DevicePath;
     PWCHAR ArcName;
+    PWCHAR EfiPath;
     PWCHAR SystemPath;
     PWCHAR SystemType;
     PWCHAR KernelFile;

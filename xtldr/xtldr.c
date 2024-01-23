@@ -227,6 +227,15 @@ BlInvokeBootProtocol(IN PLIST_ENTRY OptionsList)
                 BlDebugPrint(L"ERROR: Failed to find volume device path (Status Code: 0x%lx)\n", Status);
                 return Status;
             }
+
+            /* Get EFI compatible system path */
+            Status = BlGetEfiPath(BootParameters.SystemPath, &BootParameters.EfiPath);
+            if(Status != STATUS_EFI_SUCCESS)
+            {
+                /* Failed to get EFI path */
+                BlDebugPrint(L"ERROR: Failed to get EFI path (Status Code: 0x%lx)\n", Status);
+                return Status;
+            }
         }
         else if(RtlCompareWideStringInsensitive(Option->Name, L"KERNELFILE", 0) == 0)
         {
