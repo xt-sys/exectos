@@ -219,7 +219,8 @@ BlInvokeBootProtocol(IN PLIST_ENTRY OptionsList)
         else if(RtlCompareWideStringInsensitive(Option->Name, L"SYSTEMPATH", 0) == 0)
         {
             /* System path found, get volume device path */
-            Status = BlGetVolumeDevicePath((PWCHAR)Option->Value, &BootParameters.DevicePath, &BootParameters.ArcName, &BootParameters.SystemPath);
+            Status = BlGetVolumeDevicePath((PWCHAR)Option->Value, &BootParameters.DevicePath,
+                                           &BootParameters.ArcName, &BootParameters.SystemPath);
             if(Status != STATUS_EFI_SUCCESS)
             {
                 /* Failed to find volume */
