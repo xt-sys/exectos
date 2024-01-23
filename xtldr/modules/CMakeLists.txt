@@ -1,4 +1,5 @@
 add_subdirectory(beep)
+add_subdirectory(chainldr)
 add_subdirectory(dummy)
 add_subdirectory(fb_o)
 add_subdirectory(pecoff_o)
