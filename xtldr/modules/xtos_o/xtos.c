@@ -11,7 +11,7 @@
 
 /* XTOS module information */
 XTBL_MODINFO = L"XTOS boot protocol support";
-XTBL_MODDEPS = {L"fb_o", L"pecoff_o"};
+XTBL_MODDEPS = {L"fb_o", L"pecoff"};
 
 /* EFI XT Loader Protocol */
 PXTBL_LOADER_PROTOCOL XtLdrProtocol;

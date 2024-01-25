@@ -1,15 +1,16 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtldr/modules/pecoff_o/includes/pecoff.h
- * DESCRIPTION:     PE/COFF executable file format support header
+ * FILE:            xtldr/modules/pecoff/includes/pecoff.h
+ * DESCRIPTION:     Basic PE/COFF executable file format support header
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#ifndef __XTLDR_MODULES_PECOFF_O_H
-#define __XTLDR_MODULES_PECOFF_O_H
+#ifndef __XTLDR_PECOFF_H
+#define __XTLDR_PECOFF_H
 
 #include <xtblapi.h>
+#include <globals.h>
 
 
 /* PE/COFF image protocol related routines forward references */
@@ -25,8 +26,19 @@ PeGetMachineType(IN PVOID ImagePointer,
 
 XTCDECL
 EFI_STATUS
+PeGetSection(IN PVOID ImagePointer,
+             IN PCHAR SectionName,
+             OUT PULONG *RawData);
+
+XTCDECL
+EFI_STATUS
 PeGetSubSystem(IN PVOID ImagePointer,
                OUT PUSHORT SubSystem);
+
+XTCDECL
+EFI_STATUS
+PeGetVersion(IN PVOID ImagePointer,
+             OUT PUSHORT Version);
 
 XTCDECL
 EFI_STATUS
@@ -42,17 +54,15 @@ PeRelocateImage(IN PVOID ImagePointer,
 
 XTCDECL
 EFI_STATUS
-PepRelocateLoadedImage(IN PPECOFF_IMAGE_CONTEXT Image);
+PeVerifyImage(IN PVOID ImagePointer);
 
 XTCDECL
 EFI_STATUS
-PepValidateImageHeaders(IN PPECOFF_IMAGE_DOS_HEADER DosHeader,
-                        IN PPECOFF_IMAGE_PE_HEADER PeHeader,
-                        IN SIZE_T FileSize);
+PepRelocateLoadedImage(IN PPECOFF_IMAGE_CONTEXT Image);
 
 XTCDECL
 EFI_STATUS
 BlXtLdrModuleMain(IN EFI_HANDLE ImageHandle,
                   IN PEFI_SYSTEM_TABLE SystemTable);
 
-#endif /* __XTLDR_MODULES_PECOFF_O_H */
+#endif /* __XTLDR_PECOFF_H */
