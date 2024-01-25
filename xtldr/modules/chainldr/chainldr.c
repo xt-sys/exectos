@@ -150,11 +150,11 @@ XtLdrModuleMain(IN EFI_HANDLE ImageHandle,
     }
 
     /* Set routines available via ChainLoader boot protocol */
-    ChBootProtocol.BootSystem = ChBootSystem;
+    ChpBootProtocol.BootSystem = ChBootSystem;
 
     /* Register XTOS boot protocol */
     XtLdrProtocol->Boot.RegisterProtocol(L"CHAINLOADER", &Guid);
 
     /* Install XTOS protocol */
-    return XtLdrProtocol->Protocol.Install(&ChBootProtocol, &Guid);
+    return XtLdrProtocol->Protocol.Install(&ChpBootProtocol, &Guid);
 }

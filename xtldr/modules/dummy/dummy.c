@@ -24,7 +24,7 @@ XTBL_MODINFO = L"XTLDR Dummy Module";
  */
 XTCDECL
 EFI_STATUS
-BlBootDummyOS(IN PXTBL_BOOT_PARAMETERS Parameters)
+DmBootSystem(IN PXTBL_BOOT_PARAMETERS Parameters)
 {
     return STATUS_EFI_SUCCESS;
 }
@@ -59,7 +59,7 @@ XtLdrModuleMain(IN EFI_HANDLE ImageHandle,
     }
 
     /* Set boot protocol routines */
-    BlpDummyProtocol.BootSystem = BlBootDummyOS;
+    BlpDummyProtocol.BootSystem = DmBootSystem;
 
     /* Register XTOS boot protocol */
     XtLdrProtocol->Boot.RegisterProtocol(L"XTOS", &DummyGuid);

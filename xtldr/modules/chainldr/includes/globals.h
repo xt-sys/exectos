@@ -13,7 +13,7 @@
 
 
 /* ChainLoader Boot Protocol */
-EXTERN XTBL_BOOT_PROTOCOL ChBootProtocol;
+EXTERN XTBL_BOOT_PROTOCOL ChpBootProtocol;
 
 /* XTLDR protocol handler */
 EXTERN PXTBL_LOADER_PROTOCOL XtLdrProtocol;

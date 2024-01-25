@@ -16,7 +16,7 @@
 /* Dummy module routines forward references */
 XTCDECL
 EFI_STATUS
-BlBootDummyOS(IN PXTBL_BOOT_PARAMETERS Parameters);
+DmBootSystem(IN PXTBL_BOOT_PARAMETERS Parameters);
 
 XTCDECL
 EFI_STATUS
