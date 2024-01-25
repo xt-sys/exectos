@@ -1,4 +1,4 @@
-# XT Boot Loader
+# XTLDR PE/COFF image support module
 PROJECT(XTLDR_PECOFF)
 
 # Specify include directories
