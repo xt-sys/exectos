@@ -13,7 +13,7 @@
 
 
 /* Boot Loader module segment macros */
-#define XTBL_MODDEPS                                                SEGMENT(".moddeps") CONST WCHAR XtBlpDeps[][8]
+#define XTBL_MODDEPS                                                SEGMENT(".moddeps") CONST WCHAR XtBlpDeps[][9]
 #define XTBL_MODINFO                                                SEGMENT(".modinfo") CONST WCHAR XtBlpInfo[]
 
 /* XTLDR directories */
