@@ -91,6 +91,7 @@ typedef EFI_STATUS (*PBL_MAP_VIRTUAL_MEMORY)(IN OUT PXTBL_PAGE_MAPPING PageMap, 
 typedef EFI_STATUS (*PBL_OPEN_VOLUME)(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath, OUT PEFI_HANDLE DiskHandle, OUT PEFI_FILE_HANDLE *FsHandle);
 typedef EFI_STATUS (*PBL_OPEN_PROTOCOL)(OUT PEFI_HANDLE Handle, OUT PVOID *ProtocolHandler, IN PEFI_GUID ProtocolGuid);
 typedef EFI_STATUS (*PBL_OPEN_PROTOCOL_HANDLE)(IN EFI_HANDLE Handle, OUT PVOID *ProtocolHandler, IN PEFI_GUID ProtocolGuid);
+typedef PVOID (*PBL_PHYSICAL_ADDRESS_TO_VIRTUAL)(IN PVOID PhysicalAddress, IN PVOID PhysicalBase, IN PVOID VirtualBase);
 typedef EFI_STATUS (*PBL_POWER_SYSTEM)();
 typedef EFI_STATUS (*PBL_READ_FILE)(IN PEFI_FILE_HANDLE DirHandle, IN CONST PWCHAR FileName, OUT PVOID *FileData, OUT PSIZE_T FileSize);
 typedef EFI_STATUS (*PBL_REGISTER_BOOT_PROTOCOL)(IN PWCHAR SystemType, IN PEFI_GUID BootProtocolGuid);
@@ -315,6 +316,7 @@ typedef struct _XTBL_LOADER_PROTOCOL
         PBL_MAP_EFI_MEMORY MapEfiMemory;
         PBL_MAP_PAGE MapPage;
         PBL_MAP_VIRTUAL_MEMORY MapVirtualMemory;
+        PBL_PHYSICAL_ADDRESS_TO_VIRTUAL PhysicalAddressToVirtual;
         PBL_SET_MEMORY SetMemory;
         PBL_ZERO_MEMORY ZeroMemory;
     } Memory;

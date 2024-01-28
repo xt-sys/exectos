@@ -248,6 +248,12 @@ BlOpenProtocolHandle(IN EFI_HANDLE Handle,
                      IN PEFI_GUID ProtocolGuid);
 
 XTCDECL
+PVOID
+BlPhysicalAddressToVirtual(IN PVOID PhysicalAddress,
+                           IN PVOID PhysicalBase,
+                           IN PVOID VirtualBase);
+
+XTCDECL
 VOID
 BlQueryConsoleMode(OUT PUINT_PTR ResX,
                    OUT PUINT_PTR ResY);

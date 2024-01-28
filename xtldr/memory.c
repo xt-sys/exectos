@@ -489,6 +489,32 @@ BlMapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
 }
 
 /**
+ * Converts physical address to virtual address based on physical base and virtual base.
+ *
+ * @param PhysicalAddress
+ *        Specifies physical address that will be converted to virtual address.
+ *
+ * @param PhysicalBase
+ *        Supplies a physical base address.
+ *
+ * @param VirtualBase
+ *        Supplies a virtual base address.
+ *
+ * @return This routine returns a mapped virtual address.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+PVOID
+BlPhysicalAddressToVirtual(IN PVOID PhysicalAddress,
+                           IN PVOID PhysicalBase,
+                           IN PVOID VirtualBase)
+{
+    /* Convert physical address to virtual address */
+    return (PUCHAR)VirtualBase + ((PUCHAR)PhysicalAddress - (PUCHAR)PhysicalBase);
+}
+
+/**
  * Converts EFI memory type to XTLDR memory type.
  *
  * @param EfiMemoryType
