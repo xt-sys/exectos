@@ -189,6 +189,7 @@ typedef struct _XTBL_MODULE_INFO
 typedef struct _XTBL_PAGE_MAPPING
 {
     LIST_ENTRY MemoryMap;
+    ULONG MapSize;
     PVOID PtePointer;
     SHORT PageMapLevel;
     PAGE_SIZE PageSize;

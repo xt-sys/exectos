@@ -178,6 +178,7 @@ BlInitializePageMap(OUT PXTBL_PAGE_MAPPING PageMap,
 {
     /* Initialize memory mappings */
     RtlInitializeListHead(&PageMap->MemoryMap);
+    PageMap->MapSize = 0;
 
     /* Set page map size/level and memory map address */
     PageMap->PageMapLevel = PageMapLevel;
@@ -457,8 +458,9 @@ BlMapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
         ListEntry = ListEntry->Flink;
     }
 
-    /* Insert new mapping to the list */
+    /* Insert new mapping to the list and increase page map size */
     RtlInsertTailList(&PageMap->MemoryMap, &Mapping1->ListEntry);
+    PageMap->MapSize++;
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
