@@ -510,6 +510,7 @@ BlpGetLoaderMemoryType(IN EFI_MEMORY_TYPE EfiMemoryType)
         case EfiACPIMemoryNVS:
         case EfiACPIReclaimMemory:
         case EfiPalCode:
+        case EfiReservedMemoryType:
             MemoryType = LoaderSpecialMemory;
             break;
         case EfiRuntimeServicesCode:
