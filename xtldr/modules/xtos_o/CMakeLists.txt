@@ -9,7 +9,6 @@ include_directories(
 # Specify list of source code files
 list(APPEND XTLDR_XTOS_O_SOURCE
     ${XTLDR_XTOS_O_SOURCE_DIR}/${ARCH}/memory.c
-    ${XTLDR_XTOS_O_SOURCE_DIR}/memory.c
     ${XTLDR_XTOS_O_SOURCE_DIR}/xtos.c)
 
 # Link bootloader executable
