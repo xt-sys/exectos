@@ -12,6 +12,16 @@
 /* PE/COFF_O module information */
 XTBL_MODINFO = L"EFI FB (FrameBuffer) support";
 
+/**
+ * Provides an EFI Frame Buffer protocol driver name used for initialization.
+ *
+ * @param Protocol
+ *        Supplies a pointer to the memory area where framebuffer driver information will be stored.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
 XTCDECL
 EFI_STATUS
 FbGetDisplayDriver(OUT PEFI_GRAPHICS_PROTOCOL Protocol)
@@ -30,6 +40,16 @@ FbGetDisplayDriver(OUT PEFI_GRAPHICS_PROTOCOL Protocol)
     return STATUS_EFI_SUCCESS;
 }
 
+/**
+ * Returns information about EFI Frame Buffer.
+ *
+ * @param FbInfo
+ *        Supplies a pointer to the memory area where framebuffer information will be stored.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
 XTCDECL
 EFI_STATUS
 FbGetDisplayInformation(OUT PXTBL_FRAMEBUFFER_INFORMATION FbInfo)
@@ -290,9 +310,25 @@ FbpFindFramebufferAddress(OUT PEFI_PHYSICAL_ADDRESS Address)
     return STATUS_EFI_SUCCESS;
 }
 
+/**
+ * Calculates color mask and shift based upon pixel bit mask.
+ *
+ * @param PixelBitMask
+ *        Provides a pixel bit mask.
+ *
+ * @param ColorMask
+ *        Supplies a pointer to the memory area where the color mask will be stored.
+ *
+ * @param ColorShift
+ *        Supplies a pointer to the memory area where the color shift (position) will be stored.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
 XTCDECL
 VOID
-FbpGetColorMask(IN UINT EfiMask,
+FbpGetColorMask(IN UINT PixelBitMask,
                 OUT PUSHORT ColorMask,
                 OUT PUSHORT ColorShift)
 {
@@ -303,9 +339,9 @@ FbpGetColorMask(IN UINT EfiMask,
     Mask = 1;
 
     /* Make sure EfiMask is not zero */
-    if(EfiMask)
+    if(PixelBitMask)
     {
-        while((Index < 32) && ((EfiMask & Mask) == 0))
+        while((Index < 32) && ((PixelBitMask & Mask) == 0))
         {
             Index++;
             Mask <<= 1;
@@ -323,6 +359,19 @@ FbpGetColorMask(IN UINT EfiMask,
     }
 }
 
+/** 
+ * Gets pixel information based on the reported pixel format.
+ *
+ * @param FrameBufferInfo
+ *        Supplies a pointer to the framebuffer information structure.
+ *
+ * @param PixelsBitMask
+ *        Supplies a pointer to the pixel bit mask information provided by EFI graphics protocol.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
 XTCDECL
 VOID
 FbpGetPixelInformation(IN OUT PXTBL_FRAMEBUFFER_INFORMATION FrameBufferInfo,
