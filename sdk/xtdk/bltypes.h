@@ -71,6 +71,9 @@ typedef EFI_STATUS (*PBL_EXECIMAGE_RELOCATE_IMAGE)(IN PVOID ImagePointer, IN EFI
 typedef EFI_STATUS (*PBL_EXECIMAGE_VERIFY_IMAGE)(IN PVOID ImagePointer);
 typedef EFI_STATUS (*PBL_EXIT_BOOT_SERVICES)();
 typedef EFI_STATUS (*PBL_FIND_BOOT_PROTOCOL)(IN PWCHAR SystemType, OUT PEFI_GUID BootProtocolGuid);
+typedef EFI_STATUS (*PBL_FRAMEBUFFER_GET_DISPLAY_DRIVER)(OUT PEFI_GRAPHICS_PROTOCOL Protocol);
+typedef EFI_STATUS (*PBL_FRAMEBUFFER_GET_DISPLAY_INFORMATION)(OUT PXTBL_FRAMEBUFFER_INFORMATION FbInfo);
+typedef EFI_STATUS (*PBL_FRAMEBUFFER_INITIALIZE)();
 typedef EFI_STATUS (*PBL_FREE_PAGES)(IN UINT64 Size, IN EFI_PHYSICAL_ADDRESS Memory);
 typedef EFI_STATUS (*PBL_FREE_POOL)(IN PVOID Memory);
 typedef EFI_STATUS (*PBL_GET_MEMORY_MAP)(OUT PEFI_MEMORY_MAP MemoryMap);
@@ -203,6 +206,33 @@ typedef struct _XTBL_STATUS
     CPPORT SerialPort;
 } XTBL_STATUS, *PXTBL_STATUS;
 
+/* XT framebuffer information structure definition */
+typedef struct _XTBL_FRAMEBUFFER_INFORMATION
+{
+    BOOLEAN Initialized;
+    EFI_GRAPHICS_PROTOCOL Protocol;
+    EFI_PHYSICAL_ADDRESS FrameBufferBase;
+    ULONG_PTR FrameBufferSize;
+    UINT Width;
+    UINT Height;
+    UINT BitsPerPixel;
+    UINT BytesPerPixel;
+    UINT PixelsPerScanLine;
+    UINT Pitch;
+    EFI_GRAPHICS_PIXEL_FORMAT PixelFormat;
+    struct
+    {
+        USHORT BlueMask;
+        USHORT BlueShift;
+        USHORT GreenMask;
+        USHORT GreenShift;
+        USHORT RedMask;
+        USHORT RedShift;
+        USHORT ReservedMask;
+        USHORT ReservedShift;
+    } PixelInformation;
+} XTBL_FRAMEBUFFER_INFORMATION, *PXTBL_FRAMEBUFFER_INFORMATION;
+
 /* XTLDR Boot protocol structure */
 typedef struct _XTBL_BOOT_PROTOCOL
 {
@@ -222,7 +252,15 @@ typedef struct _XTBL_EXECUTABLE_IMAGE_PROTOCOL
     PBL_EXECIMAGE_VERIFY_IMAGE VerifyImage;
 } XTBL_EXECUTABLE_IMAGE_PROTOCOL, *PXTBL_EXECUTABLE_IMAGE_PROTOCOL;
 
-/* XTLDR Loader protocol */
+/* XT framebuffer support protocol structure */
+typedef struct _XTBL_FRAMEBUFFER_PROTOCOL
+{
+    PBL_FRAMEBUFFER_GET_DISPLAY_DRIVER GetDisplayDriver;
+    PBL_FRAMEBUFFER_GET_DISPLAY_INFORMATION GetDisplayInformation;
+    PBL_FRAMEBUFFER_INITIALIZE Initialize;
+} XTBL_FRAMEBUFFER_PROTOCOL, *PXTBL_FRAMEBUFFER_PROTOCOL;
+
+/* XTLDR Loader protocol structure */
 typedef struct _XTBL_LOADER_PROTOCOL
 {
     struct

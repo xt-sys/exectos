@@ -11,7 +11,7 @@
 
 /* XTOS module information */
 XTBL_MODINFO = L"XTOS boot protocol support";
-XTBL_MODDEPS = {L"fb_o", L"pecoff"};
+XTBL_MODDEPS = {L"framebuf", L"pecoff"};
 
 /* EFI XT Loader Protocol */
 PXTBL_LOADER_PROTOCOL XtLdrProtocol;
@@ -21,6 +21,32 @@ PXTBL_EXECUTABLE_IMAGE_PROTOCOL XtPeCoffProtocol;
 
 /* XTOS Boot Protocol */
 XTBL_BOOT_PROTOCOL XtBootProtocol;
+
+/**
+ * Returns information about frame buffer in XTOS compatible format.
+ *
+ * @param InformationBlock
+ *        A pointer to memory area containing XT structure where all the information will be stored.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+XtGetDisplayInformation(OUT PLOADER_GRAPHICS_INFORMATION_BLOCK InformationBlock,
+                        IN PXTBL_FRAMEBUFFER_INFORMATION FrameBufferInfo)
+{
+    InformationBlock->Initialized = FrameBufferInfo->Initialized;
+    InformationBlock->Protocol = FrameBufferInfo->Protocol;
+    InformationBlock->Address = (PVOID)(ULONG_PTR)FrameBufferInfo->FrameBufferBase;
+    InformationBlock->BufferSize = FrameBufferInfo->FrameBufferSize;
+    InformationBlock->Width = FrameBufferInfo->Width;
+    InformationBlock->Height = FrameBufferInfo->Height;
+    InformationBlock->BitsPerPixel = FrameBufferInfo->BitsPerPixel;
+    InformationBlock->PixelsPerScanLine = FrameBufferInfo->PixelsPerScanLine;
+    InformationBlock->Pitch = FrameBufferInfo->Pitch;
+}
 
 /**
  * Starts the operating system according to the provided parameters using XTOS boot protocol.
@@ -324,7 +350,8 @@ XtpInitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
                          IN PXTBL_BOOT_PARAMETERS Parameters)
 {
     EFI_GUID FrameBufGuid = XT_FRAMEBUFFER_PROTOCOL_GUID;
-    PXT_FRAMEBUFFER_PROTOCOL FrameBufProtocol;
+    PXTBL_FRAMEBUFFER_PROTOCOL FrameBufProtocol;
+    PXTBL_FRAMEBUFFER_INFORMATION FrameBufInfo = NULL;
     PKERNEL_INITIALIZATION_BLOCK LoaderBlock;
     EFI_PHYSICAL_ADDRESS Address;
     // PVOID RuntimeServices;
@@ -361,10 +388,10 @@ XtpInitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
     {
         /* Make sure FrameBuffer is initialized */
         FrameBufProtocol->Initialize();
+        FrameBufProtocol->GetDisplayInformation(FrameBufInfo);
 
         /* Store information about FrameBuffer device */
-        FrameBufProtocol->GetDisplayInformation(&LoaderBlock->LoaderInformation.FrameBuffer);
-        // FrameBufProtocol->PrintDisplayInformation();
+        XtGetDisplayInformation(&LoaderBlock->LoaderInformation.FrameBuffer, FrameBufInfo);
     }
     else
     {
