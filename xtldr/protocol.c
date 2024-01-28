@@ -260,7 +260,7 @@ BlLoadModule(IN PWCHAR ModuleName)
                 }
 
                 /* Get next dependency module name */
-                DepsData += 8;
+                DepsData += 9;
             }
         }
         else if(RtlCompareString((PCHAR)SectionHeader[SectionIndex].Name, ".modinfo", 8) == 0)
