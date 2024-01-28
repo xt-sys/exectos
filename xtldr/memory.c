@@ -92,6 +92,28 @@ BlFreeMemoryPool(IN PVOID Memory)
 }
 
 /**
+ * Returns the number of mappings in the page mapping structure.
+ *
+ * @param PageMap
+ *        Supplies a pointer to the page mapping structure.
+ *
+ * @param NumberOfMappings
+ *        Supplies a pointer to memory area where the number of mappings is returned.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+BlGetMappingsCount(IN PXTBL_PAGE_MAPPING PageMap,
+                   OUT PULONG NumberOfMappings)
+{
+    /* Return number of mappings */
+    *NumberOfMappings = PageMap->MapSize;
+}
+
+/**
  * Returns the memory descriptors which define a memory map of all the physical memory ranges reserved by the UEFI.
  *
  * @param MemoryMap

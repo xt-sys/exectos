@@ -630,6 +630,7 @@ BlpInstallXtLoaderProtocol()
     BlpLdrProtocol.Memory.CopyMemory = RtlCopyMemory;
     BlpLdrProtocol.Memory.FreePages = BlFreeMemoryPages;
     BlpLdrProtocol.Memory.FreePool = BlFreeMemoryPool;
+    BlpLdrProtocol.Memory.GetMappingsCount = BlGetMappingsCount;
     BlpLdrProtocol.Memory.GetMemoryMap = BlGetMemoryMap;
     BlpLdrProtocol.Memory.InitializePageMap = BlInitializePageMap;
     BlpLdrProtocol.Memory.MapEfiMemory = BlMapEfiMemory;

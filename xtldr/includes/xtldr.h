@@ -136,6 +136,11 @@ BlGetEfiPath(IN PWCHAR SystemPath,
              OUT PWCHAR *EfiPath);
 
 XTCDECL
+VOID
+BlGetMappingsCount(IN PXTBL_PAGE_MAPPING PageMap,
+                   OUT PULONG NumberOfMappings);
+
+XTCDECL
 EFI_STATUS
 BlGetMemoryMap(OUT PEFI_MEMORY_MAP MemoryMap);
 
