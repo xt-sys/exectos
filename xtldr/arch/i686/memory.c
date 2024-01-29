@@ -23,12 +23,12 @@ XTCDECL
 EFI_STATUS
 BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap)
 {
+    PLIST_ENTRY ListEntry, ModulesList, ModulesListEntry;
     EFI_PHYSICAL_ADDRESS Address, DirectoryAddress;
+    PXTBL_MODULE_INFO ModuleInfo;
+    PXTBL_MEMORY_MAPPING Mapping;
     EFI_STATUS Status;
     ULONG Index;
-    PLIST_ENTRY ListEntry, ModulesList, ModulesListEntry;
-    PXTBL_MODULE_INFO ModuleInfo;
-    PLOADER_MEMORY_MAPPING Mapping;
 
     /* Allocate pages for the Page Map */
     Status = BlAllocateMemoryPages(1, &Address);
@@ -119,7 +119,7 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap)
     while(ListEntry != &PageMap->MemoryMap)
     {
         /* Take mapping from the list */
-        Mapping = CONTAIN_RECORD(ListEntry, LOADER_MEMORY_MAPPING, ListEntry);
+        Mapping = CONTAIN_RECORD(ListEntry, XTBL_MEMORY_MAPPING, ListEntry);
 
         /* Check if virtual address is set */
         if(Mapping->VirtualAddress)
