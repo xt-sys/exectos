@@ -468,7 +468,8 @@ XtpInitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
     // }
 
     /* Copy parameters to kernel initialization block */
-    RtlCopyMemory(&LoaderBlock->KernelParameters, Parameters->Parameters, RtlWideStringLength(Parameters->Parameters, 0));
+    RtlCopyMemory(LoaderBlock->KernelParameters, Parameters->Parameters,
+                  (RtlWideStringLength(Parameters->Parameters, 0) + 1) * sizeof(WCHAR));
 
     /* Map kernel initialization block */
     XtLdrProtocol->Memory.MapVirtualMemory(PageMap, *VirtualAddress, (PVOID)LoaderBlock,
