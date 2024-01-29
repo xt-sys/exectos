@@ -177,6 +177,54 @@ BlGetMemoryMap(OUT PEFI_MEMORY_MAP MemoryMap)
 }
 
 /**
+ * Attempts to find a virtual address of the specified physical address in memory mappings.
+ *
+ * @param PageMap
+ *        Supplies a pointer to the page mapping structure.
+ *
+ * @param PhysicalAddress
+ *        Supplies a physical address to search for in the mappings.
+ *
+ * @return This routine returns a corresponding virtual address found in the mappings.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+PVOID
+BlGetVirtualAddress(IN PXTBL_PAGE_MAPPING PageMap,
+                    IN PVOID PhysicalAddress)
+{
+    PLOADER_MEMORY_MAPPING Mapping;
+    PLIST_ENTRY ListEntry;
+
+    /* Iterate over memory mappings in order to find descriptor containing a physical address */
+    ListEntry = PageMap->MemoryMap.Flink;
+    while(ListEntry != &PageMap->MemoryMap)
+    {
+        /* Get mapping from linked list */
+        Mapping = CONTAIN_RECORD(ListEntry, LOADER_MEMORY_MAPPING, ListEntry);
+
+        /* Make sure any virtual address is set */
+        if(Mapping->VirtualAddress)
+        {
+            /* Check if provided physical address is in range of this mapping */
+            if((PhysicalAddress >= Mapping->PhysicalAddress) &&
+               (PhysicalAddress < Mapping->PhysicalAddress + (Mapping->NumberOfPages * EFI_PAGE_SIZE)))
+            {
+                /* Calculate virtual address based on the mapping and return it */
+                return PhysicalAddress - Mapping->PhysicalAddress + Mapping->VirtualAddress;
+            }
+        }
+
+        /* Get next element from the list */
+        ListEntry = ListEntry->Flink;
+    }
+
+    /* Mapping not found, return 0 */
+    return 0;
+}
+
+/**
  * Initializes the page mapping structures.
  *
  * @param PageMap
@@ -512,6 +560,82 @@ BlPhysicalAddressToVirtual(IN PVOID PhysicalAddress,
 {
     /* Convert physical address to virtual address */
     return (PUCHAR)VirtualBase + ((PUCHAR)PhysicalAddress - (PUCHAR)PhysicalBase);
+}
+
+/**
+ * Converts whole linked list addressing from physical to virtual for future use after enabling paging.
+ *
+ * @param PageMap
+ *        Supplies a pointer to the page mapping structure.
+ *
+ * @param ListHead
+ *        Supplies a pointer to a structure that serves as the list header.
+ *
+ * @param PhysicalBase
+ *        Supplies a physical base address.
+ *
+ * @param VirtualBase
+ *        Supplies a virtual base address.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+BlPhysicalListToVirtual(IN PXTBL_PAGE_MAPPING PageMap,
+                        IN OUT PLIST_ENTRY ListHead,
+                        IN PVOID PhysicalBase,
+                        IN PVOID VirtualBase)
+{
+    PLIST_ENTRY ListEntry, NextEntry;
+
+    /* Make sure list is properly initialized */
+    if(ListHead->Flink == 0 || ListHead->Blink == 0)
+    {
+        /* List not initialized, return error code */
+        return STATUS_EFI_INVALID_PARAMETER;
+    }
+
+    /* Iterate through all elements */
+    ListEntry = ListHead->Flink;
+    while(ListEntry != ListHead)
+    {
+        /* Save physical address of the next element */
+        NextEntry = ListEntry->Flink;
+
+        /* Convert the address of this element to VirtualAddress */
+        if(ListEntry->Flink == ListHead)
+        {
+            /* Convert list head */
+            ListEntry->Flink = ListHead->Flink->Blink;
+        }
+        else
+        {
+            /* Convert list entry */
+            ListEntry->Flink = BlPhysicalAddressToVirtual(ListEntry->Flink, (PVOID)PhysicalBase, VirtualBase);
+        }
+        if(ListEntry->Blink == ListHead)
+        {
+            /* Find virtual address of list head */
+            ListEntry->Blink = BlGetVirtualAddress(PageMap, ListEntry->Blink);
+        }
+        else
+        {
+            /* Convert list entry */
+            ListEntry->Blink = BlPhysicalAddressToVirtual(ListEntry->Blink, (PVOID)PhysicalBase, VirtualBase);
+        }
+
+        /* Get to the next element*/
+        ListEntry = NextEntry;
+    }
+
+    /* Convert list head */
+    ListHead->Flink = BlPhysicalAddressToVirtual(ListHead->Flink, (PVOID)PhysicalBase, VirtualBase);
+    ListHead->Blink = BlPhysicalAddressToVirtual(ListHead->Blink, (PVOID)PhysicalBase, VirtualBase);
+
+    /* Return success */
+    return STATUS_EFI_SUCCESS;
 }
 
 /**

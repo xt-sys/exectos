@@ -153,6 +153,11 @@ INT_PTR
 BlGetSecureBootStatus();
 
 XTCDECL
+PVOID
+BlGetVirtualAddress(IN PXTBL_PAGE_MAPPING PageMap,
+                    IN PVOID PhysicalAddress);
+
+XTCDECL
 EFI_STATUS
 BlGetVolumeDevicePath(IN PWCHAR SystemPath,
                       OUT PEFI_DEVICE_PATH_PROTOCOL *DevicePath,
@@ -252,6 +257,13 @@ PVOID
 BlPhysicalAddressToVirtual(IN PVOID PhysicalAddress,
                            IN PVOID PhysicalBase,
                            IN PVOID VirtualBase);
+
+XTCDECL
+EFI_STATUS
+BlPhysicalListToVirtual(IN PXTBL_PAGE_MAPPING PageMap,
+                        IN OUT PLIST_ENTRY ListHead,
+                        IN PVOID PhysicalBase,
+                        IN PVOID VirtualBase);
 
 XTCDECL
 VOID

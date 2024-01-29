@@ -632,11 +632,13 @@ BlpInstallXtLoaderProtocol()
     BlpLdrProtocol.Memory.FreePool = BlFreeMemoryPool;
     BlpLdrProtocol.Memory.GetMappingsCount = BlGetMappingsCount;
     BlpLdrProtocol.Memory.GetMemoryMap = BlGetMemoryMap;
+    BlpLdrProtocol.Memory.GetVirtualAddress = BlGetVirtualAddress;
     BlpLdrProtocol.Memory.InitializePageMap = BlInitializePageMap;
     BlpLdrProtocol.Memory.MapEfiMemory = BlMapEfiMemory;
     BlpLdrProtocol.Memory.MapPage = BlMapPage;
     BlpLdrProtocol.Memory.MapVirtualMemory = BlMapVirtualMemory;
     BlpLdrProtocol.Memory.PhysicalAddressToVirtual = BlPhysicalAddressToVirtual;
+    BlpLdrProtocol.Memory.PhysicalListToVirtual = BlPhysicalListToVirtual;
     BlpLdrProtocol.Memory.SetMemory = RtlSetMemory;
     BlpLdrProtocol.Memory.ZeroMemory = RtlZeroMemory;
     BlpLdrProtocol.Protocol.Close = BlCloseProtocol;
