@@ -24,7 +24,7 @@ EFI_STATUS
 BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap)
 {
     PLIST_ENTRY ListEntry, ModulesList, ModulesListEntry;
-    PLOADER_MEMORY_MAPPING Mapping;
+    PXTBL_MEMORY_MAPPING Mapping;
     PXTBL_MODULE_INFO ModuleInfo;
     EFI_PHYSICAL_ADDRESS Address;
     EFI_STATUS Status;
@@ -96,7 +96,7 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap)
     while(ListEntry != &PageMap->MemoryMap)
     {
         /* Take mapping from the list */
-        Mapping = CONTAIN_RECORD(ListEntry, LOADER_MEMORY_MAPPING, ListEntry);
+        Mapping = CONTAIN_RECORD(ListEntry, XTBL_MEMORY_MAPPING, ListEntry);
 
         /* Check if virtual address is set */
         if(Mapping->VirtualAddress)

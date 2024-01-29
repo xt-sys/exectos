@@ -169,6 +169,16 @@ typedef struct _XTBL_KNOWN_BOOT_PROTOCOL
     EFI_GUID Guid;
 } XTBL_KNOWN_BOOT_PROTOCOL, *PXTBL_KNOWN_BOOT_PROTOCOL;
 
+/* Boot Loader memory mapping information */
+typedef struct _XTBL_MEMORY_MAPPING
+{
+    LIST_ENTRY ListEntry;
+    PVOID VirtualAddress;
+    PVOID PhysicalAddress;
+    ULONGLONG NumberOfPages;
+    LOADER_MEMORY_TYPE MemoryType;
+} XTBL_MEMORY_MAPPING, *PXTBL_MEMORY_MAPPING;
+
 /* XTLDR Module dependencies data */
 typedef struct _XTBL_MODULE_DEPS
 {

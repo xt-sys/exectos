@@ -115,10 +115,9 @@ typedef struct _LOADER_INFORMATION_BLOCK
 typedef struct _LOADER_MEMORY_MAPPING
 {
     LIST_ENTRY ListEntry;
-    PVOID VirtualAddress;
-    PVOID PhysicalAddress;
-    ULONGLONG NumberOfPages;
     LOADER_MEMORY_TYPE MemoryType;
+    ULONG BasePage;
+    ULONG PageCount;
 } LOADER_MEMORY_MAPPING, *PLOADER_MEMORY_MAPPING;
 
 /* Loader provided information needed by the kernel to initialize */

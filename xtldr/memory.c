@@ -194,7 +194,7 @@ PVOID
 BlGetVirtualAddress(IN PXTBL_PAGE_MAPPING PageMap,
                     IN PVOID PhysicalAddress)
 {
-    PLOADER_MEMORY_MAPPING Mapping;
+    PXTBL_MEMORY_MAPPING Mapping;
     PLIST_ENTRY ListEntry;
 
     /* Iterate over memory mappings in order to find descriptor containing a physical address */
@@ -202,7 +202,7 @@ BlGetVirtualAddress(IN PXTBL_PAGE_MAPPING PageMap,
     while(ListEntry != &PageMap->MemoryMap)
     {
         /* Get mapping from linked list */
-        Mapping = CONTAIN_RECORD(ListEntry, LOADER_MEMORY_MAPPING, ListEntry);
+        Mapping = CONTAIN_RECORD(ListEntry, XTBL_MEMORY_MAPPING, ListEntry);
 
         /* Make sure any virtual address is set */
         if(Mapping->VirtualAddress)
@@ -379,14 +379,14 @@ BlMapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
                    IN ULONGLONG NumberOfPages,
                    IN LOADER_MEMORY_TYPE MemoryType)
 {
-    PLOADER_MEMORY_MAPPING Mapping1, Mapping2, Mapping3;
+    PXTBL_MEMORY_MAPPING Mapping1, Mapping2, Mapping3;
     PVOID PhysicalAddressEnd, PhysicalAddress2End;
     PLIST_ENTRY ListEntry, MappingListEntry;
     SIZE_T NumberOfMappedPages;
     EFI_STATUS Status;
 
     /* Allocate memory for new mapping */
-    Status = BlAllocateMemoryPool(sizeof(LOADER_MEMORY_MAPPING), (PVOID *)&Mapping1);
+    Status = BlAllocateMemoryPool(sizeof(XTBL_MEMORY_MAPPING), (PVOID *)&Mapping1);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Memory allocation failure */
@@ -407,7 +407,7 @@ BlMapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
     while(ListEntry != &PageMap->MemoryMap)
     {
         /* Take a mapping from the list and calculate its end of physical address */
-        Mapping2 = CONTAIN_RECORD(ListEntry, LOADER_MEMORY_MAPPING, ListEntry);
+        Mapping2 = CONTAIN_RECORD(ListEntry, XTBL_MEMORY_MAPPING, ListEntry);
         PhysicalAddress2End = (PUCHAR)Mapping2->PhysicalAddress + (Mapping2->NumberOfPages * EFI_PAGE_SIZE) - 1 ;
 
         /* Check if new mapping is a subset of an existing mapping */
@@ -436,7 +436,7 @@ BlMapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
             if(NumberOfMappedPages > 0)
             {
                 /* Pages associated to the mapping, allocate memory for it */
-                Status = BlAllocateMemoryPool(sizeof(LOADER_MEMORY_MAPPING), (PVOID*)&Mapping3);
+                Status = BlAllocateMemoryPool(sizeof(XTBL_MEMORY_MAPPING), (PVOID*)&Mapping3);
                 if(Status != STATUS_EFI_SUCCESS)
                 {
                     /* Memory allocation failure */
@@ -472,7 +472,7 @@ BlMapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
             if(NumberOfMappedPages > 0)
             {
                 /* Pages associated to the mapping, allocate memory for it */
-                Status = BlAllocateMemoryPool(sizeof(LOADER_MEMORY_MAPPING), (PVOID*)&Mapping3);
+                Status = BlAllocateMemoryPool(sizeof(XTBL_MEMORY_MAPPING), (PVOID*)&Mapping3);
                 if(Status != STATUS_EFI_SUCCESS)
                 {
                     /* Memory allocation failure */
