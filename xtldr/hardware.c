@@ -27,7 +27,7 @@ BlpActivateSerialIOController()
     PEFI_HANDLE PciHandle = NULL;
     PCI_COMMON_HEADER PciHeader;
     EFI_STATUS Status;
-    UINT64 Address;
+    ULONGLONG Address;
 
     /* Allocate memory for single EFI_HANDLE, what should be enough in most cases */
     PciHandleSize = sizeof(EFI_HANDLE);
@@ -83,9 +83,9 @@ BlpActivateSerialIOController()
                 for(Function = 0; Function < PCI_MAX_FUNCTION; Function++)
                 {
                     /* Read configuration space */
-                    Address = ((UINT64)((((UINT_PTR) Bus) << 24) + (((UINT_PTR) Device) << 16) +
-                                        (((UINT_PTR) Function) << 8) + ((UINT_PTR) 0)));
-                    PciDev->Pci.Read(PciDev, 2, Address, sizeof (PciHeader) / sizeof (UINT32), &PciHeader);
+                    Address = ((ULONGLONG)((((UINT_PTR) Bus) << 24) + (((UINT_PTR) Device) << 16) +
+                                           (((UINT_PTR) Function) << 8) + ((UINT_PTR) 0)));
+                    PciDev->Pci.Read(PciDev, 2, Address, sizeof (PciHeader) / sizeof (UINT), &PciHeader);
 
                     /* Check if device exists */
                     if(PciHeader.VendorId == PCI_INVALID_VENDORID)

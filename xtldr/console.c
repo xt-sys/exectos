@@ -95,7 +95,7 @@ BlEnableConsoleCursor()
  */
 XTCDECL
 VOID
-BlConsolePrint(IN PUINT16 Format,
+BlConsolePrint(IN PUSHORT Format,
                IN ...)
 {
     VA_LIST Arguments;

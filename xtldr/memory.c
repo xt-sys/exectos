@@ -24,7 +24,7 @@
  */
 XTCDECL
 EFI_STATUS
-BlAllocateMemoryPages(IN UINT64 Pages,
+BlAllocateMemoryPages(IN ULONGLONG Pages,
                       OUT PEFI_PHYSICAL_ADDRESS Memory)
 {
     return EfiSystemTable->BootServices->AllocatePages(AllocateAnyPages, EfiLoaderData, Pages, Memory);
@@ -67,7 +67,7 @@ BlAllocateMemoryPool(IN UINT_PTR Size,
  */
 XTCDECL
 EFI_STATUS
-BlFreeMemoryPages(IN UINT64 Pages,
+BlFreeMemoryPages(IN ULONGLONG Pages,
                   IN EFI_PHYSICAL_ADDRESS Memory)
 {
     return EfiSystemTable->BootServices->FreePages(Memory, Pages);
@@ -328,7 +328,7 @@ EFI_STATUS
 BlMapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
                    IN PVOID VirtualAddress,
                    IN PVOID PhysicalAddress,
-                   IN UINT NumberOfPages,
+                   IN ULONGLONG NumberOfPages,
                    IN LOADER_MEMORY_TYPE MemoryType)
 {
     PLOADER_MEMORY_MAPPING Mapping1, Mapping2, Mapping3;
@@ -352,7 +352,7 @@ BlMapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
     Mapping1->MemoryType = MemoryType;
 
     /* Calculate the end of the physical address */
-    PhysicalAddressEnd = (PUINT8)PhysicalAddress + (NumberOfPages * EFI_PAGE_SIZE) - 1;
+    PhysicalAddressEnd = (PUCHAR)PhysicalAddress + (NumberOfPages * EFI_PAGE_SIZE) - 1;
 
     /* Iterate through all the mappings already set to insert new mapping at the correct place */
     ListEntry = PageMap->MemoryMap.Flink;
@@ -360,7 +360,7 @@ BlMapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
     {
         /* Take a mapping from the list and calculate its end of physical address */
         Mapping2 = CONTAIN_RECORD(ListEntry, LOADER_MEMORY_MAPPING, ListEntry);
-        PhysicalAddress2End = (PUINT8)Mapping2->PhysicalAddress + (Mapping2->NumberOfPages * EFI_PAGE_SIZE) - 1 ;
+        PhysicalAddress2End = (PUCHAR)Mapping2->PhysicalAddress + (Mapping2->NumberOfPages * EFI_PAGE_SIZE) - 1 ;
 
         /* Check if new mapping is a subset of an existing mapping */
         if(Mapping1->PhysicalAddress >= Mapping2->PhysicalAddress && PhysicalAddressEnd <= PhysicalAddress2End)
@@ -384,7 +384,7 @@ BlMapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
             }
 
             /* Calculate number of pages for this mapping */
-            NumberOfMappedPages = ((PUINT8)PhysicalAddress2End - (PUINT8)PhysicalAddressEnd) / EFI_PAGE_SIZE;
+            NumberOfMappedPages = ((PUCHAR)PhysicalAddress2End - (PUCHAR)PhysicalAddressEnd) / EFI_PAGE_SIZE;
             if(NumberOfMappedPages > 0)
             {
                 /* Pages associated to the mapping, allocate memory for it */
@@ -396,7 +396,7 @@ BlMapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
                 }
 
                 /* Set mapping fields and insert it on the top */
-                Mapping3->PhysicalAddress = (PUINT8)PhysicalAddressEnd + 1;
+                Mapping3->PhysicalAddress = (PUCHAR)PhysicalAddressEnd + 1;
                 Mapping3->VirtualAddress = NULL;
                 Mapping3->NumberOfPages = NumberOfMappedPages;
                 Mapping3->MemoryType = Mapping2->MemoryType;
@@ -404,9 +404,9 @@ BlMapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
             }
 
             /* Calculate number of pages and the end of the physical address */
-            Mapping2->NumberOfPages = ((PUINT8)PhysicalAddressEnd + 1 -
-                                       (PUINT8)Mapping2->PhysicalAddress) / EFI_PAGE_SIZE;
-            PhysicalAddress2End = (PUINT8)Mapping2->PhysicalAddress + (Mapping2->NumberOfPages * EFI_PAGE_SIZE) - 1;
+            Mapping2->NumberOfPages = ((PUCHAR)PhysicalAddressEnd + 1 -
+                                       (PUCHAR)Mapping2->PhysicalAddress) / EFI_PAGE_SIZE;
+            PhysicalAddress2End = (PUCHAR)Mapping2->PhysicalAddress + (Mapping2->NumberOfPages * EFI_PAGE_SIZE) - 1;
         }
 
         /* Check if they overlap */
@@ -420,7 +420,7 @@ BlMapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
             }
 
             /* Calculate number of pages for this mapping */
-            NumberOfMappedPages = ((PUINT8)PhysicalAddress2End + 1 - (PUINT8)Mapping1->PhysicalAddress) / EFI_PAGE_SIZE;
+            NumberOfMappedPages = ((PUCHAR)PhysicalAddress2End + 1 - (PUCHAR)Mapping1->PhysicalAddress) / EFI_PAGE_SIZE;
             if(NumberOfMappedPages > 0)
             {
                 /* Pages associated to the mapping, allocate memory for it */
@@ -440,9 +440,9 @@ BlMapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
             }
 
             /* Calculate number of pages and the end of the physical address */
-            Mapping2->NumberOfPages = ((PUINT8)Mapping1->PhysicalAddress -
-                                       (PUINT8)Mapping2->PhysicalAddress) / EFI_PAGE_SIZE;
-            PhysicalAddress2End = (PUINT8)Mapping2->PhysicalAddress + (Mapping2->NumberOfPages * EFI_PAGE_SIZE) - 1;
+            Mapping2->NumberOfPages = ((PUCHAR)Mapping1->PhysicalAddress -
+                                       (PUCHAR)Mapping2->PhysicalAddress) / EFI_PAGE_SIZE;
+            PhysicalAddress2End = (PUCHAR)Mapping2->PhysicalAddress + (Mapping2->NumberOfPages * EFI_PAGE_SIZE) - 1;
         }
 
         /* Check if mapping is really needed */

@@ -922,12 +922,12 @@ BlpDuplicateDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath)
     /* Get the device path length */
     while(TRUE)
     {
-        Length += *(PUINT16)DevicePath->Length;
+        Length += *(PUSHORT)DevicePath->Length;
         if(DevicePathNode->Type == EFI_END_DEVICE_PATH)
         {
             break;
         }
-        DevicePathNode = (PEFI_DEVICE_PATH_PROTOCOL)((PUCHAR)DevicePathNode + *(PUINT16)DevicePath->Length);
+        DevicePathNode = (PEFI_DEVICE_PATH_PROTOCOL)((PUCHAR)DevicePathNode + *(PUSHORT)DevicePath->Length);
     }
 
     /* Check length */
@@ -1044,8 +1044,8 @@ BlpFindParentBlockDevice(IN PLIST_ENTRY BlockDevices,
             }
 
             /* Get child and parent node lengths */
-            ChildLength = *(PUINT16)ChildDevicePath->Length;
-            ParentLength = *(PUINT16)ParentDevicePath->Length;
+            ChildLength = *(PUSHORT)ChildDevicePath->Length;
+            ParentLength = *(PUSHORT)ParentDevicePath->Length;
 
             /* Check if lengths match */
             if(ChildLength != ParentLength)

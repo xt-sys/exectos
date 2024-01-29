@@ -28,7 +28,7 @@
 XTCDECL
 VOID
 BlpStringPrint(IN IN BLPRINTCHAR PrintCharRoutine,
-               IN PUINT16 Format,
+               IN PUSHORT Format,
                IN VA_LIST Arguments)
 {
     PEFI_GUID Guid;
@@ -46,7 +46,7 @@ BlpStringPrint(IN IN BLPRINTCHAR PrintCharRoutine,
                 {
                     case L'b':
                         /* Boolean */
-                        BlpStringFormat(PrintCharRoutine, L"%s", VA_ARG(Arguments, INT32) ? "TRUE" : "FALSE");
+                        BlpStringFormat(PrintCharRoutine, L"%s", VA_ARG(Arguments, INT) ? "TRUE" : "FALSE");
                         break;
                     case L'c':
                         /* Character */
@@ -54,7 +54,7 @@ BlpStringPrint(IN IN BLPRINTCHAR PrintCharRoutine,
                         break;
                     case L'd':
                         /* Signed 32-bit integer */
-                        BlpStringPrintSigned32(PrintCharRoutine, VA_ARG(Arguments, INT32), 10);
+                        BlpStringPrintSigned32(PrintCharRoutine, VA_ARG(Arguments, INT), 10);
                         break;
                     case L'g':
                         /* EFI GUID */
@@ -106,11 +106,11 @@ BlpStringPrint(IN IN BLPRINTCHAR PrintCharRoutine,
                         break;
                     case L'u':
                         /* Unsigned 32-bit integer */
-                        BlpStringPrintUnsigned32(PrintCharRoutine, VA_ARG(Arguments, UINT32), 10, 0);
+                        BlpStringPrintUnsigned32(PrintCharRoutine, VA_ARG(Arguments, UINT), 10, 0);
                         break;
                     case L'x':
                         /* Unsigned 32-bit hexadecimal integer */
-                        BlpStringPrintUnsigned32(PrintCharRoutine, VA_ARG(Arguments, UINT32), 16, 0);
+                        BlpStringPrintUnsigned32(PrintCharRoutine, VA_ARG(Arguments, UINT), 16, 0);
                         break;
                     case L'0':
                         /* Zero padded numbers */
@@ -120,7 +120,7 @@ BlpStringPrint(IN IN BLPRINTCHAR PrintCharRoutine,
                         {
                             case L'd':
                                 /* Zero-padded, signed 32-bit integer */
-                                BlpStringPrintSigned32(PrintCharRoutine, VA_ARG(Arguments, INT32), 10);
+                                BlpStringPrintSigned32(PrintCharRoutine, VA_ARG(Arguments, INT), 10);
                                 break;
                             case L'l':
                                 /* 64-bit numbers */
@@ -146,11 +146,11 @@ BlpStringPrint(IN IN BLPRINTCHAR PrintCharRoutine,
                                 break;
                             case L'u':
                                 /* Zero-padded, unsigned 32-bit integer */
-                                BlpStringPrintUnsigned32(PrintCharRoutine, VA_ARG(Arguments, UINT32), 10, PaddingCount);
+                                BlpStringPrintUnsigned32(PrintCharRoutine, VA_ARG(Arguments, UINT), 10, PaddingCount);
                                 break;
                             case L'x':
                                 /* Zero-padded, unsigned 32-bit hexadecimal integer */
-                                BlpStringPrintUnsigned32(PrintCharRoutine, VA_ARG(Arguments, UINT32), 16, PaddingCount);
+                                BlpStringPrintUnsigned32(PrintCharRoutine, VA_ARG(Arguments, UINT), 16, PaddingCount);
                                 break;
                             default:
                                 /* Unknown by default */
@@ -203,7 +203,7 @@ BlpStringPrint(IN IN BLPRINTCHAR PrintCharRoutine,
 XTCDECL
 VOID
 BlpStringFormat(IN BLPRINTCHAR PrintCharRoutine,
-                IN PUINT16 Format,
+                IN PUSHORT Format,
                 IN ...)
 {
     VA_LIST Arguments;
@@ -371,9 +371,9 @@ BlpStringPrintUnsigned64(IN BLPRINTCHAR PrintCharRoutine,
                          IN UINT_PTR Base,
                          IN UINT_PTR Padding)
 {
-    UINT16 Buffer[20];
+    USHORT Buffer[20];
     UINT_PTR NumberLength;
-    PUINT16 Pointer;
+    PUSHORT Pointer;
 
     /* Set pointer to the end of buffer */
     Pointer = Buffer + ARRAY_SIZE(Buffer);
@@ -417,11 +417,11 @@ BlpStringPrintUnsigned64(IN BLPRINTCHAR PrintCharRoutine,
  * @since XT 1.0
  */
 XTCDECL
-UINT64
-BlpStringReadPadding(IN PUINT16 *Format)
+ULONGLONG
+BlpStringReadPadding(IN PUSHORT *Format)
 {
     ULONG Count = 0;
-    PUINT16 Fmt = *Format;
+    PUSHORT Fmt = *Format;
 
     /* Read the padding */
     for(;; ++Fmt)

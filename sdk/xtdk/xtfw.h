@@ -117,7 +117,7 @@ typedef struct _LOADER_MEMORY_MAPPING
     LIST_ENTRY ListEntry;
     PVOID VirtualAddress;
     PVOID PhysicalAddress;
-    UINT NumberOfPages;
+    ULONGLONG NumberOfPages;
     LOADER_MEMORY_TYPE MemoryType;
 } LOADER_MEMORY_MAPPING, *PLOADER_MEMORY_MAPPING;
 

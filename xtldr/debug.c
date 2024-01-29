@@ -24,7 +24,7 @@
  */
 XTCDECL
 VOID
-BlDebugPrint(IN PUINT16 Format,
+BlDebugPrint(IN PUSHORT Format,
              IN ...)
 {
     VA_LIST Arguments;

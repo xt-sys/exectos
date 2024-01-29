@@ -21,7 +21,7 @@ typedef VOID (BLPRINTCHAR)(IN USHORT Character);
 /* XTLDR routines forward references */
 XTCDECL
 EFI_STATUS
-BlAllocateMemoryPages(IN UINT64 Pages,
+BlAllocateMemoryPages(IN ULONGLONG Pages,
                       OUT PEFI_PHYSICAL_ADDRESS Memory);
 
 XTCDECL
@@ -52,7 +52,7 @@ BlCloseVolume(IN PEFI_HANDLE VolumeHandle);
 
 XTCDECL
 VOID
-BlConsolePrint(IN PUINT16 Format,
+BlConsolePrint(IN PUSHORT Format,
                IN ...);
 
 XTCDECL
@@ -61,7 +61,7 @@ BlConsoleWrite(IN PUSHORT String);
 
 XTCDECL
 VOID
-BlDebugPrint(IN PUINT16 Format,
+BlDebugPrint(IN PUSHORT Format,
              IN ...);
 
 XTCDECL
@@ -119,7 +119,7 @@ BlFindVolumeDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL FsHandle,
 
 XTCDECL
 EFI_STATUS
-BlFreeMemoryPages(IN UINT64 Pages,
+BlFreeMemoryPages(IN ULONGLONG Pages,
                   IN EFI_PHYSICAL_ADDRESS Memory);
 
 XTCDECL
@@ -226,7 +226,7 @@ EFI_STATUS
 BlMapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
                    IN PVOID VirtualAddress,
                    IN PVOID PhysicalAddress,
-                   IN UINT NumberOfPages,
+                   IN ULONGLONG NumberOfPages,
                    IN LOADER_MEMORY_TYPE MemoryType);
 
 XTCDECL
@@ -469,13 +469,13 @@ BlpReadConfigFile(IN CONST PWCHAR ConfigDirectory,
 XTCDECL
 VOID
 BlpStringFormat(IN BLPRINTCHAR PrintCharRoutine,
-                IN PUINT16 Format,
+                IN PUSHORT Format,
                 IN ...);
 
 XTCDECL
 VOID
 BlpStringPrint(IN IN BLPRINTCHAR PrintCharRoutine,
-               IN PUINT16 Format,
+               IN PUSHORT Format,
                IN VA_LIST Arguments);
 
 XTCDECL
@@ -505,8 +505,8 @@ BlpStringPrintUnsigned64(IN BLPRINTCHAR PrintCharRoutine,
                          IN UINT_PTR Padding);
 
 XTCDECL
-UINT64
-BlpStringReadPadding(IN PUINT16 *Format);
+ULONGLONG
+BlpStringReadPadding(IN PUSHORT *Format);
 
 XTCDECL
 VOID
