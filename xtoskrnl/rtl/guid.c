@@ -9,6 +9,19 @@
 #include <xtos.h>
 
 
+/**
+ * Compares two GUIDs (Globally Unique Identifiers).
+ *
+ * @param Guid1
+ *        Supplies the first GUID to compare.
+ *
+ * @param Guid2
+ *        Supplies the second GUID to compare.
+ *
+ * @return This routine returns TRUE if the provided GUIDs are equal, or FALSE otherwise.
+ *
+ * @since XT 1.0
+ */
 XTAPI
 BOOLEAN
 RtlCompareGuids(IN PGUID Guid1,
