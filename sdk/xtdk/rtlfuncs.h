@@ -49,6 +49,11 @@ RtlRemoveEntryList(IN PLIST_ENTRY Entry);
 
 /* Runtime Library routines forward references */
 XTAPI
+BOOLEAN
+RtlCompareGuids(IN PGUID Guid1,
+                IN PGUID Guid2);
+
+XTAPI
 SIZE_T
 RtlCompareMemory(IN PCVOID LeftBuffer,
                  IN PCVOID RightBuffer,
