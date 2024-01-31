@@ -70,5 +70,6 @@ set_install_target(xtoskrnl "exectos/boot")
 # Set kernel entrypoint, imagebase address, ordinals and subsystem
 set_entrypoint(xtoskrnl "KeStartXtSystem")
 set_imagebase(xtoskrnl ${BASEADDRESS_XTOSKRNL})
+set_linker_map(xtoskrnl TRUE)
 set_ordinals(xtoskrnl TRUE)
 set_subsystem(xtoskrnl native xt_native_kernel)
