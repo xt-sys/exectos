@@ -132,6 +132,11 @@ BlGetConfigValue(IN CONST PWCHAR ConfigName);
 
 XTCDECL
 EFI_STATUS
+BlGetConfigurationTable(IN PEFI_GUID TableGuid,
+                        OUT PVOID *Table);
+
+XTCDECL
+EFI_STATUS
 BlGetEfiPath(IN PWCHAR SystemPath,
              OUT PWCHAR *EfiPath);
 

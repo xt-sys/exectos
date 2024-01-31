@@ -653,6 +653,7 @@ BlpInstallXtLoaderProtocol()
     BlpLdrProtocol.Tui.DisplayProgressDialog = BlDisplayProgressDialog;
     BlpLdrProtocol.Tui.UpdateProgressBar = BlUpdateProgressBar;
     BlpLdrProtocol.Util.ExitBootServices = BlExitBootServices;
+    BlpLdrProtocol.Util.GetConfigurationTable = BlGetConfigurationTable;
     BlpLdrProtocol.Util.GetSecureBootStatus = BlGetSecureBootStatus;
     BlpLdrProtocol.Util.LoadEfiImage = BlLoadEfiImage;
     BlpLdrProtocol.Util.RebootSystem = BlRebootSystem;

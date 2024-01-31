@@ -67,6 +67,43 @@ BlExitBootServices()
 }
 
 /**
+ * Gets the address of a reqested system configuration table.
+ *
+ * @param TableGuid
+ *        Supplies a GUID of the configuration table.
+ *
+ * @param Table
+ *        Supplies a pointer to the memory area where the table address will be stored.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+BlGetConfigurationTable(IN PEFI_GUID TableGuid,
+                        OUT PVOID *Table)
+{
+    SIZE_T Index;
+
+    /* Iterate through all system configuration tables */
+    for(Index = 0; Index < EfiSystemTable->NumberOfTableEntries; Index++)
+    {
+        /* Check if this table matches requested table */
+        if(RtlCompareGuids((PGUID)&(EfiSystemTable->ConfigurationTable[Index].VendorGuid), (PGUID)TableGuid))
+        {
+            /* Found requested table, return success */
+            *Table = EfiSystemTable->ConfigurationTable[Index].VendorTable;
+            return STATUS_EFI_SUCCESS;
+        }
+    }
+
+    /* Table not found */
+    *Table = NULL;
+    return STATUS_EFI_NOT_FOUND;
+}
+
+/**
  * Checks whether SecureBoot is enabled or not.
  *
  * @return Numeric representation of SecureBoot status (0 = Disabled, >0 = Enabled, <0 SetupMode).
