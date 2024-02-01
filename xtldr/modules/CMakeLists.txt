@@ -1,3 +1,4 @@
+add_subdirectory(acpi)
 add_subdirectory(beep)
 add_subdirectory(chainldr)
 add_subdirectory(dummy)

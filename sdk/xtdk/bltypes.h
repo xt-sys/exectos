@@ -40,6 +40,9 @@
 #define XTBL_TUI_MAX_DIALOG_WIDTH                                   100
 
 /* Boot Loader protocol routine pointers */
+typedef EFI_STATUS (*PBL_ACPI_GET_ACPI_TABLE)(OUT PVOID *AcpiTable);
+typedef EFI_STATUS (*PBL_ACPI_GET_RSDP_TABLE)(OUT PVOID *AcpiTable);
+typedef EFI_STATUS (*PBL_ACPI_GET_XSDP_TABLE)(OUT PVOID *AcpiTable);
 typedef EFI_STATUS (*PBL_ALLOCATE_PAGES)(IN ULONGLONG Size, OUT PEFI_PHYSICAL_ADDRESS Memory);
 typedef EFI_STATUS (*PBL_ALLOCATE_POOL)(IN UINT_PTR Size, OUT PVOID *Memory);
 typedef VOID (*PBL_BOOTMENU_INITIALIZE_OS_LIST)(OUT PXTBL_BOOTMENU_ITEM MenuEntries, OUT PULONG EntriesCount, OUT PULONG DefaultId);
@@ -248,6 +251,14 @@ typedef struct _XTBL_FRAMEBUFFER_INFORMATION
         USHORT ReservedShift;
     } PixelInformation;
 } XTBL_FRAMEBUFFER_INFORMATION, *PXTBL_FRAMEBUFFER_INFORMATION;
+
+/* XTLDR ACPI protocol structure */
+typedef struct _XTBL_ACPI_PROTOCOL
+{
+    PBL_ACPI_GET_ACPI_TABLE GetAcpiTable;
+    PBL_ACPI_GET_RSDP_TABLE GetRsdpTable;
+    PBL_ACPI_GET_XSDP_TABLE GetXsdpTable;
+} XTBL_ACPI_PROTOCOL, *PXTBL_ACPI_PROTOCOL;
 
 /* XTLDR Boot protocol structure */
 typedef struct _XTBL_BOOT_PROTOCOL
