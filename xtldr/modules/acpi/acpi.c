@@ -281,7 +281,10 @@ XtLdrModuleMain(IN EFI_HANDLE ImageHandle,
 
     /* Set routines available via ACPI protocol */
     AcpAcpiProtocol.GetAcpiDescriptionPointer = AcGetAcpiDescriptionPointer;
+    AcpAcpiProtocol.GetApicBase = AcGetApicBase;
     AcpAcpiProtocol.GetRsdpTable = AcGetRsdpTable;
+    AcpAcpiProtocol.GetSMBiosTable = AcGetSMBiosTable;
+    AcpAcpiProtocol.GetSMBios3Table = AcGetSMBios3Table;
     AcpAcpiProtocol.GetXsdpTable = AcGetXsdpTable;
 
     /* Install ACPI protocol */
