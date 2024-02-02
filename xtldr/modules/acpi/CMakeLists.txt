@@ -15,7 +15,7 @@ list(APPEND XTLDR_ACPI_SOURCE
 add_executable(acpi ${XTLDR_ACPI_SOURCE})
 
 # Add linker libraries
-target_link_libraries(acpi libxtldr)
+target_link_libraries(acpi libxtldr libxtos)
 
 # Set proper binary name and install target
 set_target_properties(acpi PROPERTIES SUFFIX .efi)
