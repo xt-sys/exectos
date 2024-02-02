@@ -28,6 +28,14 @@ AcGetRsdpTable(OUT PVOID *AcpiTable);
 
 XTCDECL
 EFI_STATUS
+AcGetSMBiosTable(OUT PVOID *SmBiosTable);
+
+XTCDECL
+EFI_STATUS
+AcGetSMBios3Table(OUT PVOID *SmBiosTable);
+
+XTCDECL
+EFI_STATUS
 AcGetXsdpTable(OUT PVOID *AcpiTable);
 
 XTCDECL

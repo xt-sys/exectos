@@ -142,6 +142,7 @@ typedef struct _CPPORT
     USHORT Flags;
 } CPPORT, *PCPPORT;
 
+/* HAL framebuffer data structure */
 typedef struct _HAL_FRAMEBUFFER_DATA
 {
     BOOLEAN Initialized;
@@ -153,5 +154,39 @@ typedef struct _HAL_FRAMEBUFFER_DATA
     UINT BitsPerPixel;
     UINT Pitch;
 } HAL_FRAMEBUFFER_DATA, *PHAL_FRAMEBUFFER_DATA;
+
+/* SMBIOS table header structure */
+typedef struct _SMBIOS_TABLE_HEADER
+{
+    UCHAR Signature[4];
+    UCHAR Checksum;
+    UCHAR Length;
+    UCHAR MajorVersion;
+    UCHAR MinorVersion;
+    USHORT MaxStructureSize;
+    UCHAR EntryPointRevision;
+    UCHAR Reserved[5];
+    UCHAR Signature2[5];
+    UCHAR IntermediateChecksum;
+    USHORT TableLength;
+    ULONG TableAddress;
+    USHORT NumberOfStructures;
+    UCHAR BcdRevision;
+} SMBIOS_TABLE_HEADER, *PSMBIOS_TABLE_HEADER;
+
+/* SMBIOS3 table header structure */
+typedef struct _SMBIOS3_TABLE_HEADER
+{
+    UCHAR Signature[5];
+    UCHAR Checksum;
+    UCHAR Length;
+    UCHAR MajorVersion;
+    UCHAR MinorVersion;
+    UCHAR DocRevision;
+    UCHAR EntryPointRevision;
+    UCHAR Reserved;
+    ULONG MaxStructureSize;
+    ULONGLONG TableAddress;
+} SMBIOS3_TABLE_HEADER, *PSMBIOS3_TABLE_HEADER;
 
 #endif /* __XTDK_HLTYPES_H */

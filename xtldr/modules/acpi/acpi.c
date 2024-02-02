@@ -120,6 +120,70 @@ AcGetRsdpTable(OUT PVOID *AcpiTable)
 }
 
 /**
+ * Gets SMBIOS from EFI system configuration
+ *
+ * @param SmBiosTable
+ *        Suplies a pointer to memory area where SMBIOS address will be stored.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+AcGetSMBiosTable(OUT PVOID *SmBiosTable)
+{
+    EFI_GUID SmBiosGuid = EFI_CONFIG_TABLE_SMBIOS_TABLE_GUID;
+    PSMBIOS_TABLE_HEADER SmBios;
+    EFI_STATUS Status;
+
+    /* Get SMBIOS table from system configuration tables */
+    Status = XtLdrProtocol->Util.GetConfigurationTable(&SmBiosGuid, (PVOID)&SmBios);
+    if(Status != STATUS_EFI_SUCCESS || AcpChecksumTable(SmBios, SmBios->Length) != 0)
+    {
+        /* SMBIOS not found or checksum mismatch */
+        *SmBiosTable = NULL;
+        return STATUS_EFI_NOT_FOUND;
+    }
+
+    /* SMBIOS found, return success */
+    *SmBiosTable = SmBios;
+    return STATUS_EFI_SUCCESS;
+}
+
+/**
+ * Gets SMBIOS3 from EFI system configuration
+ *
+ * @param SmBiosTable
+ *        Suplies a pointer to memory area where SMBIOS3 address will be stored.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+AcGetSMBios3Table(OUT PVOID *SmBiosTable)
+{
+    EFI_GUID SmBios3Guid = EFI_CONFIG_TABLE_SMBIOS3_TABLE_GUID;
+    PSMBIOS3_TABLE_HEADER SmBios;
+    EFI_STATUS Status;
+
+    /* Get SMBIOS3 table from system configuration tables */
+    Status = XtLdrProtocol->Util.GetConfigurationTable(&SmBios3Guid, (PVOID)&SmBios);
+    if(Status != STATUS_EFI_SUCCESS || AcpChecksumTable(SmBios, SmBios->Length) != 0)
+    {
+        /* SMBIOS3 not found or checksum mismatch */
+        *SmBiosTable = NULL;
+        return STATUS_EFI_NOT_FOUND;
+    }
+
+    /* SMBIOS3 found, return success */
+    *SmBiosTable = SmBios;
+    return STATUS_EFI_SUCCESS;
+}
+
+/**
  * Gets XSDP (ACPI 2.0) from EFI system configuration
  *
  * @param AcpiTable
