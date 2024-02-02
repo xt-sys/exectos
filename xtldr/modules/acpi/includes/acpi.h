@@ -20,6 +20,10 @@ AcGetAcpiDescriptionPointer(OUT PVOID *AcpiTable);
 
 XTCDECL
 EFI_STATUS
+AcGetApicBase(OUT PVOID *ApicBase);
+
+XTCDECL
+EFI_STATUS
 AcGetRsdpTable(OUT PVOID *AcpiTable);
 
 XTCDECL

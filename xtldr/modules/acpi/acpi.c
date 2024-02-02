@@ -49,6 +49,45 @@ AcGetAcpiDescriptionPointer(OUT PVOID *AcpiTable)
 }
 
 /**
+ * Gets the Advanced Programmable Interrupt Controller (APIC) base address.
+ *
+ * @param ApicBase
+ *        Supplies a pointer to memory area where APIC base address will be stored.
+ *
+ * @return This routine returns an EFI status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+AcGetApicBase(OUT PVOID *ApicBase)
+{
+    PCPUID_REGISTERS CpuRegisters = NULL;
+
+    /* Get CPU features list */
+    CpuRegisters->Leaf = CPUID_GET_CPU_FEATURES;
+    CpuRegisters->SubLeaf = 0;
+    CpuRegisters->Eax = 0;
+    CpuRegisters->Ebx = 0;
+    CpuRegisters->Ecx = 0;
+    CpuRegisters->Edx = 0;
+    ArCpuId(CpuRegisters);
+
+    /* Check if APIC present */
+    if((CpuRegisters->Edx & CPUID_FEATURES_EDX_APIC) == 0)
+    {
+        /* APIC is not supported by the CPU */
+        return STATUS_EFI_UNSUPPORTED;
+    }
+
+    /* Get APIC base address */
+    *ApicBase = (PVOID)((UINT_PTR)ArReadModelSpecificRegister(0x1B) & 0xFFFFF000);
+
+    /* Return success */
+    return STATUS_EFI_SUCCESS;
+}
+
+/**
  * Gets RSDP (ACPI 1.0) from EFI system configuration
  *
  * @param AcpiTable
