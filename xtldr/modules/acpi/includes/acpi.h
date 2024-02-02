@@ -16,7 +16,7 @@
 /* ACPI module routines forward references */
 XTCDECL
 EFI_STATUS
-AcGetAcpiTable(OUT PVOID *AcpiTable);
+AcGetAcpiDescriptionPointer(OUT PVOID *AcpiTable);
 
 XTCDECL
 EFI_STATUS
@@ -29,7 +29,7 @@ AcGetXsdpTable(OUT PVOID *AcpiTable);
 XTCDECL
 UCHAR
 AcpChecksumTable(IN PVOID Buffer,
-                IN UINT_PTR Size);
+                 IN UINT_PTR Size);
 
 XTCDECL
 EFI_STATUS

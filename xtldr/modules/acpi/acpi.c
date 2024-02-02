@@ -24,7 +24,7 @@ XTBL_MODINFO = L"ACPI support";
  */
 XTCDECL
 EFI_STATUS
-AcGetAcpiTable(OUT PVOID *AcpiTable)
+AcGetAcpiDescriptionPointer(OUT PVOID *AcpiTable)
 {
     PVOID Rsdp;
 
@@ -126,7 +126,7 @@ AcGetXsdpTable(OUT PVOID *AcpiTable)
 XTCDECL
 UCHAR
 AcpChecksumTable(IN PVOID Buffer,
-                IN UINT_PTR Size)
+                 IN UINT_PTR Size)
 {
     PUCHAR Pointer;
     UCHAR Sum;
@@ -177,7 +177,7 @@ XtLdrModuleMain(IN EFI_HANDLE ImageHandle,
     }
 
     /* Set routines available via ACPI protocol */
-    AcpAcpiProtocol.GetAcpiTable = AcGetAcpiTable;
+    AcpAcpiProtocol.GetAcpiDescriptionPointer = AcGetAcpiDescriptionPointer;
     AcpAcpiProtocol.GetRsdpTable = AcGetRsdpTable;
     AcpAcpiProtocol.GetXsdpTable = AcGetXsdpTable;
 
