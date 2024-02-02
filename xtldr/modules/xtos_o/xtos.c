@@ -11,7 +11,7 @@
 
 /* XTOS module information */
 XTBL_MODINFO = L"XTOS boot protocol support";
-XTBL_MODDEPS = {L"framebuf", L"pecoff"};
+XTBL_MODDEPS = {L"acpi", L"framebuf", L"pecoff"};
 
 /* EFI XT Loader Protocol */
 PXTBL_LOADER_PROTOCOL XtLdrProtocol;
@@ -352,27 +352,27 @@ XTCDECL
 EFI_STATUS
 XtpInitializeApicBase(IN PXTBL_PAGE_MAPPING PageMap)
 {
-    PCPUID_REGISTERS CpuRegisters = NULL;
+    EFI_GUID AcpiGuid = XT_ACPI_PROTOCOL_GUID;
+    PXTBL_ACPI_PROTOCOL AcpiProtocol;
+    EFI_HANDLE ProtocolHandle;
     PVOID ApicBaseAddress;
+    EFI_STATUS Status;
 
-    /* Get CPU features list */
-    CpuRegisters->Leaf = CPUID_GET_CPU_FEATURES;
-    CpuRegisters->SubLeaf = 0;
-    CpuRegisters->Eax = 0;
-    CpuRegisters->Ebx = 0;
-    CpuRegisters->Ecx = 0;
-    CpuRegisters->Edx = 0;
-    ArCpuId(CpuRegisters);
-
-    /* Check if APIC is present */
-    if((CpuRegisters->Edx & CPUID_FEATURES_EDX_APIC) == 0)
+    /* Open ACPI protocol */
+    Status = XtLdrProtocol->Protocol.Open(&ProtocolHandle, (PVOID*)&AcpiProtocol, &AcpiGuid);
+    if(Status != STATUS_EFI_SUCCESS)
     {
-        /* APIC is not supported by the CPU */
-        return STATUS_EFI_UNSUPPORTED;
+        /* ACPI protocol not found */
+        return Status;
     }
 
     /* Get APIC base address */
-    ApicBaseAddress = (PVOID)((UINT_PTR)ArReadModelSpecificRegister(0x1B) & 0xFFFFF000);
+    Status = AcpiProtocol->GetApicBase(&ApicBaseAddress);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to get APIC base address */
+        return Status;
+    }
 
     /* Map APIC base address */
     XtLdrProtocol->Memory.MapVirtualMemory(PageMap, (PVOID)APIC_BASE, ApicBaseAddress, 1, LoaderFirmwarePermanent);
