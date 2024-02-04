@@ -146,6 +146,28 @@ typedef enum _KTHREAD_STATE
     DeferredReady
 } KTHREAD_STATE, *PKTHREAD_STATE;
 
+/* Spin lock queue levels */
+typedef enum _KSPIN_LOCK_QUEUE_LEVEL
+{
+    DispatcherLock,
+    UnusedSpareLock,
+    PfnLock,
+    SystemSpaceLock,
+    VacbLock,
+    MasterLock,
+    NonPagedPoolLock,
+    IoCancelLock,
+    WorkQueueLock,
+    IoVpbLock,
+    IoDatabaseLock,
+    IoCompletionLock,
+    FsStructLock,
+    AfdWorkQueueLock,
+    BcbLock,
+    MmNonPagedPoolLock,
+    MaximumLock
+} KSPIN_LOCK_QUEUE_LEVEL, *PKSPIN_LOCK_QUEUE_LEVEL;
+
 /* Timer type */
 typedef enum _KTIMER_TYPE
 {
