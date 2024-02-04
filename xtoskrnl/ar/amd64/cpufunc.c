@@ -272,6 +272,23 @@ ArLoadTaskRegister(USHORT Source)
 }
 
 /**
+ * Orders memory accesses as seen by other processors.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+ArMemoryBarrier()
+{
+    LONG Barrier;
+    asm volatile("lock; orl $0, %0;"
+                 :
+                 : "m"(Barrier));
+}
+
+/**
  * Reads the specified CPU control register and returns its value.
  *
  * @param ControlRegister
@@ -483,6 +500,23 @@ ArReadTimeStampCounter()
                    "=d" (High));
 
     return ((ULONGLONG)High << 32) | Low;
+}
+
+/**
+ * Orders memory accesses as seen by other processors, without fence.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+ArReadWriteBarrier()
+{
+    asm volatile(""
+                 :
+                 :
+                 : "memory");
 }
 
 /**

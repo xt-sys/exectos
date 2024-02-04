@@ -60,6 +60,10 @@ VOID
 ArLoadTaskRegister(USHORT Source);
 
 XTCDECL
+VOID
+ArMemoryBarrier();
+
+XTCDECL
 ULONG_PTR
 ArReadControlRegister(IN USHORT ControlRegister);
 
@@ -82,6 +86,10 @@ ArReadMxCsrRegister();
 XTCDECL
 ULONGLONG
 ArReadTimeStampCounter();
+
+XTCDECL
+VOID
+ArReadWriteBarrier();
 
 XTAPI
 VOID
