@@ -34,6 +34,16 @@ RtlAtomicAnd64(IN VOLATILE PLONG_PTR Address,
                IN LONG_PTR Mask);
 
 XTFASTCALL
+UCHAR
+RtlAtomicBitTestAndSet(IN VOLATILE PLONG Base,
+                       IN LONG Offset);
+
+XTFASTCALL
+UCHAR
+RtlAtomicBitTestAndSet64(IN VOLATILE PLONGLONG Base,
+                         IN LONGLONG Offset);
+
+XTFASTCALL
 CHAR
 RtlAtomicCompareExchange8(IN VOLATILE PCHAR Address,
                           IN CHAR Comperand,

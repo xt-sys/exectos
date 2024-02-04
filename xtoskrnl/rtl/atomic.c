@@ -94,6 +94,48 @@ RtlAtomicAnd64(IN VOLATILE PLONG_PTR Address,
 }
 
 /**
+ * Performs an atomic test of the specified bit of the specified long value and sets it to 1.
+ *
+ * @param Base
+ *        Specifies a pointer to the variable.
+ *
+ * @param Offset
+ *        Specifies the bit position to be tested.
+ *
+ * @return Returns a value of the specified bit.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+UCHAR
+RtlAtomicBitTestAndSet(IN VOLATILE PLONG Base,
+                       IN LONG Offset)
+{
+    return (__atomic_fetch_or(Base, 1l << Offset, __ATOMIC_SEQ_CST) >> Offset) & 1;
+}
+
+/**
+ * Performs an atomic test of the specified bit of the specified 64-bit long value and sets it to 1.
+ *
+ * @param Base
+ *        Specifies a pointer to the variable.
+ *
+ * @param Offset
+ *        Specifies the bit position to be tested.
+ *
+ * @return Returns a value of the specified bit.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+UCHAR
+RtlAtomicBitTestAndSet64(IN VOLATILE PLONGLONG Base,
+                         IN LONGLONG Offset)
+{
+    return (__atomic_fetch_or(Base, 1ll << Offset, __ATOMIC_SEQ_CST) >> Offset) & 1;
+}
+
+/**
  * Performs atomically compare exchange operation on the 8-bit value.
  *
  * @param Address
