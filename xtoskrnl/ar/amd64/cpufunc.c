@@ -68,6 +68,21 @@ ArCpuId(IN OUT PCPUID_REGISTERS Registers)
 }
 
 /**
+ * Partially flushes the Translation Lookaside Buffer (TLB)
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+ArFlushTlb()
+{
+    /* Flush the TLB by resetting the CR3 */
+    ArWriteControlRegister(3, ArReadControlRegister(3));
+}
+
+/**
  * Gets the address of the current stack register.
  *
  * @return This routine returns the current stack pointer.
