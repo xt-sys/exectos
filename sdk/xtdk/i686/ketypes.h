@@ -165,6 +165,9 @@
 /* XTOS Kernel stack size */
 #define KERNEL_STACK_SIZE                 0x4000
 
+/* XTOS Kernel stack guard pages */
+#define KERNEL_STACK_GUARD_PAGES          1
+
 /* Kernel frames */
 #define KTRAP_FRAME_ALIGN                 0x08
 #define KTRAP_FRAME_SIZE                  sizeof(KTRAP_FRAME)

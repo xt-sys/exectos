@@ -139,6 +139,9 @@
 /* XTOS Kernel stack size */
 #define KERNEL_STACK_SIZE                 0x8000
 
+/* XTOS Kernel stack guard pages */
+#define KERNEL_STACK_GUARD_PAGES          1
+
 /* Kernel frames */
 #define KEXCEPTION_FRAME_SIZE             sizeof(KEXCEPTION_FRAME)
 #define KSWITCH_FRAME_SIZE                sizeof(KSWITCH_FRAME)
