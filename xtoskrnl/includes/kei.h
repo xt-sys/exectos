@@ -13,6 +13,10 @@
 
 
 /* Kernel services routines forward references */
+XTFASTCALL
+VOID
+KeAcquireQueuedSpinLock(IN KSPIN_LOCK_QUEUE_LEVEL LockLevel);
+
 XTAPI
 VOID
 KeClearEvent(IN PKEVENT Event);
@@ -70,6 +74,10 @@ KePanicEx(IN ULONG Code,
 XTFASTCALL
 KRUNLEVEL
 KeRaiseRunLevel(IN KRUNLEVEL RunLevel);
+
+XTFASTCALL
+VOID
+KeReleaseQueuedSpinLock(IN KSPIN_LOCK_QUEUE_LEVEL LockLevel);
 
 XTAPI
 LONG

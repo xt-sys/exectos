@@ -16,6 +16,10 @@
 
 
 /* Kernel services routines forward references */
+XTFASTCALL
+VOID
+KeAcquireSpinLock(IN OUT PKSPIN_LOCK SpinLock);
+
 XTAPI
 VOID
 KeInitializeApc(IN PKAPC Apc,
@@ -68,6 +72,10 @@ KeReleaseSemaphore(IN PKSEMAPHORE Semaphore,
                    IN KPRIORITY Increment,
                    IN LONG Adjustment,
                    IN BOOLEAN Wait);
+
+XTFASTCALL
+VOID
+KeReleaseSpinLock(IN OUT PKSPIN_LOCK SpinLock);
 
 XTAPI
 VOID
