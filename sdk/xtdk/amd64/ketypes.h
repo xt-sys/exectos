@@ -526,6 +526,7 @@ typedef struct _KPROCESSOR_CONTROL_BLOCK
     ULONG_PTR SetMember;
     CPU_IDENTIFICATION CpuId;
     KPROCESSOR_STATE ProcessorState;
+    KSPIN_LOCK_QUEUE LockQueue[MaximumLock];
     KDPC_DATA DpcData[2];
     PVOID DpcStack;
     VOLATILE BOOLEAN DpcRoutineActive;

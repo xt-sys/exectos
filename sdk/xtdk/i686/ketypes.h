@@ -465,6 +465,7 @@ typedef struct _KPROCESSOR_CONTROL_BLOCK
     ULONG_PTR SetMember;
     CPU_IDENTIFICATION CpuId;
     KPROCESSOR_STATE ProcessorState;
+    KSPIN_LOCK_QUEUE LockQueue[MaximumLock];
     ULONG_PTR MultiThreadProcessorSet;
     KDPC_DATA DpcData[2];
     PVOID DpcStack;
