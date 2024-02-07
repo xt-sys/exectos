@@ -66,7 +66,7 @@ file(RELATIVE_PATH _PATH_PREFIX ${EXECTOS_BINARY_DIR} ${EXECTOS_SOURCE_DIR})
 add_compiler_flags(-D__RELFILE__="&__FILE__[__FILE__[0] == '.' ? sizeof \\\"${_PATH_PREFIX}\\\" - 1 : sizeof XTOS_SOURCE_DIR]")
 
 # Set the virtual disk image size (in MiB)
-set_disk_image_size(128)
+set_disk_image_size(32)
 
 # Build all subprojects
 add_subdirectory(bootdata)
