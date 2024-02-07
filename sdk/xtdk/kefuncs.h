@@ -24,6 +24,10 @@ XTFASTCALL
 VOID
 KeAcquireSpinLock(IN OUT PKSPIN_LOCK SpinLock);
 
+XTFASTCALL
+KRUNLEVEL
+KeGetCurrentRunLevel(VOID);
+
 XTAPI
 VOID
 KeInitializeApc(IN PKAPC Apc,
@@ -65,6 +69,14 @@ XTAPI
 VOID
 KeInitializeTimerEx(OUT PKTIMER Timer,
                     IN KTIMER_TYPE Type);
+
+XTFASTCALL
+VOID
+KeLowerRunLevel(IN KRUNLEVEL RunLevel);
+
+XTFASTCALL
+KRUNLEVEL
+KeRaiseRunLevel(IN KRUNLEVEL RunLevel);
 
 XTAPI
 LONG
