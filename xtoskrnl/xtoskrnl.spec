@@ -1,4 +1,4 @@
-# XTOS exports
+# XTOS kernel exports
 @ fastcall ExAcquireRundownProtection(ptr)
 @ fastcall ExCompleteRundownProtection(ptr)
 @ fastcall ExInitializeRundownProtection(ptr)
@@ -49,7 +49,3 @@
 @ stdcall RtlWriteRegisterLong(ptr long)
 @ stdcall RtlWriteRegisterShort(ptr long)
 @ stdcall RtlZeroMemory(ptr long)
-
-
-# NT compatibilty layer exports
-@ fastcall ExRundownCompleted(ptr) ExCompleteRundownProtection
