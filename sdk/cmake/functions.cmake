@@ -89,13 +89,13 @@ function(set_install_target TARGET DESTINATION)
 endfunction()
 
 # This function is responsible for compiling module SPEC file
-function(set_specfile SPECFILE)
-    if(NOT ${ARGC} EQUAL 1)
+function(set_specfile SPECFILE EXPORTNAME)
+    if(NOT ${ARGC} EQUAL 2)
         message(FATAL_ERROR "Invalid number of arguments passed to set_specfile() function")
     endif()
     get_filename_component(FILENAME ${SPECFILE} NAME_WE)
     add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${FILENAME}.def ${CMAKE_CURRENT_BINARY_DIR}/${FILENAME}.c
-                       COMMAND ${CMAKE_SPEC_COMPILER} -a=${ARCH} -d=${CMAKE_CURRENT_BINARY_DIR}/${FILENAME}.def -s=${CMAKE_CURRENT_BINARY_DIR}/${FILENAME}.c ${CMAKE_CURRENT_SOURCE_DIR}/${SPECFILE})
+                       COMMAND ${CMAKE_SPEC_COMPILER} -a=${ARCH} -n=${EXPORTNAME} -d=${CMAKE_CURRENT_BINARY_DIR}/${FILENAME}.def -s=${CMAKE_CURRENT_BINARY_DIR}/${FILENAME}.c ${CMAKE_CURRENT_SOURCE_DIR}/${SPECFILE})
 endfunction()
 
 # This function sets the the qemu disk image size (in MiB)

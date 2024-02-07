@@ -51,7 +51,7 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/rtl/${ARCH}/exsup.c)
 
 # Set module definition SPEC file
-set_specfile(xtoskrnl.spec)
+set_specfile(xtoskrnl.spec xtoskrnl.exe)
 
 # Link static XTOS library
 add_library(libxtos ${XTOSKRNL_SOURCE})
@@ -64,7 +64,8 @@ add_executable(xtoskrnl
 # Add linker libraries
 target_link_libraries(xtoskrnl)
 
-# Set instal target
+# Set proper binary name and install target
+set_target_properties(xtoskrnl PROPERTIES SUFFIX .exe)
 set_install_target(xtoskrnl "exectos/boot")
 
 # Set kernel entrypoint, imagebase address, ordinals and subsystem
