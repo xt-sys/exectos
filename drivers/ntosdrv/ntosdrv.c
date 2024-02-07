@@ -8,6 +8,14 @@
 
 #include <xtkmapi.h>
 
+
+/**
+ * This routine is the entry point of the driver.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
 XTAPI
 XTSTATUS
 XtDriverEntry()
