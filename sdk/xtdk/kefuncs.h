@@ -18,6 +18,10 @@
 /* Kernel services routines forward references */
 XTFASTCALL
 VOID
+KeAcquireQueuedSpinLock(IN KSPIN_LOCK_QUEUE_LEVEL LockLevel);
+
+XTFASTCALL
+VOID
 KeAcquireSpinLock(IN OUT PKSPIN_LOCK SpinLock);
 
 XTAPI
@@ -72,6 +76,10 @@ KeReleaseSemaphore(IN PKSEMAPHORE Semaphore,
                    IN KPRIORITY Increment,
                    IN LONG Adjustment,
                    IN BOOLEAN Wait);
+
+XTFASTCALL
+VOID
+KeReleaseQueuedSpinLock(IN KSPIN_LOCK_QUEUE_LEVEL LockLevel);
 
 XTFASTCALL
 VOID
