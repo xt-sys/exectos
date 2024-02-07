@@ -8,6 +8,7 @@ All routines in kernel are prefixed to indicate the kernel subsystem they belong
 This is a list of them:
 
  * Ar - Architecture library
+ * Ex - Kernel Executive
  * Hl - Hardware Abstraction Layer (HAL)
  * Ke - Core kernel library
  * Mm - Memory manager
@@ -19,6 +20,11 @@ This module contains processor architecture specific functions. This includes en
 the processor, getting the address of a page fault, getting CPUID information, and performing very early processor
 initialization. This module does not contain any manufacturer or board-specific code, only CPU architecture specific
 code.
+
+### EX: Kernel Executive
+The kernel executive supplies heap management, including support for allocating system memory from paged/non-paged
+pools, as well as synchronization primitives like push locks and fast mutexes, interlocked memory access, and worker
+threads.
 
 ### HL: Hardware Abstraction Layer
 Hardware Abstraction Layer (HAL), is a layer between the physical hardware of the computer and the rest of the operating
