@@ -9,11 +9,25 @@
 #ifndef __XTDK_RTLTYPES_H
 #define __XTDK_RTLTYPES_H
 
+#include <xtbase.h>
 #include <xttypes.h>
 
 
 /* UUID string lengths */
 #define GUID_STRING_LENGTH              38
 #define PARTUUID_STRING_LENGTH          13
+
+/* Runtime Library routine callbacks */
+typedef VOID (*PWRITE_CHARACTER)(IN CHAR Character);
+typedef VOID (*PWRITE_WIDE_CHARACTER)(IN WCHAR Character);
+
+/* Runtime Library print context structure definition */
+typedef struct _RTL_PRINT_CONTEXT
+{
+    PWRITE_CHARACTER WriteCharacter;
+    PWRITE_WIDE_CHARACTER WriteWideCharacter;
+    ULONG CharactersWritten;
+    ULONG Limit;
+} RTL_PRINT_CONTEXT, *PRTL_PRINT_CONTEXT;
 
 #endif /* __XTDK_RTLTYPES_H */
