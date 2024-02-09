@@ -11,15 +11,30 @@
 
 
 /**
+ * Clears all errors on the APIC.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+HlClearApicErrors()
+{
+    /* Clear APIC errors */
+    HlWriteApicRegister(APIC_ESR, 0);
+}
+
+/**
  * Disables the legacy 8259 Programmable Interrupt Controller (PIC).
  *
  * @return This routine does not return any value.
  *
  * @since XT 1.0
  */
-XTCDECL
+XTAPI
 VOID
-HlDisablePic(VOID)
+HlDisableLegacyPic()
 {
     HlIoPortOutByte(PIC1_DATA_PORT, 0xFF);
     HlIoPortOutByte(PIC2_DATA_PORT, 0xFF);
@@ -49,6 +64,21 @@ HlReadApicRegister(IN APIC_REGISTER Register)
         /* Read from xAPIC */
         return RtlReadRegisterLong((PULONG)(APIC_BASE + (Register << 4)));
     }
+}
+
+/**
+ * Signals to the APIC that handling an interrupt is complete.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+HlSendEoi()
+{
+    /* Send APIC EOI */
+    HlWriteApicRegister(APIC_EOI, 0);
 }
 
 /**

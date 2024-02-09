@@ -13,13 +13,21 @@
 
 
 /* HAL library routines forward references */
-XTCDECL
+XTAPI
 VOID
-HlDisablePic(VOID);
+HlClearApicErrors();
+
+XTAPI
+VOID
+HlDisableLegacyPic();
 
 XTFASTCALL
 ULONG
 HlReadApicRegister(IN APIC_REGISTER Register);
+
+XTAPI
+VOID
+HlSendEoi();
 
 XTFASTCALL
 VOID
