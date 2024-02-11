@@ -84,7 +84,7 @@
 #define SIZE_TO_PAGES(Size)                    (((Size) >> MM_PAGE_SHIFT) + (((Size) & (MM_PAGE_MASK)) ? 1 : 0))
 
 /* Variadic ABI functions */
-typedef __builtin_va_list VA_LIST;
+typedef __builtin_va_list VA_LIST, *PVA_LIST;
 #define VA_ARG(Marker, Type)                   ((sizeof (Type) < sizeof(UINT_PTR)) ? \
                                                (Type)(__builtin_va_arg(Marker, UINT_PTR)) : \
                                                (Type)(__builtin_va_arg(Marker, Type)))
