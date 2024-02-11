@@ -58,6 +58,8 @@ typedef signed long long INT64, *PINT64;
 typedef unsigned long long UINT64, *PUINT64;
 
 /* 64-bit types */
+typedef long double DOUBLE64, *PDOUBLE64;
+typedef long double LDOUBLE, *PLDOUBLE;
 typedef long long LONG64, *PLONG64;
 typedef long long LONGLONG, *PLONGLONG;
 typedef unsigned long long ULONGLONG, *PULONGLONG;
