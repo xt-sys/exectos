@@ -40,6 +40,9 @@
 #define MAXLONG                                0x7FFFFFFF
 #define MAXULONG                               0xFFFFFFFF
 
+/* Number of bits per byte */
+#define BITS_PER_BYTE                          8
+
 /* Preprocessor macros for defining a structure alignment, packing and segment */
 #define ALIGN(x)                               __attribute__((aligned(x)))
 #define PACK                                   __attribute__((packed))
