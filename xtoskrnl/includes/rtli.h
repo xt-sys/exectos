@@ -215,6 +215,46 @@ XTFASTCALL
 ULONGLONG
 RtlByteSwap64(IN ULONGLONG Source);
 
+XTAPI
+INT
+RtlCountLeadingZeroes32(IN ULONG Value);
+
+XTAPI
+INT
+RtlCountLeadingZeroes64(IN ULONG Value);
+
+XTAPI
+INT
+RtlCountTrailingZeroes32(IN ULONG Value);
+
+XTAPI
+INT
+RtlCountTrailingZeroes64(IN ULONGLONG Value);
+
+XTAPI
+LONGLONG
+RtlDivide32(IN LONG Dividend,
+            IN LONG Divisor,
+            OUT PLONG Remainder);
+
+XTAPI
+LONGLONG
+RtlDivide64(IN LONGLONG Dividend,
+            IN LONGLONG Divisor,
+            OUT PLONGLONG Remainder);
+
+XTAPI
+ULONGLONG
+RtlDivideUnsigned32(IN ULONG Dividend,
+                    IN ULONG Divisor,
+                    OUT PULONG Remainder);
+
+XTAPI
+ULONGLONG
+RtlDivideUnsigned64(IN ULONGLONG Dividend,
+                    IN ULONGLONG Divisor,
+                    OUT PULONGLONG Remainder);
+
 XTCDECL
 VOID
 RtlInitializeListHead(IN PLIST_ENTRY ListHead);

@@ -90,10 +90,25 @@ RtlConcatenateWideString(OUT PWCHAR Destination,
                          IN SIZE_T Count);
 
 XTAPI
+LARGE_INTEGER
+RtlConvertToLargeInteger32(IN LONG Value);
+
+XTAPI
+LARGE_INTEGER
+RtlConvertToLargeIntegerUnsigned32(IN ULONG Value);
+
+XTAPI
 VOID
 RtlCopyMemory(OUT PVOID Destination,
               IN PCVOID Source,
               IN SIZE_T Length);
+
+XTAPI
+LARGE_INTEGER
+RtlDivideLargeInteger(IN LARGE_INTEGER Dividend,
+                      IN ULONG Divisor,
+                      OUT PULONG Remainder);
+
 
 XTAPI
 VOID
@@ -106,6 +121,11 @@ VOID
 RtlMoveMemory(OUT PVOID Destination,
               IN PCVOID Source,
               IN SIZE_T Length);
+
+XTAPI
+LARGE_INTEGER
+RtlMultiplyLargeInteger(IN LARGE_INTEGER Multiplicand,
+                        IN LONG Multiplier);
 
 XTAPI
 BOOLEAN
