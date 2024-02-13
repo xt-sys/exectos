@@ -255,6 +255,11 @@ RtlDivideUnsigned64(IN ULONGLONG Dividend,
                     IN ULONGLONG Divisor,
                     OUT PULONGLONG Remainder);
 
+XTAPI
+LONG
+RtlGetBaseExponent(IN DOUBLE Value,
+                   OUT PDOUBLE PowerOfTen);
+
 XTCDECL
 VOID
 RtlInitializeListHead(IN PLIST_ENTRY ListHead);

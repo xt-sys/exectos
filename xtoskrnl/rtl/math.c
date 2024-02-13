@@ -511,6 +511,96 @@ RtlDivideLargeInteger(IN LARGE_INTEGER Dividend,
 }
 
 /**
+ * Gets the base exponent of a given floating point value.
+ *
+ * @param Value
+ *        Supplies the floating point value to get the base exponent of.
+ *
+ * @param PowerOfTen
+ *        Supplies a pointer that receives the power of ten associated with the base exponent.
+ *
+ * @return This routine returns the base exponent value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+LONG
+RtlGetBaseExponent(IN DOUBLE Value,
+                   OUT PDOUBLE PowerOfTen)
+{
+    LONG BaseExponent, CurrentExponent, Exponent;
+    ULONG ExponentShift, ExponentMask;
+    LARGE_DOUBLE Parts;
+    DOUBLE Power;
+
+    /* Calculate the exponent mask and shift */
+    ExponentMask = DOUBLE_EXPONENT_MASK >> (sizeof(ULONG) * BITS_PER_BYTE);
+    ExponentShift = DOUBLE_EXPONENT_SHIFT - (sizeof(ULONG) * BITS_PER_BYTE);
+
+    /* Check if value is zero */
+    if(Value == 0.0)
+    {
+        /* Return the power of ten and the exponent */
+        *PowerOfTen = 1.0;
+        return 0;
+    }
+
+    /* Get the parts of the value and calculate the exponent by multiplying by log10(2) */
+    Parts.DoublePart = Value;
+    BaseExponent = ((Parts.u.HighPart & ExponentMask) >> ExponentShift) - DOUBLE_EXPONENT_BIAS;
+    Exponent = (LONG)((DOUBLE)BaseExponent * 0.30102999566) + 1;
+
+    /* Set the initial values and calculate the exponent */
+    CurrentExponent = 0;
+    Power = 1.0;
+    if(Exponent > 0)
+    {
+        /* Calculate the exponent */
+        while(CurrentExponent + 10 <= Exponent)
+        {
+            Power *= 0.0000000001;
+            CurrentExponent += 10;
+        }
+
+        while(CurrentExponent + 1 <= Exponent)
+        {
+            Power *= 0.1;
+            CurrentExponent += 1;
+        }
+    }
+    else
+    {
+        /* Calculate the exponent */
+        while(CurrentExponent - 10 >= Exponent)
+        {
+            Power *= 10000000000;
+            CurrentExponent -= 10;
+        }
+
+        while(CurrentExponent - 1 >= Exponent)
+        {
+            Power *= 10.0;
+            CurrentExponent -= 1;
+        }
+    }
+
+    /* Normalize input value */
+    Value *= Power;
+
+    /* Remove all leading zeros, if any */
+    while((Value != 0.0) && ((LONG)Value == 0))
+    {
+        Value *= 10.0;
+        Exponent -= 1;
+        Power *= 10.0;
+    }
+
+    /* Return the power of ten and the exponent */
+    *PowerOfTen = Power;
+    return Exponent;
+}
+
+/**
  * Multiplies a signed large integer by a signed integer.
  *
  * @param Multiplicand

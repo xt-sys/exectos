@@ -163,6 +163,18 @@ typedef struct _FLOAT128
     LONGLONG HighPart;
 } FLOAT128, *PFLOAT128;
 
+/* 64-bit floating point union */
+typedef union _LARGE_DOUBLE
+{
+    struct
+    {
+        ULONG LowPart;
+        ULONG HighPart;
+    } u;
+    DOUBLE DoublePart;
+    ULONGLONG QuadPart;
+} LARGE_DOUBLE, *PLARGE_DOUBLE;
+
 /* 64-bit signed integer union */
 typedef union _LARGE_INTEGER
 {

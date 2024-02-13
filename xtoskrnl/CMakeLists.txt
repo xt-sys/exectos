@@ -41,6 +41,7 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/po/idle.c
     ${XTOSKRNL_SOURCE_DIR}/rtl/atomic.c
     ${XTOSKRNL_SOURCE_DIR}/rtl/byteswap.c
+    ${XTOSKRNL_SOURCE_DIR}/rtl/globals.c
     ${XTOSKRNL_SOURCE_DIR}/rtl/guid.c
     ${XTOSKRNL_SOURCE_DIR}/rtl/ioreg.c
     ${XTOSKRNL_SOURCE_DIR}/rtl/math.c

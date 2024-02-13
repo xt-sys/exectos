@@ -17,6 +17,11 @@
 #define GUID_STRING_LENGTH              38
 #define PARTUUID_STRING_LENGTH          13
 
+/* Floating point definitions */
+#define DOUBLE_EXPONENT_MASK            0x7FF0000000000000ULL
+#define DOUBLE_EXPONENT_SHIFT           0x34
+#define DOUBLE_EXPONENT_BIAS            0x3FF
+
 /* Runtime Library routine callbacks */
 typedef VOID (*PWRITE_CHARACTER)(IN CHAR Character);
 typedef VOID (*PWRITE_WIDE_CHARACTER)(IN WCHAR Character);
