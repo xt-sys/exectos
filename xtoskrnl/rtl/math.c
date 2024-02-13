@@ -183,10 +183,17 @@ RtlDivide64(IN LONGLONG Dividend,
             IN LONGLONG Divisor,
             OUT PLONGLONG Remainder)
 {
-    LONGLONG Quotient;
+    LONGLONG DividendSign, DivisorSign, Quotient, UDividend, UDivisor;
+
+    /* Remove the sign bit from dividend and divisor if present */
+    DividendSign = Dividend >> ((sizeof(LONGLONG) * BITS_PER_BYTE) - 1);
+    DivisorSign = Divisor >> ((sizeof(LONGLONG) * BITS_PER_BYTE) - 1);
+    UDividend = (Dividend ^ DividendSign) - DividendSign;
+    UDivisor = (Divisor ^ DivisorSign) - DivisorSign;
 
     /* Calculate the quotient */
-    Quotient = Dividend / Divisor;
+    DividendSign ^= DivisorSign;
+    Quotient = (RtlDivideUnsigned64(UDividend, UDivisor, NULL) ^ DividendSign) - DividendSign;
 
     /* Make sure a pointer to remainder provided */
     if(Remainder)
@@ -254,15 +261,210 @@ RtlDivideUnsigned64(IN ULONGLONG Dividend,
                     IN ULONGLONG Divisor,
                     OUT PULONGLONG Remainder)
 {
-    /* Make sure a pointer to remainder provided */
-    if(Remainder)
+    ULARGE_INTEGER DividendParts, DivisorParts, QuotientParts, RemainderParts;
+    LONGLONG Difference;
+    ULONGLONG Shift;
+    ULONG Carry;
+
+    /* Make sure divisor is not 0 */
+    if(Divisor == 0)
     {
-        /* Calculate remainder */
-        *Remainder = Dividend % Divisor;
+        /* Cannot divide by 0 */
+        return 0;
+    }
+
+    /* Assign dividend and divisor to large integer representations */
+    DividendParts.QuadPart = Dividend;
+    DivisorParts.QuadPart = Divisor;
+
+    /* Check if dividend is 32-bit value */
+    if(DividendParts.u.HighPart == 0)
+    {
+        /* Check if devisor is 32-bit value */
+        if(DivisorParts.u.HighPart == 0)
+        {
+            /* 32-bit divide operation, check if remainder provided */
+            if(Remainder != NULL)
+            {
+                /* Calculate remainder */
+                *Remainder = DividendParts.u.LowPart % DivisorParts.u.LowPart;
+            }
+
+            /* Return the quotient */
+            return DividendParts.u.LowPart / DivisorParts.u.LowPart;
+        }
+
+        /* 32-bit value divided by a 64-bit value, check if remainder provided */
+        if(Remainder != NULL)
+        {
+            /* Calculate remainder */
+            *Remainder = DividendParts.u.LowPart;
+        }
+
+        /* Return zero as quotient */
+        return 0;
+    }
+
+    /* Dividend is a 64-bit value, check if divisor has a low part */
+    if(DivisorParts.u.LowPart != 0)
+    {
+        /* Divisor has a non-zero low part, check if divisor has a high part */
+        if(DivisorParts.u.HighPart != 0)
+        {
+            /* Divisor is 64-bit value, calculate the shift count */
+            Shift = RtlCountLeadingZeroes32(DivisorParts.u.HighPart) - RtlCountLeadingZeroes32(DividendParts.u.HighPart);
+
+            /* Check if shift count exceeds 32-bits */
+            if(Shift > ((sizeof(ULONG) * BITS_PER_BYTE) - 1))
+            {
+                /* Check if remainder provided */
+                if(Remainder != NULL)
+                {
+                    /* Calculate remainder */
+                    *Remainder = DividendParts.QuadPart;
+                }
+
+                return 0;
+            }
+
+            /* Increase shift and clear quotient low part */
+            Shift++;
+            QuotientParts.u.LowPart = 0;
+
+            /* Check if shift is 32-bits */
+            if(Shift == (sizeof(ULONG) * BITS_PER_BYTE)) {
+                /* Get the quotient high part and remainder */
+                QuotientParts.u.HighPart = DividendParts.u.LowPart;
+                RemainderParts.u.LowPart = DividendParts.u.HighPart;
+                RemainderParts.u.HighPart = 0;
+            } else {
+                /* Get the quotient high part and remainder */
+                QuotientParts.u.HighPart = DividendParts.u.LowPart << ((sizeof(ULONG) * BITS_PER_BYTE) - Shift);
+                RemainderParts.u.LowPart = (DividendParts.u.HighPart << ((sizeof(ULONG) * BITS_PER_BYTE) - Shift)) |
+                                           (DividendParts.u.LowPart >> Shift);
+                RemainderParts.u.HighPart = DividendParts.u.HighPart >> Shift;
+            }
+        }
+        else
+        {
+            /* Divisor is 32-bit value, calculate the shift count */
+            Shift = (sizeof(ULONG) * BITS_PER_BYTE) + 1 +
+                    RtlCountLeadingZeroes32(DivisorParts.u.LowPart) -
+                    RtlCountLeadingZeroes32(DividendParts.u.HighPart);
+
+            /* Check if shift is 32-bit */
+            if(Shift == (sizeof(ULONG) * BITS_PER_BYTE))
+            {
+                /* Get the quotient and remainder */
+                QuotientParts.u.LowPart = 0;
+                QuotientParts.u.HighPart = DividendParts.u.LowPart;
+                RemainderParts.u.LowPart = DividendParts.u.HighPart;
+                RemainderParts.u.HighPart = 0;
+            }
+            else if(Shift < (sizeof(ULONG) * BITS_PER_BYTE))
+            {
+                /* Shift is smaller, get the quotient and remainder */
+                QuotientParts.u.LowPart = 0;
+                QuotientParts.u.HighPart = DividendParts.u.LowPart << ((sizeof(ULONG) * BITS_PER_BYTE) - Shift);
+                RemainderParts.u.LowPart = (DividendParts.u.HighPart <<
+                                           ((sizeof(ULONG) * BITS_PER_BYTE) - Shift)) |
+                                           (DividendParts.u.LowPart >> Shift);
+                RemainderParts.u.HighPart = DividendParts.u.HighPart >> Shift;
+            }
+            else
+            {
+                /* Shift is larger, get the quotient and remainder */
+                QuotientParts.u.LowPart = DividendParts.u.LowPart << ((sizeof(ULONGLONG) * BITS_PER_BYTE) - Shift);
+                QuotientParts.u.HighPart = (DividendParts.u.HighPart << ((sizeof(ULONGLONG) * BITS_PER_BYTE) - Shift)) |
+                                           (DividendParts.u.LowPart >> (Shift - (sizeof(ULONG) * BITS_PER_BYTE)));
+                RemainderParts.u.LowPart = DividendParts.u.HighPart >> (Shift - (sizeof(ULONG) * BITS_PER_BYTE));
+                RemainderParts.u.HighPart = 0;
+            }
+        }
+    }
+    else
+    {
+        /* Divisor is 64-bit value, check if dividend has low part set */
+        if(DividendParts.u.LowPart == 0)
+        {
+            /* Check if remainder provided */
+            if(Remainder != NULL)
+            {
+                /* Calculate the remainder */
+                RemainderParts.u.HighPart = DividendParts.u.HighPart % DivisorParts.u.HighPart;
+                RemainderParts.u.LowPart = 0;
+                *Remainder = RemainderParts.QuadPart;
+            }
+
+            /* Return the quotient */
+            return DividendParts.u.HighPart / DivisorParts.u.HighPart;
+        }
+
+        /* Calculate the shift count */
+        Shift = RtlCountLeadingZeroes32(DivisorParts.u.HighPart) - RtlCountLeadingZeroes32(DividendParts.u.HighPart);
+
+        /* Check if shift exceeds 32-bits */
+        if(Shift > ((sizeof(ULONG) * BITS_PER_BYTE) - 2))
+        {
+            /* Check if remainder provided */
+            if(Remainder != NULL)
+            {
+                /* Calculate the remainder */
+                *Remainder = DividendParts.QuadPart;
+            }
+
+            /* Return 0 */
+            return 0;
+        }
+
+        /* Increase shift and clear quotient low part */
+        Shift++;
+        QuotientParts.u.LowPart = 0;
+
+        /* Get the quotient high part and remainder */
+        QuotientParts.u.HighPart = DividendParts.u.LowPart << ((sizeof(ULONG) * BITS_PER_BYTE) - Shift);
+        RemainderParts.u.HighPart = DividendParts.u.HighPart >> Shift;
+        RemainderParts.u.LowPart = (DividendParts.u.HighPart <<
+                                   ((sizeof(ULONG) * BITS_PER_BYTE) - Shift)) |
+                                   (DividendParts.u.LowPart >> Shift);
+    }
+
+    /* Perform the division until shift is zero */
+    Carry = 0;
+    while(Shift > 0)
+    {
+        /* Shift the remainder and the quotient */
+        RemainderParts.u.HighPart = (RemainderParts.u.HighPart << 1) |
+                                    (RemainderParts.u.LowPart >>
+                                    ((sizeof(ULONG) * BITS_PER_BYTE) - 1));
+        RemainderParts.u.LowPart = (RemainderParts.u.LowPart << 1) |
+                                   (QuotientParts.u.HighPart >>
+                                   ((sizeof(ULONG) * BITS_PER_BYTE) - 1));
+        QuotientParts.u.HighPart = (QuotientParts.u.HighPart << 1) |
+                                   (QuotientParts.u.LowPart >>
+                                   ((sizeof(ULONG) * BITS_PER_BYTE) - 1));
+        QuotientParts.u.LowPart = (QuotientParts.u.LowPart << 1) | Carry;
+
+        /* Set the carry and subtract the divisor */
+        Difference = (LONGLONG)(DivisorParts.QuadPart - RemainderParts.QuadPart - 1) >>
+                     ((sizeof(ULONGLONG) * BITS_PER_BYTE) - 1);
+        Carry = Difference & 0x1;
+        RemainderParts.QuadPart -= DivisorParts.QuadPart & Difference;
+        Shift -= 1;
+    }
+
+    /* Add the carry to the quotient */
+    QuotientParts.QuadPart = (QuotientParts.QuadPart << 1) | Carry;
+
+    /* Check if remainder provided */
+    if(Remainder != NULL)
+    {
+        /* Calculate the remainder */
+        *Remainder = RemainderParts.QuadPart;
     }
 
     /* Return the quotient */
-    return Dividend / Divisor;
+    return QuotientParts.QuadPart;
 }
 
 /**
@@ -287,17 +489,24 @@ RtlDivideLargeInteger(IN LARGE_INTEGER Dividend,
                       IN ULONG Divisor,
                       OUT PULONG Remainder)
 {
+    LONGLONG DividendSign, UDividend;
     LARGE_INTEGER LargeInt;
+
+    /* Remove the sign bit from dividend if present */
+    DividendSign = Dividend.QuadPart >> ((sizeof(LONGLONG) * BITS_PER_BYTE) - 1);
+    UDividend = (Dividend.QuadPart ^ DividendSign) - DividendSign;
+
+    /* Calculate the quotient */
+    LargeInt.QuadPart = (RtlDivideUnsigned64(UDividend, Divisor, NULL) ^ DividendSign) - DividendSign;
 
     /* Make sure a pointer to remainder provided */
     if(Remainder)
     {
         /* Calculate remainder */
-        *Remainder = Dividend.QuadPart % Divisor;
+        *Remainder = Dividend.QuadPart - (LargeInt.QuadPart * Divisor);
     }
 
     /* Return the quotient */
-    LargeInt.QuadPart = Dividend.QuadPart / Divisor;
     return LargeInt;
 }
 
