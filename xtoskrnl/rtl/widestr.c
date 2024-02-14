@@ -88,7 +88,7 @@ RtlCompareWideStringInsensitive(IN CONST PWCHAR String1,
     ULONG Index = 0;
 
     /* Iterate through the wide strings */
-    while(String1[Index] != '\0' && String2[Index] != '\0')
+    while(String1[Index] != L'\0' && String2[Index] != L'\0')
     {
         /* Check if length limit reached */
         if(Index != 0 && Index == Length)
@@ -102,15 +102,15 @@ RtlCompareWideStringInsensitive(IN CONST PWCHAR String1,
         Character2 = String2[Index];
 
         /* Lowercase wide string1 character if needed */
-        if(String1[Index] >= 'A' && String1[Index] <= 'Z')
+        if(String1[Index] >= L'A' && String1[Index] <= L'Z')
         {
-            Character1 = String1[Index] - 'A' + 'a';
+            Character1 = String1[Index] - L'A' + L'a';
         }
 
         /* Lowercase wide string2 character if needed */
-        if(String2[Index] >= 'A' && String2[Index] <= 'Z')
+        if(String2[Index] >= L'A' && String2[Index] <= L'Z')
         {
-            Character2 = String2[Index] - 'A' + 'a';
+            Character2 = String2[Index] - L'A' + L'a';
         }
 
         /* Compare the characters */
@@ -165,7 +165,7 @@ RtlConcatenateWideString(OUT PWCHAR Destination,
         do
         {
             /* Check if NULL terminated character found */
-            if((*Destination = *Source++) == '\0')
+            if((*Destination = *Source++) == L'\0')
             {
                 /* Break on '\0' character */
                 break;
@@ -175,7 +175,7 @@ RtlConcatenateWideString(OUT PWCHAR Destination,
         while(--Count != 0);
 
         /* Add NULL termination character to the end of destination wide string */
-        *Destination = '\0';
+        *Destination = L'\0';
     }
     else
     {
@@ -185,6 +185,37 @@ RtlConcatenateWideString(OUT PWCHAR Destination,
 
     /* Return copy of the destination wide string */
     return DestString;
+}
+
+/**
+ * Reverses a characters order in a wide string. It modifies the original, input variable.
+ *
+ * @param String
+ *        Supplies a pointer to the wide string to reverse.
+ *
+ * @param Length
+ *        Supplies the length of the wide string to reverse.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+RtlReverseWideString(IN OUT PWCHAR String,
+                     IN ULONG Length)
+{
+    WCHAR TempChar;
+    ULONG Index;
+
+    /* Iterate through the string */
+    for(Index = 0; Index < (Length / 2); Index++)
+    {
+        /* Swap characters */
+        TempChar = String[Index];
+        String[Index] = String[Length - Index - 1];
+        String[Length - Index - 1] = TempChar;
+    }
 }
 
 /**
@@ -232,7 +263,7 @@ RtlTokenizeWideString(IN PWCHAR String,
     for(;;)
     {
         Char = *String++;
-        Span = (WCHAR *)Delimiter;
+        Span = (PWCHAR)Delimiter;
         do
         {
             if((SpanChar = *Span++) == Char)
@@ -255,6 +286,86 @@ RtlTokenizeWideString(IN PWCHAR String,
         }
         while(SpanChar != L'\0');
     }
+}
+
+/**
+ * Removes certain characters from a beginning of the wide string.
+ *
+ * @param String
+ *        Pointer to the null-terminated wide string to be trimmed.
+ *
+ * @return This routine returns a pointer to the left-trimmed wide string.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PWCHAR
+RtlTrimLeftWideString(IN CONST PWCHAR String)
+{
+    PWCHAR Start;
+
+    /* Initialize pointer */
+    Start = String;
+
+    /* Skip all leading whitespaces */
+    while(*Start == L' ' || *Start == L'\n' || *Start == L'\t' || *Start == L'\r' || *Start == L'\v' || *Start == L'\f')
+    {
+        /* Advance to the next character */
+        Start++;
+    }
+
+    /* Return left-trimmed string */
+    return Start;
+}
+
+/**
+ * Removes certain characters from the end of the wide string.
+ *
+ * @param String
+ *        Pointer to the null-terminated wide string to be trimmed.
+ *
+ * @return This routine returns a pointer to the right-trimmed wide string.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PWCHAR
+RtlTrimRightWideString(IN CONST PWCHAR String)
+{
+    PWCHAR End;
+
+    /* Find end of the string */
+    End = String + RtlWideStringLength(String, 0);
+
+    /* Skip all trailing whitespaces */
+    while((End != String) && (*End == L' ' || *End == L'\n' || *End == L'\t' || *End == L'\r' || *End == L'\v' || *End == L'\f'))
+    {
+        /* Move to the previous character */
+        End--;
+    }
+
+    /* Terminate the string */
+    *End = 0;
+
+    /* Return right-trimmed string */
+    return String;
+}
+
+/**
+ * Removes certain characters from the beginning and the end of the wide string.
+ *
+ * @param String
+ *        Pointer to the null-terminated wide string to be trimmed.
+ *
+ * @return This routine returns a pointer to the trimmed wide string.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PWCHAR
+RtlTrimWideString(IN CONST PWCHAR String)
+{
+    return RtlTrimLeftWideString(RtlTrimRightWideString(String));
 }
 
 /**

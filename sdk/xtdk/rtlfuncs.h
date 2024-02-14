@@ -139,6 +139,11 @@ RtlReverseString(IN OUT PCHAR String,
                  IN ULONG Length);
 
 XTAPI
+VOID
+RtlReverseWideString(IN OUT PWCHAR String,
+                     IN ULONG Length);
+
+XTAPI
 BOOLEAN
 RtlSameMemory(IN PCVOID LeftBuffer,
               IN PCVOID RightBuffer,
@@ -177,13 +182,25 @@ XTCDECL
 PCHAR
 RtlTrimLeftString(IN CONST PCHAR String);
 
+XTAPI
+PWCHAR
+RtlTrimLeftWideString(IN CONST PWCHAR String);
+
 XTCDECL
 PCHAR
 RtlTrimRightString(IN CONST PCHAR String);
 
+XTAPI
+PWCHAR
+RtlTrimRightWideString(IN CONST PWCHAR String);
+
 XTCDECL
 PCHAR
 RtlTrimString(IN CONST PCHAR String);
+
+XTAPI
+PWCHAR
+RtlTrimWideString(IN CONST PWCHAR String);
 
 XTCDECL
 SIZE_T
