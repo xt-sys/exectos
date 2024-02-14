@@ -59,25 +59,25 @@ RtlCompareMemory(IN PCVOID LeftBuffer,
                  IN PCVOID RightBuffer,
                  IN SIZE_T Length);
 
-XTCDECL
+XTAPI
 SIZE_T
 RtlCompareString(IN CONST PCHAR String1,
                  IN CONST PCHAR String2,
                  IN SIZE_T Length);
 
-XTCDECL
+XTAPI
 SIZE_T
 RtlCompareStringInsensitive(IN CONST PCHAR String1,
                             IN CONST PCHAR String2,
                             IN SIZE_T Length);
 
-XTCDECL
+XTAPI
 SIZE_T
 RtlCompareWideString(IN CONST PWCHAR String1,
                      IN CONST PWCHAR String2,
                      IN SIZE_T Length);
 
-XTCDECL
+XTAPI
 SIZE_T
 RtlCompareWideStringInsensitive(IN CONST PWCHAR String1,
                                 IN CONST PWCHAR String2,
@@ -89,7 +89,7 @@ RtlConcatenateString(OUT PCHAR Destination,
                      IN PCHAR Source,
                      IN SIZE_T Count);
 
-XTCDECL
+XTAPI
 PWCHAR
 RtlConcatenateWideString(OUT PWCHAR Destination,
                          IN PWCHAR Source,
@@ -155,12 +155,12 @@ RtlSetMemory(OUT PVOID Destination,
              IN UCHAR Byte,
              IN SIZE_T Length);
 
-XTCDECL
+XTAPI
 SIZE_T
 RtlStringLength(IN CONST PCHAR String,
                 IN SIZE_T MaxLength);
 
-XTCDECL
+XTAPI
 SIZE_T
 RtlStringToWideString(OUT PWCHAR Destination,
                       IN CONST PCHAR *Source,
@@ -172,13 +172,13 @@ RtlTokenizeString(IN PCHAR String,
                   IN CONST PCHAR Delimiter,
                   IN OUT PCHAR *SavePtr);
 
-XTCDECL
+XTAPI
 PWCHAR
 RtlTokenizeWideString(IN PWCHAR String,
                       IN CONST PWCHAR Delimiter,
                       IN OUT PWCHAR *SavePtr);
 
-XTCDECL
+XTAPI
 PCHAR
 RtlTrimLeftString(IN CONST PCHAR String);
 
@@ -186,7 +186,7 @@ XTAPI
 PWCHAR
 RtlTrimLeftWideString(IN CONST PWCHAR String);
 
-XTCDECL
+XTAPI
 PCHAR
 RtlTrimRightString(IN CONST PCHAR String);
 
@@ -194,7 +194,7 @@ XTAPI
 PWCHAR
 RtlTrimRightWideString(IN CONST PWCHAR String);
 
-XTCDECL
+XTAPI
 PCHAR
 RtlTrimString(IN CONST PCHAR String);
 
@@ -202,7 +202,7 @@ XTAPI
 PWCHAR
 RtlTrimWideString(IN CONST PWCHAR String);
 
-XTCDECL
+XTAPI
 SIZE_T
 RtlWideStringLength(IN CONST PWCHAR String,
                     IN SIZE_T MaxLength);

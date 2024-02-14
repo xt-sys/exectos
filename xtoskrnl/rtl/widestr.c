@@ -25,7 +25,7 @@
  *
  * @since XT 1.0
  */
-XTCDECL
+XTAPI
 SIZE_T
 RtlCompareWideString(IN CONST PWCHAR String1,
                      IN CONST PWCHAR String2,
@@ -77,7 +77,7 @@ RtlCompareWideString(IN CONST PWCHAR String1,
  *
  * @since XT 1.0
  */
-XTCDECL
+XTAPI
 SIZE_T
 RtlCompareWideStringInsensitive(IN CONST PWCHAR String1,
                                 IN CONST PWCHAR String2,
@@ -144,7 +144,7 @@ RtlCompareWideStringInsensitive(IN CONST PWCHAR String1,
  *
  * @since XT 1.0
  */
-XTCDECL
+XTAPI
 PWCHAR
 RtlConcatenateWideString(OUT PWCHAR Destination,
                          IN PWCHAR Source,
@@ -234,7 +234,7 @@ RtlReverseWideString(IN OUT PWCHAR String,
  *
  * @since: XT 1.0
  */
-XTCDECL
+XTAPI
 PWCHAR
 RtlTokenizeWideString(IN PWCHAR String,
                       IN CONST PWCHAR Delimiter,
@@ -381,7 +381,7 @@ RtlTrimWideString(IN CONST PWCHAR String)
  *
  * @since: XT 1.0
  */
-XTCDECL
+XTAPI
 SIZE_T
 RtlWideStringLength(IN CONST PWCHAR String,
                     IN SIZE_T MaxLength)

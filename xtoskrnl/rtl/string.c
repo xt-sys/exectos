@@ -25,7 +25,7 @@
  *
  * @since XT 1.0
  */
-XTCDECL
+XTAPI
 SIZE_T
 RtlCompareString(IN CONST PCHAR String1,
                  IN CONST PCHAR String2,
@@ -77,7 +77,7 @@ RtlCompareString(IN CONST PCHAR String1,
  *
  * @since XT 1.0
  */
-XTCDECL
+XTAPI
 SIZE_T
 RtlCompareStringInsensitive(IN CONST PCHAR String1,
                             IN CONST PCHAR String2,
@@ -231,7 +231,7 @@ RtlReverseString(IN OUT PCHAR String,
  *
  * @since: XT 1.0
  */
-XTCDECL
+XTAPI
 SIZE_T
 RtlStringLength(IN CONST PCHAR String,
                 IN SIZE_T MaxLength)
@@ -276,7 +276,7 @@ RtlStringLength(IN CONST PCHAR String,
  *
  * @since XT 1.0
  */
-XTCDECL
+XTAPI
 SIZE_T
 RtlStringToWideString(OUT PWCHAR Destination,
                       IN CONST PCHAR *Source,
@@ -389,7 +389,7 @@ RtlTokenizeString(IN PCHAR String,
  *
  * @since XT 1.0
  */
-XTCDECL
+XTAPI
 PCHAR
 RtlTrimLeftString(IN CONST PCHAR String)
 {
@@ -419,7 +419,7 @@ RtlTrimLeftString(IN CONST PCHAR String)
  *
  * @since XT 1.0
  */
-XTCDECL
+XTAPI
 PCHAR
 RtlTrimRightString(IN CONST PCHAR String)
 {
@@ -452,7 +452,7 @@ RtlTrimRightString(IN CONST PCHAR String)
  *
  * @since XT 1.0
  */
-XTCDECL
+XTAPI
 PCHAR
 RtlTrimString(IN CONST PCHAR String)
 {
