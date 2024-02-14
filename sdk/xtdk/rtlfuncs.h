@@ -83,6 +83,12 @@ RtlCompareWideStringInsensitive(IN CONST PWCHAR String1,
                                 IN CONST PWCHAR String2,
                                 IN SIZE_T Length);
 
+XTAPI
+PCHAR
+RtlConcatenateString(OUT PCHAR Destination,
+                     IN PCHAR Source,
+                     IN SIZE_T Count);
+
 XTCDECL
 PWCHAR
 RtlConcatenateWideString(OUT PWCHAR Destination,
@@ -128,6 +134,11 @@ RtlMultiplyLargeInteger(IN LARGE_INTEGER Multiplicand,
                         IN LONG Multiplier);
 
 XTAPI
+VOID
+RtlReverseString(IN OUT PCHAR String,
+                 IN ULONG Length);
+
+XTAPI
 BOOLEAN
 RtlSameMemory(IN PCVOID LeftBuffer,
               IN PCVOID RightBuffer,
@@ -149,6 +160,12 @@ SIZE_T
 RtlStringToWideString(OUT PWCHAR Destination,
                       IN CONST PCHAR *Source,
                       IN SIZE_T Length);
+
+XTAPI
+PCHAR
+RtlTokenizeString(IN PCHAR String,
+                  IN CONST PCHAR Delimiter,
+                  IN OUT PCHAR *SavePtr);
 
 XTCDECL
 PWCHAR

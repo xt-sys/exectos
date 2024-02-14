@@ -129,6 +129,96 @@ RtlCompareStringInsensitive(IN CONST PCHAR String1,
 }
 
 /**
+ * Appends a copy of the source string to the end of the destination string.
+ *
+ * @param Destination
+ *        Supplies a pointer to the null-terminated string to append to.
+ *
+ * @param Source
+ *        Supplies a pointer to the null-terminated string to copy from.
+ *
+ * @param Count
+ *        Sets a maximum number of characters to copy. If no limit set, appends whole string.
+ *
+ * @return This routine returns a copy of a destination string.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PCHAR
+RtlConcatenateString(OUT PCHAR Destination,
+                     IN PCHAR Source,
+                     IN SIZE_T Count)
+{
+    PCHAR DestString = Destination;
+
+    /* Go to the end of destination string */
+    while(*Destination)
+    {
+        Destination++;
+    }
+
+    /* Check if copy limit set */
+    if(Count > 0)
+    {
+        /* Copy character-by-character */
+        do
+        {
+            /* Check if NULL terminated character found */
+            if((*Destination = *Source++) == '\0')
+            {
+                /* Break on '\0' character */
+                break;
+            }
+            Destination++;
+        }
+        while(--Count != 0);
+
+        /* Add NULL termination character to the end of destination string */
+        *Destination = '\0';
+    }
+    else
+    {
+        /* No limit set, copy all characters */
+        while((*Destination++ = *Source++) != 0);
+    }
+
+    /* Return copy of the destination string */
+    return DestString;
+}
+
+/**
+ * Reverses a characters order in a string. It modifies the original, input variable.
+ *
+ * @param String
+ *        Supplies a pointer to the string to reverse.
+ *
+ * @param Length
+ *        Supplies the length of the string to reverse.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+RtlReverseString(IN OUT PCHAR String,
+                 IN ULONG Length)
+{
+    UCHAR TempChar;
+    ULONG Index;
+
+    /* Iterate through the string */
+    for(Index = 0; Index < (Length / 2); Index++)
+    {
+        /* Swap characters */
+        TempChar = String[Index];
+        String[Index] = String[Length - Index - 1];
+        String[Length - Index - 1] = TempChar;
+    }
+}
+
+/**
  * Calculates the length of a given string.
  *
  * @param String
@@ -217,6 +307,76 @@ RtlStringToWideString(OUT PWCHAR Destination,
     }
 
     return Length - Count;
+}
+
+/**
+ * Finds the next token in a null-terminated string.
+ *
+ * @param String
+ *        Pointer to the null-terminated string to tokenize.
+ *
+ * @param Delimiter
+ *        Pointer to the null-terminated string identifying delimiters.
+ *
+ * @param SavePtr
+ *        Pointer to an object used to store routine internal state.
+ *
+ * @return Pointer to the beginning of the next token or NULL if there are no more tokens.
+ *
+ * @since: XT 1.0
+ */
+XTAPI
+PCHAR
+RtlTokenizeString(IN PCHAR String,
+                  IN CONST PCHAR Delimiter,
+                  IN OUT PCHAR *SavePtr)
+{
+    PCHAR Span, Token;
+    CHAR Char, SpanChar;
+
+    /* Check if there is anything to tokenize */
+    if(String == NULL && (String = *SavePtr) == NULL)
+    {
+        /* Empty string given */
+        return NULL;
+    }
+
+    /* Check non-delimiter characters */
+    Char = *String++;
+    if(Char == '\0')
+    {
+        *SavePtr = NULL;
+        return NULL;
+    }
+    Token = String - 1;
+
+    /* Scan token for delimiters */
+    for(;;)
+    {
+        Char = *String++;
+        Span = (PCHAR)Delimiter;
+        do
+        {
+            if((SpanChar = *Span++) == Char)
+            {
+                if(Char == '\0')
+                {
+                    String = NULL;
+                }
+                else
+                {
+                    String[-1] = '\0';
+                }
+
+                /* Store pointer to the next token */
+                *SavePtr = String;
+
+                /* Return token */
+                return Token;
+            }
+        }
+        while(SpanChar != '\0');
+    }
 }
 
 /**
