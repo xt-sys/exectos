@@ -290,4 +290,46 @@ XTCDECL
 VOID
 RtlRemoveEntryList(IN PLIST_ENTRY Entry);
 
+XTAPI
+XTSTATUS
+RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
+                                     IN PCWSTR Format,
+                                     IN PVA_LIST ArgumentList,
+                                     IN OUT PULONG Index);
+
+XTAPI
+ULONGLONG
+RtlpGetWideStringArgument(IN PVA_LIST ArgumentList,
+                          IN ULONG ArgumentNumber,
+                          IN LONG ArgumentSize);
+
+XTAPI
+ULONGLONG
+RtlpGetWideStringSpecifierValue(IN PWCHAR *Format);
+
+XTAPI
+XTSTATUS
+RtlpWriteWideCharacter(IN PRTL_PRINT_CONTEXT Context,
+                       IN WCHAR Character);
+
+XTAPI
+XTSTATUS
+RtlpWriteWideStringIntegerValue(IN PRTL_PRINT_CONTEXT Context,
+                                IN PRTL_PRINT_FORMAT_PROPERTIES FormatProperties,
+                                IN ULONGLONG Integer);
+
+XTAPI
+XTSTATUS
+RtlpWriteWideStringStringValue(PRTL_PRINT_CONTEXT Context,
+                               PRTL_PRINT_FORMAT_PROPERTIES FormatProperties,
+                               PCHAR String,
+                               BOOLEAN Character);
+
+XTAPI
+XTSTATUS
+RtlpWriteWideStringValue(PRTL_PRINT_CONTEXT Context,
+                         PRTL_PRINT_FORMAT_PROPERTIES FormatProperties,
+                         PWCHAR String,
+                         BOOLEAN Character);
+
 #endif /* __XTOSKRNL_RTLI_H */

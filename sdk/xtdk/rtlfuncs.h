@@ -12,6 +12,7 @@
 #include <xtdefs.h>
 #include <xtstruct.h>
 #include <xttypes.h>
+#include <rtltypes.h>
 
 
 /* Routines used by XTLDR */
@@ -121,6 +122,12 @@ VOID
 RtlFillMemory(OUT PVOID Destination,
               IN SIZE_T Length,
               IN UCHAR Value);
+
+XTAPI
+XTSTATUS
+RtlFormatWideString(IN PRTL_PRINT_CONTEXT Context,
+                    IN PCWSTR Format,
+                    IN VA_LIST ArgumentList);
 
 XTAPI
 VOID
