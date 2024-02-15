@@ -15,9 +15,6 @@
 #include <globals.h>
 
 
-/* XTLDR routine callbacks */
-typedef VOID (BLPRINTCHAR)(IN USHORT Character);
-
 /* XTLDR routines forward references */
 XTCDECL
 EFI_STATUS
@@ -359,11 +356,11 @@ EFI_STATUS
 BlpActivateSerialIOController();
 
 XTCDECL
-VOID
+XTSTATUS
 BlpConsolePrintChar(IN USHORT Character);
 
 XTCDECL
-VOID
+XTSTATUS
 BlpDebugPutChar(IN USHORT Character);
 
 XTCDECL
@@ -482,44 +479,6 @@ EFI_STATUS
 BlpReadConfigFile(IN CONST PWCHAR ConfigDirectory,
                   IN CONST PWCHAR ConfigFile,
                   OUT PCHAR *ConfigData);
-
-XTCDECL
-VOID
-BlpStringFormat(IN BLPRINTCHAR PrintCharRoutine,
-                IN PUSHORT Format,
-                IN ...);
-
-XTCDECL
-VOID
-BlpStringPrint(IN IN BLPRINTCHAR PrintCharRoutine,
-               IN PUSHORT Format,
-               IN VA_LIST Arguments);
-
-XTCDECL
-VOID
-BlpStringPrintSigned32(IN BLPRINTCHAR PrintCharRoutine,
-                       IN INT Number,
-                       IN UINT Base);
-
-XTCDECL
-VOID
-BlpStringPrintSigned64(IN BLPRINTCHAR PrintCharRoutine,
-                       IN INT_PTR Number,
-                       IN UINT_PTR Base);
-
-XTCDECL
-VOID
-BlpStringPrintUnsigned32(IN BLPRINTCHAR PrintCharRoutine,
-                         IN UINT Number,
-                         IN UINT Base,
-                         IN UINT Padding);
-
-XTCDECL
-VOID
-BlpStringPrintUnsigned64(IN BLPRINTCHAR PrintCharRoutine,
-                         IN UINT_PTR Number,
-                         IN UINT_PTR Base,
-                         IN UINT_PTR Padding);
 
 XTCDECL
 ULONGLONG

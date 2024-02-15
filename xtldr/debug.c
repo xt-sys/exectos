@@ -27,11 +27,16 @@ VOID
 BlDebugPrint(IN PUSHORT Format,
              IN ...)
 {
+    RTL_PRINT_CONTEXT ConsolePrintContext, SerialPrintContext;
     VA_LIST Arguments;
 
     /* Check if debugging enabled and if EFI serial port is fully initialized */
     if(DEBUG)
     {
+        /* Initialize the print contexts */
+        ConsolePrintContext.WriteWideCharacter = BlpConsolePrintChar;
+        SerialPrintContext.WriteWideCharacter = BlpDebugPutChar;
+
         /* Initialise the va_list */
         VA_START(Arguments, Format);
 
@@ -39,14 +44,14 @@ BlDebugPrint(IN PUSHORT Format,
         if((BlpStatus.DebugPort & XTBL_DEBUGPORT_SERIAL) && (BlpStatus.SerialPort.Flags & COMPORT_FLAG_INIT))
         {
             /* Format and print the string to the serial console */
-            BlpStringPrint(BlpDebugPutChar, Format, Arguments);
+            RtlFormatWideString(&SerialPrintContext, (PWCHAR)Format, Arguments);
         }
 
         /* Check if screen debug port is enabled and Boot Services are still available */
         if((BlpStatus.DebugPort & XTBL_DEBUGPORT_SCREEN) && (BlpStatus.BootServices == TRUE))
         {
             /* Format and print the string to the screen */
-            BlpStringPrint(BlpConsolePrintChar, Format, Arguments);
+            RtlFormatWideString(&ConsolePrintContext, (PWCHAR)Format, Arguments);
         }
 
         /* Clean up the va_list */
@@ -245,12 +250,12 @@ BlpInitializeSerialPort(IN ULONG PortNumber,
  * @param Character
  *        The integer promotion of the character to be written.
  *
- * @return This routine does not return any value.
+ * @return This routine returns a status code.
  *
  * @since XT 1.0
  */
 XTCDECL
-VOID
+XTSTATUS
 BlpDebugPutChar(IN USHORT Character)
 {
     USHORT Buffer[2];
@@ -258,6 +263,8 @@ BlpDebugPutChar(IN USHORT Character)
     /* Write character to the serial console */
     Buffer[0] = Character;
     Buffer[1] = 0;
-
     HlComPortPutByte(&BlpStatus.SerialPort, Buffer[0]);
+
+    /* Return success */
+    return STATUS_EFI_SUCCESS;
 }

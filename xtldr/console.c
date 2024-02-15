@@ -98,13 +98,18 @@ VOID
 BlConsolePrint(IN PUSHORT Format,
                IN ...)
 {
+    RTL_PRINT_CONTEXT ConsolePrintContext, SerialPrintContext;
     VA_LIST Arguments;
+
+    /* Initialise the print contexts */
+    ConsolePrintContext.WriteWideCharacter = BlpConsolePrintChar;
+    SerialPrintContext.WriteWideCharacter = BlpDebugPutChar;
 
     /* Initialise the va_list */
     VA_START(Arguments, Format);
 
     /* Format and print the string to the stdout */
-    BlpStringPrint(BlpConsolePrintChar, Format, Arguments);
+    RtlFormatWideString(&ConsolePrintContext, (PWCHAR)Format, Arguments);
 
     /* Print to serial console only if not running under OVMF */
     if(RtlCompareWideString(EfiSystemTable->FirmwareVendor, L"EDK II", 6) != 0)
@@ -113,7 +118,7 @@ BlConsolePrint(IN PUSHORT Format,
         if(DEBUG && (BlpStatus.SerialPort.Flags & COMPORT_FLAG_INIT))
         {
             /* Format and print the string to the serial console */
-            BlpStringPrint(BlpDebugPutChar, Format, Arguments);
+            RtlFormatWideString(&SerialPrintContext, (PWCHAR)Format, Arguments);
         }
     }
 
@@ -281,18 +286,28 @@ BlSetCursorPosition(IN ULONGLONG PosX,
  * @param Character
  *        The integer promotion of the character to be written.
  *
- * @return This routine does not return any value.
+ * @return This routine returns a status code.
  *
  * @since XT 1.0
  */
 XTCDECL
-VOID
+XTSTATUS
 BlpConsolePrintChar(IN USHORT Character)
 {
     USHORT Buffer[2];
+
+    /* Check if character is a newline ('\n') */
+    if(Character == L'\n')
+    {
+        /* Print carriage return ('\r') as well */
+        BlpConsolePrintChar(L'\r');
+    }
 
     /* Write character to the screen console */
     Buffer[0] = Character;
     Buffer[1] = 0;
     EfiSystemTable->ConOut->OutputString(EfiSystemTable->ConOut, Buffer);
+
+    /* Return success */
+    return STATUS_SUCCESS;
 }

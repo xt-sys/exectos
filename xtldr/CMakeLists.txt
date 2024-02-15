@@ -25,7 +25,6 @@ list(APPEND XTLDR_SOURCE
     ${XTLDR_SOURCE_DIR}/memory.c
     ${XTLDR_SOURCE_DIR}/protocol.c
     ${XTLDR_SOURCE_DIR}/shell.c
-    ${XTLDR_SOURCE_DIR}/string.c
     ${XTLDR_SOURCE_DIR}/textui.c
     ${XTLDR_SOURCE_DIR}/volume.c
     ${XTLDR_SOURCE_DIR}/xtldr.c)
