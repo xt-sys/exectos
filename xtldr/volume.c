@@ -70,7 +70,7 @@ BlEnumerateBlockDevices()
     Status = BlpDiscoverEfiBlockDevices(&BlockDevices);
     if(Status != STATUS_EFI_SUCCESS)
     {
-        BlDebugPrint(L"ERROR: Failed to discover EFI block devices (Status Code: 0x%lX)\n", Status);
+        BlDebugPrint(L"ERROR: Failed to discover EFI block devices (Status Code: 0x%zX)\n", Status);
         return Status;
     }
 
@@ -169,7 +169,7 @@ BlEnumerateBlockDevices()
             Status = BlAllocateMemoryPool(sizeof(EFI_BLOCK_DEVICE), (PVOID *)&BlockDevice);
             if(Status != STATUS_EFI_SUCCESS)
             {
-                BlDebugPrint(L"ERROR: Failed to allocate memory pool for block device (Status Code: 0x%lX)\n", Status);
+                BlDebugPrint(L"ERROR: Failed to allocate memory pool for block device (Status Code: 0x%zX)\n", Status);
                 return STATUS_EFI_OUT_OF_RESOURCES;
             }
 
@@ -305,7 +305,7 @@ BlGetEfiPath(IN PWCHAR SystemPath,
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to allocate memory, print error message and return status code */
-        BlDebugPrint(L"ERROR: Memory allocation failure (Status Code: 0x%lX)\n", Status);
+        BlDebugPrint(L"ERROR: Memory allocation failure (Status Code: 0x%zX)\n", Status);
         return STATUS_EFI_OUT_OF_RESOURCES;
     }
 
@@ -408,7 +408,7 @@ BlGetVolumeDevicePath(IN PWCHAR SystemPath,
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to parse system path */
-        BlDebugPrint(L"ERROR: Failed to parse system path: '%s' (Status Code: 0x%lX)\n", SystemPath, Status);
+        BlDebugPrint(L"ERROR: Failed to parse system path: '%s' (Status Code: 0x%zX)\n", SystemPath, Status);
         return Status;
     }
 
@@ -667,7 +667,7 @@ BlpDiscoverEfiBlockDevices(OUT PLIST_ENTRY BlockDevices)
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to locate handles */
-        BlDebugPrint(L"ERROR: Failed to locate block devices handles (Status Code: 0x%lX)\n", Status);
+        BlDebugPrint(L"ERROR: Failed to locate block devices handles (Status Code: 0x%zX)\n", Status);
         return Status;
     }
 
@@ -683,7 +683,7 @@ BlpDiscoverEfiBlockDevices(OUT PLIST_ENTRY BlockDevices)
         if(Status != STATUS_EFI_SUCCESS || Io == NULL)
         {
             /* Failed to open I/O protocol, skip it */
-            BlDebugPrint(L"WARNING: Failed to open EFI Block I/O protocol (Status Code: 0x%lX)\n", Status);
+            BlDebugPrint(L"WARNING: Failed to open EFI Block I/O protocol (Status Code: 0x%zX)\n", Status);
             continue;
         }
 
@@ -701,7 +701,7 @@ BlpDiscoverEfiBlockDevices(OUT PLIST_ENTRY BlockDevices)
         if(Status != STATUS_EFI_SUCCESS || DevicePath == NULL)
         {
             /* Device failed to handle DP protocol */
-            BlDebugPrint(L"WARNING: Unable to open DevicePath protocol (Status Code: 0x%lX)\n", Status);
+            BlDebugPrint(L"WARNING: Unable to open DevicePath protocol (Status Code: 0x%zX)\n", Status);
             EfiSystemTable->BootServices->CloseProtocol(Handles[Index], &IoGuid, EfiImageHandle, NULL);
             continue;
         }
@@ -711,7 +711,7 @@ BlpDiscoverEfiBlockDevices(OUT PLIST_ENTRY BlockDevices)
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory allocation failure */
-            BlDebugPrint(L"ERROR: Failed to allocate memory pool for block device (Status Code: 0x%lX)\n", Status);
+            BlDebugPrint(L"ERROR: Failed to allocate memory pool for block device (Status Code: 0x%zX)\n", Status);
             EfiSystemTable->BootServices->CloseProtocol(Handles[Index], &DevicePathGuid, EfiImageHandle, NULL);
             EfiSystemTable->BootServices->CloseProtocol(Handles[Index], &IoGuid, EfiImageHandle, NULL);
             return Status;
@@ -942,7 +942,7 @@ BlpDuplicateDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath)
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to allocate memory */
-        BlDebugPrint(L"ERROR: Failed to allocate memory pool for device path duplicate (Status Code: 0x%lX)\n", Status);
+        BlDebugPrint(L"ERROR: Failed to allocate memory pool for device path duplicate (Status Code: 0x%zX)\n", Status);
         return NULL;
     }
 

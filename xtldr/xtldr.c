@@ -56,7 +56,7 @@ BlInitializeBootLoader()
             /* Protocol opened successfully, print useful debug information */
             BlConsolePrint(L"\n---------- BOOTLOADER DEBUG ----------\n"
                            L"Pointer Size      : %d\n"
-                           L"Image Base Address: 0x%lX\n"
+                           L"Image Base Address: %P\n"
                            L"Image Base Size   : 0x%lX\n"
                            L"Image Revision    : 0x%lX\n"
                            L"--------------------------------------\n",
@@ -204,7 +204,7 @@ BlInvokeBootProtocol(IN PLIST_ENTRY OptionsList)
             if(Status != STATUS_EFI_SUCCESS)
             {
                 /* Failed to allocate memory, print error message and return status code */
-                BlDebugPrint(L"ERROR: Memory allocation failure (Status Code: 0x%lX)\n", Status);
+                BlDebugPrint(L"ERROR: Memory allocation failure (Status Code: 0x%zX)\n", Status);
                 return STATUS_EFI_OUT_OF_RESOURCES;
             }
 
@@ -224,7 +224,7 @@ BlInvokeBootProtocol(IN PLIST_ENTRY OptionsList)
             if(Status != STATUS_EFI_SUCCESS)
             {
                 /* Failed to find volume */
-                BlDebugPrint(L"ERROR: Failed to find volume device path (Status Code: 0x%lX)\n", Status);
+                BlDebugPrint(L"ERROR: Failed to find volume device path (Status Code: 0x%zX)\n", Status);
                 return Status;
             }
 
@@ -233,7 +233,7 @@ BlInvokeBootProtocol(IN PLIST_ENTRY OptionsList)
             if(Status != STATUS_EFI_SUCCESS)
             {
                 /* Failed to get EFI path */
-                BlDebugPrint(L"ERROR: Failed to get EFI path (Status Code: 0x%lX)\n", Status);
+                BlDebugPrint(L"ERROR: Failed to get EFI path (Status Code: 0x%zX)\n", Status);
                 return Status;
             }
         }
@@ -267,7 +267,7 @@ BlInvokeBootProtocol(IN PLIST_ENTRY OptionsList)
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to load modules, print error message and return status code */
-        BlDebugPrint(L"ERROR: Failed to load XTLDR modules (Status Code: 0x%lX)\n", Status);
+        BlDebugPrint(L"ERROR: Failed to load XTLDR modules (Status Code: 0x%zX)\n", Status);
         return STATUS_EFI_NOT_READY;
     }
 
@@ -276,7 +276,7 @@ BlInvokeBootProtocol(IN PLIST_ENTRY OptionsList)
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to get boot protocol GUID */
-        BlDebugPrint(L"ERROR: Unable to find appropriate boot protocol (Status Code: 0x%lX)\n", Status);
+        BlDebugPrint(L"ERROR: Unable to find appropriate boot protocol (Status Code: 0x%zX)\n", Status);
         return STATUS_EFI_UNSUPPORTED;
     }
 
@@ -285,7 +285,7 @@ BlInvokeBootProtocol(IN PLIST_ENTRY OptionsList)
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to open boot protocol */
-        BlDebugPrint(L"ERROR: Failed to open boot protocol (Status Code: 0x%lX)\n", Status);
+        BlDebugPrint(L"ERROR: Failed to open boot protocol (Status Code: 0x%zX)\n", Status);
         return Status;
     }
 
@@ -363,7 +363,7 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to disable the timer, print message */
-        BlDebugPrint(L"WARNING: Failed to disable watchdog timer (Status Code: 0x%lX)\n", Status);
+        BlDebugPrint(L"WARNING: Failed to disable watchdog timer (Status Code: 0x%zX)\n", Status);
     }
 
     /* Install loader protocol */
@@ -371,7 +371,7 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to register loader protocol */
-        BlDebugPrint(L"ERROR: Failed to register XTLDR loader protocol (Status Code: 0x%lX)\n", Status);
+        BlDebugPrint(L"ERROR: Failed to register XTLDR loader protocol (Status Code: 0x%zX)\n", Status);
         return Status;
     }
 
@@ -380,7 +380,7 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to load modules */
-        BlDebugPrint(L"ERROR: Failed to load XTLDR modules (Status Code: 0x%lX)\n", Status);
+        BlDebugPrint(L"ERROR: Failed to load XTLDR modules (Status Code: 0x%zX)\n", Status);
         BlDisplayErrorDialog(L"XTLDR", L"Failed to load some XTLDR modules.");
     }
 
@@ -389,7 +389,7 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to enumerate block devices */
-        BlDebugPrint(L"ERROR: Failed to discover and enumerate block devices (Status Code: 0x%lX)\n", Status);
+        BlDebugPrint(L"ERROR: Failed to discover and enumerate block devices (Status Code: 0x%zX)\n", Status);
         return Status;
     }
 

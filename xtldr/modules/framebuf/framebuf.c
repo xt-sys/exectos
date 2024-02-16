@@ -146,7 +146,7 @@ FbInitializeDisplay()
                 if(Status != STATUS_EFI_SUCCESS)
                 {
                     /* Unable to get current UGA mode */
-                    XtLdrProtocol->Debug.Print(L"ERROR: Failed to get current UGA mode (Status Code: 0x%lX)\n", Status);
+                    XtLdrProtocol->Debug.Print(L"ERROR: Failed to get current UGA mode (Status Code: 0x%zX)\n", Status);
 
                     /* Close UGA protocol and return error */
                     XtLdrProtocol->Protocol.Close(Handle, &UgaGuid);
@@ -166,7 +166,7 @@ FbInitializeDisplay()
                 if(Status != STATUS_EFI_SUCCESS)
                 {
                     /* Unable to find framebuffer address */
-                    XtLdrProtocol->Debug.Print(L"ERROR: Failed to get EFI FB address (Status Code: 0x%lX)\n", Status);
+                    XtLdrProtocol->Debug.Print(L"ERROR: Failed to get EFI FB address (Status Code: 0x%zX)\n", Status);
 
                     /* Close UGA protocol and return error */
                     XtLdrProtocol->Protocol.Close(Handle, &UgaGuid);
@@ -240,7 +240,7 @@ FbpFindFramebufferAddress(OUT PEFI_PHYSICAL_ADDRESS Address)
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to get handles, return error code */
-        XtLdrProtocol->Debug.Print(L"ERROR: Failed to get handles (Status Code: 0x%lX)\n", Status);
+        XtLdrProtocol->Debug.Print(L"ERROR: Failed to get handles (Status Code: 0x%zX)\n", Status);
         return Status;
     }
 
@@ -252,7 +252,7 @@ FbpFindFramebufferAddress(OUT PEFI_PHYSICAL_ADDRESS Address)
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Failed to open protocol, continue with next handle */
-            XtLdrProtocol->Debug.Print(L"ERROR: Failed to open protocol (Status Code: 0x%lX)\n", Status);
+            XtLdrProtocol->Debug.Print(L"ERROR: Failed to open protocol (Status Code: 0x%zX)\n", Status);
             continue;
         }
 
@@ -261,7 +261,7 @@ FbpFindFramebufferAddress(OUT PEFI_PHYSICAL_ADDRESS Address)
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Failed to read PCI device class */
-            XtLdrProtocol->Debug.Print(L"ERROR: Failed to read class (Status Code: 0x%lX)\n", Status);
+            XtLdrProtocol->Debug.Print(L"ERROR: Failed to read class (Status Code: 0x%zX)\n", Status);
 
             /* Close protocol and continue with next handle */
             XtLdrProtocol->Protocol.Close(Handles[Index], &PciIoGuid);

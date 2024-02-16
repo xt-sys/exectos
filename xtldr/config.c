@@ -50,7 +50,7 @@ BlGetConfigValue(IN CONST PWCHAR ConfigName)
             if(Status != STATUS_EFI_SUCCESS)
             {
                 /* Memory allocation failure, return NULL */
-                BlDebugPrint(L"ERROR: Memory allocation failure (Status Code: 0x%lX)\n", Status);
+                BlDebugPrint(L"ERROR: Memory allocation failure (Status Code: 0x%zX)\n", Status);
                 return NULL;
             }
 
@@ -148,7 +148,7 @@ BlpLoadConfiguration()
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to load configuration */
-        BlDebugPrint(L"Failed to load FS0:/EFI/BOOT/XTLDR/XTLDR.INI configuration file (Status Code: 0x%lX)\n", Status);
+        BlDebugPrint(L"Failed to load FS0:/EFI/BOOT/XTLDR/XTLDR.INI configuration file (Status Code: 0x%zX)\n", Status);
         return Status;
     }
 
@@ -157,7 +157,7 @@ BlpLoadConfiguration()
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to parse configuration */
-        BlDebugPrint(L"Failed to parse FS0:/EFI/BOOT/XTLDR/XTLDR.INI configuration file (Status Code: 0x%lX)\n", Status);
+        BlDebugPrint(L"Failed to parse FS0:/EFI/BOOT/XTLDR/XTLDR.INI configuration file (Status Code: 0x%zX)\n", Status);
         return Status;
     }
 

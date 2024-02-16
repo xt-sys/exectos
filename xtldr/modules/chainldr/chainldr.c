@@ -48,7 +48,7 @@ ChBootSystem(IN PXTBL_BOOT_PARAMETERS Parameters)
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to open a volume, return error code */
-        XtLdrProtocol->Debug.Print(L"ERROR: Unable to open boot volume (Status Code: 0x%lX)\n", Status);
+        XtLdrProtocol->Debug.Print(L"ERROR: Unable to open boot volume (Status Code: 0x%zX)\n", Status);
         return Status;
     }
 
@@ -60,7 +60,7 @@ ChBootSystem(IN PXTBL_BOOT_PARAMETERS Parameters)
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to open directory */
-        XtLdrProtocol->Debug.Print(L"ERROR: Unable to open system boot directory (Status Code: 0x%lX)\n", Status);
+        XtLdrProtocol->Debug.Print(L"ERROR: Unable to open system boot directory (Status Code: 0x%zX)\n", Status);
 
         /* Close volume and return error code */
         XtLdrProtocol->Disk.CloseVolume(DiskHandle);
@@ -91,7 +91,7 @@ ChBootSystem(IN PXTBL_BOOT_PARAMETERS Parameters)
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to chainload EFI binary, return error code */
-        XtLdrProtocol->Debug.Print(L"ERROR: Unable to chainload '%S' (Status Code: 0x%lX)\n",
+        XtLdrProtocol->Debug.Print(L"ERROR: Unable to chainload '%S' (Status Code: 0x%zX)\n",
                                    Parameters->KernelFile, Status);
         return Status;
     }
@@ -101,7 +101,7 @@ ChBootSystem(IN PXTBL_BOOT_PARAMETERS Parameters)
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to open EFI_LOADED_IMAGE_PROTOCOL, return error code */
-        XtLdrProtocol->Debug.Print(L"ERROR: Unable to access binary interface (Status Code: 0x%lX)\n", Status);
+        XtLdrProtocol->Debug.Print(L"ERROR: Unable to access binary interface (Status Code: 0x%zX)\n", Status);
         return Status;
     }
 

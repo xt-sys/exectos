@@ -246,7 +246,7 @@ BlLoadModule(IN PWCHAR ModuleName)
                 if(Status != STATUS_EFI_SUCCESS)
                 {
                     /* Failed to load module, print error message and return status code */
-                    BlDebugPrint(L"Failed to load dependency module '%S', (Status Code: 0x%lX)\n", DepsData, Status);
+                    BlDebugPrint(L"Failed to load dependency module '%S', (Status Code: 0x%zX)\n", DepsData, Status);
                     return STATUS_EFI_UNSUPPORTED;
                 }
 
@@ -299,7 +299,7 @@ BlLoadModule(IN PWCHAR ModuleName)
         else
         {
             /* Failed to load module */
-            BlDebugPrint(L"ERROR: Unable to load module '%S' (Status Code: 0x%lX)\n", ModuleName, Status);
+            BlDebugPrint(L"ERROR: Unable to load module '%S' (Status Code: 0x%zX)\n", ModuleName, Status);
         }
 
         /* Return error status code */
@@ -312,7 +312,7 @@ BlLoadModule(IN PWCHAR ModuleName)
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to open LoadedImage protocol */
-        BlDebugPrint(L"ERROR: Unable to access module interface (Status Code: 0x%lX)\n", Status);
+        BlDebugPrint(L"ERROR: Unable to access module interface (Status Code: 0x%zX)\n", Status);
         return Status;
     }
 
@@ -340,7 +340,7 @@ BlLoadModule(IN PWCHAR ModuleName)
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to start module image */
-        BlDebugPrint(L"ERROR: Failed to start module '%S' (Status Code: 0x%lX)\n", ModuleName, Status);
+        BlDebugPrint(L"ERROR: Failed to start module '%S' (Status Code: 0x%zX)\n", ModuleName, Status);
         return Status;
     }
 
@@ -383,7 +383,7 @@ BlLoadModules(IN PWCHAR ModulesList)
             if(Status != STATUS_EFI_SUCCESS)
             {
                 /* Failed to load module, print error message and set new return value */
-                BlDebugPrint(L"ERROR: Failed to load module '%S', (Status Code: 0x%lX)\n", Module, Status);
+                BlDebugPrint(L"ERROR: Failed to load module '%S', (Status Code: 0x%zX)\n", Module, Status);
                 ReturnStatus = STATUS_EFI_LOAD_ERROR;
             }
 

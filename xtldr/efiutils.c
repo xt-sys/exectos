@@ -32,7 +32,7 @@ BlExitBootServices()
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Memory allocation failure */
-        BlDebugPrint(L"ERROR: Memory allocation failure (Status Code: 0x%lX)\n", Status);
+        BlDebugPrint(L"ERROR: Memory allocation failure (Status Code: 0x%zX)\n", Status);
         return Status;
     }
 
