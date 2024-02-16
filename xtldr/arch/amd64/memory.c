@@ -102,8 +102,8 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap)
         if(Mapping->VirtualAddress)
         {
             /* Dump memory mapping */
-            BlDebugPrint(L"   Type=%02lu, PhysicalBase=0x%016lX, VirtualBase=0x%016lX, Pages=%lu\n", Mapping->MemoryType,
-                         Mapping->PhysicalAddress, Mapping->VirtualAddress, Mapping->NumberOfPages);
+            BlDebugPrint(L"   Type=%02lu, PhysicalBase=%.16p, VirtualBase=%.16p, Pages=%lu\n",
+                         Mapping->MemoryType, Mapping->PhysicalAddress, Mapping->VirtualAddress, Mapping->NumberOfPages);
 
             /* Map memory */
             Status = BlMapPage(PageMap, (UINT_PTR)Mapping->VirtualAddress,

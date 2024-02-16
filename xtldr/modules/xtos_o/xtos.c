@@ -581,7 +581,7 @@ XtpLoadModule(IN PEFI_FILE_HANDLE SystemDir,
     }
 
     /* Print debug message */
-    XtLdrProtocol->Debug.Print(L"Loaded %S at PA: 0x%lX, VA: 0x%lX\n", FileName,
+    XtLdrProtocol->Debug.Print(L"Loaded %S at PA: %p, VA: %p\n", FileName,
                                (*ImageContext)->PhysicalAddress, (*ImageContext)->VirtualAddress);
 
     /* Return success */
