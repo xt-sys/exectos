@@ -901,7 +901,7 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
     if(FormatProperties.VariableType == Unknown)
     {
         /* Write defined wide character */
-        Status = RtlpWriteWideStringValue(Context, &FormatProperties, &WideCharArg, TRUE);
+        Status = RtlpWriteWideStringValue(Context, &FormatProperties, &WideCharArg, 1);
     }
     if(FormatProperties.VariableType == Boolean)
     {
@@ -920,14 +920,17 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
         /* Check if using uppercase format */
         if(FormatProperties.PrintUpperCase)
         {
-            /* Write 'TRUE' or 'FALSE' depending on argument value */
-            Status = RtlpWriteWideStringValue(Context, &FormatProperties, IntArg ? L"TRUE" : L"FALSE", FALSE);
+            /* Set uppercase boolean string depending on argument value */
+            WideStrArg = IntArg ? L"TRUE" : L"FALSE";
         }
         else
         {
-            /* Write 'true' or 'false' depending on argument value */
-            Status = RtlpWriteWideStringValue(Context, &FormatProperties, IntArg ? L"true" : L"false", FALSE);
+            /* Set lowercase boolean string depending on argument value */
+            WideStrArg = IntArg ? L"true" : L"false";
         }
+
+        /* Write formatted boolean string */
+        Status = RtlpWriteWideStringValue(Context, &FormatProperties, WideStrArg, RtlWideStringLength(WideStrArg, 0));
     }
     else if(FormatProperties.VariableType == Char)
     {
@@ -944,7 +947,7 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
         }
 
         /* Write formatted character */
-        Status = RtlpWriteWideStringStringValue(Context, &FormatProperties, &CharArg, TRUE);
+        Status = RtlpWriteWideStringStringValue(Context, &FormatProperties, &CharArg, 1);
     }
     else if(FormatProperties.VariableType == WideChar)
     {
@@ -961,7 +964,7 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
         }
 
         /* Write formatted wide character */
-        Status = RtlpWriteWideStringValue(Context, &FormatProperties, &WideCharArg, TRUE);
+        Status = RtlpWriteWideStringValue(Context, &FormatProperties, &WideCharArg, 1);
     }
     else if(FormatProperties.VariableType == Float)
     {
@@ -1068,7 +1071,7 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
         }
 
         /* Write formatted string value */
-        Status = RtlpWriteWideStringStringValue(Context, &FormatProperties, StrArg, FALSE);
+        Status = RtlpWriteWideStringStringValue(Context, &FormatProperties, StrArg, RtlStringLength(StrArg, 0));
     }
     else if(FormatProperties.VariableType == WideString)
     {
@@ -1086,7 +1089,7 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
         }
 
         /* Write formatted wide string value */
-        Status = RtlpWriteWideStringValue(Context, &FormatProperties, WideStrArg, FALSE);
+        Status = RtlpWriteWideStringValue(Context, &FormatProperties, WideStrArg, RtlWideStringLength(WideStrArg, 0));
     }
 
     /* Cleanup ArgumentsCopy object */
@@ -1527,11 +1530,10 @@ XTSTATUS
 RtlpWriteWideStringStringValue(PRTL_PRINT_CONTEXT Context,
                                PRTL_PRINT_FORMAT_PROPERTIES FormatProperties,
                                PCHAR String,
-                               BOOLEAN Character)
+                               SIZE_T StringLength)
 {
     WCHAR WideCharacter[2];
     ULONG PaddingLength;
-    SIZE_T StringLength;
     XTSTATUS Status;
 
     /* Check for NULL string */
@@ -1539,18 +1541,7 @@ RtlpWriteWideStringStringValue(PRTL_PRINT_CONTEXT Context,
     {
         /* Print '(null)' instead */
         String = "(null)";
-    }
-
-    /* Check if single character is expected */
-    if(Character)
-    {
-        /* Force string length to 1 */
-        StringLength = 1;
-    }
-    else
-    {
-        /* Get real string length */
-        StringLength = RtlStringLength(String, 0);
+        StringLength = 6;
     }
 
     /* Check if string length exceeds precision limit */
@@ -1649,10 +1640,9 @@ XTSTATUS
 RtlpWriteWideStringValue(PRTL_PRINT_CONTEXT Context,
                          PRTL_PRINT_FORMAT_PROPERTIES FormatProperties,
                          PWCHAR String,
-                         BOOLEAN Character)
+                         SIZE_T StringLength)
 {
     ULONG PaddingLength;
-    SIZE_T StringLength;
     XTSTATUS Status;
 
     /* Check for NULL string */
@@ -1660,18 +1650,7 @@ RtlpWriteWideStringValue(PRTL_PRINT_CONTEXT Context,
     {
         /* Print '(null)' instead */
         String = L"(null)";
-    }
-
-    /* Check if single character is expected */
-    if(Character)
-    {
-        /* Force string length to 1 */
-        StringLength = 1;
-    }
-    else
-    {
-        /* Get real string length */
-        StringLength = RtlWideStringLength(String, 0);
+        StringLength = 6;
     }
 
     /* Check if string length exceeds precision limit */

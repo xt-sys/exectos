@@ -323,13 +323,13 @@ XTSTATUS
 RtlpWriteWideStringStringValue(PRTL_PRINT_CONTEXT Context,
                                PRTL_PRINT_FORMAT_PROPERTIES FormatProperties,
                                PCHAR String,
-                               BOOLEAN Character);
+                               SIZE_T StringLength);
 
 XTAPI
 XTSTATUS
 RtlpWriteWideStringValue(PRTL_PRINT_CONTEXT Context,
                          PRTL_PRINT_FORMAT_PROPERTIES FormatProperties,
                          PWCHAR String,
-                         BOOLEAN Character);
+                         SIZE_T StringLength);
 
 #endif /* __XTOSKRNL_RTLI_H */
