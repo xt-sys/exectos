@@ -857,7 +857,14 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
             FormatProperties.Radix = 8;
             break;
         case L'p':
-            /* Pointer argument as hexadecimal number (uppercase) */
+            /* Pointer argument as hexadecimal number (lowercase) */
+            FormatProperties.VariableType = Integer;
+            FormatProperties.IntegerSize = sizeof(UINT_PTR);
+            FormatProperties.Radix = 16;
+            FormatProperties.PrintRadix = TRUE;
+            break;
+        case L'P':
+            /* XTOS extension: Pointer argument as hexadecimal number (uppercase) */
             FormatProperties.VariableType = Integer;
             FormatProperties.IntegerSize = sizeof(UINT_PTR);
             FormatProperties.Radix = 16;
@@ -1504,17 +1511,8 @@ RtlpWriteWideStringIntegerValue(IN PRTL_PRINT_CONTEXT Context,
             Prefix[PrefixLength] = L'0';
             PrefixLength += 1;
 
-            /* Check if uppercase is required */
-            if(FormatProperties->PrintUpperCase != 0)
-            {
-                /* Write uppercase 'X' character */
-                Prefix[PrefixLength] = L'X';
-            }
-            else
-            {
-                /* Write lowercase 'x' character */
-                Prefix[PrefixLength] = L'x';
-            }
+            /* Write lowercase 'x' character */
+            Prefix[PrefixLength] = L'x';
 
             PrefixLength += 1;
         }
