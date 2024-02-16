@@ -314,6 +314,12 @@ RtlpWriteWideCharacter(IN PRTL_PRINT_CONTEXT Context,
 
 XTAPI
 XTSTATUS
+RtlpWriteWideStringCustomValue(IN PRTL_PRINT_CONTEXT Context,
+                               IN PCWSTR Format,
+                               IN ...);
+
+XTAPI
+XTSTATUS
 RtlpWriteWideStringIntegerValue(IN PRTL_PRINT_CONTEXT Context,
                                 IN PRTL_PRINT_FORMAT_PROPERTIES FormatProperties,
                                 IN ULONGLONG Integer);

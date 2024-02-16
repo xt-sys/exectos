@@ -523,6 +523,7 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
     PWCHAR WideStrArg;
     ULONGLONG IntArg;
     XTSTATUS Status;
+    PGUID GuidArg;
     PCHAR StrArg;
     CHAR CharArg;
 
@@ -876,6 +877,10 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
             FormatProperties.VariableType = Integer;
             FormatProperties.Radix = 10;
             break;
+        case L'U':
+            /* XTOS extension: UUID/GUID argument */
+            FormatProperties.VariableType = Guid;
+            break;
         case L'x':
             /* Unsigned integer argument as hexadecimal number (lowercase) */
             FormatProperties.VariableType = Integer;
@@ -937,6 +942,32 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
 
         /* Write formatted boolean string */
         Status = RtlpWriteWideStringValue(Context, &FormatProperties, WideStrArg, RtlWideStringLength(WideStrArg, 0));
+    }
+    else if(FormatProperties.VariableType == Guid)
+    {
+        /* GUID type */
+        if(ArgPosition != 0)
+        {
+            /* Get argument value from specified argument position */
+            IntArg = RtlpGetWideStringArgument(&ArgumentsCopy, ArgPosition, sizeof(PGUID));
+            GuidArg = (PGUID)(UINT_PTR)IntArg;
+        }
+        else
+        {
+            /* Get argument value from the next argument */
+            GuidArg = VA_ARG(*ArgumentList, PGUID);
+        }
+
+        /* Make sure GUID is not NULL */
+        if(GuidArg != NULL)
+        {
+            /* Write formatted GUID string */
+            Status = RtlpWriteWideStringCustomValue(Context, L"%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x",
+                                                    GuidArg->Data1, GuidArg->Data2, GuidArg->Data3,
+                                                    GuidArg->Data4[0], GuidArg->Data4[1], GuidArg->Data4[2],
+                                                    GuidArg->Data4[3], GuidArg->Data4[4], GuidArg->Data4[5],
+                                                    GuidArg->Data4[6], GuidArg->Data4[7]);
+        }
     }
     else if(FormatProperties.VariableType == Char)
     {
@@ -1268,6 +1299,44 @@ RtlpWriteWideCharacter(IN PRTL_PRINT_CONTEXT Context,
     /* Write wide character and increment number of characters written so far */
     Status = Context->WriteWideCharacter(Character);
     Context->CharactersWritten++;
+
+    /* Return status code */
+    return Status;
+}
+
+/**
+ * Writes a wide string custom-formatted value to the destination provided by the print context.
+ *
+ * @param Context
+ *        Supplies a pointer to the print context structure.
+ *
+ * @param Format
+ *        Supplies a pointer to the printf-alike format string.
+ *
+ * @param ...
+ *        Depending on the format string, this routine might expect a sequence of additional arguments.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+RtlpWriteWideStringCustomValue(IN PRTL_PRINT_CONTEXT Context,
+                               IN PCWSTR Format,
+                               IN ...)
+{
+    VA_LIST Arguments;
+    XTSTATUS Status;
+
+    /* Initialise the va_list */
+    VA_START(Arguments, Format);
+
+    /* Format and print the string to the desired output */
+    Status = RtlFormatWideString(Context, Format, Arguments);
+
+    /* Clean up the va_list */
+    VA_END(Arguments);
 
     /* Return status code */
     return Status;
