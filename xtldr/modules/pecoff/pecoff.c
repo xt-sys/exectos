@@ -246,7 +246,7 @@ PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Memory allocation failure */
-        XtLdrProtocol->Debug.Print(L"ERROR: Memory allocation failure (Status Code: 0x%lx)\n", Status);
+        XtLdrProtocol->Debug.Print(L"ERROR: Memory allocation failure (Status Code: 0x%lX)\n", Status);
         return Status;
     }
 
@@ -260,7 +260,7 @@ PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory allocation failure */
-            XtLdrProtocol->Debug.Print(L"ERROR: Memory allocation failure (Status Code: 0x%lx)\n", Status);
+            XtLdrProtocol->Debug.Print(L"ERROR: Memory allocation failure (Status Code: 0x%lX)\n", Status);
             return Status;
         }
 
@@ -270,7 +270,7 @@ PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Unable to get file information */
-        XtLdrProtocol->Debug.Print(L"ERROR: Failed to get PE/COFF file information (Status Code: 0x%lx)\n", Status);
+        XtLdrProtocol->Debug.Print(L"ERROR: Failed to get PE/COFF file information (Status Code: 0x%lX)\n", Status);
         return Status;
     }
 
@@ -279,7 +279,7 @@ PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Memory allocation failure */
-        XtLdrProtocol->Debug.Print(L"ERROR: Memory allocation failure (Status Code: 0x%lx)\n", Status);
+        XtLdrProtocol->Debug.Print(L"ERROR: Memory allocation failure (Status Code: 0x%lX)\n", Status);
         return Status;
     }
 
@@ -297,7 +297,7 @@ PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Pages allocation failure */
-        XtLdrProtocol->Debug.Print(L"ERROR: Pages allocation failure (Status Code: 0x%lx)\n", Status);
+        XtLdrProtocol->Debug.Print(L"ERROR: Pages allocation failure (Status Code: 0x%lX)\n", Status);
         XtLdrProtocol->Memory.FreePool(ImageData);
         return Status;
     }
@@ -309,7 +309,7 @@ PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to read data */
-        XtLdrProtocol->Debug.Print(L"ERROR: Failed to read PE/COFF image file (Status Code: 0x%lx)\n", Status);
+        XtLdrProtocol->Debug.Print(L"ERROR: Failed to read PE/COFF image file (Status Code: 0x%lX)\n", Status);
         XtLdrProtocol->Memory.FreePages(Pages, (EFI_PHYSICAL_ADDRESS)(UINT_PTR)Data);
         XtLdrProtocol->Memory.FreePool(ImageData);
         return Status;
@@ -324,7 +324,7 @@ PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Header validation failed, probably broken or invalid PE/COFF image */
-        XtLdrProtocol->Debug.Print(L"ERROR: Invalid PE/COFF image headers (Status Code: 0x%lx)\n", Status);
+        XtLdrProtocol->Debug.Print(L"ERROR: Invalid PE/COFF image headers (Status Code: 0x%lX)\n", Status);
         XtLdrProtocol->Memory.FreePages(Pages, (EFI_PHYSICAL_ADDRESS)(UINT_PTR)Data);
         XtLdrProtocol->Memory.FreePool(ImageData);
         return Status;
@@ -349,7 +349,7 @@ PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Pages reallocation failure */
-        XtLdrProtocol->Debug.Print(L"ERROR: Pages reallocation failure (Status Code: 0x%lx)\n", Status);
+        XtLdrProtocol->Debug.Print(L"ERROR: Pages reallocation failure (Status Code: 0x%lX)\n", Status);
         XtLdrProtocol->Memory.FreePool(ImageData);
         return Status;
     }
@@ -415,7 +415,7 @@ PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to relocate image */
-        XtLdrProtocol->Debug.Print(L"ERROR: PE/COFF image relocation failed (Status Code: 0x%lx)\n", Status);
+        XtLdrProtocol->Debug.Print(L"ERROR: PE/COFF image relocation failed (Status Code: 0x%lX)\n", Status);
         return Status;
     }
 

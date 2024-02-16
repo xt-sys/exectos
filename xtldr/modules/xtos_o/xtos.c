@@ -298,7 +298,7 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to setup kernel initialization block */
-        XtLdrProtocol->Debug.Print(L"Failed to initialize APIC (Status Code: %lx)\n", Status);
+        XtLdrProtocol->Debug.Print(L"Failed to initialize APIC (Status Code: %lX)\n", Status);
         return Status;
     }
 
@@ -310,7 +310,7 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to setup kernel initialization block */
-        XtLdrProtocol->Debug.Print(L"Failed to setup kernel initialization block (Status Code: %lx)\n", Status);
+        XtLdrProtocol->Debug.Print(L"Failed to setup kernel initialization block (Status Code: %lX)\n", Status);
         return Status;
     }
 
@@ -326,7 +326,7 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to enable paging */
-        XtLdrProtocol->Debug.Print(L"Failed to enable paging (Status Code: %lx)\n", Status);
+        XtLdrProtocol->Debug.Print(L"Failed to enable paging (Status Code: %lX)\n", Status);
         return Status;
     }
 
@@ -581,7 +581,7 @@ XtpLoadModule(IN PEFI_FILE_HANDLE SystemDir,
     }
 
     /* Print debug message */
-    XtLdrProtocol->Debug.Print(L"Loaded %S at PA: 0x%lx, VA: 0x%lx\n", FileName,
+    XtLdrProtocol->Debug.Print(L"Loaded %S at PA: 0x%lX, VA: 0x%lX\n", FileName,
                                (*ImageContext)->PhysicalAddress, (*ImageContext)->VirtualAddress);
 
     /* Return success */
