@@ -512,7 +512,9 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
                                      IN OUT PULONG Index)
 {
     RTL_PRINT_FORMAT_PROPERTIES FormatProperties;
+    PUNICODE_STRING UnicodeStrArg;
     WCHAR Specifier, WideCharArg;
+    PANSI_STRING AnsiStrArg;
     LONGLONG SpecifierValue;
     VA_LIST ArgumentsCopy;
     LARGE_DOUBLE FloatArg;
@@ -885,6 +887,10 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
             FormatProperties.Radix = 16;
             FormatProperties.PrintUpperCase = TRUE;
             break;
+        case L'Z':
+            /* MSVC extension: ANSI/Unicode string argument */
+            FormatProperties.VariableType = FormatProperties.LongInteger ? UnicodeString : AnsiString;
+            break;
         case L'%':
             /* Print '%' character */
             FormatProperties.VariableType = Unknown;
@@ -1090,6 +1096,42 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
 
         /* Write formatted wide string value */
         Status = RtlpWriteWideStringValue(Context, &FormatProperties, WideStrArg, RtlWideStringLength(WideStrArg, 0));
+    }
+    else if(FormatProperties.VariableType == AnsiString )
+    {
+        /* ANSI string type */
+        if(ArgPosition != 0)
+        {
+            /* Get argument value from specified argument position */
+            IntArg = RtlpGetWideStringArgument(&ArgumentsCopy, ArgPosition, sizeof(PANSI_STRING));
+            AnsiStrArg = (PANSI_STRING)(UINT_PTR)IntArg;
+        }
+        else
+        {
+            /* Get argument value from the next argument */
+            AnsiStrArg = VA_ARG(*ArgumentList, PANSI_STRING);
+        }
+
+        /* Write formatted ANSI string value */
+        Status = RtlpWriteWideStringStringValue(Context, &FormatProperties, AnsiStrArg->Buffer, AnsiStrArg->Length);
+    }
+    else if(FormatProperties.VariableType == UnicodeString)
+    {
+        /* Unicode string type */
+        if(ArgPosition != 0)
+        {
+            /* Get argument value from specified argument position */
+            IntArg = RtlpGetWideStringArgument(&ArgumentsCopy, ArgPosition, sizeof(PUNICODE_STRING));
+            UnicodeStrArg = (PUNICODE_STRING)(UINT_PTR)IntArg;
+        }
+        else
+        {
+            /* Get argument value from the next argument */
+            UnicodeStrArg = VA_ARG(*ArgumentList, PUNICODE_STRING);
+        }
+
+        /* Write formatted UNICODE string value */
+        Status = RtlpWriteWideStringValue(Context, &FormatProperties, UnicodeStrArg->Buffer, UnicodeStrArg->Length);
     }
 
     /* Cleanup ArgumentsCopy object */
