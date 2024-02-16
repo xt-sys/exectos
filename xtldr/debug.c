@@ -235,7 +235,7 @@ BlpInitializeSerialPort(IN ULONG PortNumber,
     /* Print debug message depending on port settings */
     if(PortAddress)
     {
-        BlConsolePrint(L"Initializing serial console at COM port address: 0x%lx\n", PortAddress);
+        BlConsolePrint(L"Initializing serial console at COM port address: 0x%lX\n", PortAddress);
     }
     else
     {

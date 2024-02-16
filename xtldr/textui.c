@@ -139,7 +139,7 @@ BlDisplayBootMenu()
                     if(Status != STATUS_SUCCESS)
                     {
                         /* Failed to boot OS */
-                        BlDebugPrint(L"ERROR: Failed to boot '%S' (Status Code: 0x%lx)\n",
+                        BlDebugPrint(L"ERROR: Failed to boot '%S' (Status Code: 0x%lX)\n",
                                      MenuEntries[HighligtedEntryId].EntryName, Status);
                         BlDisplayErrorDialog(L"XTLDR", L"Failed to startup the selected Operating System.");
                     }
@@ -283,7 +283,7 @@ BlDisplayBootMenu()
                     if(Status != STATUS_SUCCESS)
                     {
                         /* Failed to boot OS */
-                        BlDebugPrint(L"ERROR: Failed to boot '%S' (Status Code: 0x%lx)\n",
+                        BlDebugPrint(L"ERROR: Failed to boot '%S' (Status Code: 0x%lX)\n",
                                      MenuEntries[HighligtedEntryId].EntryName, Status);
                         BlDisplayErrorDialog(L"XTLDR", L"Failed to startup the selected Operating System.");
                     }
@@ -456,7 +456,7 @@ BlDisplayInputDialog(IN PWCHAR Caption,
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Memory allocation failure, print error message and return */
-        BlDebugPrint(L"ERROR: Memory allocation failure (Status Code: 0x%lx)\n", Status);
+        BlDebugPrint(L"ERROR: Memory allocation failure (Status Code: 0x%lX)\n", Status);
         BlDisplayErrorDialog(L"XTLDR", L"Failed to allocate memory for input field buffer.");
         return;
     }
@@ -1217,7 +1217,7 @@ BlpDrawDialogMessage(IN PXTBL_DIALOG_HANDLE Handle,
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Memory allocation failure, print debug message and return */
-        BlDebugPrint(L"ERROR: Memory allocation failure (Status Code: 0x%lx)\n", Status);
+        BlDebugPrint(L"ERROR: Memory allocation failure (Status Code: 0x%lX)\n", Status);
         return;
     }
 
