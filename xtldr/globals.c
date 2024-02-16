@@ -18,9 +18,6 @@ LIST_ENTRY BlpConfig;
 /* XT Boot Loader loaded configuration */
 LIST_ENTRY BlpConfigSections;
 
-/* XT Boot Loader hex table */
-STATIC PUINT16 BlpHexTable = L"0123456789ABCDEF";
-
 /* XT Boot Loader protocol */
 XTBL_LOADER_PROTOCOL BlpLdrProtocol;
 

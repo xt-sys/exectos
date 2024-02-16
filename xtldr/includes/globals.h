@@ -21,9 +21,6 @@ EXTERN LIST_ENTRY BlpConfig;
 /* XT Boot Loader loaded configuration */
 EXTERN LIST_ENTRY BlpConfigSections;
 
-/* XT Boot Loader hex table */
-EXTERN PUINT16 BlpHexTable;
-
 /* XT Boot Loader protocol */
 EXTERN XTBL_LOADER_PROTOCOL BlpLdrProtocol;
 
