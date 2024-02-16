@@ -958,7 +958,7 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
             GuidArg = VA_ARG(*ArgumentList, PGUID);
         }
 
-        /* Make sure GUID is not NULL */
+        /* Make sure a pointer to GUID is not NULL */
         if(GuidArg != NULL)
         {
             /* Write formatted GUID string */
@@ -1143,8 +1143,12 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
             AnsiStrArg = VA_ARG(*ArgumentList, PANSI_STRING);
         }
 
-        /* Write formatted ANSI string value */
-        Status = RtlpWriteWideStringStringValue(Context, &FormatProperties, AnsiStrArg->Buffer, AnsiStrArg->Length);
+        /* Make sure a pointer to ANSI_STRING is not NULL */
+        if(AnsiStrArg != NULL)
+        {
+            /* Write formatted ANSI string value */
+            Status = RtlpWriteWideStringStringValue(Context, &FormatProperties, AnsiStrArg->Buffer, AnsiStrArg->Length);
+        }
     }
     else if(FormatProperties.VariableType == UnicodeString)
     {
@@ -1161,8 +1165,12 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
             UnicodeStrArg = VA_ARG(*ArgumentList, PUNICODE_STRING);
         }
 
-        /* Write formatted UNICODE string value */
-        Status = RtlpWriteWideStringValue(Context, &FormatProperties, UnicodeStrArg->Buffer, UnicodeStrArg->Length);
+        /* Make sure a pointer to UNICODE_STRING is not NULL */
+        if(UnicodeStrArg != NULL)
+        {
+            /* Write formatted UNICODE string value */
+            Status = RtlpWriteWideStringValue(Context, &FormatProperties, UnicodeStrArg->Buffer, UnicodeStrArg->Length);
+        }
     }
 
     /* Cleanup ArgumentsCopy object */
