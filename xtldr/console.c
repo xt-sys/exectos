@@ -102,7 +102,7 @@ BlConsolePrint(IN PUSHORT Format,
     VA_LIST Arguments;
 
     /* Initialise the print contexts */
-    ConsolePrintContext.WriteWideCharacter = BlpConsolePrintChar;
+    ConsolePrintContext.WriteWideCharacter = BlpConsolePutChar;
     SerialPrintContext.WriteWideCharacter = BlpDebugPutChar;
 
     /* Initialise the va_list */
@@ -292,7 +292,7 @@ BlSetCursorPosition(IN ULONGLONG PosX,
  */
 XTCDECL
 XTSTATUS
-BlpConsolePrintChar(IN USHORT Character)
+BlpConsolePutChar(IN USHORT Character)
 {
     USHORT Buffer[2];
 
@@ -300,7 +300,7 @@ BlpConsolePrintChar(IN USHORT Character)
     if(Character == L'\n')
     {
         /* Print carriage return ('\r') as well */
-        BlpConsolePrintChar(L'\r');
+        BlpConsolePutChar(L'\r');
     }
 
     /* Write character to the screen console */

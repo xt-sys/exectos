@@ -357,7 +357,7 @@ BlpActivateSerialIOController();
 
 XTCDECL
 XTSTATUS
-BlpConsolePrintChar(IN USHORT Character);
+BlpConsolePutChar(IN USHORT Character);
 
 XTCDECL
 XTSTATUS

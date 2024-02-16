@@ -34,7 +34,7 @@ BlDebugPrint(IN PUSHORT Format,
     if(DEBUG)
     {
         /* Initialize the print contexts */
-        ConsolePrintContext.WriteWideCharacter = BlpConsolePrintChar;
+        ConsolePrintContext.WriteWideCharacter = BlpConsolePutChar;
         SerialPrintContext.WriteWideCharacter = BlpDebugPutChar;
 
         /* Initialise the va_list */
@@ -57,6 +57,31 @@ BlDebugPrint(IN PUSHORT Format,
         /* Clean up the va_list */
         VA_END(Arguments);
     }
+}
+
+/**
+ * Writes a character to the serial console.
+ *
+ * @param Character
+ *        The integer promotion of the character to be written.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+XTSTATUS
+BlpDebugPutChar(IN USHORT Character)
+{
+    USHORT Buffer[2];
+
+    /* Write character to the serial console */
+    Buffer[0] = Character;
+    Buffer[1] = 0;
+    HlComPortPutByte(&BlpStatus.SerialPort, Buffer[0]);
+
+    /* Return success */
+    return STATUS_EFI_SUCCESS;
 }
 
 /**
@@ -239,31 +264,6 @@ BlpInitializeSerialPort(IN ULONG PortNumber,
         /* Serial port initialization failed, mark as not ready */
         return STATUS_EFI_NOT_READY;
     }
-
-    /* Return success */
-    return STATUS_EFI_SUCCESS;
-}
-
-/**
- * Writes a character to the serial console.
- *
- * @param Character
- *        The integer promotion of the character to be written.
- *
- * @return This routine returns a status code.
- *
- * @since XT 1.0
- */
-XTCDECL
-XTSTATUS
-BlpDebugPutChar(IN USHORT Character)
-{
-    USHORT Buffer[2];
-
-    /* Write character to the serial console */
-    Buffer[0] = Character;
-    Buffer[1] = 0;
-    HlComPortPutByte(&BlpStatus.SerialPort, Buffer[0]);
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
