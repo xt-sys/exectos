@@ -138,7 +138,7 @@ BlEnumerateBlockDevices()
 
                 /* Print debug message */
                 BlDebugPrint(L"Found Hard Disk partition (DiskNumber: %lu, PartNumber: %lu, "
-                           L"MBRType: %u, GUID: {%U}, PartSize: %uB)\n",
+                           L"MBRType: %u, GUID: {%V}, PartSize: %uB)\n",
                            DriveNumber, PartitionNumber, HDPath->MBRType,
                            PartitionGuid, HDPath->PartitionSize * Media->BlockSize);
             }

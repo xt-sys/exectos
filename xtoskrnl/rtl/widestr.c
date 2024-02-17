@@ -884,9 +884,14 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
             FormatProperties.VariableType = Integer;
             FormatProperties.Radix = 10;
             break;
-        case L'U':
-            /* XTOS extension: UUID/GUID argument */
+        case L'v':
+            /* XTOS extension: UUID/GUID argument (lowercase) */
             FormatProperties.VariableType = Guid;
+            break;
+        case L'V':
+            /* XTOS extension: UUID/GUID argument (uppercase) */
+            FormatProperties.VariableType = Guid;
+            FormatProperties.PrintUpperCase = TRUE;
             break;
         case L'x':
             /* Unsigned integer argument as hexadecimal number (lowercase) */
@@ -968,9 +973,19 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
         /* Make sure a pointer to GUID is not NULL */
         if(GuidArg != NULL)
         {
+            /* Check if using uppercase format */
+            if(FormatProperties.PrintUpperCase)
+            {
+                /* Use uppercase GUID format string */
+                WideStrArg = L"%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X";
+            }
+            else
+            {
+                /* Use lowercase GUID format string */
+                WideStrArg = L"%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x";
+            }
             /* Write formatted GUID string */
-            Status = RtlpWriteWideStringCustomValue(Context, L"%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x",
-                                                    GuidArg->Data1, GuidArg->Data2, GuidArg->Data3,
+            Status = RtlpWriteWideStringCustomValue(Context, WideStrArg, GuidArg->Data1, GuidArg->Data2, GuidArg->Data3,
                                                     GuidArg->Data4[0], GuidArg->Data4[1], GuidArg->Data4[2],
                                                     GuidArg->Data4[3], GuidArg->Data4[4], GuidArg->Data4[5],
                                                     GuidArg->Data4[6], GuidArg->Data4[7]);
