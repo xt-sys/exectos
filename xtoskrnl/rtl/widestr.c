@@ -567,32 +567,32 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
         if(*FormatIndex == L'\'')
         {
             /* Thousands grouping separator applied */
-            FormatProperties.ThousandsGrouping = TRUE;
+            FormatProperties.Flags |= PFL_THOUSANDS_GROUPING;
         }
         else if(*FormatIndex == L'-')
         {
             /* Left-align the output */
-            FormatProperties.LeftJustified = TRUE;
+            FormatProperties.Flags |= PFL_LEFT_JUSTIFIED;
         }
         else if(*FormatIndex == L' ')
         {
             /* Prepend a space for positive signed-numeric types */
-            FormatProperties.SpaceForPlus = TRUE;
+            FormatProperties.Flags |= PFL_SPACE_FOR_PLUS;
         }
         else if(*FormatIndex == L'+')
         {
             /* Prepend a plus for positive signed-numeric types */
-            FormatProperties.AlwaysPrintSign = TRUE;
+            FormatProperties.Flags |= PFL_ALWAYS_PRINT_SIGN;
         }
         else if(*FormatIndex == L'#')
         {
             /* Convert to an alternate form */
-            FormatProperties.PrintRadix = TRUE;
+            FormatProperties.Flags |= PFL_PRINT_RADIX;
         }
         else if(*FormatIndex == L'0')
         {
             /* Prepend zeros for numeric types */
-            FormatProperties.PrintLeadingZeroes = TRUE;
+            FormatProperties.Flags |= PFL_LEADING_ZEROES;
         }
         else
         {
@@ -605,17 +605,17 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
     }
 
     /* Check if output is left-justified */
-    if(FormatProperties.LeftJustified)
+    if(FormatProperties.Flags & PFL_LEFT_JUSTIFIED)
     {
         /* Left justified output can't have leading zeros */
-        FormatProperties.PrintLeadingZeroes = FALSE;
+        FormatProperties.Flags &= ~PFL_LEADING_ZEROES;
     }
 
     /* Check if plus for positive signed-numeric types is enabled */
-    if(FormatProperties.AlwaysPrintSign)
+    if(FormatProperties.Flags & PFL_ALWAYS_PRINT_SIGN)
     {
         /* Do not append a space when plus character is enabled */
-        FormatProperties.SpaceForPlus = FALSE;
+        FormatProperties.Flags &= ~PFL_SPACE_FOR_PLUS;
     }
 
     /* Lookup width field */
@@ -637,7 +637,7 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
     if(FormatProperties.FieldWidth < 0)
     {
         /* Force left-aligned output and turn field width into positive value */
-        FormatProperties.LeftJustified = TRUE;
+        FormatProperties.Flags |= PFL_LEFT_JUSTIFIED;
         FormatProperties.FieldWidth *= -1;
     }
 
@@ -681,11 +681,13 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
             /* SHORT-sized integer argument */
             FormatIndex++;
             FormatProperties.IntegerSize = sizeof(SHORT);
+            FormatProperties.Flags |= PFL_SHORT_VALUE;
             if(*FormatIndex == L'h')
             {
                 /* CHAR-sized integer argument */
                 FormatIndex++;
                 FormatProperties.IntegerSize = sizeof(CHAR);
+                FormatProperties.Flags &= ~PFL_SHORT_VALUE;
             }
             break;
         case L'j':
@@ -696,16 +698,14 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
         case L'l':
             /* LONG-sized double/integer argument */
             FormatIndex++;
-            FormatProperties.LongDouble = TRUE;
-            FormatProperties.LongInteger = TRUE;
             FormatProperties.IntegerSize = sizeof(LONG);
+            FormatProperties.Flags |= PFL_LONG_DOUBLE | PFL_LONG_INTEGER | PFL_WIDE_CHARACTER;
             if(*FormatIndex == L'l')
             {
                 /* LONGLONG-sized integer argument */
                 FormatIndex++;
-                FormatProperties.LongDouble = FALSE;
-                FormatProperties.LongInteger = FALSE;
                 FormatProperties.IntegerSize = sizeof(LONGLONG);
+                FormatProperties.Flags &= ~(PFL_LONG_DOUBLE | PFL_LONG_INTEGER | PFL_WIDE_CHARACTER);
             }
             break;
         case L'q':
@@ -721,7 +721,7 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
         case L'w':
             /* MSVC extension: wide character or wide string argument */
             FormatIndex++;
-            FormatProperties.LongInteger = TRUE;
+            FormatProperties.Flags |= PFL_WIDE_CHARACTER;
             break;
         case L'z':
             /* SIZE_T-sized integer argument */
@@ -736,8 +736,8 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
             {
                 /* MSVC extension: 32-bit (double word) integer argument */
                 FormatIndex += 2;
-                FormatProperties.LongInteger = TRUE;
                 FormatProperties.IntegerSize = sizeof(LONG);
+                FormatProperties.Flags |= PFL_LONG_INTEGER;
             }
             else if((*FormatIndex == L'6') && (*(FormatIndex + 1) == L'4'))
             {
@@ -749,8 +749,8 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
         case L'L':
             /* LONG-sized double argument */
             FormatIndex++;
-            FormatProperties.LongDouble = TRUE;
             FormatProperties.IntegerSize = sizeof(LDOUBLE);
+            FormatProperties.Flags |= PFL_LONG_DOUBLE;
             break;
     }
 
@@ -758,7 +758,7 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
     Specifier = *FormatIndex++;
 
     /* Handle char and string modifiers */
-    if(FormatProperties.LongInteger)
+    if(FormatProperties.Flags & PFL_WIDE_CHARACTER)
     {
         if(Specifier == L'c')
         {
@@ -773,20 +773,19 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
     }
 
     /* Lookup format specifier */
-    FormatProperties.UnsignedValue = TRUE;
+    FormatProperties.Flags |= PFL_UNSIGNED;
     switch(Specifier)
     {
         case L'a':
             /* Double argument as hexadecimal number (lowercase) */
             FormatProperties.VariableType = Float;
-            FormatProperties.ScientificFormat = TRUE;
+            FormatProperties.Flags |= PFL_SCI_FORMAT;
             FormatProperties.Radix = 16;
             break;
         case L'A':
             /* Double argument as hexadecimal number (uppercase) */
             FormatProperties.VariableType = Float;
-            FormatProperties.ScientificFormat = TRUE;
-            FormatProperties.PrintUpperCase = TRUE;
+            FormatProperties.Flags |= PFL_SCI_FORMAT | PFL_UPPERCASE;
             FormatProperties.Radix = 16;
             break;
         case L'b':
@@ -796,7 +795,7 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
         case L'B':
             /* XTOS extension: Boolean argument (uppercase) */
             FormatProperties.VariableType = Boolean;
-            FormatProperties.PrintUpperCase = TRUE;
+            FormatProperties.Flags |= PFL_UPPERCASE;
             break;
         case L'c':
             /* Character argument */
@@ -810,41 +809,38 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
         case L'i':
             /* Signed integer argument as decimal number */
             FormatProperties.VariableType = Integer;
+            FormatProperties.Flags &= ~PFL_UNSIGNED;
             FormatProperties.Radix = 10;
-            FormatProperties.UnsignedValue = FALSE;
             break;
         case L'e':
             /* Double argument in scientific notation (lowercase) */
             FormatProperties.VariableType = Float;
-            FormatProperties.ScientificFormat = TRUE;
+            FormatProperties.Flags |= PFL_SCI_FORMAT;
             break;
         case L'E':
             /* Double argument in scientific notation (uppercase) */
             FormatProperties.VariableType = Float;
-            FormatProperties.ScientificFormat = TRUE;
-            FormatProperties.PrintUpperCase = TRUE;
+            FormatProperties.Flags |= PFL_SCI_FORMAT | PFL_UPPERCASE;
             break;
         case L'f':
             /* Double argument as floating point number (lowercase) */
             FormatProperties.VariableType = Float;
-            FormatProperties.FloatFormat = TRUE;
+            FormatProperties.Flags |= PFL_FLOAT_FORMAT;
             break;
         case L'F':
             /* Double argument as floating point number (uppercase) */
             FormatProperties.VariableType = Float;
-            FormatProperties.FloatFormat = TRUE;
-            FormatProperties.PrintUpperCase = TRUE;
+            FormatProperties.Flags |= PFL_FLOAT_FORMAT | PFL_UPPERCASE;
             break;
         case L'g':
             /* Double argument as either floating point number or in scientific notation (lowercase) */
             FormatProperties.VariableType = Float;
-            FormatProperties.SignificantDigitPrecision = TRUE;
+            FormatProperties.Flags |= PFL_DIGIT_PRECISION;
             break;
         case L'G':
             /* Double argument as either floating point number or in scientific notation (uppercase) */
             FormatProperties.VariableType = Float;
-            FormatProperties.PrintUpperCase = TRUE;
-            FormatProperties.SignificantDigitPrecision = TRUE;
+            FormatProperties.Flags |= PFL_DIGIT_PRECISION | PFL_UPPERCASE;
             break;
         case L'n':
             /* Write number of characters written so far into an integer pointer parameter */
@@ -860,16 +856,15 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
             /* Pointer argument as hexadecimal number (lowercase) */
             FormatProperties.VariableType = Integer;
             FormatProperties.IntegerSize = sizeof(UINT_PTR);
+            FormatProperties.Flags |= PFL_PRINT_RADIX;
             FormatProperties.Radix = 16;
-            FormatProperties.PrintRadix = TRUE;
             break;
         case L'P':
             /* XTOS extension: Pointer argument as hexadecimal number (uppercase) */
             FormatProperties.VariableType = Integer;
             FormatProperties.IntegerSize = sizeof(UINT_PTR);
+            FormatProperties.Flags |= PFL_PRINT_RADIX | PFL_UPPERCASE;
             FormatProperties.Radix = 16;
-            FormatProperties.PrintUpperCase = TRUE;
-            FormatProperties.PrintRadix = TRUE;
             break;
         case L's':
             /* String argument */
@@ -891,7 +886,7 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
         case L'V':
             /* XTOS extension: UUID/GUID argument (uppercase) */
             FormatProperties.VariableType = Guid;
-            FormatProperties.PrintUpperCase = TRUE;
+            FormatProperties.Flags |= PFL_UPPERCASE;
             break;
         case L'x':
             /* Unsigned integer argument as hexadecimal number (lowercase) */
@@ -901,12 +896,12 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
         case L'X':
             /* Unsigned integer argument as hexadecimal number (uppercase) */
             FormatProperties.VariableType = Integer;
+            FormatProperties.Flags |= PFL_UPPERCASE;
             FormatProperties.Radix = 16;
-            FormatProperties.PrintUpperCase = TRUE;
             break;
         case L'Z':
             /* MSVC extension: ANSI/Unicode string argument */
-            FormatProperties.VariableType = FormatProperties.LongInteger ? UnicodeString : AnsiString;
+            FormatProperties.VariableType = (FormatProperties.Flags & PFL_WIDE_CHARACTER) ? UnicodeString : AnsiString;
             break;
         case L'%':
             /* Print '%' character */
@@ -941,7 +936,7 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
         }
 
         /* Check if using uppercase format */
-        if(FormatProperties.PrintUpperCase)
+        if(FormatProperties.Flags & PFL_UPPERCASE)
         {
             /* Set uppercase boolean string depending on argument value */
             WideStrArg = IntArg ? L"TRUE" : L"FALSE";
@@ -974,7 +969,7 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
         if(GuidArg != NULL)
         {
             /* Check if using uppercase format */
-            if(FormatProperties.PrintUpperCase)
+            if(FormatProperties.Flags & PFL_UPPERCASE)
             {
                 /* Use uppercase GUID format string */
                 WideStrArg = L"%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X";
@@ -1036,7 +1031,7 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
         else
         {
             /* Get argument value from the next argument, depending on its size */
-            if(FormatProperties.LongDouble)
+            if(FormatProperties.Flags & PFL_LONG_DOUBLE)
             {
                 FloatArg.DoublePart = VA_ARG(*ArgumentList, LDOUBLE);
             }
@@ -1407,7 +1402,7 @@ RtlpWriteWideStringIntegerValue(IN PRTL_PRINT_CONTEXT Context,
     Negative = FALSE;
 
     /* Check if this is signed integer */
-    if(!FormatProperties->UnsignedValue)
+    if(!(FormatProperties->Flags & PFL_UNSIGNED))
     {
         /* Check integer size and extend to signed value */
         switch(FormatProperties->IntegerSize)
@@ -1428,14 +1423,14 @@ RtlpWriteWideStringIntegerValue(IN PRTL_PRINT_CONTEXT Context,
     if(Integer == 0)
     {
         /* Cannot print radix if integer is zero */
-        FormatProperties->PrintRadix = FALSE;
+        FormatProperties->Flags &= ~PFL_PRINT_RADIX;
     }
 
     /* Check if any of the integer value or precision is non-zero */
     if(Integer != 0 || FormatProperties->Precision != 0)
     {
         /* Check if the integer is negative */
-        if(!FormatProperties->UnsignedValue && (LONGLONG)Integer < 0)
+        if(!(FormatProperties->Flags & PFL_UNSIGNED) && (LONGLONG)Integer < 0)
         {
             /* Mark the integer as negative and turn it positive */
             Negative = TRUE;
@@ -1456,7 +1451,7 @@ RtlpWriteWideStringIntegerValue(IN PRTL_PRINT_CONTEXT Context,
             if(Character > 9)
             {
                 /* Check if the character should be upper case */
-                if(FormatProperties->PrintUpperCase)
+                if(FormatProperties->Flags & PFL_UPPERCASE)
                 {
                     /* Get the uppercase character */
                     Character = Character - 10 + L'A';
@@ -1488,19 +1483,19 @@ RtlpWriteWideStringIntegerValue(IN PRTL_PRINT_CONTEXT Context,
 
     /* Handle the sign decoration */
     PrefixLength = 0;
-    if(!FormatProperties->UnsignedValue && Negative)
+    if(!(FormatProperties->Flags & PFL_UNSIGNED) && Negative)
     {
         /* Signed negative value, write '-' character */
         Prefix[PrefixLength] = L'-';
         PrefixLength += 1;
     }
-    else if(FormatProperties->AlwaysPrintSign)
+    else if(FormatProperties->Flags & PFL_ALWAYS_PRINT_SIGN)
     {
         /* Write '+' character for positive value */
         Prefix[PrefixLength] = L'+';
         PrefixLength += 1;
     }
-    else if(FormatProperties->SpaceForPlus)
+    else if(FormatProperties->Flags & PFL_SPACE_FOR_PLUS)
     {
         /* Write ' ' character for positive value */
         Prefix[PrefixLength] = L' ';
@@ -1508,7 +1503,7 @@ RtlpWriteWideStringIntegerValue(IN PRTL_PRINT_CONTEXT Context,
     }
 
     /* Handle the radix decoration */
-    if(FormatProperties->PrintRadix)
+    if(FormatProperties->Flags & PFL_PRINT_RADIX)
     {
         if(FormatProperties->Radix == 8)
         {
@@ -1548,10 +1543,10 @@ RtlpWriteWideStringIntegerValue(IN PRTL_PRINT_CONTEXT Context,
     }
 
     /* Check if leading zero padding is required and if field is left aligned */
-    if(!FormatProperties->LeftJustified || FormatProperties->PrintLeadingZeroes)
+    if(!(FormatProperties->Flags & PFL_LEFT_JUSTIFIED) || (FormatProperties->Flags & PFL_LEADING_ZEROES))
     {
         Character = L' ';
-        if(FormatProperties->PrintLeadingZeroes)
+        if(FormatProperties->Flags & PFL_LEADING_ZEROES)
         {
             /* Write leading zero padding characters */
             Character = L'0';
@@ -1691,7 +1686,7 @@ RtlpWriteWideStringStringValue(PRTL_PRINT_CONTEXT Context,
     }
 
     /* Check is left side padding is required */
-    if(!FormatProperties->LeftJustified)
+    if(!(FormatProperties->Flags & PFL_LEFT_JUSTIFIED))
     {
         /* Pad left */
         while(PaddingLength > 0)
@@ -1801,7 +1796,7 @@ RtlpWriteWideStringValue(PRTL_PRINT_CONTEXT Context,
 
 
     /* Check is left side padding is required */
-    if(!FormatProperties->LeftJustified)
+    if(!(FormatProperties->Flags & PFL_LEFT_JUSTIFIED))
     {
         /* Pad left */
         while(PaddingLength > 0)
