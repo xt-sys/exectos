@@ -18,7 +18,7 @@
  */
 XTCDECL
 VOID
-ArClearInterruptFlag()
+ArClearInterruptFlag(VOID)
 {
     asm volatile("cli");
 }
@@ -76,7 +76,7 @@ ArCpuId(IN OUT PCPUID_REGISTERS Registers)
  */
 XTCDECL
 VOID
-ArFlushTlb()
+ArFlushTlb(VOID)
 {
     /* Flush the TLB by resetting the CR3 */
     ArWriteControlRegister(3, ArReadControlRegister(3));
@@ -92,7 +92,7 @@ ArFlushTlb()
 XTASSEMBLY
 XTCDECL
 ULONG_PTR
-ArGetStackPointer()
+ArGetStackPointer(VOID)
 {
     /* Get current stack pointer */
     asm volatile("mov %%esp, %%eax\n"
@@ -111,7 +111,7 @@ ArGetStackPointer()
  */
 XTCDECL
 VOID
-ArHalt()
+ArHalt(VOID)
 {
     asm volatile("hlt");
 }
@@ -276,7 +276,7 @@ ArLoadTaskRegister(USHORT Source)
  */
 XTCDECL
 VOID
-ArMemoryBarrier()
+ArMemoryBarrier(VOID)
 {
    LONG Barrier;
    asm volatile("xchg %%eax, %0"
@@ -463,7 +463,7 @@ ArReadModelSpecificRegister(IN ULONG Register)
  */
 XTCDECL
 UINT
-ArReadMxCsrRegister()
+ArReadMxCsrRegister(VOID)
 {
     return __builtin_ia32_stmxcsr();
 }
@@ -477,7 +477,7 @@ ArReadMxCsrRegister()
  */
 XTCDECL
 ULONGLONG
-ArReadTimeStampCounter()
+ArReadTimeStampCounter(VOID)
 {
     ULONGLONG Value;
 
@@ -496,7 +496,7 @@ ArReadTimeStampCounter()
  */
 XTCDECL
 VOID
-ArReadWriteBarrier()
+ArReadWriteBarrier(VOID)
 {
     asm volatile(""
                  :
@@ -513,7 +513,7 @@ ArReadWriteBarrier()
  */
 XTCDECL
 VOID
-ArSetInterruptFlag()
+ArSetInterruptFlag(VOID)
 {
     asm volatile("sti");
 }
@@ -825,7 +825,7 @@ ArWriteModelSpecificRegister(IN ULONG Register,
  */
 XTCDECL
 VOID
-ArYieldProcessor()
+ArYieldProcessor(VOID)
 {
     asm volatile("pause"
                  :

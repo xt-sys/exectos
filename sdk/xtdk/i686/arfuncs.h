@@ -18,7 +18,7 @@
 /* Routines used by XTLDR */
 XTCDECL
 VOID
-ArClearInterruptFlag();
+ArClearInterruptFlag(VOID);
 
 XTCDECL
 BOOLEAN
@@ -26,7 +26,7 @@ ArCpuId(IN OUT PCPUID_REGISTERS Registers);
 
 XTCDECL
 VOID
-ArHalt();
+ArHalt(VOID);
 
 XTCDECL
 ULONG_PTR

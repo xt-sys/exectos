@@ -15,7 +15,7 @@
 /* I686 architecture library routines forward references */
 XTCDECL
 VOID
-ArClearInterruptFlag();
+ArClearInterruptFlag(VOID);
 
 XTCDECL
 BOOLEAN
@@ -23,16 +23,16 @@ ArCpuId(IN OUT PCPUID_REGISTERS Registers);
 
 XTCDECL
 VOID
-ArFlushTlb();
+ArFlushTlb(VOID);
 
 XTASSEMBLY
 XTCDECL
 ULONG_PTR
-ArGetStackPointer();
+ArGetStackPointer(VOID);
 
 XTCDECL
 VOID
-ArHalt();
+ArHalt(VOID);
 
 XTAPI
 VOID
@@ -65,7 +65,7 @@ ArLoadTaskRegister(USHORT Source);
 
 XTCDECL
 VOID
-ArMemoryBarrier();
+ArMemoryBarrier(VOID);
 
 XTCDECL
 ULONG_PTR
@@ -85,15 +85,15 @@ ArReadModelSpecificRegister(IN ULONG Register);
 
 XTCDECL
 UINT
-ArReadMxCsrRegister();
+ArReadMxCsrRegister(VOID);
 
 XTCDECL
 ULONGLONG
-ArReadTimeStampCounter();
+ArReadTimeStampCounter(VOID);
 
 XTCDECL
 VOID
-ArReadWriteBarrier();
+ArReadWriteBarrier(VOID);
 
 XTAPI
 VOID
@@ -103,7 +103,7 @@ ArSetGdtEntryBase(IN PKGDTENTRY Gdt,
 
 XTCDECL
 VOID
-ArSetInterruptFlag();
+ArSetInterruptFlag(VOID);
 
 XTCDECL
 VOID
@@ -147,95 +147,95 @@ ArWriteModelSpecificRegister(IN ULONG Register,
 
 XTCDECL
 VOID
-ArYieldProcessor();
+ArYieldProcessor(VOID);
 
 XTCDECL
 VOID
-ArpHandleTrap00();
+ArpHandleTrap00(VOID);
 
 XTCDECL
 VOID
-ArpHandleTrap01();
+ArpHandleTrap01(VOID);
 
 XTCDECL
 VOID
-ArpHandleTrap02();
+ArpHandleTrap02(VOID);
 
 XTCDECL
 VOID
-ArpHandleTrap03();
+ArpHandleTrap03(VOID);
 
 XTCDECL
 VOID
-ArpHandleTrap04();
+ArpHandleTrap04(VOID);
 
 XTCDECL
 VOID
-ArpHandleTrap05();
+ArpHandleTrap05(VOID);
 
 XTCDECL
 VOID
-ArpHandleTrap06();
+ArpHandleTrap06(VOID);
 
 XTCDECL
 VOID
-ArpHandleTrap07();
+ArpHandleTrap07(VOID);
 
 XTCDECL
 VOID
-ArpHandleTrap08();
+ArpHandleTrap08(VOID);
 
 XTCDECL
 VOID
-ArpHandleTrap09();
+ArpHandleTrap09(VOID);
 
 XTCDECL
 VOID
-ArpHandleTrap0A();
+ArpHandleTrap0A(VOID);
 
 XTCDECL
 VOID
-ArpHandleTrap0B();
+ArpHandleTrap0B(VOID);
 
 XTCDECL
 VOID
-ArpHandleTrap0C();
+ArpHandleTrap0C(VOID);
 
 XTCDECL
 VOID
-ArpHandleTrap0D();
+ArpHandleTrap0D(VOID);
 
 XTCDECL
 VOID
-ArpHandleTrap0E();
+ArpHandleTrap0E(VOID);
 
 XTCDECL
 VOID
-ArpHandleTrap10();
+ArpHandleTrap10(VOID);
 
 XTCDECL
 VOID
-ArpHandleTrap11();
+ArpHandleTrap11(VOID);
 
 XTCDECL
 VOID
-ArpHandleTrap12();
+ArpHandleTrap12(VOID);
 
 XTCDECL
 VOID
-ArpHandleTrap13();
+ArpHandleTrap13(VOID);
 
 XTCDECL
 VOID
-ArpHandleTrap2C();
+ArpHandleTrap2C(VOID);
 
 XTCDECL
 VOID
-ArpHandleTrap2D();
+ArpHandleTrap2D(VOID);
 
 XTCDECL
 VOID
-ArpHandleTrapFF();
+ArpHandleTrapFF(VOID);
 
 XTAPI
 VOID

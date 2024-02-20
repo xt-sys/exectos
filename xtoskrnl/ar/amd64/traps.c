@@ -11,14 +11,14 @@
 
 XTCDECL
 VOID
-ArpHandleSystemCall32()
+ArpHandleSystemCall32(VOID)
 {
     DebugPrint(L"Handled 32-bit system call!\n");
 }
 
 XTCDECL
 VOID
-ArpHandleSystemCall64()
+ArpHandleSystemCall64(VOID)
 {
     DebugPrint(L"Handled 64-bit system call!\n");
 }
@@ -32,7 +32,7 @@ ArpHandleSystemCall64()
  */
 XTCDECL
 VOID
-ArpHandleTrap00()
+ArpHandleTrap00(VOID)
 {
     DebugPrint(L"Handled Division-By-Zero Error (0x00)!\n");
     for(;;);
@@ -47,7 +47,7 @@ ArpHandleTrap00()
  */
 XTCDECL
 VOID
-ArpHandleTrap01()
+ArpHandleTrap01(VOID)
 {
     DebugPrint(L"Handled Debug exception (0x01)!\n");
     for(;;);
@@ -62,7 +62,7 @@ ArpHandleTrap01()
  */
 XTCDECL
 VOID
-ArpHandleTrap02()
+ArpHandleTrap02(VOID)
 {
     DebugPrint(L"Handled Non-Maskable-Interrupt (0x02)!\n");
     for(;;);
@@ -77,7 +77,7 @@ ArpHandleTrap02()
  */
 XTCDECL
 VOID
-ArpHandleTrap03()
+ArpHandleTrap03(VOID)
 {
     DebugPrint(L"Handled INT3 (0x03)!\n");
     for(;;);
@@ -92,7 +92,7 @@ ArpHandleTrap03()
  */
 XTCDECL
 VOID
-ArpHandleTrap04()
+ArpHandleTrap04(VOID)
 {
     DebugPrint(L"Handled Overflow exception (0x04)!\n");
     for(;;);
@@ -107,7 +107,7 @@ ArpHandleTrap04()
  */
 XTCDECL
 VOID
-ArpHandleTrap05()
+ArpHandleTrap05(VOID)
 {
     DebugPrint(L"Handled Bound-Range-Exceeded exception (0x05)!\n");
     for(;;);
@@ -122,7 +122,7 @@ ArpHandleTrap05()
  */
 XTCDECL
 VOID
-ArpHandleTrap06()
+ArpHandleTrap06(VOID)
 {
     DebugPrint(L"Handled Invalid Opcode exception (0x06)!\n");
     for(;;);
@@ -137,7 +137,7 @@ ArpHandleTrap06()
  */
 XTCDECL
 VOID
-ArpHandleTrap07()
+ArpHandleTrap07(VOID)
 {
     DebugPrint(L"Handled Device Not Available exception (0x07)!\n");
     for(;;);
@@ -152,7 +152,7 @@ ArpHandleTrap07()
  */
 XTCDECL
 VOID
-ArpHandleTrap08()
+ArpHandleTrap08(VOID)
 {
     DebugPrint(L"Handled Double-Fault exception (0x08)!\n");
     for(;;);
@@ -167,7 +167,7 @@ ArpHandleTrap08()
  */
 XTCDECL
 VOID
-ArpHandleTrap09()
+ArpHandleTrap09(VOID)
 {
     DebugPrint(L"Handled Segment-Overrun exception (0x09)!\n");
     for(;;);
@@ -182,7 +182,7 @@ ArpHandleTrap09()
  */
 XTCDECL
 VOID
-ArpHandleTrap0A()
+ArpHandleTrap0A(VOID)
 {
     DebugPrint(L"Handled Invalid-TSS exception (0x0A)!\n");
     for(;;);
@@ -197,7 +197,7 @@ ArpHandleTrap0A()
  */
 XTCDECL
 VOID
-ArpHandleTrap0B()
+ArpHandleTrap0B(VOID)
 {
     DebugPrint(L"Handled Segment-Not-Present exception (0x0B)!\n");
     for(;;);
@@ -212,7 +212,7 @@ ArpHandleTrap0B()
  */
 XTCDECL
 VOID
-ArpHandleTrap0C()
+ArpHandleTrap0C(VOID)
 {
     DebugPrint(L"Handled Stack-Segment-Fault exception (0x0C)!\n");
     for(;;);
@@ -227,7 +227,7 @@ ArpHandleTrap0C()
  */
 XTCDECL
 VOID
-ArpHandleTrap0D()
+ArpHandleTrap0D(VOID)
 {
     DebugPrint(L"Handled General-Protection-Fault (0x0D)!\n");
     for(;;);
@@ -242,7 +242,7 @@ ArpHandleTrap0D()
  */
 XTCDECL
 VOID
-ArpHandleTrap0E()
+ArpHandleTrap0E(VOID)
 {
     DebugPrint(L"Handled Page-Fault exception (0x0E)!\n");
     for(;;);
@@ -257,7 +257,7 @@ ArpHandleTrap0E()
  */
 XTCDECL
 VOID
-ArpHandleTrap10()
+ArpHandleTrap10(VOID)
 {
     DebugPrint(L"Handled x87 Floating-Point exception (0x10)!\n");
     for(;;);
@@ -272,7 +272,7 @@ ArpHandleTrap10()
  */
 XTCDECL
 VOID
-ArpHandleTrap11()
+ArpHandleTrap11(VOID)
 {
     DebugPrint(L"Handled Alignment-Check exception (0x11)!\n");
     for(;;);
@@ -287,7 +287,7 @@ ArpHandleTrap11()
  */
 XTCDECL
 VOID
-ArpHandleTrap12()
+ArpHandleTrap12(VOID)
 {
     DebugPrint(L"Handled Machine-Check exception (0x12)!\n");
     for(;;);
@@ -302,7 +302,7 @@ ArpHandleTrap12()
  */
 XTCDECL
 VOID
-ArpHandleTrap13()
+ArpHandleTrap13(VOID)
 {
     DebugPrint(L"Handled SIMD Floating-Point exception (0x13)!\n");
     for(;;);
@@ -317,7 +317,7 @@ ArpHandleTrap13()
  */
 XTCDECL
 VOID
-ArpHandleTrap2C()
+ArpHandleTrap2C(VOID)
 {
     DebugPrint(L"Handled Assertion (0x2C)!\n");
     for(;;);
@@ -332,7 +332,7 @@ ArpHandleTrap2C()
  */
 XTCDECL
 VOID
-ArpHandleTrap2D()
+ArpHandleTrap2D(VOID)
 {
     DebugPrint(L"Handled Debug-Service-Request (0x2D)!\n");
     for(;;);
@@ -347,7 +347,7 @@ ArpHandleTrap2D()
  */
 XTCDECL
 VOID
-ArpHandleTrapFF()
+ArpHandleTrapFF(VOID)
 {
     DebugPrint(L"Handled Unexpected-Interrupt (0xFF)!\n");
     for(;;);
