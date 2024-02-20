@@ -365,7 +365,7 @@ VOID
 ArpInitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock)
 {
     /* Clear I/O map */
-    RtlFillMemory(ProcessorBlock->TssBase->IoMaps[0].IoMap, IOPM_FULL_SIZE, 0xFF);
+    RtlSetMemory(ProcessorBlock->TssBase->IoMaps[0].IoMap, 0xFF, IOPM_FULL_SIZE);
 
     /* Fill Interrupt Direction Maps with zeroes */
     RtlZeroMemory(ProcessorBlock->TssBase->IoMaps[0].DirectionMap, IOPM_DIRECTION_MAP_SIZE);
