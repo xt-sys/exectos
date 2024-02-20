@@ -19,7 +19,7 @@
  */
 XTAPI
 VOID
-HlClearApicErrors()
+HlClearApicErrors(VOID)
 {
     /* Clear APIC errors */
     HlWriteApicRegister(APIC_ESR, 0);
@@ -34,7 +34,7 @@ HlClearApicErrors()
  */
 XTAPI
 VOID
-HlDisableLegacyPic()
+HlDisableLegacyPic(VOID)
 {
     HlIoPortOutByte(PIC1_DATA_PORT, 0xFF);
     HlIoPortOutByte(PIC2_DATA_PORT, 0xFF);
@@ -75,7 +75,7 @@ HlReadApicRegister(IN APIC_REGISTER Register)
  */
 XTAPI
 VOID
-HlSendEoi()
+HlSendEoi(VOID)
 {
     /* Send APIC EOI */
     HlWriteApicRegister(APIC_EOI, 0);
@@ -158,7 +158,7 @@ HlpCheckX2ApicSupport(VOID)
  */
 XTCDECL
 VOID
-HlpHandleApicSpuriousService()
+HlpHandleApicSpuriousService(VOID)
 {
 }
 
@@ -171,7 +171,7 @@ HlpHandleApicSpuriousService()
  */
 XTCDECL
 VOID
-HlpHandlePicSpuriousService()
+HlpHandlePicSpuriousService(VOID)
 {
 }
 

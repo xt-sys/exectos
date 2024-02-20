@@ -15,11 +15,11 @@
 /* HAL library routines forward references */
 XTAPI
 VOID
-HlClearApicErrors();
+HlClearApicErrors(VOID);
 
 XTAPI
 VOID
-HlDisableLegacyPic();
+HlDisableLegacyPic(VOID);
 
 XTFASTCALL
 ULONG
@@ -27,7 +27,7 @@ HlReadApicRegister(IN APIC_REGISTER Register);
 
 XTAPI
 VOID
-HlSendEoi();
+HlSendEoi(VOID);
 
 XTFASTCALL
 VOID
@@ -40,11 +40,11 @@ HlpCheckX2ApicSupport(VOID);
 
 XTCDECL
 VOID
-HlpHandleApicSpuriousService();
+HlpHandleApicSpuriousService(VOID);
 
 XTCDECL
 VOID
-HlpHandlePicSpuriousService();
+HlpHandlePicSpuriousService(VOID);
 
 XTAPI
 VOID
