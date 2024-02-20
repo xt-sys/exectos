@@ -18,7 +18,7 @@
  */
 XTAPI
 XTSTATUS
-XtDriverEntry()
+XtDriverEntry(VOID)
 {
     /* Return success */
     return STATUS_SUCCESS;
