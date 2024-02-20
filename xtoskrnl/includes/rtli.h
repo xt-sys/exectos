@@ -312,7 +312,7 @@ XTSTATUS
 RtlpWriteWideCharacter(IN PRTL_PRINT_CONTEXT Context,
                        IN WCHAR Character);
 
-XTAPI
+XTCDECL
 XTSTATUS
 RtlpWriteWideStringCustomValue(IN PRTL_PRINT_CONTEXT Context,
                                IN PCWSTR Format,
