@@ -42,7 +42,6 @@
 @ stdcall RtlConvertToLargeIntegerUnsigned32(long)
 @ stdcall RtlCopyMemory(ptr ptr long)
 @ stdcall RtlDivideLargeInteger(long long long ptr)
-@ stdcall RtlFillMemory(ptr long long)
 @ stdcall RtlMoveMemory(ptr ptr long)
 @ stdcall RtlMultiplyLargeInteger(long long long)
 @ stdcall RtlReadRegisterByte(ptr)

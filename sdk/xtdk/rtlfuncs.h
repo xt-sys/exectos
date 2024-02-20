@@ -116,13 +116,6 @@ RtlDivideLargeInteger(IN LARGE_INTEGER Dividend,
                       IN ULONG Divisor,
                       OUT PULONG Remainder);
 
-
-XTAPI
-VOID
-RtlFillMemory(OUT PVOID Destination,
-              IN SIZE_T Length,
-              IN UCHAR Value);
-
 XTAPI
 XTSTATUS
 RtlFormatWideString(IN PRTL_PRINT_CONTEXT Context,
