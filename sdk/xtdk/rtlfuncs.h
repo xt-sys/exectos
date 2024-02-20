@@ -111,6 +111,18 @@ RtlCopyMemory(OUT PVOID Destination,
               IN SIZE_T Length);
 
 XTAPI
+VOID
+RtlCopyString(IN PCHAR Destination,
+              IN PCCHAR Source,
+              IN ULONG Length);
+
+XTAPI
+VOID
+RtlCopyWideString(IN PWCHAR Destination,
+                  IN CONST PWCHAR Source,
+                  IN ULONG Length);
+
+XTAPI
 LARGE_INTEGER
 RtlDivideLargeInteger(IN LARGE_INTEGER Dividend,
                       IN ULONG Divisor,

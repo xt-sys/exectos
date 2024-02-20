@@ -188,6 +188,48 @@ RtlConcatenateString(OUT PCHAR Destination,
 }
 
 /**
+ * Copies a string from a buffer into another buffer, ensuring that the destination string is NULL-terminated.
+ *
+ * @param Destination
+ *        Supplies a pointer to the destination buffer.
+ *
+ * @param Source
+ *        Supplies a pointer to the source buffer.
+ *
+ * @param Length
+ *        Supplies the length of the string to copy.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+RtlCopyString(IN PCHAR Destination,
+              IN PCCHAR Source,
+              IN ULONG Length)
+{
+    ULONG Index;
+
+    /* Copy characters */
+    for(Index = 0; Index < Length; Index++)
+    {
+        /* Copy source character */
+        Destination[Index] = Source[Index];
+
+        /* Check if NULL terminated character found */
+        if(Source[Index] == '\0')
+        {
+            /* End of source string reached */
+            break;
+        }
+    }
+
+    /* Make sure the destination string is terminated properly */
+    Destination[Index] = '\0';
+}
+
+/**
  * Reverses a characters order in a string. It modifies the original, input variable.
  *
  * @param String
