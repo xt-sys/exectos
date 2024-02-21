@@ -261,6 +261,10 @@ RtlGetBaseExponent(IN DOUBLE Value,
                    OUT PDOUBLE PowerOfTen);
 
 XTCDECL
+BOOLEAN
+RtlInfiniteDouble(IN DOUBLE Value);
+
+XTCDECL
 VOID
 RtlInitializeListHead(IN PLIST_ENTRY ListHead);
 
@@ -285,6 +289,10 @@ RtlListEmpty(PLIST_ENTRY ListHead);
 XTCDECL
 BOOLEAN
 RtlListLoop(IN PLIST_ENTRY ListHead);
+
+XTCDECL
+BOOLEAN
+RtlNanDouble(IN DOUBLE Value);
 
 XTCDECL
 VOID

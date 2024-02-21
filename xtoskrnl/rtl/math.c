@@ -601,6 +601,40 @@ RtlGetBaseExponent(IN DOUBLE Value,
 }
 
 /**
+ * Determines whether a floating-point number is infinite.
+ *
+ * @param Value
+ *        Supplies the floating-point value to test.
+ *
+ * @return This routine returns TRUE if the argument is infinite or a NaN, or FALSE otherwise.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+BOOLEAN
+RtlInfiniteDouble(IN DOUBLE Value)
+{
+    /* DOUBLE argument in IEEE 754 standard format */
+    union
+    {
+        PDOUBLE Double;
+        struct
+        {
+            UINT MantissaLow:32;
+            UINT MantissaHigh:20;
+            UINT Exponent:11;
+            UINT Sign:1;
+        } *DoubleS;
+    } Var;
+
+    /* Convert input double value to IEEE 754 format */
+    Var.Double = &Value;
+
+    /* Return TRUE if it is infinite, or FALSE otherwise */
+    return ((Var.DoubleS->Exponent & 0x7FF) == 0x7FF);
+}
+
+/**
  * Multiplies a signed large integer by a signed integer.
  *
  * @param Multiplicand
@@ -623,4 +657,38 @@ RtlMultiplyLargeInteger(IN LARGE_INTEGER Multiplicand,
     /* Perform multiplication and return the result */
     LargeInt.QuadPart = (LONGLONG) Multiplicand.QuadPart * Multiplier;
     return LargeInt;
+}
+
+/**
+ * Determines whether a floating-point number is a NaN ("Not a Number").
+ *
+ * @param Value
+ *        Supplies the floating-point value to test.
+ *
+ * @return This routine returns TRUE if the argument is a NaN, or FALSE otherwise.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+BOOLEAN
+RtlNanDouble(IN DOUBLE Value)
+{
+    /* DOUBLE argument in IEEE 754 standard format */
+    union
+    {
+        PDOUBLE Double;
+        struct
+        {
+            UINT MantissaLow:32;
+            UINT MantissaHigh:20;
+            UINT Exponent:11;
+            UINT Sign:1;
+        } *DoubleS;
+    } Var;
+
+    /* Convert input double value to IEEE 754 format */
+    Var.Double = &Value;
+
+    /* Return TRUE if it is NaN, or FALSE otherwise */
+    return (Var.DoubleS->Exponent == 0x7FF && (Var.DoubleS->MantissaHigh != 0 || Var.DoubleS->MantissaLow != 0));
 }
