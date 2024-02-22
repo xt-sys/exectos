@@ -1085,7 +1085,7 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
         }
 
         /* Write formatted double value */
-        // Status = RtlpWriteWideStringDoubleValue(Context, &FormatProperties, FloatArg.DoublePart);
+        Status = RtlpWriteWideStringDoubleValue(Context, &FormatProperties, FloatArg.DoublePart);
     }
     else if(FormatProperties.VariableType == Integer)
     {
@@ -1408,6 +1408,995 @@ RtlpWriteWideStringCustomValue(IN PRTL_PRINT_CONTEXT Context,
 
     /* Return status code */
     return Status;
+}
+
+XTAPI
+XTSTATUS
+RtlpWriteWideStringDoubleValue(IN PRTL_PRINT_CONTEXT Context,
+                               IN PRTL_PRINT_FORMAT_PROPERTIES FormatProperties,
+                               IN DOUBLE Value)
+{
+    LONG CurrentExponent, DigitCount, Exponent, Precision, PrecisionIndex, SignificantDigits;
+    WCHAR Character, Digit, ExponentCharacter, SignCharacter;
+    ULONG FieldCount, FieldIndex, Index, NumberLength;
+    WCHAR Buffer[MAX_DOUBLE_STRING_SIZE];
+    BOOLEAN NegativeValue, WriteExponent;
+    DOUBLE RoundingAmount, TenPower;
+    PWCHAR NonNumberString;
+    LARGE_DOUBLE Parts;
+    XTSTATUS Status;
+
+    /* Initialize variables */
+    NegativeValue = FALSE;
+    NumberLength = 0;
+    Parts.DoublePart = Value;
+    Precision = FormatProperties->Precision;
+    SignCharacter = 0;
+
+    /* Check if the precision is specified */
+    if(Precision == -1)
+    {
+        /* Set default precision */
+        Precision = DOUBLE_PRECISION;
+    }
+
+    /* Check if the precision is zero */
+    if((FormatProperties->Flags & PFL_DIGIT_PRECISION) && (Precision == 0))
+    {
+        /* Display at least one digit */
+        Precision = 1;
+    }
+
+    /* Determine whether the value is infinite or nan */
+    if(RtlInfiniteDouble(Value))
+    {
+        /* Check if the value is nan */
+        if(RtlNanDouble(Value))
+        {
+            /* Set non-number string depending on the selection of upper or lowercase */
+            if(FormatProperties->Flags & PFL_UPPERCASE)
+            {
+                NonNumberString = L"#NAN";
+            }
+            else
+            {
+                NonNumberString = L"#nan";
+            }
+        }
+        else
+        {
+            /* Otherwise it is infinite, set proper string depending on the selection of upper or lowercase */
+            if(FormatProperties->Flags & PFL_UPPERCASE)
+            {
+                NonNumberString = L"#INF";
+            }
+            else
+            {
+                NonNumberString = L"#inf";
+            }
+
+            /* Check if the value is negative */
+            if(Value < 0)
+            {
+                NegativeValue = TRUE;
+            }
+        }
+
+        /* Set index to 0 and add sign if needed */
+        Index = 0;
+        if(NegativeValue != FALSE)
+        {
+            /* Add negative (-) sign */
+            Buffer[Index] = L'-';
+            Index++;
+        }
+        else if(FormatProperties->Flags & PFL_ALWAYS_PRINT_SIGN)
+        {
+            /* Add positive (+) sign */
+            Buffer[Index] = L'+';
+            Index++;
+        }
+        else if(FormatProperties->Flags & PFL_SPACE_FOR_PLUS)
+        {
+            /* Add space for positive value */
+            Buffer[Index] = L' ';
+            Index++;
+        }
+
+        /* Copy string to buffer and write it to wide string context */
+        RtlCopyWideString(Buffer + Index, NonNumberString, sizeof(Buffer) - Index);
+        return RtlpWriteWideStringValue(Context, FormatProperties, Buffer, RtlWideStringLength(Buffer, 0));
+    }
+
+    /* Check whether we need to handle hexadecimal format */
+    if(FormatProperties->Radix == 16)
+    {
+        /* Handle it as hex value */
+        return RtlpWriteWideStringHexDoubleValue(Context, FormatProperties, Value);
+    }
+
+    /* Check if the value is negative */
+    if((Parts.u.HighPart & (DOUBLE_SIGN_BIT >> DOUBLE_HIGH_VALUE_SHIFT)) != 0)
+    {
+        /* Turn the negative value into a positive value */
+        Value *= -1;
+        NegativeValue = TRUE;
+    }
+
+    /* Calculate the exponent */
+    Exponent = RtlGetBaseExponent(Value, &TenPower);
+    RoundingAmount = 0.5;
+
+    /* Determine whether or not to write the exponent */
+    WriteExponent = (FormatProperties->Flags & PFL_SCI_FORMAT);
+    if((WriteExponent == FALSE) && !(FormatProperties->Flags & PFL_FLOAT_FORMAT))
+    {
+        if((Exponent < DOUBLE_SCIENTIFIC_PRECISION) || (Exponent >= Precision))
+        {
+            /* Write the exponent */
+            WriteExponent = TRUE;
+        }
+    }
+
+    /* Make sure the value is not zero */
+    DigitCount = 0;
+    if(Value != 0.0)
+    {
+        /* Adjust rounding if needed */
+        if((WriteExponent != FALSE) || (FormatProperties->Flags & PFL_DIGIT_PRECISION))
+        {
+            /* Calculate the rounding */
+            RoundingAmount /= TenPower;
+
+            /* Check if the precision is specified */
+            if(FormatProperties->Flags & PFL_DIGIT_PRECISION)
+            {
+                /* Increase rounding amount */
+                RoundingAmount *= 10.0;
+            }
+        }
+
+        /* Handle the rounding precision */
+        for(PrecisionIndex = 0; PrecisionIndex < Precision; PrecisionIndex++)
+        {
+            RoundingAmount *= 0.1;
+        }
+
+        /* Normalize the value */
+        Value += RoundingAmount;
+        Value *= TenPower;
+
+        /* Adjust the value if it is greater than 9 */
+        if((LONG)Value > 9)
+        {
+            Value *= 0.1;
+            Exponent += 1;
+        }
+
+        /* Turn numbers into characters */
+        while((Value != 0.0) && (DigitCount < MAX_DOUBLE_STRING_SIZE))
+        {
+            Buffer[DigitCount] = (LONG)Value + L'0';
+            DigitCount += 1;
+            Value = (Value - (double)(LONG)Value) * 10.0;
+        }
+
+        /* Check if precision matters */
+        if(FormatProperties->Flags & PFL_DIGIT_PRECISION)
+        {
+            /* Make sure precision is greater than 0 */
+            if(Precision > 0)
+            {
+                /* Check if number of digit exceeds the precision */
+                if(DigitCount > Precision)
+                {
+                    /* Decrease the number of digits to fit the precision */
+                    DigitCount = Precision;
+                }
+            }
+        }
+
+        /* Remove zero characters from the end of the string */
+        while((DigitCount > 1) && (Buffer[DigitCount - 1] == L'0'))
+        {
+            /* Decrease buffer length */
+            DigitCount -= 1;
+        }
+    }
+
+    /* Handle the sign character */
+    if(NegativeValue)
+    {
+        /* Negative value, add the '-' character */
+        SignCharacter = L'-';
+    }
+    else if(FormatProperties->Flags & PFL_ALWAYS_PRINT_SIGN)
+    {
+        /* Positive value, add the '+' character */
+        SignCharacter = L'+';
+    }
+    else if(FormatProperties->Flags & PFL_SPACE_FOR_PLUS)
+    {
+        /* Positive value, add the ' ' character */
+        SignCharacter = L' ';
+    }
+
+    /* Handle the significant digit precision */
+    SignificantDigits = DigitCount;
+    if(FormatProperties->Flags & PFL_DIGIT_PRECISION)
+    {
+        /* Check if number of digit exceeds the precision */
+        if(SignificantDigits > Precision)
+        {
+            /* Cap the number of significant digits */
+            SignificantDigits = Precision;
+        }
+        else if(Precision > SignificantDigits)
+        {
+            /* Cap the precision */
+            Precision = SignificantDigits;
+
+            /* Check if an exponent is going to be written and if precision needs to be adjusted for it */
+            if(!WriteExponent && ((Exponent + 1) > Precision))
+            {
+                /* Adjust the precision */
+                Precision = Exponent + 1;
+            }
+
+            /* Make sure precision is greater than 0 */
+            if(Precision == 0)
+            {
+                /* Adjust the precision */
+                Precision = 1;
+            }
+        }
+    }
+
+    /* Check whether to print a radix */
+    NumberLength = Precision;
+    if(FormatProperties->Flags & PFL_PRINT_RADIX)
+    {
+        /* Include the radix character */
+        NumberLength += 1;
+    }
+    else if(FormatProperties->Flags & PFL_DIGIT_PRECISION)
+    {
+        /* Check if an exponent is going to be written */
+        if(WriteExponent)
+        {
+            /* Make sure precision is greater than 1 */
+            if(Precision > 1)
+            {
+                /* Include radix character */
+                NumberLength += 1;
+            }
+        }
+        else
+        {
+            /* Still check if radix character should be written */
+            if((Exponent < 0) || ((Exponent + 1) - SignificantDigits < 0))
+            {
+                /* Reserve space for radix character */
+                NumberLength += 1;
+            }
+        }
+    }
+    else if(Precision != 0)
+    {
+        /* Include the radix character */
+        NumberLength += 1;
+    }
+
+    /* Check if an exponent is going to be written */
+    if(WriteExponent)
+    {
+        /* Ensure there is enough room for the exponent character, sign and digits */
+        NumberLength += 4;
+
+        /* Check if precision represents the fractional part only */
+        if(!(FormatProperties->Flags & PFL_DIGIT_PRECISION))
+        {
+            /* Add space for one more digit */
+            NumberLength += 1;
+        }
+
+        /* Check if the exponent is negative */
+        if(Exponent < 0)
+        {
+            /* Check if the exponent is less than -100 */
+            if(Exponent <= -100)
+            {
+                /* Add space for one more digit */
+                NumberLength += 1;
+
+                /* Check if the exponent is less than -1000 */
+                if(Exponent <= -1000)
+                {
+                    /* Add space for one more digit */
+                    NumberLength += 1;
+                }
+            }
+        }
+        else
+        {
+            /* Check if the exponent is greater than 100 */
+            if(Exponent >= 100)
+            {
+                /* Add space for one more digit */
+                NumberLength += 1;
+
+                /* Check if the exponent is greater than 1000 */
+                if(Exponent >= 1000)
+                {
+                    /* Add space for one more digit */
+                    NumberLength += 1;
+                }
+            }
+        }
+    }
+    else
+    {
+        if(Exponent >= 0)
+        {
+            /* Not negative */
+            if(!(FormatProperties->Flags & PFL_DIGIT_PRECISION))
+            {
+                /*Adjust number length */
+                NumberLength += Exponent + 1;
+            }
+        }
+        else
+        {
+            /* Negative, add space for additional '0' character*/
+            NumberLength += 1;
+
+            /* Check if precision is number of significant digits */
+            if(FormatProperties->Flags & PFL_DIGIT_PRECISION)
+            {
+                /* Add exponent to the precision */
+                Precision += (-Exponent) - 1;
+                NumberLength += (-Exponent) - 1;
+            }
+        }
+    }
+
+    /* Make a room for sign character if any */
+    if(SignCharacter != 0)
+    {
+        NumberLength += 1;
+    }
+
+    /* Check if field width is bigger than integer */
+    FieldCount = 0;
+    if(NumberLength < FormatProperties->FieldWidth)
+    {
+        /* Add field spacing characters */
+        FieldCount = FormatProperties->FieldWidth - NumberLength;
+    }
+
+    /* Check if prefix will be written */
+    if((FormatProperties->Flags & PFL_LEFT_JUSTIFIED) || (FormatProperties->Flags & PFL_LEADING_ZEROES))
+    {
+        /* Check for a sign character */
+        if(SignCharacter != 0)
+        {
+            /* Write the sign character */
+            Status = RtlpWriteWideCharacter(Context, SignCharacter);
+            if(Status != STATUS_SUCCESS)
+            {
+                /* Failed to write the character, return status code */
+                return Status;
+            }
+        }
+
+        /* Reset the sign character */
+        SignCharacter = 0;
+    }
+
+    /* Check if leading zero padding is required and if field is left aligned */
+    if(!(FormatProperties->Flags & PFL_LEFT_JUSTIFIED) || (FormatProperties->Flags & PFL_LEADING_ZEROES))
+    {
+        /* Check if leading zero padding is required */
+        if(FormatProperties->Flags & PFL_LEADING_ZEROES)
+        {
+            /* Write leading zeros */
+            Character = L'0';
+        }
+        else
+        {
+            /* Write leading spaces */
+            Character = L' ';
+        }
+
+        /* Fill up with leading characters */
+        for(FieldIndex = 0; FieldIndex < FieldCount; FieldIndex++)
+        {
+            /* Write the leading character */
+            Status = RtlpWriteWideCharacter(Context, Character);
+            if(Status != STATUS_SUCCESS)
+            {
+                /* Failed to write the character, return status code */
+                return Status;
+            }
+        }
+
+        /* Reset the field count */
+        FieldCount = 0;
+    }
+
+    /* Check if a sign character has already been written */
+    if(SignCharacter != 0)
+    {
+        /* Write the sign character */
+        Status = RtlpWriteWideCharacter(Context, SignCharacter);
+        if(Status != STATUS_SUCCESS)
+        {
+            /* Failed to write the character, return status code */
+            return Status;
+        }
+    }
+
+    /* Check if exponent is to be written */
+    Index = 0;
+    if(WriteExponent)
+    {
+        /* Check if there is anything to write */
+        if(DigitCount == 0)
+        {
+            /* No digits, write '0' */
+            Digit = L'0';
+        }
+        else
+        {
+            /* Write the first digit */
+            Digit = Buffer[Index];
+            Index++;
+        }
+
+        /* Write the digit */
+        Status = RtlpWriteWideCharacter(Context, Digit);
+        if(Status != STATUS_SUCCESS)
+        {
+            /* Failed to write the character, return status code */
+            return Status;
+        }
+
+        /* Check if precision is number of significant digits */
+        if((FormatProperties->Flags & PFL_DIGIT_PRECISION) && (Precision != 0))
+        {
+            /* Adjust the precision */
+            Precision--;
+        }
+
+        /* Check if radix character should be written */
+        if((Precision != 0) || (FormatProperties->Flags & PFL_PRINT_RADIX))
+        {
+            /* Write the radix character */
+            Status = RtlpWriteWideCharacter(Context, L'.');
+            if(Status != STATUS_SUCCESS)
+            {
+                /* Failed to write the character, return status code */
+                return Status;
+            }
+        }
+
+        /* Write more digits up to the precision limit */
+        for(PrecisionIndex = 0; PrecisionIndex < Precision; PrecisionIndex++)
+        {
+            /* Check if there is anything to write */
+            if(Index < DigitCount)
+            {
+                /* Write the next digit */
+                Digit = Buffer[Index];
+                Index++;
+            }
+            else
+            {
+                /* No more digits, write '0' */
+                Digit = L'0';
+            }
+
+            /* Write the digit */
+            Status = RtlpWriteWideCharacter(Context, Digit);
+            if(Status != STATUS_SUCCESS)
+            {
+                /* Failed to write the character, return status code */
+                return Status;
+            }
+        }
+
+        /* Check if exponent should be in uppercase */
+        if(FormatProperties->Flags & PFL_UPPERCASE)
+        {
+            /* Use uppercase exponent character */
+            ExponentCharacter = L'E';
+        }
+        else
+        {
+            /* Use lowercase exponent character */
+            ExponentCharacter = L'e';
+        }
+
+        /* Write the exponent string */
+        Status = RtlpWriteWideStringCustomValue(Context, L"%C%+0.2d", ExponentCharacter, Exponent);
+        if(Status != STATUS_SUCCESS)
+        {
+            /* Failed to write the characters, return status code */
+            return Status;
+        }
+    }
+    else
+    {
+        /* Non scientific format, check if exponent is positive value */
+        if(Exponent >= 0)
+        {
+            /* Write integral part */
+            CurrentExponent = Exponent;
+            while(CurrentExponent >= 0)
+            {
+                /* Check if there is anything to write */
+                if(Index < DigitCount)
+                {
+                    /* Write the next digit */
+                    Digit = Buffer[Index];
+                    Index++;
+                }
+                else
+                {
+                    /* No more digits, write '0' */
+                    Digit = L'0';
+                }
+
+                /* Write the digit */
+                Status = RtlpWriteWideCharacter(Context, Digit);
+                if(Status != STATUS_SUCCESS)
+                {
+                    /* Failed to write the character, return status code */
+                    return Status;
+                }
+
+                /* Check if presition is number of significant digits */
+                if((FormatProperties->Flags & PFL_DIGIT_PRECISION) && (Precision != 0))
+                {
+                    /* Adjust the precision */
+                    Precision--;
+                }
+
+                /* Get next exponent character */
+                CurrentExponent--;
+            }
+        }
+        else
+        {
+            /* Exponent is negative, write '0' */
+            Status = RtlpWriteWideCharacter(Context, L'0');
+            if(Status != STATUS_SUCCESS)
+            {
+                /* Failed to write the character, return status code */
+                return Status;
+            }
+
+            /* Nothing more to do with the exponent */
+            CurrentExponent = -1;
+        }
+
+        /* Check if radix character should be written */
+        if((Precision != 0) || (FormatProperties->Flags & PFL_PRINT_RADIX))
+        {
+            /* Write the radix character */
+            Status = RtlpWriteWideCharacter(Context, L'.');
+            if(Status != STATUS_SUCCESS)
+            {
+                /* Failed to write the character, return status code */
+                return Status;
+            }
+        }
+
+        /* Write more digits, until precision limit is reached */
+        for(PrecisionIndex = 0; PrecisionIndex < Precision; PrecisionIndex++)
+        {
+            /* Check if there is anything to write */
+            if(CurrentExponent > Exponent)
+            {
+                /* Write the next digit */
+                Digit = L'0';
+            }
+            else if(Index < DigitCount)
+            {
+                /* Write the next digit */
+                Digit = Buffer[Index];
+                Index++;
+            }
+            else
+            {
+                /* Whenever reached this, write '0' character */
+                Digit = L'0';
+            }
+
+            /* Write the digit */
+            Status = RtlpWriteWideCharacter(Context, Digit);
+            if(Status != STATUS_SUCCESS)
+            {
+                /* Failed to write the character, return status code */
+                return Status;
+            }
+
+            /* Get next exponent character */
+            CurrentExponent--;
+        }
+    }
+
+    /* Iterate through the field characters */
+    for(FieldIndex = 0; FieldIndex < FieldCount; FieldIndex++)
+    {
+        /* Fill the remaining space with spaces */
+        Status = RtlpWriteWideCharacter(Context, L' ');
+        if(Status != STATUS_SUCCESS)
+        {
+            /* Failed to write the character, return status code */
+            return Status;
+        }
+    }
+
+    /* Return success */
+    return STATUS_SUCCESS;
+}
+
+/**
+ * Writes a wide string double value in the hexadecimal format to the destination provided by the print context.
+ *
+ * @param Context
+ *        Supplies a pointer to the print context structure.
+ *
+ * @param FormatProperties
+ *        Supplies a pointer to the print format properties structure, describing the style characteristics.
+ *
+ * @param Double
+ *        Supplies the double/float value to write as a wide string in a hexadecimal format.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+RtlpWriteWideStringHexDoubleValue(IN PRTL_PRINT_CONTEXT Context,
+                                  IN PRTL_PRINT_FORMAT_PROPERTIES FormatProperties,
+                                  IN DOUBLE Double)
+{
+    LONG AbsoluteExponent, Exponent, FieldCount, Index, NumberLength;
+    WCHAR Character, Digit, ExponentCharacter, IntegerValue;
+    LONG Precision, PrecisionIndex, PrefixIndex, PrefixSize;
+    ULONGLONG HalfWay, RoundingValue, Significand;
+    WCHAR Buffer[MAX_DOUBLE_STRING_SIZE];
+    BOOLEAN NegativeValue;
+    LARGE_DOUBLE Parts;
+    WCHAR Prefix[4];
+    XTSTATUS Status;
+
+    /* Initialize variables */
+    NegativeValue = FALSE;
+    Parts.DoublePart = Double;
+    Precision = FormatProperties->Precision;
+
+    /* Check if the value is zero */
+    if(Double == 0.0)
+    {
+        AbsoluteExponent = 0;
+        Exponent = 0;
+        IntegerValue = L'0';
+        Significand = 0;
+
+        /* Check if the precision is specified */
+        if(Precision == -1)
+        {
+            /* Set the precision to 0 */
+            Precision = 0;
+        }
+
+        /* Fill the significand hex digits buffer */
+        for(Index = 0; Index < DOUBLE_HEX_PRECISION; Index++)
+        {
+            /* Fill the buffer with zero */
+            Buffer[Index] = L'0';
+        }
+    }
+    else
+    {
+        /* Value is not zero, check if it is negative */
+        if((Parts.u.HighPart & (DOUBLE_SIGN_BIT >> DOUBLE_HIGH_VALUE_SHIFT)) != 0)
+        {
+            /* Turn the negative value into a positive one */
+            NegativeValue = TRUE;
+            Parts.DoublePart *= -1;
+        }
+
+        /* Calculate exponent */
+        Exponent = (Parts.u.HighPart &
+                   (DOUBLE_EXPONENT_MASK >> DOUBLE_HIGH_VALUE_SHIFT)) >>
+                   (DOUBLE_EXPONENT_SHIFT - DOUBLE_HIGH_VALUE_SHIFT);
+        Exponent -= DOUBLE_EXPONENT_BIAS;
+
+        /* Get absolute exponent and check if it is negative */
+        AbsoluteExponent = Exponent;
+        if(AbsoluteExponent < 0)
+        {
+            /* Turn the absolute exponent into a positive value */
+            AbsoluteExponent *= -1;
+        }
+
+        /* Calculate significand */
+        Significand = Parts.u.LowPart |
+                      ((ULONGLONG)(Parts.u.HighPart & DOUBLE_HIGH_VALUE_MASK) <<
+                      (sizeof(ULONG) * BITS_PER_BYTE));
+
+        /* Check if the precision is specified */
+        IntegerValue = L'1';
+        if(Precision != -1)
+        {
+            /* Calculate the half way point and rounding value */
+            HalfWay = 1ULL << (DOUBLE_EXPONENT_SHIFT - 1);
+            RoundingValue = HalfWay;
+            if((Precision * 4) > (sizeof(ULONGLONG) * BITS_PER_BYTE))
+            {
+                /* Set the rounding value to zero */
+                RoundingValue = 0;
+            }
+            else
+            {
+                /* Calculate the rounding value */
+                RoundingValue = RoundingValue >> (Precision * 4);
+            }
+
+            /* Add the rounding value to the significand */
+            Significand += RoundingValue;
+            if(Significand >= (1ULL << DOUBLE_EXPONENT_SHIFT))
+            {
+                /* Adjust the significand and increment the integer portion */
+                Significand -= (1ULL << DOUBLE_EXPONENT_SHIFT);
+                IntegerValue++;
+            }
+        }
+
+        /* Convert the significand into a hex string value */
+        for(Index = 0; Index < DOUBLE_HEX_PRECISION; Index++)
+        {
+            /* Get the digit value */
+            Digit = (Significand >> (Index * 4)) & 0xF;
+
+            /* Check if the digit is less than 10 (hex A) */
+            if(Digit < 10)
+            {
+                /* Convert the digit value to a character */
+                Character = Digit + L'0';
+            }
+            else if(FormatProperties->Flags & PFL_UPPERCASE)
+            {
+                /* Convert the digit value to an uppercase character */
+                Character = Digit + L'A' - 10;
+            }
+            else
+            {
+                /* Convert the digit value to a lowercase character */
+                Character = Digit + L'a' - 10;
+            }
+
+            /* Put the character in the buffer */
+            Buffer[DOUBLE_HEX_PRECISION - Index - 1] = Character;
+        }
+
+        /* Check if the precision is specified */
+        if(Precision == -1)
+        {
+            /* Set the precision to the number of significant digits */
+            Precision = DOUBLE_HEX_PRECISION;
+
+            /* Find the first non-zero character */
+            while((Precision - 1 >= 0) && (Buffer[Precision - 1] == L'0'))
+            {
+                /* Decrement the precision */
+                Precision--;
+            }
+        }
+    }
+
+    /* Handle the sign character */
+    PrefixSize = 0;
+    if(NegativeValue)
+    {
+        /* Negative value, add the '-' character */
+        Prefix[PrefixSize] = L'-';
+        PrefixSize += 1;
+    }
+    else if(FormatProperties->Flags & PFL_ALWAYS_PRINT_SIGN)
+    {
+        /* Positive value, add the '+' character */
+        Prefix[PrefixSize] = L'+';
+        PrefixSize += 1;
+    }
+    else if(FormatProperties->Flags & PFL_SPACE_FOR_PLUS)
+    {
+        /* Positive value, add the ' ' character */
+        Prefix[PrefixSize] = L' ';
+        PrefixSize += 1;
+    }
+
+    /* Handle the radix characters */
+    Prefix[PrefixSize] = L'0';
+    Prefix[PrefixSize + 1] = L'x';
+    PrefixSize += 2;
+
+    /* Get the initial number length */
+    NumberLength = Precision + 1;
+
+    /* Check if radix is specified */
+    if((FormatProperties->Flags & PFL_PRINT_RADIX) || (Precision != 0))
+    {
+        /* Reserve space for the radix character */
+        NumberLength += 1;
+    }
+
+    /* Check if uppercase characters are required */
+    if(FormatProperties->Flags & PFL_UPPERCASE)
+    {
+        /* Use uppercase 'P' character for the exponent */
+        ExponentCharacter = L'P';
+    }
+    else
+    {
+        /* Use lowercase 'p' character for the exponent */
+        ExponentCharacter = L'p';
+    }
+
+    /* Reserve space for exponent character, sign and digits */
+    NumberLength += 3;
+    if(AbsoluteExponent > 10)
+    {
+        NumberLength += 1;
+        if(AbsoluteExponent > 100)
+        {
+            NumberLength += 1;
+            if(AbsoluteExponent > 1000)
+            {
+                NumberLength += 1;
+            }
+        }
+    }
+
+    /* Check if any field spacing characters are needed */
+    FieldCount = 0;
+    if(NumberLength + PrefixSize < FormatProperties->FieldWidth)
+    {
+        /* Field width is larger than the integer part, calculate the field count */
+        FieldCount = FormatProperties->FieldWidth - (NumberLength + PrefixSize);
+    }
+
+    /* Check for leading zero padding and left alignment */
+    if(!(FormatProperties->Flags & PFL_LEFT_JUSTIFIED) || (FormatProperties->Flags & PFL_LEADING_ZEROES))
+    {
+        /* Check if leading zeros are required */
+        if(FormatProperties->Flags & PFL_LEADING_ZEROES)
+        {
+            /* Write the prefix first */
+            Character = L'0';
+            PrefixIndex = 0;
+            while(PrefixSize--)
+            {
+                /* Write the prefix character */
+                Status = RtlpWriteWideCharacter(Context, Prefix[PrefixIndex]);
+                if(Status != STATUS_SUCCESS)
+                {
+                    /* Failed to write character, return error code */
+                    return Status;
+                }
+
+                /* Increment the prefix index */
+                PrefixIndex++;
+            }
+        }
+        else
+        {
+            /* No leading zeros are required */
+            Character = L' ';
+        }
+
+        /* Write the field characters */
+        while(FieldCount)
+        {
+            /* Write the field character */
+            Status = RtlpWriteWideCharacter(Context, Character);
+            if(Status != STATUS_SUCCESS)
+            {
+                /* Failed to write character, return error code */
+                return Status;
+            }
+
+            /* Decrement the field count number */
+            FieldCount--;
+        }
+    }
+
+    /* Write the prefix characters */
+    for(PrefixIndex = 0; PrefixIndex < PrefixSize; PrefixIndex++)
+    {
+        /* Write the prefix character */
+        Status = RtlpWriteWideCharacter(Context, Prefix[PrefixIndex]);
+        if(Status != STATUS_SUCCESS)
+        {
+            /* Failed to write character, return error code */
+            return Status;
+        }
+    }
+
+    /* Write the integer value */
+    Status = RtlpWriteWideCharacter(Context, IntegerValue);
+    if(Status != STATUS_SUCCESS)
+    {
+        /* Failed to write character, return error code */
+        return Status;
+    }
+
+    /* Check if radix character is required */
+    if((FormatProperties->Flags & PFL_PRINT_RADIX) || (Precision != 0))
+    {
+        /* Write the radix character */
+        Status = RtlpWriteWideCharacter(Context, L'.');
+        if(Status != STATUS_SUCCESS)
+        {
+            /* Failed to write character, return error code */
+            return Status;
+        }
+    }
+
+    /* Write the precision characters */
+    for(PrecisionIndex = 0; PrecisionIndex < Precision; PrecisionIndex++)
+    {
+        /* Check if precision index exceeds the number of significant digits */
+        if(PrecisionIndex >= DOUBLE_HEX_PRECISION)
+        {
+            /* Just write a L'0' character */
+            Digit = L'0';
+        }
+        else
+        {
+            /* Write the precision character */
+            Digit = Buffer[PrecisionIndex];
+        }
+
+        /* Write the precision character */
+        Status = RtlpWriteWideCharacter(Context, Digit);
+        if(Status != STATUS_SUCCESS)
+        {
+            /* Failed to write character, return error code */
+            return Status;
+        }
+    }
+
+    /* Write the exponent characters */
+    Status = RtlpWriteWideStringCustomValue(Context, L"%C%+d", ExponentCharacter, Exponent);
+    if(Status != STATUS_SUCCESS)
+    {
+        /* Failed to write character, return error code */
+        return Status;
+    }
+
+    /* Write the field characters if any left */
+    while(FieldCount)
+    {
+        /* Write the field character */
+        Status = RtlpWriteWideCharacter(Context, L' ');
+        if(Status != STATUS_SUCCESS)
+        {
+            /* Failed to write character, return error code */
+            return Status;
+        }
+
+        /* Decrement the field count number */
+        FieldCount--;
+    }
+
+    /* Return success */
+    return STATUS_SUCCESS;
 }
 
 /**

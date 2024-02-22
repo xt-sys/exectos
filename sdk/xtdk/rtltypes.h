@@ -17,13 +17,20 @@
 #define GUID_STRING_LENGTH              38
 #define PARTUUID_STRING_LENGTH          13
 
-/* Maximum integer value string length */
+/* Maximum double/integer value string length */
+#define MAX_DOUBLE_STRING_SIZE          15
 #define MAX_INTEGER_STRING_SIZE         25
 
 /* Floating point definitions */
 #define DOUBLE_EXPONENT_MASK            0x7FF0000000000000ULL
 #define DOUBLE_EXPONENT_SHIFT           0x34
 #define DOUBLE_EXPONENT_BIAS            0x3FF
+#define DOUBLE_HIGH_VALUE_MASK          0x000FFFFF
+#define DOUBLE_HIGH_VALUE_SHIFT         0x20
+#define DOUBLE_PRECISION                6
+#define DOUBLE_HEX_PRECISION            13
+#define DOUBLE_SCIENTIFIC_PRECISION     -4
+#define DOUBLE_SIGN_BIT                 0x8000000000000000ULL
 
 /* Print flag definitions */
 #define PFL_ALWAYS_PRINT_SIGN           0x00000001

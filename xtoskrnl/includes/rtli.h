@@ -328,6 +328,18 @@ RtlpWriteWideStringCustomValue(IN PRTL_PRINT_CONTEXT Context,
 
 XTAPI
 XTSTATUS
+RtlpWriteWideStringDoubleValue(IN PRTL_PRINT_CONTEXT Context,
+                               IN PRTL_PRINT_FORMAT_PROPERTIES FormatProperties,
+                               IN DOUBLE Value);
+
+XTAPI
+XTSTATUS
+RtlpWriteWideStringHexDoubleValue(IN PRTL_PRINT_CONTEXT Context,
+                                  IN PRTL_PRINT_FORMAT_PROPERTIES FormatProperties,
+                                  IN DOUBLE Value);
+
+XTAPI
+XTSTATUS
 RtlpWriteWideStringIntegerValue(IN PRTL_PRINT_CONTEXT Context,
                                 IN PRTL_PRINT_FORMAT_PROPERTIES FormatProperties,
                                 IN ULONGLONG Integer);
