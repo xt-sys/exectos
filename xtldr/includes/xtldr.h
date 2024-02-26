@@ -151,6 +151,10 @@ PLIST_ENTRY
 BlGetModulesList();
 
 XTCDECL
+ULONGLONG
+BlGetRandomValue(IN OUT PULONGLONG RNGBuffer);
+
+XTCDECL
 INT_PTR
 BlGetSecureBootStatus();
 
@@ -179,6 +183,10 @@ BlInitializeBootMenuList(OUT PXTBL_BOOTMENU_ITEM MenuEntries,
 XTCDECL
 VOID
 BlInitializeConsole();
+
+XTCDECL
+EFI_STATUS
+BlInitializeEntropy(PULONGLONG RNGBuffer);
 
 XTCDECL
 VOID

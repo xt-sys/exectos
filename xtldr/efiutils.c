@@ -104,6 +104,31 @@ BlGetConfigurationTable(IN PEFI_GUID TableGuid,
 }
 
 /**
+ * Returns a random value based on the initialized RNG buffer.
+ *
+ * @param RNGBuffer
+ *        Supplies a pointer to the RNG buffer.
+ *
+ * @return This routine returns a random value.
+ *
+ * @since XT 1.0
+ *
+ * @see https://en.wikipedia.org/wiki/Xorshift
+ */
+XTCDECL
+ULONGLONG
+BlGetRandomValue(IN OUT PULONGLONG RNGBuffer)
+{
+    /* Recalculate RNG buffer with XORSHIFT */
+    *RNGBuffer ^= *RNGBuffer >> 12;
+    *RNGBuffer ^= *RNGBuffer << 25;
+    *RNGBuffer ^= *RNGBuffer >> 27;
+
+    /* Return random value */
+    return *RNGBuffer * 0x2545F4914F6CDD1D;
+}
+
+/**
  * Checks whether SecureBoot is enabled or not.
  *
  * @return Numeric representation of SecureBoot status (0 = Disabled, >0 = Enabled, <0 SetupMode).
@@ -134,6 +159,50 @@ BlGetSecureBootStatus()
 
     /* Return SecureBoot status */
     return SecureBootStatus;
+}
+
+/**
+ * Initializes the RNG buffer with random bytes from the default EFI RNG algorithm.
+ *
+ * @param RNGBuffer
+ *        Supplies a pointer to the RNG buffer.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+BlInitializeEntropy(PULONGLONG RNGBuffer)
+{
+    EFI_GUID RngGuid = EFI_RNG_PROTOCOL_GUID;
+    PEFI_RNG_PROTOCOL Rng;
+    EFI_STATUS Status;
+    ULONGLONG Seed;
+
+    /* Initialize variables */
+    Rng = NULL;
+    Seed = 0;
+
+    /* Locate RNG protocol */
+    Status = EfiSystemTable->BootServices->LocateProtocol(&RngGuid, NULL, (PVOID *)&Rng);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to locate RNG protocol, return status code */
+        return Status;
+    }
+
+    /* Get RNG value using the default algorithm */
+    Status = Rng->GetRNG(Rng, NULL, 8, (PUCHAR)&Seed);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to get RNG value, return status code */
+        return Status;
+    }
+
+    /* Initialize RNG state and return success */
+    *RNGBuffer = Seed ? Seed : 1;
+    return STATUS_EFI_SUCCESS;
 }
 
 /**
