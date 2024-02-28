@@ -10,7 +10,10 @@
 
 
 /* PE/COFF_O module information */
-XTBL_MODINFO = L"EFI FB (FrameBuffer) support";
+MODULE_AUTHOR(L"Rafal Kupiec <belliash@codingworkshop.eu.org>");
+MODULE_DESCRIPTION(L"EFI FB (FrameBuffer) support");
+MODULE_LICENSE(L"GPLv3");
+MODULE_VERSION(L"0.1");
 
 /**
  * Provides an EFI Frame Buffer protocol driver name used for initialization.

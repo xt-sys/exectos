@@ -10,7 +10,10 @@
 
 
 /* Dummy module information */
-XTBL_MODINFO = L"ACPI support";
+MODULE_AUTHOR(L"Rafal Kupiec <belliash@codingworkshop.eu.org>");
+MODULE_DESCRIPTION(L"ACPI support");
+MODULE_LICENSE(L"GPLv3");
+MODULE_VERSION(L"0.1");
 
 /**
  * Attempts to get XSDP. If it is not found or checksum mismatch, it will try to get RSDP instead.

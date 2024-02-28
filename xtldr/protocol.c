@@ -129,6 +129,7 @@ EFI_STATUS
 BlLoadModule(IN PWCHAR ModuleName)
 {
     EFI_GUID LIPGuid = EFI_LOADED_IMAGE_PROTOCOL_GUID;
+    PLIST_ENTRY DepsListEntry, ModuleListEntry;
     EFI_MEMMAP_DEVICE_PATH ModuleDevicePath[2];
     PEFI_LOADED_IMAGE_PROTOCOL LoadedImage;
     PEFI_FILE_HANDLE DirHandle, FsHandle;
@@ -136,15 +137,14 @@ BlLoadModule(IN PWCHAR ModuleName)
     PPECOFF_IMAGE_SECTION_HEADER SectionHeader;
     PPECOFF_IMAGE_DOS_HEADER DosHeader;
     PPECOFF_IMAGE_PE_HEADER PeHeader;
-    PXTBL_MODULE_DEPS ModuleDependencies;
+    PXTBL_MODULE_DEPS ModuleDependency;
     PXTBL_MODULE_INFO ModuleInfo;
-    PLIST_ENTRY ModuleListEntry;
     WCHAR ModuleFileName[24];
     USHORT SectionIndex;
+    PWCHAR SectionData;
     SIZE_T ModuleSize;
     EFI_STATUS Status;
     PVOID ModuleData;
-    PWCHAR DepsData;
 
     ModuleListEntry = BlpLoadedModules.Flink;
     while(ModuleListEntry != &BlpLoadedModules)
@@ -217,9 +217,8 @@ BlLoadModule(IN PWCHAR ModuleName)
         return Status;
     }
 
-    /* Zero module information block and initialize dependencies list */
+    /* Zero module information block */
     RtlZeroMemory(ModuleInfo, sizeof(XTBL_MODULE_INFO));
-    RtlInitializeListHead(&ModuleInfo->Dependencies);
 
     /* Setup PE/COFF EFI image headers */
     DosHeader = (PPECOFF_IMAGE_DOS_HEADER)ModuleData;
@@ -227,51 +226,44 @@ BlLoadModule(IN PWCHAR ModuleName)
     SectionHeader = (PPECOFF_IMAGE_SECTION_HEADER)((PUCHAR)&PeHeader->OptionalHeader +
                                                    PeHeader->FileHeader.SizeOfOptionalHeader);
 
-    /* Look for .moddeps and .modinfo sections */
+    /* Look for .modinfo section */
     for(SectionIndex = 0; SectionIndex < PeHeader->FileHeader.NumberOfSections; SectionIndex++)
     {
-        /* Check section name */
-        if(RtlCompareString((PCHAR)SectionHeader[SectionIndex].Name, ".moddeps", 8) == 0)
+        if(RtlCompareString((PCHAR)SectionHeader[SectionIndex].Name, ".modinfo", 8) == 0)
         {
-            /* Store address of .moddeps data segment */
-            DepsData = ModuleData + SectionHeader[SectionIndex].PointerToRawData;
+            /* Module information section found */
+            SectionData = ModuleData + SectionHeader[SectionIndex].PointerToRawData;
 
-            /* Iterate over all dependencies stored */
-            while(*DepsData != 0)
+            /* Get module information */
+            Status = BlpGetModuleInformation(SectionData, SectionHeader[SectionIndex].SizeOfRawData, ModuleInfo);
+            if(Status != STATUS_EFI_SUCCESS)
             {
-                /* Load dependency module */
-                BlDebugPrint(L"Module '%S' requires '%S' ...\n", ModuleName, DepsData);
-                Status = BlLoadModule(DepsData);
-
-                if(Status != STATUS_EFI_SUCCESS)
-                {
-                    /* Failed to load module, print error message and return status code */
-                    BlDebugPrint(L"Failed to load dependency module '%S', (Status Code: 0x%zX)\n", DepsData, Status);
-                    return STATUS_EFI_UNSUPPORTED;
-                }
-
-                /* Allocate memory for module dependency */
-                Status = BlAllocateMemoryPool(sizeof(XTBL_MODULE_DEPS), (PVOID*)&ModuleDependencies);
-                if(Status == STATUS_EFI_SUCCESS)
-                {
-                    /* Memory allocated successfully, store module's dependency */
-                    ModuleDependencies->ModuleName = DepsData;
-                    RtlInsertTailList(&ModuleInfo->Dependencies, &ModuleDependencies->Flink);
-                }
-
-                /* Get next dependency module name */
-                DepsData += 9;
+                /* Failed to read module information */
+                return Status;
             }
-        }
-        else if(RtlCompareString((PCHAR)SectionHeader[SectionIndex].Name, ".modinfo", 8) == 0)
-        {
-            /* Store module description */
-            ModuleInfo->ModuleDescription = ModuleData + SectionHeader[SectionIndex].PointerToRawData;
         }
     }
 
-    /* Finally, store module name */
-    ModuleInfo->ModuleName = ModuleName;
+    /* Iterate through module dependencies */
+    DepsListEntry = ModuleInfo->Dependencies.Flink;
+    while(DepsListEntry != &ModuleInfo->Dependencies)
+    {
+        /* Get module dependency information */
+        ModuleDependency = CONTAIN_RECORD(DepsListEntry, XTBL_MODULE_DEPS, Flink);
+
+        /* Load dependency module */
+        BlDebugPrint(L"Module '%S' requires '%S' ...\n", ModuleName, ModuleDependency->ModuleName);
+        Status = BlLoadModule(ModuleDependency->ModuleName);
+        if(Status != STATUS_EFI_SUCCESS)
+        {
+            /* Failed to load module, print error message and return status code */
+            BlDebugPrint(L"Failed to load dependency module '%S' (Status Code: 0x%zX)\n", ModuleDependency->ModuleName, Status);
+            return STATUS_EFI_UNSUPPORTED;
+        }
+
+        /* Move to the next dependency */
+        DepsListEntry = DepsListEntry->Flink;
+    }
 
     /* Setup module device path */
     ModuleDevicePath[0].Header.Length[0] = sizeof(EFI_MEMMAP_DEVICE_PATH);
@@ -287,6 +279,7 @@ BlLoadModule(IN PWCHAR ModuleName)
     ModuleDevicePath[1].Header.SubType = EFI_END_ENTIRE_DP;
 
     /* Load EFI image */
+    BlDebugPrint(L"Starting module '%S' ...\n", ModuleName);
     Status = BlLoadEfiImage((PEFI_DEVICE_PATH_PROTOCOL)ModuleDevicePath, ModuleData, ModuleSize, &ModuleHandle);
     if(Status != STATUS_EFI_SUCCESS)
     {
@@ -326,7 +319,8 @@ BlLoadModule(IN PWCHAR ModuleName)
         EfiSystemTable->BootServices->CloseProtocol(LoadedImage, &LIPGuid, LoadedImage, NULL);
     }
 
-    /* Save module information */
+    /* Save additional module information, not found in '.modinfo' section */
+    ModuleInfo->ModuleName = ModuleName;
     ModuleInfo->ModuleBase = LoadedImage->ImageBase;
     ModuleInfo->ModuleSize = LoadedImage->ImageSize;
     ModuleInfo->Revision = LoadedImage->Revision;
@@ -383,7 +377,7 @@ BlLoadModules(IN PWCHAR ModulesList)
             if(Status != STATUS_EFI_SUCCESS)
             {
                 /* Failed to load module, print error message and set new return value */
-                BlDebugPrint(L"ERROR: Failed to load module '%S', (Status Code: 0x%zX)\n", Module, Status);
+                BlDebugPrint(L"ERROR: Failed to load module '%S' (Status Code: 0x%zX)\n", Module, Status);
                 ReturnStatus = STATUS_EFI_LOAD_ERROR;
             }
 
@@ -584,6 +578,258 @@ BlRegisterBootProtocol(IN PWCHAR SystemType,
     ProtocolEntry->SystemType = SystemType;
     ProtocolEntry->Guid = *BootProtocolGuid;
     RtlInsertTailList(&BlpBootProtocols, &ProtocolEntry->Flink);
+
+    /* Return success */
+    return STATUS_EFI_SUCCESS;
+}
+
+/**
+ * Reads information from the '.modinfo' section and populates the module information structure.
+ *
+ * @param SectionData
+ *        Supplies a pointer to the module's information section data.
+ *
+ * @param SectionSize
+ *        Supplies an expected size of the section data.
+ *
+ * @param ModuleInfo
+ *        Supplies a pointer to the module information structure that will be filled by data from module's info section.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+BlpGetModuleInformation(IN PWCHAR SectionData,
+                        IN ULONG SectionSize,
+                        OUT PXTBL_MODULE_INFO ModuleInfo)
+{
+    PXTBL_MODULE_DEPS ModuleDependencies;
+    PXTBL_MODULE_AUTHORS ModuleAuthors;
+    PWCHAR Dependency, Key, LastStr;
+    ULONG Index, Count;
+    EFI_STATUS Status;
+    PWCHAR *Strings;
+
+    /* Initialize authors and dependencies lists */
+    RtlInitializeListHead(&ModuleInfo->Authors);
+    RtlInitializeListHead(&ModuleInfo->Dependencies);
+
+    /* Get information strings from '.modinfo' section */
+    Status = BlpGetModuleInfoStrings(SectionData, SectionSize, &Strings, &Count);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to get information strings */
+        return Status;
+    }
+
+    /* Parse information strings */
+    for(Index = 0; Index < Count; Index++)
+    {
+        /* Store the key */
+        Key = Strings[Index];
+
+        /* Find the end of the key and the beginning of the value */
+        while(*Strings[Index] != L'=' && *Strings[Index] != L'\0' && *Strings[Index] != L'\n')
+        {
+            /* Move to the next character */
+            Strings[Index]++;
+        }
+
+        /* Make sure value is NULL-terminated */
+        *Strings[Index] = L'\0';
+        Strings[Index]++;
+
+        /* Parse information string key */
+        if(RtlCompareWideString(Key, L"author", 6) == 0)
+        {
+            /* Allocate memory for module author */
+            Status = BlAllocateMemoryPool(sizeof(XTBL_MODULE_AUTHORS), (PVOID*)&ModuleAuthors);
+            if(Status != STATUS_EFI_SUCCESS)
+            {
+                /* Memory allocation failure */
+                return Status;
+            }
+
+            /* Store module's author */
+            ModuleAuthors->AuthorName = Strings[Index];
+            RtlInsertTailList(&ModuleInfo->Authors, &ModuleAuthors->Flink);
+        }
+        else if(RtlCompareWideString(Key, L"description", 11) == 0)
+        {
+            /* Store module's description */
+            ModuleInfo->ModuleDescription = Strings[Index];
+        }
+        else if(RtlCompareWideString(Key, L"license", 7) == 0)
+        {
+            /* Store module's license */
+            ModuleInfo->License = Strings[Index];
+        }
+        else if(RtlCompareWideString(Key, L"softdeps", 6) == 0)
+        {
+            /* Tokenize value to get module's single dependency */
+            Dependency = RtlTokenizeWideString(Strings[Index], L" ", &LastStr);
+            while(Dependency != NULL)
+            {
+                /* Allocate memory for module dependency */
+                Status = BlAllocateMemoryPool(sizeof(XTBL_MODULE_DEPS), (PVOID*)&ModuleDependencies);
+                if(Status != STATUS_EFI_SUCCESS)
+                {
+                    /* Memory allocation failure */
+                    return Status;
+                }
+
+                /* Store module's dependency */
+                ModuleDependencies->ModuleName = Dependency;
+                RtlInsertTailList(&ModuleInfo->Dependencies, &ModuleDependencies->Flink);
+
+                /* Get next dependency from single value if available */
+                Dependency = RtlTokenizeWideString(NULL, L" ", &LastStr);
+            }
+        }
+        else if(RtlCompareWideString(Key, L"version", 7) == 0)
+        {
+            /* Store module's version */
+            ModuleInfo->Version = Strings[Index];
+        }
+    }
+
+    /* Return success */
+    return STATUS_EFI_SUCCESS;
+}
+
+/**
+ * Reads raw data from the '.modinfo' section and populates an array of strings.
+ *
+ * @param SectionData
+ *        Supplies a pointer to the module's information section data.
+ *
+ * @param SectionSize
+ *        Supplies an expected size of the section data.
+ *
+ * @param ModInfo
+ *        Supplies a pointer to memory area, where an array of strings read from the section will be stored.
+ *
+ * @param InfoCount
+ *        Supplies a pointer to variable that will receive the number of strings found in the section.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+BlpGetModuleInfoStrings(IN PWCHAR SectionData,
+                        IN ULONG SectionSize,
+                        OUT PWCHAR **ModInfo,
+                        OUT PULONG InfoCount)
+{
+    ULONG Count, Index, ArrayIndex;
+    PCWSTR InfoStrings;
+    EFI_STATUS Status;
+    PWCHAR *Array;
+    PWCHAR String;
+
+    /* Check input parameters */
+    InfoStrings = SectionData;
+    if(!InfoStrings || !SectionSize)
+    {
+        /* Invalid input parameters */
+        return STATUS_EFI_INVALID_PARAMETER;
+    }
+
+    /* Skip zero padding */
+    while(InfoStrings[0] == L'\0' && SectionSize > 1)
+    {
+        /* Get next character and decrement section size */
+        InfoStrings++;
+        SectionSize--;
+    }
+
+    /* Make sure there is at least one string available */
+    if(SectionSize <= 1)
+    {
+        /* No strings found */
+        return STATUS_EFI_END_OF_FILE;
+    }
+
+    /* Count number of strings */
+    Index = 0;
+    Count = 0;
+    while(Index < SectionSize)
+    {
+        /* Get to the next string */
+        if(InfoStrings[Index] != L'\0')
+        {
+            /* Get next character */
+            Index++;
+            continue;
+        }
+
+        /* Skip zero padding */
+        while(InfoStrings[Index] == L'\0' && Index < SectionSize)
+        {
+            /* Get next character */
+            Index++;
+        }
+
+        /* New string found, increment counter */
+        Count++;
+    }
+
+    /* Make sure there is no missing string */
+    if(InfoStrings[Index - 1] != L'\0')
+    {
+        /* One more string available */
+        Count++;
+    }
+
+    /* Allocate memory for array of strings */
+    Status = BlAllocateMemoryPool(SectionSize + 1 + sizeof(PWCHAR) * (Count + 1), (PVOID *)&Array);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to allocate memory */
+        return STATUS_EFI_OUT_OF_RESOURCES;
+    }
+
+    /* Cioy strings read from '.modinfo' section */
+    String = (PWCHAR)(Array + Count + 1);
+    RtlCopyMemory(String, InfoStrings, SectionSize);
+
+    /* Make sure last string is NULL-terminated */
+    String[SectionSize] = L'\0';
+    Array[Count] = NULL;
+    Array[0] = String;
+
+    /* Parse strings into array */
+    Index = 0;
+    ArrayIndex = 1;
+    while(Index < SectionSize && ArrayIndex < Count)
+    {
+        /* Get to the next string */
+        if(String[Index] != L'\0')
+        {
+            /* Get next character */
+            Index++;
+            continue;
+        }
+
+        /* Skip zero padding */
+        while(InfoStrings[Index] == L'\0' && Index < SectionSize)
+        {
+            /* Get next character */
+            Index++;
+        }
+
+        /* Push string into array */
+        Array[ArrayIndex] = &String[Index];
+        ArrayIndex++;
+    }
+
+    /* Return array of strings and its size */
+    *ModInfo = Array;
+    *InfoCount = Count;
 
     /* Return success */
     return STATUS_EFI_SUCCESS;

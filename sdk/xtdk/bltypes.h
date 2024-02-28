@@ -191,6 +191,13 @@ typedef struct _XTBL_MEMORY_MAPPING
 } XTBL_MEMORY_MAPPING, *PXTBL_MEMORY_MAPPING;
 
 /* XTLDR Module dependencies data */
+typedef struct _XTBL_MODULE_AUTHORS
+{
+    LIST_ENTRY Flink;
+    PWCHAR AuthorName;
+} XTBL_MODULE_AUTHORS, *PXTBL_MODULE_AUTHORS;
+
+/* XTLDR Module dependencies data */
 typedef struct _XTBL_MODULE_DEPS
 {
     LIST_ENTRY Flink;
@@ -203,6 +210,9 @@ typedef struct _XTBL_MODULE_INFO
     LIST_ENTRY Flink;
     PWCHAR ModuleName;
     PWCHAR ModuleDescription;
+    PWCHAR License;
+    PWCHAR Version;
+    LIST_ENTRY Authors;
     LIST_ENTRY Dependencies;
     PVOID ModuleBase;
     ULONGLONG ModuleSize;

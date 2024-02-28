@@ -10,7 +10,10 @@
 
 
 /* PE/COFF_O module information */
-XTBL_MODINFO = L"Basic PE/COFF executable file format support";
+MODULE_AUTHOR(L"Rafal Kupiec <belliash@codingworkshop.eu.org>");
+MODULE_DESCRIPTION(L"Basic PE/COFF executable file format support");
+MODULE_LICENSE(L"GPLv3");
+MODULE_VERSION(L"0.1");
 
 /**
  * Returns the address of the entry point.

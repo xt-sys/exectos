@@ -10,7 +10,10 @@
 
 
 /* Dummy module information */
-XTBL_MODINFO = L"XTLDR Dummy Module";
+MODULE_AUTHOR(L"Rafal Kupiec <belliash@codingworkshop.eu.org>");
+MODULE_DESCRIPTION(L"XTLDR Dummy Module");
+MODULE_LICENSE(L"GPLv3");
+MODULE_VERSION(L"0.1");
 
 /**
  * Stub boot routine.

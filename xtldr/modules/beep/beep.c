@@ -9,8 +9,11 @@
 #include <beep.h>
 
 
-/* Dummy module information */
-XTBL_MODINFO = L"Plays a GRUB compatible tune via PC speaker";
+/* Beep module information */
+MODULE_AUTHOR(L"Rafal Kupiec <belliash@codingworkshop.eu.org>");
+MODULE_DESCRIPTION(L"Plays a GRUB compatible tune via PC speaker");
+MODULE_LICENSE(L"GPLv3");
+MODULE_VERSION(L"0.1");
 
 /**
  * Disables the PC speaker.

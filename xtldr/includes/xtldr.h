@@ -446,6 +446,19 @@ BlpGetLoaderMemoryType(IN EFI_MEMORY_TYPE EfiMemoryType);
 
 XTCDECL
 EFI_STATUS
+BlpGetModuleInformation(IN PWCHAR SectionData,
+                        IN ULONG SectionSize,
+                        OUT PXTBL_MODULE_INFO ModuleInfo);
+
+XTCDECL
+EFI_STATUS
+BlpGetModuleInfoStrings(IN PWCHAR SectionData,
+                        IN ULONG SectionSize,
+                        OUT PWCHAR **ModInfo,
+                        OUT PULONG InfoCount);
+
+XTCDECL
+EFI_STATUS
 BlpGetNextPageTable(IN PXTBL_PAGE_MAPPING PageMap,
                     IN PHARDWARE_PTE PageTable,
                     IN SIZE_T Entry,

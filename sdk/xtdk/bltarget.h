@@ -12,9 +12,17 @@
 #include <xttypes.h>
 
 
-/* Boot Loader module segment macros */
-#define XTBL_MODDEPS                                                SEGMENT(".moddeps") CONST WCHAR XtBlpDeps[][9]
-#define XTBL_MODINFO                                                SEGMENT(".modinfo") CONST WCHAR XtBlpInfo[]
+/* Boot Loader module information macros */
+#define MODULE_AUTHOR(_author)                                      XTBL_MODULE_INFO(author, author, _author)
+#define MODULE_DEPENDENCY(_softdeps)                                XTBL_MODULE_INFO(softdeps, softdeps, _softdeps)
+#define MODULE_DESCRIPTION(_description)                            XTBL_MODULE_INFO(description, description, _description)
+#define MODULE_LICENSE(_license)                                    XTBL_MODULE_INFO(license, license, _license)
+#define MODULE_VERSION(_version)                                    XTBL_MODULE_INFO(version, version, _version)
+
+/* Boot Loader module information segment macro */
+#define XTBL_MODULE_INFO(Tag, Name, Data)                           STATIC CONST WCHAR UNIQUE(Name)[] \
+                                                                    USED SEGMENT(".modinfo") ALIGN(1) \
+                                                                    = STRINGIFY(Tag) "=" Data
 
 /* XTLDR directories */
 #define XTBL_LOADER_DIRECTORY_PATH                                  L"\\EFI\\BOOT\\XTLDR\\"

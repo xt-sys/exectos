@@ -10,8 +10,11 @@
 
 
 /* XTOS module information */
-XTBL_MODINFO = L"XTOS boot protocol support";
-XTBL_MODDEPS = {L"acpi", L"framebuf", L"pecoff"};
+MODULE_AUTHOR(L"Rafal Kupiec <belliash@codingworkshop.eu.org>");
+MODULE_DESCRIPTION(L"XTOS boot protocol support");
+MODULE_DEPENDENCY(L"acpi framebuf pecoff");
+MODULE_LICENSE(L"GPLv3");
+MODULE_VERSION(L"0.1");
 
 /* EFI XT Loader Protocol */
 PXTBL_LOADER_PROTOCOL XtLdrProtocol;
