@@ -18,6 +18,7 @@
 #define XTFASTCALL                             __fastcall
 #define XTINLINE                               __inline
 #define XTASSEMBLY                             __attribute__((naked))
+#define XTINTERRUPT                            __attribute__((interrupt))
 
 /* Variable modifiers */
 #define CONST                                  const
@@ -43,13 +44,18 @@
 /* Number of bits per byte */
 #define BITS_PER_BYTE                          8
 
-/* Preprocessor macros for defining a structure alignment, packing and segment */
-#define ALIGN(x)                               __attribute__((aligned(x)))
+/* Preprocessor macros for defining an additional compiler attributes */
+#define ALIGN(Alignment)                       __attribute__((aligned(Alignment)))
 #define PACK                                   __attribute__((packed))
-#define SEGMENT(segment)                       __attribute__((section(segment)))
+#define SEGMENT(Segment)                       __attribute__((section(Segment)))
+#define USED                                   __attribute__((__used__))
 
 /* Macro for calculating size of an array */
-#define ARRAY_SIZE(x)                          (sizeof(x) / sizeof(*x))
+#define ARRAY_SIZE(Array)                      (sizeof(Array) / sizeof(*Array))
+
+/* Macro for concatenating two strings */
+#define CONCAT_STRING(Str1, Str2)              Str1##Str2
+#define CONCATENATE(Str1, Str2)                CONCAT_STRING(Str1, Str2)
 
 /* Macro for accessing the base address of a structure from a structure member */
 #define CONTAIN_RECORD(Address, Type, Field)   ((Type *)(((ULONG_PTR)Address) - (ULONG_PTR)(&(((Type *)0)->Field))))
@@ -73,10 +79,10 @@
 #define PAGE_OFFSET(VirtualAddress)            ((ULONG)((ULONG_PTR)VirtualAddress & MM_PAGE_MASK))
 
 /* Macro for rounding down */
-#define ROUND_DOWN(X, Alignment)               ((X) & ~((Alignment) - 1))
+#define ROUND_DOWN(Value, Alignment)           ((Value) & ~((Alignment) - 1))
 
 /* Macro for rounding up */
-#define ROUND_UP(X, Alignment)                 ROUND_DOWN((X) + (Alignment - 1), Alignment)
+#define ROUND_UP(Value, Alignment)             ROUND_DOWN((Value) + (Alignment - 1), Alignment)
 
 /* Macros for defining signatures built from ASCII characters */
 #define SIGNATURE16(A, B)                      ((A) | (B << 8))
@@ -85,6 +91,13 @@
 
 /* XT size to pages conversion macro */
 #define SIZE_TO_PAGES(Size)                    (((Size) >> MM_PAGE_SHIFT) + (((Size) & (MM_PAGE_MASK)) ? 1 : 0))
+
+/* Macros for concatenating strings */
+#define STRINGIFY(String...)                   STRINGIZE(String)
+#define STRINGIZE(String...)                   #String
+
+/* Macro for generating unique identifiers */
+#define UNIQUE(Prefix)                         CONCATENATE(CONCATENATE(__UNIQUE_ID_, Prefix), __COUNTER__)
 
 /* Variadic ABI functions */
 typedef __builtin_va_list VA_LIST, *PVA_LIST;

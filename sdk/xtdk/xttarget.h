@@ -11,10 +11,8 @@
 
 
 /* Preprocessor macros for including arch-specific headers */
-#define _ARCH_STRINGIZE(x)             _INCL_STRINGIZE(x)
-#define _INCL_STRINGIZE(x)             #x
-#define ARCH_COMMON(header)            _ARCH_STRINGIZE(../_ARCH_COMMON/header)
-#define ARCH_HEADER(header)            _ARCH_STRINGIZE(_ARCH/header)
+#define ARCH_COMMON(header)                         STRINGIFY(../_ARCH_COMMON/header)
+#define ARCH_HEADER(header)                         STRINGIFY(_ARCH/header)
 
 /* Architecture specific definitions */
 #if defined(__i386__) || defined(__i686__)
