@@ -21,6 +21,16 @@ PeGetEntryPoint(IN PVOID ImagePointer,
 
 XTCDECL
 EFI_STATUS
+PeGetFileSize(IN PVOID ImagePointer,
+              OUT PULONGLONG FileSize);
+
+XTCDECL
+EFI_STATUS
+PeGetImageSize(IN PVOID ImagePointer,
+               OUT PUINT ImageSize);
+
+XTCDECL
+EFI_STATUS
 PeGetMachineType(IN PVOID ImagePointer,
                  OUT PUSHORT MachineType);
 
@@ -51,6 +61,10 @@ XTCDECL
 EFI_STATUS
 PeRelocateImage(IN PVOID ImagePointer,
                 IN EFI_VIRTUAL_ADDRESS Address);
+
+XTCDECL
+EFI_STATUS
+PeUnloadImage(IN PVOID ImagePointer);
 
 XTCDECL
 EFI_STATUS

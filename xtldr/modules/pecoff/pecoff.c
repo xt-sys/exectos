@@ -48,6 +48,76 @@ PeGetEntryPoint(IN PVOID ImagePointer,
 }
 
 /**
+ * Returns the size of the loaded PE/COFF file.
+ *
+ * @param ImagePointer
+ *        Supplies a pointer to the PE/COFF context structure representing the loaded image.
+ *
+ * @param ImageSize
+ *        Supplies a pointer to the memory area where file size will be stored.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+PeGetFileSize(IN PVOID ImagePointer,
+              OUT PULONGLONG FileSize)
+{
+    PPECOFF_IMAGE_CONTEXT Image;
+
+    /* Get PE/COFF image pointer*/
+    Image = ImagePointer;
+
+    /* Validate input data */
+    if(!Image || !Image->ImageSize)
+    {
+        /* Invalid parameter passed */
+        return STATUS_EFI_INVALID_PARAMETER;
+    }
+
+    /* Get image size and return success */
+    *FileSize = Image->FileSize;
+    return STATUS_EFI_NOT_FOUND;
+}
+
+/**
+ * Returns the size of the loaded PE/COFF image.
+ *
+ * @param ImagePointer
+ *        Supplies a pointer to the PE/COFF context structure representing the loaded image.
+ *
+ * @param ImageSize
+ *        Supplies a pointer to the memory area where image size will be stored.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+PeGetImageSize(IN PVOID ImagePointer,
+               OUT PUINT ImageSize)
+{
+    PPECOFF_IMAGE_CONTEXT Image;
+
+    /* Get PE/COFF image pointer*/
+    Image = ImagePointer;
+
+    /* Validate input data */
+    if(!Image || !Image->ImageSize)
+    {
+        /* Invalid parameter passed */
+        return STATUS_EFI_INVALID_PARAMETER;
+    }
+
+    /* Get image size and return success */
+    *ImageSize = Image->ImageSize;
+    return STATUS_EFI_NOT_FOUND;
+}
+
+/**
  * Returns the machine type of the PE/COFF image.
  *
  * @param ImagePointer
@@ -218,7 +288,7 @@ PeGetVersion(IN PVOID ImagePointer,
  * @param Image
  *        Supplies pointer to the memory area where loaded PE/COFF image context will be stored.
  *
- * @return This routine returns status code.
+ * @return This routine returns a status code.
  *
  * @since XT 1.0
  */
@@ -438,7 +508,7 @@ PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
  * @param Address
  *        Specifies destination address of memory region, where image should be relocated.
  *
- * @return This routine returns status code.
+ * @return This routine returns a status code.
  *
  * @since XT 1.0
  */
@@ -481,6 +551,41 @@ PeRelocateImage(IN PVOID ImagePointer,
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
+}
+
+/**
+ * Unloads a PE/COFF image file and frees allocated memory.
+ *
+ * @param ImagePointer
+ *        Supplies a pointer to the PE/COFF context structure representing the loaded image.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+PeUnloadImage(IN PVOID ImagePointer)
+{
+    PPECOFF_IMAGE_CONTEXT Image;
+    EFI_STATUS Status;
+
+    /* Get PE/COFF image pointer*/
+    Image = ImagePointer;
+
+    /* Validate input data */
+    if(!Image || !Image->Data)
+    {
+        /* Invalid parameter passed */
+        return STATUS_EFI_INVALID_PARAMETER;
+    }
+
+    /* Free memory allocated for the image */
+    Status = XtLdrProtocol->Memory.FreePages(Image->ImagePages, (EFI_PHYSICAL_ADDRESS)(UINT_PTR)Image->Data);
+    Status |= XtLdrProtocol->Memory.FreePool(Image);
+
+    /* Return status */
+    return Status;
 }
 
 /**
@@ -666,7 +771,7 @@ PepRelocateLoadedImage(IN PPECOFF_IMAGE_CONTEXT Image)
  * @param SystemTable
  *        Provides the EFI system table.
  *
- * @return This routine returns status code.
+ * @return This routine returns a status code.
  *
  * @since XT 1.0
  */
@@ -688,12 +793,15 @@ XtLdrModuleMain(IN EFI_HANDLE ImageHandle,
 
     /* Set routines available via PE/COFF image protocol */
     PeCoffProtocol.GetEntryPoint = PeGetEntryPoint;
+    PeCoffProtocol.GetFileSize = PeGetFileSize;
+    PeCoffProtocol.GetImageSize = PeGetImageSize;
     PeCoffProtocol.GetMachineType = PeGetMachineType;
     PeCoffProtocol.GetSection = PeGetSection;
     PeCoffProtocol.GetSubSystem = PeGetSubSystem;
     PeCoffProtocol.GetVersion = PeGetVersion;
     PeCoffProtocol.LoadImage = PeLoadImage;
     PeCoffProtocol.RelocateImage = PeRelocateImage;
+    PeCoffProtocol.UnloadImage = PeUnloadImage;
     PeCoffProtocol.VerifyImage = PeVerifyImage;
 
     /* Register PE/COFF protocol */
