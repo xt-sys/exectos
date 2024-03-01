@@ -370,8 +370,8 @@ typedef struct _PECOFF_IMAGE_SECTION_HEADER
     ULONG Characteristics;
 } PECOFF_IMAGE_SECTION_HEADER, *PPECOFF_IMAGE_SECTION_HEADER;
 
-/* PE/COFF image optional header */
-typedef struct _PECOFF_IMAGE_OPTIONAL_HEADER
+/* PE/COFF image 32bit optional header */
+typedef struct _PECOFF_IMAGE_OPTIONAL_HEADER32
 {
     USHORT Magic;
     UCHAR MajorLinkerVersion;
@@ -381,15 +381,8 @@ typedef struct _PECOFF_IMAGE_OPTIONAL_HEADER
     ULONG SizeOfUninitializedData;
     ULONG AddressOfEntryPoint;
     ULONG BaseOfCode;
-    union
-    {
-        struct
-        {
-            ULONG BaseOfData;
-            ULONG ImageBase32;
-        };
-        ULONGLONG ImageBase64;
-    };
+    ULONG BaseOfData;
+    ULONG ImageBase;
     ULONG SectionAlignment;
     ULONG FileAlignment;
     USHORT MajorOperatingSystemVersion;
@@ -411,7 +404,42 @@ typedef struct _PECOFF_IMAGE_OPTIONAL_HEADER
     ULONG LoaderFlags;
     ULONG NumberOfRvaAndSizes;
     PECOFF_IMAGE_DATA_DIRECTORY DataDirectory[PECOFF_IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
-} PECOFF_IMAGE_OPTIONAL_HEADER, *PPECOFF_IMAGE_OPTIONAL_HEADER;
+} PECOFF_IMAGE_OPTIONAL_HEADER32, *PPECOFF_IMAGE_OPTIONAL_HEADER32;
+
+/* PE/COFF image 32bit optional header */
+typedef struct _PECOFF_IMAGE_OPTIONAL_HEADER64
+{
+    USHORT Magic;
+    UCHAR MajorLinkerVersion;
+    UCHAR MinorLinkerVersion;
+    ULONG SizeOfCode;
+    ULONG SizeOfInitializedData;
+    ULONG SizeOfUninitializedData;
+    ULONG AddressOfEntryPoint;
+    ULONG BaseOfCode;
+    ULONGLONG ImageBase;
+    ULONG SectionAlignment;
+    ULONG FileAlignment;
+    USHORT MajorOperatingSystemVersion;
+    USHORT MinorOperatingSystemVersion;
+    USHORT MajorImageVersion;
+    USHORT MinorImageVersion;
+    USHORT MajorSubsystemVersion;
+    USHORT MinorSubsystemVersion;
+    ULONG Win32VersionValue;
+    ULONG SizeOfImage;
+    ULONG SizeOfHeaders;
+    ULONG CheckSum;
+    USHORT Subsystem;
+    USHORT DllCharacteristics;
+    ULONGLONG SizeOfStackReserve;
+    ULONGLONG SizeOfStackCommit;
+    ULONGLONG SizeOfHeapReserve;
+    ULONGLONG SizeOfHeapCommit;
+    ULONG LoaderFlags;
+    ULONG NumberOfRvaAndSizes;
+    PECOFF_IMAGE_DATA_DIRECTORY DataDirectory[PECOFF_IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
+} PECOFF_IMAGE_OPTIONAL_HEADER64, *PPECOFF_IMAGE_OPTIONAL_HEADER64;
 
 /* PE/COFF ROM optional header */
 typedef struct _PECOFF_IMAGE_ROM_OPTIONAL_HEADER
@@ -436,7 +464,11 @@ typedef struct _PECOFF_IMAGE_PE_HEADER
 {
     ULONG Signature;
     PECOFF_IMAGE_FILE_HEADER FileHeader;
-    PECOFF_IMAGE_OPTIONAL_HEADER OptionalHeader;
+    union
+    {
+        PECOFF_IMAGE_OPTIONAL_HEADER32 OptionalHeader32;
+        PECOFF_IMAGE_OPTIONAL_HEADER64 OptionalHeader64;
+    };
 } PECOFF_IMAGE_PE_HEADER, *PPECOFF_IMAGE_PE_HEADER;
 
 /* PE/COFF ROM image header */

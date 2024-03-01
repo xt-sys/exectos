@@ -42,8 +42,19 @@ PeGetEntryPoint(IN PVOID ImagePointer,
         return STATUS_EFI_INVALID_PARAMETER;
     }
 
-    /* Get entry point and return success */
-    *EntryPoint = (PUINT8)Image->VirtualAddress + Image->PeHeader->OptionalHeader.AddressOfEntryPoint;
+    /* Check PE/COFF image type */
+    if(Image->PeHeader->OptionalHeader32.Magic == PECOFF_IMAGE_PE_OPTIONAL_HDR64_MAGIC)
+    {
+        /* Get entry point from 64-bit optional header */
+        *EntryPoint = (PUINT8)Image->VirtualAddress + Image->PeHeader->OptionalHeader64.AddressOfEntryPoint;
+    }
+    else
+    {
+        /* Get entry point from 32-bit optional header */
+        *EntryPoint = (PUINT8)Image->VirtualAddress + Image->PeHeader->OptionalHeader32.AddressOfEntryPoint;
+    }
+
+    /* Return success */
     return STATUS_EFI_SUCCESS;
 }
 
@@ -186,9 +197,19 @@ PeGetSection(IN PVOID ImagePointer,
         return STATUS_EFI_INVALID_PARAMETER;
     }
 
-    /* Find section header */
-    SectionHeader = (PPECOFF_IMAGE_SECTION_HEADER)((PUCHAR)&Image->PeHeader->OptionalHeader +
-                                                   Image->PeHeader->FileHeader.SizeOfOptionalHeader);
+    /* Check PE/COFF image type */
+    if(Image->PeHeader->OptionalHeader32.Magic == PECOFF_IMAGE_PE_OPTIONAL_HDR64_MAGIC)
+    {
+        /* Find section header in 64-bit optional header */
+        SectionHeader = (PPECOFF_IMAGE_SECTION_HEADER)((PUCHAR)&Image->PeHeader->OptionalHeader64 +
+                                                       Image->PeHeader->FileHeader.SizeOfOptionalHeader);
+    }
+    else
+    {
+        /* Find section header in 32-bit optional header */
+        SectionHeader = (PPECOFF_IMAGE_SECTION_HEADER)((PUCHAR)&Image->PeHeader->OptionalHeader32 +
+                                                       Image->PeHeader->FileHeader.SizeOfOptionalHeader);
+    }
 
     /* Get section name length */
     SectionNameLength = RtlStringLength(SectionName, 0);
@@ -236,8 +257,19 @@ PeGetSubSystem(IN PVOID ImagePointer,
         return STATUS_EFI_INVALID_PARAMETER;
     }
 
-    /* Get image subsystem and return success */
-    *SubSystem = Image->PeHeader->OptionalHeader.Subsystem;
+    /* Check PE/COFF image type */
+    if(Image->PeHeader->OptionalHeader32.Magic == PECOFF_IMAGE_PE_OPTIONAL_HDR64_MAGIC)
+    {
+        /* Get image subsystem from 64-bit optional header */
+        *SubSystem = Image->PeHeader->OptionalHeader64.Subsystem;
+    }
+    else
+    {
+        /* Get image subsystem from 32-bit optional header */
+        *SubSystem = Image->PeHeader->OptionalHeader32.Subsystem;
+    }
+
+    /* Return success */
     return STATUS_EFI_SUCCESS;
 }
 
@@ -268,8 +300,19 @@ PeGetVersion(IN PVOID ImagePointer,
         return STATUS_EFI_INVALID_PARAMETER;
     }
 
-    /* Get image major version and return success */
-    *Version = Image->PeHeader->OptionalHeader.MajorImageVersion;
+    /* Check PE/COFF image type */
+    if(Image->PeHeader->OptionalHeader32.Magic == PECOFF_IMAGE_PE_OPTIONAL_HDR64_MAGIC)
+    {
+        /* Get image major version from 64-bit optional header */
+        *Version = Image->PeHeader->OptionalHeader64.MajorImageVersion;
+    }
+    else
+    {
+        /* Get image major version from 32-bit optional header */
+        *Version = Image->PeHeader->OptionalHeader32.MajorImageVersion;
+    }
+
+    /* Return success */
     return STATUS_EFI_SUCCESS;
 }
 
@@ -413,8 +456,19 @@ PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
         return STATUS_EFI_LOAD_ERROR;
     }
 
-    /* Store image size and calculate number of image pages */
-    ImageData->ImageSize = ImageData->PeHeader->OptionalHeader.SizeOfImage;
+    /* Store image size depending on the PE/COFF image type */
+    if(ImageData->PeHeader->OptionalHeader32.Magic == PECOFF_IMAGE_PE_OPTIONAL_HDR64_MAGIC)
+    {
+        /* Store 64-bit image size */
+        ImageData->ImageSize = ImageData->PeHeader->OptionalHeader64.SizeOfImage;
+    }
+    else
+    {
+        /* Store 32-bit image size */
+        ImageData->ImageSize = ImageData->PeHeader->OptionalHeader32.SizeOfImage;
+    }
+
+    /* Calculate number of image pages */
     ImageData->ImagePages = EFI_SIZE_TO_PAGES(ImageData->ImageSize);
 
     /* Allocate image pages */
@@ -441,12 +495,25 @@ PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
         ImageData->VirtualAddress = (PVOID)(UINT_PTR)Address;
     }
 
-    /* Copy all sections */
-    XtLdrProtocol->Memory.CopyMemory(ImageData->Data, Data, ImageData->PeHeader->OptionalHeader.SizeOfHeaders);
+    /* Check the PE/COFF image type */
+    if(ImageData->PeHeader->OptionalHeader32.Magic == PECOFF_IMAGE_PE_OPTIONAL_HDR64_MAGIC)
+    {
+        /* Copy all PE32+ sections */
+        XtLdrProtocol->Memory.CopyMemory(ImageData->Data, Data, ImageData->PeHeader->OptionalHeader64.SizeOfHeaders);
 
-    /* Find section header */
-    SectionHeader = (PPECOFF_IMAGE_SECTION_HEADER)((PUCHAR)&ImageData->PeHeader->OptionalHeader +
-                                                   ImageData->PeHeader->FileHeader.SizeOfOptionalHeader);
+        /* Find PE32+ section header */
+        SectionHeader = (PPECOFF_IMAGE_SECTION_HEADER)((PUCHAR)&ImageData->PeHeader->OptionalHeader64 +
+                                                       ImageData->PeHeader->FileHeader.SizeOfOptionalHeader);
+    }
+    else
+    {
+        /* Copy all PE32 sections */
+        XtLdrProtocol->Memory.CopyMemory(ImageData->Data, Data, ImageData->PeHeader->OptionalHeader64.SizeOfHeaders);
+
+        /* Find PE32 section header */
+        SectionHeader = (PPECOFF_IMAGE_SECTION_HEADER)((PUCHAR)&ImageData->PeHeader->OptionalHeader64 +
+                                                       ImageData->PeHeader->FileHeader.SizeOfOptionalHeader);
+    }
 
     /* Load each section into memory */
     for(Index = 0; Index < ImageData->PeHeader->FileHeader.NumberOfSections; Index++)
@@ -526,15 +593,15 @@ PeRelocateImage(IN PVOID ImagePointer,
     OldVirtualAddress = (UINT_PTR)Image->VirtualAddress;
 
     /* Check PE/COFF image type */
-    if(Image->PeHeader->OptionalHeader.Magic == PECOFF_IMAGE_PE_OPTIONAL_HDR64_MAGIC)
+    if(Image->PeHeader->OptionalHeader32.Magic == PECOFF_IMAGE_PE_OPTIONAL_HDR64_MAGIC)
     {
         /* This is 64-bit PE32+, store its image base address */
-        ImageBase = Image->PeHeader->OptionalHeader.ImageBase64;
+        ImageBase = Image->PeHeader->OptionalHeader64.ImageBase;
     }
     else
     {
         /* This is 32-bit PE32, store its image base address */
-        ImageBase = Image->PeHeader->OptionalHeader.ImageBase32;
+        ImageBase = Image->PeHeader->OptionalHeader32.ImageBase;
     }
 
     /* Overwrite virtual address and relocate image once again */
@@ -634,8 +701,8 @@ PeVerifyImage(IN PVOID ImagePointer)
     }
 
     /* Validate optional header */
-    if(Image->PeHeader->OptionalHeader.Magic != PECOFF_IMAGE_PE_OPTIONAL_HDR32_MAGIC &&
-       Image->PeHeader->OptionalHeader.Magic != PECOFF_IMAGE_PE_OPTIONAL_HDR64_MAGIC)
+    if(Image->PeHeader->OptionalHeader32.Magic != PECOFF_IMAGE_PE_OPTIONAL_HDR32_MAGIC &&
+       Image->PeHeader->OptionalHeader64.Magic != PECOFF_IMAGE_PE_OPTIONAL_HDR64_MAGIC)
     {
         /* Invalid optional header signature, return error */
         return STATUS_EFI_INCOMPATIBLE_VERSION;
@@ -676,27 +743,34 @@ PepRelocateLoadedImage(IN PPECOFF_IMAGE_CONTEXT Image)
         return STATUS_EFI_SUCCESS;
     }
 
-    /* Set relocation data directory */
-    DataDirectory = &Image->PeHeader->OptionalHeader.DataDirectory[PECOFF_IMAGE_DIRECTORY_ENTRY_BASERELOC];
-
-    /* Check if loaded image should be relocated */
-    if(Image->PeHeader->OptionalHeader.NumberOfRvaAndSizes <= PECOFF_IMAGE_DIRECTORY_ENTRY_BASERELOC ||
-       DataDirectory->VirtualAddress == 0 || DataDirectory->Size < sizeof(PECOFF_IMAGE_BASE_RELOCATION))
-    {
-        /* No need to relocate the image */
-        return STATUS_EFI_SUCCESS;
-    }
-
     /* Check PE/COFF image type */
-    if(Image->PeHeader->OptionalHeader.Magic == PECOFF_IMAGE_PE_OPTIONAL_HDR64_MAGIC)
+    if(Image->PeHeader->OptionalHeader32.Magic == PECOFF_IMAGE_PE_OPTIONAL_HDR64_MAGIC)
     {
-        /* This is 64-bit PE32+, store its image base address */
-        ImageBase = Image->PeHeader->OptionalHeader.ImageBase64;
+        /* Set relocation data directory and image base address */
+        DataDirectory = &Image->PeHeader->OptionalHeader64.DataDirectory[PECOFF_IMAGE_DIRECTORY_ENTRY_BASERELOC];
+        ImageBase = Image->PeHeader->OptionalHeader64.ImageBase;
+
+        /* Check if loaded 64-bit PE32+ image should be relocated */
+        if(Image->PeHeader->OptionalHeader64.NumberOfRvaAndSizes <= PECOFF_IMAGE_DIRECTORY_ENTRY_BASERELOC ||
+        DataDirectory->VirtualAddress == 0 || DataDirectory->Size < sizeof(PECOFF_IMAGE_BASE_RELOCATION))
+        {
+            /* No need to relocate the image */
+            return STATUS_EFI_SUCCESS;
+        }
     }
     else
     {
-        /* This is 32-bit PE32, store its image base address */
-        ImageBase = Image->PeHeader->OptionalHeader.ImageBase32;
+        /* Check if loaded 32-bit PE32 image should be relocated */
+        /* Set relocation data directory and image base address */
+        DataDirectory = &Image->PeHeader->OptionalHeader32.DataDirectory[PECOFF_IMAGE_DIRECTORY_ENTRY_BASERELOC];
+        ImageBase = Image->PeHeader->OptionalHeader32.ImageBase;
+
+        if(Image->PeHeader->OptionalHeader32.NumberOfRvaAndSizes <= PECOFF_IMAGE_DIRECTORY_ENTRY_BASERELOC ||
+        DataDirectory->VirtualAddress == 0 || DataDirectory->Size < sizeof(PECOFF_IMAGE_BASE_RELOCATION))
+        {
+            /* No need to relocate the image */
+            return STATUS_EFI_SUCCESS;
+        }
     }
 
     /* Set relocation pointers */

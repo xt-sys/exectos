@@ -223,8 +223,20 @@ BlLoadModule(IN PWCHAR ModuleName)
     /* Setup PE/COFF EFI image headers */
     DosHeader = (PPECOFF_IMAGE_DOS_HEADER)ModuleData;
     PeHeader = (PPECOFF_IMAGE_PE_HEADER)(ModuleData + DosHeader->PeHeaderOffset);
-    SectionHeader = (PPECOFF_IMAGE_SECTION_HEADER)((PUCHAR)&PeHeader->OptionalHeader +
-                                                   PeHeader->FileHeader.SizeOfOptionalHeader);
+
+    /* Check PE/COFF image type*/
+    if(PeHeader->OptionalHeader32.Magic == PECOFF_IMAGE_PE_OPTIONAL_HDR64_MAGIC)
+    {
+        /* Get PE32+ (64-bit) image section headers */
+        SectionHeader = (PPECOFF_IMAGE_SECTION_HEADER)((PUCHAR)&PeHeader->OptionalHeader64 +
+                                                       PeHeader->FileHeader.SizeOfOptionalHeader);
+    }
+    else
+    {
+        /* Get PE32 (32-bit) image section headers */
+        SectionHeader = (PPECOFF_IMAGE_SECTION_HEADER)((PUCHAR)&PeHeader->OptionalHeader32 +
+                                                       PeHeader->FileHeader.SizeOfOptionalHeader);
+    }
 
     /* Look for .modinfo section */
     for(SectionIndex = 0; SectionIndex < PeHeader->FileHeader.NumberOfSections; SectionIndex++)
