@@ -88,6 +88,7 @@ BlSetConfigValue(IN CONST PWCHAR ConfigName,
 {
     PXTBL_CONFIG_ENTRY ConfigEntry;
     PLIST_ENTRY ConfigListEntry;
+    EFI_STATUS Status;
     SIZE_T Length;
 
     /* Get config entry name length */
@@ -103,8 +104,27 @@ BlSetConfigValue(IN CONST PWCHAR ConfigName,
         /* Check if requested configuration found */
         if(RtlCompareWideStringInsensitive(ConfigEntry->Name, ConfigName, Length) == 0)
         {
+            /* Check new config value length */
+            Length = RtlWideStringLength(ConfigValue, 0);
+
+            /* Reallocate memory for new config value */
+            Status = BlFreeMemoryPool(ConfigEntry->Value);
+            if(Status == STATUS_EFI_SUCCESS)
+            {
+                /* Successfully freed memory, allocate a new pool */
+                Status = BlAllocateMemoryPool((Length + 1) * sizeof(WCHAR), (PVOID *)&ConfigEntry->Value);
+            }
+
+            /* Check memory reallocation status */
+            if(Status != STATUS_EFI_SUCCESS)
+            {
+                /* Failed to reallocate memory */
+                return Status;
+            }
+
             /* Update config value */
-            ConfigEntry->Value = ConfigValue;
+            RtlCopyMemory(ConfigEntry->Value, ConfigValue, Length * sizeof(WCHAR));
+            ConfigEntry->Value[Length] = L'\0';
 
             /* Return success */
             return STATUS_EFI_SUCCESS;
