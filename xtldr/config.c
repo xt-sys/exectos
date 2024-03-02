@@ -46,7 +46,7 @@ BlGetConfigValue(IN CONST PWCHAR ConfigName)
             ValueLength = RtlWideStringLength(ConfigEntry->Value, 0);
 
             /* Allocate memory for value */
-            Status = BlAllocateMemoryPool(ValueLength * sizeof(WCHAR), (PVOID *)&Value);
+            Status = BlAllocateMemoryPool((ValueLength + 1) * sizeof(WCHAR), (PVOID *)&Value);
             if(Status != STATUS_EFI_SUCCESS)
             {
                 /* Memory allocation failure, return NULL */
@@ -56,7 +56,7 @@ BlGetConfigValue(IN CONST PWCHAR ConfigName)
 
             /* Copy value and return it */
             RtlCopyMemory(Value, ConfigEntry->Value, ValueLength * sizeof(WCHAR));
-            Value[ValueLength] = 0;
+            Value[ValueLength] = L'\0';
             return Value;
         }
 
@@ -229,28 +229,28 @@ BlpParseCommandLine(VOID)
                 Key = Argument;
 
                 /* Find end of the key */
-                while(*Argument != '=' && *Argument != 0 && *Argument != '\n')
+                while(*Argument != L'=' && *Argument != L'\0' && *Argument != L'\n')
                 {
                     /* Advance to the next character */
                     Argument++;
                 }
 
                 /* Mark end of the key and advance to the next character */
-                *Argument = 0;
+                *Argument = L'\0';
                 Argument++;
 
                 /* Store value */
                 Value = Argument;
 
                 /* Find end of the value */
-                while(*Argument != 0 && *Argument != '\n')
+                while(*Argument != L'\0' && *Argument != L'\n')
                 {
                     /* Advance to the next character */
                     Argument++;
                 }
 
                 /* Mark end of the value and advance to the next character */
-                *Argument = 0;
+                *Argument = L'\0';
                 Argument++;
 
                 /* Get length of the key and its value */
@@ -285,8 +285,8 @@ BlpParseCommandLine(VOID)
                 /* Set entry name and value */
                 RtlCopyMemory(Option->Name, Key, (KeyLength * sizeof(WCHAR)));
                 RtlCopyMemory(Option->Value, Value, (ValueLength * sizeof(WCHAR)));
-                Option->Name[KeyLength] = 0;
-                Option->Value[ValueLength] = 0;
+                Option->Name[KeyLength] = L'\0';
+                Option->Value[ValueLength] = L'\0';
 
                 /* Add entry to the list */
                 RtlInsertTailList(&Config, &Option->Flink);
@@ -337,12 +337,12 @@ BlpParseConfigFile(IN CONST PCHAR RawConfig,
     Value = NULL;
 
     /* Analyze configuration data until end of file is reached */
-    while(*InputData != 0)
+    while(*InputData != '\0')
     {
         if(*InputData == ';' || *InputData == '#')
         {
             /* Skip comment until end of the line */
-            while(*InputData != 0 && *InputData != '\n')
+            while(*InputData != '\0' && *InputData != '\n')
             {
                 /* Advance to the next character */
                 InputData++;
@@ -362,7 +362,7 @@ BlpParseConfigFile(IN CONST PCHAR RawConfig,
             SectionName = InputData;
 
             /* Find end of the section name */
-            while(*InputData != ']' && *InputData != 0 && *InputData != '\n')
+            while(*InputData != ']' && *InputData != '\0' && *InputData != '\n')
             {
                 /* Advance to the next character */
                 InputData++;
@@ -376,7 +376,7 @@ BlpParseConfigFile(IN CONST PCHAR RawConfig,
             }
 
             /* Mark end of the section name and advance to the next character */
-            *InputData = 0;
+            *InputData = '\0';
             InputData++;
 
             /* Remove leading and trailing spaces from section name */
@@ -398,9 +398,12 @@ BlpParseConfigFile(IN CONST PCHAR RawConfig,
                 return Status;
             }
 
-            /* Initialize new section and add it to the list */
+            /* Initialize new section and convert its name to wide string */
             RtlInitializeListHead(&Section->Options);
-            RtlStringToWideString(Section->SectionName, &SectionName, SectionLength + 1);
+            RtlStringToWideString(Section->SectionName, &SectionName, SectionLength);
+
+            /* Ensure string is NULL-terminated and add new section to the configuration list */
+            Section->SectionName[SectionLength] = L'\0';
             RtlInsertTailList(Configuration, &Section->Flink);
         }
         else
@@ -409,7 +412,7 @@ BlpParseConfigFile(IN CONST PCHAR RawConfig,
             Key = InputData;
 
             /* Find end of the key */
-            while(*InputData != '=' && *InputData != 0 && *InputData != '\n')
+            while(*InputData != '=' && *InputData != '\0' && *InputData != '\n')
             {
                 /* Advance to the next character */
                 InputData++;
@@ -437,7 +440,7 @@ BlpParseConfigFile(IN CONST PCHAR RawConfig,
             Value = InputData;
 
             /* Find end of the value */
-            while(*InputData != 0 && *InputData != '\n')
+            while(*InputData != '\0' && *InputData != '\n')
             {
                 /* Advance to the next character */
                 InputData++;
@@ -482,12 +485,16 @@ BlpParseConfigFile(IN CONST PCHAR RawConfig,
             /* Remove trailing quotes from the value */
             if(Value[ValueLength - 2] == '"' || Value[ValueLength - 2] == '\'')
             {
-                Value[ValueLength - 2] = 0;
+                Value[ValueLength - 2] = '\0';
             }
 
-            /* Initialize new option and add it to the list */
+            /* Convert key and value to wide strings */
             RtlStringToWideString(Option->Name, &Key, RtlStringLength(Key, 0) + 1);
             RtlStringToWideString(Option->Value, &Value, RtlStringLength(Value, 0) + 1);
+
+            /* Ensure strings are NULL-terminated and add new option to the list */
+            Option->Name[KeyLength] = L'\0';
+            Option->Value[ValueLength] = L'\0';
             RtlInsertTailList(&Section->Options, &Option->Flink);
         }
     }
