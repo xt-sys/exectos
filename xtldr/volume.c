@@ -615,7 +615,7 @@ BlReadFile(IN PEFI_FILE_HANDLE DirHandle,
         return Status;
     }
 
-    /* Calculate number of bytes to read and zero memory*/
+    /* Calculate number of bytes to read and zero memory */
     ReadSize = Pages * EFI_PAGE_SIZE;
     *FileData = (PCHAR)(UINT_PTR)Address;
     RtlZeroMemory(*FileData, ReadSize);
