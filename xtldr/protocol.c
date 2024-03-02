@@ -159,7 +159,7 @@ BlLoadModule(IN PWCHAR ModuleName)
             return STATUS_EFI_SUCCESS;
         }
 
-        /* Move to the module */
+        /* Move to next module */
         ModuleListEntry = ModuleListEntry->Flink;
     }
 
@@ -262,6 +262,13 @@ BlLoadModule(IN PWCHAR ModuleName)
     {
         /* Get module dependency information */
         ModuleDependency = CONTAIN_RECORD(DepsListEntry, XTBL_MODULE_DEPS, Flink);
+
+        /* Make sure dependency list contains a valid module name */
+        if(ModuleDependency->ModuleName == NULL || ModuleDependency->ModuleName[0] == L'\0')
+        {
+            /* Invalid module name found, just skip this step */
+            break;
+        }
 
         /* Load dependency module */
         BlDebugPrint(L"Module '%S' requires '%S' ...\n", ModuleName, ModuleDependency->ModuleName);
