@@ -95,10 +95,12 @@ FbInitializeDisplay()
 {
     EFI_GUID GopGuid = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
     EFI_GUID UgaGuid = EFI_UNIVERSAL_GRAPHICS_ADAPTER_PROTOCOL_GUID;
+    PEFI_GRAPHICS_OUTPUT_MODE_INFORMATION GopModeInfo;
     PEFI_UNIVERSAL_GRAPHICS_ADAPTER_PROTOCOL Uga;
     PEFI_GRAPHICS_OUTPUT_PROTOCOL Gop;
     EFI_PIXEL_BITMASK PixelBitMask;
-    UINT32 Depth, Refresh;
+    UINT Depth, Refresh;
+    ULONG_PTR InfoSize;
     EFI_HANDLE Handle;
     EFI_STATUS Status;
 
@@ -116,10 +118,29 @@ FbInitializeDisplay()
         /* Check if Graphics Output Protocol (GOP) is available */
         if(Status == STATUS_EFI_SUCCESS)
         {
-            /* Found GOP */
-            XtLdrProtocol->Debug.Print(L"Found EFI-GOP compatible display adapter\n");
+            /* Check if there are any video modes available */
+            if(Gop->Mode->MaxMode == 0)
+            {
+                /* No video modes available */
+                XtLdrProtocol->Debug.Print(L"ERROR: No GOP video mode available\n");
+                return STATUS_EFI_UNSUPPORTED;
+            }
 
-            /* Set framebuffer information */
+            /* Query current graphics mode */
+            Status = Gop->QueryMode(Gop, Gop->Mode == NULL ? 0 : Gop->Mode->Mode, &InfoSize, &GopModeInfo);
+            if(Status == STATUS_EFI_NOT_STARTED)
+            {
+                /* Set the mode to circumvent buggy UEFI firmware */
+                Status = Gop->SetMode(Gop, 0);
+            }
+            if(Status != STATUS_EFI_SUCCESS)
+            {
+                /* Unable to query GOP modes */
+                XtLdrProtocol->Debug.Print(L"ERROR: Failed to get GOP native mode (Status Code: 0x%zX)\n");
+                return STATUS_EFI_UNSUPPORTED;
+            }
+
+            /* Store GOP framebuffer information */
             FbpDisplayInfo.Protocol = GOP;
             FbpDisplayInfo.Width = Gop->Mode->Info->HorizontalResolution;
             FbpDisplayInfo.Height = Gop->Mode->Info->VerticalResolution;
@@ -132,6 +153,13 @@ FbInitializeDisplay()
             /* Set framebuffer address and size */
             FbpDisplayInfo.FrameBufferBase = Gop->Mode->FrameBufferBase;
             FbpDisplayInfo.FrameBufferSize = Gop->Mode->FrameBufferSize;
+
+            /* Get pixel information */
+            FbpGetPixelInformation(&FbpDisplayInfo, &PixelBitMask);
+
+            /* Found GOP */
+            XtLdrProtocol->Debug.Print(L"Found EFI-GOP compatible display adapter @ %P (%zu bytes)\n",
+                                       FbpDisplayInfo.FrameBufferBase, FbpDisplayInfo.FrameBufferSize);
 
             /* Close GOP protocol */
             Status = XtLdrProtocol->Protocol.Close(Handle, &GopGuid);
@@ -156,15 +184,7 @@ FbInitializeDisplay()
                     return STATUS_EFI_DEVICE_ERROR;
                 }
 
-                /* Set framebuffer information */
-                FbpDisplayInfo.Protocol = UGA;
-                FbpDisplayInfo.PixelsPerScanLine = FbpDisplayInfo.Width;
-                FbpDisplayInfo.PixelFormat = PixelBlueGreenRedReserved8BitPerColor;
-
-                /* Get pixel bit mask information */
-                PixelBitMask = (EFI_PIXEL_BITMASK){0, 0, 0, 0};
-
-                /* Set framebuffer address */
+                /* Find framebuffer address */
                 Status = FbpFindFramebufferAddress(&FbpDisplayInfo.FrameBufferBase);
                 if(Status != STATUS_EFI_SUCCESS)
                 {
@@ -176,10 +196,25 @@ FbInitializeDisplay()
                     return STATUS_EFI_DEVICE_ERROR;
                 }
 
+                /* Set framebuffer information */
+                FbpDisplayInfo.Protocol = UGA;
+                FbpDisplayInfo.PixelsPerScanLine = FbpDisplayInfo.Width;
+                FbpDisplayInfo.PixelFormat = PixelBlueGreenRedReserved8BitPerColor;
+
+                /* Get pixel bit mask information */
+                PixelBitMask = (EFI_PIXEL_BITMASK){0, 0, 0, 0};
+
+                /* Get pixel information */
+                FbpGetPixelInformation(&FbpDisplayInfo, &PixelBitMask);
+
                 /* Set framebuffer size */
                 FbpDisplayInfo.FrameBufferSize = FbpDisplayInfo.Width * 
                                                   FbpDisplayInfo.Height *
                                                   FbpDisplayInfo.BytesPerPixel + 1024;
+
+                /* Found UGA */
+                XtLdrProtocol->Debug.Print(L"Found EFI-UGA compatible display adapter @ %P (%zu bytes)\n",
+                                           FbpDisplayInfo.FrameBufferBase, FbpDisplayInfo.FrameBufferSize);
 
                 /* Close UGA protocol */
                 XtLdrProtocol->Protocol.Close(Handle, &UgaGuid);
@@ -191,14 +226,11 @@ FbInitializeDisplay()
         {
             /* GOP and UGA unavailable */
             XtLdrProtocol->Debug.Print(L"WARNING: No display adapter found!\n");
+            for(;;);
             return STATUS_EFI_NOT_FOUND;
         }
 
-        /* Get pixel information */
-        FbpGetPixelInformation(&FbpDisplayInfo, &PixelBitMask);
-
-        /* Set additional framebuffer information */
-        FbpDisplayInfo.BytesPerPixel = FbpDisplayInfo.BitsPerPixel >> 3;
+        /* Calculate framebuffer pitch */
         FbpDisplayInfo.Pitch = FbpDisplayInfo.PixelsPerScanLine * (FbpDisplayInfo.BitsPerPixel / 8);
 
         /* Set framebuffer initialization flag */
@@ -449,6 +481,9 @@ FbpGetPixelInformation(IN OUT PXTBL_FRAMEBUFFER_INFORMATION FrameBufferInfo,
             FrameBufferInfo->PixelInformation.ReservedShift = 0;
             break;
     }
+
+    /* Calculate bytes per pixel based on bits per pixel */
+    FrameBufferInfo->BytesPerPixel = FrameBufferInfo->BitsPerPixel >> 3;
 }
 
 /**
