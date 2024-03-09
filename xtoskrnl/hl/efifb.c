@@ -20,14 +20,19 @@ XTAPI
 VOID
 HlClearScreen(VOID)
 {
-    SIZE_T PositionX, PositionY;
+    SIZE_T Line, PositionX, PositionY;
+    PULONG FrameBuf;
+
+    /* Get pointer to frame buffer */
+    FrameBuf = HlpFrameBufferData.Address;
 
     /* Fill the screen with a black box */
-    for(PositionX = 0; PositionX < HlpFrameBufferData.Width; PositionX++)
+    for(PositionY = 0; PositionY < HlpFrameBufferData.Height; PositionY++)
     {
-        for(PositionY = 0; PositionY < HlpFrameBufferData.Height; PositionY++)
+        Line = PositionY * HlpFrameBufferData.PixelsPerScanLine;
+        for(PositionX = 0; PositionX < HlpFrameBufferData.Width; PositionX++)
         {
-            HlDrawPixel(PositionX, PositionY, 0x00000000);
+            FrameBuf[Line + PositionX] = 0x00000000;
         }
     }
 }
@@ -74,7 +79,7 @@ HlDrawPixel(IN ULONG PositionX,
     FrameBufferIndex = 4 * HlpFrameBufferData.PixelsPerScanLine * PositionY + 4 * PositionX;
 
     /* Set the color of the pixel by writing to the corresponding memory location */
-    *((PUINT)(HlpFrameBufferData.Address + FrameBufferIndex)) = Color;
+    *((PULONG)(HlpFrameBufferData.Address + FrameBufferIndex)) = Color;
 }
 
 /**
