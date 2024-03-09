@@ -146,7 +146,7 @@ typedef struct _CPPORT
 typedef struct _HAL_FRAMEBUFFER_DATA
 {
     BOOLEAN Initialized;
-    PULONG Address;
+    PVOID Address;
     ULONG_PTR BufferSize;
     UINT Width;
     UINT Height;

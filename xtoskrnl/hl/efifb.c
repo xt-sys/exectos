@@ -71,10 +71,10 @@ HlDrawPixel(IN ULONG PositionX,
     }
 
     /* Calculate the index of the pixel in the frame buffer memory using the provided x and y coordinates */
-    FrameBufferIndex = PositionY * HlpFrameBufferData.PixelsPerScanLine + PositionX;
+    FrameBufferIndex = 4 * HlpFrameBufferData.PixelsPerScanLine * PositionY + 4 * PositionX;
 
     /* Set the color of the pixel by writing to the corresponding memory location */
-    HlpFrameBufferData.Address[FrameBufferIndex] = Color;
+    *((PUINT)(HlpFrameBufferData.Address + FrameBufferIndex)) = Color;
 }
 
 /**
@@ -104,7 +104,7 @@ HlInitializeFrameBuffer(VOID)
     }
 
     /* Save framebuffer information and mark display as initialized */
-    HlpFrameBufferData.Address = (PULONG)KeInitializationBlock->LoaderInformation.FrameBuffer.Address;
+    HlpFrameBufferData.Address = KeInitializationBlock->LoaderInformation.FrameBuffer.Address;
     HlpFrameBufferData.Width = KeInitializationBlock->LoaderInformation.FrameBuffer.Width;
     HlpFrameBufferData.Height = KeInitializationBlock->LoaderInformation.FrameBuffer.Height;
     HlpFrameBufferData.BitsPerPixel = KeInitializationBlock->LoaderInformation.FrameBuffer.BitsPerPixel;

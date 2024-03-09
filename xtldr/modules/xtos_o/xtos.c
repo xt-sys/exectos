@@ -42,7 +42,7 @@ XtGetDisplayInformation(OUT PLOADER_GRAPHICS_INFORMATION_BLOCK InformationBlock,
 {
     InformationBlock->Initialized = FrameBufferInfo->Initialized;
     InformationBlock->Protocol = FrameBufferInfo->Protocol;
-    InformationBlock->Address = (PVOID)(ULONG_PTR)FrameBufferInfo->FrameBufferBase;
+    InformationBlock->Address = (PVOID)FrameBufferInfo->FrameBufferBase;
     InformationBlock->BufferSize = FrameBufferInfo->FrameBufferSize;
     InformationBlock->Width = FrameBufferInfo->Width;
     InformationBlock->Height = FrameBufferInfo->Height;
