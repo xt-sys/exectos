@@ -12,6 +12,7 @@
 #include <xttypes.h>
 #include <xtdefs.h>
 
+
 /* SSF2 font header */
 typedef struct _SSFN_FONT_HEADER
 {

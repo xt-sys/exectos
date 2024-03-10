@@ -55,6 +55,13 @@ XTAPI
 XTSTATUS
 HlInitializeFrameBuffer(VOID);
 
+XTAPI
+VOID
+HlPutCharacter(IN ULONG PositionX,
+               IN ULONG PositionY,
+               IN ULONG Color,
+               IN WCHAR WideCharacter);
+
 XTFASTCALL
 VOID
 HlSetRunLevel(IN KRUNLEVEL RunLevel);
