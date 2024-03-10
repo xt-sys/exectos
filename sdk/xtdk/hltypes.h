@@ -153,6 +153,7 @@ typedef struct _HAL_FRAMEBUFFER_DATA
     UINT PixelsPerScanLine;
     UINT BitsPerPixel;
     UINT Pitch;
+    PVOID Font;
 } HAL_FRAMEBUFFER_DATA, *PHAL_FRAMEBUFFER_DATA;
 
 /* SMBIOS table header structure */
