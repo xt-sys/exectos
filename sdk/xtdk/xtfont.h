@@ -10,7 +10,25 @@
 #define __XTDK_XTFONT_H
 
 #include <xttypes.h>
+#include <xtdefs.h>
 
+/* SSF2 font header */
+typedef struct _SSFN_FONT_HEADER
+{
+    UCHAR Magic[4];
+    UINT Size;
+    UCHAR Type;
+    UCHAR Features;
+    UCHAR Width;
+    UCHAR Height;
+    UCHAR Baseline;
+    UCHAR Underline;
+    USHORT FragmentsOffset;
+    UINT CharactersOffset;
+    UINT LigatureOffset;
+    UINT KerningOffset;
+    UINT ColorMapOffset;
+} SSFN_FONT_HEADER, *PSSFN_FONT_HEADER;
 
 /* XTOS font (VGA Unicode by Dmitry Yu. Bolkhovityanov (C) 2000, https://www.inp.nsk.su/~bolkhov/files/fonts/univga/) */
 UCHAR XtFbDefaultFont[] = {0x78, 0x74, 0x66, 0x6E, 0x3B, 0xE7, 0x00, 0x00, 0x03, 0x00, 0x08, 0x10, 0x0C, 0x0D, 0x7D,
