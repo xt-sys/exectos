@@ -78,9 +78,5 @@ KePanicEx(IN ULONG Code,
           IN ULONG_PTR Parameter4)
 {
     KeDbgPrint(L"Fatal System Error: 0x%08lx\nKernel Panic!\n\n", Code);
-    for(;;)
-    {
-        ArClearInterruptFlag();
-        ArHalt();
-    }
+    KeHaltSystem();
 }
