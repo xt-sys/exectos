@@ -102,6 +102,7 @@ typedef struct _LOADER_GRAPHICS_INFORMATION_BLOCK
     UINT PixelsPerScanLine;
     UINT BitsPerPixel;
     UINT Pitch;
+    PVOID Font;
 } LOADER_GRAPHICS_INFORMATION_BLOCK, *PLOADER_GRAPHICS_INFORMATION_BLOCK;
 
 /* Boot Loader information block */

@@ -7,6 +7,7 @@
  */
 
 #include <xtos.h>
+#include <xtfont.h>
 
 
 /**
@@ -106,6 +107,18 @@ HlInitializeFrameBuffer(VOID)
     {
         /* Display not initialized */
         return STATUS_DEVICE_NOT_READY;
+    }
+
+    /* Check if custom font provided by bootloader */
+    if(KeInitializationBlock->LoaderInformation.FrameBuffer.Font)
+    {
+        /* Use custom font */
+        HlpFrameBufferData.Font = KeInitializationBlock->LoaderInformation.FrameBuffer.Font;
+    }
+    else
+    {
+        /* Use default font */
+        HlpFrameBufferData.Font = (PVOID)&XtFbDefaultFont;
     }
 
     /* Save framebuffer information and mark display as initialized */
