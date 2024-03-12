@@ -256,6 +256,10 @@ RtlDivideUnsigned64(IN ULONGLONG Dividend,
                     OUT PULONGLONG Remainder);
 
 XTAPI
+VOID
+RtlDumpBitMap(IN PRTL_BITMAP BitMap);
+
+XTAPI
 LONG
 RtlGetBaseExponent(IN DOUBLE Value,
                    OUT PDOUBLE PowerOfTen);

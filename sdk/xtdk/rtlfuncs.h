@@ -50,6 +50,15 @@ RtlRemoveEntryList(IN PLIST_ENTRY Entry);
 
 /* Runtime Library routines forward references */
 XTAPI
+VOID
+RtlClearAllBits(IN PRTL_BITMAP BitMap);
+
+XTAPI
+VOID
+RtlClearBit(IN PRTL_BITMAP BitMap,
+            IN ULONG_PTR Bit);
+
+XTAPI
 BOOLEAN
 RtlCompareGuids(IN PGUID Guid1,
                 IN PGUID Guid2);
@@ -136,6 +145,12 @@ RtlFormatWideString(IN PRTL_PRINT_CONTEXT Context,
 
 XTAPI
 VOID
+RtlInitializeBitMap(IN PRTL_BITMAP BitMap,
+                    IN PULONG_PTR Buffer,
+                    IN ULONG Size);
+
+XTAPI
+VOID
 RtlMoveMemory(OUT PVOID Destination,
               IN PCVOID Source,
               IN SIZE_T Length);
@@ -163,6 +178,15 @@ RtlSameMemory(IN PCVOID LeftBuffer,
 
 XTAPI
 VOID
+RtlSetAllBits(IN PRTL_BITMAP BitMap);
+
+XTAPI
+VOID
+RtlSetBit(IN PRTL_BITMAP BitMap,
+          IN ULONG_PTR Bit);
+
+XTAPI
+VOID
 RtlSetMemory(OUT PVOID Destination,
              IN UCHAR Byte,
              IN SIZE_T Length);
@@ -177,6 +201,11 @@ SIZE_T
 RtlStringToWideString(OUT PWCHAR Destination,
                       IN CONST PCHAR *Source,
                       IN SIZE_T Length);
+
+XTAPI
+BOOLEAN
+RtlTestBit(IN PRTL_BITMAP BitMap,
+           IN ULONG_PTR Bit);
 
 XTAPI
 PCHAR
