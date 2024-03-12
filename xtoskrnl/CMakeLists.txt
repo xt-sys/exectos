@@ -40,6 +40,7 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/pages.c
     ${XTOSKRNL_SOURCE_DIR}/po/idle.c
     ${XTOSKRNL_SOURCE_DIR}/rtl/atomic.c
+    ${XTOSKRNL_SOURCE_DIR}/rtl/bitmap.c
     ${XTOSKRNL_SOURCE_DIR}/rtl/byteswap.c
     ${XTOSKRNL_SOURCE_DIR}/rtl/globals.c
     ${XTOSKRNL_SOURCE_DIR}/rtl/guid.c

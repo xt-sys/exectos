@@ -22,6 +22,7 @@
     #define _ARCH_NAME                              "32-bit x86"
     #define _ARCH_IMAGE_MACHINE_TYPE                0x014C
     #define _XT32                                   1
+    #define BITS_PER_LONG                           32
     #define CACHE_ALIGNMENT                         64
     #define EFI_ERROR_MASK                          0x80000000
     #define MAXIMUM_PROCESSORS                      32
@@ -35,6 +36,7 @@
     #define _ARCH_NAME                              "64-bit x86"
     #define _ARCH_IMAGE_MACHINE_TYPE                0x8664
     #define _XT64                                   1
+    #define BITS_PER_LONG                           64
     #define CACHE_ALIGNMENT                         64
     #define EFI_ERROR_MASK                          0x8000000000000000
     #define MAXIMUM_PROCESSORS                      256

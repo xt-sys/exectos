@@ -41,6 +41,14 @@
 #define MAXLONG                                0x7FFFFFFF
 #define MAXULONG                               0xFFFFFFFF
 
+/* Pointer limits */
+#define MININT_PTR                             (~MAXINT_PTR)
+#define MAXINT_PTR                             ((INT_PTR)(MAXUINT_PTR >> 1))
+#define MAXUINT_PTR                            (~((UINT_PTR)0))
+#define MINLONG_PTR                            (~MAXLONG_PTR)
+#define MAXLONG_PTR                            ((LONG_PTR)(MAXULONG_PTR >> 1))
+#define MAXULONG_PTR                           (~((ULONG_PTR)0))
+
 /* Number of bits per byte */
 #define BITS_PER_BYTE                          8
 

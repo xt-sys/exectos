@@ -69,6 +69,13 @@ typedef enum _RTL_VARIABLE_TYPE
     WideString
 } RTL_VARIABLE_TYPE, *PRTL_VARIABLE_TYPE;
 
+/* Bit Map structure definition */
+typedef struct _RTL_BITMAP
+{
+    ULONG Size;
+    PULONG_PTR Buffer;
+} RTL_BITMAP, *PRTL_BITMAP;
+
 /* Runtime Library print context structure definition */
 typedef struct _RTL_PRINT_CONTEXT
 {
