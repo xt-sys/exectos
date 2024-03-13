@@ -59,6 +59,7 @@ XtEnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to build page map */
+        XtLdrProtocol->Debug.Print(L"Failed to build page map (Status code: %zX)\n", Status);
         return Status;
     }
 
@@ -68,7 +69,7 @@ XtEnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to exit boot services */
-        XtLdrProtocol->Debug.Print(L"Failed to exit boot services (Status code: %lX)\n", Status);
+        XtLdrProtocol->Debug.Print(L"Failed to exit boot services (Status code: %zX)\n", Status);
         return STATUS_EFI_ABORTED;
     }
 
