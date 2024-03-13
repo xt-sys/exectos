@@ -226,7 +226,6 @@ FbInitializeDisplay()
         {
             /* GOP and UGA unavailable */
             XtLdrProtocol->Debug.Print(L"WARNING: No display adapter found!\n");
-            for(;;);
             return STATUS_EFI_NOT_FOUND;
         }
 
