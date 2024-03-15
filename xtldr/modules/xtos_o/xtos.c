@@ -44,11 +44,11 @@ XtGetDisplayInformation(OUT PLOADER_GRAPHICS_INFORMATION_BLOCK InformationBlock,
     InformationBlock->Protocol = FrameBufferInfo->Protocol;
     InformationBlock->Address = (PVOID)FrameBufferInfo->FrameBufferBase;
     InformationBlock->BufferSize = FrameBufferInfo->FrameBufferSize;
-    InformationBlock->Width = FrameBufferInfo->Width;
-    InformationBlock->Height = FrameBufferInfo->Height;
-    InformationBlock->BitsPerPixel = FrameBufferInfo->BitsPerPixel;
-    InformationBlock->PixelsPerScanLine = FrameBufferInfo->PixelsPerScanLine;
-    InformationBlock->Pitch = FrameBufferInfo->Pitch;
+    InformationBlock->Width = FrameBufferInfo->ModeInfo.Width;
+    InformationBlock->Height = FrameBufferInfo->ModeInfo.Height;
+    InformationBlock->BitsPerPixel = FrameBufferInfo->ModeInfo.BitsPerPixel;
+    InformationBlock->PixelsPerScanLine = FrameBufferInfo->ModeInfo.PixelsPerScanLine;
+    InformationBlock->Pitch = FrameBufferInfo->ModeInfo.Pitch;
 }
 
 XTCDECL

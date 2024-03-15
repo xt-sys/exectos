@@ -16,7 +16,20 @@
 /* FrameBuffer support protocol related routines forward references */
 XTCDECL
 EFI_STATUS
+FbGetDisplayDriver(OUT PEFI_GRAPHICS_PROTOCOL Protocol);
+
+XTCDECL
+EFI_STATUS
+FbGetDisplayInformation(OUT PXTBL_FRAMEBUFFER_INFORMATION FbInfo);
+
+XTCDECL
+EFI_STATUS
 FbInitializeDisplay();
+
+XTCDECL
+EFI_STATUS
+FbSetScreenResolution(IN UINT Width,
+                      IN UINT Height);
 
 XTCDECL
 EFI_STATUS
@@ -29,9 +42,12 @@ FbpGetColorMask(IN UINT EfiMask,
                 OUT PUSHORT ColorShift);
 
 XTCDECL
+EFI_STATUS
+FbpGetModeInfo();
+
+XTCDECL
 VOID
-FbpGetPixelInformation(IN OUT PXTBL_FRAMEBUFFER_INFORMATION FrameBufferInfo,
-                       IN PEFI_PIXEL_BITMASK PixelsBitMask);
+FbpGetPixelInformation(IN PEFI_PIXEL_BITMASK PixelsBitMask);
 
 XTCDECL
 EFI_STATUS

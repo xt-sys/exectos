@@ -123,6 +123,7 @@ typedef EFI_STATUS (*PBL_EXECIMAGE_VERIFY_IMAGE)(IN PVOID ImagePointer);
 typedef EFI_STATUS (*PBL_FRAMEBUFFER_GET_DISPLAY_DRIVER)(OUT PEFI_GRAPHICS_PROTOCOL Protocol);
 typedef EFI_STATUS (*PBL_FRAMEBUFFER_GET_DISPLAY_INFORMATION)(OUT PXTBL_FRAMEBUFFER_INFORMATION FbInfo);
 typedef EFI_STATUS (*PBL_FRAMEBUFFER_INITIALIZE)();
+typedef EFI_STATUS (*PBL_FRAMEBUFFER_SET_SCREEN_RESOLUTION)(IN UINT Width, IN UINT Height);
 
 /* Boot parameters structure */
 typedef struct _XTBL_BOOT_PARAMETERS
@@ -252,24 +253,35 @@ typedef struct _XTBL_FRAMEBUFFER_INFORMATION
     EFI_GRAPHICS_PROTOCOL Protocol;
     EFI_PHYSICAL_ADDRESS FrameBufferBase;
     ULONG_PTR FrameBufferSize;
-    UINT Width;
-    UINT Height;
-    UINT BitsPerPixel;
-    UINT BytesPerPixel;
-    UINT PixelsPerScanLine;
-    UINT Pitch;
-    EFI_GRAPHICS_PIXEL_FORMAT PixelFormat;
+    UINT DefaultMode;
+    union
+    {
+        PEFI_GRAPHICS_OUTPUT_PROTOCOL Gop;
+        PEFI_UNIVERSAL_GRAPHICS_ADAPTER_PROTOCOL Uga;
+    } Driver;
     struct
     {
-        USHORT BlueMask;
-        USHORT BlueShift;
-        USHORT GreenMask;
-        USHORT GreenShift;
-        USHORT RedMask;
-        USHORT RedShift;
-        USHORT ReservedMask;
-        USHORT ReservedShift;
-    } PixelInformation;
+        UINT Width;
+        UINT Height;
+        UINT Depth;
+        UINT RefreshRate;
+        UINT BitsPerPixel;
+        UINT BytesPerPixel;
+        UINT PixelsPerScanLine;
+        UINT Pitch;
+        EFI_GRAPHICS_PIXEL_FORMAT PixelFormat;
+        struct
+        {
+            USHORT BlueMask;
+            USHORT BlueShift;
+            USHORT GreenMask;
+            USHORT GreenShift;
+            USHORT RedMask;
+            USHORT RedShift;
+            USHORT ReservedMask;
+            USHORT ReservedShift;
+        } PixelInformation;
+    } ModeInfo;
 } XTBL_FRAMEBUFFER_INFORMATION, *PXTBL_FRAMEBUFFER_INFORMATION;
 
 /* XTLDR ACPI protocol structure */
@@ -311,6 +323,7 @@ typedef struct _XTBL_FRAMEBUFFER_PROTOCOL
     PBL_FRAMEBUFFER_GET_DISPLAY_DRIVER GetDisplayDriver;
     PBL_FRAMEBUFFER_GET_DISPLAY_INFORMATION GetDisplayInformation;
     PBL_FRAMEBUFFER_INITIALIZE Initialize;
+    PBL_FRAMEBUFFER_SET_SCREEN_RESOLUTION SetScreenResolution;
 } XTBL_FRAMEBUFFER_PROTOCOL, *PXTBL_FRAMEBUFFER_PROTOCOL;
 
 /* XTLDR Loader protocol structure */
