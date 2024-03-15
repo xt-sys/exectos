@@ -252,7 +252,9 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
                 IN PXTBL_BOOT_PARAMETERS Parameters)
 {
     EFI_GUID LoadedImageGuid = EFI_LOADED_IMAGE_PROTOCOL_GUID;
+    EFI_GUID FrameBufGuid = XT_FRAMEBUFFER_PROTOCOL_GUID;
     PKERNEL_INITIALIZATION_BLOCK KernelParameters;
+    PXTBL_FRAMEBUFFER_PROTOCOL FrameBufProtocol;
     PPECOFF_IMAGE_CONTEXT ImageContext = NULL;
     PEFI_LOADED_IMAGE_PROTOCOL ImageProtocol;
     PVOID VirtualAddress, VirtualMemoryArea;
@@ -263,6 +265,18 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
 
     /* Initialize XTOS startup sequence */
     XtLdrProtocol->Debug.Print(L"Initializing XTOS startup sequence\n");
+
+    /* Load FrameBuffer protocol */
+    Status = XtLdrProtocol->Protocol.Open(&ProtocolHandle, (PVOID*)&FrameBufProtocol, &FrameBufGuid);
+    if(Status == STATUS_EFI_SUCCESS)
+    {
+        /* Make sure FrameBuffer is initialized */
+        FrameBufProtocol->Initialize();
+        FrameBufProtocol->SetScreenResolution(0, 0);
+    }
+
+    /* Close FrameBuffer protocol */
+    XtLdrProtocol->Protocol.Close(ProtocolHandle, &FrameBufGuid);
 
     /* Set base virtual memory area for the kernel mappings */
     VirtualMemoryArea = (PVOID)KSEG0_BASE;
@@ -438,8 +452,7 @@ XtpInitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
     Status = XtLdrProtocol->Protocol.Open(&ProtocolHandle, (PVOID*)&FrameBufProtocol, &FrameBufGuid);
     if(Status == STATUS_EFI_SUCCESS)
     {
-        /* Make sure FrameBuffer is initialized */
-        FrameBufProtocol->Initialize();
+        /* Get FrameBuffer information */
         FrameBufProtocol->GetDisplayInformation(FrameBufInfo);
 
         /* Store information about FrameBuffer device */
