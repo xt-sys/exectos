@@ -20,7 +20,9 @@ FbGetDisplayDriver(OUT PEFI_GRAPHICS_PROTOCOL Protocol);
 
 XTCDECL
 EFI_STATUS
-FbGetDisplayInformation(OUT PXTBL_FRAMEBUFFER_INFORMATION FbInfo);
+FbGetDisplayInformation(OUT PEFI_PHYSICAL_ADDRESS FrameBufferBase,
+                        OUT PULONG_PTR FrameBufferSize,
+                        OUT PXTBL_FRAMEBUFFER_MODE_INFORMATION ModeInfo);
 
 XTCDECL
 EFI_STATUS

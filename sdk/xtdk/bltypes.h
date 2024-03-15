@@ -121,7 +121,7 @@ typedef EFI_STATUS (*PBL_EXECIMAGE_RELOCATE_IMAGE)(IN PVOID ImagePointer, IN EFI
 typedef EFI_STATUS (*PBL_EXECIMAGE_UNLOAD_IMAGE)(IN PVOID ImagePointer);
 typedef EFI_STATUS (*PBL_EXECIMAGE_VERIFY_IMAGE)(IN PVOID ImagePointer);
 typedef EFI_STATUS (*PBL_FRAMEBUFFER_GET_DISPLAY_DRIVER)(OUT PEFI_GRAPHICS_PROTOCOL Protocol);
-typedef EFI_STATUS (*PBL_FRAMEBUFFER_GET_DISPLAY_INFORMATION)(OUT PXTBL_FRAMEBUFFER_INFORMATION FbInfo);
+typedef EFI_STATUS (*PBL_FRAMEBUFFER_GET_DISPLAY_INFORMATION)(OUT PEFI_PHYSICAL_ADDRESS FrameBufferBase, OUT PULONG_PTR FrameBufferSize, OUT PXTBL_FRAMEBUFFER_MODE_INFORMATION ModeInfo);
 typedef EFI_STATUS (*PBL_FRAMEBUFFER_INITIALIZE)();
 typedef EFI_STATUS (*PBL_FRAMEBUFFER_SET_SCREEN_RESOLUTION)(IN UINT Width, IN UINT Height);
 
@@ -246,6 +246,31 @@ typedef struct _XTBL_STATUS
     CPPORT SerialPort;
 } XTBL_STATUS, *PXTBL_STATUS;
 
+/* XT framebuffer video mode information structure definition */
+typedef struct _XTBL_FRAMEBUFFER_MODE_INFORMATION
+{
+    UINT Width;
+    UINT Height;
+    UINT Depth;
+    UINT RefreshRate;
+    UINT BitsPerPixel;
+    UINT BytesPerPixel;
+    UINT PixelsPerScanLine;
+    UINT Pitch;
+    EFI_GRAPHICS_PIXEL_FORMAT PixelFormat;
+    struct
+    {
+        USHORT BlueMask;
+        USHORT BlueShift;
+        USHORT GreenMask;
+        USHORT GreenShift;
+        USHORT RedMask;
+        USHORT RedShift;
+        USHORT ReservedMask;
+        USHORT ReservedShift;
+    } PixelInformation;
+} XTBL_FRAMEBUFFER_MODE_INFORMATION, *PXTBL_FRAMEBUFFER_MODE_INFORMATION;
+
 /* XT framebuffer information structure definition */
 typedef struct _XTBL_FRAMEBUFFER_INFORMATION
 {
@@ -259,29 +284,7 @@ typedef struct _XTBL_FRAMEBUFFER_INFORMATION
         PEFI_GRAPHICS_OUTPUT_PROTOCOL Gop;
         PEFI_UNIVERSAL_GRAPHICS_ADAPTER_PROTOCOL Uga;
     } Driver;
-    struct
-    {
-        UINT Width;
-        UINT Height;
-        UINT Depth;
-        UINT RefreshRate;
-        UINT BitsPerPixel;
-        UINT BytesPerPixel;
-        UINT PixelsPerScanLine;
-        UINT Pitch;
-        EFI_GRAPHICS_PIXEL_FORMAT PixelFormat;
-        struct
-        {
-            USHORT BlueMask;
-            USHORT BlueShift;
-            USHORT GreenMask;
-            USHORT GreenShift;
-            USHORT RedMask;
-            USHORT RedShift;
-            USHORT ReservedMask;
-            USHORT ReservedShift;
-        } PixelInformation;
-    } ModeInfo;
+    XTBL_FRAMEBUFFER_MODE_INFORMATION ModeInfo;
 } XTBL_FRAMEBUFFER_INFORMATION, *PXTBL_FRAMEBUFFER_INFORMATION;
 
 /* XTLDR ACPI protocol structure */

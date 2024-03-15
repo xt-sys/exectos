@@ -55,7 +55,9 @@ FbGetDisplayDriver(OUT PEFI_GRAPHICS_PROTOCOL Protocol)
  */
 XTCDECL
 EFI_STATUS
-FbGetDisplayInformation(OUT PXTBL_FRAMEBUFFER_INFORMATION FbInfo)
+FbGetDisplayInformation(OUT PEFI_PHYSICAL_ADDRESS FrameBufferBase,
+                        OUT PULONG_PTR FrameBufferSize,
+                        OUT PXTBL_FRAMEBUFFER_MODE_INFORMATION ModeInfo)
 {
     /* Check if framebuffer is initialized */
     if(!FbpDisplayInfo.Initialized)
@@ -64,19 +66,21 @@ FbGetDisplayInformation(OUT PXTBL_FRAMEBUFFER_INFORMATION FbInfo)
         return STATUS_EFI_NOT_READY;
     }
 
-    /* Copy framebuffer information */
-    FbInfo->ModeInfo.BitsPerPixel = FbpDisplayInfo.ModeInfo.BitsPerPixel;
-    FbInfo->ModeInfo.BytesPerPixel = FbpDisplayInfo.ModeInfo.BytesPerPixel;
-    FbInfo->ModeInfo.PixelFormat = FbpDisplayInfo.ModeInfo.PixelFormat;
-    FbInfo->ModeInfo.PixelInformation = FbpDisplayInfo.ModeInfo.PixelInformation;
-    FbInfo->ModeInfo.PixelsPerScanLine = FbpDisplayInfo.ModeInfo.PixelsPerScanLine;
-    FbInfo->ModeInfo.Width = FbpDisplayInfo.ModeInfo.Width;
-    FbInfo->ModeInfo.Height = FbpDisplayInfo.ModeInfo.Height;
-    FbInfo->ModeInfo.Pitch = FbpDisplayInfo.ModeInfo.Pitch;
-    FbInfo->FrameBufferBase = FbpDisplayInfo.FrameBufferBase;
-    FbInfo->FrameBufferSize = FbpDisplayInfo.FrameBufferSize;
-    FbInfo->Protocol = FbpDisplayInfo.Protocol;
-    FbInfo->Initialized = FbpDisplayInfo.Initialized;
+    /* Set basic framebuffer information */
+    *FrameBufferBase = FbpDisplayInfo.FrameBufferBase;
+    *FrameBufferSize = FbpDisplayInfo.FrameBufferSize;
+
+    /* Set framebuffer mode information */
+    ModeInfo->Width = FbpDisplayInfo.ModeInfo.Width;
+    ModeInfo->Height = FbpDisplayInfo.ModeInfo.Height;
+    ModeInfo->Depth = FbpDisplayInfo.ModeInfo.Depth;
+    ModeInfo->RefreshRate = FbpDisplayInfo.ModeInfo.RefreshRate;
+    ModeInfo->BitsPerPixel = FbpDisplayInfo.ModeInfo.BitsPerPixel;
+    ModeInfo->BytesPerPixel = FbpDisplayInfo.ModeInfo.BytesPerPixel;
+    ModeInfo->PixelsPerScanLine = FbpDisplayInfo.ModeInfo.PixelsPerScanLine;
+    ModeInfo->Pitch = FbpDisplayInfo.ModeInfo.Pitch;
+    ModeInfo->PixelFormat = FbpDisplayInfo.ModeInfo.PixelFormat;
+    ModeInfo->PixelInformation = FbpDisplayInfo.ModeInfo.PixelInformation;
 
     /* Return success */
     return STATUS_EFI_SUCCESS;

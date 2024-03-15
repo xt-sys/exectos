@@ -38,17 +38,18 @@ XTBL_BOOT_PROTOCOL XtBootProtocol;
 XTCDECL
 VOID
 XtGetDisplayInformation(OUT PLOADER_GRAPHICS_INFORMATION_BLOCK InformationBlock,
-                        IN PXTBL_FRAMEBUFFER_INFORMATION FrameBufferInfo)
+                        IN PEFI_PHYSICAL_ADDRESS FrameBufferBase,
+                        IN PULONG_PTR FrameBufferSize,
+                        IN PXTBL_FRAMEBUFFER_MODE_INFORMATION FrameBufferModeInfo)
 {
-    InformationBlock->Initialized = FrameBufferInfo->Initialized;
-    InformationBlock->Protocol = FrameBufferInfo->Protocol;
-    InformationBlock->Address = (PVOID)FrameBufferInfo->FrameBufferBase;
-    InformationBlock->BufferSize = FrameBufferInfo->FrameBufferSize;
-    InformationBlock->Width = FrameBufferInfo->ModeInfo.Width;
-    InformationBlock->Height = FrameBufferInfo->ModeInfo.Height;
-    InformationBlock->BitsPerPixel = FrameBufferInfo->ModeInfo.BitsPerPixel;
-    InformationBlock->PixelsPerScanLine = FrameBufferInfo->ModeInfo.PixelsPerScanLine;
-    InformationBlock->Pitch = FrameBufferInfo->ModeInfo.Pitch;
+    InformationBlock->Initialized = TRUE;
+    InformationBlock->Address = (PVOID)*FrameBufferBase;
+    InformationBlock->BufferSize = *FrameBufferSize;
+    InformationBlock->Width = FrameBufferModeInfo->Width;
+    InformationBlock->Height = FrameBufferModeInfo->Height;
+    InformationBlock->BitsPerPixel = FrameBufferModeInfo->BitsPerPixel;
+    InformationBlock->PixelsPerScanLine = FrameBufferModeInfo->PixelsPerScanLine;
+    InformationBlock->Pitch = FrameBufferModeInfo->Pitch;
 }
 
 XTCDECL
@@ -417,10 +418,11 @@ XtpInitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
 {
     EFI_GUID FrameBufGuid = XT_FRAMEBUFFER_PROTOCOL_GUID;
     PXTBL_FRAMEBUFFER_PROTOCOL FrameBufProtocol;
-    PXTBL_FRAMEBUFFER_INFORMATION FrameBufInfo = NULL;
+    XTBL_FRAMEBUFFER_MODE_INFORMATION FbModeInfo;
     PKERNEL_INITIALIZATION_BLOCK LoaderBlock;
-    EFI_PHYSICAL_ADDRESS Address;
+    EFI_PHYSICAL_ADDRESS Address, FbAddress;
     // PVOID RuntimeServices;
+    ULONG_PTR FbSize;
     EFI_STATUS Status;
     EFI_HANDLE ProtocolHandle;
     UINT BlockPages, FrameBufferPages;
@@ -453,16 +455,17 @@ XtpInitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
     if(Status == STATUS_EFI_SUCCESS)
     {
         /* Get FrameBuffer information */
-        FrameBufProtocol->GetDisplayInformation(FrameBufInfo);
-
-        /* Store information about FrameBuffer device */
-        XtGetDisplayInformation(&LoaderBlock->LoaderInformation.FrameBuffer, FrameBufInfo);
+        Status = FrameBufProtocol->GetDisplayInformation(&FbAddress, &FbSize, &FbModeInfo);
+        if(Status == STATUS_EFI_SUCCESS)
+        {
+            /* Store information about FrameBuffer device */
+            XtGetDisplayInformation(&LoaderBlock->LoaderInformation.FrameBuffer, &FbAddress, &FbSize, &FbModeInfo);
+        }
     }
-    else
+    if(Status != STATUS_EFI_SUCCESS)
     {
         /* No FrameBuffer available */
         LoaderBlock->LoaderInformation.FrameBuffer.Initialized = FALSE;
-        LoaderBlock->LoaderInformation.FrameBuffer.Protocol = NONE;
     }
 
     /* Close FrameBuffer protocol */

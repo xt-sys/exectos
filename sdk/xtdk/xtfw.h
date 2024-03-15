@@ -94,7 +94,6 @@ typedef struct _FIRMWARE_INFORMATION_BLOCK
 typedef struct _LOADER_GRAPHICS_INFORMATION_BLOCK
 {
     BOOLEAN Initialized;
-    EFI_GRAPHICS_PROTOCOL Protocol;
     PVOID Address;
     ULONG_PTR BufferSize;
     UINT Width;
