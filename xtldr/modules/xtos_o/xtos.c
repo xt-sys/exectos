@@ -286,7 +286,7 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
     /* Initialize virtual memory mappings */
     XtLdrProtocol->Memory.InitializePageMap(&PageMap, 3, Size4K);
 
-    Status = XtLdrProtocol->Memory.MapEfiMemory(&PageMap, &VirtualMemoryArea);
+    Status = XtLdrProtocol->Memory.MapEfiMemory(&PageMap, &VirtualMemoryArea, NULL);
     if(Status != STATUS_EFI_SUCCESS)
     {
         return Status;
