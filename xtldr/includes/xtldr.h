@@ -227,7 +227,8 @@ BlLocateProtocolHandles(OUT PEFI_HANDLE *Handles,
 XTCDECL
 EFI_STATUS
 BlMapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
-               IN OUT PVOID *DesiredVirtualAddress);
+               IN OUT PVOID *DesiredVirtualAddress,
+               IN PBL_GET_MEMTYPE_ROUTINE GetMemoryTypeRoutine);
 
 XTCDECL
 EFI_STATUS

@@ -264,6 +264,9 @@ BlInitializePageMap(OUT PXTBL_PAGE_MAPPING PageMap,
  * @param MemoryMapAddress
  *        Supplies a virtual address, where EFI memory will be mapped.
  *
+ * @param GetMemoryTypeRoutine
+ *        Supplies a pointer to the routine which will be used to match EFI memory type to the OS memory type.
+ *
  * @return This routine returns a status code.
  *
  * @since XT 1.0
@@ -271,7 +274,8 @@ BlInitializePageMap(OUT PXTBL_PAGE_MAPPING PageMap,
 XTCDECL
 EFI_STATUS
 BlMapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
-               IN OUT PVOID *MemoryMapAddress)
+               IN OUT PVOID *MemoryMapAddress,
+               IN PBL_GET_MEMTYPE_ROUTINE GetMemoryTypeRoutine)
 {
     PEFI_MEMORY_DESCRIPTOR Descriptor;
     LOADER_MEMORY_TYPE MemoryType;
@@ -283,6 +287,13 @@ BlMapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
 
     /* Set virtual address as specified in argument */
     VirtualAddress = *MemoryMapAddress;
+
+    /* Check if custom memory type routine is specified */
+    if(GetMemoryTypeRoutine == NULL)
+    {
+        /* Use default memory type routine */
+        GetMemoryTypeRoutine = (PBL_GET_MEMTYPE_ROUTINE)BlpGetLoaderMemoryType;
+    }
 
     /* Allocate and zero-fill buffer for EFI memory map */
     BlAllocateMemoryPool(sizeof(EFI_MEMORY_MAP), (PVOID*)&MemoryMap);
@@ -307,7 +318,7 @@ BlMapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
         if((Descriptor->PhysicalStart + (Descriptor->NumberOfPages * EFI_PAGE_SIZE)) <= (UINT_PTR)-1)
         {
             /* Convert EFI memory type into XTLDR memory type */
-            MemoryType = BlpGetLoaderMemoryType(Descriptor->Type);
+            MemoryType = GetMemoryTypeRoutine(Descriptor->Type);
 
             /* Do memory mappings depending on memory type */
             if(MemoryType == LoaderFirmwareTemporary)
