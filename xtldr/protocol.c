@@ -873,6 +873,7 @@ BlpInstallXtLoaderProtocol()
     BlpLdrProtocol.Boot.InvokeProtocol = BlInvokeBootProtocol;
     BlpLdrProtocol.Boot.RegisterMenu = BlRegisterBootMenu;
     BlpLdrProtocol.Boot.RegisterProtocol = BlRegisterBootProtocol;
+    BlpLdrProtocol.Config.GetBooleanValue = BlGetConfigBooleanValue;
     BlpLdrProtocol.Config.GetValue = BlGetConfigValue;
     BlpLdrProtocol.Console.ClearLine = BlClearConsoleLine;
     BlpLdrProtocol.Console.ClearScreen = BlClearConsoleScreen;
