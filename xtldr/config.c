@@ -10,6 +10,39 @@
 
 
 /**
+ * Returns a boolean value of the specified configuration key.
+ *
+ * @param ConfigName
+ *        Specifies the configuration key to return its boolean representation.
+ *
+ * @return This routine returns a boolean representation of the configuration value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+BOOLEAN
+BlGetConfigBooleanValue(IN CONST PWCHAR ConfigName)
+{
+    PWCHAR Value;
+
+    /* Get config value */
+    Value = BlGetConfigValue(ConfigName);
+
+    /* Check if option is enabled */
+    if(RtlCompareWideStringInsensitive(Value, L"ENABLED", 0) == 0 ||
+       RtlCompareWideStringInsensitive(Value, L"ON", 0) == 0 ||
+       RtlCompareWideStringInsensitive(Value, L"TRUE", 0) == 0 ||
+       RtlCompareWideStringInsensitive(Value, L"YES", 0) == 0)
+    {
+        /* This option is enabled */
+        return TRUE;
+    }
+
+    /* Return FALSE by default */
+    return FALSE;
+}
+
+/**
  * Returns a value of the specified configuration key.
  *
  * @param ConfigName

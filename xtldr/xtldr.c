@@ -112,7 +112,7 @@ BlInitializeBootMenuList(OUT PXTBL_BOOTMENU_ITEM MenuEntries,
     DefaultMenuEntry = BlGetConfigValue(L"DEFAULT");
 
     /* Check if configuration allows to use last booted OS */
-    if(RtlCompareWideStringInsensitive(BlGetConfigValue(L"KEEPLASTBOOT"), L"TRUE", 0) == 0)
+    if(BlGetConfigBooleanValue(L"KEEPLASTBOOT"))
     {
         /* Attempt to get last booted Operating System from NVRAM */
         Status = BlGetEfiVariable(&VendorGuid, L"XtLdrLastBootOS", (PVOID*)&LastBooted);
@@ -312,7 +312,7 @@ BlInvokeBootProtocol(IN PWCHAR ShortName,
     }
 
     /* Check if chosen operating system should be saved */
-    if(RtlCompareWideStringInsensitive(BlGetConfigValue(L"KEEPLASTBOOT"), L"TRUE", 0) == 0)
+    if(BlGetConfigBooleanValue(L"KEEPLASTBOOT"))
     {
         /* Save chosen operating system in NVRAM */
         Status = BlSetEfiVariable(&VendorGuid, L"XtLdrLastBootOS", (PVOID)ShortName, RtlWideStringLength(ShortName, 0) * sizeof(WCHAR));

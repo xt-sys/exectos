@@ -124,6 +124,10 @@ EFI_STATUS
 BlFreeMemoryPool(IN PVOID Memory);
 
 XTCDECL
+BOOLEAN
+BlGetConfigBooleanValue(IN CONST PWCHAR ConfigName);
+
+XTCDECL
 PWCHAR
 BlGetConfigValue(IN CONST PWCHAR ConfigName);
 
