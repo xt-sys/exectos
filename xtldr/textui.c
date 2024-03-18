@@ -135,7 +135,8 @@ BlDisplayBootMenu()
                     BlConsolePrint(L"Booting '%S' now...\n", MenuEntries[HighligtedEntryId].EntryName);
 
                     /* Boot the highlighted (chosen) OS */
-                    Status = BlInvokeBootProtocol(MenuEntries[HighligtedEntryId].Options);
+                    Status = BlInvokeBootProtocol(MenuEntries[HighligtedEntryId].ShortName,
+                                                  MenuEntries[HighligtedEntryId].Options);
                     if(Status != STATUS_SUCCESS)
                     {
                         /* Failed to boot OS */
@@ -279,7 +280,8 @@ BlDisplayBootMenu()
                     TimeOut = -1;
 
                     /* Boot the highlighted (default) OS */
-                    Status = BlInvokeBootProtocol(MenuEntries[HighligtedEntryId].Options);
+                    Status = BlInvokeBootProtocol(MenuEntries[HighligtedEntryId].ShortName,
+                                                  MenuEntries[HighligtedEntryId].Options);
                     if(Status != STATUS_SUCCESS)
                     {
                         /* Failed to boot OS */

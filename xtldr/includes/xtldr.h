@@ -207,7 +207,8 @@ BlInstallProtocol(IN PVOID Interface,
 
 XTCDECL
 EFI_STATUS
-BlInvokeBootProtocol(IN PLIST_ENTRY OptionsList);
+BlInvokeBootProtocol(IN PWCHAR ShortName,
+                     IN PLIST_ENTRY OptionsList);
 
 XTCDECL
 EFI_STATUS

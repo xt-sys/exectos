@@ -94,12 +94,14 @@ BlInitializeBootMenuList(OUT PXTBL_BOOTMENU_ITEM MenuEntries,
                          OUT PULONG EntriesCount,
                          OUT PULONG DefaultId)
 {
-    PWCHAR DefaultMenuEntry, MenuEntryName;
+    EFI_GUID VendorGuid = XT_BOOT_LOADER_PROTOCOL_GUID;
+    PWCHAR DefaultMenuEntry, LastBooted, MenuEntryName;
     PLIST_ENTRY MenuEntrySectionList, MenuEntryList;
     PXTBL_CONFIG_SECTION MenuEntrySection;
     PXTBL_CONFIG_ENTRY MenuEntryOption;
-    PXTBL_BOOTMENU_ITEM OsList;
     ULONG DefaultOS, NumberOfEntries;
+    PXTBL_BOOTMENU_ITEM OsList;
+    EFI_STATUS Status;
 
     /* Set default values */
     DefaultOS = 0;
@@ -108,6 +110,20 @@ BlInitializeBootMenuList(OUT PXTBL_BOOTMENU_ITEM MenuEntries,
 
     /* Get default menu entry from configuration */
     DefaultMenuEntry = BlGetConfigValue(L"DEFAULT");
+
+    /* Check if configuration allows to use last booted OS */
+    if(RtlCompareWideStringInsensitive(BlGetConfigValue(L"KEEPLASTBOOT"), L"TRUE", 0) == 0)
+    {
+        /* Attempt to get last booted Operating System from NVRAM */
+        Status = BlGetEfiVariable(&VendorGuid, L"XtLdrLastBootOS", (PVOID*)&LastBooted);
+        if(Status == STATUS_EFI_SUCCESS)
+        {
+            /* Set default menu entry to last booted OS */
+            DefaultMenuEntry = LastBooted;
+        }
+        BlDebugPrint(L"Last booted OS: '%S' - '%S'\n", LastBooted, DefaultMenuEntry);
+        BlSleepExecution(5000);
+    }
 
     /* Iterate through all menu sections */
     MenuEntrySectionList = BlpMenuList->Flink;
@@ -146,6 +162,7 @@ BlInitializeBootMenuList(OUT PXTBL_BOOTMENU_ITEM MenuEntries,
 
         /* Add OS to the boot menu list */
         OsList[NumberOfEntries].EntryName = MenuEntryName;
+        OsList[NumberOfEntries].ShortName = MenuEntrySection->SectionName;
         OsList[NumberOfEntries].Options = &MenuEntrySection->Options;
 
         /* Get next menu entry */
@@ -162,6 +179,9 @@ BlInitializeBootMenuList(OUT PXTBL_BOOTMENU_ITEM MenuEntries,
 /**
  * Loads all necessary modules and invokes boot protocol.
  *
+ * @param ShortName
+ *        Supplies a pointer to a short name of the chosen boot menu entry.
+ *
  * @param OptionsList
  *        Supplies a pointer to list of options associated with chosen boot menu entry.
  *
@@ -171,8 +191,10 @@ BlInitializeBootMenuList(OUT PXTBL_BOOTMENU_ITEM MenuEntries,
  */
 XTCDECL
 EFI_STATUS
-BlInvokeBootProtocol(IN PLIST_ENTRY OptionsList)
+BlInvokeBootProtocol(IN PWCHAR ShortName,
+                     IN PLIST_ENTRY OptionsList)
 {
+    EFI_GUID VendorGuid = XT_BOOT_LOADER_PROTOCOL_GUID;
     XTBL_BOOT_PARAMETERS BootParameters;
     PXTBL_BOOT_PROTOCOL BootProtocol;
     PLIST_ENTRY OptionsListEntry;
@@ -287,6 +309,21 @@ BlInvokeBootProtocol(IN PLIST_ENTRY OptionsList)
         /* Failed to open boot protocol */
         BlDebugPrint(L"ERROR: Failed to open boot protocol (Status Code: 0x%zX)\n", Status);
         return Status;
+    }
+
+    /* Check if chosen operating system should be saved */
+    if(RtlCompareWideStringInsensitive(BlGetConfigValue(L"KEEPLASTBOOT"), L"TRUE", 0) == 0)
+    {
+        /* Save chosen operating system in NVRAM */
+        Status = BlSetEfiVariable(&VendorGuid, L"XtLdrLastBootOS", (PVOID)ShortName, RtlWideStringLength(ShortName, 0) * sizeof(WCHAR));
+        if(Status != STATUS_EFI_SUCCESS)
+        {
+            /* Failed to save chosen Operating System */
+            BlDebugPrint(L"WARNING: Failed to save chosen Operating System in NVRAM (Status Code: 0x%zX)\n", Status);
+        }
+
+        BlDebugPrint(L"Now setting OS: '%S'\n", ShortName);
+        BlSleepExecution(5000);
     }
 
     /* Boot Operating System */
