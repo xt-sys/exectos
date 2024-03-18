@@ -138,6 +138,12 @@ BlGetEfiPath(IN PWCHAR SystemPath,
              OUT PWCHAR *EfiPath);
 
 XTCDECL
+EFI_STATUS
+BlGetEfiVariable(IN PEFI_GUID Vendor,
+                 IN PWCHAR VariableName,
+                 OUT PVOID *VariableValue);
+
+XTCDECL
 VOID
 BlGetMappingsCount(IN PXTBL_PAGE_MAPPING PageMap,
                    OUT PULONG NumberOfMappings);
@@ -326,6 +332,13 @@ XTCDECL
 VOID
 BlSetCursorPosition(IN ULONGLONG PosX,
                     IN ULONGLONG PosY);
+
+XTCDECL
+EFI_STATUS
+BlSetEfiVariable(IN PEFI_GUID Vendor,
+                 IN PWCHAR VariableName,
+                 IN PVOID VariableValue,
+                 IN UINT_PTR Size);
 
 XTCDECL
 EFI_STATUS

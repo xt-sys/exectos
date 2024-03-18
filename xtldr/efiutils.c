@@ -104,6 +104,54 @@ BlGetConfigurationTable(IN PEFI_GUID TableGuid,
 }
 
 /**
+ * Gets the value of the EFI variable.
+ *
+ * @param Vendor
+ *        Supplies a pointer to the unique vendor GUID.
+ *
+ * @param VariableName
+ *        Supplies a pointer to tge NULL-terminated string containing the variable name.
+ *
+ * @param VariableValue
+ *        Supplies a pointer to the buffer, where the variable value will be stored.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+BlGetEfiVariable(IN PEFI_GUID Vendor,
+                 IN PWCHAR VariableName,
+                 OUT PVOID *VariableValue)
+{
+    EFI_STATUS Status;
+    PVOID Buffer;
+    UINT_PTR Size;
+
+    /* Allocate a buffer for storing a variable's value */
+    Size = EFI_MAXIMUM_VARIABLE_SIZE * sizeof(PWCHAR);
+    Status = BlAllocateMemoryPool(Size, (PVOID*)&Buffer);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Memory allocation failure */
+        return Status;
+    }
+
+    /* Attempt to get variable value */
+    Status = EfiSystemTable->RuntimeServices->GetVariable(VariableName, Vendor, NULL, &Size, Buffer);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to get variable, probably not found such one */
+        return Status;
+    }
+
+    /* Get variable value and return success */
+    *VariableValue = Buffer;
+    return STATUS_EFI_SUCCESS;
+}
+
+/**
  * Returns a random value based on the initialized RNG buffer.
  *
  * @param RNGBuffer
@@ -248,6 +296,39 @@ BlRebootSystem()
 {
     /* Reboot machine */
     return EfiSystemTable->RuntimeServices->ResetSystem(EfiResetCold, STATUS_EFI_SUCCESS, 0, NULL);
+}
+
+/**
+ * Sets a value of an EFI variable.
+ *
+ * @param Vendor
+ *        Supplies a pointer to the unique vendor GUID.
+ *
+ * @param VariableName
+ *        Supplies a pointer to tge NULL-terminated string containing the variable name.
+ *
+ * @param VariableValue
+ *        Supplies the contents of the variable.
+ *
+ * @param Size
+ *        Supplies the size of the variable data buffer.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+BlSetEfiVariable(IN PEFI_GUID Vendor,
+                 IN PWCHAR VariableName,
+                 IN PVOID VariableValue,
+                 IN UINT_PTR Size)
+{
+    ULONG Attributes;
+
+    /* Set EFI variable */
+    Attributes = EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS;
+    return EfiSystemTable->RuntimeServices->SetVariable(VariableName, Vendor, Attributes, Size, VariableValue);
 }
 
 /**
