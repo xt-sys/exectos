@@ -69,6 +69,7 @@ typedef EFI_STATUS (*PBL_FIND_BOOT_PROTOCOL)(IN PWCHAR SystemType, OUT PEFI_GUID
 typedef EFI_STATUS (*PBL_FREE_PAGES)(IN ULONGLONG Size, IN EFI_PHYSICAL_ADDRESS Memory);
 typedef EFI_STATUS (*PBL_FREE_POOL)(IN PVOID Memory);
 typedef EFI_STATUS (*PBL_GET_CONFIGURATION_TABLE)(IN PEFI_GUID TableGuid, OUT PVOID *Table);
+typedef EFI_STATUS (*PBL_GET_EFI_VARIABLE)(IN PEFI_GUID Vendor, IN PWCHAR VariableName, OUT PVOID *VariableValue);
 typedef VOID (*PBL_GET_MAPPINGS_COUNT)(IN PXTBL_PAGE_MAPPING PageMap, OUT PULONG NumberOfMappings);
 typedef EFI_STATUS (*PBL_GET_MEMORY_MAP)(OUT PEFI_MEMORY_MAP MemoryMap);
 typedef PLIST_ENTRY (*PBL_GET_MODULES_LIST)();
@@ -93,6 +94,7 @@ typedef EFI_STATUS (*PBL_POWER_SYSTEM)();
 typedef EFI_STATUS (*PBL_READ_FILE)(IN PEFI_FILE_HANDLE DirHandle, IN CONST PWCHAR FileName, OUT PVOID *FileData, OUT PSIZE_T FileSize);
 typedef EFI_STATUS (*PBL_REGISTER_BOOT_PROTOCOL)(IN PWCHAR SystemType, IN PEFI_GUID BootProtocolGuid);
 typedef VOID (*PBL_REGISTER_XT_BOOT_MENU)(PVOID BootMenuRoutine);
+typedef EFI_STATUS (*PBL_SET_EFI_VARIABLE)(IN PEFI_GUID Vendor, IN PWCHAR VariableName, IN PVOID VariableValue, IN UINT_PTR Size);
 typedef VOID (XTAPI *PBL_SET_MEMORY)(OUT PVOID Destination, IN UCHAR Byte, IN SIZE_T Length);
 typedef VOID (*PBL_SLEEP_EXECUTION)(IN ULONG_PTR Milliseconds);
 typedef EFI_STATUS (*PBL_START_EFI_IMAGE)(IN EFI_HANDLE ImageHandle);
@@ -415,11 +417,13 @@ typedef struct _XTBL_LOADER_PROTOCOL
     {
         PBL_EXIT_BOOT_SERVICES ExitBootServices;
         PBL_GET_CONFIGURATION_TABLE GetConfigurationTable;
+        PBL_GET_EFI_VARIABLE GetEfiVariable;
         PBL_GET_RANDOM_VALUE GetRandomValue;
         PBL_GET_SECURE_BOOT_STATUS GetSecureBootStatus;
         PBL_INITIALIZE_ENTROPY InitializeEntropy;
         PBL_LOAD_EFI_IMAGE LoadEfiImage;
         PBL_POWER_SYSTEM RebootSystem;
+        PBL_SET_EFI_VARIABLE SetEfiVariable;
         PBL_POWER_SYSTEM ShutdownSystem;
         PBL_SLEEP_EXECUTION SleepExecution;
         PBL_START_EFI_IMAGE StartEfiImage;

@@ -920,11 +920,13 @@ BlpInstallXtLoaderProtocol()
     BlpLdrProtocol.Tui.UpdateProgressBar = BlUpdateProgressBar;
     BlpLdrProtocol.Util.ExitBootServices = BlExitBootServices;
     BlpLdrProtocol.Util.GetConfigurationTable = BlGetConfigurationTable;
+    BlpLdrProtocol.Util.GetEfiVariable = BlGetEfiVariable;
     BlpLdrProtocol.Util.GetRandomValue = BlGetRandomValue;
     BlpLdrProtocol.Util.GetSecureBootStatus = BlGetSecureBootStatus;
     BlpLdrProtocol.Util.InitializeEntropy = BlInitializeEntropy;
     BlpLdrProtocol.Util.LoadEfiImage = BlLoadEfiImage;
     BlpLdrProtocol.Util.RebootSystem = BlRebootSystem;
+    BlpLdrProtocol.Util.SetEfiVariable = BlSetEfiVariable;
     BlpLdrProtocol.Util.ShutdownSystem = BlShutdownSystem;
     BlpLdrProtocol.Util.SleepExecution = BlSleepExecution;
     BlpLdrProtocol.Util.StartEfiImage = BlStartEfiImage;
