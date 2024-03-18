@@ -121,8 +121,6 @@ BlInitializeBootMenuList(OUT PXTBL_BOOTMENU_ITEM MenuEntries,
             /* Set default menu entry to last booted OS */
             DefaultMenuEntry = LastBooted;
         }
-        BlDebugPrint(L"Last booted OS: '%S' - '%S'\n", LastBooted, DefaultMenuEntry);
-        BlSleepExecution(5000);
     }
 
     /* Iterate through all menu sections */
@@ -321,9 +319,6 @@ BlInvokeBootProtocol(IN PWCHAR ShortName,
             /* Failed to save chosen Operating System */
             BlDebugPrint(L"WARNING: Failed to save chosen Operating System in NVRAM (Status Code: 0x%zX)\n", Status);
         }
-
-        BlDebugPrint(L"Now setting OS: '%S'\n", ShortName);
-        BlSleepExecution(5000);
     }
 
     /* Boot Operating System */
