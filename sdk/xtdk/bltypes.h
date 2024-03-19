@@ -64,6 +64,7 @@ typedef VOID (*PBL_CONSOLE_SET_CURSOR_POSITION)(IN ULONGLONG PosX, IN ULONGLONG 
 typedef VOID (*PBL_CONSOLE_WRITE)(IN PUSHORT String);
 typedef VOID (XTAPI *PBL_COPY_MEMORY)(OUT PVOID Destination, IN PCVOID Source, IN SIZE_T Length);
 typedef VOID (*PBL_DEBUG_PRINT)(IN PUSHORT Format, IN ...);
+typedef EFI_STATUS (*PBL_ENTER_FIRMWARE_SETUP)();
 typedef EFI_STATUS (*PBL_EXIT_BOOT_SERVICES)();
 typedef EFI_STATUS (*PBL_FIND_BOOT_PROTOCOL)(IN PWCHAR SystemType, OUT PEFI_GUID BootProtocolGuid);
 typedef EFI_STATUS (*PBL_FREE_PAGES)(IN ULONGLONG Size, IN EFI_PHYSICAL_ADDRESS Memory);
@@ -415,6 +416,7 @@ typedef struct _XTBL_LOADER_PROTOCOL
     } Tui;
     struct
     {
+        PBL_ENTER_FIRMWARE_SETUP EnterFirmwareSetup;
         PBL_EXIT_BOOT_SERVICES ExitBootServices;
         PBL_GET_CONFIGURATION_TABLE GetConfigurationTable;
         PBL_GET_EFI_VARIABLE GetEfiVariable;
