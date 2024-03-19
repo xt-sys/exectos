@@ -215,11 +215,21 @@ BlDisplayBootMenu()
                                                   L"Press 'e' key to edit the highlighted menu entry.\n"
                                                   L"Press 's' key to exit into XTLDR shell (enters advanced mode).\n"
                                                   L" \n"
-                                                  L"F1 shows this help, F11 reboots the machine and F12 turns it off.\n"
+                                                  L"F1 shows this help, F10 reboots into UEFI firmware interface,\n"
+                                                  L"F11 reboots the machine and F12 turns it off.\n"
                                                   L" \n"
                                                   L" \n"
                                                   L"XTLDR is a part of the ExectOS Operating System.\n"
                                                   L"Visit https://exectos.eu.org/ for more information.");
+
+                    /* Break from boot menu event loop to redraw whole boot menu */
+                    break;
+                }
+                else if(Key.ScanCode == 0x14)
+                {
+                    /* F10 key pressed, reboot into UEFI setup interface */
+                    BlEnterFirmwareSetup();
+                    BlDisplayErrorDialog(L"XTLDR", L"Reboot into firmware setup interface not supported!");
 
                     /* Break from boot menu event loop to redraw whole boot menu */
                     break;
