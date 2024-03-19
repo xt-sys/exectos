@@ -57,6 +57,80 @@ RtlClearBit(IN PRTL_BITMAP BitMap,
 }
 
 /**
+ * Clears a specified set of bits within a bit map.
+ *
+ * @param BitMap
+ *        Supplies a pointer to the bit map.
+ *
+ * @param StartingIndex
+ *        Supplies the starting index of the first bit to clear.
+ *
+ * @param Length
+ *        Supplies the length (number of bits) to clear.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since NT 3.5
+ */
+XTAPI
+VOID
+RtlClearBits(IN PRTL_BITMAP BitMap,
+             IN ULONG StartingIndex,
+             IN ULONG Length)
+{
+    ULONG_PTR BitOffset, Mask;
+    PULONG_PTR Buffer;
+
+    /* Make sure there is anything to clear */
+    if(!Length)
+    {
+        /* No bits to clear */
+        return;
+    }
+
+    /* Get pointer to first byte to clear and calculate bit offset */
+    Buffer = &BitMap->Buffer[StartingIndex / BITS_PER_LONG];
+    BitOffset = StartingIndex & (BITS_PER_LONG - 1);
+
+    /* Check if bit offset is not zero */
+    if(BitOffset)
+    {
+        /* Get mask and calculate new bit offset */
+        Mask = MAXULONG_PTR << BitOffset;
+        BitOffset = BITS_PER_LONG - BitOffset;
+
+        /* Check if there are enough bits to clear */
+        if(Length < BitOffset)
+        {
+            /* Recalculate bit offset and fixup the mask */
+            BitOffset -= Length;
+            Mask = Mask << BitOffset >> BitOffset;
+
+            /* Clear bits and return */
+            *Buffer &= ~Mask;
+            return;
+        }
+
+        /* Clear bits, recalculate length and advance buffer pointer */
+        *Buffer &= ~Mask;
+        Length -= BitOffset;
+        Buffer++;
+    }
+
+    /* Clear remaining bits */
+    RtlSetMemory(Buffer, 0, Length >> 3);
+
+    /* Look for any remaining bits to clear */
+    Buffer += Length / BITS_PER_LONG;
+    Length &= BITS_PER_LONG - 1;
+    if(Length)
+    {
+        /* Clear what's left */
+        *Buffer &= MAXULONG_PTR << Length;
+    }
+}
+
+/**
  * Dumps the contents of the bit map.
  *
  * @param BitMap
@@ -154,6 +228,80 @@ RtlSetBit(IN PRTL_BITMAP BitMap,
 
     /* Set specified bit */
     BitMap->Buffer[Bit / BITS_PER_LONG] |= 1 << (Bit & (BITS_PER_LONG - 1));
+}
+
+/**
+ * Sets a specified set of bits within a bit map.
+ *
+ * @param BitMap
+ *        Supplies a pointer to the bit map.
+ *
+ * @param StartingIndex
+ *        Supplies the starting index of the first bit to set.
+ *
+ * @param Length
+ *        Supplies the length (number of bits) to set.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since NT 3.5
+ */
+XTAPI
+VOID
+RtlSetBits(IN PRTL_BITMAP BitMap,
+           IN ULONG StartingIndex,
+           IN ULONG Length)
+{
+    ULONG_PTR BitOffset, Mask;
+    PULONG_PTR Buffer;
+
+    /* Make sure there is anything to set */
+    if(!Length)
+    {
+        /* No bits to set */
+        return;
+    }
+
+    /* Get pointer to first byte to clear and calculate bit offset */
+    Buffer = &BitMap->Buffer[StartingIndex / BITS_PER_LONG];
+    BitOffset = StartingIndex & (BITS_PER_LONG - 1);
+
+    /* Check if bit offset is not zero */
+    if(BitOffset)
+    {
+        /* Get mask and calculate new bit offset */
+        Mask = MAXULONG_PTR << BitOffset;
+        BitOffset = BITS_PER_LONG - BitOffset;
+
+        /* Check if there are enough bits to set */
+        if(Length < BitOffset)
+        {
+            /* Recalculate bit offset and fixup the mask */
+            BitOffset -= Length;
+            Mask = Mask << BitOffset >> BitOffset;
+
+            /* Set bits and return */
+            *Buffer |= Mask;
+            return;
+        }
+
+        /* Set bits, recalculate length and advance buffer pointer */
+        *Buffer |= Mask;
+        Buffer++;
+        Length -= BitOffset;
+    }
+
+    /* Set remaining bits */
+    RtlSetMemory(Buffer, 0xFF, Length >> 3);
+
+    /* Look for any remaining bits to set */
+    Buffer += Length / BITS_PER_LONG;
+    Length &= BITS_PER_LONG - 1;
+    if(Length)
+    {
+        /* Set what's left */
+        *Buffer |= ~(MAXULONG_PTR << Length);
+    }
 }
 
 /**

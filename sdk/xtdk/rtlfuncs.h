@@ -59,6 +59,12 @@ RtlClearBit(IN PRTL_BITMAP BitMap,
             IN ULONG_PTR Bit);
 
 XTAPI
+VOID
+RtlClearBits(IN PRTL_BITMAP BitMap,
+             IN ULONG StartingIndex,
+             IN ULONG Length);
+
+XTAPI
 BOOLEAN
 RtlCompareGuids(IN PGUID Guid1,
                 IN PGUID Guid2);
@@ -184,6 +190,12 @@ XTAPI
 VOID
 RtlSetBit(IN PRTL_BITMAP BitMap,
           IN ULONG_PTR Bit);
+
+XTAPI
+VOID
+RtlSetBits(IN PRTL_BITMAP BitMap,
+           IN ULONG StartingIndex,
+           IN ULONG Length);
 
 XTAPI
 VOID
