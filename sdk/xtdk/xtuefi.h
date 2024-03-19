@@ -312,6 +312,9 @@
 #define EFI_TEXT_BOX_FULL_BLOCK                                     0x2588
 #define EFI_TEXT_BOX_LIGHT_BLOCK                                    0x2591
 
+/* EFI OS indication bits */
+#define EFI_OS_INDICATIONS_BOOT_TO_FW_UI                            0x0000000000000001ULL
+
 /* EFI protocols GUIDs */
 #define EFI_BLOCK_IO_PROTOCOL_GUID                         {0x964E5B21, 0x6459, 0x11D2, {0x8E, 0x39, 0x00, 0xA0, 0xC9, 0x69, 0x72, 0x3B}}
 #define EFI_BLOCK_IO2_PROTOCOL_GUID                        {0xA77B2472, 0xE282, 0x4E9F, {0xA2, 0x45, 0xC2, 0xC0, 0xE2, 0x7B, 0xBC, 0xC1}}

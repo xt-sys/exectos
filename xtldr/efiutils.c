@@ -10,6 +10,51 @@
 
 
 /**
+ * Reboots into UEFI firmware setup interface.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+BlEnterFirmwareSetup()
+{
+    EFI_GUID Guid = EFI_GLOBAL_VARIABLE_GUID;
+    PULONGLONG SetupSupport;
+    ULONGLONG Indications;
+    EFI_STATUS Status;
+
+    /* Check if booting into firmware interface is supported */
+    Status = BlGetEfiVariable(&Guid, L"OsIndicationsSupported", (PVOID*)&SetupSupport);
+    if(Status != STATUS_EFI_SUCCESS || !(*SetupSupport & EFI_OS_INDICATIONS_BOOT_TO_FW_UI))
+    {
+        /* Reboot into firmware setup is not supported */
+        BlDebugPrint(L"WARNING: Reboot into firmware setup interface not supported\n");
+        return STATUS_EFI_UNSUPPORTED;
+    }
+
+    /* Get the value of OsIndications variable */
+    Indications = 0;
+    Status = BlGetEfiVariable(&Guid, L"OsIndications", (PVOID)&Indications);
+
+    /* Enable FW setup on next boot */
+    Indications |= EFI_OS_INDICATIONS_BOOT_TO_FW_UI;
+    Status = BlSetEfiVariable(&Guid, L"OsIndications", (PVOID)&Indications, sizeof(Indications));
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to update OsIndications variable */
+        return Status;
+    }
+
+    /* Reboot into firmware setup */
+    BlRebootSystem();
+
+    /* Must not reach this point, just make the compiler happy */
+    return STATUS_EFI_SUCCESS;
+}
+
+/**
  * Exits EFI boot services.
  *
  * @return This routine returns status code.

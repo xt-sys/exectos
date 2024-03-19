@@ -97,6 +97,10 @@ BlEnableConsoleCursor();
 
 XTCDECL
 EFI_STATUS
+BlEnterFirmwareSetup();
+
+XTCDECL
+EFI_STATUS
 BlEnumerateBlockDevices();
 
 XTCDECL
