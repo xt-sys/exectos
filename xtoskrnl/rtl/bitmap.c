@@ -75,8 +75,8 @@ RtlClearBit(IN PRTL_BITMAP BitMap,
 XTAPI
 VOID
 RtlClearBits(IN PRTL_BITMAP BitMap,
-             IN ULONG StartingIndex,
-             IN ULONG Length)
+             IN ULONG_PTR StartingIndex,
+             IN ULONG_PTR Length)
 {
     ULONG_PTR BitOffset, Mask;
     PULONG_PTR Buffer;
@@ -249,8 +249,8 @@ RtlSetBit(IN PRTL_BITMAP BitMap,
 XTAPI
 VOID
 RtlSetBits(IN PRTL_BITMAP BitMap,
-           IN ULONG StartingIndex,
-           IN ULONG Length)
+           IN ULONG_PTR StartingIndex,
+           IN ULONG_PTR Length)
 {
     ULONG_PTR BitOffset, Mask;
     PULONG_PTR Buffer;
