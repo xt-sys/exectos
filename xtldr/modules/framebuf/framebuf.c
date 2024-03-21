@@ -102,7 +102,6 @@ FbInitializeDisplay()
     PEFI_GRAPHICS_OUTPUT_MODE_INFORMATION GopModeInfo;
     UINT Depth, QueryMode, Refresh;
     ULONG_PTR InfoSize;
-    EFI_HANDLE Handle;
     EFI_STATUS Status;
 
     /* Check if framebuffer already initialized */
@@ -112,7 +111,7 @@ FbInitializeDisplay()
         XtLdrProtocol->Debug.Print(L"Initializing framebuffer device\n");
 
         /* Attempt to open EFI GOP protocol */
-        Status = XtLdrProtocol->Protocol.Open(&Handle, (PVOID*)&FbpDisplayInfo.Driver.Gop, &GopGuid);
+        Status = XtLdrProtocol->Protocol.Open(&FbpDisplayInfo.Handle, (PVOID*)&FbpDisplayInfo.Driver.Gop, &GopGuid);
 
         /* Check if Graphics Output Protocol (GOP) is available */
         if(Status == STATUS_EFI_SUCCESS)
@@ -122,6 +121,9 @@ FbInitializeDisplay()
             {
                 /* No video modes available */
                 XtLdrProtocol->Debug.Print(L"ERROR: No GOP video mode available\n");
+
+                /* Close GOP protocol and return error */
+                XtLdrProtocol->Protocol.Close(FbpDisplayInfo.Handle, &GopGuid);
                 return STATUS_EFI_UNSUPPORTED;
             }
 
@@ -137,6 +139,9 @@ FbInitializeDisplay()
             {
                 /* Unable to query GOP modes */
                 XtLdrProtocol->Debug.Print(L"ERROR: Failed to get GOP native mode (Status Code: 0x%zX)\n");
+
+                /* Close GOP protocol and return error */
+                XtLdrProtocol->Protocol.Close(FbpDisplayInfo.Handle, &GopGuid);
                 return STATUS_EFI_UNSUPPORTED;
             }
 
@@ -151,6 +156,9 @@ FbInitializeDisplay()
             {
                 /* Unable to get mode information */
                 XtLdrProtocol->Debug.Print(L"ERROR: Failed to get GOP mode information (Status Code: 0x%zX)\n");
+
+                /* Close GOP protocol and return error */
+                XtLdrProtocol->Protocol.Close(FbpDisplayInfo.Handle, &GopGuid);
                 return STATUS_EFI_UNSUPPORTED;
             }
 
@@ -159,12 +167,12 @@ FbInitializeDisplay()
                                        FbpDisplayInfo.FrameBufferBase, FbpDisplayInfo.FrameBufferSize);
 
             /* Close GOP protocol */
-            Status = XtLdrProtocol->Protocol.Close(Handle, &GopGuid);
+            Status = XtLdrProtocol->Protocol.Close(FbpDisplayInfo.Handle, &GopGuid);
         }
         else
         {
             /* GOP is unavailable, attempt to open UGA protocol */
-            Status = XtLdrProtocol->Protocol.Open(&Handle, (PVOID*)&FbpDisplayInfo.Driver.Uga, &UgaGuid);
+            Status = XtLdrProtocol->Protocol.Open(&FbpDisplayInfo.Handle, (PVOID*)&FbpDisplayInfo.Driver.Uga, &UgaGuid);
 
             /* Check if Universal Graphics Adapter (UGA) is available */
             if(Status == STATUS_EFI_SUCCESS)
@@ -178,7 +186,7 @@ FbInitializeDisplay()
                     XtLdrProtocol->Debug.Print(L"ERROR: Failed to get current UGA mode (Status Code: 0x%zX)\n", Status);
 
                     /* Close UGA protocol and return error */
-                    XtLdrProtocol->Protocol.Close(Handle, &UgaGuid);
+                    XtLdrProtocol->Protocol.Close(FbpDisplayInfo.Handle, &UgaGuid);
                     return STATUS_EFI_DEVICE_ERROR;
                 }
 
@@ -190,7 +198,7 @@ FbInitializeDisplay()
                     XtLdrProtocol->Debug.Print(L"ERROR: Failed to get EFI FB address (Status Code: 0x%zX)\n", Status);
 
                     /* Close UGA protocol and return error */
-                    XtLdrProtocol->Protocol.Close(Handle, &UgaGuid);
+                    XtLdrProtocol->Protocol.Close(FbpDisplayInfo.Handle, &UgaGuid);
                     return STATUS_EFI_DEVICE_ERROR;
                 }
 
@@ -212,7 +220,7 @@ FbInitializeDisplay()
                                            FbpDisplayInfo.FrameBufferBase, FbpDisplayInfo.FrameBufferSize);
 
                 /* Close UGA protocol */
-                XtLdrProtocol->Protocol.Close(Handle, &UgaGuid);
+                XtLdrProtocol->Protocol.Close(FbpDisplayInfo.Handle, &UgaGuid);
             }
         }
 

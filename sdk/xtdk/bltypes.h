@@ -287,6 +287,7 @@ typedef struct _XTBL_FRAMEBUFFER_INFORMATION
     EFI_PHYSICAL_ADDRESS FrameBufferBase;
     ULONG_PTR FrameBufferSize;
     UINT DefaultMode;
+    EFI_HANDLE Handle;
     union
     {
         PEFI_GRAPHICS_OUTPUT_PROTOCOL Gop;
