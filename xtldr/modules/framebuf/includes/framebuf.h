@@ -26,6 +26,11 @@ FbGetDisplayInformation(OUT PEFI_PHYSICAL_ADDRESS FrameBufferBase,
 
 XTCDECL
 EFI_STATUS
+FbGetPreferredScreenResolution(OUT PUINT PreferredWidth,
+                               OUT PUINT PreferredHeight);
+
+XTCDECL
+EFI_STATUS
 FbInitializeDisplay();
 
 XTCDECL

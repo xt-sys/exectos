@@ -87,6 +87,63 @@ FbGetDisplayInformation(OUT PEFI_PHYSICAL_ADDRESS FrameBufferBase,
 }
 
 /**
+ * Determines the preferred (native) screen resolution from EDID. This works only with GOP.
+ *
+ * @param PreferredWidth
+ *        Supplies a pointer to the memory area where preferred screen width will be stored.
+ *
+ * @param PreferredHeight
+ *        Supplies a pointer to the memory area where preferred screen height will be stored.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+FbGetPreferredScreenResolution(OUT PUINT PreferredWidth,
+                               OUT PUINT PreferredHeight)
+{
+    EFI_GUID GopGuid = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
+    EFI_GUID EdidGuid = EFI_EDID_ACTIVE_PROTOCOL_GUID;
+    PEFI_EDID_ACTIVE_PROTOCOL ActiveEdid;
+    EFI_STATUS Status;
+
+    /* Check if framebuffer is initialized */
+    if(!FbpDisplayInfo.Initialized)
+    {
+        /* Framebuffer not ready to use EDID protocol */
+        return STATUS_EFI_NOT_READY;
+    }
+
+    /* Check if GOP device driver is used */
+    if(FbpDisplayInfo.Protocol != GOP)
+    {
+        /* Unsupported device driver */
+        return STATUS_EFI_UNSUPPORTED;
+    }
+
+    /* Open EDID protocol */
+    Status = XtLdrProtocol->Protocol.OpenHandle(FbpDisplayInfo.Handle, (PVOID *)&ActiveEdid, &EdidGuid);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to open EDID protocol, close GOP protocol and return */
+        XtLdrProtocol->Protocol.Close(FbpDisplayInfo.Handle, &GopGuid);
+        return Status;
+    }
+
+    /* Return preferred screen resolution */
+    *PreferredWidth = ActiveEdid->Edid[0x38] | ((ActiveEdid->Edid[0x3A] & 0xF0) << 4);
+    *PreferredHeight = ActiveEdid->Edid[0x3B] | ((ActiveEdid->Edid[0x3D] & 0xF0) << 4);
+
+    /* Close EDID & GOP protocols */
+    XtLdrProtocol->Protocol.Close(FbpDisplayInfo.Handle, &EdidGuid);
+
+    /* Return success */
+    return STATUS_EFI_SUCCESS;
+}
+
+/**
  * Initializes FrameBuffer device on GOP and UGA compatible adapters.
  *
  * @return This routine returns a status code.
@@ -717,6 +774,7 @@ XtLdrModuleMain(IN EFI_HANDLE ImageHandle,
     /* Set routines available via XTLDR framebuffer protocol */
     FbpFrameBufferProtocol.GetDisplayDriver = FbGetDisplayDriver;
     FbpFrameBufferProtocol.GetDisplayInformation = FbGetDisplayInformation;
+    FbpFrameBufferProtocol.GetPreferredScreenResolution = FbGetPreferredScreenResolution;
     FbpFrameBufferProtocol.Initialize = FbInitializeDisplay;
     FbpFrameBufferProtocol.SetScreenResolution = FbSetScreenResolution;
 
