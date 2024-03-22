@@ -221,7 +221,7 @@ RtlCountLeadingZeroes32(IN ULONG Value);
 
 XTAPI
 INT
-RtlCountLeadingZeroes64(IN ULONG Value);
+RtlCountLeadingZeroes64(IN ULONGLONG Value);
 
 XTAPI
 INT

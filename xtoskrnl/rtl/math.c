@@ -81,7 +81,7 @@ RtlCountLeadingZeroes32(IN ULONG Value)
  */
 XTAPI
 INT
-RtlCountLeadingZeroes64(IN ULONG Value)
+RtlCountLeadingZeroes64(IN ULONGLONG Value)
 {
     /* Return a number of leading zero bits */
     return __builtin_clzll(Value);
