@@ -131,6 +131,44 @@ RtlClearBits(IN PRTL_BITMAP BitMap,
 }
 
 /**
+ * Searches the bit map for a contiguous region of set bits and clears them.
+ *
+ * @param BitMap
+ *        Supplies a pointer to the bit map.
+ *
+ * @param Length
+ *        Supplies the length of contiguous region (number of set bits) to look for.
+ *
+ * @param Index
+ *        Supplies the index of the first bit to start the search at a given position.
+ *
+ * @return This routine returns the bit map index position of the contiguous region found, or MAXULONG_PTR if not found.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG
+RtlClearSetBits(IN PRTL_BITMAP BitMap,
+                IN ULONG_PTR Length,
+                IN ULONG_PTR Index)
+{
+    ULONG_PTR StartingIndex;
+
+    /* Find set bits */
+    StartingIndex = RtlFindSetBits(BitMap, Length, Index);
+
+    /* Check if set bits were found */
+    if(StartingIndex != MAXULONG_PTR)
+    {
+        /* Clear bits */
+        RtlClearBits(BitMap, StartingIndex, Length);
+    }
+
+    /* Return position of bits found */
+    return StartingIndex;
+}
+
+/**
  * Dumps the contents of the bit map.
  *
  * @param BitMap
@@ -154,6 +192,58 @@ RtlDumpBitMap(IN PRTL_BITMAP BitMap)
     {
         DebugPrint(L"  %8zu: %08lx\n", Index, BitMap->Buffer[Index]);
     }
+}
+
+/**
+ * Searches the bit map for a contiguous region of clear bits.
+ *
+ * @param BitMap
+ *        Supplies a pointer to the bit map.
+ *
+ * @param Length
+ *        Supplies the length of contiguous region (number of clear bits) to look for.
+ *
+ * @param Index
+ *        Supplies the index of the first bit to start the search at a given position.
+ *
+ * @return This routine returns the bit map index position of the contiguous region found, or MAXULONG_PTR if not found.
+ *
+ * @since NT 3.5
+ */
+XTAPI
+ULONG_PTR
+RtlFindClearBits(IN PRTL_BITMAP BitMap,
+                 IN ULONG_PTR Length,
+                 IN ULONG_PTR Index)
+{
+    /* Find clear bits */
+    return RtlpFindBits(BitMap, Length, Index, FALSE);
+}
+
+/**
+ * Searches the bit map for a contiguous region of set bits.
+ *
+ * @param BitMap
+ *        Supplies a pointer to the bit map.
+ *
+ * @param Length
+ *        Supplies the length of contiguous region (number of set bits) to look for.
+ *
+ * @param Index
+ *        Supplies the index of the first bit to start the search at a given position.
+ *
+ * @return This routine returns the bit map index position of the contiguous region found, or MAXULONG_PTR if not found.
+ *
+ * @since NT 3.5
+ */
+XTAPI
+ULONG_PTR
+RtlFindSetBits(IN PRTL_BITMAP BitMap,
+               IN ULONG_PTR Length,
+               IN ULONG_PTR Index)
+{
+    /* Find set bits */
+    return RtlpFindBits(BitMap, Length, Index, TRUE);
 }
 
 /**
@@ -305,6 +395,44 @@ RtlSetBits(IN PRTL_BITMAP BitMap,
 }
 
 /**
+ * Searches the bit map for a contiguous region of clear bits and sets them.
+ *
+ * @param BitMap
+ *        Supplies a pointer to the bit map.
+ *
+ * @param Length
+ *        Supplies the length of contiguous region (number of clear bits) to look for.
+ *
+ * @param Index
+ *        Supplies the index of the first bit to start the search at a given position.
+ *
+ * @return This routine returns the bit map index position of the contiguous region found, or MAXULONG_PTR if not found.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG
+RtlSetClearBits(IN PRTL_BITMAP BitMap,
+                IN ULONG_PTR Length,
+                IN ULONG_PTR Index)
+{
+    ULONG_PTR StartingIndex;
+
+    /* Find clear bits */
+    StartingIndex = RtlFindClearBits(BitMap, Length, Index);
+
+    /* Check if clear bits were found */
+    if(StartingIndex != MAXULONG_PTR)
+    {
+        /* Set bits */
+        RtlSetBits(BitMap, StartingIndex, Length);
+    }
+
+    /* Return position of bits found */
+    return StartingIndex;
+}
+
+/**
  * Tests a state of a single bit in the bit map.
  *
  * @param BitMap
@@ -331,4 +459,156 @@ RtlTestBit(IN PRTL_BITMAP BitMap,
 
     /* Test specified bit and return result */
     return ((BitMap->Buffer[Bit / BITS_PER_LONG] >> (Bit & (BITS_PER_LONG - 1))) & 1) ? TRUE : FALSE;
+}
+
+/**
+ * Counts the number of either set or clear bits in the contiguous region of the bit map.
+ *
+ * @param BitMap
+ *        Supplies a pointer to the bit map.
+ *
+ * @param Length
+ *        Supplies the maximum length (number of bits) to count.
+ *
+ * @param StartingIndex
+ *        Supplies the starting index of the first bit to count.
+ *
+ * @param SetBits
+ *        Specifies whether count bits that are set or clear.
+ *
+ * @return This routine returns the number of equal bits found in the contiguous region.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG_PTR
+RtlpCountBits(IN PRTL_BITMAP BitMap,
+              IN ULONG_PTR Length,
+              IN ULONG_PTR StartingIndex,
+              IN BOOLEAN SetBits)
+{
+    PULONG_PTR Buffer, BufferEnd;
+    ULONG_PTR BitOffset, Size;
+    ULONGLONG Value;
+
+    /* Get pointers to first and last bytes to check */
+    Buffer = &BitMap->Buffer[StartingIndex / BITS_PER_LONG];
+    BufferEnd = Buffer + ((Length + BITS_PER_LONG - 1) / BITS_PER_LONG);
+
+    /* Get offset and value */
+    BitOffset = StartingIndex & (BITS_PER_LONG - 1);
+    Value = (SetBits ? ~*Buffer : *Buffer) >> BitOffset << BitOffset;
+
+    /* Find first bit set until the end of the buffer */
+    while(!Value && Buffer + 1 < BufferEnd)
+    {
+        /* Advance buffer pointer and get value */
+        Value = SetBits ? ~*(++Buffer) : *(++Buffer);
+    }
+
+    /* Check if value found */
+    if(!Value)
+    {
+        /* No bits found, return length */
+        return Length;
+    }
+
+    /* Calculate size */
+    Size = ((Buffer - BitMap->Buffer) * BITS_PER_LONG) - StartingIndex + (ULONG_PTR)RtlCountTrailingZeroes64(Value);
+
+    /* Return whatever is smaller */
+    return Size > Length ? Length : Size;
+}
+
+/**
+ * Searches the bit map for a contiguous region of either set or clear bits.
+ *
+ * @param BitMap
+ *        Supplies a pointer to the bit map.
+ *
+ * @param Length
+ *        Supplies the length (number of equal bits) to look for.
+ *
+ * @param StartingIndex
+ *        Supplies the starting index of the first bit to start the search at a given position.
+ *
+ * @param SetBits
+ *        Specifies whether count bits that are set or clear.
+ *
+ * @return This routine returns the bit map index position of the contiguous region found, or MAXULONG_PTR if not found.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG_PTR
+RtlpFindBits(IN PRTL_BITMAP BitMap,
+             IN ULONG_PTR Length,
+             IN ULONG_PTR StartingIndex,
+             IN BOOLEAN SetBits)
+{
+    ULONG_PTR BitMapEnd, BitOffset, Size;
+    ULONG Tries;
+
+    /* Validate length */
+    if(Length > BitMap->Size)
+    {
+        /* Length exceeds bit map size, return MAXULONG_PTR */
+        return (ULONG_PTR)-1;
+    }
+    else if(!Length)
+    {
+        /* Length not specified, return starting index */
+        return StartingIndex;
+    }
+
+    /* Check if starting index is in range of bit map size */
+    if(StartingIndex >= BitMap->Size)
+    {
+        /* Starting index exceeds bit map size, start from the beginning */
+        StartingIndex = 0;
+    }
+
+    /* Try from starting index */
+    BitOffset = StartingIndex;
+    BitMapEnd = BitMap->Size;
+
+    /* At least two tries are required */
+    Tries = (StartingIndex != 0) + 2;
+    while(Tries)
+    {
+        /* Find until the end of the bit map */
+        while(BitOffset + Length < BitMapEnd)
+        {
+            /* Increment offset */
+            BitOffset += RtlpCountBits(BitMap, BitMap->Size - BitOffset, BitOffset, !SetBits);
+            if(BitOffset + Length > BitMapEnd)
+            {
+                /* No match found, break loop execution */
+                break;
+            }
+
+            /* Count bits in the contiguous region and check if match found */
+            Size = RtlpCountBits(BitMap, Length, BitOffset, SetBits);
+            if(Size >= Length)
+            {
+                /* Match found, return offset */
+                return BitOffset;
+            }
+
+            /* Increment offset */
+            BitOffset += Size;
+        }
+
+        /* Try again if possible */
+        Tries--;
+        if(Tries)
+        {
+            /* Restart from the beginning up to the starting index */
+            BitOffset = 0;
+            BitMapEnd = StartingIndex;
+        }
+    }
+
+    /* No match found, return MAXULONG_PTR */
+    return (ULONG_PTR)-1;
 }

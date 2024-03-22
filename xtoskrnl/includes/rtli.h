@@ -303,6 +303,20 @@ VOID
 RtlRemoveEntryList(IN PLIST_ENTRY Entry);
 
 XTAPI
+ULONG_PTR
+RtlpCountBits(IN PRTL_BITMAP BitMap,
+              IN ULONG_PTR Length,
+              IN ULONG_PTR StartingIndex,
+              IN BOOLEAN SetBits);
+
+XTAPI
+ULONG_PTR
+RtlpFindBits(IN PRTL_BITMAP BitMap,
+             IN ULONG_PTR Length,
+             IN ULONG_PTR StartingIndex,
+             IN BOOLEAN SetBits);
+
+XTAPI
 XTSTATUS
 RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
                                      IN PCWSTR Format,

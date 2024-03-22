@@ -65,6 +65,12 @@ RtlClearBits(IN PRTL_BITMAP BitMap,
              IN ULONG_PTR Length);
 
 XTAPI
+ULONG
+RtlClearSetBits(IN PRTL_BITMAP BitMap,
+                IN ULONG_PTR Length,
+                IN ULONG_PTR Index);
+
+XTAPI
 BOOLEAN
 RtlCompareGuids(IN PGUID Guid1,
                 IN PGUID Guid2);
@@ -144,6 +150,18 @@ RtlDivideLargeInteger(IN LARGE_INTEGER Dividend,
                       OUT PULONG Remainder);
 
 XTAPI
+ULONG_PTR
+RtlFindClearBits(IN PRTL_BITMAP BitMap,
+                 IN ULONG_PTR Length,
+                 IN ULONG_PTR Index);
+
+XTAPI
+ULONG_PTR
+RtlFindSetBits(IN PRTL_BITMAP BitMap,
+               IN ULONG_PTR Length,
+               IN ULONG_PTR Index);
+
+XTAPI
 XTSTATUS
 RtlFormatWideString(IN PRTL_PRINT_CONTEXT Context,
                     IN PCWSTR Format,
@@ -196,6 +214,12 @@ VOID
 RtlSetBits(IN PRTL_BITMAP BitMap,
            IN ULONG_PTR StartingIndex,
            IN ULONG_PTR Length);
+
+XTAPI
+ULONG
+RtlSetClearBits(IN PRTL_BITMAP BitMap,
+                IN ULONG_PTR Length,
+                IN ULONG_PTR Index);
 
 XTAPI
 VOID
