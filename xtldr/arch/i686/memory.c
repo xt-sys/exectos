@@ -142,9 +142,6 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap)
         ListEntry = ListEntry->Flink;
     }
 
-    /* Finally, map zero page */
-    BlMapPage(PageMap, 0, 0, 1);
-
     /* Return success */
     return STATUS_EFI_SUCCESS;
 }
