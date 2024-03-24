@@ -355,6 +355,14 @@ BlMapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
         }
     }
 
+    /* Map BIOS ROM and VRAM */
+    Status = BlMapVirtualMemory(PageMap, NULL, (PVOID)0xA0000, 0x60, LoaderFirmwarePermanent);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Mapping failed */
+        return Status;
+    }
+
     /* Store next valid virtual address and return success */
     *MemoryMapAddress = VirtualAddress;
     return STATUS_EFI_SUCCESS;
