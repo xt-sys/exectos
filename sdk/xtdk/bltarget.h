@@ -13,14 +13,14 @@
 
 
 /* Boot Loader module information macros */
-#define MODULE_AUTHOR(_author)                                      XTBL_MODULE_INFO(author, author, _author)
-#define MODULE_DEPENDENCY(_softdeps)                                XTBL_MODULE_INFO(softdeps, softdeps, _softdeps)
-#define MODULE_DESCRIPTION(_description)                            XTBL_MODULE_INFO(description, description, _description)
-#define MODULE_LICENSE(_license)                                    XTBL_MODULE_INFO(license, license, _license)
-#define MODULE_VERSION(_version)                                    XTBL_MODULE_INFO(version, version, _version)
+#define MODULE_AUTHOR(_author)                                      XTBL_MODULE_DATA(author, author, _author)
+#define MODULE_DEPENDENCY(_softdeps)                                XTBL_MODULE_DATA(softdeps, softdeps, _softdeps)
+#define MODULE_DESCRIPTION(_description)                            XTBL_MODULE_DATA(description, description, _description)
+#define MODULE_LICENSE(_license)                                    XTBL_MODULE_DATA(license, license, _license)
+#define MODULE_VERSION(_version)                                    XTBL_MODULE_DATA(version, version, _version)
 
 /* Boot Loader module information segment macro */
-#define XTBL_MODULE_INFO(Tag, Name, Data)                           STATIC CONST WCHAR UNIQUE(Name)[] \
+#define XTBL_MODULE_DATA(Tag, Name, Data)                           STATIC CONST WCHAR UNIQUE(Name)[] \
                                                                     USED SEGMENT(".modinfo") ALIGN(1) \
                                                                     = STRINGIFY(Tag) "=" Data
 
