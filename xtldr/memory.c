@@ -314,9 +314,24 @@ BlMapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
     /* Iterate through all descriptors from the memory map */
     for(Index = 0; Index < DescriptorCount; Index++)
     {
-        /* Make sure descriptor does not go beyond lowest physical page */
-        if((Descriptor->PhysicalStart + (Descriptor->NumberOfPages * EFI_PAGE_SIZE)) <= (UINT_PTR)-1)
+        /* Make sure descriptor does not start beyond lowest physical page */
+        if(Descriptor->PhysicalStart <= MAXUINT_PTR)
         {
+            /* Skip EFI reserved memory */
+            if(Descriptor->Type == EfiReservedMemoryType)
+            {
+                /* Go to the next descriptor */
+                Descriptor = (PEFI_MEMORY_DESCRIPTOR)((PUCHAR)Descriptor + MemoryMap->DescriptorSize);
+                continue;
+            }
+
+            /* Check if memory descriptor exceeds the lowest physical page */
+            if(Descriptor->PhysicalStart + (Descriptor->NumberOfPages << EFI_PAGE_SHIFT) > MAXUINT_PTR)
+            {
+                /* Truncate memory descriptor to the 4GB */
+                Descriptor->NumberOfPages = ((MAXUINT_PTR + 1) - Descriptor->PhysicalStart) >> EFI_PAGE_SHIFT;
+            }
+
             /* Convert EFI memory type into XTLDR memory type */
             MemoryType = GetMemoryTypeRoutine(Descriptor->Type);
 
@@ -349,10 +364,10 @@ BlMapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
                 /* Mapping failed */
                 return Status;
             }
-
-            /* Grab next descriptor */
-            Descriptor = (PEFI_MEMORY_DESCRIPTOR)((PUCHAR)Descriptor + MemoryMap->DescriptorSize);
         }
+
+        /* Grab next descriptor */
+        Descriptor = (PEFI_MEMORY_DESCRIPTOR)((PUCHAR)Descriptor + MemoryMap->DescriptorSize);
     }
 
     /* Always map first page */
