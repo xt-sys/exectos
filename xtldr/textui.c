@@ -894,6 +894,9 @@ BlpDrawBootMenuEntry(IN PXTBL_DIALOG_HANDLE Handle,
 {
     UINT Index;
 
+    /* Move cursor to the right position */
+    BlSetCursorPosition(5, 4 + Position);
+
     /* Check whether this entry should be highlighted */
     if(Highlighted)
     {
@@ -905,9 +908,6 @@ BlpDrawBootMenuEntry(IN PXTBL_DIALOG_HANDLE Handle,
         /* Set default colors */
         BlSetConsoleAttributes(EFI_TEXT_BGCOLOR_BLACK | EFI_TEXT_FGCOLOR_LIGHTGRAY);
     }
-
-    /* Move cursor to the right position */
-    BlSetCursorPosition(5, 4 + Position);
 
     /* Clear menu entry */
     for(Index = 0; Index < Handle->Width - 4; Index++)
