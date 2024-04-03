@@ -789,7 +789,7 @@ BlpGetNextPageTable(IN PXTBL_PAGE_MAPPING PageMap,
         /* Set paging entry settings */
         PageTable[Entry].PageFrameNumber = Address / EFI_PAGE_SIZE;
         PageTable[Entry].Valid = 1;
-        PageTable[Entry].Write = 1;
+        PageTable[Entry].Writable = 1;
         PmlPointer = (ULONGLONG)Address;
     }
 

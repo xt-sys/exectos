@@ -214,7 +214,7 @@ BlMapPage(IN PXTBL_PAGE_MAPPING PageMap,
         /* Set paging entry settings */
         Pml1[Pml1Entry].PageFrameNumber = PageFrameNumber;
         Pml1[Pml1Entry].Valid = 1;
-        Pml1[Pml1Entry].Write = 1;
+        Pml1[Pml1Entry].Writable = 1;
 
         /* Take next virtual address and PFN */
         VirtualAddress += EFI_PAGE_SIZE;
