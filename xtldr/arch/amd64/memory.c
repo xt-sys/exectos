@@ -15,13 +15,17 @@
  * @param PageMap
  *        Supplies a pointer to the page mapping structure.
  *
+ * @param SelfMapAddress
+ *        Supplies a virtual address of the page tables.
+ *
  * @return This routine returns a status code.
  *
  * @since XT 1.0
  */
 XTCDECL
 EFI_STATUS
-BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap)
+BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
+               IN ULONG_PTR SelfMapAddress)
 {
     PLIST_ENTRY ListEntry, ModulesList, ModulesListEntry;
     PXTBL_MEMORY_MAPPING Mapping;
@@ -42,7 +46,7 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap)
     RtlZeroMemory(PageMap->PtePointer, EFI_PAGE_SIZE);
 
     /* Add page mapping itself to memory mapping */
-    Status = BlMapVirtualMemory(PageMap, NULL, PageMap->PtePointer, 1, LoaderMemoryData);
+    Status = BlpSelfMapPml(PageMap, SelfMapAddress);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* PML mapping failed */
@@ -222,6 +226,48 @@ BlMapPage(IN PXTBL_PAGE_MAPPING PageMap,
 
         /* Decrease number of pages left */
         NumberOfPages--;
+    }
+
+    /* Return success */
+    return STATUS_EFI_SUCCESS;
+}
+
+/**
+ * Creates a recursive self mapping for all PML levels.
+ *
+ * @param PageMap
+ *        Supplies a pointer to the page mapping structure.
+ *
+ * @param SelfMapAddress
+ *        Supplies a virtual address of the page tables.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+BlpSelfMapPml(IN PXTBL_PAGE_MAPPING PageMap,
+              IN ULONG_PTR SelfMapAddress)
+{
+    ULONGLONG PmlIndex;
+
+    /* Check page map level */
+    if(PageMap->PageMapLevel == 5)
+    {
+        /* Self-mapping for PML5 is not supported */
+        BlDebugPrint(L"PML5 self-mapping not supported yet!\n");
+        return STATUS_EFI_UNSUPPORTED;
+    }
+    else
+    {
+        /* Calculate PML index based on provided self map address */
+        PmlIndex = (SelfMapAddress >> 39) & 0x1FF;
+
+        /* Add self-mapping for PML4 */
+        ((PHARDWARE_PTE)PageMap->PtePointer)[PmlIndex].PageFrameNumber = (UINT_PTR)PageMap->PtePointer / EFI_PAGE_SIZE;
+        ((PHARDWARE_PTE)PageMap->PtePointer)[PmlIndex].Valid = 1;
+        ((PHARDWARE_PTE)PageMap->PtePointer)[PmlIndex].Writable = 1;
     }
 
     /* Return success */

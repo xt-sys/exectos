@@ -21,7 +21,8 @@
  */
 XTCDECL
 EFI_STATUS
-BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap)
+BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
+               IN ULONG_PTR SelfMapAddress)
 {
     PLIST_ENTRY ListEntry, ModulesList, ModulesListEntry;
     EFI_PHYSICAL_ADDRESS Address, DirectoryAddress;

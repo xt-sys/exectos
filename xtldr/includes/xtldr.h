@@ -28,7 +28,8 @@ BlAllocateMemoryPool(IN UINT_PTR Size,
 
 XTCDECL
 EFI_STATUS
-BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap);
+BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
+               IN ULONG_PTR SelfMapAddress);
 
 XTCDECL
 VOID
@@ -523,6 +524,11 @@ EFI_STATUS
 BlpReadConfigFile(IN CONST PWCHAR ConfigDirectory,
                   IN CONST PWCHAR ConfigFile,
                   OUT PCHAR *ConfigData);
+
+XTCDECL
+EFI_STATUS
+BlpSelfMapPml(IN PXTBL_PAGE_MAPPING PageMap,
+              IN ULONG_PTR SelfMapAddress);
 
 XTCDECL
 ULONGLONG
