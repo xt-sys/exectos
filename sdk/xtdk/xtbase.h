@@ -29,6 +29,9 @@ typedef UCHAR KRUNLEVEL, *PKRUNLEVEL;
 /* Spin locks synchronization mechanism */
 typedef ULONG_PTR KSPIN_LOCK, *PKSPIN_LOCK;
 
+/* Page Frame Number */
+typedef ULONG_PTR PFN_NUMBER, *PPFN_NUMBER;
+
 /* 128-bit buffer containing a unique identifier value */
 typedef struct _GUID
 {
