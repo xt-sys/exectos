@@ -66,7 +66,7 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
     }
 
     /* Add page mapping itself to memory mapping */
-    Status = BlMapVirtualMemory(PageMap, NULL, PageMap->PtePointer, 1, LoaderMemoryData);
+    Status = BlpSelfMapPml(PageMap, SelfMapAddress);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* PML mapping failed */
@@ -228,6 +228,60 @@ BlMapPage(IN PXTBL_PAGE_MAPPING PageMap,
 
         /* Decrease number of pages left */
         NumberOfPages--;
+    }
+
+    /* Return success */
+    return STATUS_EFI_SUCCESS;
+}
+
+/**
+ * Creates a recursive self mapping for all PML levels.
+ *
+ * @param PageMap
+ *        Supplies a pointer to the page mapping structure.
+ *
+ * @param SelfMapAddress
+ *        Supplies a virtual address of the page tables.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+BlpSelfMapPml(IN PXTBL_PAGE_MAPPING PageMap,
+              IN ULONG_PTR SelfMapAddress)
+{
+    ULONGLONG PmlIndex;
+    PHARDWARE_PTE Pml;
+    ULONG Index;
+
+    /* Check page map level */
+    if(PageMap->PageMapLevel == 3)
+    {
+        /* Calculate PML index based on provided self map address */
+        PmlIndex = (SelfMapAddress >> 21) & 0x1FF;
+
+        /* Get Page Directory */
+        Pml = (PHARDWARE_PTE)(((PHARDWARE_PTE)PageMap->PtePointer)[SelfMapAddress >> 30].PageFrameNumber * EFI_PAGE_SIZE);
+
+        /* Add self-mapping for PML3 (PAE enabled) */
+        for(Index = 0; Index < 4; Index++)
+        {
+            Pml[PmlIndex + Index].PageFrameNumber = ((PHARDWARE_PTE)PageMap->PtePointer)[Index].PageFrameNumber;
+            Pml[PmlIndex + Index].Valid = 1;
+            Pml[PmlIndex + Index].Writable = 1;
+        }
+    }
+    else
+    {
+        /* Calculate PML index based on provided self map address */
+        PmlIndex = (SelfMapAddress >> 22);
+
+        /* Add self-mapping for PML2 (PAE disabled) */
+        ((PHARDWARE_LEGACY_PTE)PageMap->PtePointer)[PmlIndex].PageFrameNumber = (UINT_PTR)PageMap->PtePointer / EFI_PAGE_SIZE;
+        ((PHARDWARE_LEGACY_PTE)PageMap->PtePointer)[PmlIndex].Valid = 1;
+        ((PHARDWARE_LEGACY_PTE)PageMap->PtePointer)[PmlIndex].Writable = 1;
     }
 
     /* Return success */
