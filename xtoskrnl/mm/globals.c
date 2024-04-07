@@ -23,3 +23,6 @@ ULONG MmNumberOfPhysicalPages;
 
 /* Old biggest free memory descriptor */
 LOADER_MEMORY_MAPPING MmOldFreeDescriptor;
+
+/* Page Map Level */
+ULONG MmPageMapLevel;

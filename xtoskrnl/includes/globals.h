@@ -57,4 +57,7 @@ EXTERN ULONG MmNumberOfPhysicalPages;
 /* Old biggest free memory descriptor */
 EXTERN LOADER_MEMORY_MAPPING MmOldFreeDescriptor;
 
+/* Page Map Level */
+EXTERN ULONG MmPageMapLevel;
+
 #endif /* __XTOSKRNL_GLOBALS_H */

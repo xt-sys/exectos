@@ -468,6 +468,9 @@ XtpInitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
         LoaderBlock->LoaderInformation.FrameBuffer.Initialized = FALSE;
     }
 
+    /* Store page map level */
+    LoaderBlock->LoaderInformation.PageMapLevel = 3;
+
     /* Close FrameBuffer protocol */
     XtLdrProtocol->Protocol.Close(ProtocolHandle, &FrameBufGuid);
 

@@ -31,6 +31,9 @@ MmInitializeMemoryManager(VOID)
         KePanic(0);
     }
 
+    /* Store Page Map Level */
+    MmPageMapLevel = KeInitializationBlock->LoaderInformation.PageMapLevel;
+
     /* Proceed with architecture specific initialization */
     MmpInitializeArchitecture();
 }
@@ -108,7 +111,6 @@ MmpScanMemoryDescriptors(VOID)
 
     /* Store original free descriptor */
     RtlCopyMemory(&MmOldFreeDescriptor, MmFreeDescriptor, sizeof(LOADER_MEMORY_MAPPING));
-
 }
 
 /** Checks whether the specified memory type should be considered as free.
