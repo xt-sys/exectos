@@ -158,7 +158,7 @@ FbInitializeDisplay()
     EFI_GUID UgaGuid = EFI_UNIVERSAL_GRAPHICS_ADAPTER_PROTOCOL_GUID;
     PEFI_GRAPHICS_OUTPUT_MODE_INFORMATION GopModeInfo;
     UINT Depth, QueryMode, Refresh;
-    ULONG_PTR InfoSize;
+    UINT_PTR InfoSize;
     EFI_STATUS Status;
 
     /* Check if framebuffer already initialized */
