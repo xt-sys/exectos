@@ -24,4 +24,20 @@ VOID
 MmFreeKernelStack(IN PVOID Stack,
                   IN BOOLEAN LargeStack);
 
+XTAPI
+VOID
+MmInitializeMemoryManager();
+
+XTAPI
+VOID
+MmpScanMemoryDescriptors();
+
+XTAPI
+BOOLEAN
+MmpVerifyMemoryTypeFree(LOADER_MEMORY_TYPE MemoryType);
+
+XTAPI
+BOOLEAN
+MmpVerifyMemoryTypeInvisible(LOADER_MEMORY_TYPE MemoryType);
+
 #endif /* __XTOSKRNL_MMI_H */

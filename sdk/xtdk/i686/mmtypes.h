@@ -17,6 +17,9 @@
 #define MM_PAGE_SHIFT                              12
 #define MM_PAGE_SIZE                               4096
 
+/* Minimum number of physical pages needed by the system */
+#define MM_MINIMUM_PHYSICAL_PAGES                  1100
+
 /* Page size enumeration list */
 typedef enum _PAGE_SIZE
 {

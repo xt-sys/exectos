@@ -18,4 +18,8 @@ VOID
 MmZeroPages(IN PVOID Address,
             IN ULONG Size);
 
+XTAPI
+VOID
+MmpInitializeArchitecture();
+
 #endif /* __XTOSKRNL_I686_MMI_H */

@@ -18,4 +18,24 @@ VOID
 MmZeroPages(IN PVOID Address,
             IN ULONG Size);
 
+XTAPI
+PMMPTE
+MmpGetPdeAddress(PVOID Address);
+
+XTAPI
+PMMPTE
+MmpGetPpeAddress(PVOID Address);
+
+XTAPI
+PMMPTE
+MmpGetPteAddress(PVOID Address);
+
+XTAPI
+PMMPTE
+MmpGetPxeAddress(PVOID Address);
+
+XTAPI
+VOID
+MmpInitializeArchitecture();
+
 #endif /* __XTOSKRNL_AMD64_MMI_H */

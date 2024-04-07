@@ -42,4 +42,19 @@ EXTERN KSERVICE_DESCRIPTOR_TABLE KeServiceDescriptorTable[KSERVICE_TABLES_COUNT]
 /* Kernel process list */
 EXTERN LIST_ENTRY KepProcessListHead;
 
+/* Biggest free memory descriptor */
+EXTERN PLOADER_MEMORY_MAPPING MmFreeDescriptor;
+
+/* Highest physical page number */
+EXTERN ULONG_PTR MmHighestPhysicalPage;
+
+/* Lowest physical page number */
+EXTERN ULONG_PTR MmLowestPhysicalPage;
+
+/* Number of physical pages */
+EXTERN ULONG MmNumberOfPhysicalPages;
+
+/* Old biggest free memory descriptor */
+EXTERN LOADER_MEMORY_MAPPING MmOldFreeDescriptor;
+
 #endif /* __XTOSKRNL_GLOBALS_H */
