@@ -107,7 +107,8 @@ MmpScanMemoryDescriptors(VOID)
     }
 
     /* Store original free descriptor */
-    MmOldFreeDescriptor = *MmFreeDescriptor;
+    RtlCopyMemory(&MmOldFreeDescriptor, MmFreeDescriptor, sizeof(LOADER_MEMORY_MAPPING));
+
 }
 
 /** Checks whether the specified memory type should be considered as free.
