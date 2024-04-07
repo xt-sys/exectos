@@ -36,6 +36,6 @@ MmpGetPxeAddress(PVOID Address);
 
 XTAPI
 VOID
-MmpInitializeArchitecture();
+MmpInitializeArchitecture(VOID);
 
 #endif /* __XTOSKRNL_AMD64_MMI_H */

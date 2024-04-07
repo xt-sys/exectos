@@ -20,6 +20,6 @@ MmZeroPages(IN PVOID Address,
 
 XTAPI
 VOID
-MmpInitializeArchitecture();
+MmpInitializeArchitecture(VOID);
 
 #endif /* __XTOSKRNL_I686_MMI_H */

@@ -26,11 +26,11 @@ MmFreeKernelStack(IN PVOID Stack,
 
 XTAPI
 VOID
-MmInitializeMemoryManager();
+MmInitializeMemoryManager(VOID);
 
 XTAPI
 VOID
-MmpScanMemoryDescriptors();
+MmpScanMemoryDescriptors(VOID);
 
 XTAPI
 BOOLEAN

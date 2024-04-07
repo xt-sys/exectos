@@ -18,7 +18,7 @@
  */
 XTAPI
 VOID
-MmpInitializeArchitecture()
+MmpInitializeArchitecture(VOID)
 {
     UNIMPLEMENTED;
 }

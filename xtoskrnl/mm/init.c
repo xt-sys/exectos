@@ -18,7 +18,7 @@
  */
 XTAPI
 VOID
-MmInitializeMemoryManager()
+MmInitializeMemoryManager(VOID)
 {
     /* Scan memory descriptors provided by the boot loader */
     MmpScanMemoryDescriptors();
@@ -44,7 +44,7 @@ MmInitializeMemoryManager()
  */
 XTAPI
 VOID
-MmpScanMemoryDescriptors()
+MmpScanMemoryDescriptors(VOID)
 {
     PLOADER_MEMORY_MAPPING MemoryDescriptor;
     PLIST_ENTRY MemoryMappings;

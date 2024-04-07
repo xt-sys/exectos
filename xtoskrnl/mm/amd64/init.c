@@ -98,7 +98,7 @@ MmpGetPxeAddress(PVOID Address)
  */
 XTAPI
 VOID
-MmpInitializeArchitecture()
+MmpInitializeArchitecture(VOID)
 {
     UNIMPLEMENTED;
 }
