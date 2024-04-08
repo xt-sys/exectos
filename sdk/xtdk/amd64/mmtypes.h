@@ -10,6 +10,7 @@
 #define __XTDK_AMD64_MMTYPES_H
 
 #include <xtbase.h>
+#include <mmtypes.h>
 
 
 /* Pages related definitions */
@@ -33,6 +34,9 @@
 
 /* Minimum number of physical pages needed by the system */
 #define MM_MINIMUM_PHYSICAL_PAGES                  2048
+
+/* Default number of secondary colors */
+#define MM_DEFAULT_SECONDARY_COLORS                64
 
 /* Page size enumeration list */
 typedef enum _PAGE_SIZE
@@ -182,9 +186,51 @@ typedef union _MMPTE
     MMPTE_LIST List;
 } MMPTE, *PMMPTE;
 
-/* Page Directory Entry structure definitions */
-typedef union _MMPTE MMPDE, *PMMPDE;
-typedef union _MMPTE MMPPE, *PMMPPE;
-typedef union _MMPTE MMPXE, *PMMPXE;
+/* Page Frame Number structure definition */
+typedef struct _MMPFN
+{
+    union
+    {
+        PFN_NUMBER Flink;
+        ULONG WsIndex;
+        PKEVENT Event;
+        XTSTATUS ReadStatus;
+        SINGLE_LIST_ENTRY NextStackPfn;
+    } u1;
+    PMMPTE PteAddress;
+    union
+    {
+        PFN_NUMBER Blink;
+        ULONG_PTR ShareCount;
+    } u2;
+    union
+    {
+        MMPFNENTRY e1;
+        struct
+        {
+            USHORT ShortFlags;
+            USHORT ReferenceCount;
+        } e2;
+    } u3;
+    union
+    {
+        MMPTE OriginalPte;
+        LONG AweReferenceCount;
+    };
+    union
+    {
+        ULONG_PTR EntireFrame;
+        struct
+        {
+            ULONG_PTR PteFrame:58;
+            ULONG_PTR InPageError:1;
+            ULONG_PTR VerifierAllocation:1;
+            ULONG_PTR AweAllocation:1;
+            ULONG_PTR LockCharged:1;
+            ULONG_PTR KernelStack:1;
+            ULONG_PTR MustBeCached:1;
+        };
+    } u4;
+} MMPFN, *PMMPFN;
 
 #endif /* __XTDK_AMD64_MMTYPES_H */

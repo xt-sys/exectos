@@ -32,6 +32,7 @@
 #include <iotypes.h>
 #include <ketypes.h>
 #include <ldrtypes.h>
+#include <mmtypes.h>
 #include <potypes.h>
 #include <pstypes.h>
 #include <rtltypes.h>

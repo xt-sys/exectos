@@ -10,6 +10,7 @@
 #define __XTDK_I686_MMTYPES_H
 
 #include <xtbase.h>
+#include <mmtypes.h>
 
 
 /* Pages related definitions */
@@ -19,6 +20,9 @@
 
 /* Minimum number of physical pages needed by the system */
 #define MM_MINIMUM_PHYSICAL_PAGES                  1100
+
+/* Default number of secondary colors */
+#define MM_DEFAULT_SECONDARY_COLORS                64
 
 /* Page size enumeration list */
 typedef enum _PAGE_SIZE
@@ -144,9 +148,6 @@ typedef union _MMPTE
     MMPTE_LIST List;
 } MMPTE, *PMMPTE;
 
-/* Page Directory Entry structure definition (with PAE support) */
-typedef union _MMPTE MMPDE, *PMMPDE;
-
 /* Legacy Page Table entry structure definition (without PAE support) */
 typedef struct _HARDWARE_LEGACY_PTE
 {
@@ -254,7 +255,51 @@ typedef union _MMPTE_LEGACY
     MMPTE_LEGACY_LIST List;
 } MMPTE_LEGACY, *PMMPTE_LEGACY;
 
-/* Page Directory Entry structure definition (without PAE support) */
-typedef union _MMPTE_LEGACY MMPDE_LEGACY, *PMMPDE_LEGACY;
+/* Page Frame Number structure definition */
+typedef struct _MMPFN
+{
+    union
+    {
+        PFN_NUMBER Flink;
+        ULONG WsIndex;
+        PKEVENT Event;
+        XTSTATUS ReadStatus;
+        SINGLE_LIST_ENTRY NextStackPfn;
+    } u1;
+    PMMPTE PteAddress;
+    union
+    {
+        PFN_NUMBER Blink;
+        ULONG_PTR ShareCount;
+    } u2;
+    union
+    {
+        MMPFNENTRY e1;
+        struct
+        {
+            USHORT ShortFlags;
+            USHORT ReferenceCount;
+        } e2;
+    } u3;
+    union
+    {
+        MMPTE OriginalPte;
+        LONG AweReferenceCount;
+    };
+    union
+    {
+        ULONG_PTR EntireFrame;
+        struct
+        {
+            ULONG_PTR PteFrame:26;
+            ULONG_PTR InPageError:1;
+            ULONG_PTR VerifierAllocation:1;
+            ULONG_PTR AweAllocation:1;
+            ULONG_PTR LockCharged:1;
+            ULONG_PTR KernelStack:1;
+            ULONG_PTR MustBeCached:1;
+        };
+    } u4;
+} MMPFN, *PMMPFN;
 
 #endif /* __XTDK_I686_MMTYPES_H */
