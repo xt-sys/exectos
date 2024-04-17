@@ -386,17 +386,13 @@ XTAPI
 VOID
 ArpInitializeSegments(VOID)
 {
-    asm volatile("mov %0, %%ax\n"
-                 "mov %%ax, %%fs\n"
-                 "mov %1, %%ax\n"
-                 "mov %%ax, %%ds\n"
-                 "mov %%ax, %%es\n"
-                 "mov %%ax, %%gs\n"
-                 "swapgs\n"
-                 "mov %%ax, %%gs\n"
-                 :
-                 : "i" (KGDT_R3_CMTEB | RPL_MASK),
-                   "i" (KGDT_R3_DATA | RPL_MASK));
+    /* Initialize segments */
+    ArLoadSegment(SEGMENT_CS, KGDT_R0_CODE);
+    ArLoadSegment(SEGMENT_DS, KGDT_R3_DATA | RPL_MASK);
+    ArLoadSegment(SEGMENT_ES, KGDT_R3_DATA | RPL_MASK);
+    ArLoadSegment(SEGMENT_FS, KGDT_R3_CMTEB | RPL_MASK);
+    ArLoadSegment(SEGMENT_GS, KGDT_R3_DATA | RPL_MASK);
+    ArLoadSegment(SEGMENT_SS, KGDT_R0_DATA);
 }
 
 /**
