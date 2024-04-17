@@ -235,30 +235,42 @@ ArLoadSegment(IN USHORT Segment,
     switch(Segment)
     {
         case SEGMENT_CS:
-            asm volatile("movl %0, %%cs"
+            /* Load CS Segment */
+            asm volatile("mov %0, %%rax\n"
+                         "push %%rax\n"
+                         "lea label(%%rip), %%rax\n"
+                         "push %%rax\n"
+                         "lretq\n"
+                         "label:"
                          :
-                         : "r" (Source));
+                         : "ri" ((ULONGLONG)Source)
+                         : "rax");
             break;
         case SEGMENT_DS:
+            /* Load DS Segment */
             asm volatile("movl %0, %%ds"
                          :
                          : "r" (Source));
             break;
         case SEGMENT_ES:
+            /* Load ES Segment */
             asm volatile("movl %0, %%es"
                          :
                          : "r" (Source));
             break;
         case SEGMENT_FS:
+            /* Load FS Segment */
             asm volatile("movl %0, %%fs"
                          :
                          : "r" (Source));
             break;
         case SEGMENT_GS:
+            /* Load GS Segment */
             asm volatile("movl %0, %%gs"
                          :
                          : "r" (Source));
             break;
+            /* Load SS Segment */
         case SEGMENT_SS:
             asm volatile("movl %0, %%ss"
                          :
