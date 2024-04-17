@@ -61,9 +61,6 @@ ArInitializeProcessor(VOID)
     /* Initialize segment registers */
     ArpInitializeSegments();
 
-    /* Load FS segment */
-    ArLoadSegment(SEGMENT_FS, KGDT_R0_PB);
-
     /* Initialize processor registers */
     ArpInitializeProcessorRegisters();
 
@@ -346,8 +343,11 @@ XTAPI
 VOID
 ArpInitializeSegments(VOID)
 {
+    /* Initialize segments */
+    ArLoadSegment(SEGMENT_CS, KGDT_R0_CODE);
     ArLoadSegment(SEGMENT_DS, KGDT_R3_DATA | RPL_MASK);
     ArLoadSegment(SEGMENT_ES, KGDT_R3_DATA | RPL_MASK);
+    ArLoadSegment(SEGMENT_FS, KGDT_R0_PB);
 }
 
 /**
