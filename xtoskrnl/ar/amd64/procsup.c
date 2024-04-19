@@ -56,7 +56,6 @@ ArInitializeProcessor(VOID)
     ArLoadTaskRegister((UINT)KGDT_SYS_TSS);
 
     /* Enter passive IRQ level */
-    ProcessorBlock->RunLevel = PASSIVE_LEVEL;
     ArWriteControlRegister(8, PASSIVE_LEVEL);
 
     /* Initialize segment registers */
@@ -321,6 +320,9 @@ ArpInitializeProcessorBlock(OUT PKPROCESSOR_BLOCK ProcessorBlock,
 
     /* Set initial MXCSR register value */
     ProcessorBlock->Prcb.MxCsr = INITIAL_MXCSR;
+
+    /* Set initial runlevel */
+    ProcessorBlock->RunLevel = PASSIVE_LEVEL;
 }
 
 /**
@@ -345,6 +347,9 @@ ArpInitializeProcessorRegisters(VOID)
     /* Set debugger extension */
     ArWriteControlRegister(4, ArReadControlRegister(4) | CR4_DE);
 
+    /* Enable large pages */
+    ArWriteControlRegister(4, ArReadControlRegister(4) | CR4_PSE);
+
     /* Enable write-protection */
     ArWriteControlRegister(0, ArReadControlRegister(0) | CR0_WP);
 
@@ -356,6 +361,9 @@ ArpInitializeProcessorRegisters(VOID)
 
     /* Disable x87 FPU exceptions */
     ArWriteControlRegister(0, ArReadControlRegister(0) & ~CR0_NE);
+
+    /* Flush the TLB */
+    ArFlushTlb();
 
     /* Initialize system calls MSR */
     ArWriteModelSpecificRegister(X86_MSR_STAR, (((ULONG64)KGDT_R3_CMCODE | RPL_MASK) << 48) | ((ULONG64)KGDT_R0_CODE << 32));
