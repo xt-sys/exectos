@@ -381,88 +381,43 @@ typedef struct _KSWITCH_FRAME
 /* Trap frame definition */
 typedef struct _KTRAP_FRAME
 {
-    ULONG64 P1Home;
-    ULONG64 P2Home;
-    ULONG64 P3Home;
-    ULONG64 P4Home;
-    ULONG64 P5;
-    KPROCESSOR_MODE PreviousMode;
-    KRUNLEVEL PreviousRunLevel;
-    UCHAR FaultIndicator;
-    UCHAR ExceptionActive;
-    ULONG MxCsr;
-    ULONG64 Rax;
-    ULONG64 Rcx;
-    ULONG64 Rdx;
-    ULONG64 R8;
-    ULONG64 R9;
-    ULONG64 R10;
-    ULONG64 R11;
-    union
-    {
-        ULONG64 GsBase;
-        ULONG64 GsSwap;
-    };
-    M128 Xmm0;
-    M128 Xmm1;
-    M128 Xmm2;
-    M128 Xmm3;
-    M128 Xmm4;
-    M128 Xmm5;
-    union
-    {
-        ULONG64 FaultAddress;
-        ULONG64 ContextRecord;
-        ULONG64 TimeStampCKCL;
-    };
-    ULONG64 Dr0;
-    ULONG64 Dr1;
-    ULONG64 Dr2;
-    ULONG64 Dr3;
-    ULONG64 Dr6;
-    ULONG64 Dr7;
-    union
-    {
-        struct
-        {
-            ULONG64 DebugControl;
-            ULONG64 LastBranchToRip;
-            ULONG64 LastBranchFromRip;
-            ULONG64 LastExceptionToRip;
-            ULONG64 LastExceptionFromRip;
-        };
-        struct
-        {
-            ULONG64 LastBranchControl;
-            ULONG LastBranchMSR;
-        };
-    };
+    ULONGLONG Dr0;
+    ULONGLONG Dr1;
+    ULONGLONG Dr2;
+    ULONGLONG Dr3;
+    ULONGLONG Dr6;
+    ULONGLONG Dr7;
+    ULONGLONG Cr2;
+    ULONGLONG Cr3;
     USHORT SegDs;
     USHORT SegEs;
     USHORT SegFs;
     USHORT SegGs;
-    ULONG64 TrapFrame;
-    ULONG64 Rbx;
-    ULONG64 Rdi;
-    ULONG64 Rsi;
-    ULONG64 Rbp;
-    union
-    {
-        ULONG64 ErrorCode;
-        ULONG64 ExceptionFrame;
-        ULONG64 TimeStampKlog;
+    ULONGLONG Rax;
+    ULONGLONG Rbx;
+    ULONGLONG Rcx;
+    ULONGLONG Rdx;
+    ULONGLONG Rsi;
+    ULONGLONG Rdi;
+    ULONGLONG Rbp;
+    ULONGLONG R8;
+    ULONGLONG R9;
+    ULONGLONG R10;
+    ULONGLONG R11;
+    ULONGLONG R12;
+    ULONGLONG R13;
+    ULONGLONG R14;
+    ULONGLONG R15;
+    ULONGLONG Vector;
+    union {
+        ULONGLONG ErrorCode;
+        ULONGLONG ExceptionFrame;
     };
-    ULONG64 Rip;
-    USHORT SegCs;
-    UCHAR Fill0;
-    UCHAR Logging;
-    USHORT Fill1[2];
-    ULONG EFlags;
-    ULONG Fill2;
-    ULONG64 Rsp;
-    USHORT SegSs;
-    USHORT Fill3;
-    ULONG CodePatchCycle;
+    ULONGLONG Rip;
+    ULONGLONG Cs;
+    ULONGLONG RFlags;
+    ULONGLONG Rsp;
+    ULONGLONG SegSs;
 } KTRAP_FRAME, *PKTRAP_FRAME;
 
 /* Thread initialization frame definition */

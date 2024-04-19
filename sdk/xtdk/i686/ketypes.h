@@ -382,41 +382,32 @@ typedef struct _KSWITCH_FRAME
 /* Trap frame definition */
 typedef struct _KTRAP_FRAME
 {
-    ULONG DbgEbp;
-    ULONG DbgEip;
-    ULONG DbgMark;
-    ULONG DbgPointer;
-    ULONG TempSegCs;
-    ULONG TempEsp;
     ULONG Dr0;
     ULONG Dr1;
     ULONG Dr2;
     ULONG Dr3;
     ULONG Dr6;
     ULONG Dr7;
-    ULONG SegGs;
-    ULONG SegEs;
-    ULONG SegDs;
-    ULONG Edx;
-    ULONG Ecx;
+    ULONG Cr2;
+    ULONG Cr3;
+    USHORT SegDs;
+    USHORT SegEs;
+    USHORT SegFs;
+    USHORT SegGs;
     ULONG Eax;
-    ULONG PreviousMode;
-    PEXCEPTION_REGISTRATION_RECORD ExceptionList;
-    ULONG SegFs;
-    ULONG Edi;
-    ULONG Esi;
     ULONG Ebx;
+    ULONG Ecx;
+    ULONG Edx;
+    ULONG Esi;
+    ULONG Edi;
     ULONG Ebp;
-    ULONG ErrCode;
+    ULONG Vector;
+    ULONG ErrorCode;
     ULONG Eip;
-    ULONG SegCs;
+    ULONG Cs;
     ULONG EFlags;
-    ULONG HardwareEsp;
-    ULONG HardwareSegSs;
-    ULONG V86Es;
-    ULONG V86Ds;
-    ULONG V86Fs;
-    ULONG V86Gs;
+    ULONG Esp;
+    ULONG SegSs;
 } KTRAP_FRAME, *PKTRAP_FRAME;
 
 /* Thread initialization frame definition */
