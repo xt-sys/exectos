@@ -65,7 +65,7 @@ ArLoadSegment(IN USHORT Segment,
 
 XTCDECL
 VOID
-ArLoadTaskRegister(USHORT Source);
+ArLoadTaskRegister(IN USHORT Source);
 
 XTCDECL
 VOID
@@ -81,7 +81,7 @@ ArReadDebugRegister(IN USHORT DebugRegister);
 
 XTCDECL
 ULONGLONG
-ArReadGSQuadWord(ULONG Offset);
+ArReadGSQuadWord(IN ULONG Offset);
 
 XTCDECL
 ULONGLONG
@@ -155,6 +155,10 @@ ArYieldProcessor(VOID);
 
 XTCDECL
 VOID
+ArpDispatchTrap(IN PKTRAP_FRAME TrapFrame);
+
+XTCDECL
+VOID
 ArpHandleSystemCall32(VOID);
 
 XTCDECL
@@ -163,91 +167,103 @@ ArpHandleSystemCall64(VOID);
 
 XTCDECL
 VOID
-ArpHandleTrap00(VOID);
+ArpHandleTrap00(IN PKTRAP_FRAME TrapFrame);
 
 XTCDECL
 VOID
-ArpHandleTrap01(VOID);
+ArpHandleTrap01(IN PKTRAP_FRAME TrapFrame);
 
 XTCDECL
 VOID
-ArpHandleTrap02(VOID);
+ArpHandleTrap02(IN PKTRAP_FRAME TrapFrame);
 
 XTCDECL
 VOID
-ArpHandleTrap03(VOID);
+ArpHandleTrap03(IN PKTRAP_FRAME TrapFrame);
 
 XTCDECL
 VOID
-ArpHandleTrap04(VOID);
+ArpHandleTrap04(IN PKTRAP_FRAME TrapFrame);
 
 XTCDECL
 VOID
-ArpHandleTrap05(VOID);
+ArpHandleTrap05(IN PKTRAP_FRAME TrapFrame);
 
 XTCDECL
 VOID
-ArpHandleTrap06(VOID);
+ArpHandleTrap06(IN PKTRAP_FRAME TrapFrame);
 
 XTCDECL
 VOID
-ArpHandleTrap07(VOID);
+ArpHandleTrap07(IN PKTRAP_FRAME TrapFrame);
 
 XTCDECL
 VOID
-ArpHandleTrap08(VOID);
+ArpHandleTrap08(IN PKTRAP_FRAME TrapFrame);
 
 XTCDECL
 VOID
-ArpHandleTrap09(VOID);
+ArpHandleTrap09(IN PKTRAP_FRAME TrapFrame);
 
 XTCDECL
 VOID
-ArpHandleTrap0A(VOID);
+ArpHandleTrap0A(IN PKTRAP_FRAME TrapFrame);
 
 XTCDECL
 VOID
-ArpHandleTrap0B(VOID);
+ArpHandleTrap0B(IN PKTRAP_FRAME TrapFrame);
 
 XTCDECL
 VOID
-ArpHandleTrap0C(VOID);
+ArpHandleTrap0C(IN PKTRAP_FRAME TrapFrame);
 
 XTCDECL
 VOID
-ArpHandleTrap0D(VOID);
+ArpHandleTrap0D(IN PKTRAP_FRAME TrapFrame);
 
 XTCDECL
 VOID
-ArpHandleTrap0E(VOID);
+ArpHandleTrap0E(IN PKTRAP_FRAME TrapFrame);
 
 XTCDECL
 VOID
-ArpHandleTrap10(VOID);
+ArpHandleTrap10(IN PKTRAP_FRAME TrapFrame);
 
 XTCDECL
 VOID
-ArpHandleTrap11(VOID);
+ArpHandleTrap11(IN PKTRAP_FRAME TrapFrame);
 
 XTCDECL
 VOID
-ArpHandleTrap12(VOID);
+ArpHandleTrap12(IN PKTRAP_FRAME TrapFrame);
 
 XTCDECL
 VOID
-ArpHandleTrap13(VOID);
+ArpHandleTrap13(IN PKTRAP_FRAME TrapFrame);
 
 XTCDECL
 VOID
-ArpHandleTrap2C(VOID);
+ArpHandleTrap1F(IN PKTRAP_FRAME TrapFrame);
 
 XTCDECL
 VOID
-ArpHandleTrap2D(VOID);
+ArpHandleTrap2C(IN PKTRAP_FRAME TrapFrame);
 
 XTCDECL
 VOID
-ArpHandleTrapFF(VOID);
+ArpHandleTrap2D(IN PKTRAP_FRAME TrapFrame);
+
+XTCDECL
+VOID
+ArpHandleTrap2F(IN PKTRAP_FRAME TrapFrame);
+
+XTCDECL
+VOID
+ArpHandleTrapE1(IN PKTRAP_FRAME TrapFrame);
+
+XTCDECL
+VOID
+ArpHandleTrapFF(IN PKTRAP_FRAME TrapFrame);
 
 XTAPI
 VOID
@@ -299,5 +315,101 @@ ArpSetIdtGate(IN PKIDTENTRY Idt,
               IN USHORT Selector,
               IN USHORT Ist,
               IN USHORT Access);
+
+XTCDECL
+VOID
+ArpTrap0x00(VOID);
+
+XTCDECL
+VOID
+ArpTrap0x01(VOID);
+
+XTCDECL
+VOID
+ArpTrap0x02(VOID);
+
+XTCDECL
+VOID
+ArpTrap0x03(VOID);
+
+XTCDECL
+VOID
+ArpTrap0x04(VOID);
+
+XTCDECL
+VOID
+ArpTrap0x05(VOID);
+
+XTCDECL
+VOID
+ArpTrap0x06(VOID);
+
+XTCDECL
+VOID
+ArpTrap0x07(VOID);
+
+XTCDECL
+VOID
+ArpTrap0x08(VOID);
+
+XTCDECL
+VOID
+ArpTrap0x09(VOID);
+
+XTCDECL
+VOID
+ArpTrap0x0A(VOID);
+
+XTCDECL
+VOID
+ArpTrap0x0B(VOID);
+
+XTCDECL
+VOID
+ArpTrap0x0C(VOID);
+
+XTCDECL
+VOID
+ArpTrap0x0D(VOID);
+
+XTCDECL
+VOID
+ArpTrap0x0E(VOID);
+
+XTCDECL
+VOID
+ArpTrap0x10(VOID);
+
+XTCDECL
+VOID
+ArpTrap0x11(VOID);
+
+XTCDECL
+VOID
+ArpTrap0x12(VOID);
+
+XTCDECL
+VOID
+ArpTrap0x13(VOID);
+
+XTCDECL
+VOID
+ArpTrap0x1F(VOID);
+
+XTCDECL
+VOID
+ArpTrap0x2C(VOID);
+
+XTCDECL
+VOID
+ArpTrap0x2D(VOID);
+
+XTCDECL
+VOID
+ArpTrap0x2F(VOID);
+
+XTCDECL
+VOID
+ArpTrap0xE1(VOID);
 
 #endif /* __XTOSKRNL_AMD64_ARI_H */
