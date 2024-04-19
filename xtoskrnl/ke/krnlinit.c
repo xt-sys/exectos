@@ -54,6 +54,9 @@ KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
     /* Architecture specific kernel initialization */
     KepInitializeMachine();
 
+    /* Raise to HIGH runlevel */
+    KeRaiseRunLevel(HIGH_LEVEL);
+
     /* Switch boot stack aligning it to 4 byte boundary */
     KepSwitchBootStack((ULONG_PTR)&ArKernelBootStack & ~0x3);
 }
