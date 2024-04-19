@@ -56,7 +56,7 @@ ArInitializeProcessor(VOID)
     ArLoadTaskRegister((UINT)KGDT_SYS_TSS);
 
     /* Enter passive IRQ level */
-    ProcessorBlock->RunLevel = PASSIVE_LEVEL;
+    HlSetRunLevel(PASSIVE_LEVEL);
 
     /* Initialize segment registers */
     ArpInitializeSegments();
@@ -315,6 +315,9 @@ ArpInitializeProcessorBlock(OUT PKPROCESSOR_BLOCK ProcessorBlock,
     ProcessorBlock->Prcb.CurrentThread->ApcState.Process = &KeInitialProcess.ProcessControlBlock;
     ProcessorBlock->Prcb.IdleThread = &KeInitialThread.ThreadControlBlock;
     ProcessorBlock->Prcb.NextThread = NULL;
+
+    /* Set initial runlevel */
+    ProcessorBlock->RunLevel = PASSIVE_LEVEL;
 }
 
 /**
