@@ -81,18 +81,18 @@ KepInitializeThreadContext(IN PKTHREAD Thread,
         ThreadFrame->TrapFrame.Dr7 = 0;
 
         /* Set exception list pointer in the trap frame */
-        ThreadFrame->TrapFrame.ExceptionList = (PEXCEPTION_REGISTRATION_RECORD) - 1;
+        // ThreadFrame->TrapFrame.ExceptionList = (PEXCEPTION_REGISTRATION_RECORD) - 1;
 
         /* Set DS, ES and SS segments for user mode */
         ThreadFrame->TrapFrame.SegDs |= RPL_MASK;
         ThreadFrame->TrapFrame.SegEs |= RPL_MASK;
-        ThreadFrame->TrapFrame.HardwareSegSs |= RPL_MASK;
+        ThreadFrame->TrapFrame.SegSs |= RPL_MASK;
 
         /* Set debug mark in the trap frame */
-        ThreadFrame->TrapFrame.DbgMark = 0x8BADF00D;
+        // ThreadFrame->TrapFrame.DbgMark = 0x8BADF00D;
 
         /* Set user mode thread in the trap frame */
-        ThreadFrame->TrapFrame.PreviousMode = UserMode;
+        // ThreadFrame->TrapFrame.PreviousMode = UserMode;
     }
     else
     {
