@@ -56,7 +56,7 @@ ArInitializeProcessor(VOID)
     ArLoadTaskRegister((UINT)KGDT_SYS_TSS);
 
     /* Enter passive IRQ level */
-    ArWriteControlRegister(8, PASSIVE_LEVEL);
+    HlSetRunLevel(PASSIVE_LEVEL);
 
     /* Initialize segment registers */
     ArpInitializeSegments();
