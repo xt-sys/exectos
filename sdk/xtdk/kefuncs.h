@@ -24,6 +24,10 @@ XTFASTCALL
 VOID
 KeAcquireSpinLock(IN OUT PKSPIN_LOCK SpinLock);
 
+XTAPI
+BOOLEAN
+KeCancelTimer(IN PKTIMER Timer);
+
 XTFASTCALL
 KRUNLEVEL
 KeGetCurrentRunLevel(VOID);
@@ -63,12 +67,8 @@ KeInitializeThreadedDpc(IN PKDPC Dpc,
 
 XTAPI
 VOID
-KeInitializeTimer(OUT PKTIMER Timer);
-
-XTAPI
-VOID
-KeInitializeTimerEx(OUT PKTIMER Timer,
-                    IN KTIMER_TYPE Type);
+KeInitializeTimer(OUT PKTIMER Timer,
+                  IN KTIMER_TYPE Type);
 
 XTFASTCALL
 VOID

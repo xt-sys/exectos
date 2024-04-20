@@ -10,21 +10,61 @@
 
 
 /**
- * Initializes a kernel timer.
+ * Cancels the timer.
  *
  * @param Timer
- *        Supplies a pointer to a time object.
+ *        Supplies a pointer to a timer object.
  *
- * @return This routine does not return any value.
+ * @return This routine returns TRUE if the cancelled timer was set, or FALSE otherwise.
  *
  * @since NT 3.5
  */
 XTAPI
-VOID
-KeInitializeTimer(OUT PKTIMER Timer)
+BOOLEAN
+KeCancelTimer(IN PKTIMER Timer)
 {
-    /* Initialize the timer */
-    KeInitializeTimerEx(Timer, NotificationTimer);
+    BOOLEAN Result;
+    KRUNLEVEL OldRunLevel;
+
+    /* Set default result value */
+    Result = FALSE;
+
+    /* Raise run level and acquire dispatcher lock */
+    OldRunLevel = KeRaiseRunLevel(SYNC_LEVEL);
+    KeAcquireQueuedSpinLock(DispatcherLock);
+
+    /* Check timer status */
+    if(Timer->Header.Inserted)
+    {
+        /* Remove the timer from the list */
+        KepRemoveTimer(Timer);
+        Result = TRUE;
+    }
+
+    /* Release dispatcher lock and processes the deferred ready list */
+    KeReleaseQueuedSpinLock(DispatcherLock);
+    KepExitDispatcher(OldRunLevel);
+
+    /* Return result */
+    return Result;
+}
+
+/**
+ * Clears the signal state of the timer.
+ *
+ * @param Timer
+ *        Supplies a pointer to a timer object.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since NT 4.0
+ */
+XTAPI
+VOID
+KeClearTimer(IN PKTIMER Timer)
+{
+    /* Clear signal state */
+    Timer->Header.SignalState = 0;
 }
 
 /**
@@ -38,12 +78,12 @@ KeInitializeTimer(OUT PKTIMER Timer)
  *
  * @return This routine does not return any value.
  *
- * @since NT 3.5
+ * @since XT 1.0
  */
 XTAPI
 VOID
-KeInitializeTimerEx(OUT PKTIMER Timer,
-                    IN KTIMER_TYPE Type)
+KeInitializeTimer(OUT PKTIMER Timer,
+                  IN KTIMER_TYPE Type)
 {
     /* Initialize the header */
     Timer->Header.Type = TimerNotificationObject + Type;
@@ -57,4 +97,23 @@ KeInitializeTimerEx(OUT PKTIMER Timer,
     /* Initialize linked lists */
     RtlInitializeListHead(&Timer->Header.WaitListHead);
     RtlInitializeListHead(&Timer->TimerListEntry);
+}
+
+/**
+ * Removes a specified timer from the timer list.
+ *
+ * @param Timer
+ *        Supplies a pointer to a timer object.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KepRemoveTimer(IN OUT PKTIMER Timer)
+{
+    /* Remove the timer from the list */
+    Timer->Header.Inserted = FALSE;
+    RtlRemoveEntryList(&Timer->TimerListEntry);
 }

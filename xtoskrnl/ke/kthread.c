@@ -113,7 +113,7 @@ KeInitializeThread(IN PKPROCESS Process,
     KeInitializeSemaphore(&Thread->SuspendSemaphore, 0, 2);
 
     /* Initialize the builtin timer */
-    KeInitializeTimer(&Thread->Timer);
+    KeInitializeTimer(&Thread->Timer, NotificationTimer);
     TimerWaitBlock = &Thread->WaitBlock[KTIMER_WAIT_BLOCK];
     TimerWaitBlock->Object = &Thread->Timer;
     TimerWaitBlock->WaitKey = STATUS_TIMEOUT;
@@ -192,6 +192,26 @@ VOID
 KeStartThread(IN PKTHREAD Thread)
 {
     UNIMPLEMENTED;
+}
+
+/**
+ * Exits the dispatcher, switches context to a new thread and lowers runlevel to its original state.
+ *
+ * @param OldRunLevel
+ *        Supplies the original runlevel state.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+VOID
+KepExitDispatcher(IN KRUNLEVEL OldRunLevel)
+{
+    UNIMPLEMENTED;
+
+    /* Lower runlevel */
+    KeLowerRunLevel(OldRunLevel);
 }
 
 /**

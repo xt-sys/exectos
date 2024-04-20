@@ -19,6 +19,10 @@ KeClearEvent(IN PKEVENT Event);
 
 XTAPI
 VOID
+KeClearTimer(IN PKTIMER Timer);
+
+XTAPI
+VOID
 KeHaltSystem(VOID);
 
 XTAPI
@@ -77,6 +81,14 @@ KeStartThread(IN PKTHREAD Thread);
 XTAPI
 VOID
 KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters);
+
+XTFASTCALL
+VOID
+KepExitDispatcher(IN KRUNLEVEL OldRunLevel);
+
+XTAPI
+VOID
+KepRemoveTimer(IN OUT PKTIMER Timer);
 
 XTFASTCALL
 VOID

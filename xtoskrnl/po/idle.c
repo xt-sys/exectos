@@ -34,7 +34,7 @@ PoInitializeProcessorControlBlock(IN OUT PKPROCESSOR_CONTROL_BLOCK Prcb)
     /* Initialize DPC and Timer */
     KeInitializeDpc(&Prcb->PowerState.PerfDpc, PopPerfIdleDpc, Prcb);
     KeSetTargetProcessorDpc(&Prcb->PowerState.PerfDpc, Prcb->Number);
-    KeInitializeTimerEx(&Prcb->PowerState.PerfTimer, SynchronizationTimer);
+    KeInitializeTimer(&Prcb->PowerState.PerfTimer, SynchronizationTimer);
 }
 
 /**
