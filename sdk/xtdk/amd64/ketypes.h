@@ -415,7 +415,7 @@ typedef struct _KTRAP_FRAME
     };
     ULONGLONG Rip;
     ULONGLONG Cs;
-    ULONGLONG RFlags;
+    ULONGLONG Flags;
     ULONGLONG Rsp;
     ULONGLONG SegSs;
 } KTRAP_FRAME, *PKTRAP_FRAME;

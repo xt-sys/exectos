@@ -405,7 +405,7 @@ typedef struct _KTRAP_FRAME
     ULONG ErrorCode;
     ULONG Eip;
     ULONG Cs;
-    ULONG EFlags;
+    ULONG Flags;
     ULONG Esp;
     ULONG SegSs;
 } KTRAP_FRAME, *PKTRAP_FRAME;
