@@ -64,6 +64,10 @@ KePanicEx(IN ULONG Code,
           IN ULONG_PTR Parameter4);
 
 XTAPI
+ULONGLONG
+KeQueryTimer(IN PKTIMER Timer);
+
+XTAPI
 LONG
 KeSetEvent(IN PKEVENT Event,
            IN KPRIORITY Increment,

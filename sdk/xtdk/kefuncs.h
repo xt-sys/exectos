@@ -33,6 +33,10 @@ KRUNLEVEL
 KeGetCurrentRunLevel(VOID);
 
 XTAPI
+BOOLEAN
+KeGetTimerState(IN PKTIMER Timer);
+
+XTAPI
 VOID
 KeInitializeApc(IN PKAPC Apc,
                 IN PKTHREAD Thread,
@@ -101,6 +105,13 @@ XTAPI
 VOID
 KeSetTargetProcessorDpc(IN PKDPC Dpc,
                         IN CCHAR Number);
+
+XTAPI
+VOID
+KeSetTimer(IN PKTIMER Timer,
+           IN LARGE_INTEGER DueTime,
+           IN LONG Period,
+           IN PKDPC Dpc);
 
 XTAPI
 VOID

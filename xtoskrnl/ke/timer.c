@@ -24,13 +24,13 @@ BOOLEAN
 KeCancelTimer(IN PKTIMER Timer)
 {
     BOOLEAN Result;
-    KRUNLEVEL OldRunLevel;
+    KRUNLEVEL RunLevel;
 
     /* Set default result value */
     Result = FALSE;
 
     /* Raise run level and acquire dispatcher lock */
-    OldRunLevel = KeRaiseRunLevel(SYNC_LEVEL);
+    RunLevel = KeRaiseRunLevel(SYNC_LEVEL);
     KeAcquireQueuedSpinLock(DispatcherLock);
 
     /* Check timer status */
@@ -41,9 +41,9 @@ KeCancelTimer(IN PKTIMER Timer)
         Result = TRUE;
     }
 
-    /* Release dispatcher lock and processes the deferred ready list */
+    /* Release dispatcher lock and process the deferred ready list */
     KeReleaseQueuedSpinLock(DispatcherLock);
-    KepExitDispatcher(OldRunLevel);
+    KepExitDispatcher(RunLevel);
 
     /* Return result */
     return Result;
@@ -65,6 +65,24 @@ KeClearTimer(IN PKTIMER Timer)
 {
     /* Clear signal state */
     Timer->Header.SignalState = 0;
+}
+
+/**
+ * Reads the current signal state of the given timer.
+ *
+ * @param Timer
+ *        Supplies a pointer to a timer object.
+ *
+ * @return This routine returns TRUE if the timer is set, or FALSE otherwise.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+BOOLEAN
+KeGetTimerState(IN PKTIMER Timer)
+{
+    /* Return timer state */
+    return (BOOLEAN)Timer->Header.SignalState;
 }
 
 /**
@@ -97,6 +115,74 @@ KeInitializeTimer(OUT PKTIMER Timer,
     /* Initialize linked lists */
     RtlInitializeListHead(&Timer->Header.WaitListHead);
     RtlInitializeListHead(&Timer->TimerListEntry);
+}
+
+/**
+ * Queries the timer's interrupt due time.
+ *
+ * @param Timer
+ *        Supplies a pointer to a timer object.
+ *
+ * @return This routine returns the time remaining on the timer, or 0 if the timer is not set.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONGLONG
+KeQueryTimer(IN PKTIMER Timer)
+{
+    KRUNLEVEL RunLevel;
+    ULONGLONG DueTime;
+
+    /* Set initial due time */
+    DueTime = 0;
+
+    /* Raise run level and acquire dispatcher lock */
+    RunLevel = KeRaiseRunLevel(SYNC_LEVEL);
+    KeAcquireQueuedSpinLock(DispatcherLock);
+
+    /* Check timer status */
+    if(Timer->Header.Inserted)
+    {
+        /* Get timer's due time */
+        DueTime = Timer->DueTime.QuadPart;
+    }
+
+    /* Release dispatcher lock and process the deferred ready list */
+    KeReleaseQueuedSpinLock(DispatcherLock);
+    KepExitDispatcher(RunLevel);
+
+    /* Return timer's due time */
+    return DueTime;
+}
+
+/**
+ * Sets the supplied timer to expire at the specified time.
+ *
+ * @param Timer
+ *        Supplies a pointer to a timer object.
+ *
+ * @param DueTime
+ *        Supplies the time at which the timer should expire (both absolute and relative times are supported).
+ *
+ * @param Period
+ *        Supplies the timer period.
+ *
+ * @param Dpc
+ *        Supplies a pointer to a Deferred Procedure Call (DPC) object.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KeSetTimer(IN PKTIMER Timer,
+           IN LARGE_INTEGER DueTime,
+           IN LONG Period,
+           IN PKDPC Dpc)
+{
+    UNIMPLEMENTED;
 }
 
 /**
