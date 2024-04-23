@@ -6,6 +6,8 @@
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
+#include <i686/asmsup.h>
+
 .altmacro
 .text
 
@@ -40,36 +42,45 @@ _ArpTrap\Vector:
     push %ebx
     push %eax
 
-    /* Push Segments */
-    mov %gs, %ax
-    push %ax
-    mov %fs, %ax
-    push %ax
-    mov %es, %ax
-    push %ax
-    mov %ds, %ax
-    push %ax
+    /* Reserve space for other registers and point RBP to the trap frame */
+    sub $(TRAP_FRAME_SIZE - TRAP_REGISTERS_SIZE), %esp
+    lea (%esp), %ebp
 
-    /* Push Control Registers */
-    mov %cr3, %eax
-    push %eax
-    mov %cr2, %eax
-    push %eax
+    /* Store segment selectors */
+    mov %gs, TrapSegGs(%ebp)
+    mov %fs, TrapSegFs(%ebp)
+    mov %es, TrapSegEs(%ebp)
+    mov %ds, TrapSegDs(%ebp)
 
-    /* Push Debug Registers */
+    /* Store debug registers */
     mov %dr7, %eax
-    push %eax
+    mov %eax, TrapDr7(%ebp)
     mov %dr6, %eax
-    push %eax
+    mov %eax, TrapDr6(%ebp)
     mov %dr3, %eax
-    push %eax
+    mov %eax, TrapDr3(%ebp)
     mov %dr2, %eax
-    push %eax
+    mov %eax, TrapDr2(%ebp)
     mov %dr1, %eax
-    push %eax
+    mov %eax, TrapDr1(%ebp)
     mov %dr0, %eax
-    push %eax
+    mov %eax, TrapDr0(%ebp)
 
+    /* Store CR2 and CR3 */
+    mov %cr3, %eax
+    mov %eax, TrapCr3(%ebp)
+    mov %cr2, %eax
+    mov %eax, TrapCr2(%ebp)
+
+    /* Test previous mode and swap GS if needed */
+    movl $0, TrapPreviousMode(%ebp)
+    mov %cs, %ax
+    and $1, %al
+    mov %al, TrapPreviousMode(%ebp)
+    jz KernelMode$\Vector
+    swapgs
+
+KernelMode$\Vector:
     /* Push Frame Pointer, clear direction flag and pass to trap dispatcher */
     push %esp
     cld
@@ -78,14 +89,20 @@ _ArpTrap\Vector:
     /* Clean up the stack */
     add $4, %esp
 
-    /* Skip space occupied by Debug Registers */
-    add $(6 * 4), %esp
+    /* Test previous mode and swapgs if needed */
+    testb $1, TrapPreviousMode(%ebp)
+    jz KernelModeReturn$\Vector
+    cli
+    swapgs
 
-    /* Skip space occupied by CR2 and CR3 */
-    add $(2 * 4), %esp
+KernelModeReturn$\Vector:
+    /* Restore segment selectors */
+    mov TrapSegDs(%ebp), %ds
+    mov TrapSegEs(%ebp), %es
+    mov TrapSegFs(%ebp), %fs
 
-    /* Skip space occupied by Segments */
-    add $(4 * 2), %esp
+    /* Free stack space */
+    add $(TRAP_FRAME_SIZE - TRAP_REGISTERS_SIZE), %esp
 
     /* Pop General Purpose Registers */
     pop %eax

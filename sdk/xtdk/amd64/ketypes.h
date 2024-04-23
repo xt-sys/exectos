@@ -381,14 +381,32 @@ typedef struct _KSWITCH_FRAME
 /* Trap frame definition */
 typedef struct _KTRAP_FRAME
 {
+    M128 Xmm0;
+    M128 Xmm1;
+    M128 Xmm2;
+    M128 Xmm3;
+    M128 Xmm4;
+    M128 Xmm5;
+    M128 Xmm6;
+    M128 Xmm7;
+    M128 Xmm8;
+    M128 Xmm9;
+    M128 Xmm10;
+    M128 Xmm11;
+    M128 Xmm12;
+    M128 Xmm13;
+    M128 Xmm14;
+    M128 Xmm15;
+    ULONG MxCsr;
+    ULONG PreviousMode;
+    ULONGLONG Cr2;
+    ULONGLONG Cr3;
     ULONGLONG Dr0;
     ULONGLONG Dr1;
     ULONGLONG Dr2;
     ULONGLONG Dr3;
     ULONGLONG Dr6;
     ULONGLONG Dr7;
-    ULONGLONG Cr2;
-    ULONGLONG Cr3;
     USHORT SegDs;
     USHORT SegEs;
     USHORT SegFs;
@@ -397,9 +415,6 @@ typedef struct _KTRAP_FRAME
     ULONGLONG Rbx;
     ULONGLONG Rcx;
     ULONGLONG Rdx;
-    ULONGLONG Rsi;
-    ULONGLONG Rdi;
-    ULONGLONG Rbp;
     ULONGLONG R8;
     ULONGLONG R9;
     ULONGLONG R10;
@@ -408,13 +423,16 @@ typedef struct _KTRAP_FRAME
     ULONGLONG R13;
     ULONGLONG R14;
     ULONGLONG R15;
+    ULONGLONG Rsi;
+    ULONGLONG Rdi;
+    ULONGLONG Rbp;
     ULONGLONG Vector;
     union {
         ULONGLONG ErrorCode;
         ULONGLONG ExceptionFrame;
     };
     ULONGLONG Rip;
-    ULONGLONG Cs;
+    ULONGLONG SegCs;
     ULONGLONG Flags;
     ULONGLONG Rsp;
     ULONGLONG SegSs;

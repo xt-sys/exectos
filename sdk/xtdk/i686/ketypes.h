@@ -382,14 +382,15 @@ typedef struct _KSWITCH_FRAME
 /* Trap frame definition */
 typedef struct _KTRAP_FRAME
 {
+    ULONG PreviousMode;
+    ULONG Cr2;
+    ULONG Cr3;
     ULONG Dr0;
     ULONG Dr1;
     ULONG Dr2;
     ULONG Dr3;
     ULONG Dr6;
     ULONG Dr7;
-    ULONG Cr2;
-    ULONG Cr3;
     USHORT SegDs;
     USHORT SegEs;
     USHORT SegFs;
@@ -404,7 +405,7 @@ typedef struct _KTRAP_FRAME
     ULONG Vector;
     ULONG ErrorCode;
     ULONG Eip;
-    ULONG Cs;
+    ULONG SegCs;
     ULONG Flags;
     ULONG Esp;
     ULONG SegSs;
