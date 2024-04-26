@@ -190,8 +190,8 @@ VOID
 BlInitializeBootLoader();
 
 XTCDECL
-VOID
-BlInitializeBootMenuList(OUT PXTBL_BOOTMENU_ITEM MenuEntries,
+EFI_STATUS
+BlInitializeBootMenuList(OUT PXTBL_BOOTMENU_ITEM *MenuEntries,
                          OUT PULONG EntriesCount,
                          OUT PULONG DefaultId);
 

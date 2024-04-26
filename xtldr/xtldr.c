@@ -89,8 +89,8 @@ BlInitializeBootLoader()
  * @since XT 1.0
  */
 XTCDECL
-VOID
-BlInitializeBootMenuList(OUT PXTBL_BOOTMENU_ITEM MenuEntries,
+EFI_STATUS
+BlInitializeBootMenuList(OUT PXTBL_BOOTMENU_ITEM *MenuEntries,
                          OUT PULONG EntriesCount,
                          OUT PULONG DefaultId)
 {
@@ -106,7 +106,6 @@ BlInitializeBootMenuList(OUT PXTBL_BOOTMENU_ITEM MenuEntries,
     /* Set default values */
     DefaultOS = 0;
     NumberOfEntries = 0;
-    OsList = NULL;
 
     /* Get default menu entry from configuration */
     DefaultMenuEntry = BlGetConfigValue(L"DEFAULT");
@@ -123,7 +122,25 @@ BlInitializeBootMenuList(OUT PXTBL_BOOTMENU_ITEM MenuEntries,
         }
     }
 
-    /* Iterate through all menu sections */
+    /* Iterate through menu items to get a total number of entries */
+    MenuEntrySectionList = BlpMenuList->Flink;
+    while(MenuEntrySectionList != BlpMenuList)
+    {
+        /* Increase number of menu entries, and simply get next item */
+        NumberOfEntries++;
+        MenuEntrySectionList = MenuEntrySectionList->Flink;
+    }
+
+    /* Allocate memory for the OS list depending on the item count */
+    Status = BlAllocateMemoryPool(NumberOfEntries * sizeof(XTBL_BOOTMENU_ITEM), (PVOID*)&OsList);
+    if(Status != STATUS_EFI_SUCCESS || !OsList)
+    {
+        /* Memory allocation failure */
+        return STATUS_EFI_OUT_OF_RESOURCES;
+    }
+
+    /* Reset counter and iterate through all menu items once again */
+    NumberOfEntries = 0;
     MenuEntrySectionList = BlpMenuList->Flink;
     while(MenuEntrySectionList != BlpMenuList)
     {
@@ -171,7 +188,10 @@ BlInitializeBootMenuList(OUT PXTBL_BOOTMENU_ITEM MenuEntries,
     /* Set return values */
     *DefaultId = DefaultOS;
     *EntriesCount = NumberOfEntries;
-    MenuEntries = OsList;
+    *MenuEntries = OsList;
+
+    /* Return success */
+    return STATUS_EFI_SUCCESS;
 }
 
 /**

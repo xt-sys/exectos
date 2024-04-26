@@ -32,7 +32,12 @@ BlDisplayBootMenu()
     PWCHAR TimeOutString;
 
     /* Initialize boot menu list */
-    BlInitializeBootMenuList(MenuEntries, &NumberOfEntries, &HighligtedEntryId);
+    Status = BlInitializeBootMenuList(&MenuEntries, &NumberOfEntries, &HighligtedEntryId);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to initialize boot menu list, exit into XTLDR shell */
+        return;
+    }
 
     /* Get timeout from the configuration */
     TimeOutString = BlGetConfigValue(L"TIMEOUT");
