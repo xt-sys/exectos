@@ -65,7 +65,7 @@ XtLdrModuleMain(IN EFI_HANDLE ImageHandle,
     BlpDummyProtocol.BootSystem = DmBootSystem;
 
     /* Register XTOS boot protocol */
-    XtLdrProtocol->Boot.RegisterProtocol(L"XTOS", &DummyGuid);
+    XtLdrProtocol->Boot.RegisterProtocol(L"DUMMYOS", &DummyGuid);
 
     /* Register DUMMY protocol as XTOS boot protocol */
     return XtLdrProtocol->Protocol.Install(&BlpDummyProtocol, &DummyGuid);
