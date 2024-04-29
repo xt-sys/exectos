@@ -812,8 +812,8 @@ BlpGetModuleInfoStrings(IN PWCHAR SectionData,
         return STATUS_EFI_OUT_OF_RESOURCES;
     }
 
-    /* Cioy strings read from '.modinfo' section */
-    String = (PWCHAR)(Array + Count + 1);
+    /* Allocate memory and copy strings read from '.modinfo' section */
+    BlAllocateMemoryPool(SectionSize, (PVOID*)&String);
     RtlCopyMemory(String, InfoStrings, SectionSize);
 
     /* Make sure last string is NULL-terminated */
