@@ -325,11 +325,23 @@ BlMapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
                 continue;
             }
 
-            /* Check if memory descriptor exceeds the lowest physical page */
-            if(Descriptor->PhysicalStart + (Descriptor->NumberOfPages << EFI_PAGE_SHIFT) > MAXUINT_PTR)
+            /* Check if preparing page map level 2 (non-PAE i686) */
+            if(PageMap->PageMapLevel == 2)
             {
-                /* Truncate memory descriptor to the 4GB */
-                Descriptor->NumberOfPages = ((MAXUINT_PTR + 1) - Descriptor->PhysicalStart) >> EFI_PAGE_SHIFT;
+                /* Check if physical address starts beyond 4GB */
+                if(Descriptor->PhysicalStart > 0xFFFFFFFF)
+                {
+                    /* Go to the next descriptor */
+                    Descriptor = (PEFI_MEMORY_DESCRIPTOR)((PUCHAR)Descriptor + MemoryMap->DescriptorSize);
+                    continue;
+                }
+
+                /* Check if memory descriptor exceeds the lowest physical page */
+                if(Descriptor->PhysicalStart + (Descriptor->NumberOfPages << EFI_PAGE_SHIFT) > MAXULONG)
+                {
+                    /* Truncate memory descriptor to the 4GB */
+                    Descriptor->NumberOfPages = (((ULONGLONG)MAXULONG + 1) - Descriptor->PhysicalStart) >> EFI_PAGE_SHIFT;
+                }
             }
 
             /* Convert EFI memory type into XTLDR memory type */
