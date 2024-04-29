@@ -27,7 +27,6 @@ KeHaltSystem(VOID)
         ArClearInterruptFlag();
         ArHalt();
     }
-
 }
 
 /**
