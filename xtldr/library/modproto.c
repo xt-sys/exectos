@@ -76,5 +76,5 @@ BlGetXtLdrProtocol(IN PEFI_SYSTEM_TABLE SystemTable,
     }
 
     /* Return success */
-	return STATUS_EFI_SUCCESS;
+    return STATUS_EFI_SUCCESS;
 }
