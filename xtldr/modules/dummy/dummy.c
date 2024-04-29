@@ -50,7 +50,7 @@ EFI_STATUS
 XtLdrModuleMain(IN EFI_HANDLE ImageHandle,
                 IN PEFI_SYSTEM_TABLE SystemTable)
 {
-    EFI_GUID DummyGuid = XT_XTOS_BOOT_PROTOCOL_GUID;
+    EFI_GUID DummyGuid = XT_DUMMY_BOOT_PROTOCOL_GUID;
     EFI_STATUS Status;
 
     /* Open the XTLDR protocol */
