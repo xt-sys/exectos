@@ -633,7 +633,7 @@ BlReadFile(IN PEFI_FILE_HANDLE DirHandle,
 
     /* Close handle and free memory */
     FileHandle->Close(FileHandle);
-    BlFreeMemoryPool(&FileInfo);
+    BlFreeMemoryPool(FileInfo);
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
