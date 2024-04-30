@@ -19,6 +19,12 @@ add_custom_target(diskimg
                   COMMAND rm ${EXECTOS_BINARY_DIR}/output/part.img
                   VERBATIM)
 
+# This target starts up a BOCHS+OVMF virtual machine
+add_custom_target(bochsvm
+                  DEPENDS diskimg
+                  COMMAND bochs -f ../sdk/firmware/bochsrc_${ARCH}.cfg -q -unlock
+                  VERBATIM USES_TERMINAL)
+
 # This target starts up a QEMU+OVMF virtual machine using KVM accelerator
 add_custom_target(testkvm
                   DEPENDS diskimg
