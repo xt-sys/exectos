@@ -817,7 +817,6 @@ BlpGetModuleInfoStrings(IN PWCHAR SectionData,
     RtlCopyMemory(String, InfoStrings, SectionSize);
 
     /* Make sure last string is NULL-terminated */
-    String[SectionSize] = L'\0';
     Array[Count] = NULL;
     Array[0] = String;
 
