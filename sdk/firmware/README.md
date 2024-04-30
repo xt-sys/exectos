@@ -7,6 +7,12 @@ for virtual machines used to test the XTOS. It includes the necessary instructio
 load the operating system, and provide various system services during the boot process. The ovmf_code file is
 responsible for establishing a UEFI environment within the virtual machine, enabling it to boot and operate effectively.
 
+The ovmf_pure files contains the minimum version of the CPU specific UEFI firmware code, suitable for use with Bochs.
+
 The ovmf_vars files, store UEFI variables, which are used to store and retrieve system configuration information, such as
 boot options, device settings, and system preferences. The ovmf_vars file contains the persistent variables specific to
 a virtual machine, allowing it to maintain its configuration across multiple boot sessions.
+
+## Video BIOS (LGPL'd VGABios)
+The vgabios.bin file contains the Video Bios for Bochs and QEMU. This VGA Bios is very specific to the emulated VGA card.
+It is NOT meant to drive a physical vga card. It also implements support for VBE version 2.0.
