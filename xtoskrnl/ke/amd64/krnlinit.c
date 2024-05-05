@@ -38,6 +38,9 @@ KepInitializeKernel(VOID)
     /* Save processor state */
     KepSaveProcessorState(&Prcb->ProcessorState);
 
+    /* Lower to APC runlevel */
+    KeLowerRunLevel(APC_LEVEL);
+
     /* Initialize Idle process */
     RtlInitializeListHead(&KepProcessListHead);
     PageDirectory[0] = 0;
