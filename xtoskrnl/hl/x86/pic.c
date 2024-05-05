@@ -231,7 +231,6 @@ HlpInitializeApic(VOID)
 
     /* Initialize Logical Vector Table */
     LvtRegister.Long = 0;
-    LvtRegister.Vector = APIC_VECTOR_NMI;
     LvtRegister.MessageType = APIC_DM_FIXED;
     LvtRegister.DeliveryStatus = 0;
     LvtRegister.RemoteIRR = 0;
@@ -239,7 +238,12 @@ HlpInitializeApic(VOID)
     LvtRegister.Mask = 0;
     LvtRegister.TimerMode = 0;
 
+    /* Mask LVTR_ERROR first, to prevent local APIC error */
+    LvtRegister.Vector = APIC_VECTOR_ERROR;
+    HlWriteApicRegister(APIC_ERRLVTR, LvtRegister.Long);
+
     /* Mask LVT tables */
+    LvtRegister.Vector = APIC_VECTOR_NMI;
     HlWriteApicRegister(APIC_TMRLVTR, LvtRegister.Long);
     HlWriteApicRegister(APIC_THRMLVTR, LvtRegister.Long);
     HlWriteApicRegister(APIC_PCLVTR, LvtRegister.Long);
@@ -250,16 +254,10 @@ HlpInitializeApic(VOID)
     HlWriteApicRegister(APIC_LINT0, LvtRegister.Long);
 
     /* Mask LINT1 */
-    LvtRegister.Mask = 0;
     LvtRegister.Vector = APIC_VECTOR_NMI;
     LvtRegister.MessageType = APIC_DM_NMI;
     LvtRegister.TriggerMode = APIC_TGM_LEVEL;
     HlWriteApicRegister(APIC_LINT1, LvtRegister.Long);
-
-    /* Mask LVTR_ERROR */
-    LvtRegister.Vector = APIC_VECTOR_ERROR;
-    LvtRegister.MessageType = APIC_DM_FIXED;
-    HlWriteApicRegister(APIC_ERRLVTR, LvtRegister.Long);
 
     /* Clear errors after enabling vectors */
     HlWriteApicRegister(APIC_ESR, 0);
