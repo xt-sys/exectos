@@ -46,7 +46,7 @@ KepInitializeKernel(VOID)
     CurrentProcess->Quantum = MAXCHAR;
 
     /* Initialize Idle thread */
-    KeInitializeThread(CurrentProcess, CurrentThread, NULL, NULL, NULL, NULL, NULL, Prcb->DpcStack, TRUE);
+    KeInitializeThread(CurrentProcess, CurrentThread, NULL, NULL, NULL, NULL, NULL, ArKernelBootStack, TRUE);
     CurrentThread->NextProcessor = Prcb->Number;
     CurrentThread->Priority = THREAD_HIGH_PRIORITY;
     CurrentThread->State = Running;
