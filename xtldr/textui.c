@@ -106,6 +106,9 @@ BlDisplayBootMenu()
         Events[0] = EfiSystemTable->ConIn->WaitForKey;
         Events[1] = TimerEvent;
 
+        /* Flush keyboard buffer out of any keystrokes */
+        EfiSystemTable->ConIn->Reset(EfiSystemTable->ConIn, FALSE);
+
         /* Infinite boot menu event loop */
         while(TRUE)
         {
