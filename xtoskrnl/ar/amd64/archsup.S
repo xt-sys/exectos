@@ -102,7 +102,7 @@ ArpTrap\Vector:
     movdqa %xmm0, TrapXmm0(%rbp)
 
     /* Test previous mode and swap GS if needed */
-    movl $0, TrapPreviousMode(%ebp)
+    movl $0, TrapPreviousMode(%rbp)
     mov %cs, %ax
     and $1, %al
     mov %al, TrapPreviousMode(%rbp)
