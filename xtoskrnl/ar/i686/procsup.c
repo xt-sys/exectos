@@ -130,9 +130,9 @@ ArpIdentifyProcessor(VOID)
 
     /* Store CPU vendor in processor control block */
     Prcb->CpuId.Vendor = CpuRegisters.Ebx;
-    Prcb->CpuId.VendorName[0] = CpuRegisters.Ebx;
-    Prcb->CpuId.VendorName[4] = CpuRegisters.Edx;
-    Prcb->CpuId.VendorName[8] = CpuRegisters.Ecx;
+    *(PULONG)&Prcb->CpuId.VendorName[0] = CpuRegisters.Ebx;
+    *(PULONG)&Prcb->CpuId.VendorName[4] = CpuRegisters.Edx;
+    *(PULONG)&Prcb->CpuId.VendorName[8] = CpuRegisters.Ecx;
     Prcb->CpuId.VendorName[12] = '\0';
 
     /* Get CPU features */
