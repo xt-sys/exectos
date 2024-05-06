@@ -82,7 +82,7 @@ KepInitializeThreadContext(IN PKTHREAD Thread,
         ThreadFrame->TrapFrame.Dr7 = 0;
 
         /* Set initial MXCSR register value */
-        // ThreadFrame->TrapFrame.MxCsr = INITIAL_MXCSR;
+        ThreadFrame->TrapFrame.MxCsr = INITIAL_MXCSR;
 
         /* Initialize exception frame */
         ThreadFrame->ExceptionFrame.P1Home = (ULONG64)StartContext;
