@@ -28,4 +28,4 @@ LOADER_MEMORY_MAPPING MmOldFreeDescriptor;
 ULONG MmPageMapLevel;
 
 /* Processor structures data (THIS IS A TEMPORARY HACK) */
-UCHAR MmProcessorStructuresData[MAXIMUM_PROCESSORS - 1][KPROCESSOR_STRUCTURES_SIZE] = {0};
+UCHAR MmProcessorStructuresData[MAXIMUM_PROCESSORS][KPROCESSOR_STRUCTURES_SIZE] = {0};
