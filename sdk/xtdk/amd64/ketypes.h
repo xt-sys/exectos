@@ -142,6 +142,10 @@
 /* XTOS Kernel stack guard pages */
 #define KERNEL_STACK_GUARD_PAGES          1
 
+/* Processor structures size */
+#define KPROCESSOR_STRUCTURES_SIZE        ((2 * KERNEL_STACK_SIZE) + sizeof(ArInitialGdt) + sizeof(ArInitialTss) + \
+                                          sizeof(ArInitialProcessorBlock) + MM_PAGE_SIZE)
+
 /* Kernel frames */
 #define KEXCEPTION_FRAME_SIZE             sizeof(KEXCEPTION_FRAME)
 #define KSWITCH_FRAME_SIZE                sizeof(KSWITCH_FRAME)

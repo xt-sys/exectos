@@ -60,4 +60,7 @@ EXTERN LOADER_MEMORY_MAPPING MmOldFreeDescriptor;
 /* Page Map Level */
 EXTERN ULONG MmPageMapLevel;
 
+/* Processor structures data (THIS IS A TEMPORARY HACK) */
+EXTERN UCHAR MmProcessorStructuresData[MAXIMUM_PROCESSORS - 1][KPROCESSOR_STRUCTURES_SIZE];
+
 #endif /* __XTOSKRNL_GLOBALS_H */

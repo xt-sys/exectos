@@ -36,6 +36,51 @@ MmAllocateKernelStack(IN PVOID *Stack,
 }
 
 /**
+ * Allocates a buffer for structures needed by a processor and assigns it to a corresponding CPU.
+ *
+ * @param CpuNumber
+ *        Specifies the zero-indexed CPU number as an owner of the allocated structures.
+ *
+ * @param StructuresData
+ *        Supplies a pointer to the memory area that will contain the allocated buffer.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+MmAllocateProcessorStructures(IN ULONG CpuNumber,
+                              OUT PVOID *StructuresData)
+{
+    PKPROCESSOR_BLOCK ProcessorBlock;
+    PVOID ProcessorStructures;
+    UINT_PTR Address;
+
+    /* Not implemented yet, this is just a hack */
+    UNIMPLEMENTED;
+
+    /* Assign memory for processor structures from preallocated buffer */
+    ProcessorStructures = &MmProcessorStructuresData[CpuNumber - 1];
+
+    /* Make sure all structures are zeroed */
+    RtlZeroMemory(ProcessorStructures, KPROCESSOR_STRUCTURES_SIZE);
+
+    /* Align address to page size boundary and find a space for processor block */
+    Address = ROUND_UP((UINT_PTR)ProcessorStructures, MM_PAGE_SIZE);
+    ProcessorBlock = (PKPROCESSOR_BLOCK)((PUCHAR)Address + (2 * KERNEL_STACK_SIZE) + sizeof(ArInitialGdt));
+
+    /* Store processor number in the processor block */
+    ProcessorBlock->CpuNumber = CpuNumber;
+
+    /* Return pointer to the processor structures */
+    *StructuresData = ProcessorStructures;
+
+    /* Return success */
+    return STATUS_SUCCESS;
+}
+
+/**
  * Destroys a kernel stack and frees page table entry.
  *
  * @param Stack
@@ -52,6 +97,23 @@ XTAPI
 VOID
 MmFreeKernelStack(IN PVOID Stack,
                   IN BOOLEAN LargeStack)
+{
+    UNIMPLEMENTED;
+}
+
+/**
+ * Destroys an unused set of processor structures.
+ *
+ * @param StructuresData
+ *        Supplies a pointer to the memory area containing the allocated buffer.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MmFreeProcessorStructures(IN PVOID StructuresData)
 {
     UNIMPLEMENTED;
 }

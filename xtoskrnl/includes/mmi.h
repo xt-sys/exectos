@@ -20,9 +20,18 @@ MmAllocateKernelStack(IN PVOID *Stack,
                       IN UCHAR SystemNode);
 
 XTAPI
+XTSTATUS
+MmAllocateProcessorStructures(IN ULONG CpuNumber,
+                              OUT PVOID *StructuresData);
+
+XTAPI
 VOID
 MmFreeKernelStack(IN PVOID Stack,
                   IN BOOLEAN LargeStack);
+
+XTAPI
+VOID
+MmFreeProcessorStructures(IN PVOID StructuresData);
 
 XTAPI
 VOID
