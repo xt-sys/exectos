@@ -12,17 +12,19 @@
 /**
  * Initializes the processor.
  *
+ * @param CpuNumber
+ *        Supplies the number of the CPU, that is being initialized.
+ *
  * @return This routine does not return any value.
  *
  * @since XT 1.0
  */
 XTAPI
 VOID
-HlInitializeProcessor(VOID)
+HlInitializeProcessor(IN ULONG CpuNumber)
 {
     PKPROCESSOR_BLOCK ProcessorBlock;
     KAFFINITY Affinity;
-    ULONG CpuNumber = 0;
 
     /* Get current processor block */
     ProcessorBlock = KeGetCurrentProcessorBlock();
@@ -40,7 +42,7 @@ HlInitializeProcessor(VOID)
     HlpActiveProcessors |= Affinity;
 
     /* Initialize APIC for this processor */
-    HlpInitializeApic();
+    HlpInitializePic(CpuNumber);
 
     /* Set the APIC running level */
     HlSetRunLevel(KeGetCurrentProcessorBlock()->RunLevel);

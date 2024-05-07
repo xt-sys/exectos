@@ -73,14 +73,11 @@ KepInitializeMachine(VOID)
     HlIoPortOutByte(0x376, 0);
     HlIoPortOutByte(0x3F6, 0);
 
-    /* Disable the legacy PIC */
-    HlDisableLegacyPic();
-
     /* Initialize frame buffer */
     HlInitializeFrameBuffer();
 
     /* Initialize processor */
-    HlInitializeProcessor();
+    HlInitializeProcessor(0);
 }
 
 /**

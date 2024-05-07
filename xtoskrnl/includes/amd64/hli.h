@@ -48,7 +48,11 @@ HlpHandlePicSpuriousService(VOID);
 
 XTAPI
 VOID
-HlpInitializeApic(VOID);
+HlpInitializeApic(IN ULONG CpuNumber);
+
+XTAPI
+VOID
+HlpInitializePic(IN ULONG CpuNumber);
 
 XTFASTCALL
 KRUNLEVEL

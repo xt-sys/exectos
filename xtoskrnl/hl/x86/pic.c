@@ -178,20 +178,20 @@ HlpHandlePicSpuriousService(VOID)
 /**
  * Initializes the APIC interrupt controller.
  *
+ * @param CpuNumber
+ *        Supplies the number of the CPU, that is being initialized.
+ *
  * @return This routine does not return any value.
  *
  * @since XT 1.0
- *
- * @todo Register interrupt handlers for spurious vectors.
  */
 XTAPI
 VOID
-HlpInitializeApic(VOID)
+HlpInitializeApic(IN ULONG CpuNumber)
 {
     APIC_BASE_REGISTER BaseRegister;
     APIC_LVT_REGISTER LvtRegister;
     APIC_SPURIOUS_REGISTER SpuriousRegister;
-    ULONG CpuNumber = 0;
 
     /* Check if this is an x2APIC compatible machine */
     if(HlpCheckX2ApicSupport())
@@ -209,7 +209,7 @@ HlpInitializeApic(VOID)
     BaseRegister.LongLong = ArReadModelSpecificRegister(APIC_LAPIC_MSR_BASE);
     BaseRegister.Enable = 1;
     BaseRegister.ExtendedMode = (HlpApicMode == APIC_MODE_X2APIC);
-    BaseRegister.BootStrapProcessor = 1;
+    BaseRegister.BootStrapProcessor = (CpuNumber == 0) ? 1 : 0;
     ArWriteModelSpecificRegister(APIC_LAPIC_MSR_BASE, BaseRegister.LongLong);
 
     /* xAPIC compatibility mode specific initialization */
@@ -265,4 +265,25 @@ HlpInitializeApic(VOID)
     /* Register interrupt handlers once the APIC initialization is done */
     KeSetInterruptHandler(APIC_VECTOR_SPURIOUS, HlpHandleApicSpuriousService);
     KeSetInterruptHandler(PIC1_VECTOR_SPURIOUS, HlpHandlePicSpuriousService);
+}
+
+/**
+ * Initializes the (A)PIC interrupt controller.
+ *
+ * @param CpuNumber
+ *        Supplies the number of the CPU, that is being initialized.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ *
+ * @todo Initialize APIC only when supported, otherwise fall back to legacy PIC.
+ */
+XTAPI
+VOID
+HlpInitializePic(IN ULONG CpuNumber)
+{
+    /* Disable legacy PIC and initialize APIC */
+    HlDisableLegacyPic();
+    HlpInitializeApic(CpuNumber);
 }
