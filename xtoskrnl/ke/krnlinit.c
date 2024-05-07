@@ -49,7 +49,7 @@ KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
                XTOS_COMPILER_NAME, XTOS_COMPILER_VERSION);
 
     /* Initialize boot CPU */
-    ArInitializeProcessor();
+    ArInitializeProcessor(NULL);
 
     /* Architecture specific kernel initialization */
     KepInitializeMachine();

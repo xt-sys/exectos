@@ -18,23 +18,35 @@
  */
 XTAPI
 VOID
-ArInitializeProcessor(VOID)
+ArInitializeProcessor(IN PVOID ProcessorStructures)
 {
     KDESCRIPTOR GdtDescriptor, IdtDescriptor;
+    PVOID KernelBootStack, KernelFaultStack;
     PKPROCESSOR_BLOCK ProcessorBlock;
-    PVOID KernelFaultStack;
     PKGDTENTRY Gdt;
     PKIDTENTRY Idt;
     PKTSS Tss;
 
-    /* Use initial structures */
-    Gdt = ArInitialGdt;
-    Idt = ArInitialIdt;
-    Tss = &ArInitialTss;
-    KernelFaultStack = &ArKernelFaultStack;
+    /* Check if processor structures buffer provided */
+    if(ProcessorStructures)
+    {
+        /* Assign CPU structures from provided buffer */
+        ArpInitializeProcessorStructures(ProcessorStructures, &Gdt, &Tss, &ProcessorBlock,
+                                         &KernelBootStack, &KernelFaultStack);
 
-    /* Load processor block */
-    ProcessorBlock = CONTAIN_RECORD(&ArInitialProcessorBlock.Prcb, KPROCESSOR_BLOCK, Prcb);
+        /* Use global IDT */
+        Idt = ArInitialIdt;
+    }
+    else
+    {
+        /* Use initial structures */
+        Gdt = ArInitialGdt;
+        Idt = ArInitialIdt;
+        Tss = &ArInitialTss;
+        KernelBootStack = &ArKernelBootStack;
+        KernelFaultStack = &ArKernelFaultStack;
+        ProcessorBlock = &ArInitialProcessorBlock;
+    }
 
     /* Initialize processor block */
     ArpInitializeProcessorBlock(ProcessorBlock, Gdt, Idt, Tss, KernelFaultStack);
@@ -287,9 +299,6 @@ ArpInitializeProcessorBlock(OUT PKPROCESSOR_BLOCK ProcessorBlock,
                             IN PKTSS Tss,
                             IN PVOID DpcStack)
 {
-    /* Fill processor block with zeroes */
-    RtlZeroMemory(ProcessorBlock, sizeof(KPROCESSOR_BLOCK));
-
     /* Set processor block and processor control block */
     ProcessorBlock->Self = ProcessorBlock;
     ProcessorBlock->CurrentPrcb = &ProcessorBlock->Prcb;
@@ -384,6 +393,64 @@ ArpInitializeProcessorRegisters(VOID)
 
     /* Initialize MXCSR register */
     ArLoadMxcsrRegister(INITIAL_MXCSR);
+}
+
+/**
+ * Initializes i686 processor specific structures with provided memory buffer.
+ *
+ * @param ProcessorStructures
+ *        Supplies a pointer to the allocated buffer with processor structures.
+ *
+ * @param Gdt
+ *        Supplies a pointer to the GDT.
+ *
+ * @param Tss
+ *        Supplies a pointer to the TSS.
+ *
+ * @param ProcessorBlock
+ *        Supplies a pointer to the processor block.
+ *
+ * @param KernelBootStack
+ *        Supplies a pointer to the kernel boot stack.
+ *
+ * @param KernelFaultStack
+ *        Supplies a pointer to the kernel fault stack.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+ArpInitializeProcessorStructures(IN PVOID ProcessorStructures,
+                                 OUT PKGDTENTRY *Gdt,
+                                 OUT PKTSS *Tss,
+                                 OUT PKPROCESSOR_BLOCK *ProcessorBlock,
+                                 OUT PVOID *KernelBootStack,
+                                 OUT PVOID *KernelFaultStack)
+{
+    UINT_PTR Address;
+
+    /* Align address to page size boundary and move to kernel boot stack */
+    Address = ROUND_UP((UINT_PTR)ProcessorStructures, MM_PAGE_SIZE) + KERNEL_STACK_SIZE;
+
+    /* Assign a space for kernel boot stack and advance */
+    *KernelBootStack = (PVOID)Address;
+    Address += KERNEL_STACK_SIZE;
+
+    /* Assign a space for kernel fault stack, no advance needed as stack grows down */
+    *KernelFaultStack = (PVOID)Address;
+
+    /* Assign a space for GDT and advance */
+    *Gdt = (PVOID)Address;
+    Address += sizeof(ArInitialGdt);
+
+    /* Assign a space for Processor Block and advance */
+    *ProcessorBlock = (PVOID)Address;
+    Address += sizeof(ArInitialProcessorBlock);
+
+    /* Assign a space for TSS */
+    *Tss = (PVOID)Address;
 }
 
 /**

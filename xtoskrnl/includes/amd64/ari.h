@@ -36,7 +36,7 @@ ArHalt(VOID);
 
 XTAPI
 VOID
-ArInitializeProcessor(VOID);
+ArInitializeProcessor(IN PVOID ProcessorStructures);
 
 XTCDECL
 VOID
@@ -288,6 +288,15 @@ ArpInitializeProcessorBlock(OUT PKPROCESSOR_BLOCK ProcessorBlock,
 XTAPI
 VOID
 ArpInitializeProcessorRegisters(VOID);
+
+XTAPI
+VOID
+ArpInitializeProcessorStructures(IN PVOID ProcessorStructures,
+                                 OUT PKGDTENTRY *Gdt,
+                                 OUT PKTSS *Tss,
+                                 OUT PKPROCESSOR_BLOCK *ProcessorBlock,
+                                 OUT PVOID *KernelBootStack,
+                                 OUT PVOID *KernelFaultStack);
 
 XTAPI
 VOID
