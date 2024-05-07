@@ -526,8 +526,13 @@ typedef struct _KPROCESSOR_BLOCK
     PKIDTENTRY IdtBase;
     KRUNLEVEL RunLevel;
     KPROCESSOR_CONTROL_BLOCK Prcb;
+    ULONG Irr;
+    ULONG IrrActive;
+    ULONG Idr;
     ULONG ContextSwitches;
+    KAFFINITY SetMember;
     ULONG StallScaleFactor;
+    UCHAR CpuNumber;
 } KPROCESSOR_BLOCK, *PKPROCESSOR_BLOCK;
 
 /* Thread Environment Block (TEB) structure definition */

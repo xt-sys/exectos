@@ -470,16 +470,27 @@ typedef struct _KPROCESSOR_CONTROL_BLOCK
 /* Processor Block structure definition */
 typedef struct _KPROCESSOR_BLOCK
 {
-    THREAD_INFORMATION_BLOCK ThreadInformationBlock;
-    PKPROCESSOR_BLOCK Self;
-    PKPROCESSOR_CONTROL_BLOCK CurrentPrcb;
-    KRUNLEVEL RunLevel;
+    union
+    {
+        THREAD_INFORMATION_BLOCK ThreadInformationBlock;
+        struct
+        {
+            PKGDTENTRY GdtBase;
+            PKTSS TssBase;
+            PKPROCESSOR_BLOCK Self;
+            PKPROCESSOR_CONTROL_BLOCK CurrentPrcb;
+        };
+    };
     PKIDTENTRY IdtBase;
-    PKGDTENTRY GdtBase;
-    PKTSS TssBase;
+    KRUNLEVEL RunLevel;
     KPROCESSOR_CONTROL_BLOCK Prcb;
+    ULONG Irr;
+    ULONG IrrActive;
+    ULONG Idr;
     ULONG ContextSwitches;
+    KAFFINITY SetMember;
     ULONG StallScaleFactor;
+    UCHAR CpuNumber;
 } KPROCESSOR_BLOCK, *PKPROCESSOR_BLOCK;
 
 /* Thread Environment Block (TEB) structure definition */
