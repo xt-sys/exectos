@@ -39,6 +39,20 @@ KeGetCurrentProcessorControlBlock(VOID)
 }
 
 /**
+ * Gets the number of the currently executing processor.
+ *
+ * @return This routine returns the zero-indexed processor number.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG
+KeGetCurrentProcessorNumber(VOID)
+{
+    return (ULONG)ArReadGSQuadWord(FIELD_OFFSET(KPROCESSOR_BLOCK, CpuNumber));
+}
+
+/**
  * Gets the current thread running on the currently executing processor.
  *
  * @return This routine returns the address of the current thread object.

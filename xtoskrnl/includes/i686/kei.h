@@ -22,6 +22,10 @@ PKPROCESSOR_CONTROL_BLOCK
 KeGetCurrentProcessorControlBlock(VOID);
 
 XTAPI
+ULONG
+KeGetCurrentProcessorNumber(VOID);
+
+XTAPI
 PKTHREAD
 KeGetCurrentThread(VOID);
 
