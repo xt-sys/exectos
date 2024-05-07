@@ -29,8 +29,10 @@ HlInitializeProcessor(IN ULONG CpuNumber)
     /* Get current processor block */
     ProcessorBlock = KeGetCurrentProcessorBlock();
 
-    /* Set initial stall factor */
+    /* Set initial stall factor, CPU number and mask interrupts */
     ProcessorBlock->StallScaleFactor = INITIAL_STALL_FACTOR;
+    ProcessorBlock->CpuNumber = CpuNumber;
+    ProcessorBlock->Idr = 0xFFFFFFFF;
 
     /* Record processor block in the processors table */
     HlpProcessorsIdentity[CpuNumber].ProcessorBlock = ProcessorBlock;
