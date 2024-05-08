@@ -53,8 +53,8 @@ ArInitializeProcessor(IN PVOID ProcessorStructures)
 
     /* Initialize GDT, IDT and TSS */
     ArpInitializeGdt(ProcessorBlock);
-    ArpInitializeTss(ProcessorBlock);
     ArpInitializeIdt(ProcessorBlock);
+    ArpInitializeTss(ProcessorBlock, KernelBootStack, KernelFaultStack);
 
     /* Set GDT and IDT descriptors */
     GdtDescriptor.Base = Gdt;
@@ -311,9 +311,9 @@ ArpInitializeProcessorBlock(OUT PKPROCESSOR_BLOCK ProcessorBlock,
     ProcessorBlock->Prcb.DpcStack = DpcStack;
 
     /* Setup processor control block */
-    ProcessorBlock->Prcb.Number = 0;
-    ProcessorBlock->Prcb.SetMember = 1;
-    ProcessorBlock->Prcb.MultiThreadProcessorSet = 1;
+    ProcessorBlock->Prcb.CpuNumber = ProcessorBlock->CpuNumber;
+    ProcessorBlock->Prcb.SetMember = 1 << ProcessorBlock->CpuNumber;
+    ProcessorBlock->Prcb.MultiThreadProcessorSet = 1 << ProcessorBlock->CpuNumber;
 
     /* Clear DR6 and DR7 registers */
     ProcessorBlock->Prcb.ProcessorState.SpecialRegisters.KernelDr6 = 0;
@@ -435,7 +435,9 @@ ArpInitializeSegments(VOID)
  */
 XTAPI
 VOID
-ArpInitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock)
+ArpInitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock,
+                 IN PVOID KernelBootStack,
+                 IN PVOID KernelFaultStack)
 {
     /* Clear I/O map */
     RtlSetMemory(ProcessorBlock->TssBase->IoMaps[0].IoMap, 0xFF, IOPM_FULL_SIZE);
@@ -458,6 +460,7 @@ ArpInitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock)
 
     /* Set I/O map base and disable traps */
     ProcessorBlock->TssBase->IoMapBase = sizeof(KTSS);
+    ProcessorBlock->TssBase->Esp0 = (ULONG_PTR)KernelBootStack;
     ProcessorBlock->TssBase->Flags = 0;
 
     /* Set LDT and SS */
@@ -465,8 +468,8 @@ ArpInitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock)
     ProcessorBlock->TssBase->Ss0 = KGDT_R0_DATA;
 
     /* Initialize task gates for DoubleFault and NMI traps */
-    ArpSetDoubleFaultTssEntry(ProcessorBlock);
-    ArpSetNonMaskableInterruptTssEntry(ProcessorBlock);
+    ArpSetDoubleFaultTssEntry(ProcessorBlock, KernelFaultStack);
+    ArpSetNonMaskableInterruptTssEntry(ProcessorBlock, KernelFaultStack);
 }
 
 /**
@@ -481,7 +484,8 @@ ArpInitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock)
  */
 XTAPI
 VOID
-ArpSetDoubleFaultTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock)
+ArpSetDoubleFaultTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock,
+                          IN PVOID KernelFaultStack)
 {
     PKGDTENTRY TaskGateEntry, TssEntry;
     PKTSS Tss;
@@ -499,8 +503,8 @@ ArpSetDoubleFaultTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock)
     Tss->Flags = 0;
     Tss->LDT = KGDT_R0_LDT;
     Tss->CR3 = ArReadControlRegister(3);
-    Tss->Esp = (ULONG_PTR)&ArKernelFaultStack;
-    Tss->Esp0 = (ULONG_PTR)&ArKernelFaultStack;
+    Tss->Esp = (ULONG_PTR)KernelFaultStack;
+    Tss->Esp0 = (ULONG_PTR)KernelFaultStack;
     Tss->Eip = PtrToUlong(ArpHandleTrap08);
     Tss->Cs = KGDT_R0_CODE;
     Tss->Ds = KGDT_R3_DATA | RPL_MASK;
@@ -650,7 +654,8 @@ ArpSetIdtGate(IN PKIDTENTRY Idt,
  */
 XTAPI
 VOID
-ArpSetNonMaskableInterruptTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock)
+ArpSetNonMaskableInterruptTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock,
+                                   IN PVOID KernelFaultStack)
 {
     PKGDTENTRY TaskGateEntry, TssEntry;
     PKTSS Tss;
@@ -668,8 +673,8 @@ ArpSetNonMaskableInterruptTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock)
     Tss->Flags = 0;
     Tss->LDT = KGDT_R0_LDT;
     Tss->CR3 = ArReadControlRegister(3);
-    Tss->Esp = (ULONG_PTR)&ArKernelFaultStack;
-    Tss->Esp0 = (ULONG_PTR)&ArKernelFaultStack;
+    Tss->Esp = (ULONG_PTR)KernelFaultStack;
+    Tss->Esp0 = (ULONG_PTR)KernelFaultStack;
     Tss->Eip = PtrToUlong(ArpHandleTrap02);
     Tss->Cs = KGDT_R0_CODE;
     Tss->Ds = KGDT_R3_DATA | RPL_MASK;

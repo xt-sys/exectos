@@ -457,7 +457,7 @@ typedef struct _KPROCESSOR_CONTROL_BLOCK
     PKTHREAD CurrentThread;
     PKTHREAD IdleThread;
     PKTHREAD NextThread;
-    UCHAR Number;
+    UCHAR CpuNumber;
     ULONG_PTR SetMember;
     CPU_IDENTIFICATION CpuId;
     KPROCESSOR_STATE ProcessorState;

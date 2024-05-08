@@ -53,8 +53,8 @@ ArInitializeProcessor(IN PVOID ProcessorStructures)
 
     /* Initialize GDT, IDT and TSS */
     ArpInitializeGdt(ProcessorBlock);
-    ArpInitializeTss(ProcessorBlock);
     ArpInitializeIdt(ProcessorBlock);
+    ArpInitializeTss(ProcessorBlock, KernelBootStack, KernelFaultStack);
 
     /* Set GDT and IDT descriptors */
     GdtDescriptor.Base = Gdt;
@@ -313,9 +313,9 @@ ArpInitializeProcessorBlock(OUT PKPROCESSOR_BLOCK ProcessorBlock,
     ProcessorBlock->Prcb.DpcStack = DpcStack;
 
     /* Setup processor control block */
-    ProcessorBlock->Prcb.Number = 0;
-    ProcessorBlock->Prcb.SetMember = 1ULL;
-    ProcessorBlock->Prcb.MultiThreadProcessorSet = 1ULL;
+    ProcessorBlock->Prcb.CpuNumber = ProcessorBlock->CpuNumber;
+    ProcessorBlock->Prcb.SetMember = 1ULL << ProcessorBlock->CpuNumber;
+    ProcessorBlock->Prcb.MultiThreadProcessorSet = 1ULL << ProcessorBlock->CpuNumber;
 
     /* Clear DR6 and DR7 registers */
     ProcessorBlock->Prcb.ProcessorState.SpecialRegisters.KernelDr6 = 0;
@@ -488,16 +488,18 @@ ArpInitializeSegments(VOID)
  */
 XTAPI
 VOID
-ArpInitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock)
+ArpInitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock,
+                 IN PVOID KernelBootStack,
+                 IN PVOID KernelFaultStack)
 {
     /* Fill TSS with zeroes */
     RtlZeroMemory(ProcessorBlock->TssBase, sizeof(KTSS));
 
     /* Setup I/O map and stacks for ring0 & traps */
     ProcessorBlock->TssBase->IoMapBase = sizeof(KTSS);
-    ProcessorBlock->TssBase->Rsp0 = (ULONG_PTR)&ArKernelBootStack;
-    ProcessorBlock->TssBase->Ist[KIDT_IST_PANIC] = (ULONG_PTR)&ArKernelFaultStack;
-    ProcessorBlock->TssBase->Ist[KIDT_IST_MCA] = (ULONG_PTR)&ArKernelFaultStack;
+    ProcessorBlock->TssBase->Rsp0 = (ULONG_PTR)KernelBootStack;
+    ProcessorBlock->TssBase->Ist[KIDT_IST_PANIC] = (ULONG_PTR)KernelFaultStack;
+    ProcessorBlock->TssBase->Ist[KIDT_IST_MCA] = (ULONG_PTR)KernelFaultStack;
 }
 
 /**

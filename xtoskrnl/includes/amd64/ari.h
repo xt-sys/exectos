@@ -304,7 +304,9 @@ ArpInitializeSegments(VOID);
 
 XTAPI
 VOID
-ArpInitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock);
+ArpInitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock,
+                 IN PVOID KernelBootStack,
+                 IN PVOID KernelFaultStack);
 
 XTAPI
 VOID

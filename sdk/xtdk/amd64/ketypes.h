@@ -495,7 +495,7 @@ typedef struct _KPROCESSOR_STATE
 typedef struct _KPROCESSOR_CONTROL_BLOCK
 {
     ULONG MxCsr;
-    UCHAR Number;
+    UCHAR CpuNumber;
     PKTHREAD CurrentThread;
     PKTHREAD IdleThread;
     PKTHREAD NextThread;

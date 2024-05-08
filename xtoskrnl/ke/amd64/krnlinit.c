@@ -50,12 +50,12 @@ KepInitializeKernel(VOID)
 
     /* Initialize Idle thread */
     KeInitializeThread(CurrentProcess, CurrentThread, NULL, NULL, NULL, NULL, NULL, ArKernelBootStack, TRUE);
-    CurrentThread->NextProcessor = Prcb->Number;
+    CurrentThread->NextProcessor = Prcb->CpuNumber;
     CurrentThread->Priority = THREAD_HIGH_PRIORITY;
     CurrentThread->State = Running;
-    CurrentThread->Affinity = (ULONG_PTR)1 << Prcb->Number;
+    CurrentThread->Affinity = (ULONG_PTR)1 << Prcb->CpuNumber;
     CurrentThread->WaitRunLevel = DISPATCH_LEVEL;
-    CurrentProcess->ActiveProcessors |= (ULONG_PTR)1 << Prcb->Number;
+    CurrentProcess->ActiveProcessors |= (ULONG_PTR)1 << Prcb->CpuNumber;
 }
 
 /**

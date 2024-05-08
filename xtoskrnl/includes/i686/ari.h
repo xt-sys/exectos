@@ -292,11 +292,14 @@ ArpInitializeSegments(VOID);
 
 XTAPI
 VOID
-ArpInitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock);
+ArpInitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock,
+                 IN PVOID KernelBootStack,
+                 IN PVOID KernelFaultStack);
 
 XTAPI
 VOID
-ArpSetDoubleFaultTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock);
+ArpSetDoubleFaultTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock,
+                          IN PVOID KernelFaultStack);
 
 XTAPI
 VOID
@@ -319,7 +322,8 @@ ArpSetIdtGate(IN PKIDTENTRY Idt,
 
 XTAPI
 VOID
-ArpSetNonMaskableInterruptTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock);
+ArpSetNonMaskableInterruptTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock,
+                                   IN PVOID KernelFaultStack);
 
 XTCDECL
 VOID
