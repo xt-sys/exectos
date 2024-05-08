@@ -77,7 +77,7 @@ KepInitializeMachine(VOID)
     HlInitializeFrameBuffer();
 
     /* Initialize processor */
-    HlInitializeProcessor(0);
+    HlInitializeProcessor();
 }
 
 /**

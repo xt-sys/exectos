@@ -187,11 +187,12 @@ HlpHandlePicSpuriousService(VOID)
  */
 XTAPI
 VOID
-HlpInitializeApic(IN ULONG CpuNumber)
+HlpInitializeApic()
 {
     APIC_BASE_REGISTER BaseRegister;
     APIC_LVT_REGISTER LvtRegister;
     APIC_SPURIOUS_REGISTER SpuriousRegister;
+    ULONG CpuNumber;
 
     /* Check if this is an x2APIC compatible machine */
     if(HlpCheckX2ApicSupport())
@@ -204,6 +205,9 @@ HlpInitializeApic(IN ULONG CpuNumber)
         /* Use xAPIC compatibility mode */
         HlpApicMode = APIC_MODE_COMPAT;
     }
+
+    /* Get processor number */
+    CpuNumber = KeGetCurrentProcessorNumber();
 
     /* Enable the APIC */
     BaseRegister.LongLong = ArReadModelSpecificRegister(APIC_LAPIC_MSR_BASE);
@@ -281,9 +285,9 @@ HlpInitializeApic(IN ULONG CpuNumber)
  */
 XTAPI
 VOID
-HlpInitializePic(IN ULONG CpuNumber)
+HlpInitializePic()
 {
     /* Disable legacy PIC and initialize APIC */
     HlDisableLegacyPic();
-    HlpInitializeApic(CpuNumber);
+    HlpInitializeApic();
 }

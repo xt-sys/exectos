@@ -21,7 +21,7 @@
  */
 XTAPI
 VOID
-HlInitializeProcessor(IN ULONG CpuNumber)
+HlInitializeProcessor()
 {
     PKPROCESSOR_BLOCK ProcessorBlock;
     KAFFINITY Affinity;
@@ -31,20 +31,19 @@ HlInitializeProcessor(IN ULONG CpuNumber)
 
     /* Set initial stall factor, CPU number and mask interrupts */
     ProcessorBlock->StallScaleFactor = INITIAL_STALL_FACTOR;
-    ProcessorBlock->CpuNumber = CpuNumber;
     ProcessorBlock->Idr = 0xFFFFFFFF;
 
     /* Record processor block in the processors table */
-    HlpProcessorsIdentity[CpuNumber].ProcessorBlock = ProcessorBlock;
+    HlpProcessorsIdentity[ProcessorBlock->CpuNumber].ProcessorBlock = ProcessorBlock;
 
     /* Set processor affinity */
-    Affinity = (KAFFINITY) 1 << CpuNumber;
+    Affinity = (KAFFINITY) 1 << ProcessorBlock->CpuNumber;
 
     /* Apply affinity to a set of processors */
     HlpActiveProcessors |= Affinity;
 
     /* Initialize APIC for this processor */
-    HlpInitializePic(CpuNumber);
+    HlpInitializePic();
 
     /* Set the APIC running level */
     HlSetRunLevel(KeGetCurrentProcessorBlock()->RunLevel);

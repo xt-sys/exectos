@@ -68,6 +68,6 @@ HlSetRunLevel(IN KRUNLEVEL RunLevel);
 
 XTAPI
 VOID
-HlInitializeProcessor(IN ULONG CpuNumber);
+HlInitializeProcessor();
 
 #endif /* __XTOSKRNL_HLI_H */
