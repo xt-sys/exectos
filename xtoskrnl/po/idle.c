@@ -29,6 +29,7 @@ PoInitializeProcessorControlBlock(IN OUT PKPROCESSOR_CONTROL_BLOCK Prcb)
     /* Initialize default power state */
     Prcb->PowerState.Idle0TimeLimit = 0xFFFFFFFF;
     Prcb->PowerState.CurrentThrottle = 100;
+    Prcb->PowerState.CurrentThrottleIndex = 0;
     Prcb->PowerState.IdleFunction = PopIdle0Function;
 
     /* Initialize DPC and Timer */
