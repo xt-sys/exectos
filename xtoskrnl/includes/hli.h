@@ -14,7 +14,7 @@
 /* HAL library routines forward references */
 XTAPI
 VOID
-HlClearScreen(VOID);
+HlClearScreen(IN ULONG Color);
 
 XTCDECL
 XTSTATUS

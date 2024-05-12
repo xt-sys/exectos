@@ -11,7 +11,10 @@
 
 
 /**
- * Clears the screen by drawing a filled black box.
+ * Clears the screen by drawing a box filled with specified color.
+ *
+ * @param Color
+ *        Specifies the color of the box used to fill the screen.
  *
  * @return This routine does not return any value.
  *
@@ -19,7 +22,7 @@
  */
 XTAPI
 VOID
-HlClearScreen(VOID)
+HlClearScreen(IN ULONG Color)
 {
     SIZE_T Line, PositionX, PositionY;
     PULONG FrameBuf;
@@ -33,7 +36,7 @@ HlClearScreen(VOID)
         Line = PositionY * HlpFrameBufferData.PixelsPerScanLine;
         for(PositionX = 0; PositionX < HlpFrameBufferData.Width; PositionX++)
         {
-            FrameBuf[Line + PositionX] = 0x00000000;
+            FrameBuf[Line + PositionX] = Color;
         }
     }
 }
@@ -128,10 +131,18 @@ HlInitializeFrameBuffer(VOID)
     HlpFrameBufferData.BitsPerPixel = KeInitializationBlock->LoaderInformation.FrameBuffer.BitsPerPixel;
     HlpFrameBufferData.PixelsPerScanLine = KeInitializationBlock->LoaderInformation.FrameBuffer.PixelsPerScanLine;
     HlpFrameBufferData.Pitch = KeInitializationBlock->LoaderInformation.FrameBuffer.Pitch;
+    HlpFrameBufferData.Pixels.BlueShift = KeInitializationBlock->LoaderInformation.FrameBuffer.Pixels.BlueShift;
+    HlpFrameBufferData.Pixels.BlueSize = KeInitializationBlock->LoaderInformation.FrameBuffer.Pixels.BlueSize;
+    HlpFrameBufferData.Pixels.GreenShift = KeInitializationBlock->LoaderInformation.FrameBuffer.Pixels.GreenShift;
+    HlpFrameBufferData.Pixels.GreenSize = KeInitializationBlock->LoaderInformation.FrameBuffer.Pixels.GreenSize;
+    HlpFrameBufferData.Pixels.RedShift = KeInitializationBlock->LoaderInformation.FrameBuffer.Pixels.RedShift;
+    HlpFrameBufferData.Pixels.RedSize = KeInitializationBlock->LoaderInformation.FrameBuffer.Pixels.RedSize;
+    HlpFrameBufferData.Pixels.ReservedShift = KeInitializationBlock->LoaderInformation.FrameBuffer.Pixels.ReservedShift;
+    HlpFrameBufferData.Pixels.ReservedSize = KeInitializationBlock->LoaderInformation.FrameBuffer.Pixels.ReservedSize;
     HlpFrameBufferData.Initialized = TRUE;
 
     /* Clear screen */
-    HlClearScreen();
+    HlClearScreen(0x00000000);
 
     /* Return success */
     return STATUS_SUCCESS;

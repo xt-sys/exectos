@@ -154,6 +154,17 @@ typedef struct _HAL_FRAMEBUFFER_DATA
     UINT BitsPerPixel;
     UINT Pitch;
     PVOID Font;
+    struct
+    {
+        USHORT BlueShift;
+        USHORT BlueSize;
+        USHORT GreenShift;
+        USHORT GreenSize;
+        USHORT RedShift;
+        USHORT RedSize;
+        USHORT ReservedShift;
+        USHORT ReservedSize;
+    } Pixels;
 } HAL_FRAMEBUFFER_DATA, *PHAL_FRAMEBUFFER_DATA;
 
 /* SMBIOS table header structure */
