@@ -524,8 +524,8 @@ FbpFindFramebufferAddress(OUT PEFI_PHYSICAL_ADDRESS Address)
  * @param PixelBitMask
  *        Provides a pixel bit mask.
  *
- * @param ColorMask
- *        Supplies a pointer to the memory area where the color mask will be stored.
+ * @param ColorSize
+ *        Supplies a pointer to the memory area where the color size will be stored.
  *
  * @param ColorShift
  *        Supplies a pointer to the memory area where the color shift (position) will be stored.
@@ -537,34 +537,37 @@ FbpFindFramebufferAddress(OUT PEFI_PHYSICAL_ADDRESS Address)
 XTCDECL
 VOID
 FbpGetColorMask(IN UINT PixelBitMask,
-                OUT PUSHORT ColorMask,
+                OUT PUSHORT ColorSize,
                 OUT PUSHORT ColorShift)
 {
-    UINT Index, Mask;
+    UINT Shift, Size;
 
     /* Initialize variables */
-    Index = 0;
-    Mask = 1;
+    Shift = 0;
+    Size = 0;
 
     /* Make sure EfiMask is not zero */
     if(PixelBitMask)
     {
-        while((Index < 32) && ((PixelBitMask & Mask) == 0))
+        /* Get color shift */
+        while((PixelBitMask & 1) == 0)
         {
-            Index++;
-            Mask <<= 1;
+            Shift++;
+            PixelBitMask >>= 1;
         }
 
-        /* Set color mask and shift */
-        *ColorShift = Index;
-        *ColorMask = (Mask >> Index);
+        /* Get color size */
+        while((PixelBitMask & 1) == 1)
+        {
+            Size++;
+            PixelBitMask >>= 1;
+        }
+
     }
-    else
-    {
-        /* Set default color mask and shift */
-        *ColorMask = 0;
-        *ColorShift = 0;
-    }
+
+    /* Set color mask and shift */
+    *ColorShift = Shift;
+    *ColorSize = Size;
 }
 
 /**
@@ -672,26 +675,26 @@ FbpGetPixelInformation(IN PEFI_PIXEL_BITMASK PixelsBitMask)
         case PixelBlueGreenRedReserved8BitPerColor:
             /* BGRR, 32 bits per pixel */
             FbpDisplayInfo.ModeInfo.BitsPerPixel = 32;
-            FbpDisplayInfo.ModeInfo.PixelInformation.BlueMask = 0xFF;
             FbpDisplayInfo.ModeInfo.PixelInformation.BlueShift = 0;
-            FbpDisplayInfo.ModeInfo.PixelInformation.GreenMask = 0xFF;
+            FbpDisplayInfo.ModeInfo.PixelInformation.BlueSize = 8;
             FbpDisplayInfo.ModeInfo.PixelInformation.GreenShift = 8;
-            FbpDisplayInfo.ModeInfo.PixelInformation.RedMask = 0xFF;
+            FbpDisplayInfo.ModeInfo.PixelInformation.GreenSize = 8;
             FbpDisplayInfo.ModeInfo.PixelInformation.RedShift = 16;
-            FbpDisplayInfo.ModeInfo.PixelInformation.ReservedMask = 0xFF;
+            FbpDisplayInfo.ModeInfo.PixelInformation.RedSize = 8;
             FbpDisplayInfo.ModeInfo.PixelInformation.ReservedShift = 24;
+            FbpDisplayInfo.ModeInfo.PixelInformation.ReservedSize = 8;
             break;
         case PixelRedGreenBlueReserved8BitPerColor:
             /* RGBR, 32 bits per pixel */
             FbpDisplayInfo.ModeInfo.BitsPerPixel = 32;
-            FbpDisplayInfo.ModeInfo.PixelInformation.BlueMask = 0xFF;
             FbpDisplayInfo.ModeInfo.PixelInformation.BlueShift = 16;
-            FbpDisplayInfo.ModeInfo.PixelInformation.GreenMask = 0xFF;
+            FbpDisplayInfo.ModeInfo.PixelInformation.BlueSize = 8;
             FbpDisplayInfo.ModeInfo.PixelInformation.GreenShift = 8;
-            FbpDisplayInfo.ModeInfo.PixelInformation.RedMask = 0xFF;
+            FbpDisplayInfo.ModeInfo.PixelInformation.GreenSize = 8;
             FbpDisplayInfo.ModeInfo.PixelInformation.RedShift = 0;
-            FbpDisplayInfo.ModeInfo.PixelInformation.ReservedMask = 0xFF;
+            FbpDisplayInfo.ModeInfo.PixelInformation.RedSize = 8;
             FbpDisplayInfo.ModeInfo.PixelInformation.ReservedShift = 24;
+            FbpDisplayInfo.ModeInfo.PixelInformation.ReservedSize = 8;
             break;
         case PixelBitMask:
             /* Assume 32 bits per pixel */
@@ -711,26 +714,26 @@ FbpGetPixelInformation(IN PEFI_PIXEL_BITMASK PixelsBitMask)
             }
 
             /* Set pixel information */
-            FbpGetColorMask(PixelsBitMask->RedMask, &FbpDisplayInfo.ModeInfo.PixelInformation.RedMask,
+            FbpGetColorMask(PixelsBitMask->RedMask, &FbpDisplayInfo.ModeInfo.PixelInformation.RedSize,
                             &FbpDisplayInfo.ModeInfo.PixelInformation.RedShift);
-            FbpGetColorMask(PixelsBitMask->GreenMask, &FbpDisplayInfo.ModeInfo.PixelInformation.GreenMask,
+            FbpGetColorMask(PixelsBitMask->GreenMask, &FbpDisplayInfo.ModeInfo.PixelInformation.GreenSize,
                             &FbpDisplayInfo.ModeInfo.PixelInformation.GreenShift);
-            FbpGetColorMask(PixelsBitMask->BlueMask, &FbpDisplayInfo.ModeInfo.PixelInformation.BlueMask,
+            FbpGetColorMask(PixelsBitMask->BlueMask, &FbpDisplayInfo.ModeInfo.PixelInformation.BlueSize,
                             &FbpDisplayInfo.ModeInfo.PixelInformation.BlueShift);
-            FbpGetColorMask(PixelsBitMask->ReservedMask, &FbpDisplayInfo.ModeInfo.PixelInformation.ReservedMask,
+            FbpGetColorMask(PixelsBitMask->ReservedMask, &FbpDisplayInfo.ModeInfo.PixelInformation.ReservedSize,
                             &FbpDisplayInfo.ModeInfo.PixelInformation.ReservedShift);
             break;
         default:
             /* Unknown pixel format */
             FbpDisplayInfo.ModeInfo.BitsPerPixel = 0;
-            FbpDisplayInfo.ModeInfo.PixelInformation.BlueMask = 0x0;
             FbpDisplayInfo.ModeInfo.PixelInformation.BlueShift = 0;
-            FbpDisplayInfo.ModeInfo.PixelInformation.GreenMask = 0x0;
+            FbpDisplayInfo.ModeInfo.PixelInformation.BlueSize = 0;
             FbpDisplayInfo.ModeInfo.PixelInformation.GreenShift = 0;
-            FbpDisplayInfo.ModeInfo.PixelInformation.RedMask = 0x0;
+            FbpDisplayInfo.ModeInfo.PixelInformation.GreenSize = 0;
             FbpDisplayInfo.ModeInfo.PixelInformation.RedShift = 0;
-            FbpDisplayInfo.ModeInfo.PixelInformation.ReservedMask = 0x0;
+            FbpDisplayInfo.ModeInfo.PixelInformation.RedSize = 0;
             FbpDisplayInfo.ModeInfo.PixelInformation.ReservedShift = 0;
+            FbpDisplayInfo.ModeInfo.PixelInformation.ReservedSize = 0;
             break;
     }
 

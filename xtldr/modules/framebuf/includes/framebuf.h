@@ -45,7 +45,7 @@ FbpFindFramebufferAddress(OUT PEFI_PHYSICAL_ADDRESS Address);
 XTCDECL
 VOID
 FbpGetColorMask(IN UINT EfiMask,
-                OUT PUSHORT ColorMask,
+                OUT PUSHORT ColorSize,
                 OUT PUSHORT ColorShift);
 
 XTCDECL

@@ -269,14 +269,14 @@ typedef struct _XTBL_FRAMEBUFFER_MODE_INFORMATION
     EFI_GRAPHICS_PIXEL_FORMAT PixelFormat;
     struct
     {
-        USHORT BlueMask;
         USHORT BlueShift;
-        USHORT GreenMask;
+        USHORT BlueSize;
         USHORT GreenShift;
-        USHORT RedMask;
+        USHORT GreenSize;
         USHORT RedShift;
-        USHORT ReservedMask;
+        USHORT RedSize;
         USHORT ReservedShift;
+        USHORT ReservedSize;
     } PixelInformation;
 } XTBL_FRAMEBUFFER_MODE_INFORMATION, *PXTBL_FRAMEBUFFER_MODE_INFORMATION;
 
