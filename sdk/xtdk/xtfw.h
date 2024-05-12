@@ -102,6 +102,17 @@ typedef struct _LOADER_GRAPHICS_INFORMATION_BLOCK
     UINT BitsPerPixel;
     UINT Pitch;
     PVOID Font;
+    struct
+    {
+        USHORT BlueShift;
+        USHORT BlueSize;
+        USHORT GreenShift;
+        USHORT GreenSize;
+        USHORT RedShift;
+        USHORT RedSize;
+        USHORT ReservedShift;
+        USHORT ReservedSize;
+    } Pixels;
 } LOADER_GRAPHICS_INFORMATION_BLOCK, *PLOADER_GRAPHICS_INFORMATION_BLOCK;
 
 /* Boot Loader information block */

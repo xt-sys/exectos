@@ -50,6 +50,14 @@ XtGetDisplayInformation(OUT PLOADER_GRAPHICS_INFORMATION_BLOCK InformationBlock,
     InformationBlock->BitsPerPixel = FrameBufferModeInfo->BitsPerPixel;
     InformationBlock->PixelsPerScanLine = FrameBufferModeInfo->PixelsPerScanLine;
     InformationBlock->Pitch = FrameBufferModeInfo->Pitch;
+    InformationBlock->Pixels.BlueShift = FrameBufferModeInfo->PixelInformation.BlueShift;
+    InformationBlock->Pixels.BlueSize = FrameBufferModeInfo->PixelInformation.BlueSize;
+    InformationBlock->Pixels.GreenShift = FrameBufferModeInfo->PixelInformation.GreenShift;
+    InformationBlock->Pixels.GreenSize = FrameBufferModeInfo->PixelInformation.GreenSize;
+    InformationBlock->Pixels.RedShift = FrameBufferModeInfo->PixelInformation.RedShift;
+    InformationBlock->Pixels.RedSize = FrameBufferModeInfo->PixelInformation.RedSize;
+    InformationBlock->Pixels.ReservedShift = FrameBufferModeInfo->PixelInformation.ReservedShift;
+    InformationBlock->Pixels.ReservedSize = FrameBufferModeInfo->PixelInformation.ReservedSize;
 }
 
 XTCDECL
