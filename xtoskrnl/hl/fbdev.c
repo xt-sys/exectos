@@ -1,8 +1,8 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/hl/efifb.c
- * DESCRIPTION:     EFI framebuffer support
+ * FILE:            xtoskrnl/hl/fbdev.c
+ * DESCRIPTION:     FrameBuffer support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
