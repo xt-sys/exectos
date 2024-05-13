@@ -62,6 +62,10 @@ HlPutCharacter(IN ULONG PositionX,
                IN ULONG Color,
                IN WCHAR WideCharacter);
 
+XTAPI
+ULONG
+HlRGBColor(IN ULONG Color);
+
 XTFASTCALL
 VOID
 HlSetRunLevel(IN KRUNLEVEL RunLevel);

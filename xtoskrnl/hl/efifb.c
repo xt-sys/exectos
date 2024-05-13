@@ -14,7 +14,7 @@
  * Clears the screen by drawing a box filled with specified color.
  *
  * @param Color
- *        Specifies the color of the box used to fill the screen.
+ *        Specifies the color of the box used to fill the screen in (A)RGB format.
  *
  * @return This routine does not return any value.
  *
@@ -25,10 +25,14 @@ VOID
 HlClearScreen(IN ULONG Color)
 {
     SIZE_T Line, PositionX, PositionY;
+    ULONG BackgroundColor;
     PULONG FrameBuf;
 
     /* Get pointer to frame buffer */
     FrameBuf = HlpFrameBufferData.Address;
+
+    /* Convert background color */
+    BackgroundColor = HlRGBColor(Color);
 
     /* Fill the screen with a black box */
     for(PositionY = 0; PositionY < HlpFrameBufferData.Height; PositionY++)
@@ -36,7 +40,7 @@ HlClearScreen(IN ULONG Color)
         Line = PositionY * HlpFrameBufferData.PixelsPerScanLine;
         for(PositionX = 0; PositionX < HlpFrameBufferData.Width; PositionX++)
         {
-            FrameBuf[Line + PositionX] = Color;
+            FrameBuf[Line + PositionX] = BackgroundColor;
         }
     }
 }
@@ -51,7 +55,7 @@ HlClearScreen(IN ULONG Color)
  *        Supplies the Y coordinate of the pixel.
  *
  * @param Color
- *        Specifies the color of the pixel.
+ *        Specifies the color of the pixel in (A)RGB format.
  *
  * @return This routine does not return any value.
  *
@@ -83,7 +87,7 @@ HlDrawPixel(IN ULONG PositionX,
     FrameBufferIndex = 4 * HlpFrameBufferData.PixelsPerScanLine * PositionY + 4 * PositionX;
 
     /* Set the color of the pixel by writing to the corresponding memory location */
-    *((PULONG)(HlpFrameBufferData.Address + FrameBufferIndex)) = Color;
+    *((PULONG)(HlpFrameBufferData.Address + FrameBufferIndex)) = HlRGBColor(Color);
 }
 
 /**
@@ -158,7 +162,7 @@ HlInitializeFrameBuffer(VOID)
  *        Supplies the Y coordinate of the character.
  *
  * @param Color
- *        Supplies the font color.
+ *        Supplies the font color in (A)RGB format.
  *
  * @param WideCharacter
  *        Supplies the wide character to be drawn on the framebuffer.
@@ -178,6 +182,7 @@ HlPutCharacter(IN ULONG PositionX,
     PUCHAR Character, CharacterMapping, Fragment;
     UINT_PTR GlyphPixel, Pixel;
     PSSFN_FONT_HEADER FbFont;
+    ULONG FontColor;
 
     /* Get pointers to font data */
     FbFont = (PSSFN_FONT_HEADER)HlpFrameBufferData.Font;
@@ -227,8 +232,9 @@ HlPutCharacter(IN ULONG PositionX,
         return;
     }
 
-    /* Find the glyph position on the frame buffer */
+    /* Find the glyph position on the frame buffer and set font color */
     GlyphPixel = (UINT_PTR)HlpFrameBufferData.Address + PositionY * HlpFrameBufferData.Pitch + PositionX * 4;
+    FontColor = HlRGBColor(Color);
 
     /* Check all kerning fragments */
     Mapping = 0;
@@ -283,7 +289,7 @@ HlPutCharacter(IN ULONG PositionX,
                 if(*Fragment & CurrentFragment)
                 {
                     /* Draw glyph pixel */
-                    *((PULONG)Pixel) = Color;
+                    *((PULONG)Pixel) = FontColor;
                 }
 
                 /* Advance pixel pointer */
@@ -299,4 +305,31 @@ HlPutCharacter(IN ULONG PositionX,
         /* Get next mapping */
         CharacterMapping += Character[0] & 0x40 ? 6 : 5;
     }
+}
+
+/**
+ * Converts color format from (A)RGB one expected by current FrameBuffer.
+ *
+ * @param Color
+ *        Specifies the color in (A)RGB format.
+ *
+ * @return Returns the color in FrameBuffer format.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG
+HlRGBColor(IN ULONG Color)
+{
+    USHORT Blue, Green, Red, Reserved;
+
+    /* Extract color components from (A)RGB value */
+    Blue = (USHORT)(Color & 0xFF);
+    Green = (USHORT)((Color >> 8) & 0xFF);
+    Red = (USHORT)((Color >> 16) & 0xFF);
+    Reserved = (USHORT)((Color >> 24) & 0xFF);
+
+    /* Return color in FrameBuffer pixel format */
+    return (ULONG)((Blue << HlpFrameBufferData.Pixels.BlueShift) | (Green << HlpFrameBufferData.Pixels.GreenShift) |
+                   (Red << HlpFrameBufferData.Pixels.RedShift) | (Reserved << HlpFrameBufferData.Pixels.ReservedShift));
 }
