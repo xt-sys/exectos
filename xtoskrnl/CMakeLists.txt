@@ -15,7 +15,7 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/traps.c
     ${XTOSKRNL_SOURCE_DIR}/ex/rundown.c
     ${XTOSKRNL_SOURCE_DIR}/hl/cport.c
-    ${XTOSKRNL_SOURCE_DIR}/hl/efifb.c
+    ${XTOSKRNL_SOURCE_DIR}/hl/fbdev.c
     ${XTOSKRNL_SOURCE_DIR}/hl/globals.c
     ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/cpu.c
     ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/pic.c
