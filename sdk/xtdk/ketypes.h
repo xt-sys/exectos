@@ -365,25 +365,35 @@ typedef struct _KPROCESS
     LIST_ENTRY ProfileListHead;
     ULONG_PTR DirectoryTable[2];
     USHORT IopmOffset;
+    UCHAR Iopl;
     VOLATILE KAFFINITY ActiveProcessors;
+    ULONG KernelTime;
+    ULONG UserTime;
     LIST_ENTRY ReadyListHead;
+    SINGLE_LIST_ENTRY SwapListEntry;
+    PVOID VdmTrapHandler;
     LIST_ENTRY ThreadListHead;
+    KSPIN_LOCK ProcessLock;
     KAFFINITY Affinity;
     union
     {
         struct
         {
-            LONG AutoAlignment:1;
-            LONG DisableBoost:1;
-            LONG DisableQuantum:1;
+            BOOLEAN AutoAlignment;
+            BOOLEAN DisableBoost;
+            BOOLEAN DisableQuantum;
             LONG ReservedFlags:29;
         };
         LONG ProcessFlags;
     };
+    ULONG_PTR StackCount;
     SCHAR BasePriority;
     SCHAR Quantum;
     UCHAR State;
-    ULONG_PTR StackCount;
+    UCHAR ThreadSeed;
+    UCHAR PowerState;
+    UCHAR IdealNode;
+    UCHAR Spare;
 } KPROCESS, *PKPROCESS;
 
 /* Thread control block structure definition */
@@ -396,7 +406,13 @@ typedef struct _KTHREAD
     PVOID StackBase;
     PVOID StackLimit;
     KSPIN_LOCK ThreadLock;
-    volatile UCHAR State;
+
+    ULONG ContextSwitches;
+    VOLATILE UCHAR State;
+    UCHAR NpxState;
+    KRUNLEVEL WaitRunLevel;
+    KPROCESSOR_MODE WaitMode;
+    PTHREAD_ENVIRONMENT_BLOCK EnvironmentBlock;
     union
     {
         KAPC_STATE ApcState;
@@ -411,13 +427,8 @@ typedef struct _KTHREAD
         };
     };
     KSPIN_LOCK ApcQueueLock;
-    ULONG ContextSwitches;
     LONG_PTR WaitStatus;
-    union
-    {
-        PKWAIT_BLOCK WaitBlockList;
-        PKGATE GateObject;
-    };
+    PKWAIT_BLOCK WaitBlockList;
     BOOLEAN Alertable;
     BOOLEAN WaitNext;
     UCHAR WaitReason;
@@ -431,43 +442,62 @@ typedef struct _KTHREAD
         SINGLE_LIST_ENTRY SwapListEntry;
     };
     PKQUEUE Queue;
-    CHAR PreviousMode;
-    SHORT SpecialApcDisable;
-    PTHREAD_ENVIRONMENT_BLOCK EnvironmentBlock;
+    ULONG WaitTime;
     union
     {
-        KTIMER Timer;
         struct
         {
-            UCHAR TimerFill[KTIMER_LENGTH];
-            union
-            {
-                struct
-                {
-                    LONG AutoAlignment:1;
-                    LONG DisableBoost:1;
-                    LONG ReservedFlags:30;
-                };
-                LONG ThreadFlags;
-            };
+            SHORT KernelApcDisable;
+            SHORT SpecialApcDisable;
         };
+        ULONG CombinedApcDisable;
     };
+    KTIMER Timer;
     KWAIT_BLOCK WaitBlock[KTHREAD_WAIT_BLOCK + 1];
-    UCHAR NpxState;
-    KRUNLEVEL WaitRunLevel;
     LIST_ENTRY QueueListEntry;
-    PKTRAP_FRAME TrapFrame;
-    PVOID CallbackStack;
-    PVOID ServiceTable;
-    ULONG KernelLimit;
     UCHAR ApcStateIndex;
-    BOOLEAN StackResident;
+    BOOLEAN Preempted;
+    BOOLEAN ProcessReadyQueue;
+    BOOLEAN KernelStackResident;
+    CHAR Saturation;
+    UCHAR IdealProcessor;
+    SCHAR BasePriority;
+    UCHAR Spare4;
+    SCHAR PriorityDecrement;
+    SCHAR Quantum;
+    BOOLEAN SystemAffinityActive;
+    CHAR PreviousMode;
+    UCHAR ResourceIndex;
+    UCHAR DisableBoost;
+    KAFFINITY UserAffinity;
     PKPROCESS Process;
     KAFFINITY Affinity;
+    PVOID ServiceTable;
     PKAPC_STATE ApcStatePointer[2];
     KAPC_STATE SavedApcState;
+    PVOID CallbackStack;
+    PVOID SubSystemThread;
+    PKTRAP_FRAME TrapFrame;
+    ULONG KernelTime;
+    ULONG UserTime;
     KAPC SuspendApc;
     KSEMAPHORE SuspendSemaphore;
+    PVOID TlsArray;
+    PVOID LegoData;
+    LIST_ENTRY ThreadListEntry;
+    UCHAR LargeStack;
+    UCHAR PowerState;
+    UCHAR NpxIrql;
+    UCHAR Spare5;
+    BOOLEAN AutoAlignment;
+    UCHAR Iopl;
+    CCHAR FreezeCount;
+    CCHAR SuspendCount;
+    UCHAR Spare0[1];
+    UCHAR UserIdealProcessor;
+    UCHAR Spare2[3];
+    ULONG KernelLimit;
+    BOOLEAN StackResident;
 } KTHREAD, *PKTHREAD;
 
 #endif /* __XTDK_KEFUNCS_H */
