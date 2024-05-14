@@ -83,6 +83,30 @@ ArFlushTlb(VOID)
 }
 
 /**
+ * Gets the EFLAGS register.
+ *
+ * @return This routine returns the EFLAGS register.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+ULONG
+ArGetCpuFlags(VOID)
+{
+    ULONG Flags;
+
+    /* Get EFLAGS register */
+    asm volatile("pushf\n"
+                 "pop %0\n"
+                 : "=rm" (Flags)
+                 :
+                 : "memory");
+
+    /* Return flags */
+    return Flags;
+}
+
+/**
  * Gets the address of the current stack register.
  *
  * @return This routine returns the current stack pointer.
