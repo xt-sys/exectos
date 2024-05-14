@@ -94,7 +94,7 @@ RtlInsertTailList(IN OUT PLIST_ENTRY ListHead,
 }
 
 /**
- * Indicates whether a doubly linked list structure is empty.
+ * Indicates whether a doubly linked list structure is empty, or not initialized at all.
  *
  * @param ListHead
  *        Pointer to a structure that represents the head of the list.
@@ -107,7 +107,7 @@ XTCDECL
 BOOLEAN
 RtlListEmpty(IN PLIST_ENTRY ListHead)
 {
-    return (ListHead->Flink == ListHead);
+    return (((ListHead->Flink == NULL) && (ListHead->Blink == NULL)) || (ListHead->Flink == ListHead));
 }
 
 /**
