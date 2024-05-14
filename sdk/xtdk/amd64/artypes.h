@@ -93,29 +93,31 @@
 #define X86_MSR_EFER_SVME                               (1 << 12)
 
 /* X86 EFLAG bit masks definitions */
-#define X86_EFLAGS_CF_MASK                              0x00000001
-#define X86_EFLAGS_PF_MASK                              0x00000004
-#define X86_EFALGS_AF_MASK                              0x00000010
-#define X86_EFLAGS_ZF_MASK                              0x00000040
-#define X86_EFLAGS_SF_MASK                              0x00000080
-#define X86_EFLAGS_TF_MASK                              0x00000100
-#define X86_EFLAGS_IF_MASK                              0x00000200
-#define X86_EFLAGS_DF_MASK                              0x00000400
-#define X86_EFLAGS_OF_MASK                              0x00000800
-#define X86_EFLAGS_IOPL_MASK                            0x00003000
-#define X86_EFLAGS_NT_MASK                              0x00004000
-#define X86_EFLAGS_RF_MASK                              0x00010000
-#define X86_EFLAGS_VM_MASK                              0x00020000
-#define X86_EFLAGS_AC_MASK                              0x00040000
-#define X86_EFLAGS_VIF_MASK                             0x00080000
-#define X86_EFLAGS_VIP_MASK                             0x00100000
-#define X86_EFLAGS_ID_MASK                              0x00200000
+#define X86_EFLAGS_NF_MASK                              0x00000000 /* None */
+#define X86_EFLAGS_CF_MASK                              0x00000001 /* Carry */
+#define X86_EFLAGS_PF_MASK                              0x00000004 /* Parity */
+#define X86_EFALGS_AF_MASK                              0x00000010 /* Aux Carry */
+#define X86_EFLAGS_ZF_MASK                              0x00000040 /* Zero */
+#define X86_EFLAGS_SF_MASK                              0x00000080 /* Sign */
+#define X86_EFLAGS_TF_MASK                              0x00000100 /* Trap */
+#define X86_EFLAGS_IF_MASK                              0x00000200 /* Interrupt */
+#define X86_EFLAGS_DF_MASK                              0x00000400 /* Direction */
+#define X86_EFLAGS_OF_MASK                              0x00000800 /* Overflow */
+#define X86_EFLAGS_IOPL_MASK                            0x00003000 /* I/O Privilege */
+#define X86_EFLAGS_NT_MASK                              0x00004000 /* Nested Task */
+#define X86_EFLAGS_SIGN_MASK                            0x00008000 /* Sign */
+#define X86_EFLAGS_RF_MASK                              0x00010000 /* Resume */
+#define X86_EFLAGS_V86_MASK                             0x00020000 /* Virtual 8086 */
+#define X86_EFLAGS_AC_MASK                              0x00040000 /* Alignment Check */
+#define X86_EFLAGS_VIF_MASK                             0x00080000 /* Virtual Interrupt */
+#define X86_EFLAGS_VIP_MASK                             0x00100000 /* Virtual Interrupt Pending */
+#define X86_EFLAGS_ID_MASK                              0x00200000 /* Identification */
 
 /* CPU vendor enumeration list */
 typedef enum _CPU_VENDOR
 {
     CPU_VENDOR_AMD = 0x68747541,
-    CPU_VENDOR_INTEL = 0x756e6547,
+    CPU_VENDOR_INTEL = 0x756E6547,
     CPU_VENDOR_UNKNOWN = 0xFFFFFFFF
 } CPU_VENDOR, *PCPU_VENDOR;
 
