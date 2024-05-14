@@ -162,9 +162,9 @@ ArpIdentifyProcessor(VOID)
     if(Prcb->CpuId.Vendor == CPU_VENDOR_AMD)
     {
         /* AMD CPU */
-        Prcb->CpuId.Family = Prcb->CpuId.Family + CpuSignature.ExtendedFamily;
-        if(Prcb->CpuId.Model == 0xF)
+        if(Prcb->CpuId.Family >= 0xF)
         {
+            Prcb->CpuId.Family = Prcb->CpuId.Family + CpuSignature.ExtendedFamily;
             Prcb->CpuId.Model = Prcb->CpuId.Model + (CpuSignature.ExtendedModel << 4);
         }
     }
@@ -176,7 +176,7 @@ ArpIdentifyProcessor(VOID)
             Prcb->CpuId.Family = Prcb->CpuId.Family + CpuSignature.ExtendedFamily;
         }
 
-        if((Prcb->CpuId.Family == 0xF) || (Prcb->CpuId.Family == 0x6))
+        if((Prcb->CpuId.Family == 0x6) || (Prcb->CpuId.Family == 0xF))
         {
             Prcb->CpuId.Model = Prcb->CpuId.Model + (CpuSignature.ExtendedModel << 4);
         }
