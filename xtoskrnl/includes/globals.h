@@ -42,6 +42,12 @@ EXTERN KSERVICE_DESCRIPTOR_TABLE KeServiceDescriptorTable[KSERVICE_TABLES_COUNT]
 /* Kernel process list */
 EXTERN LIST_ENTRY KepProcessListHead;
 
+/* Kernel system resources list */
+EXTERN LIST_ENTRY KepSystemResourcesListHead;
+
+/* Kernel system resources lock */
+EXTERN KSPIN_LOCK KepSystemResourcesLock;
+
 /* Biggest free memory descriptor */
 EXTERN PLOADER_MEMORY_MAPPING MmFreeDescriptor;
 

@@ -92,6 +92,16 @@ KepExitDispatcher(IN KRUNLEVEL OldRunLevel);
 
 XTAPI
 VOID
+KepGetSystemResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
+                     IN BOOLEAN Acquire,
+                     OUT PSYSTEM_RESOURCE_HEADER *ResourceHeader);
+
+XTAPI
+XTSTATUS
+KepInitializeSystemResources(VOID);
+
+XTAPI
+VOID
 KepRemoveTimer(IN OUT PKTIMER Timer);
 
 XTFASTCALL

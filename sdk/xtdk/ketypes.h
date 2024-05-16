@@ -183,6 +183,13 @@ typedef enum _MODE
     MaximumMode
 } MODE, *PMODE;
 
+/* System resource types */
+typedef enum _SYSTEM_RESOURCE_TYPE
+{
+    SystemResourceInvalid,
+    SystemResourceFrameBuffer
+} SYSTEM_RESOURCE_TYPE, *PSYSTEM_RESOURCE_TYPE;
+
 /* Wait type */
 typedef enum _WAIT_TYPE
 {
@@ -499,5 +506,41 @@ typedef struct _KTHREAD
     ULONG KernelLimit;
     BOOLEAN StackResident;
 } KTHREAD, *PKTHREAD;
+
+/* System resource common header structure definition */
+typedef struct _SYSTEM_RESOURCE_HEADER
+{
+    LIST_ENTRY ListEntry;
+    SYSTEM_RESOURCE_TYPE ResourceType;
+    ULONG ResourceSize;
+    PVOID PhysicalAddress;
+    PVOID VirtualAddress;
+    BOOLEAN Acquired;
+} SYSTEM_RESOURCE_HEADER, *PSYSTEM_RESOURCE_HEADER;
+
+/* FrameBuffer system resource structure definition */
+typedef struct _SYSTEM_RESOURCE_FRAMEBUFFER
+{
+    SYSTEM_RESOURCE_HEADER Header;
+    ULONG_PTR BufferSize;
+    UINT Width;
+    UINT Height;
+    UINT Depth;
+    UINT PixelsPerScanLine;
+    UINT BitsPerPixel;
+    UINT Pitch;
+    PVOID Font;
+    struct
+    {
+        USHORT BlueShift;
+        USHORT BlueSize;
+        USHORT GreenShift;
+        USHORT GreenSize;
+        USHORT RedShift;
+        USHORT RedSize;
+        USHORT ReservedShift;
+        USHORT ReservedSize;
+    } Pixels;
+} SYSTEM_RESOURCE_FRAMEBUFFER, *PSYSTEM_RESOURCE_FRAMEBUFFER;
 
 #endif /* __XTDK_KEFUNCS_H */

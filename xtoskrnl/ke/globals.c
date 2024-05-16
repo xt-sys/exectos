@@ -26,3 +26,9 @@ KSERVICE_DESCRIPTOR_TABLE KeServiceDescriptorTable[KSERVICE_TABLES_COUNT];
 
 /* Kernel process list */
 LIST_ENTRY KepProcessListHead;
+
+/* Kernel system resources list */
+LIST_ENTRY KepSystemResourcesListHead;
+
+/* Kernel system resources lock */
+KSPIN_LOCK KepSystemResourcesLock;

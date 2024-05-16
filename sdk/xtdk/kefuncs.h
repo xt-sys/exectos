@@ -25,12 +25,22 @@ VOID
 KeAcquireSpinLock(IN OUT PKSPIN_LOCK SpinLock);
 
 XTAPI
+XTSTATUS
+KeAcquireSystemResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
+                        OUT PSYSTEM_RESOURCE_HEADER *ResourceHeader);
+
+XTAPI
 BOOLEAN
 KeCancelTimer(IN PKTIMER Timer);
 
 XTFASTCALL
 KRUNLEVEL
 KeGetCurrentRunLevel(VOID);
+
+XTAPI
+XTSTATUS
+KeGetSystemResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
+                    OUT PSYSTEM_RESOURCE_HEADER *ResourceHeader);
 
 XTAPI
 BOOLEAN
@@ -100,6 +110,10 @@ KeReleaseQueuedSpinLock(IN KSPIN_LOCK_QUEUE_LEVEL LockLevel);
 XTFASTCALL
 VOID
 KeReleaseSpinLock(IN OUT PKSPIN_LOCK SpinLock);
+
+XTAPI
+VOID
+KeReleaseSystemResource(IN PSYSTEM_RESOURCE_HEADER ResourceHeader);
 
 XTAPI
 VOID
