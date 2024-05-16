@@ -659,16 +659,6 @@ BlPhysicalListToVirtual(IN PXTBL_PAGE_MAPPING PageMap,
         NextEntry = ListEntry->Flink;
 
         /* Convert the address of this element to VirtualAddress */
-        if(ListEntry->Flink == ListHead)
-        {
-            /* Convert list head */
-            ListEntry->Flink = ListHead->Flink->Blink;
-        }
-        else
-        {
-            /* Convert list entry */
-            ListEntry->Flink = BlPhysicalAddressToVirtual(ListEntry->Flink, (PVOID)PhysicalBase, VirtualBase);
-        }
         if(ListEntry->Blink == ListHead)
         {
             /* Find virtual address of list head */
@@ -679,14 +669,24 @@ BlPhysicalListToVirtual(IN PXTBL_PAGE_MAPPING PageMap,
             /* Convert list entry */
             ListEntry->Blink = BlPhysicalAddressToVirtual(ListEntry->Blink, (PVOID)PhysicalBase, VirtualBase);
         }
+        if(ListEntry->Flink == ListHead)
+        {
+            /* Convert list head */
+            ListEntry->Flink = ListHead->Flink->Blink;
+        }
+        else
+        {
+            /* Convert list entry */
+            ListEntry->Flink = BlPhysicalAddressToVirtual(ListEntry->Flink, (PVOID)PhysicalBase, VirtualBase);
+        }
 
         /* Get to the next element*/
         ListEntry = NextEntry;
     }
 
     /* Convert list head */
-    ListHead->Flink = BlPhysicalAddressToVirtual(ListHead->Flink, (PVOID)PhysicalBase, VirtualBase);
     ListHead->Blink = BlPhysicalAddressToVirtual(ListHead->Blink, (PVOID)PhysicalBase, VirtualBase);
+    ListHead->Flink = BlPhysicalAddressToVirtual(ListHead->Flink, (PVOID)PhysicalBase, VirtualBase);
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
