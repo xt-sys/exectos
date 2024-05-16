@@ -61,11 +61,6 @@ typedef enum _SYSTEM_FIRMWARE_TYPE
     SystemFirmwarePcat
 } SYSTEM_FIRMWARE_TYPE, *PSYSTEM_FIRMWARE_TYPE;
 
-/* Hardware information block */
-typedef struct _HARDWARE_INFORMATION_BLOCK
-{
-} HARDWARE_INFORMATION_BLOCK, *PHARDWARE_INFORMATION_BLOCK;
-
 /* PCAT Firmware information block */
 typedef struct _PCAT_FIRMWARE_INFORMATION
 {
@@ -142,7 +137,7 @@ typedef struct _KERNEL_INITIALIZATION_BLOCK
     LIST_ENTRY LoadOrderListHead;
     LIST_ENTRY MemoryDescriptorListHead;
     LIST_ENTRY BootDriverListHead;
-    HARDWARE_INFORMATION_BLOCK HardwareInformation;
+    LIST_ENTRY SystemResourcesListHead;
     LOADER_INFORMATION_BLOCK LoaderInformation;
     FIRMWARE_INFORMATION_BLOCK FirmwareInformation;
 } KERNEL_INITIALIZATION_BLOCK, *PKERNEL_INITIALIZATION_BLOCK;
