@@ -141,6 +141,26 @@ ArHalt(VOID)
 }
 
 /**
+ * Checks whether interrupts are enabled or not.
+ *
+ * @return This routine returns TRUE if interrupts are enabled, or FALSE otherwise.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+BOOLEAN
+ArInterruptsEnabled(VOID)
+{
+    ULONG_PTR Flags;
+
+    /* Get RFLAGS register */
+    Flags = ArGetCpuFlags();
+
+    /* Check if interrupts are enabled and return result */
+    return (Flags & X86_EFLAGS_IF_MASK) ? TRUE : FALSE;
+}
+
+/**
  * Invalidates the TLB (Translation Lookaside Buffer) for specified virtual address.
  *
  * @param Address

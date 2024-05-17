@@ -43,6 +43,10 @@ VOID
 ArInitializeProcessor(IN PVOID ProcessorStructures);
 
 XTCDECL
+BOOLEAN
+ArInterruptsEnabled(VOID);
+
+XTCDECL
 VOID
 ArInvalidateTlbEntry(IN PVOID Address);
 
