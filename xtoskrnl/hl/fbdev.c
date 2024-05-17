@@ -101,6 +101,10 @@ XTAPI
 XTSTATUS
 HlInitializeFrameBuffer(VOID)
 {
+    PSYSTEM_RESOURCE_FRAMEBUFFER FrameBufferResource;
+    PSYSTEM_RESOURCE_HEADER SystemResource;
+    XTSTATUS Status;
+
     /* Check if display already initialized */
     if(HlpFrameBufferData.Initialized)
     {
@@ -108,19 +112,29 @@ HlInitializeFrameBuffer(VOID)
         return STATUS_SUCCESS;
     }
 
-    /* Check if framebuffer initialized by bootloader */
-    if(!KeInitializationBlock->LoaderInformation.FrameBuffer.Initialized ||
-       !KeInitializationBlock->LoaderInformation.FrameBuffer.Address)
+    /* Get FrameBuffer system resource */
+    Status = KeGetSystemResource(SystemResourceFrameBuffer, &SystemResource);
+    if(Status != STATUS_SUCCESS)
     {
-        /* Display not initialized */
+        /* Resource not found */
+        return STATUS_NOT_FOUND;
+    }
+
+    /* Cast system resource to FrameBuffer resource */
+    FrameBufferResource = (PSYSTEM_RESOURCE_FRAMEBUFFER)SystemResource;
+
+    /* Check if bootloader provided a framebuffer address */
+    if(!FrameBufferResource->Header.VirtualAddress)
+    {
+        /* Display probably not initialized */
         return STATUS_DEVICE_NOT_READY;
     }
 
-    /* Check if custom font provided by bootloader */
-    if(KeInitializationBlock->LoaderInformation.FrameBuffer.Font)
+    /* Check if bootloader provided a custom font */
+    if(FrameBufferResource->Font)
     {
         /* Use custom font */
-        HlpFrameBufferData.Font = KeInitializationBlock->LoaderInformation.FrameBuffer.Font;
+        HlpFrameBufferData.Font = FrameBufferResource->Font;
     }
     else
     {
@@ -129,20 +143,20 @@ HlInitializeFrameBuffer(VOID)
     }
 
     /* Save framebuffer information and mark display as initialized */
-    HlpFrameBufferData.Address = KeInitializationBlock->LoaderInformation.FrameBuffer.Address;
-    HlpFrameBufferData.Width = KeInitializationBlock->LoaderInformation.FrameBuffer.Width;
-    HlpFrameBufferData.Height = KeInitializationBlock->LoaderInformation.FrameBuffer.Height;
-    HlpFrameBufferData.BitsPerPixel = KeInitializationBlock->LoaderInformation.FrameBuffer.BitsPerPixel;
-    HlpFrameBufferData.PixelsPerScanLine = KeInitializationBlock->LoaderInformation.FrameBuffer.PixelsPerScanLine;
-    HlpFrameBufferData.Pitch = KeInitializationBlock->LoaderInformation.FrameBuffer.Pitch;
-    HlpFrameBufferData.Pixels.BlueShift = KeInitializationBlock->LoaderInformation.FrameBuffer.Pixels.BlueShift;
-    HlpFrameBufferData.Pixels.BlueSize = KeInitializationBlock->LoaderInformation.FrameBuffer.Pixels.BlueSize;
-    HlpFrameBufferData.Pixels.GreenShift = KeInitializationBlock->LoaderInformation.FrameBuffer.Pixels.GreenShift;
-    HlpFrameBufferData.Pixels.GreenSize = KeInitializationBlock->LoaderInformation.FrameBuffer.Pixels.GreenSize;
-    HlpFrameBufferData.Pixels.RedShift = KeInitializationBlock->LoaderInformation.FrameBuffer.Pixels.RedShift;
-    HlpFrameBufferData.Pixels.RedSize = KeInitializationBlock->LoaderInformation.FrameBuffer.Pixels.RedSize;
-    HlpFrameBufferData.Pixels.ReservedShift = KeInitializationBlock->LoaderInformation.FrameBuffer.Pixels.ReservedShift;
-    HlpFrameBufferData.Pixels.ReservedSize = KeInitializationBlock->LoaderInformation.FrameBuffer.Pixels.ReservedSize;
+    HlpFrameBufferData.Address = FrameBufferResource->Header.VirtualAddress;
+    HlpFrameBufferData.Width = FrameBufferResource->Width;
+    HlpFrameBufferData.Height = FrameBufferResource->Height;
+    HlpFrameBufferData.BitsPerPixel = FrameBufferResource->BitsPerPixel;
+    HlpFrameBufferData.PixelsPerScanLine = FrameBufferResource->PixelsPerScanLine;
+    HlpFrameBufferData.Pitch = FrameBufferResource->Pitch;
+    HlpFrameBufferData.Pixels.BlueShift = FrameBufferResource->Pixels.BlueShift;
+    HlpFrameBufferData.Pixels.BlueSize = FrameBufferResource->Pixels.BlueSize;
+    HlpFrameBufferData.Pixels.GreenShift = FrameBufferResource->Pixels.GreenShift;
+    HlpFrameBufferData.Pixels.GreenSize = FrameBufferResource->Pixels.GreenSize;
+    HlpFrameBufferData.Pixels.RedShift = FrameBufferResource->Pixels.RedShift;
+    HlpFrameBufferData.Pixels.RedSize = FrameBufferResource->Pixels.RedSize;
+    HlpFrameBufferData.Pixels.ReservedShift = FrameBufferResource->Pixels.ReservedShift;
+    HlpFrameBufferData.Pixels.ReservedSize = FrameBufferResource->Pixels.ReservedSize;
     HlpFrameBufferData.Initialized = TRUE;
 
     /* Clear screen */
