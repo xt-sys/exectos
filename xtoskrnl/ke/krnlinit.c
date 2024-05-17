@@ -51,6 +51,9 @@ KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
     /* Initialize boot CPU */
     ArInitializeProcessor(NULL);
 
+    /* Initialize system resources */
+    KepInitializeSystemResources();
+
     /* Architecture specific kernel initialization */
     KepInitializeMachine();
 
