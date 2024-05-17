@@ -93,7 +93,7 @@ XTCDECL
 ULONG
 ArGetCpuFlags(VOID)
 {
-    ULONG Flags;
+    ULONG_PTR Flags;
 
     /* Get RFLAGS register */
     asm volatile("pushf\n"
