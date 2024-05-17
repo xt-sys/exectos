@@ -57,21 +57,21 @@ HlInitializeFrameBuffer(VOID);
 
 XTAPI
 VOID
+HlInitializeProcessor();
+
+XTAPI
+VOID
 HlPutCharacter(IN ULONG PositionX,
                IN ULONG PositionY,
                IN ULONG Color,
                IN WCHAR WideCharacter);
-
-XTAPI
-ULONG
-HlRGBColor(IN ULONG Color);
 
 XTFASTCALL
 VOID
 HlSetRunLevel(IN KRUNLEVEL RunLevel);
 
 XTAPI
-VOID
-HlInitializeProcessor();
+ULONG
+HlpRGBColor(IN ULONG Color);
 
 #endif /* __XTOSKRNL_HLI_H */

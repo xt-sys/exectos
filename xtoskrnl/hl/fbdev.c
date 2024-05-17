@@ -32,7 +32,7 @@ HlClearScreen(IN ULONG Color)
     FrameBuf = HlpFrameBufferData.Address;
 
     /* Convert background color */
-    BackgroundColor = HlRGBColor(Color);
+    BackgroundColor = HlpRGBColor(Color);
 
     /* Fill the screen with a black box */
     for(PositionY = 0; PositionY < HlpFrameBufferData.Height; PositionY++)
@@ -87,7 +87,7 @@ HlDrawPixel(IN ULONG PositionX,
     FrameBufferIndex = 4 * HlpFrameBufferData.PixelsPerScanLine * PositionY + 4 * PositionX;
 
     /* Set the color of the pixel by writing to the corresponding memory location */
-    *((PULONG)(HlpFrameBufferData.Address + FrameBufferIndex)) = HlRGBColor(Color);
+    *((PULONG)(HlpFrameBufferData.Address + FrameBufferIndex)) = HlpRGBColor(Color);
 }
 
 /**
@@ -248,7 +248,7 @@ HlPutCharacter(IN ULONG PositionX,
 
     /* Find the glyph position on the frame buffer and set font color */
     GlyphPixel = (UINT_PTR)HlpFrameBufferData.Address + PositionY * HlpFrameBufferData.Pitch + PositionX * 4;
-    FontColor = HlRGBColor(Color);
+    FontColor = HlpRGBColor(Color);
 
     /* Check all kerning fragments */
     Mapping = 0;
@@ -333,7 +333,7 @@ HlPutCharacter(IN ULONG PositionX,
  */
 XTAPI
 ULONG
-HlRGBColor(IN ULONG Color)
+HlpRGBColor(IN ULONG Color)
 {
     USHORT Blue, Green, Red, Reserved;
 
