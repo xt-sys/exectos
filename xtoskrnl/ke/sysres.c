@@ -168,6 +168,10 @@ KepGetSystemResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
 {
     PSYSTEM_RESOURCE_HEADER Resource;
     PLIST_ENTRY ListEntry;
+    BOOLEAN Interrupts;
+
+    /* Check if interrupts are enabled */
+    Interrupts = ArInterruptsEnabled();
 
     /* Disable interrupts and acquire a spinlock */
     ArClearInterruptFlag();
@@ -205,9 +209,13 @@ KepGetSystemResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
         Resource = NULL;
     }
 
-    /* Release spinlock and enable interrupts */
+    /* Release spinlock and re-enable interrupts if necessary */
     KeReleaseSpinLock(&KepSystemResourcesLock);
-    ArSetInterruptFlag();
+    if(Interrupts)
+    {
+        /* Re-enable interrupts */
+        ArSetInterruptFlag();
+    }
 
     /* Return resource header */
     *ResourceHeader = Resource;
