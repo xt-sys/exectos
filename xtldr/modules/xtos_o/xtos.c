@@ -37,33 +37,36 @@ XTBL_BOOT_PROTOCOL XtBootProtocol;
  */
 XTCDECL
 VOID
-XtGetDisplayInformation(OUT PLOADER_GRAPHICS_INFORMATION_BLOCK InformationBlock,
+XtGetDisplayInformation(OUT PSYSTEM_RESOURCE_FRAMEBUFFER FrameBufferResource,
                         IN PEFI_PHYSICAL_ADDRESS FrameBufferBase,
                         IN PULONG_PTR FrameBufferSize,
                         IN PXTBL_FRAMEBUFFER_MODE_INFORMATION FrameBufferModeInfo)
 {
-    InformationBlock->Initialized = TRUE;
-    InformationBlock->Address = (PVOID)*FrameBufferBase;
-    InformationBlock->BufferSize = *FrameBufferSize;
-    InformationBlock->Width = FrameBufferModeInfo->Width;
-    InformationBlock->Height = FrameBufferModeInfo->Height;
-    InformationBlock->BitsPerPixel = FrameBufferModeInfo->BitsPerPixel;
-    InformationBlock->PixelsPerScanLine = FrameBufferModeInfo->PixelsPerScanLine;
-    InformationBlock->Pitch = FrameBufferModeInfo->Pitch;
-    InformationBlock->Pixels.BlueShift = FrameBufferModeInfo->PixelInformation.BlueShift;
-    InformationBlock->Pixels.BlueSize = FrameBufferModeInfo->PixelInformation.BlueSize;
-    InformationBlock->Pixels.GreenShift = FrameBufferModeInfo->PixelInformation.GreenShift;
-    InformationBlock->Pixels.GreenSize = FrameBufferModeInfo->PixelInformation.GreenSize;
-    InformationBlock->Pixels.RedShift = FrameBufferModeInfo->PixelInformation.RedShift;
-    InformationBlock->Pixels.RedSize = FrameBufferModeInfo->PixelInformation.RedSize;
-    InformationBlock->Pixels.ReservedShift = FrameBufferModeInfo->PixelInformation.ReservedShift;
-    InformationBlock->Pixels.ReservedSize = FrameBufferModeInfo->PixelInformation.ReservedSize;
+    /* Fill in frame buffer resource */
+    FrameBufferResource->Header.PhysicalAddress = (PVOID)*FrameBufferBase;
+    FrameBufferResource->Header.ResourceType = SystemResourceFrameBuffer;
+    FrameBufferResource->Header.ResourceSize = sizeof(SYSTEM_RESOURCE_FRAMEBUFFER);
+    FrameBufferResource->BufferSize = *FrameBufferSize;
+    FrameBufferResource->Width = FrameBufferModeInfo->Width;
+    FrameBufferResource->Height = FrameBufferModeInfo->Height;
+    FrameBufferResource->Depth = FrameBufferModeInfo->Depth;
+    FrameBufferResource->BitsPerPixel = FrameBufferModeInfo->BitsPerPixel;
+    FrameBufferResource->PixelsPerScanLine = FrameBufferModeInfo->PixelsPerScanLine;
+    FrameBufferResource->Pitch = FrameBufferModeInfo->Pitch;
+    FrameBufferResource->Pixels.BlueShift = FrameBufferModeInfo->PixelInformation.BlueShift;
+    FrameBufferResource->Pixels.BlueSize = FrameBufferModeInfo->PixelInformation.BlueSize;
+    FrameBufferResource->Pixels.GreenShift = FrameBufferModeInfo->PixelInformation.GreenShift;
+    FrameBufferResource->Pixels.GreenSize = FrameBufferModeInfo->PixelInformation.GreenSize;
+    FrameBufferResource->Pixels.RedShift = FrameBufferModeInfo->PixelInformation.RedShift;
+    FrameBufferResource->Pixels.RedSize = FrameBufferModeInfo->PixelInformation.RedSize;
+    FrameBufferResource->Pixels.ReservedShift = FrameBufferModeInfo->PixelInformation.ReservedShift;
+    FrameBufferResource->Pixels.ReservedSize = FrameBufferModeInfo->PixelInformation.ReservedSize;
 }
 
 XTCDECL
 EFI_STATUS
 XtGetMemoryDescriptorList(IN PXTBL_PAGE_MAPPING PageMap,
-                          IN PVOID VirtualAddress,
+                          IN PVOID *VirtualAddress,
                           OUT PLIST_ENTRY MemoryDescriptorList)
 {
     EFI_PHYSICAL_ADDRESS Address;
@@ -78,7 +81,7 @@ XtGetMemoryDescriptorList(IN PXTBL_PAGE_MAPPING PageMap,
         return Status;
     }
 
-    Status = XtLdrProtocol->Memory.MapVirtualMemory(PageMap, VirtualAddress, (PVOID)Address, Pages, LoaderMemoryData);
+    Status = XtLdrProtocol->Memory.MapVirtualMemory(PageMap, *VirtualAddress, (PVOID)Address, Pages, LoaderMemoryData);
     if(Status != STATUS_EFI_SUCCESS)
     {
         XtLdrProtocol->Memory.FreePages(Address, Pages);
@@ -104,7 +107,90 @@ XtGetMemoryDescriptorList(IN PXTBL_PAGE_MAPPING PageMap,
         ListEntry = ListEntry->Flink;
     }
 
-    XtLdrProtocol->Memory.PhysicalListToVirtual(PageMap, MemoryDescriptorList, PhysicalBase, VirtualAddress);
+    XtLdrProtocol->Memory.PhysicalListToVirtual(PageMap, MemoryDescriptorList, PhysicalBase, *VirtualAddress);
+
+    return STATUS_EFI_SUCCESS;
+}
+
+XTCDECL
+EFI_STATUS
+XtGetSystemResourcesList(IN PXTBL_PAGE_MAPPING PageMap,
+                         IN PVOID *VirtualAddress,
+                         OUT PLIST_ENTRY SystemResourcesList)
+{
+    XTSTATUS Status;
+    EFI_HANDLE ProtocolHandle;
+    EFI_GUID FrameBufGuid = XT_FRAMEBUFFER_PROTOCOL_GUID;
+    PXTBL_FRAMEBUFFER_PROTOCOL FrameBufProtocol;
+    XTBL_FRAMEBUFFER_MODE_INFORMATION FbModeInfo;
+    EFI_PHYSICAL_ADDRESS FbAddress;
+    ULONG_PTR FbSize;
+    UINT FrameBufferPages;
+    PSYSTEM_RESOURCE_FRAMEBUFFER FrameBufferResource;
+    ULONGLONG Pages;
+    EFI_PHYSICAL_ADDRESS Address;
+    PVOID VirtualBase;
+
+    Pages = (ULONGLONG)EFI_SIZE_TO_PAGES(3 * sizeof(SYSTEM_RESOURCE_FRAMEBUFFER));
+
+    Status = XtLdrProtocol->Memory.AllocatePages(Pages, &Address);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        return Status;
+    }
+    Status = XtLdrProtocol->Memory.MapVirtualMemory(PageMap, *VirtualAddress, (PVOID)Address, Pages, LoaderFirmwarePermanent);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        XtLdrProtocol->Memory.FreePages(Address, Pages);
+        return Status;
+    }
+
+    FrameBufferResource = (PSYSTEM_RESOURCE_FRAMEBUFFER)Address;
+    PVOID PhysicalBase = (PVOID)Address;
+    VirtualBase = *VirtualAddress;
+
+    /* Calculate next valid virtual address */
+    *VirtualAddress += (UINT_PTR)(Pages * EFI_PAGE_SIZE);
+
+    RtlZeroMemory(FrameBufferResource, sizeof(SYSTEM_RESOURCE_FRAMEBUFFER));
+
+    /* Load FrameBuffer protocol */
+    Status = XtLdrProtocol->Protocol.Open(&ProtocolHandle, (PVOID*)&FrameBufProtocol, &FrameBufGuid);
+    if(Status == STATUS_EFI_SUCCESS)
+    {
+        /* Get FrameBuffer information */
+        Status = FrameBufProtocol->GetDisplayInformation(&FbAddress, &FbSize, &FbModeInfo);
+        if(Status == STATUS_EFI_SUCCESS)
+        {
+
+            /* Store information about FrameBuffer device */
+            XtGetDisplayInformation(FrameBufferResource, &FbAddress, &FbSize, &FbModeInfo);
+        }
+    }
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        return Status;
+    }
+
+    /* Calculate pages needed to map framebuffer */
+    FrameBufferPages = EFI_SIZE_TO_PAGES(FbSize);
+
+    /* Rewrite framebuffer address by using virtual address */
+    FrameBufferResource->Header.VirtualAddress = *VirtualAddress;
+
+    /* Map frame buffer memory */
+    XtLdrProtocol->Memory.MapVirtualMemory(PageMap, FrameBufferResource->Header.VirtualAddress,
+                                           FrameBufferResource->Header.PhysicalAddress,
+                                           FrameBufferPages, LoaderFirmwarePermanent);
+
+    /* Close FrameBuffer protocol */
+    XtLdrProtocol->Protocol.Close(ProtocolHandle, &FrameBufGuid);
+
+    *VirtualAddress += (UINT_PTR)(FrameBufferPages * EFI_PAGE_SIZE);
+
+    RtlInsertTailList(SystemResourcesList, &FrameBufferResource->Header.ListEntry);
+
+    XtLdrProtocol->Memory.PhysicalListToVirtual(PageMap, SystemResourcesList, PhysicalBase, VirtualBase);
 
     return STATUS_EFI_SUCCESS;
 }
@@ -424,16 +510,11 @@ XtpInitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
                          IN PVOID *VirtualAddress,
                          IN PXTBL_BOOT_PARAMETERS Parameters)
 {
-    EFI_GUID FrameBufGuid = XT_FRAMEBUFFER_PROTOCOL_GUID;
-    PXTBL_FRAMEBUFFER_PROTOCOL FrameBufProtocol;
-    XTBL_FRAMEBUFFER_MODE_INFORMATION FbModeInfo;
     PKERNEL_INITIALIZATION_BLOCK LoaderBlock;
-    EFI_PHYSICAL_ADDRESS Address, FbAddress;
+    EFI_PHYSICAL_ADDRESS Address;
     // PVOID RuntimeServices;
-    ULONG_PTR FbSize;
     EFI_STATUS Status;
-    EFI_HANDLE ProtocolHandle;
-    UINT BlockPages, FrameBufferPages;
+    UINT BlockPages;
 
     /* Calculate number of pages needed for initialization block */
     BlockPages = EFI_SIZE_TO_PAGES(sizeof(KERNEL_INITIALIZATION_BLOCK));
@@ -458,29 +539,8 @@ XtpInitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
     /* Set LoaderInformation block properties */
     LoaderBlock->LoaderInformation.DbgPrint = XtLdrProtocol->Debug.Print;
 
-    /* Load FrameBuffer protocol */
-    Status = XtLdrProtocol->Protocol.Open(&ProtocolHandle, (PVOID*)&FrameBufProtocol, &FrameBufGuid);
-    if(Status == STATUS_EFI_SUCCESS)
-    {
-        /* Get FrameBuffer information */
-        Status = FrameBufProtocol->GetDisplayInformation(&FbAddress, &FbSize, &FbModeInfo);
-        if(Status == STATUS_EFI_SUCCESS)
-        {
-            /* Store information about FrameBuffer device */
-            XtGetDisplayInformation(&LoaderBlock->LoaderInformation.FrameBuffer, &FbAddress, &FbSize, &FbModeInfo);
-        }
-    }
-    if(Status != STATUS_EFI_SUCCESS)
-    {
-        /* No FrameBuffer available */
-        LoaderBlock->LoaderInformation.FrameBuffer.Initialized = FALSE;
-    }
-
     /* Store page map level */
     LoaderBlock->LoaderInformation.PageMapLevel = 3;
-
-    /* Close FrameBuffer protocol */
-    XtLdrProtocol->Protocol.Close(ProtocolHandle, &FrameBufGuid);
 
     /* Attempt to find virtual address of the EFI Runtime Services */
     // Status = XtLdrProtocol->GetVirtualAddress(MemoryMappings, &EfiSystemTable->RuntimeServices->Hdr, &RuntimeServices);
@@ -508,27 +568,12 @@ XtpInitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
     /* Calculate next valid virtual address */
     *VirtualAddress += (UINT_PTR)(BlockPages * EFI_PAGE_SIZE);
 
-    /* Check if framebuffer initialized */
-    if(LoaderBlock->LoaderInformation.FrameBuffer.Initialized)
-    {
-        /* Calculate pages needed to map framebuffer */
-        FrameBufferPages = EFI_SIZE_TO_PAGES(LoaderBlock->LoaderInformation.FrameBuffer.BufferSize);
-
-        /* Map frame buffer memory */
-        XtLdrProtocol->Memory.MapVirtualMemory(PageMap, *VirtualAddress,
-                                               LoaderBlock->LoaderInformation.FrameBuffer.Address,
-                                               FrameBufferPages, LoaderFirmwarePermanent);
-
-        /* Rewrite framebuffer address by using virtual address */
-        LoaderBlock->LoaderInformation.FrameBuffer.Address = *VirtualAddress;
-
-        /* Calcualate next valid virtual address */
-        *VirtualAddress += (UINT_PTR)(FrameBufferPages * EFI_PAGE_SIZE);
-    }
+    RtlInitializeListHead(&LoaderBlock->SystemResourcesListHead);
+    XtGetSystemResourcesList(PageMap, VirtualAddress, &LoaderBlock->SystemResourcesListHead);
 
     /* Initialize memory descriptor list */
     RtlInitializeListHead(&LoaderBlock->MemoryDescriptorListHead);
-    XtGetMemoryDescriptorList(PageMap, *VirtualAddress, &LoaderBlock->MemoryDescriptorListHead);
+    XtGetMemoryDescriptorList(PageMap, VirtualAddress, &LoaderBlock->MemoryDescriptorListHead);
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
