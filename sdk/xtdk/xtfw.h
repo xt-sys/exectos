@@ -85,37 +85,11 @@ typedef struct _FIRMWARE_INFORMATION_BLOCK
     };
 } FIRMWARE_INFORMATION_BLOCK, *PFIRMWARE_INFORMATION_BLOCK;
 
-/* Boot Loader FrameBuffer information block */
-typedef struct _LOADER_GRAPHICS_INFORMATION_BLOCK
-{
-    BOOLEAN Initialized;
-    PVOID Address;
-    ULONG_PTR BufferSize;
-    UINT Width;
-    UINT Height;
-    UINT PixelsPerScanLine;
-    UINT BitsPerPixel;
-    UINT Pitch;
-    PVOID Font;
-    struct
-    {
-        USHORT BlueShift;
-        USHORT BlueSize;
-        USHORT GreenShift;
-        USHORT GreenSize;
-        USHORT RedShift;
-        USHORT RedSize;
-        USHORT ReservedShift;
-        USHORT ReservedSize;
-    } Pixels;
-} LOADER_GRAPHICS_INFORMATION_BLOCK, *PLOADER_GRAPHICS_INFORMATION_BLOCK;
-
 /* Boot Loader information block */
 typedef struct _LOADER_INFORMATION_BLOCK
 {
     PVOID DbgPrint;
     ULONG PageMapLevel;
-    LOADER_GRAPHICS_INFORMATION_BLOCK FrameBuffer;
 } LOADER_INFORMATION_BLOCK, *PLOADER_INFORMATION_BLOCK;
 
 /* Boot Loader memory mapping information */
