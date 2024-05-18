@@ -28,6 +28,13 @@ HlClearScreen(IN ULONG Color)
     ULONG BackgroundColor;
     PULONG FrameBuf;
 
+    /* Make sure frame buffer is already initialized */
+    if(HlpFrameBufferData.Initialized == FALSE)
+    {
+        /* Unable to operate on non-initialized frame buffer */
+        return;
+    }
+
     /* Get pointer to frame buffer */
     FrameBuf = HlpFrameBufferData.Address;
 
@@ -197,6 +204,13 @@ HlPutCharacter(IN ULONG PositionX,
     UINT_PTR GlyphPixel, Pixel;
     PSSFN_FONT_HEADER FbFont;
     ULONG FontColor;
+
+    /* Make sure frame buffer is already initialized */
+    if(HlpFrameBufferData.Initialized == FALSE)
+    {
+        /* Unable to operate on non-initialized frame buffer */
+        return;
+    }
 
     /* Get pointers to font data */
     FbFont = (PSSFN_FONT_HEADER)HlpFrameBufferData.Font;
