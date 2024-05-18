@@ -11,11 +11,11 @@
 
 
 /* Debugging macros */
-#define CHECKPOINT                      DebugPrint(L"Checkpoint reached at %s:%d\n", __FILE__, __LINE__);
+#define CHECKPOINT                      DebugPrint(L"Checkpoint reached at %s:%d\n", __RELFILE__, __LINE__);
 #define DEPRECATED                      DebugPrint(L"Called deprecated routine '%s()' at %s:%d\n", \
-                                                 __FUNCTION__, __FILE__, __LINE__);
+                                                 __FUNCTION__, __RELFILE__, __LINE__);
 #define UNIMPLEMENTED                   DebugPrint(L"Called unimplemented routine '%s()' at %s:%d\n", \
-                                                 __FUNCTION__, __FILE__, __LINE__);
+                                                 __FUNCTION__, __RELFILE__, __LINE__);
 
 /* XTOS platform debugging macros */
 #ifdef DBG
