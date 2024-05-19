@@ -9,8 +9,26 @@
 #ifndef __XTDK_HLTYPES_H
 #define __XTDK_HLTYPES_H
 
+#include <xtdefs.h>
 #include <xttypes.h>
 
+
+/* ACPI table signatures */
+#define ACPI_APIC_SIGNATURE         0x43495041 /* MADT/APIC Description Table */
+#define ACPI_BGRT_SIGNATURE         0x54524742 /* Boot Graphics Record Table */
+#define ACPI_DBGP_SIGNATURE         0x50474244 /* Debug Port Table */
+#define ACPI_DSDT_SIGNATURE         0x54445344 /* Differentiated System Description Table */
+#define ACPI_FADT_SIGNATURE         0x50434146 /* Fixed ACPI Description Table */
+#define ACPI_GTDT_SIGNATURE         0x54445447 /* Generic Timer Description Table */
+#define ACPI_HPET_SIGNATURE         0x54455048 /* High Precision Event Timer */
+#define ACPI_MCFG_SIGNATURE         0x4746434D /* Memory Mapped Configuration Space Access Table */
+#define ACPI_PSDT_SIGNATURE         0x54445350 /* Persistent System Description Table */
+#define ACPI_RSDT_SIGNATURE         0x54445352 /* Root System Description Table */
+#define ACPI_SBST_SIGNATURE         0x54534253 /* Smart Battery Subsystem Table */
+#define ACPI_SSDT_SIGNATURE         0x54445353 /* Secondary System Descriptor Table */
+#define ACPI_SRAT_SIGNATURE         0x54415253 /* Static Resource Affinity Table */
+#define ACPI_WDTT_SIGNATURE         0x54524457 /* Watchdog Timer Resource Table */
+#define ACPI_XSDT_SIGNATURE         0x54445358 /* eXtended System Descriptor Table */
 
 /* Default serial port settings */
 #define COMPORT_CLOCK_RATE          0x1C200
@@ -133,6 +151,41 @@ typedef enum _HAL_APIC_MODE
     APIC_MODE_COMPAT,
     APIC_MODE_X2APIC
 } HAL_APIC_MODE, *PHAL_APIC_MODE;
+
+/* Each ACPI table description header structure */
+typedef struct _ACPI_DESCRIPTION_HEADER
+{
+    UCHAR Signature[4];
+    ULONG Length;
+    UCHAR Revision;
+    UCHAR Checksum;
+    UCHAR OemId[6];
+    UCHAR OemTableID[8];
+    ULONG OemRevision;
+    UCHAR CreatorID[4];
+    ULONG CreatorRev;
+} PACK ACPI_DESCRIPTION_HEADER, *PACPI_DESCRIPTION_HEADER;
+
+/* ACPI Root System Description Table Pointer structure */
+typedef struct _ACPI_RSDP
+{
+    UCHAR Signature[8];
+    UCHAR Checksum;
+    UCHAR OemId[6];
+    UCHAR Revision;
+    ULONG RsdtAddress;
+    ULONG Length;
+    ULONGLONG XsdtAddress;
+    UCHAR XChecksum;
+    UCHAR Reserved[3];
+} PACK ACPI_RSDP, *PACPI_RSDP;
+
+/* ACPI Root System Description Table structure */
+typedef struct _ACPI_RSDT
+{
+    ACPI_DESCRIPTION_HEADER Header;
+    UCHAR Entries[];
+} PACK ACPI_RSDT, *PACPI_RSDT;
 
 /* Serial (COM) port initial state */
 typedef struct _CPPORT

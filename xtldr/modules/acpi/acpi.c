@@ -52,6 +52,115 @@ AcGetAcpiDescriptionPointer(OUT PVOID *AcpiTable)
 }
 
 /**
+ * Finds ACPI description table with given signature.
+ *
+ * @param Signature
+ *        Supplies the signature of the desired ACPI table.
+ *
+ * @param PreviousTable
+ *        Supplies a pointer to the table to start searching from.
+ *
+ * @param AcpiTable
+ *        Supplies a pointer to memory area where ACPI table address will be stored, or NULL if not found.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+AcGetAcpiTable(IN CONST UINT Signature,
+               IN PVOID PreviousTable,
+               OUT PVOID *AcpiTable)
+{
+    PACPI_DESCRIPTION_HEADER TableHeader;
+    SIZE_T RsdtIndex, TableIndex;
+    EFI_STATUS Status;
+    SIZE_T TableCount;
+    PACPI_RSDP Rsdp;
+    PACPI_RSDT Rsdt;
+    BOOLEAN Xsdp;
+
+    /* Return NULL address by default if requested table not found */
+    *AcpiTable = NULL;
+
+    /* Get Root System Description Table Pointer */
+    Status = AcGetAcpiDescriptionPointer((PVOID)&Rsdp);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* ACPI tables not found, return error */
+        return Status;
+    }
+
+    /* Check if it is XSDP (ACPI 2.0) or RSDP (ACPI 1.0) */
+    if(Rsdp->Revision >= 2 && Rsdp->XsdtAddress)
+    {
+        /* XSDP (ACPI 2.0) */
+        Xsdp = TRUE;
+        Rsdt = (PACPI_RSDT)(UINT_PTR)Rsdp->XsdtAddress;
+        TableCount = (Rsdt->Header.Length - sizeof(ACPI_DESCRIPTION_HEADER)) / 8;
+    }
+    else
+    {
+        /* RSDP (ACPI 1.0) */
+        Xsdp = FALSE;
+        Rsdt = (PACPI_RSDT)(UINT_PTR)Rsdp->RsdtAddress;
+        TableCount = (Rsdt->Header.Length - sizeof(ACPI_DESCRIPTION_HEADER)) / 4;
+    }
+
+    /* Iterate over all ACPI tables */
+    for(TableIndex = 0; TableIndex < TableCount; TableIndex++)
+    {
+        /* Get table headers in reverse order */
+        RsdtIndex = TableCount - TableIndex - 1;
+
+        /* Check if XSDP or RSDT is used */
+        if(Xsdp)
+        {
+            /* Get table header from XSDT */
+            TableHeader = (PACPI_DESCRIPTION_HEADER)(ULONG_PTR)((PULONGLONG)Rsdt->Entries)[RsdtIndex];
+        }
+        else
+        {
+            /* Get table header from RSDT */
+            TableHeader = (PACPI_DESCRIPTION_HEADER)(ULONG_PTR)((PULONG)Rsdt->Entries)[RsdtIndex];
+        }
+
+        /* Make sure table header exists */
+        if(TableHeader == NULL)
+        {
+            /* Skip to next ACPI table */
+            continue;
+        }
+
+        /* Check if previous table provided */
+        if(PreviousTable != NULL)
+        {
+            /* Check if this is a table previously found */
+            if(TableHeader == (PVOID)PreviousTable)
+            {
+                /* Unset previous table */
+                PreviousTable = NULL;
+            }
+
+            /* Skip to next ACPI table */
+            continue;
+        }
+
+        /* Verify table signature and checksum */
+        if((*(PLONG)TableHeader->Signature == Signature) && (AcpChecksumTable(TableHeader, TableHeader->Length) == 0))
+        {
+            /* Found valid ACPI table */
+            *AcpiTable = TableHeader;
+            return STATUS_EFI_SUCCESS;
+        }
+    }
+
+    /* ACPI table not found */
+    return STATUS_EFI_NOT_FOUND;
+}
+
+/**
  * Gets the Advanced Programmable Interrupt Controller (APIC) base address.
  *
  * @param ApicBase
@@ -284,6 +393,7 @@ XtLdrModuleMain(IN EFI_HANDLE ImageHandle,
 
     /* Set routines available via ACPI protocol */
     AcpAcpiProtocol.GetAcpiDescriptionPointer = AcGetAcpiDescriptionPointer;
+    AcpAcpiProtocol.GetAcpiTable = AcGetAcpiTable;
     AcpAcpiProtocol.GetApicBase = AcGetApicBase;
     AcpAcpiProtocol.GetRsdpTable = AcGetRsdpTable;
     AcpAcpiProtocol.GetSMBiosTable = AcGetSMBiosTable;

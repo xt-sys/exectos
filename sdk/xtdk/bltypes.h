@@ -110,6 +110,7 @@ typedef VOID (XTAPI *PBL_ZERO_MEMORY)(OUT PVOID Destination, IN SIZE_T Length);
 
 /* Module protocols routine pointers */
 typedef EFI_STATUS (*PBL_ACPI_GET_ACPI_DESCRIPTION_POINTER)(OUT PVOID *AcpiTable);
+typedef EFI_STATUS (*PBL_ACPI_GET_ACPI_TABLE)(IN CONST UINT Signature, IN PVOID PreviousTable, OUT PVOID *AcpiTable);
 typedef EFI_STATUS (*PBL_ACPI_GET_APIC_BASE)(OUT PVOID *ApicBase);
 typedef EFI_STATUS (*PBL_ACPI_GET_RSDP_TABLE)(OUT PVOID *AcpiTable);
 typedef EFI_STATUS (*PBL_ACPI_GET_SMBIOS_TABLE)(OUT PVOID *SmBiosTable);
@@ -301,6 +302,7 @@ typedef struct _XTBL_FRAMEBUFFER_INFORMATION
 typedef struct _XTBL_ACPI_PROTOCOL
 {
     PBL_ACPI_GET_ACPI_DESCRIPTION_POINTER GetAcpiDescriptionPointer;
+    PBL_ACPI_GET_ACPI_TABLE GetAcpiTable;
     PBL_ACPI_GET_APIC_BASE GetApicBase;
     PBL_ACPI_GET_RSDP_TABLE GetRsdpTable;
     PBL_ACPI_GET_SMBIOS_TABLE GetSMBiosTable;
