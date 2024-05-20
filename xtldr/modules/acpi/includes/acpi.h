@@ -20,6 +20,12 @@ AcGetAcpiDescriptionPointer(OUT PVOID *AcpiTable);
 
 XTCDECL
 EFI_STATUS
+AcGetAcpiTable(IN CONST UINT Signature,
+               IN PVOID PreviousTable,
+               OUT PVOID *AcpiTable);
+
+XTCDECL
+EFI_STATUS
 AcGetApicBase(OUT PVOID *ApicBase);
 
 XTCDECL
