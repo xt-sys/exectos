@@ -293,7 +293,7 @@ typedef struct _KTSS
     ULONG64 Reserved1;
     USHORT Reserved2;
     USHORT IoMapBase;
-} PACK KTSS, *PKTSS;
+} PACKED KTSS, *PKTSS;
 
 /* Exception frame definition */
 typedef struct _KEXCEPTION_FRAME

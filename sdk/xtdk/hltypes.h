@@ -164,7 +164,7 @@ typedef struct _ACPI_DESCRIPTION_HEADER
     ULONG OemRevision;
     UCHAR CreatorID[4];
     ULONG CreatorRev;
-} PACK ACPI_DESCRIPTION_HEADER, *PACPI_DESCRIPTION_HEADER;
+} PACKED ACPI_DESCRIPTION_HEADER, *PACPI_DESCRIPTION_HEADER;
 
 /* ACPI Root System Description Table Pointer structure */
 typedef struct _ACPI_RSDP
@@ -178,14 +178,14 @@ typedef struct _ACPI_RSDP
     ULONGLONG XsdtAddress;
     UCHAR XChecksum;
     UCHAR Reserved[3];
-} PACK ACPI_RSDP, *PACPI_RSDP;
+} PACKED ACPI_RSDP, *PACPI_RSDP;
 
 /* ACPI Root System Description Table structure */
 typedef struct _ACPI_RSDT
 {
     ACPI_DESCRIPTION_HEADER Header;
     UCHAR Entries[];
-} PACK ACPI_RSDT, *PACPI_RSDT;
+} PACKED ACPI_RSDT, *PACPI_RSDT;
 
 /* Serial (COM) port initial state */
 typedef struct _CPPORT

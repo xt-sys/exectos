@@ -16,6 +16,7 @@
 #define XTAPI                                  __stdcall
 #define XTCDECL                                __cdecl
 #define XTFASTCALL                             __fastcall
+#define XTVECTORCALL                           __vectorcall
 #define XTINLINE                               __inline
 #define XTASSEMBLY                             __attribute__((naked))
 #define XTINTERRUPT                            __attribute__((interrupt))
@@ -54,7 +55,7 @@
 
 /* Preprocessor macros for defining an additional compiler attributes */
 #define ALIGN(Alignment)                       __attribute__((aligned(Alignment)))
-#define PACK                                   __attribute__((packed))
+#define PACKED                                 __attribute__((packed))
 #define SEGMENT(Segment)                       __attribute__((section(Segment)))
 #define USED                                   __attribute__((__used__))
 
