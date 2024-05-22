@@ -38,4 +38,8 @@ XTAPI
 VOID
 MmpInitializeArchitecture(VOID);
 
+XTAPI
+BOOLEAN
+MmpMemoryExtensionEnabled(VOID);
+
 #endif /* __XTOSKRNL_AMD64_MMI_H */

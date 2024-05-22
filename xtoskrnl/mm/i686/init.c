@@ -10,6 +10,67 @@
 
 
 /**
+ * Gets the address of the PDE (Page Directory Entry), that maps given address.
+ *
+ * @param Address
+ *        Specifies the address to find the PDE for.
+ *
+ * @return This routine returns the address of the PDE.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PMMPTE
+MmpGetPdeAddress(PVOID Address)
+{
+    ULONG Offset, PdeBase, PdiShift, PteShift;
+
+    /* Get PDI and PTE shifts based on memory extension flag */
+    if(MmpMemoryExtension)
+    {
+        /* Get bit shifts for PAE system */
+        PdeBase = MM_PDE_PAE_BASE;
+        PdiShift = MM_PDI_PAE_SHIFT;
+        PteShift = MM_PTE_PAE_SHIFT;
+    }
+    else
+    {
+        /* Get bit shifts for non-PAE system */
+        PdeBase = MM_PDE_BASE;
+        PdiShift = MM_PDI_SHIFT;
+        PteShift = MM_PTE_SHIFT;
+    }
+
+    /* Calculate offset and return PTE address */
+    Offset = ((((ULONG)(Address)) >> PdiShift) << PteShift);
+    return (PMMPTE)(PdeBase + Offset);
+}
+
+/**
+ * Gets the address of the PTE (Page Table Entry), that maps given address.
+ *
+ * @param Address
+ *        Specifies the address to find the PTE for.
+ *
+ * @return This routine returns the address of the PTE.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PMMPTE
+MmpGetPteAddress(PVOID Address)
+{
+    ULONG Offset, PteShift;
+
+    /* Get PTE shift based on memory extension flag */
+    PteShift = MmpMemoryExtension ? MM_PTE_PAE_SHIFT : MM_PTE_SHIFT;
+
+    /* Calculate offset and return PTE address */
+    Offset = ((((ULONG)(Address)) >> MM_PTI_SHIFT) << PteShift);
+    return (PMMPTE)(MM_PTE_BASE + Offset);
+}
+
+/**
  * Performs architecture specific initialization of the XTOS Memory Manager.
  *
  * @return This routine does not return any value.
@@ -21,4 +82,19 @@ VOID
 MmpInitializeArchitecture(VOID)
 {
     UNIMPLEMENTED;
+}
+
+/**
+ * Checks if PAE (Physical Address Extension) is enabled.
+ *
+ * @return This routine returns TRUE if PAE is enabled, or FALSE otherwise.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+BOOLEAN
+MmpMemoryExtensionEnabled(VOID)
+{
+    /* Check if PAE is enabled */
+    return ((ArReadControlRegister(4) & CR4_PAE) != 0) ? TRUE : FALSE;
 }

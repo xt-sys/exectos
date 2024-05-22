@@ -75,6 +75,9 @@ EXTERN LOADER_MEMORY_MAPPING MmpHalAllocationDescriptors[MM_HAL_ALLOCATION_DESCR
 /* Live address of kernel HAL heap */
 EXTERN PVOID MmpHalHeapStart;
 
+/* Architecture-specific memory extension */
+EXTERN BOOLEAN MmpMemoryExtension;
+
 /* Number of used HAL allocation descriptors */
 EXTERN ULONG MmpUsedHalAllocationDescriptors;
 

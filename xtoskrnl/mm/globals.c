@@ -36,5 +36,8 @@ LOADER_MEMORY_MAPPING MmpHalAllocationDescriptors[MM_HAL_ALLOCATION_DESCRIPTORS]
 /* Live address of kernel HAL heap */
 PVOID MmpHalHeapStart = MM_HAL_HEAP_START_ADDRESS;
 
+/* Architecture-specific memory extension */
+BOOLEAN MmpMemoryExtension;
+
 /* Number of used HAL allocation descriptors */
 ULONG MmpUsedHalAllocationDescriptors = 0;

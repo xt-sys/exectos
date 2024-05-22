@@ -18,18 +18,23 @@
 #define MM_PAGE_SHIFT                              12L
 #define MM_PAGE_SIZE                               4096
 
+/* Page directory and page base addresses */
 #define MM_PTE_BASE                                0xFFFFF68000000000UI64
 #define MM_PDE_BASE                                0xFFFFF6FB40000000UI64
 #define MM_PPE_BASE                                0xFFFFF6FB7DA00000UI64
 #define MM_PXE_BASE                                0xFFFFF6FB7DBED000UI64
 
+/* PTE shift values */
+#define MM_PTE_SHIFT                               3
 #define MM_PTI_SHIFT                               12
 #define MM_PDI_SHIFT                               21
 #define MM_PPI_SHIFT                               30
 #define MM_PXI_SHIFT                               39
 
-#define MM_PTE_SHIFT                               3
-
+/* Number of PTEs per page */
+#define MM_PTE_PER_PAGE                            512
+#define MM_PDE_PER_PAGE                            512
+#define MM_PPE_PER_PAGE                            512
 #define MM_PXE_PER_PAGE                            512
 
 /* Minimum number of physical pages needed by the system */

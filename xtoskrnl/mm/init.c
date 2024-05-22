@@ -10,6 +10,21 @@
 
 
 /**
+ * Performs an early pre-initialization of hardware-related structures.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MmInitializeHardware(VOID)
+{
+    /* Check for architecture-specific memory extensions enabled by the firmware or boot loader */
+    MmpMemoryExtension = MmpMemoryExtensionEnabled();
+}
+
+/**
  * Performs an early initialization of the XTOS Memory Manager.
  *
  * @return This routine does not return any value.

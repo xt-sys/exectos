@@ -45,6 +45,10 @@ MmFreeProcessorStructures(IN PVOID StructuresData);
 
 XTAPI
 VOID
+MmInitializeHardware(VOID);
+
+XTAPI
+VOID
 MmInitializeMemoryManager(VOID);
 
 XTAPI

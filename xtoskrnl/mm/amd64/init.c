@@ -102,3 +102,18 @@ MmpInitializeArchitecture(VOID)
 {
     UNIMPLEMENTED;
 }
+
+/**
+ * Checks if LA57 (PML5) is enabled.
+ *
+ * @return This routine returns TRUE if LA57 is enabled, or FALSE otherwise.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+BOOLEAN
+MmpMemoryExtensionEnabled(VOID)
+{
+    /* Check if LA57 (PML5) is enabled */
+    return ((ArReadControlRegister(4) & CR4_LA57) != 0) ? TRUE : FALSE;
+}
