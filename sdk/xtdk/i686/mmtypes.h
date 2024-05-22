@@ -27,7 +27,6 @@
 #define MM_PTE_SHIFT                               2
 #define MM_PTI_SHIFT                               12
 #define MM_PDI_SHIFT                               22
-#define MM_PPI_SHIFT                               0
 #define MM_PTE_PAE_SHIFT                           3
 #define MM_PDI_PAE_SHIFT                           21
 #define MM_PPI_PAE_SHIFT                           30
