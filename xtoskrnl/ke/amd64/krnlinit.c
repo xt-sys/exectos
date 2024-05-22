@@ -20,6 +20,8 @@ XTAPI
 VOID
 KepInitializeKernel(VOID)
 {
+    /* Initialize architecture specific hardware extensions */
+    MmInitializeHardware();
 }
 
 /**
