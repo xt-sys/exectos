@@ -32,6 +32,9 @@ typedef ULONG_PTR KSPIN_LOCK, *PKSPIN_LOCK;
 /* Page Frame Number */
 typedef ULONG_PTR PFN_NUMBER, *PPFN_NUMBER;
 
+/* Physical address */
+typedef LARGE_INTEGER PHYSICAL_ADDRESS, *PPHYSICAL_ADDRESS;
+
 /* 128-bit buffer containing a unique identifier value */
 typedef struct _GUID
 {
