@@ -14,7 +14,7 @@
 
 
 /* Pages related definitions */
-#define MM_PAGE_MASK                               0xFFF
+#define MM_PAGE_MASK                               (MM_PAGE_SIZE - 1)
 #define MM_PAGE_SHIFT                              12L
 #define MM_PAGE_SIZE                               4096
 
@@ -37,6 +37,18 @@
 
 /* Default number of secondary colors */
 #define MM_DEFAULT_SECONDARY_COLORS                64
+
+/* Number of HAL allocation descriptors */
+#define MM_HAL_ALLOCATION_DESCRIPTORS              64
+
+/* Kernel HAL heap initial start address */
+#define MM_HAL_HEAP_START_ADDRESS                  ((PVOID)(((ULONG_PTR)MM_HAL_VA_START) + 1024 * 1024))
+
+/* HAL memory pool virtual address start */
+#define MM_HAL_VA_START                            0xFFFFFFFFFFC00000ULL
+
+/* Maximum physical address used by HAL allocations */
+#define MM_MAXIMUM_PHYSICAL_ADDRESS                0x00000000FFFFFFFF
 
 /* Page size enumeration list */
 typedef enum _PAGE_SIZE

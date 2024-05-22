@@ -15,6 +15,12 @@
 /* Memory Manager routines forward references */
 XTAPI
 XTSTATUS
+MmAllocateHalMemory(IN PFN_NUMBER PageCount,
+                    IN BOOLEAN Aligned,
+                    OUT PULONG_PTR Buffer);
+
+XTAPI
+XTSTATUS
 MmAllocateKernelStack(IN PVOID *Stack,
                       IN BOOLEAN LargeStack,
                       IN UCHAR SystemNode);
@@ -23,6 +29,10 @@ XTAPI
 XTSTATUS
 MmAllocateProcessorStructures(IN ULONG CpuNumber,
                               OUT PVOID *StructuresData);
+
+XTAPI
+VOID
+MmFlushTlb(VOID);
 
 XTAPI
 VOID
@@ -36,6 +46,30 @@ MmFreeProcessorStructures(IN PVOID StructuresData);
 XTAPI
 VOID
 MmInitializeMemoryManager(VOID);
+
+XTAPI
+XTSTATUS
+MmMapHalMemory(IN PHYSICAL_ADDRESS PhysicalAddress,
+               IN PFN_NUMBER PageCount,
+               IN BOOLEAN FlushTlb,
+               OUT PVOID *VirtualAddress);
+
+XTAPI
+VOID
+MmMarkHalMemoryWriteThrough(IN PVOID VirtualAddress,
+                            IN PFN_NUMBER PageCount);
+
+XTAPI
+VOID
+MmRemapHalMemory(IN PVOID VirtualAddress,
+                 IN PHYSICAL_ADDRESS PhysicalAddress,
+                 IN BOOLEAN FlushTlb);
+
+XTAPI
+XTSTATUS
+MmUnmapHalMemory(IN PVOID VirtualAddress,
+                 IN PFN_NUMBER PageCount,
+                 IN BOOLEAN FlushTlb);
 
 XTAPI
 VOID

@@ -39,8 +39,10 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/kthread.c
     ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/proc.c
     ${XTOSKRNL_SOURCE_DIR}/mm/globals.c
+    ${XTOSKRNL_SOURCE_DIR}/mm/hlpool.c
     ${XTOSKRNL_SOURCE_DIR}/mm/init.c
     ${XTOSKRNL_SOURCE_DIR}/mm/kpools.c
+    ${XTOSKRNL_SOURCE_DIR}/mm/pages.c
     ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/init.c
     ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/pages.c
     ${XTOSKRNL_SOURCE_DIR}/po/idle.c

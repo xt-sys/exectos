@@ -29,3 +29,12 @@ ULONG MmPageMapLevel;
 
 /* Processor structures data (THIS IS A TEMPORARY HACK) */
 UCHAR MmProcessorStructuresData[MAXIMUM_PROCESSORS][KPROCESSOR_STRUCTURES_SIZE] = {0};
+
+/* Allocation descriptors dedicated for HAL */
+LOADER_MEMORY_MAPPING MmpHalAllocationDescriptors[MM_HAL_ALLOCATION_DESCRIPTORS];
+
+/* Live address of kernel HAL heap */
+PVOID MmpHalHeapStart = MM_HAL_HEAP_START_ADDRESS;
+
+/* Number of used HAL allocation descriptors */
+ULONG MmpUsedHalAllocationDescriptors = 0;

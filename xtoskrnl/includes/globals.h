@@ -69,4 +69,13 @@ EXTERN ULONG MmPageMapLevel;
 /* Processor structures data (THIS IS A TEMPORARY HACK) */
 EXTERN UCHAR MmProcessorStructuresData[MAXIMUM_PROCESSORS][KPROCESSOR_STRUCTURES_SIZE];
 
+/* Allocation descriptors dedicated for HAL */
+EXTERN LOADER_MEMORY_MAPPING MmpHalAllocationDescriptors[MM_HAL_ALLOCATION_DESCRIPTORS];
+
+/* Live address of kernel HAL heap */
+EXTERN PVOID MmpHalHeapStart;
+
+/* Number of used HAL allocation descriptors */
+EXTERN ULONG MmpUsedHalAllocationDescriptors;
+
 #endif /* __XTOSKRNL_GLOBALS_H */
