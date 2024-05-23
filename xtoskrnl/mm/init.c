@@ -64,7 +64,7 @@ XTAPI
 VOID
 MmpScanMemoryDescriptors(VOID)
 {
-    PLOADER_MEMORY_MAPPING MemoryDescriptor;
+    PLOADER_MEMORY_DESCRIPTOR MemoryDescriptor;
     PLIST_ENTRY MemoryMappings;
     PFN_NUMBER FreePages;
 
@@ -76,7 +76,7 @@ MmpScanMemoryDescriptors(VOID)
     while(MemoryMappings != &KeInitializationBlock->MemoryDescriptorListHead)
     {
         /* Get memory descriptor */
-        MemoryDescriptor = CONTAIN_RECORD(MemoryMappings, LOADER_MEMORY_MAPPING, ListEntry);
+        MemoryDescriptor = CONTAIN_RECORD(MemoryMappings, LOADER_MEMORY_DESCRIPTOR, ListEntry);
 
         /* Check if memory type is invisible or cached */
         if(MmpVerifyMemoryTypeInvisible(MemoryDescriptor->MemoryType) ||
@@ -125,7 +125,7 @@ MmpScanMemoryDescriptors(VOID)
     }
 
     /* Store original free descriptor */
-    RtlCopyMemory(&MmOldFreeDescriptor, MmFreeDescriptor, sizeof(LOADER_MEMORY_MAPPING));
+    RtlCopyMemory(&MmOldFreeDescriptor, MmFreeDescriptor, sizeof(LOADER_MEMORY_DESCRIPTOR));
 }
 
 /** Checks whether the specified memory type should be considered as free.

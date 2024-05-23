@@ -73,7 +73,7 @@ XtGetMemoryDescriptorList(IN PXTBL_PAGE_MAPPING PageMap,
     EFI_STATUS Status;
     ULONGLONG Pages;
 
-    Pages = (ULONGLONG)EFI_SIZE_TO_PAGES((PageMap->MapSize + 1) * sizeof(LOADER_MEMORY_MAPPING));
+    Pages = (ULONGLONG)EFI_SIZE_TO_PAGES((PageMap->MapSize + 1) * sizeof(LOADER_MEMORY_DESCRIPTOR));
 
     Status = XtLdrProtocol->Memory.AllocatePages(Pages, &Address);
     if(Status != STATUS_EFI_SUCCESS)
@@ -95,7 +95,7 @@ XtGetMemoryDescriptorList(IN PXTBL_PAGE_MAPPING PageMap,
     while(ListEntry != &PageMap->MemoryMap)
     {
         PXTBL_MEMORY_MAPPING MemoryMapping = CONTAIN_RECORD(ListEntry, XTBL_MEMORY_MAPPING, ListEntry);
-        PLOADER_MEMORY_MAPPING MemoryDescriptor = (PLOADER_MEMORY_MAPPING)Address;
+        PLOADER_MEMORY_DESCRIPTOR MemoryDescriptor = (PLOADER_MEMORY_DESCRIPTOR)Address;
 
         MemoryDescriptor->MemoryType = MemoryMapping->MemoryType;
         MemoryDescriptor->BasePage = (UINT_PTR)MemoryMapping->PhysicalAddress / EFI_PAGE_SIZE;
@@ -103,7 +103,7 @@ XtGetMemoryDescriptorList(IN PXTBL_PAGE_MAPPING PageMap,
 
         RtlInsertTailList(MemoryDescriptorList, &MemoryDescriptor->ListEntry);
 
-        Address = Address + sizeof(LOADER_MEMORY_MAPPING);
+        Address = Address + sizeof(LOADER_MEMORY_DESCRIPTOR);
         ListEntry = ListEntry->Flink;
     }
 

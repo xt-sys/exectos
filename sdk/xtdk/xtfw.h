@@ -93,13 +93,13 @@ typedef struct _LOADER_INFORMATION_BLOCK
 } LOADER_INFORMATION_BLOCK, *PLOADER_INFORMATION_BLOCK;
 
 /* Boot Loader memory mapping information */
-typedef struct _LOADER_MEMORY_MAPPING
+typedef struct _LOADER_MEMORY_DESCRIPTOR
 {
     LIST_ENTRY ListEntry;
     LOADER_MEMORY_TYPE MemoryType;
     ULONG BasePage;
     ULONG PageCount;
-} LOADER_MEMORY_MAPPING, *PLOADER_MEMORY_MAPPING;
+} LOADER_MEMORY_DESCRIPTOR, *PLOADER_MEMORY_DESCRIPTOR;
 
 /* Loader provided information needed by the kernel to initialize */
 typedef struct _KERNEL_INITIALIZATION_BLOCK

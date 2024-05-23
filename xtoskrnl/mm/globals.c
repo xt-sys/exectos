@@ -10,7 +10,7 @@
 
 
 /* Biggest free memory descriptor */
-PLOADER_MEMORY_MAPPING MmFreeDescriptor;
+PLOADER_MEMORY_DESCRIPTOR MmFreeDescriptor;
 
 /* Highest physical page number */
 ULONG_PTR MmHighestPhysicalPage;
@@ -22,7 +22,7 @@ ULONG_PTR MmLowestPhysicalPage = -1;
 ULONG MmNumberOfPhysicalPages;
 
 /* Old biggest free memory descriptor */
-LOADER_MEMORY_MAPPING MmOldFreeDescriptor;
+LOADER_MEMORY_DESCRIPTOR MmOldFreeDescriptor;
 
 /* Page Map Level */
 ULONG MmPageMapLevel;
@@ -31,7 +31,7 @@ ULONG MmPageMapLevel;
 UCHAR MmProcessorStructuresData[MAXIMUM_PROCESSORS][KPROCESSOR_STRUCTURES_SIZE] = {0};
 
 /* Allocation descriptors dedicated for HAL */
-LOADER_MEMORY_MAPPING MmpHalAllocationDescriptors[MM_HAL_ALLOCATION_DESCRIPTORS];
+LOADER_MEMORY_DESCRIPTOR MmpHalAllocationDescriptors[MM_HAL_ALLOCATION_DESCRIPTORS];
 
 /* Live address of kernel HAL heap */
 PVOID MmpHalHeapStart = MM_HAL_HEAP_START_ADDRESS;

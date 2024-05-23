@@ -49,7 +49,7 @@ EXTERN LIST_ENTRY KepSystemResourcesListHead;
 EXTERN KSPIN_LOCK KepSystemResourcesLock;
 
 /* Biggest free memory descriptor */
-EXTERN PLOADER_MEMORY_MAPPING MmFreeDescriptor;
+EXTERN PLOADER_MEMORY_DESCRIPTOR MmFreeDescriptor;
 
 /* Highest physical page number */
 EXTERN ULONG_PTR MmHighestPhysicalPage;
@@ -61,7 +61,7 @@ EXTERN ULONG_PTR MmLowestPhysicalPage;
 EXTERN ULONG MmNumberOfPhysicalPages;
 
 /* Old biggest free memory descriptor */
-EXTERN LOADER_MEMORY_MAPPING MmOldFreeDescriptor;
+EXTERN LOADER_MEMORY_DESCRIPTOR MmOldFreeDescriptor;
 
 /* Page Map Level */
 EXTERN ULONG MmPageMapLevel;
@@ -70,7 +70,7 @@ EXTERN ULONG MmPageMapLevel;
 EXTERN UCHAR MmProcessorStructuresData[MAXIMUM_PROCESSORS][KPROCESSOR_STRUCTURES_SIZE];
 
 /* Allocation descriptors dedicated for HAL */
-EXTERN LOADER_MEMORY_MAPPING MmpHalAllocationDescriptors[MM_HAL_ALLOCATION_DESCRIPTORS];
+EXTERN LOADER_MEMORY_DESCRIPTOR MmpHalAllocationDescriptors[MM_HAL_ALLOCATION_DESCRIPTORS];
 
 /* Live address of kernel HAL heap */
 EXTERN PVOID MmpHalHeapStart;

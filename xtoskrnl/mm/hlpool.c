@@ -31,7 +31,7 @@ MmAllocateHalMemory(IN PFN_NUMBER PageCount,
                     IN BOOLEAN Aligned,
                     OUT PULONG_PTR Buffer)
 {
-    PLOADER_MEMORY_MAPPING Descriptor, ExtraDescriptor, HalDescriptor;
+    PLOADER_MEMORY_DESCRIPTOR Descriptor, ExtraDescriptor, HalDescriptor;
     PFN_NUMBER Alignment, MaxPage;
     ULONGLONG PhysicalAddress;
     PLIST_ENTRY ListEntry;
@@ -53,7 +53,7 @@ MmAllocateHalMemory(IN PFN_NUMBER PageCount,
     ListEntry = KeInitializationBlock->MemoryDescriptorListHead.Flink;
     while(ListEntry != &KeInitializationBlock->MemoryDescriptorListHead)
     {
-        Descriptor = CONTAIN_RECORD(ListEntry, LOADER_MEMORY_MAPPING, ListEntry);
+        Descriptor = CONTAIN_RECORD(ListEntry, LOADER_MEMORY_DESCRIPTOR, ListEntry);
 
         /* Align memory to 64KB if needed */
         Alignment = Aligned ? (((Descriptor->BasePage + 0x0F) & ~0x0F) - Descriptor->BasePage) : 0;
