@@ -20,16 +20,13 @@
 
 /* Page directory and page base addresses */
 #define MM_PTE_BASE                                0xC0000000
-#define MM_PDE_BASE                                0xC0300000
-#define MM_PDE_PAE_BASE                            0xC0600000
+#define MM_PDE_BASE                                0xC0600000
 
 /* PTE shift values */
-#define MM_PTE_SHIFT                               2
+#define MM_PTE_SHIFT                               3
 #define MM_PTI_SHIFT                               12
-#define MM_PDI_SHIFT                               22
-#define MM_PTE_PAE_SHIFT                           3
-#define MM_PDI_PAE_SHIFT                           21
-#define MM_PPI_PAE_SHIFT                           30
+#define MM_PDI_SHIFT                               21
+#define MM_PPI_SHIFT                               30
 
 /* Minimum number of physical pages needed by the system */
 #define MM_MINIMUM_PHYSICAL_PAGES                  1100

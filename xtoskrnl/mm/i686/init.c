@@ -23,27 +23,11 @@ XTAPI
 PMMPTE
 MmpGetPdeAddress(PVOID Address)
 {
-    ULONG Offset, PdeBase, PdiShift, PteShift;
-
-    /* Get PDI and PTE shifts based on memory extension flag */
-    if(MmpMemoryExtension)
-    {
-        /* Get bit shifts for PAE system */
-        PdeBase = MM_PDE_PAE_BASE;
-        PdiShift = MM_PDI_PAE_SHIFT;
-        PteShift = MM_PTE_PAE_SHIFT;
-    }
-    else
-    {
-        /* Get bit shifts for non-PAE system */
-        PdeBase = MM_PDE_BASE;
-        PdiShift = MM_PDI_SHIFT;
-        PteShift = MM_PTE_SHIFT;
-    }
+    ULONG Offset;
 
     /* Calculate offset and return PTE address */
-    Offset = ((((ULONG)(Address)) >> PdiShift) << PteShift);
-    return (PMMPTE)(PdeBase + Offset);
+    Offset = ((((ULONG)(Address)) >> MM_PDI_SHIFT) << MM_PTE_SHIFT);
+    return (PMMPTE)(MM_PDE_BASE + Offset);
 }
 
 /**
@@ -60,13 +44,10 @@ XTAPI
 PMMPTE
 MmpGetPteAddress(PVOID Address)
 {
-    ULONG Offset, PteShift;
-
-    /* Get PTE shift based on memory extension flag */
-    PteShift = MmpMemoryExtension ? MM_PTE_PAE_SHIFT : MM_PTE_SHIFT;
+    ULONG Offset;
 
     /* Calculate offset and return PTE address */
-    Offset = ((((ULONG)(Address)) >> MM_PTI_SHIFT) << PteShift);
+    Offset = ((((ULONG)(Address)) >> MM_PTI_SHIFT) << MM_PTE_SHIFT);
     return (PMMPTE)(MM_PTE_BASE + Offset);
 }
 
