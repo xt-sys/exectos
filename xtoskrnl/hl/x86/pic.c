@@ -36,6 +36,7 @@ XTAPI
 VOID
 HlDisableLegacyPic(VOID)
 {
+    /* Mask all interrupts */
     HlIoPortOutByte(PIC1_DATA_PORT, 0xFF);
     HlIoPortOutByte(PIC2_DATA_PORT, 0xFF);
 }
@@ -189,9 +190,10 @@ XTAPI
 VOID
 HlpInitializeApic()
 {
+    APIC_SPURIOUS_REGISTER SpuriousRegister;
+    APIC_COMMAND_REGISTER CommandRegister;
     APIC_BASE_REGISTER BaseRegister;
     APIC_LVT_REGISTER LvtRegister;
-    APIC_SPURIOUS_REGISTER SpuriousRegister;
     ULONG CpuNumber;
 
     /* Check if this is an x2APIC compatible machine */
@@ -215,6 +217,9 @@ HlpInitializeApic()
     BaseRegister.ExtendedMode = (HlpApicMode == APIC_MODE_X2APIC);
     BaseRegister.BootStrapProcessor = (CpuNumber == 0) ? 1 : 0;
     ArWriteModelSpecificRegister(APIC_LAPIC_MSR_BASE, BaseRegister.LongLong);
+
+    /* Raise APIC task priority (TPR) to mask off all interrupts */
+    HlWriteApicRegister(APIC_TPR, 0xFF);
 
     /* xAPIC compatibility mode specific initialization */
     if(HlpApicMode == APIC_MODE_COMPAT)
@@ -263,12 +268,23 @@ HlpInitializeApic()
     LvtRegister.TriggerMode = APIC_TGM_LEVEL;
     HlWriteApicRegister(APIC_LINT1, LvtRegister.Long);
 
+    /* Mask ICR0 */
+    CommandRegister.Long0 = 0;
+    CommandRegister.Vector = APIC_VECTOR_ZERO;
+    CommandRegister.MessageType = APIC_MT_INIT;
+    CommandRegister.TriggerMode = APIC_TGM_LEVEL;
+    CommandRegister.DestinationShortHand = APIC_DSH_AllIncludingSelf;
+    HlWriteApicRegister(APIC_ICR0, CommandRegister.Long0);
+
     /* Clear errors after enabling vectors */
     HlWriteApicRegister(APIC_ESR, 0);
 
     /* Register interrupt handlers once the APIC initialization is done */
     KeSetInterruptHandler(APIC_VECTOR_SPURIOUS, HlpHandleApicSpuriousService);
     KeSetInterruptHandler(PIC1_VECTOR_SPURIOUS, HlpHandlePicSpuriousService);
+
+    /* Lower APIC TPR to re-enable interrupts */
+    HlWriteApicRegister(APIC_TPR, 0x00);
 }
 
 /**

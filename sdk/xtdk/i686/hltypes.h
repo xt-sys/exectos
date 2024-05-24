@@ -78,6 +78,28 @@
 /* Initial stall factor */
 #define INITIAL_STALL_FACTOR                            100
 
+/* APIC destination short-hand enumeration list */
+typedef enum _APIC_DSH
+{
+    APIC_DSH_Destination,
+    APIC_DSH_Self,
+    APIC_DSH_AllIncludingSelf,
+    APIC_DSH_AllExclusingSelf
+} APIC_DSH, *PAPIC_DSH;
+
+/* APIC message type enumeration list */
+typedef enum _APIC_MT
+{
+    APIC_MT_Fixed = 0,
+    APIC_MT_LowestPriority = 1,
+    APIC_MT_SMI = 2,
+    APIC_MT_RemoteRead = 3,
+    APIC_MT_NMI = 4,
+    APIC_MT_INIT = 5,
+    APIC_MT_Startup = 6,
+    APIC_MT_ExtInt = 7,
+} APIC_MT, *PAPIC_MT;
+
 /* APIC Base Register */
 typedef union _APIC_BASE_REGISTER
 {
@@ -93,6 +115,31 @@ typedef union _APIC_BASE_REGISTER
         ULONGLONG Reserved3:12;
     };
 } APIC_BASE_REGISTER, *PAPIC_BASE_REGISTER;
+
+/* APIC Command Register */
+typedef union _APIC_COMMAND_REGISTER
+{
+    ULONGLONG LongLong;
+    struct
+    {
+        ULONG Long0;
+        ULONG Long1;
+    };
+    struct
+    {
+        ULONGLONG Vector:8;
+        ULONGLONG MessageType:3;
+        ULONGLONG DestinationMode:1;
+        ULONGLONG DeliveryStatus:1;
+        ULONGLONG ReservedMBZ:1;
+        ULONGLONG Level:1;
+        ULONGLONG TriggerMode:1;
+        ULONGLONG RemoteReadStatus:2;
+        ULONGLONG DestinationShortHand:2;
+        ULONGLONG Reserved2MBZ:36;
+        ULONGLONG Destination:8;
+    };
+} APIC_COMMAND_REGISTER, *PAPIC_COMMAND_REGISTER;
 
 /* APIC Local Vector Table (LVT) Register */
 typedef union _APIC_LVT_REGISTER
