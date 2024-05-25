@@ -93,7 +93,7 @@ KeReleaseSystemResource(IN PSYSTEM_RESOURCE_HEADER ResourceHeader)
  * @since XT 1.0
  */
 XTAPI
-XTSTATUS
+VOID
 KepInitializeSystemResources(VOID)
 {
     PSYSTEM_RESOURCE_HEADER ResourceHeader;
@@ -123,12 +123,13 @@ KepInitializeSystemResources(VOID)
                     ResourceSize = sizeof(SYSTEM_RESOURCE_FRAMEBUFFER);
                     break;
                 default:
-                    /* Unknown system resource type, return error */
-                    return STATUS_UNSUCCESSFUL;
+                    /* Unknown system resource type, skip it */
+                    ResourceSize = 0;
+                    break;
             }
 
             /* Validate resource size */
-            if(ResourceHeader->ResourceSize == ResourceSize)
+            if(ResourceSize != 0 && ResourceSize == ResourceHeader->ResourceSize)
             {
                 /* Move valid resource to the internal kernel list of system resources */
                 RtlRemoveEntryList(&ResourceHeader->ListEntry);
@@ -139,9 +140,6 @@ KepInitializeSystemResources(VOID)
             ListEntry = NextListEntry;
         }
     }
-
-    /* Return success */
-    return STATUS_SUCCESS;
 }
 
 /**

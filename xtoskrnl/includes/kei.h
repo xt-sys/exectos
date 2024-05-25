@@ -97,7 +97,7 @@ KepGetSystemResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
                      OUT PSYSTEM_RESOURCE_HEADER *ResourceHeader);
 
 XTAPI
-XTSTATUS
+VOID
 KepInitializeSystemResources(VOID);
 
 XTAPI
