@@ -186,14 +186,14 @@ MmMapHalMemory(IN PHYSICAL_ADDRESS PhysicalAddress,
         }
 
         /* Get PTE pointer and advance to next page */
-        PtePointer = (PHARDWARE_PTE)MmpGetPteAddress(VirtualAddress);
-        VirtualAddress = (PVOID)(ULONG_PTR)VirtualAddress + MM_PAGE_SIZE;
+        PtePointer = (PHARDWARE_PTE)MmpGetPteAddress(ReturnAddress);
+        ReturnAddress = (PVOID)(ULONG_PTR)ReturnAddress + MM_PAGE_SIZE;
 
         /* Check if PTE is valid */
         if(PtePointer->Valid)
         {
             /* PTE is not available, go to the next one */
-            BaseAddress = VirtualAddress;
+            BaseAddress = ReturnAddress;
             MappedPages = 0;
             continue;
         }
@@ -203,7 +203,7 @@ MmMapHalMemory(IN PHYSICAL_ADDRESS PhysicalAddress,
     }
 
     /* Take the actual base address with an offset */
-    VirtualAddress = (PVOID)(ULONG_PTR)(BaseAddress + PAGE_OFFSET(PhysicalAddress.LowPart));
+    ReturnAddress = (PVOID)(ULONG_PTR)(BaseAddress + PAGE_OFFSET(PhysicalAddress.LowPart));
 
     /* Check if base address starts at the beginning of the heap */
     if(BaseAddress == MmpHalHeapStart)
