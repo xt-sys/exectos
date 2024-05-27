@@ -28,6 +28,9 @@
 #define MM_PDI_SHIFT                               21
 #define MM_PPI_SHIFT                               30
 
+/* PTE legacy shift values */
+#define MM_PDI_LEGACY_SHIFT                        22
+
 /* Minimum number of physical pages needed by the system */
 #define MM_MINIMUM_PHYSICAL_PAGES                  1100
 

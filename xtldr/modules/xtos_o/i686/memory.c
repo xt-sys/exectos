@@ -9,20 +9,68 @@
 #include <xtos.h>
 
 
+#define HAL_MEMORY 0xFFC00000
+
+/**
+ * Maps the page table for hardware layer addess space.
+ *
+ * @param PageMap
+ *        Supplies a pointer to the page mapping structure.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+XtMapHalMemory(IN PXTBL_PAGE_MAPPING PageMap)
+{
+    XTSTATUS Status;
+    EFI_PHYSICAL_ADDRESS Address;
+    PHARDWARE_PTE Pml3;
+    ULONGLONG PmlIndex;
+    ULONG Index;
+    PHARDWARE_PTE PdeBase;
+
+    /* Allocate memory */
+    Status = XtLdrProtocol->Memory.AllocatePages(1, &Address);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Memory allocation failure, return error */
+        return Status;
+    }
+
+    /* Zero fill allocated memory */
+    RtlZeroMemory((PVOID)Address, EFI_PAGE_SIZE);
+
+    /* Check page map level */
+    if(PageMap->PageMapLevel == 3)
+    {
+        /* Get PDE base address (PAE enabled) */
+        PdeBase = (PHARDWARE_PTE)(((PHARDWARE_PTE)PageMap->PtePointer)[MM_HAL_VA_START >> MM_PPI_SHIFT].PageFrameNumber << MM_PAGE_SHIFT);
+
+        /* Make PDE valid */
+        PdeBase[(MM_HAL_VA_START >> MM_PDI_SHIFT) & 0x1FF].PageFrameNumber = Address >> MM_PAGE_SHIFT;
+        PdeBase[(MM_HAL_VA_START >> MM_PDI_SHIFT) & 0x1FF].Valid = 1;
+        PdeBase[(MM_HAL_VA_START >> MM_PDI_SHIFT) & 0x1FF].Writable = 1;
+    }
+    else
+    {
+        /* Make PDE valid (PAE disabled) */
+        ((PHARDWARE_LEGACY_PTE)PageMap->PtePointer)[MM_HAL_VA_START >> MM_PDI_LEGACY_SHIFT].Valid = 1;
+        ((PHARDWARE_LEGACY_PTE)PageMap->PtePointer)[MM_HAL_VA_START >> MM_PDI_LEGACY_SHIFT].PageFrameNumber = Address >> MM_PAGE_SHIFT;
+        ((PHARDWARE_LEGACY_PTE)PageMap->PtePointer)[MM_HAL_VA_START >> MM_PDI_LEGACY_SHIFT].Writable = 1;
+    }
+
+    /* Return success */
+    return STATUS_EFI_SUCCESS;
+}
+
 /**
  * Builds the actual memory mapping page table and enables paging. This routine exits EFI boot services as well.
  *
- * @param MemoryMappings
- *        Supplies a pointer to linked list containing all memory mappings.
- *
- * @param VirtualAddress
- *        Supplies a pointer to the next valid, free and available virtual address.
- *
- * @param ImageProtocol
- *        A pointer to the EFI loaded image protocol with information about where in memory the loader code was placed.
- *
- * @param PtePointer
- *        Supplies a pointer to memory area containing a Page Table Entries (PTE).
+ * @param PageMap
+ *        Supplies a pointer to the page mapping structure.
  *
  * @return This routine returns a status code.
  *
@@ -60,6 +108,15 @@ XtEnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
     {
         /* Failed to build page map */
         XtLdrProtocol->Debug.Print(L"Failed to build page map (Status code: %zX)\n", Status);
+        return Status;
+    }
+
+    /* Map memory for hardware layer */
+    Status = XtMapHalMemory(PageMap);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to map memory for hardware layer */
+        XtLdrProtocol->Debug.Print(L"Failed to map memory for hardware leyer (Status code: %zX)\n", Status);
         return Status;
     }
 
