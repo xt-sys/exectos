@@ -260,10 +260,10 @@ BlpSelfMapPml(IN PXTBL_PAGE_MAPPING PageMap,
     if(PageMap->PageMapLevel == 3)
     {
         /* Calculate PML index based on provided self map address */
-        PmlIndex = (SelfMapAddress >> 21) & 0x1FF;
+        PmlIndex = (SelfMapAddress >> MM_PDI_SHIFT) & 0x1FF;
 
         /* Get Page Directory */
-        Pml = (PHARDWARE_PTE)(((PHARDWARE_PTE)PageMap->PtePointer)[SelfMapAddress >> 30].PageFrameNumber * EFI_PAGE_SIZE);
+        Pml = (PHARDWARE_PTE)(((PHARDWARE_PTE)PageMap->PtePointer)[SelfMapAddress >> MM_PPI_SHIFT].PageFrameNumber * EFI_PAGE_SIZE);
 
         /* Add self-mapping for PML3 (PAE enabled) */
         for(Index = 0; Index < 4; Index++)
@@ -276,7 +276,7 @@ BlpSelfMapPml(IN PXTBL_PAGE_MAPPING PageMap,
     else
     {
         /* Calculate PML index based on provided self map address */
-        PmlIndex = (SelfMapAddress >> 22);
+        PmlIndex = (SelfMapAddress >> MM_PDI_LEGACY_SHIFT);
 
         /* Add self-mapping for PML2 (PAE disabled) */
         ((PHARDWARE_LEGACY_PTE)PageMap->PtePointer)[PmlIndex].PageFrameNumber = (UINT_PTR)PageMap->PtePointer / EFI_PAGE_SIZE;

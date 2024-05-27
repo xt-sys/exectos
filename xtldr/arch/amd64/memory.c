@@ -165,11 +165,11 @@ BlMapPage(IN PXTBL_PAGE_MAPPING PageMap,
     while(NumberOfPages > 0)
     {
         /* Calculate the indices in the various Page Tables from the virtual address */
-        Pml5Entry = (VirtualAddress & ((ULONGLONG)0x1FF << 48)) >> 48;
-        Pml4Entry = (VirtualAddress & ((ULONGLONG)0x1FF << 39)) >> 39;
-        Pml3Entry = (VirtualAddress & ((ULONGLONG)0x1FF << 30)) >> 30;
-        Pml2Entry = (VirtualAddress & ((ULONGLONG)0x1FF << 21)) >> 21;
-        Pml1Entry = (VirtualAddress & ((ULONGLONG)0x1FF << 12)) >> 12;
+        Pml5Entry = (VirtualAddress & ((ULONGLONG)0x1FF << MM_LA57_SHIFT)) >> MM_LA57_SHIFT;
+        Pml4Entry = (VirtualAddress & ((ULONGLONG)0x1FF << MM_PXI_SHIFT)) >> MM_PXI_SHIFT;
+        Pml3Entry = (VirtualAddress & ((ULONGLONG)0x1FF << MM_PPI_SHIFT)) >> MM_PPI_SHIFT;
+        Pml2Entry = (VirtualAddress & ((ULONGLONG)0x1FF << MM_PDI_SHIFT)) >> MM_PDI_SHIFT;
+        Pml1Entry = (VirtualAddress & ((ULONGLONG)0x1FF << MM_PTI_SHIFT)) >> MM_PTI_SHIFT;
 
         /* Check page map level */
         if(PageMap->PageMapLevel == 5)
@@ -262,7 +262,7 @@ BlpSelfMapPml(IN PXTBL_PAGE_MAPPING PageMap,
     else
     {
         /* Calculate PML index based on provided self map address */
-        PmlIndex = (SelfMapAddress >> 39) & 0x1FF;
+        PmlIndex = (SelfMapAddress >> MM_PXI_SHIFT) & 0x1FF;
 
         /* Add self-mapping for PML4 */
         ((PHARDWARE_PTE)PageMap->PtePointer)[PmlIndex].PageFrameNumber = (UINT_PTR)PageMap->PtePointer / EFI_PAGE_SIZE;

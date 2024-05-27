@@ -30,6 +30,7 @@
 #define MM_PDI_SHIFT                               21
 #define MM_PPI_SHIFT                               30
 #define MM_PXI_SHIFT                               39
+#define MM_LA57_SHIFT                              48
 
 /* Number of PTEs per page */
 #define MM_PTE_PER_PAGE                            512
