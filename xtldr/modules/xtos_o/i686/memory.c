@@ -9,8 +9,6 @@
 #include <xtos.h>
 
 
-#define HAL_MEMORY 0xFFC00000
-
 /**
  * Maps the page table for hardware layer addess space.
  *
@@ -25,12 +23,9 @@ XTCDECL
 EFI_STATUS
 XtMapHalMemory(IN PXTBL_PAGE_MAPPING PageMap)
 {
-    XTSTATUS Status;
     EFI_PHYSICAL_ADDRESS Address;
-    PHARDWARE_PTE Pml3;
-    ULONGLONG PmlIndex;
-    ULONG Index;
     PHARDWARE_PTE PdeBase;
+    XTSTATUS Status;
 
     /* Allocate memory */
     Status = XtLdrProtocol->Memory.AllocatePages(1, &Address);
