@@ -98,6 +98,10 @@ XtpLoadModule(IN PEFI_FILE_HANDLE BootDir,
 
 XTCDECL
 EFI_STATUS
+XtpMapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap);
+
+XTCDECL
+EFI_STATUS
 BlXtLdrModuleMain(IN EFI_HANDLE ImageHandle,
                   IN PEFI_SYSTEM_TABLE SystemTable);
 

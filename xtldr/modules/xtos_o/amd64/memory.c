@@ -21,7 +21,7 @@
  */
 XTCDECL
 EFI_STATUS
-XtMapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
+XtpMapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
 {
     PHARDWARE_PTE PdeBase, PpeBase, PxeBase;
     EFI_PHYSICAL_ADDRESS Address;
@@ -147,7 +147,7 @@ XtEnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
     }
 
     /* Map memory for hardware layer */
-    Status = XtMapHardwareMemoryPool(PageMap);
+    Status = XtpMapHardwareMemoryPool(PageMap);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to map memory for hardware layer */
