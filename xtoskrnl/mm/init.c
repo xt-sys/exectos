@@ -65,7 +65,7 @@ MmpScanMemoryDescriptors(VOID)
 
         /* Check if memory type is invisible or cached */
         if(MmpVerifyMemoryTypeInvisible(MemoryDescriptor->MemoryType) ||
-           (MemoryDescriptor->MemoryType == LoaderHALCachedMemory))
+           (MemoryDescriptor->MemoryType == LoaderHardwareCachedMemory))
         {
             /* Skip this mapping */
             MemoryMappings = MemoryMappings->Flink;

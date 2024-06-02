@@ -38,13 +38,13 @@
 #define MM_DEFAULT_SECONDARY_COLORS                64
 
 /* Number of HAL allocation descriptors */
-#define MM_HAL_ALLOCATION_DESCRIPTORS              64
+#define MM_HARDWARE_ALLOCATION_DESCRIPTORS         64
 
 /* Kernel HAL heap initial start address */
-#define MM_HAL_HEAP_START_ADDRESS                  ((PVOID)(((ULONG_PTR)MM_HAL_VA_START) + 1024 * 1024))
+#define MM_HARDWARE_HEAP_START_ADDRESS             ((PVOID)(((ULONG_PTR)MM_HARDWARE_VA_START) + 1024 * 1024))
 
 /* HAL memory pool virtual address start */
-#define MM_HAL_VA_START                            0xFFC00000
+#define MM_HARDWARE_VA_START                       0xFFC00000
 
 /* Maximum physical address used by HAL allocations */
 #define MM_MAXIMUM_PHYSICAL_ADDRESS                0xFFFFFFFF

@@ -38,7 +38,7 @@ XtMapHalMemory(IN PXTBL_PAGE_MAPPING PageMap)
     PxeBase = ((PHARDWARE_PTE)(PageMap->PtePointer));
 
     /* Check if PXE entry already exists */
-    if(!PxeBase[(MM_HAL_VA_START >> MM_PXI_SHIFT) & 0x1FF].Valid)
+    if(!PxeBase[(MM_HARDWARE_VA_START >> MM_PXI_SHIFT) & 0x1FF].Valid)
     {
         /* No valid PXE, allocate memory */
         Status = XtLdrProtocol->Memory.AllocatePages(1, &Address);
@@ -52,9 +52,9 @@ XtMapHalMemory(IN PXTBL_PAGE_MAPPING PageMap)
         RtlZeroMemory((PVOID)Address, EFI_PAGE_SIZE);
 
         /* Make PXE valid */
-        PxeBase[(MM_HAL_VA_START >> MM_PXI_SHIFT) & 0x1FF].Valid = 1;
-        PxeBase[(MM_HAL_VA_START >> MM_PXI_SHIFT) & 0x1FF].PageFrameNumber = Address / EFI_PAGE_SIZE;
-        PxeBase[(MM_HAL_VA_START >> MM_PXI_SHIFT) & 0x1FF].Writable = 1;
+        PxeBase[(MM_HARDWARE_VA_START >> MM_PXI_SHIFT) & 0x1FF].Valid = 1;
+        PxeBase[(MM_HARDWARE_VA_START >> MM_PXI_SHIFT) & 0x1FF].PageFrameNumber = Address / EFI_PAGE_SIZE;
+        PxeBase[(MM_HARDWARE_VA_START >> MM_PXI_SHIFT) & 0x1FF].Writable = 1;
 
         /* Set PPE base address */
         PpeBase = (PHARDWARE_PTE)(UINT_PTR)Address;
@@ -62,11 +62,11 @@ XtMapHalMemory(IN PXTBL_PAGE_MAPPING PageMap)
     else
     {
         /* Set PPE base address based on existing PXE */
-        PpeBase = (PHARDWARE_PTE)((PxeBase[(MM_HAL_VA_START >> MM_PXI_SHIFT) & 0x1FF].PageFrameNumber) << EFI_PAGE_SHIFT);
+        PpeBase = (PHARDWARE_PTE)((PxeBase[(MM_HARDWARE_VA_START >> MM_PXI_SHIFT) & 0x1FF].PageFrameNumber) << EFI_PAGE_SHIFT);
     }
 
     /* Check if PPE entry already exists */
-    if(!PpeBase[(MM_HAL_VA_START >> MM_PPI_SHIFT) & 0x1FF].Valid)
+    if(!PpeBase[(MM_HARDWARE_VA_START >> MM_PPI_SHIFT) & 0x1FF].Valid)
     {
         /* No valid PPE, allocate memory */
         Status = XtLdrProtocol->Memory.AllocatePages(1, &Address);
@@ -80,9 +80,9 @@ XtMapHalMemory(IN PXTBL_PAGE_MAPPING PageMap)
         RtlZeroMemory((PVOID)Address, EFI_PAGE_SIZE);
 
         /* Make PPE valid */
-        PpeBase[(MM_HAL_VA_START >> MM_PPI_SHIFT) & 0x1FF].Valid = 1;
-        PpeBase[(MM_HAL_VA_START >> MM_PPI_SHIFT) & 0x1FF].PageFrameNumber = Address / EFI_PAGE_SIZE;
-        PpeBase[(MM_HAL_VA_START >> MM_PPI_SHIFT) & 0x1FF].Writable = 1;
+        PpeBase[(MM_HARDWARE_VA_START >> MM_PPI_SHIFT) & 0x1FF].Valid = 1;
+        PpeBase[(MM_HARDWARE_VA_START >> MM_PPI_SHIFT) & 0x1FF].PageFrameNumber = Address / EFI_PAGE_SIZE;
+        PpeBase[(MM_HARDWARE_VA_START >> MM_PPI_SHIFT) & 0x1FF].Writable = 1;
 
         /* Set PDE base address */
         PdeBase = (PHARDWARE_PTE)Address;
@@ -90,14 +90,14 @@ XtMapHalMemory(IN PXTBL_PAGE_MAPPING PageMap)
     else
     {
         /* Set PDE base address, based on existing PPE */
-        PdeBase = (PHARDWARE_PTE)((PpeBase[(MM_HAL_VA_START >> MM_PPI_SHIFT) & 0x1FF].PageFrameNumber) << EFI_PAGE_SHIFT);
+        PdeBase = (PHARDWARE_PTE)((PpeBase[(MM_HARDWARE_VA_START >> MM_PPI_SHIFT) & 0x1FF].PageFrameNumber) << EFI_PAGE_SHIFT);
     }
 
     /* Loop through 2 PDE entries */
     for(UINT Index = 0 ; Index < 2 ; Index++)
     {
         /* Check if PDE entry already exists */
-        if(!PdeBase[((MM_HAL_VA_START >> MM_PDI_SHIFT) & 0x1FF) + Index].Valid)
+        if(!PdeBase[((MM_HARDWARE_VA_START >> MM_PDI_SHIFT) & 0x1FF) + Index].Valid)
         {
             /* No valid PDE, allocate memory */
             Status = XtLdrProtocol->Memory.AllocatePages(1, &Address);
@@ -111,9 +111,9 @@ XtMapHalMemory(IN PXTBL_PAGE_MAPPING PageMap)
             RtlZeroMemory((PVOID)Address, EFI_PAGE_SIZE);
 
             /* Make PDE valid */
-            PdeBase[((MM_HAL_VA_START >> MM_PDI_SHIFT) & 0x1FF) + Index].Valid = 1;
-            PdeBase[((MM_HAL_VA_START >> MM_PDI_SHIFT) & 0x1FF) + Index].PageFrameNumber = Address / EFI_PAGE_SIZE;
-            PdeBase[((MM_HAL_VA_START >> MM_PDI_SHIFT) & 0x1FF) + Index].Writable = 1;
+            PdeBase[((MM_HARDWARE_VA_START >> MM_PDI_SHIFT) & 0x1FF) + Index].Valid = 1;
+            PdeBase[((MM_HARDWARE_VA_START >> MM_PDI_SHIFT) & 0x1FF) + Index].PageFrameNumber = Address / EFI_PAGE_SIZE;
+            PdeBase[((MM_HARDWARE_VA_START >> MM_PDI_SHIFT) & 0x1FF) + Index].Writable = 1;
         }
     }
 

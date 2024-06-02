@@ -31,7 +31,7 @@ MmAllocateHardwareMemory(IN PFN_NUMBER PageCount,
                          IN BOOLEAN Aligned,
                          OUT PULONG_PTR Buffer)
 {
-    PLOADER_MEMORY_DESCRIPTOR Descriptor, ExtraDescriptor, HalDescriptor;
+    PLOADER_MEMORY_DESCRIPTOR Descriptor, ExtraDescriptor, HardwareDescriptor;
     PFN_NUMBER Alignment, MaxPage;
     ULONGLONG PhysicalAddress;
     PLIST_ENTRY ListEntry;
@@ -43,7 +43,7 @@ MmAllocateHardwareMemory(IN PFN_NUMBER PageCount,
     MaxPage = MM_MAXIMUM_PHYSICAL_ADDRESS >> MM_PAGE_SHIFT;
 
     /* Make sure there are at least 2 descriptors available */
-    if((MmpUsedHalAllocationDescriptors + 2) > MM_HAL_ALLOCATION_DESCRIPTORS)
+    if((MmpUsedHardwareAllocationDescriptors + 2) > MM_HARDWARE_ALLOCATION_DESCRIPTORS)
     {
         /* Not enough descriptors, return error */
         return STATUS_INSUFFICIENT_RESOURCES;
@@ -84,13 +84,13 @@ MmAllocateHardwareMemory(IN PFN_NUMBER PageCount,
     }
 
     /* Allocate new descriptor */
-    HalDescriptor = &MmpHalAllocationDescriptors[MmpUsedHalAllocationDescriptors];
-    HalDescriptor->BasePage = Descriptor->BasePage + Alignment;
-    HalDescriptor->MemoryType = LoaderHALCachedMemory;
-    HalDescriptor->PageCount = PageCount;
+    HardwareDescriptor = &MmpHardwareAllocationDescriptors[MmpUsedHardwareAllocationDescriptors];
+    HardwareDescriptor->BasePage = Descriptor->BasePage + Alignment;
+    HardwareDescriptor->MemoryType = LoaderHardwareCachedMemory;
+    HardwareDescriptor->PageCount = PageCount;
 
-    /* Update HAL allocation descriptors count */
-    MmpUsedHalAllocationDescriptors++;
+    /* Update hardware allocation descriptors count */
+    MmpUsedHardwareAllocationDescriptors++;
 
     /* Check if alignment was done */
     if(Alignment)
@@ -99,13 +99,13 @@ MmAllocateHardwareMemory(IN PFN_NUMBER PageCount,
         if(Descriptor->PageCount > (PageCount + Alignment))
         {
             /* Initialize extra descriptor */
-            ExtraDescriptor = &MmpHalAllocationDescriptors[MmpUsedHalAllocationDescriptors];
+            ExtraDescriptor = &MmpHardwareAllocationDescriptors[MmpUsedHardwareAllocationDescriptors];
             ExtraDescriptor->BasePage = Descriptor->BasePage + Alignment + (ULONG)PageCount;
             ExtraDescriptor->MemoryType = LoaderFree;
             ExtraDescriptor->PageCount = Descriptor->PageCount - (Alignment + (ULONG)PageCount);
 
-            /* Update HAL allocation descriptors count */
-            MmpUsedHalAllocationDescriptors++;
+            /* Update hardware allocation descriptors count */
+            MmpUsedHardwareAllocationDescriptors++;
 
             /* Insert extra descriptor in the list */
             RtlInsertHeadList(&Descriptor->ListEntry, &ExtraDescriptor->ListEntry);
@@ -115,7 +115,7 @@ MmAllocateHardwareMemory(IN PFN_NUMBER PageCount,
         Descriptor->PageCount = Alignment;
 
         /* Insert new descriptor in the list */
-        RtlInsertHeadList(&Descriptor->ListEntry, &HalDescriptor->ListEntry);
+        RtlInsertHeadList(&Descriptor->ListEntry, &HardwareDescriptor->ListEntry);
     }
     else
     {
@@ -124,7 +124,7 @@ MmAllocateHardwareMemory(IN PFN_NUMBER PageCount,
         Descriptor->PageCount -= (ULONG)PageCount;
 
         /* Insert new descriptor in the list */
-        RtlInsertTailList(&Descriptor->ListEntry, &HalDescriptor->ListEntry);
+        RtlInsertTailList(&Descriptor->ListEntry, &HardwareDescriptor->ListEntry);
 
         /* Check if source descriptor is fully consumed */
         if(Descriptor->PageCount == 0)
@@ -140,7 +140,7 @@ MmAllocateHardwareMemory(IN PFN_NUMBER PageCount,
 }
 
 /**
- * Maps physical address to the virtual memory area used by kernel hardware layer (HAL).
+ * Maps physical address to the virtual memory area used by kernel hardware layer.
  *
  * @param PhysicalAddress
  *        Supplies the physical address to map.
@@ -170,7 +170,7 @@ MmMapHardwareMemory(IN PHYSICAL_ADDRESS PhysicalAddress,
     PHARDWARE_PTE PtePointer;
 
     /* Initialize variables */
-    BaseAddress = MmpHalHeapStart;
+    BaseAddress = MmpHardwareHeapStart;
     MappedPages = 0;
     ReturnAddress = BaseAddress;
     *VirtualAddress = NULL;
@@ -206,10 +206,10 @@ MmMapHardwareMemory(IN PHYSICAL_ADDRESS PhysicalAddress,
     ReturnAddress = (PVOID)(ULONG_PTR)(BaseAddress + PAGE_OFFSET(PhysicalAddress.LowPart));
 
     /* Check if base address starts at the beginning of the heap */
-    if(BaseAddress == MmpHalHeapStart)
+    if(BaseAddress == MmpHardwareHeapStart)
     {
         /* Move heap beyond base address */
-        MmpHalHeapStart = (PVOID)((ULONG_PTR)BaseAddress + ((ULONG_PTR)PageCount << MM_PAGE_SHIFT));
+        MmpHardwareHeapStart = (PVOID)((ULONG_PTR)BaseAddress + ((ULONG_PTR)PageCount << MM_PAGE_SHIFT));
     }
 
     /* Iterate through mapped pages */
@@ -339,8 +339,8 @@ MmUnmapHardwareMemory(IN PVOID VirtualAddress,
     PHARDWARE_PTE PtePointer;
     PFN_NUMBER Page;
 
-    /* Check if address is valid HAL memory */
-    if(VirtualAddress < (PVOID)MM_HAL_VA_START)
+    /* Check if address is valid hardware memory */
+    if(VirtualAddress < (PVOID)MM_HARDWARE_VA_START)
     {
         /* Invalid address, return error */
         return STATUS_INVALID_PARAMETER;
@@ -372,10 +372,10 @@ MmUnmapHardwareMemory(IN PVOID VirtualAddress,
     }
 
     /* Check if heap can be reused */
-    if(MmpHalHeapStart > VirtualAddress)
+    if(MmpHardwareHeapStart > VirtualAddress)
     {
         /* Free VA space */
-        MmpHalHeapStart = VirtualAddress;
+        MmpHardwareHeapStart = VirtualAddress;
     }
 
     /* Return success */

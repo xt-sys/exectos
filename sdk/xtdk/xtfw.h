@@ -48,7 +48,7 @@ typedef enum _LOADER_MEMORY_TYPE
     LoaderBBTMemory,
     LoaderReserve,
     LoaderXIPRom,
-    LoaderHALCachedMemory,
+    LoaderHardwareCachedMemory,
     LoaderMaximum
 } LOADER_MEMORY_TYPE, *PLOADER_MEMORY_TYPE;
 
