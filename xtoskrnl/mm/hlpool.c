@@ -27,9 +27,9 @@
  */
 XTAPI
 XTSTATUS
-MmAllocateHalMemory(IN PFN_NUMBER PageCount,
-                    IN BOOLEAN Aligned,
-                    OUT PULONG_PTR Buffer)
+MmAllocateHardwareMemory(IN PFN_NUMBER PageCount,
+                         IN BOOLEAN Aligned,
+                         OUT PULONG_PTR Buffer)
 {
     PLOADER_MEMORY_DESCRIPTOR Descriptor, ExtraDescriptor, HalDescriptor;
     PFN_NUMBER Alignment, MaxPage;
@@ -160,10 +160,10 @@ MmAllocateHalMemory(IN PFN_NUMBER PageCount,
  */
 XTAPI
 XTSTATUS
-MmMapHalMemory(IN PHYSICAL_ADDRESS PhysicalAddress,
-               IN PFN_NUMBER PageCount,
-               IN BOOLEAN FlushTlb,
-               OUT PVOID *VirtualAddress)
+MmMapHardwareMemory(IN PHYSICAL_ADDRESS PhysicalAddress,
+                    IN PFN_NUMBER PageCount,
+                    IN BOOLEAN FlushTlb,
+                    OUT PVOID *VirtualAddress)
 {
     PVOID BaseAddress, ReturnAddress;
     PFN_NUMBER MappedPages;
@@ -255,8 +255,8 @@ MmMapHalMemory(IN PHYSICAL_ADDRESS PhysicalAddress,
  */
 XTAPI
 VOID
-MmMarkHalMemoryWriteThrough(IN PVOID VirtualAddress,
-                            IN PFN_NUMBER PageCount)
+MmMarkHardwareMemoryWriteThrough(IN PVOID VirtualAddress,
+                                 IN PFN_NUMBER PageCount)
 {
     PHARDWARE_PTE PtePointer;
     PFN_NUMBER Page;
@@ -292,9 +292,9 @@ MmMarkHalMemoryWriteThrough(IN PVOID VirtualAddress,
  */
 XTAPI
 VOID
-MmRemapHalMemory(IN PVOID VirtualAddress,
-                 IN PHYSICAL_ADDRESS PhysicalAddress,
-                 IN BOOLEAN FlushTlb)
+MmRemapHardwareMemory(IN PVOID VirtualAddress,
+                      IN PHYSICAL_ADDRESS PhysicalAddress,
+                      IN BOOLEAN FlushTlb)
 {
     PHARDWARE_PTE PtePointer;
 
@@ -332,9 +332,9 @@ MmRemapHalMemory(IN PVOID VirtualAddress,
  */
 XTAPI
 XTSTATUS
-MmUnmapHalMemory(IN PVOID VirtualAddress,
-                 IN PFN_NUMBER PageCount,
-                 IN BOOLEAN FlushTlb)
+MmUnmapHardwareMemory(IN PVOID VirtualAddress,
+                      IN PFN_NUMBER PageCount,
+                      IN BOOLEAN FlushTlb)
 {
     PHARDWARE_PTE PtePointer;
     PFN_NUMBER Page;

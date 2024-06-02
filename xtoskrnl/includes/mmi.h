@@ -15,9 +15,9 @@
 /* Memory Manager routines forward references */
 XTAPI
 XTSTATUS
-MmAllocateHalMemory(IN PFN_NUMBER PageCount,
-                    IN BOOLEAN Aligned,
-                    OUT PULONG_PTR Buffer);
+MmAllocateHardwareMemory(IN PFN_NUMBER PageCount,
+                         IN BOOLEAN Aligned,
+                         OUT PULONG_PTR Buffer);
 
 XTAPI
 XTSTATUS
@@ -45,35 +45,31 @@ MmFreeProcessorStructures(IN PVOID StructuresData);
 
 XTAPI
 VOID
-MmInitializeHardware(VOID);
-
-XTAPI
-VOID
 MmInitializeMemoryManager(VOID);
 
 XTAPI
 XTSTATUS
-MmMapHalMemory(IN PHYSICAL_ADDRESS PhysicalAddress,
-               IN PFN_NUMBER PageCount,
-               IN BOOLEAN FlushTlb,
-               OUT PVOID *VirtualAddress);
+MmMapHardwareMemory(IN PHYSICAL_ADDRESS PhysicalAddress,
+                    IN PFN_NUMBER PageCount,
+                    IN BOOLEAN FlushTlb,
+                    OUT PVOID *VirtualAddress);
 
 XTAPI
 VOID
-MmMarkHalMemoryWriteThrough(IN PVOID VirtualAddress,
-                            IN PFN_NUMBER PageCount);
+MmMarkHardwareMemoryWriteThrough(IN PVOID VirtualAddress,
+                                 IN PFN_NUMBER PageCount);
 
 XTAPI
 VOID
-MmRemapHalMemory(IN PVOID VirtualAddress,
-                 IN PHYSICAL_ADDRESS PhysicalAddress,
-                 IN BOOLEAN FlushTlb);
+MmRemapHardwareMemory(IN PVOID VirtualAddress,
+                      IN PHYSICAL_ADDRESS PhysicalAddress,
+                      IN BOOLEAN FlushTlb);
 
 XTAPI
 XTSTATUS
-MmUnmapHalMemory(IN PVOID VirtualAddress,
-                 IN PFN_NUMBER PageCount,
-                 IN BOOLEAN FlushTlb);
+MmUnmapHardwareMemory(IN PVOID VirtualAddress,
+                      IN PFN_NUMBER PageCount,
+                      IN BOOLEAN FlushTlb);
 
 XTAPI
 VOID
