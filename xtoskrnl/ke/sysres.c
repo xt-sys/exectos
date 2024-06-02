@@ -118,6 +118,10 @@ KepInitializeSystemResources(VOID)
             /* Basic resource type validation */
             switch(ResourceHeader->ResourceType)
             {
+                case SystemResourceAcpi:
+                    /* ACPI system resource */
+                    ResourceSize = sizeof(SYSTEM_RESOURCE_ACPI);
+                    break;
                 case SystemResourceFrameBuffer:
                     /* FrameBuffer system resource */
                     ResourceSize = sizeof(SYSTEM_RESOURCE_FRAMEBUFFER);

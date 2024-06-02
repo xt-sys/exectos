@@ -187,6 +187,7 @@ typedef enum _MODE
 typedef enum _SYSTEM_RESOURCE_TYPE
 {
     SystemResourceInvalid,
+    SystemResourceAcpi,
     SystemResourceFrameBuffer
 } SYSTEM_RESOURCE_TYPE, *PSYSTEM_RESOURCE_TYPE;
 
@@ -517,6 +518,13 @@ typedef struct _SYSTEM_RESOURCE_HEADER
     PVOID VirtualAddress;
     BOOLEAN Acquired;
 } SYSTEM_RESOURCE_HEADER, *PSYSTEM_RESOURCE_HEADER;
+
+/* ACPI system resource structure definition */
+typedef struct _SYSTEM_RESOURCE_ACPI
+{
+    SYSTEM_RESOURCE_HEADER Header;
+    PVOID ApicBase;
+} SYSTEM_RESOURCE_ACPI, *PSYSTEM_RESOURCE_ACPI;
 
 /* FrameBuffer system resource structure definition */
 typedef struct _SYSTEM_RESOURCE_FRAMEBUFFER
