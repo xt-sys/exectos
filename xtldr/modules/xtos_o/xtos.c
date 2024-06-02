@@ -120,18 +120,21 @@ XtGetSystemResourcesList(IN PXTBL_PAGE_MAPPING PageMap,
 {
     XTSTATUS Status;
     EFI_HANDLE ProtocolHandle;
+    EFI_GUID AcpiGuid = XT_ACPI_PROTOCOL_GUID;
     EFI_GUID FrameBufGuid = XT_FRAMEBUFFER_PROTOCOL_GUID;
+    PXTBL_ACPI_PROTOCOL AcpiProtocol;
     PXTBL_FRAMEBUFFER_PROTOCOL FrameBufProtocol;
     XTBL_FRAMEBUFFER_MODE_INFORMATION FbModeInfo;
     EFI_PHYSICAL_ADDRESS FbAddress;
     ULONG_PTR FbSize;
     UINT FrameBufferPages;
     PSYSTEM_RESOURCE_FRAMEBUFFER FrameBufferResource;
+    PSYSTEM_RESOURCE_ACPI AcpiResource;
     ULONGLONG Pages;
     EFI_PHYSICAL_ADDRESS Address;
-    PVOID VirtualBase;
+    PVOID PhysicalBase, VirtualBase;
 
-    Pages = (ULONGLONG)EFI_SIZE_TO_PAGES(3 * sizeof(SYSTEM_RESOURCE_FRAMEBUFFER));
+    Pages = (ULONGLONG)EFI_SIZE_TO_PAGES(sizeof(SYSTEM_RESOURCE_ACPI) + sizeof(SYSTEM_RESOURCE_FRAMEBUFFER));
 
     Status = XtLdrProtocol->Memory.AllocatePages(Pages, &Address);
     if(Status != STATUS_EFI_SUCCESS)
@@ -145,12 +148,41 @@ XtGetSystemResourcesList(IN PXTBL_PAGE_MAPPING PageMap,
         return Status;
     }
 
-    FrameBufferResource = (PSYSTEM_RESOURCE_FRAMEBUFFER)Address;
-    PVOID PhysicalBase = (PVOID)Address;
+    PhysicalBase = (PVOID)Address;
     VirtualBase = *VirtualAddress;
 
     /* Calculate next valid virtual address */
     *VirtualAddress += (UINT_PTR)(Pages * EFI_PAGE_SIZE);
+
+    AcpiResource = (PSYSTEM_RESOURCE_ACPI)Address;
+
+    RtlZeroMemory(AcpiResource, sizeof(SYSTEM_RESOURCE_ACPI));
+
+    /* Load FrameBuffer protocol */
+    Status = XtLdrProtocol->Protocol.Open(&ProtocolHandle, (PVOID*)&AcpiProtocol, &AcpiGuid);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        return Status;
+    }
+
+    AcpiResource->Header.ResourceType = SystemResourceAcpi;
+    AcpiResource->Header.ResourceSize = sizeof(SYSTEM_RESOURCE_ACPI);
+
+    /* Get APIC and XSDP/RSDP addresses */
+    AcpiProtocol->GetApicBase(&AcpiResource->ApicBase);
+    AcpiProtocol->GetAcpiDescriptionPointer(&AcpiResource->Header.PhysicalAddress);
+
+    /* No need to map ACPI */
+    AcpiResource->Header.VirtualAddress = 0;
+
+    RtlInsertTailList(SystemResourcesList, &AcpiResource->Header.ListEntry);
+
+    /* Close FrameBuffer protocol */
+    XtLdrProtocol->Protocol.Close(ProtocolHandle, &FrameBufGuid);
+
+    Address = Address + sizeof(SYSTEM_RESOURCE_ACPI);
+
+    FrameBufferResource = (PSYSTEM_RESOURCE_FRAMEBUFFER)Address;
 
     RtlZeroMemory(FrameBufferResource, sizeof(SYSTEM_RESOURCE_FRAMEBUFFER));
 
