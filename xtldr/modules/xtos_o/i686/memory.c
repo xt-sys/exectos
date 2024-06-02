@@ -21,7 +21,7 @@
  */
 XTCDECL
 EFI_STATUS
-XtMapHalMemory(IN PXTBL_PAGE_MAPPING PageMap)
+XtMapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
 {
     EFI_PHYSICAL_ADDRESS Address;
     PHARDWARE_PTE PdeBase;
@@ -42,19 +42,19 @@ XtMapHalMemory(IN PXTBL_PAGE_MAPPING PageMap)
     if(PageMap->PageMapLevel == 3)
     {
         /* Get PDE base address (PAE enabled) */
-        PdeBase = (PHARDWARE_PTE)(((PHARDWARE_PTE)PageMap->PtePointer)[MM_HAL_VA_START >> MM_PPI_SHIFT].PageFrameNumber << MM_PAGE_SHIFT);
+        PdeBase = (PHARDWARE_PTE)(((PHARDWARE_PTE)PageMap->PtePointer)[MM_HARDWARE_VA_START >> MM_PPI_SHIFT].PageFrameNumber << MM_PAGE_SHIFT);
 
         /* Make PDE valid */
-        PdeBase[(MM_HAL_VA_START >> MM_PDI_SHIFT) & 0x1FF].PageFrameNumber = Address >> MM_PAGE_SHIFT;
-        PdeBase[(MM_HAL_VA_START >> MM_PDI_SHIFT) & 0x1FF].Valid = 1;
-        PdeBase[(MM_HAL_VA_START >> MM_PDI_SHIFT) & 0x1FF].Writable = 1;
+        PdeBase[(MM_HARDWARE_VA_START >> MM_PDI_SHIFT) & 0x1FF].PageFrameNumber = Address >> MM_PAGE_SHIFT;
+        PdeBase[(MM_HARDWARE_VA_START >> MM_PDI_SHIFT) & 0x1FF].Valid = 1;
+        PdeBase[(MM_HARDWARE_VA_START >> MM_PDI_SHIFT) & 0x1FF].Writable = 1;
     }
     else
     {
         /* Make PDE valid (PAE disabled) */
-        ((PHARDWARE_LEGACY_PTE)PageMap->PtePointer)[MM_HAL_VA_START >> MM_PDI_LEGACY_SHIFT].Valid = 1;
-        ((PHARDWARE_LEGACY_PTE)PageMap->PtePointer)[MM_HAL_VA_START >> MM_PDI_LEGACY_SHIFT].PageFrameNumber = Address >> MM_PAGE_SHIFT;
-        ((PHARDWARE_LEGACY_PTE)PageMap->PtePointer)[MM_HAL_VA_START >> MM_PDI_LEGACY_SHIFT].Writable = 1;
+        ((PHARDWARE_LEGACY_PTE)PageMap->PtePointer)[MM_HARDWARE_VA_START >> MM_PDI_LEGACY_SHIFT].Valid = 1;
+        ((PHARDWARE_LEGACY_PTE)PageMap->PtePointer)[MM_HARDWARE_VA_START >> MM_PDI_LEGACY_SHIFT].PageFrameNumber = Address >> MM_PAGE_SHIFT;
+        ((PHARDWARE_LEGACY_PTE)PageMap->PtePointer)[MM_HARDWARE_VA_START >> MM_PDI_LEGACY_SHIFT].Writable = 1;
     }
 
     /* Return success */
@@ -107,7 +107,7 @@ XtEnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
     }
 
     /* Map memory for hardware layer */
-    Status = XtMapHalMemory(PageMap);
+    Status = XtMapHardwareMemoryPool(PageMap);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to map memory for hardware layer */
