@@ -126,13 +126,6 @@ AcGetAcpiTable(IN CONST UINT Signature,
             TableHeader = (PACPI_DESCRIPTION_HEADER)(ULONG_PTR)((PULONG)Rsdt->Tables)[RsdtIndex];
         }
 
-        /* Make sure table header exists */
-        if(TableHeader == NULL)
-        {
-            /* Skip to next ACPI table */
-            continue;
-        }
-
         /* Check if previous table provided */
         if(PreviousTable != NULL)
         {
@@ -147,7 +140,7 @@ AcGetAcpiTable(IN CONST UINT Signature,
             continue;
         }
 
-        /* Verify table signature and checksum */
+        /* Verify table signature */
         if((TableHeader->Signature == Signature))
         {
             /* Found requested ACPI table */
