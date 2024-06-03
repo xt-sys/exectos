@@ -45,9 +45,9 @@ EFI_STATUS
 AcGetXsdpTable(OUT PVOID *AcpiTable);
 
 XTCDECL
-UCHAR
-AcpChecksumTable(IN PVOID Buffer,
-                 IN UINT_PTR Size);
+BOOLEAN
+AcpValidateAcpiTable(IN PVOID Buffer,
+                     IN UINT_PTR Size);
 
 XTCDECL
 EFI_STATUS

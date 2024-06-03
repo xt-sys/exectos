@@ -159,7 +159,7 @@ AcGetAcpiTable(IN CONST UINT Signature,
     if(TableHeader->Signature != ACPI_FADT_SIGNATURE || TableHeader->Revision > 2)
     {
         /* Validate table checksum */
-        if(AcpChecksumTable(TableHeader, TableHeader->Length) != 0)
+        if(!AcpValidateAcpiTable(TableHeader, TableHeader->Length))
         {
             /* Checksum mismatch, return error */
             return STATUS_EFI_CRC_ERROR;
@@ -230,7 +230,7 @@ AcGetRsdpTable(OUT PVOID *AcpiTable)
 
     /* Get RSDP (ACPI 1.0) table from system configuration tables */
     Status = XtLdrProtocol->Util.GetConfigurationTable(&AcpiGuid, &RsdpTable);
-    if(Status != STATUS_EFI_SUCCESS || AcpChecksumTable(RsdpTable, 20) != 0)
+    if(Status != STATUS_EFI_SUCCESS || !AcpValidateAcpiTable(RsdpTable, 20))
     {
         /* RSDP not found or checksum mismatch */
         *AcpiTable = NULL;
@@ -262,7 +262,7 @@ AcGetSMBiosTable(OUT PVOID *SmBiosTable)
 
     /* Get SMBIOS table from system configuration tables */
     Status = XtLdrProtocol->Util.GetConfigurationTable(&SmBiosGuid, (PVOID)&SmBios);
-    if(Status != STATUS_EFI_SUCCESS || AcpChecksumTable(SmBios, SmBios->Length) != 0)
+    if(Status != STATUS_EFI_SUCCESS || !AcpValidateAcpiTable(SmBios, SmBios->Length))
     {
         /* SMBIOS not found or checksum mismatch */
         *SmBiosTable = NULL;
@@ -294,7 +294,7 @@ AcGetSMBios3Table(OUT PVOID *SmBiosTable)
 
     /* Get SMBIOS3 table from system configuration tables */
     Status = XtLdrProtocol->Util.GetConfigurationTable(&SmBios3Guid, (PVOID)&SmBios);
-    if(Status != STATUS_EFI_SUCCESS || AcpChecksumTable(SmBios, SmBios->Length) != 0)
+    if(Status != STATUS_EFI_SUCCESS || !AcpValidateAcpiTable(SmBios, SmBios->Length))
     {
         /* SMBIOS3 not found or checksum mismatch */
         *SmBiosTable = NULL;
@@ -326,7 +326,7 @@ AcGetXsdpTable(OUT PVOID *AcpiTable)
 
     /* Get XSDP (ACPI 2.0) from system configuration tables */
     Status = XtLdrProtocol->Util.GetConfigurationTable(&AcpiGuid, &XsdpTable);
-    if(Status != STATUS_EFI_SUCCESS || AcpChecksumTable(XsdpTable, 36) != 0)
+    if(Status != STATUS_EFI_SUCCESS || !AcpValidateAcpiTable(XsdpTable, 36))
     {
         /* XSDP not found or checksum mismatch */
         *AcpiTable = NULL;
@@ -339,7 +339,7 @@ AcGetXsdpTable(OUT PVOID *AcpiTable)
 }
 
 /**
- * Checksums a given ACPI table.
+ * Validates given ACPI table by calculating its checksum.
  *
  * @param Buffer
  *        Supplies a pointer to the table to checksum.
@@ -347,12 +347,12 @@ AcGetXsdpTable(OUT PVOID *AcpiTable)
  * @param Size
  *        Supplies the size of the table, in bytes.
  *
- * @return This routine returns the calculated checksum.
+ * @return This routine returns TRUE if the table is valid, or FALSE otherwise.
  */
 XTCDECL
-UCHAR
-AcpChecksumTable(IN PVOID Buffer,
-                 IN UINT_PTR Size)
+BOOLEAN
+AcpValidateAcpiTable(IN PVOID Buffer,
+                     IN UINT_PTR Size)
 {
     PUCHAR Pointer;
     UCHAR Sum;
@@ -370,7 +370,7 @@ AcpChecksumTable(IN PVOID Buffer,
     }
 
     /* Return calculated checksum */
-    return Sum;
+    return (Sum == 0) ? TRUE : FALSE;
 }
 
 /**
