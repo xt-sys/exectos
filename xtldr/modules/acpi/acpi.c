@@ -148,16 +148,34 @@ AcGetAcpiTable(IN CONST UINT Signature,
         }
 
         /* Verify table signature and checksum */
-        if((TableHeader->Signature == Signature) && (AcpChecksumTable(TableHeader, TableHeader->Length) == 0))
+        if((TableHeader->Signature == Signature))
         {
-            /* Found valid ACPI table */
-            *AcpiTable = TableHeader;
-            return STATUS_EFI_SUCCESS;
+            /* Found requested ACPI table */
+            break;
         }
     }
 
-    /* ACPI table not found */
-    return STATUS_EFI_NOT_FOUND;
+    /* Make sure table was found */
+    if(TableHeader->Signature != Signature)
+    {
+        /* ACPI table not found, return error */
+        return STATUS_EFI_NOT_FOUND;
+    }
+
+    /* Don't validate FADT on old, broken firmwares with ACPI 2.0 or older */
+    if(TableHeader->Signature != ACPI_FADT_SIGNATURE || TableHeader->Revision > 2)
+    {
+        /* Validate table checksum */
+        if(AcpChecksumTable(TableHeader, TableHeader->Length) != 0)
+        {
+            /* Checksum mismatch, return error */
+            return STATUS_EFI_CRC_ERROR;
+        }
+    }
+
+    /* Found valid ACPI table, return success */
+    *AcpiTable = TableHeader;
+    return STATUS_EFI_SUCCESS;
 }
 
 /**
