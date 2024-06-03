@@ -231,7 +231,7 @@ typedef struct _ACPI_RSDT
 {
     ACPI_DESCRIPTION_HEADER Header;
     ULONG Tables[];
-} PACKED ACPI_RSDT, *PACPI_RSDT;
+} ACPI_RSDT, *PACPI_RSDT;
 
 /* ACPI eXtended Root System Description Table (XSDT) structure */
 typedef struct _ACPI_XSDT
