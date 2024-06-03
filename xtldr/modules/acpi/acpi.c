@@ -118,12 +118,12 @@ AcGetAcpiTable(IN CONST UINT Signature,
         if(Xsdp)
         {
             /* Get table header from XSDT */
-            TableHeader = (PACPI_DESCRIPTION_HEADER)(ULONG_PTR)((PULONGLONG)Rsdt->Entries)[RsdtIndex];
+            TableHeader = (PACPI_DESCRIPTION_HEADER)(ULONG_PTR)((PULONGLONG)Rsdt->Tables)[RsdtIndex];
         }
         else
         {
             /* Get table header from RSDT */
-            TableHeader = (PACPI_DESCRIPTION_HEADER)(ULONG_PTR)((PULONG)Rsdt->Entries)[RsdtIndex];
+            TableHeader = (PACPI_DESCRIPTION_HEADER)(ULONG_PTR)((PULONG)Rsdt->Tables)[RsdtIndex];
         }
 
         /* Make sure table header exists */
@@ -148,7 +148,7 @@ AcGetAcpiTable(IN CONST UINT Signature,
         }
 
         /* Verify table signature and checksum */
-        if((*(PLONG)TableHeader->Signature == Signature) && (AcpChecksumTable(TableHeader, TableHeader->Length) == 0))
+        if((TableHeader->Signature == Signature) && (AcpChecksumTable(TableHeader, TableHeader->Length) == 0))
         {
             /* Found valid ACPI table */
             *AcpiTable = TableHeader;

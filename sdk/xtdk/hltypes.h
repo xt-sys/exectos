@@ -9,25 +9,54 @@
 #ifndef __XTDK_HLTYPES_H
 #define __XTDK_HLTYPES_H
 
+#include <xtbase.h>
 #include <xtdefs.h>
 #include <xttypes.h>
 
 
+/* ACPI Root System Description Pointer (RSDP) signature */
+#define ACPI_RSDP_SIGNATURE         0x2052545020445352
+
 /* ACPI table signatures */
-#define ACPI_APIC_SIGNATURE         0x43495041 /* MADT/APIC Description Table */
+#define ACPI_BERT_SIGNATURE         0x54524542 /* Boot Error Record Table */
 #define ACPI_BGRT_SIGNATURE         0x54524742 /* Boot Graphics Record Table */
+#define ACPI_BOOT_SIGNATURE         0x544F4F42 /* ACPI BOOT Table */
+#define ACPI_CPEP_SIGNATURE         0x50455043 /* Corrected Platform Error Polling Table */
+#define ACPI_DBG2_SIGNATURE         0x32474244 /* Debug Port Table v2 */
 #define ACPI_DBGP_SIGNATURE         0x50474244 /* Debug Port Table */
+#define ACPI_DMAR_SIGNATURE         0x52414D44 /* DMA Remapping Table */
 #define ACPI_DSDT_SIGNATURE         0x54445344 /* Differentiated System Description Table */
+#define ACPI_ECDT_SIGNATURE         0x54444345 /* Embedded Controller Description Table */
+#define ACPI_ERST_SIGNATURE         0x54535245 /* Error Record Serialization Table */
+#define ACPI_FACS_SIGNATURE         0x53434146 /* Firmware ACPI Control Structure */
 #define ACPI_FADT_SIGNATURE         0x50434146 /* Fixed ACPI Description Table */
+#define ACPI_FBPT_SIGNATURE         0x54504246 /* Firmware Boot Performance Table */
+#define ACPI_FPDT_SIGNATURE         0x54445046 /* Firmware Performance Data Table */
 #define ACPI_GTDT_SIGNATURE         0x54445447 /* Generic Timer Description Table */
 #define ACPI_HPET_SIGNATURE         0x54455048 /* High Precision Event Timer */
+#define ACPI_IVRS_SIGNATURE         0x53525649 /* AMD IOMMU Resource Table */
+#define ACPI_MADT_SIGNATURE         0x43495041 /* MADT/APIC Description Table */
 #define ACPI_MCFG_SIGNATURE         0x4746434D /* Memory Mapped Configuration Space Access Table */
+#define ACPI_MPST_SIGNATURE         0x5453504D /* Memory Power State Table*/
+#define ACPI_MSCT_SIGNATURE         0x5443534D /* Maximum System Characteristics Table */
+#define ACPI_NFIT_SIGNATURE         0x5449464E /* NVDIMM Firmware Interface Table */
+#define ACPI_PMMT_SIGNATURE         0x544D4D50 /* Platform Memory Topology Table */
 #define ACPI_PSDT_SIGNATURE         0x54445350 /* Persistent System Description Table */
+#define ACPI_RAS2_SIGNATURE         0x32534152 /* ACPI RAS2 Feature Table */
+#define ACPI_RASF_SIGNATURE         0x46534152 /* ACPI RAS Feature Table */
 #define ACPI_RSDT_SIGNATURE         0x54445352 /* Root System Description Table */
 #define ACPI_SBST_SIGNATURE         0x54534253 /* Smart Battery Subsystem Table */
-#define ACPI_SSDT_SIGNATURE         0x54445353 /* Secondary System Descriptor Table */
+#define ACPI_SDEV_SIGNATURE         0x56454453 /* Secure Device Table */
+#define ACPI_SLIT_SIGNATURE         0x54494C53 /* System Locality Distance Information Table */
+#define ACPI_SPCR_SIGNATURE         0x52435053 /* Serial Port Console Redirection Table */
 #define ACPI_SRAT_SIGNATURE         0x54415253 /* Static Resource Affinity Table */
+#define ACPI_SSDT_SIGNATURE         0x54445353 /* Secondary System Descriptor Table */
+#define ACPI_TPM2_SIGNATURE         0x324D5054 /* ACPI TPM 2.0 Table */
+#define ACPI_WAET_SIGNATURE         0x54454157 /* Windows ACPI Enlightenment Table */
+#define ACPI_WDAT_SIGNATURE         0x54414457 /* Watch Dog Action Table */
 #define ACPI_WDTT_SIGNATURE         0x54524457 /* Watchdog Timer Resource Table */
+#define ACPI_WPBT_SIGNATURE         0x54425057 /* Windows Platform Binary Table */
+#define ACPI_WSMT_SIGNATURE         0x544D5357 /* Windows SMM Security Mitigation Table */
 #define ACPI_XSDT_SIGNATURE         0x54445358 /* eXtended System Descriptor Table */
 
 /* Default serial port settings */
@@ -152,10 +181,20 @@ typedef enum _HAL_APIC_MODE
     APIC_MODE_X2APIC
 } HAL_APIC_MODE, *PHAL_APIC_MODE;
 
+/* Generic Address structure */
+typedef struct _GENERIC_ADDRESS
+{
+    UCHAR AddressSpaceID;
+    UCHAR BitWidth;
+    UCHAR BitOffset;
+    UCHAR Reserved;
+    PHYSICAL_ADDRESS Address;
+} GENERIC_ADDRESS, *PGENERIC_ADDRESS;
+
 /* Each ACPI table description header structure */
 typedef struct _ACPI_DESCRIPTION_HEADER
 {
-    UCHAR Signature[4];
+    ULONG Signature;
     ULONG Length;
     UCHAR Revision;
     UCHAR Checksum;
@@ -164,12 +203,19 @@ typedef struct _ACPI_DESCRIPTION_HEADER
     ULONG OemRevision;
     UCHAR CreatorID[4];
     ULONG CreatorRev;
-} PACKED ACPI_DESCRIPTION_HEADER, *PACPI_DESCRIPTION_HEADER;
+} ACPI_DESCRIPTION_HEADER, *PACPI_DESCRIPTION_HEADER;
 
-/* ACPI Root System Description Table Pointer structure */
+/* ACPI cache list */
+typedef struct _ACPI_CACHE_LIST
+{
+    LIST_ENTRY ListEntry;
+    ACPI_DESCRIPTION_HEADER Header;
+} ACPI_CACHE_LIST, *PACPI_CACHE_LIST;
+
+/* ACPI Root System Description Table Pointer (RSDP) structure */
 typedef struct _ACPI_RSDP
 {
-    UCHAR Signature[8];
+    ULONGLONG Signature;
     UCHAR Checksum;
     UCHAR OemId[6];
     UCHAR Revision;
@@ -178,14 +224,81 @@ typedef struct _ACPI_RSDP
     ULONGLONG XsdtAddress;
     UCHAR XChecksum;
     UCHAR Reserved[3];
-} PACKED ACPI_RSDP, *PACPI_RSDP;
+} ACPI_RSDP, *PACPI_RSDP;
 
-/* ACPI Root System Description Table structure */
+/* ACPI Root System Description Table (RSDT) structure */
 typedef struct _ACPI_RSDT
 {
     ACPI_DESCRIPTION_HEADER Header;
-    UCHAR Entries[];
+    ULONG Tables[];
 } PACKED ACPI_RSDT, *PACPI_RSDT;
+
+/* ACPI eXtended Root System Description Table (XSDT) structure */
+typedef struct _ACPI_XSDT
+{
+    ACPI_DESCRIPTION_HEADER Header;
+    ULONGLONG Tables[];
+} PACKED ACPI_XSDT, *PACPI_XSDT;
+
+/* Fixed ACPI Description Table (FADT) structure */
+typedef struct _ACPI_FADT
+{
+    ACPI_DESCRIPTION_HEADER Header;
+    ULONG Facs;
+    ULONG Dsdt;
+    UCHAR IntModel;
+    UCHAR PmProfile;
+    USHORT SciIntVector;
+    ULONG SmiCmdIoPort;
+    UCHAR AcpiOnValue;
+    UCHAR AcpiOffValue;
+    UCHAR S4BiosReq;
+    UCHAR PStateControl;
+    ULONG Pm1aEvtBlkIoPort;
+    ULONG Pm1bEvtBlkIoPort;
+    ULONG Pm1aCtrlBlkIoPort;
+    ULONG Pm1bCtrlBlkIoPort;
+    ULONG Pm2CtrlBlkIoPort;
+    ULONG PmTmrBlkIoPort;
+    ULONG Gp0BlkIoPort;
+    ULONG Gp1BlkIoPort;
+    UCHAR Pm1EvtLen;
+    UCHAR Pm1CtrlLen;
+    UCHAR Pm2CtrlLen;
+    UCHAR PmTmrLen;
+    UCHAR Gp0BlkLen;
+    UCHAR Gp1BlkLen;
+    UCHAR Gp1Base;
+    UCHAR CStateControl;
+    USHORT Lvl2Latency;
+    USHORT Lvl3Latency;
+    USHORT FlushSize;
+    USHORT FlushStride;
+    UCHAR DutyOffset;
+    UCHAR DutyWidth;
+    UCHAR DayAlarmIndex;
+    UCHAR MonthAlarmIndex;
+    UCHAR CenturyAlarmIndex;
+    USHORT BootArch;
+    UCHAR Reserved0;
+    ULONG Flags;
+    GENERIC_ADDRESS ResetReg;
+    UCHAR ResetVal;
+    USHORT ArmBootArch;
+    UCHAR Reserved1;
+    PHYSICAL_ADDRESS XFirmwareCtrl;
+    PHYSICAL_ADDRESS XDsdt;
+    GENERIC_ADDRESS XPm1aEvtBlk;
+    GENERIC_ADDRESS XPm1bEvtBlk;
+    GENERIC_ADDRESS XPm1aCtrlBlk;
+    GENERIC_ADDRESS XPm1bCtrlBlk;
+    GENERIC_ADDRESS XPm2CtrlBlk;
+    GENERIC_ADDRESS XPmTmrBlk;
+    GENERIC_ADDRESS XGp0Blk;
+    GENERIC_ADDRESS XGp1Blk;
+    GENERIC_ADDRESS SleepControlReg;
+    GENERIC_ADDRESS SleepStatusReg;
+} ACPI_FADT, *PACPI_FADT;
 
 /* Serial (COM) port initial state */
 typedef struct _CPPORT
