@@ -188,7 +188,7 @@ HlpHandlePicSpuriousService(VOID)
  */
 XTAPI
 VOID
-HlpInitializeApic()
+HlpInitializeApic(VOID)
 {
     APIC_SPURIOUS_REGISTER SpuriousRegister;
     APIC_COMMAND_REGISTER CommandRegister;
@@ -301,7 +301,7 @@ HlpInitializeApic()
  */
 XTAPI
 VOID
-HlpInitializePic()
+HlpInitializePic(VOID)
 {
     /* Disable legacy PIC and initialize APIC */
     HlDisableLegacyPic();
