@@ -244,7 +244,7 @@ typedef struct _ACPI_XSDT
 typedef struct _ACPI_FADT
 {
     ACPI_DESCRIPTION_HEADER Header;
-    ULONG Facs;
+    ULONG FirmwareCtrl;
     ULONG Dsdt;
     UCHAR IntModel;
     UCHAR PmProfile;

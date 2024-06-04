@@ -11,6 +11,7 @@
 
 #include <xtos.h>
 
+
 /* HAL library routines forward references */
 XTAPI
 VOID
@@ -39,10 +40,18 @@ HlDrawPixel(IN ULONG PosX,
             IN ULONG PosY,
             IN ULONG Color);
 
+XTAPI
+XTSTATUS
+HlGetAcpiSystemDescriptionPointer(OUT PACPI_RSDP *Rsdp);
+
+XTAPI
+XTSTATUS
+HlGetAcpiTable(IN ULONG Signature,
+               OUT PACPI_DESCRIPTION_HEADER *AcpiTable);
+
 XTFASTCALL
 KRUNLEVEL
 HlGetRunLevel(VOID);
-
 
 XTCDECL
 XTSTATUS
@@ -71,7 +80,38 @@ VOID
 HlSetRunLevel(IN KRUNLEVEL RunLevel);
 
 XTAPI
+VOID
+HlpCacheAcpiTable(IN PACPI_DESCRIPTION_HEADER AcpiTable);
+
+XTAPI
+XTSTATUS
+HlpInitializeAcpi(VOID);
+
+XTAPI
+XTSTATUS
+HlpInitializeAcpiCache(VOID);
+
+XTAPI
+XTSTATUS
+HlpInitializeAcpiSystemDescriptionTable(OUT PACPI_DESCRIPTION_HEADER *AcpiTable);
+
+XTAPI
+XTSTATUS
+HlpQueryAcpiCache(IN ULONG Signature,
+                  OUT PACPI_DESCRIPTION_HEADER *AcpiTable);
+
+XTAPI
+XTSTATUS
+HlpQueryAcpiTables(IN ULONG Signature,
+                   OUT PACPI_DESCRIPTION_HEADER *AcpiTable);
+
+XTAPI
 ULONG
 HlpRGBColor(IN ULONG Color);
+
+XTAPI
+BOOLEAN
+HlpValidateAcpiTable(IN PVOID Buffer,
+                     IN UINT_PTR Size);
 
 #endif /* __XTOSKRNL_HLI_H */

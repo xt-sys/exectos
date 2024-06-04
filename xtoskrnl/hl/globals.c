@@ -9,6 +9,12 @@
 #include <xtos.h>
 
 
+/* ACPI tables cache list */
+LIST_ENTRY HlpAcpiCacheList;
+
+/* ACPI Root System Description Pointer (RSDP) */
+PACPI_RSDP HlpAcpiRsdp;
+
 /* Active processors count */
 KAFFINITY HlpActiveProcessors;
 

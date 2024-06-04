@@ -348,6 +348,8 @@ AcGetXsdpTable(OUT PVOID *AcpiTable)
  *        Supplies the size of the table, in bytes.
  *
  * @return This routine returns TRUE if the table is valid, or FALSE otherwise.
+ *
+ * @since XT 1.0
  */
 XTCDECL
 BOOLEAN
