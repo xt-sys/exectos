@@ -18,6 +18,7 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/hl/cport.c
     ${XTOSKRNL_SOURCE_DIR}/hl/fbdev.c
     ${XTOSKRNL_SOURCE_DIR}/hl/globals.c
+    ${XTOSKRNL_SOURCE_DIR}/hl/init.c
     ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/cpu.c
     ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/pic.c
     ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/ioport.c

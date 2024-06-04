@@ -69,6 +69,10 @@ VOID
 HlInitializeProcessor();
 
 XTAPI
+XTSTATUS
+HlInitializeSystem(VOID);
+
+XTAPI
 VOID
 HlPutCharacter(IN ULONG PositionX,
                IN ULONG PositionY,

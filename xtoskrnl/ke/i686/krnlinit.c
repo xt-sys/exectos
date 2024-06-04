@@ -20,6 +20,16 @@ XTAPI
 VOID
 KepInitializeKernel(VOID)
 {
+    XTSTATUS Status;
+
+    /* Initialize hardware layer subsystem */
+    Status = HlInitializeSystem();
+    if(Status != STATUS_SUCCESS)
+    {
+        /* Hardware layer initialization failed, kernel panic */
+        DebugPrint(L"Failed to initialize hardware layer subsystem!\n");
+        KePanic(0);
+    }
 }
 
 /**
