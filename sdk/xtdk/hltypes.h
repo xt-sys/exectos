@@ -59,6 +59,13 @@
 #define ACPI_WSMT_SIGNATURE         0x544D5357 /* Windows SMM Security Mitigation Table */
 #define ACPI_XSDT_SIGNATURE         0x54445358 /* eXtended System Descriptor Table */
 
+/* ACPI FADT flags masks */
+#define ACPI_FADT_32BIT_TIMER       (1<<8)
+
+/* ACPI Timer bit masks */
+#define ACPI_FADT_TIMER_32BIT       0x80000000
+#define ACPI_FADT_TIMER_24BIT       0x00800000
+
 /* Default serial port settings */
 #define COMPORT_CLOCK_RATE          0x1C200
 #define COMPORT_WAIT_TIMEOUT        204800
@@ -205,7 +212,7 @@ typedef struct _ACPI_DESCRIPTION_HEADER
     ULONG CreatorRev;
 } ACPI_DESCRIPTION_HEADER, *PACPI_DESCRIPTION_HEADER;
 
-/* ACPI cache list */
+/* ACPI cache list structure */
 typedef struct _ACPI_CACHE_LIST
 {
     LIST_ENTRY ListEntry;
@@ -299,6 +306,13 @@ typedef struct _ACPI_FADT
     GENERIC_ADDRESS SleepControlReg;
     GENERIC_ADDRESS SleepStatusReg;
 } ACPI_FADT, *PACPI_FADT;
+
+/* ACPI Timer information structure */
+typedef struct _ACPI_TIMER_INFO
+{
+    ULONG TimerPort;
+    ULONG MsbMask;
+} ACPI_TIMER_INFO, *PACPI_TIMER_INFO;
 
 /* Serial (COM) port initial state */
 typedef struct _CPPORT

@@ -97,6 +97,10 @@ HlpInitializeAcpiSystemDescriptionTable(OUT PACPI_DESCRIPTION_HEADER *AcpiTable)
 
 XTAPI
 XTSTATUS
+HlpInitializeAcpiTimer(VOID);
+
+XTAPI
+XTSTATUS
 HlpQueryAcpiCache(IN ULONG Signature,
                   OUT PACPI_DESCRIPTION_HEADER *AcpiTable);
 

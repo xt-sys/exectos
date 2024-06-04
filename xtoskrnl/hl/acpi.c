@@ -121,6 +121,9 @@ HlpInitializeAcpi(VOID)
         return STATUS_NOT_FOUND;
     }
 
+    /* Initialize ACPI timer */
+    HlpInitializeAcpiTimer();
+
     /* Return success */
     return STATUS_SUCCESS;
 }
@@ -248,6 +251,47 @@ HlpInitializeAcpiSystemDescriptionTable(OUT PACPI_DESCRIPTION_HEADER *AcpiTable)
 
     /* Get ACPI table header and return success */
     *AcpiTable = &Rsdt->Header;
+    return STATUS_SUCCESS;
+}
+
+/**
+ * Initializes the ACPI Timer.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+HlpInitializeAcpiTimer(VOID)
+{
+    PACPI_FADT Fadt;
+    XTSTATUS Status;
+
+    /* Get Fixed ACPI Description Table (FADT) */
+    Status = HlGetAcpiTable(ACPI_FADT_SIGNATURE, (PACPI_DESCRIPTION_HEADER*)&Fadt);
+    if(Status != STATUS_SUCCESS || !Fadt)
+    {
+        /* Failed to get FADT, return error */
+        return STATUS_NOT_FOUND;
+    }
+
+    /* Set ACPI timer port address */
+    HlpAcpiTimerInfo.TimerPort = Fadt->PmTmrBlkIoPort;
+
+    /* Determine whether 32-bit or 24-bit timer is used */
+    if(Fadt->Flags & ACPI_FADT_32BIT_TIMER)
+    {
+        /* 32-bit timer */
+        HlpAcpiTimerInfo.MsbMask = ACPI_FADT_TIMER_32BIT;
+    }
+    else
+    {
+        /* 24-bit timer */
+        HlpAcpiTimerInfo.MsbMask = ACPI_FADT_TIMER_24BIT;
+    }
+
+    /* Return success */
     return STATUS_SUCCESS;
 }
 

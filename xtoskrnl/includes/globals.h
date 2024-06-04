@@ -18,6 +18,9 @@ EXTERN LIST_ENTRY HlpAcpiCacheList;
 /* ACPI Root System Description Pointer (RSDP) */
 EXTERN PACPI_RSDP HlpAcpiRsdp;
 
+/* ACPI timer information */
+EXTERN ACPI_TIMER_INFO HlpAcpiTimerInfo;
+
 /* Active processors count */
 EXTERN KAFFINITY HlpActiveProcessors;
 
