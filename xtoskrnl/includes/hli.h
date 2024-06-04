@@ -66,7 +66,7 @@ HlInitializeFrameBuffer(VOID);
 
 XTAPI
 VOID
-HlInitializeProcessor();
+HlInitializeProcessor(VOID);
 
 XTAPI
 XTSTATUS

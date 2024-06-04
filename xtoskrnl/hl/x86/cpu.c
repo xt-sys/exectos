@@ -21,7 +21,7 @@
  */
 XTAPI
 VOID
-HlInitializeProcessor()
+HlInitializeProcessor(VOID)
 {
     PKPROCESSOR_BLOCK ProcessorBlock;
     KAFFINITY Affinity;
