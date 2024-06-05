@@ -4,7 +4,6 @@
  * FILE:            xtoskrnl/hl/x86/pic.c
  * DESCRIPTION:     Programmable Interrupt Controller (PIC) for x86 (i686/AMD64) support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
- *                  Jozef Nagy <schkwve@gmail.com>
  */
 
 #include <xtos.h>
@@ -23,22 +22,6 @@ HlClearApicErrors(VOID)
 {
     /* Clear APIC errors */
     HlWriteApicRegister(APIC_ESR, 0);
-}
-
-/**
- * Disables the legacy 8259 Programmable Interrupt Controller (PIC).
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTAPI
-VOID
-HlDisableLegacyPic(VOID)
-{
-    /* Mask all interrupts */
-    HlIoPortOutByte(PIC1_DATA_PORT, 0xFF);
-    HlIoPortOutByte(PIC2_DATA_PORT, 0xFF);
 }
 
 /**
@@ -179,9 +162,6 @@ HlpHandlePicSpuriousService(VOID)
 /**
  * Initializes the APIC interrupt controller.
  *
- * @param CpuNumber
- *        Supplies the number of the CPU, that is being initialized.
- *
  * @return This routine does not return any value.
  *
  * @since XT 1.0
@@ -288,10 +268,82 @@ HlpInitializeApic(VOID)
 }
 
 /**
- * Initializes the (A)PIC interrupt controller.
+ * Initializes the legacy PIC interrupt controller.
  *
- * @param CpuNumber
- *        Supplies the number of the CPU, that is being initialized.
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+HlpInitializeLegacyPic(VOID)
+{
+    PIC_I8259_ICW1 Icw1;
+    PIC_I8259_ICW2 Icw2;
+    PIC_I8259_ICW3 Icw3;
+    PIC_I8259_ICW4 Icw4;
+
+    /* Initialize ICW1 for PIC1 port */
+    Icw1.Init = TRUE;
+    Icw1.InterruptMode = LevelTriggered;
+    Icw1.InterruptVectorAddress = 0;
+    Icw1.Interval = Interval8;
+    Icw1.NeedIcw4 = TRUE;
+    Icw1.OperatingMode = Cascade;
+    HlIoPortOutByte(PIC1_CONTROL_PORT, Icw1.Bits);
+
+    /* Initialize ICW2 for PIC1 port */
+    Icw2.Bits = 0x00;
+    HlIoPortOutByte(PIC1_DATA_PORT, Icw2.Bits);
+
+    /* Initialize ICW3 for PIC1 port */
+    Icw3.Bits = 0;
+    Icw3.SlaveIrq2 = TRUE;
+    HlIoPortOutByte(PIC1_DATA_PORT, Icw3.Bits);
+
+    /* Initialize ICW4 for PIC1 port */
+    Icw4.BufferedMode = NonBuffered;
+    Icw4.EoiMode = NormalEoi;
+    Icw4.Reserved = 0;
+    Icw4.SpecialFullyNestedMode = FALSE;
+    Icw4.SystemMode = New8086Mode;
+    HlIoPortOutByte(PIC1_DATA_PORT, Icw4.Bits);
+
+    /* Mask all interrupts on PIC1 port */
+    HlIoPortOutByte(PIC1_DATA_PORT, 0xFF);
+
+    /* Initialize ICW1 for PIC2 port */
+    Icw1.Init = TRUE;
+    Icw1.InterruptMode = EdgeTriggered;
+    Icw1.InterruptVectorAddress = 0;
+    Icw1.Interval = Interval8;
+    Icw1.NeedIcw4 = TRUE;
+    Icw1.OperatingMode = Cascade;
+    HlIoPortOutByte(PIC2_CONTROL_PORT, Icw1.Bits);
+
+    /* Initialize ICW2 for PIC2 port */
+    Icw2.Bits = 0x08;
+    HlIoPortOutByte(PIC2_DATA_PORT, Icw2.Bits);
+
+    /* Initialize ICW3 for PIC2 port */
+    Icw3.Bits = 0;
+    Icw3.SlaveId = 2;
+    HlIoPortOutByte(PIC2_DATA_PORT, Icw3.Bits);
+
+    /* Initialize ICW4 for PIC2 port */
+    Icw4.BufferedMode = NonBuffered;
+    Icw4.EoiMode = NormalEoi;
+    Icw4.Reserved = 0;
+    Icw4.SpecialFullyNestedMode = FALSE;
+    Icw4.SystemMode = New8086Mode;
+    HlIoPortOutByte(PIC2_DATA_PORT, Icw4.Bits);
+
+    /* Mask all interrupts on PIC2 port */
+    HlIoPortOutByte(PIC2_DATA_PORT, 0xFF);
+}
+
+/**
+ * Initializes the (A)PIC interrupt controller.
  *
  * @return This routine does not return any value.
  *
@@ -303,7 +355,9 @@ XTAPI
 VOID
 HlpInitializePic(VOID)
 {
-    /* Disable legacy PIC and initialize APIC */
-    HlDisableLegacyPic();
+    /* Initialize APIC */
     HlpInitializeApic();
+
+    /* Initialize legacy PIC */
+    HlpInitializeLegacyPic();
 }

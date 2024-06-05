@@ -59,10 +59,8 @@
 /* 8259/ISP PIC ports definitions */
 #define PIC1_CONTROL_PORT                               0x20
 #define PIC1_DATA_PORT                                  0x21
-#define PIC1_ELCR_PORT                                  0x04D0
 #define PIC2_CONTROL_PORT                               0xA0
 #define PIC2_DATA_PORT                                  0xA1
-#define PIC2_ELCR_PORT                                  0x04D1
 
 /* PIC vector definitions */
 #define PIC1_VECTOR_SPURIOUS                            0x37
@@ -94,6 +92,50 @@ typedef enum _APIC_MT
     APIC_MT_Startup = 6,
     APIC_MT_ExtInt = 7,
 } APIC_MT, *PAPIC_MT;
+
+/* I8259 PIC interrupt mode enumeration list */
+typedef enum _PIC_I8259_ICW1_INTERRUPT_MODE
+{
+    EdgeTriggered,
+    LevelTriggered
+} PIC_I8259_ICW1_INTERRUPT_MODE, *PPIC_I8259_ICW1_INTERRUPT_MODE;
+
+/* I8259 PIC interval enumeration list */
+typedef enum _PIC_I8259_ICW1_INTERVAL
+{
+    Interval8,
+    Interval4
+} PIC_I8259_ICW1_INTERVAL, *PPIC_I8259_ICW1_INTERVAL;
+
+/* I8259 PIC operating mode enumeration list */
+typedef enum _PIC_I8259_ICW1_OPERATING_MODE
+{
+    Cascade,
+    Single
+} PIC_I8259_ICW1_OPERATING_MODE, *PPIC_I8259_ICW1_OPERATING_MODE;
+
+/* I8259 PIC buffered mode enumeration list */
+typedef enum _PIC_I8259_ICW4_BUFFERED_MODE
+{
+    NonBuffered,
+    NonBuffered2,
+    BufferedSlave,
+    BufferedMaster
+} PIC_I8259_ICW4_BUFFERED_MODE, *PPIC_I8259_ICW4_BUFFERED_MODE;
+
+/* I8259 PIC End Of Interrupt (EOI) mode enumeration list */
+typedef enum _PIC_I8259_ICW4_EOI_MODE
+{
+    NormalEoi,
+    AutomaticEoi
+} PIC_I8259_ICW4_EOI_MODE, *PPIC_I8259_ICW4_EOI_MODE;
+
+/* I8259 PIC system mode enumeration list */
+typedef enum _PIC_I8259_ICW4_SYSTEM_MODE
+{
+    Mcs8085Mode,
+    New8086Mode
+} PIC_I8259_ICW4_SYSTEM_MODE, *PPIC_I8259_ICW4_SYSTEM_MODE;
 
 /* APIC Base Register */
 typedef union _APIC_BASE_REGISTER
@@ -167,6 +209,71 @@ typedef union _APIC_SPURIOUS_REGISTER
         ULONG Reserved:22;
     };
 } APIC_SPURIOUS_REGISTER, *PAPIC_SPURIOUS_REGISTER;
+
+/* I8259 PIC register structure */
+typedef union _PIC_I8259_ICW1
+{
+    struct
+    {
+        UCHAR NeedIcw4:1;
+        UCHAR OperatingMode:1;
+        UCHAR Interval:1;
+        UCHAR InterruptMode:1;
+        UCHAR Init:1;
+        UCHAR InterruptVectorAddress:3;
+    };
+    UCHAR Bits;
+} PIC_I8259_ICW1, *PPIC_I8259_ICW1;
+
+/* I8259 PIC register structure */
+typedef union _PIC_I8259_ICW2
+{
+    struct
+    {
+        UCHAR Sbz:3;
+        UCHAR InterruptVector:5;
+    };
+    UCHAR Bits;
+} PIC_I8259_ICW2, *PPIC_I8259_ICW2;
+
+/* I8259 PIC register structure */
+typedef union _PIC_I8259_ICW3
+{
+    union
+    {
+        struct
+        {
+            UCHAR SlaveIrq0:1;
+            UCHAR SlaveIrq1:1;
+            UCHAR SlaveIrq2:1;
+            UCHAR SlaveIrq3:1;
+            UCHAR SlaveIrq4:1;
+            UCHAR SlaveIrq5:1;
+            UCHAR SlaveIrq6:1;
+            UCHAR SlaveIrq7:1;
+        };
+        struct
+        {
+            UCHAR SlaveId:3;
+            UCHAR Reserved:5;
+        };
+    };
+    UCHAR Bits;
+} PIC_I8259_ICW3, *PPIC_I8259_ICW3;
+
+/* I8259 PIC register structure */
+typedef union _PIC_I8259_ICW4
+{
+    struct
+    {
+        UCHAR SystemMode:1;
+        UCHAR EoiMode:1;
+        UCHAR BufferedMode:2;
+        UCHAR SpecialFullyNestedMode:1;
+        UCHAR Reserved:3;
+    };
+    UCHAR Bits;
+} PIC_I8259_ICW4, *PPIC_I8259_ICW4;
 
 /* Processor identity structure */
 typedef struct _HAL_PROCESSOR_IDENTITY

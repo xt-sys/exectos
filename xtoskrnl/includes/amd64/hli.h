@@ -17,10 +17,6 @@ XTAPI
 VOID
 HlClearApicErrors(VOID);
 
-XTAPI
-VOID
-HlDisableLegacyPic(VOID);
-
 XTFASTCALL
 ULONG
 HlReadApicRegister(IN APIC_REGISTER Register);
@@ -49,6 +45,10 @@ HlpHandlePicSpuriousService(VOID);
 XTAPI
 VOID
 HlpInitializeApic();
+
+XTAPI
+VOID
+HlpInitializeLegacyPic(VOID);
 
 XTAPI
 VOID
