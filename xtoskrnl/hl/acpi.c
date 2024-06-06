@@ -316,9 +316,6 @@ HlpQueryAcpiCache(IN ULONG Signature,
     PACPI_CACHE_LIST AcpiCache;
     PLIST_ENTRY ListEntry;
 
-    /* Assume ACPI table not cached */
-    *AcpiTable = NULL;
-
     /* Iterate through ACPI tables cache list */
     ListEntry = HlpAcpiCacheList.Flink;
     while(ListEntry != &HlpAcpiCacheList)
