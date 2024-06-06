@@ -322,14 +322,4 @@ typedef union _PIC_I8259_ICW4
     UCHAR Bits;
 } PIC_I8259_ICW4, *PPIC_I8259_ICW4;
 
-/* Processor identity structure */
-typedef struct _HAL_PROCESSOR_IDENTITY
-{
-    UCHAR ProcessorId;
-    UCHAR LApicId;
-    BOOLEAN Bsp;
-    BOOLEAN Started;
-    PKPROCESSOR_BLOCK ProcessorBlock;
-} HAL_PROCESSOR_IDENTITY, *PHAL_PROCESSOR_IDENTITY;
-
 #endif /* __XTDK_AMD64_HLTYPES_H */

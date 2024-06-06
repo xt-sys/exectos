@@ -295,6 +295,7 @@ typedef struct _ACPI_MADT
     ULONG ApicTables[];
 } ACPI_MADT, *PACPI_MADT;
 
+/* ACPI Local APIC MADT subtable structure */
 typedef struct _ACPI_MADT_TABLE_LOCAL_APIC
 {
     ACPI_SUBTABLE_HEADER Header;
@@ -303,7 +304,7 @@ typedef struct _ACPI_MADT_TABLE_LOCAL_APIC
     ULONG LapicFlags;
 } ACPI_MADT_TABLE_LOCAL_APIC, *PACPI_MADT_TABLE_LOCAL_APIC;
 
-/* ACPI System Information */
+/* ACPI System Information structure */
 typedef struct _ACPI_SYSTEM_INFO
 {
     ULONG CpuCount;
@@ -358,6 +359,16 @@ typedef struct _HAL_FRAMEBUFFER_DATA
         USHORT ReservedSize;
     } Pixels;
 } HAL_FRAMEBUFFER_DATA, *PHAL_FRAMEBUFFER_DATA;
+
+/* Processor identity structure */
+typedef struct _PROCESSOR_IDENTITY
+{
+    UCHAR Id;
+    UCHAR CpuId;
+    BOOLEAN Bsp;
+    BOOLEAN Started;
+    PKPROCESSOR_BLOCK ProcessorBlock;
+} PROCESSOR_IDENTITY, *PPROCESSOR_IDENTITY;
 
 /* SMBIOS table header structure */
 typedef struct _SMBIOS_TABLE_HEADER
