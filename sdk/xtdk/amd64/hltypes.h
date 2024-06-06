@@ -83,14 +83,14 @@ typedef enum _APIC_DSH
 /* APIC message type enumeration list */
 typedef enum _APIC_MT
 {
-    APIC_MT_Fixed = 0,
-    APIC_MT_LowestPriority = 1,
-    APIC_MT_SMI = 2,
-    APIC_MT_RemoteRead = 3,
-    APIC_MT_NMI = 4,
-    APIC_MT_INIT = 5,
-    APIC_MT_Startup = 6,
-    APIC_MT_ExtInt = 7,
+    APIC_MT_Fixed,
+    APIC_MT_LowestPriority,
+    APIC_MT_SMI,
+    APIC_MT_RemoteRead,
+    APIC_MT_NMI,
+    APIC_MT_INIT,
+    APIC_MT_Startup,
+    APIC_MT_ExtInt,
 } APIC_MT, *PAPIC_MT;
 
 /* I8259 PIC interrupt mode enumeration list */

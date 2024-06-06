@@ -204,10 +204,10 @@ HlpInitializeApic(VOID)
     /* xAPIC compatibility mode specific initialization */
     if(HlpApicMode == APIC_MODE_COMPAT)
     {
-        /* Initialize Destination Format Register with flat model */
+        /* Initialize Destination Format Register with flat model (not supported in x2APIC mode) */
         HlWriteApicRegister(APIC_DFR, APIC_DF_FLAT);
 
-        /* Set the logical APIC ID */
+        /* Set the logical APIC ID (read-only in x2APIC mode) */
         HlWriteApicRegister(APIC_LDR, (1UL << CpuNumber) << 24);
     }
 
@@ -218,50 +218,60 @@ HlpInitializeApic(VOID)
     SpuriousRegister.CoreChecking = 0;
     HlWriteApicRegister(APIC_SIVR, SpuriousRegister.Long);
 
-    /* Initialize Logical Vector Table */
-    LvtRegister.Long = 0;
-    LvtRegister.MessageType = APIC_DM_FIXED;
-    LvtRegister.DeliveryStatus = 0;
-    LvtRegister.RemoteIRR = 0;
-    LvtRegister.TriggerMode = APIC_TGM_EDGE;
-    LvtRegister.Mask = 0;
-    LvtRegister.TimerMode = 0;
-
     /* Mask LVTR_ERROR first, to prevent local APIC error */
-    LvtRegister.Vector = APIC_VECTOR_ERROR;
-    HlWriteApicRegister(APIC_ERRLVTR, LvtRegister.Long);
+    HlWriteApicRegister(APIC_ERRLVTR, APIC_VECTOR_ERROR);
 
-    /* Mask LVT tables */
-    LvtRegister.Vector = APIC_VECTOR_NMI;
+    /* Mask TMRLVTR */
+    LvtRegister.Long = 0;
+    LvtRegister.Mask = 1;
+    LvtRegister.MessageType = APIC_DM_FIXED;
+    LvtRegister.TimerMode = 1;
+    LvtRegister.TriggerMode = APIC_TGM_EDGE;
+    LvtRegister.Vector = APIC_VECTOR_PROFILE;
     HlWriteApicRegister(APIC_TMRLVTR, LvtRegister.Long);
-    HlWriteApicRegister(APIC_THRMLVTR, LvtRegister.Long);
+
+    /* Mask PCLVTR */
+    LvtRegister.Long = 0;
+    LvtRegister.Mask = 0;
+    LvtRegister.MessageType = APIC_DM_FIXED;
+    LvtRegister.TimerMode = 0;
+    LvtRegister.TriggerMode = APIC_TGM_EDGE;
+    LvtRegister.Vector = APIC_VECTOR_PERF;
     HlWriteApicRegister(APIC_PCLVTR, LvtRegister.Long);
 
     /* Mask LINT0 */
+    LvtRegister.Long = 0;
+    LvtRegister.Mask = 1;
+    LvtRegister.MessageType = APIC_DM_FIXED;
+    LvtRegister.TimerMode = 0;
+    LvtRegister.TriggerMode = APIC_TGM_EDGE;
     LvtRegister.Vector = APIC_VECTOR_SPURIOUS;
-    LvtRegister.MessageType = APIC_DM_EXTINT;
     HlWriteApicRegister(APIC_LINT0, LvtRegister.Long);
 
     /* Mask LINT1 */
-    LvtRegister.Vector = APIC_VECTOR_NMI;
+    LvtRegister.Long = 0;
+    LvtRegister.Mask = 0;
     LvtRegister.MessageType = APIC_DM_NMI;
-    LvtRegister.TriggerMode = APIC_TGM_LEVEL;
+    LvtRegister.TimerMode = 0;
+    LvtRegister.TriggerMode = APIC_TGM_EDGE;
+    LvtRegister.Vector = APIC_VECTOR_NMI;
     HlWriteApicRegister(APIC_LINT1, LvtRegister.Long);
 
     /* Mask ICR0 */
     CommandRegister.Long0 = 0;
-    CommandRegister.Vector = APIC_VECTOR_ZERO;
+    CommandRegister.DestinationShortHand = APIC_DSH_Destination;
     CommandRegister.MessageType = APIC_MT_INIT;
-    CommandRegister.TriggerMode = APIC_TGM_LEVEL;
-    CommandRegister.DestinationShortHand = APIC_DSH_AllIncludingSelf;
+    CommandRegister.DestinationMode = 1;
+    CommandRegister.TriggerMode = APIC_TGM_EDGE;
+    CommandRegister.Vector = APIC_VECTOR_ZERO;
     HlWriteApicRegister(APIC_ICR0, CommandRegister.Long0);
-
-    /* Clear errors after enabling vectors */
-    HlWriteApicRegister(APIC_ESR, 0);
 
     /* Register interrupt handlers once the APIC initialization is done */
     KeSetInterruptHandler(APIC_VECTOR_SPURIOUS, HlpHandleApicSpuriousService);
     KeSetInterruptHandler(PIC1_VECTOR_SPURIOUS, HlpHandlePicSpuriousService);
+
+    /* Clear errors after enabling vectors */
+    HlWriteApicRegister(APIC_ESR, 0);
 
     /* Lower APIC TPR to re-enable interrupts */
     HlWriteApicRegister(APIC_TPR, 0x00);
@@ -285,7 +295,7 @@ HlpInitializeLegacyPic(VOID)
 
     /* Initialize ICW1 for PIC1 port */
     Icw1.Init = TRUE;
-    Icw1.InterruptMode = LevelTriggered;
+    Icw1.InterruptMode = EdgeTriggered;
     Icw1.InterruptVectorAddress = 0;
     Icw1.Interval = Interval8;
     Icw1.NeedIcw4 = TRUE;
