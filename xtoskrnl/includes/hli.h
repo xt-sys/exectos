@@ -101,6 +101,10 @@ HlpInitializeAcpiSystemDescriptionTable(OUT PACPI_DESCRIPTION_HEADER *AcpiTable)
 
 XTAPI
 XTSTATUS
+HlpInitializeAcpiSystemInformation(VOID);
+
+XTAPI
+XTSTATUS
 HlpInitializeAcpiTimer(VOID);
 
 XTAPI

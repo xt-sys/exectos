@@ -255,6 +255,65 @@ HlpInitializeAcpiSystemDescriptionTable(OUT PACPI_DESCRIPTION_HEADER *AcpiTable)
 }
 
 /**
+ * Initializes System Information structure based on the ACPI provided data.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+HlpInitializeAcpiSystemInformation(VOID)
+{
+    PUCHAR MadtTable;
+    PACPI_MADT Madt;
+    XTSTATUS Status;
+    ULONG CpuCount;
+
+    /* Zero the ACPI system information structure */
+    RtlZeroMemory(&HlpAcpiSystemInfo, sizeof(ACPI_SYSTEM_INFO));
+
+    /* Get Multi-APIC Description Table (MADT) */
+    Status = HlGetAcpiTable(ACPI_MADT_SIGNATURE, (PACPI_DESCRIPTION_HEADER*)&Madt);
+    if(Status != STATUS_SUCCESS)
+    {
+        /* Failed to get MADT, return error */
+        return STATUS_NOT_FOUND;
+    }
+
+    /* Set APIC table traverse pointer and initialize number of CPUs */
+    MadtTable = (PUCHAR)Madt->ApicTables;
+    CpuCount = 0;
+
+    /* Traverse all MADT tables to get number of processors */
+    while(MadtTable <= ((PUCHAR)Madt + Madt->Header.Length))
+    {
+        /* Check if this is a local APIC subtable */
+        if((((PACPI_MADT_TABLE_LOCAL_APIC)MadtTable)->Header.Type == ACPI_MADT_LOCAL_APIC) &&
+           (((PACPI_MADT_TABLE_LOCAL_APIC)MadtTable)->Header.Length == sizeof(ACPI_MADT_TABLE_LOCAL_APIC)))
+        {
+            /* Make sure, this CPU can be enabled */
+            if(((PACPI_MADT_TABLE_LOCAL_APIC)MadtTable)->LapicFlags & ACPI_MADT_PLAOC_ENABLED)
+            {
+                /* Increment number of CPUs */
+                CpuCount++;
+            }
+
+            /* Go to the next MADT table */
+            MadtTable += ((PACPI_MADT_TABLE_LOCAL_APIC)MadtTable)->Header.Length;
+        }
+        else
+        {
+            /* Any other MADT table, try to go to the next one byte-by-byte */
+            MadtTable += 1;
+        }
+    }
+
+    /* Return success */
+    return STATUS_SUCCESS;
+}
+
+/**
  * Initializes the ACPI Timer.
  *
  * @return This routine returns a status code.

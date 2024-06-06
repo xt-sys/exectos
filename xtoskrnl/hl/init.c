@@ -29,6 +29,13 @@ HlInitializeSystem(VOID)
         return Status;
     }
 
+    /* Get system information from ACPI */
+    Status = HlpInitializeAcpiSystemInformation();
+    if(Status != STATUS_SUCCESS)
+    {
+        return Status;
+    }
+
     /* Return success */
     return STATUS_SUCCESS;
 }
