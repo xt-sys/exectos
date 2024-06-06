@@ -12,181 +12,153 @@
 #include <xtbase.h>
 #include <xtdefs.h>
 #include <xttypes.h>
+#include ARCH_HEADER(hltypes.h)
 
 
 /* ACPI Root System Description Pointer (RSDP) signature */
-#define ACPI_RSDP_SIGNATURE         0x2052545020445352
+#define ACPI_RSDP_SIGNATURE                         0x2052545020445352
 
 /* ACPI table signatures */
-#define ACPI_BERT_SIGNATURE         0x54524542 /* Boot Error Record Table */
-#define ACPI_BGRT_SIGNATURE         0x54524742 /* Boot Graphics Record Table */
-#define ACPI_BOOT_SIGNATURE         0x544F4F42 /* ACPI BOOT Table */
-#define ACPI_CPEP_SIGNATURE         0x50455043 /* Corrected Platform Error Polling Table */
-#define ACPI_DBG2_SIGNATURE         0x32474244 /* Debug Port Table v2 */
-#define ACPI_DBGP_SIGNATURE         0x50474244 /* Debug Port Table */
-#define ACPI_DMAR_SIGNATURE         0x52414D44 /* DMA Remapping Table */
-#define ACPI_DSDT_SIGNATURE         0x54445344 /* Differentiated System Description Table */
-#define ACPI_ECDT_SIGNATURE         0x54444345 /* Embedded Controller Description Table */
-#define ACPI_ERST_SIGNATURE         0x54535245 /* Error Record Serialization Table */
-#define ACPI_FACS_SIGNATURE         0x53434146 /* Firmware ACPI Control Structure */
-#define ACPI_FADT_SIGNATURE         0x50434146 /* Fixed ACPI Description Table */
-#define ACPI_FBPT_SIGNATURE         0x54504246 /* Firmware Boot Performance Table */
-#define ACPI_FPDT_SIGNATURE         0x54445046 /* Firmware Performance Data Table */
-#define ACPI_GTDT_SIGNATURE         0x54445447 /* Generic Timer Description Table */
-#define ACPI_HPET_SIGNATURE         0x54455048 /* High Precision Event Timer */
-#define ACPI_IVRS_SIGNATURE         0x53525649 /* AMD IOMMU Resource Table */
-#define ACPI_MADT_SIGNATURE         0x43495041 /* MADT/APIC Description Table */
-#define ACPI_MCFG_SIGNATURE         0x4746434D /* Memory Mapped Configuration Space Access Table */
-#define ACPI_MPST_SIGNATURE         0x5453504D /* Memory Power State Table*/
-#define ACPI_MSCT_SIGNATURE         0x5443534D /* Maximum System Characteristics Table */
-#define ACPI_NFIT_SIGNATURE         0x5449464E /* NVDIMM Firmware Interface Table */
-#define ACPI_PMMT_SIGNATURE         0x544D4D50 /* Platform Memory Topology Table */
-#define ACPI_PSDT_SIGNATURE         0x54445350 /* Persistent System Description Table */
-#define ACPI_RAS2_SIGNATURE         0x32534152 /* ACPI RAS2 Feature Table */
-#define ACPI_RASF_SIGNATURE         0x46534152 /* ACPI RAS Feature Table */
-#define ACPI_RSDT_SIGNATURE         0x54445352 /* Root System Description Table */
-#define ACPI_SBST_SIGNATURE         0x54534253 /* Smart Battery Subsystem Table */
-#define ACPI_SDEV_SIGNATURE         0x56454453 /* Secure Device Table */
-#define ACPI_SLIT_SIGNATURE         0x54494C53 /* System Locality Distance Information Table */
-#define ACPI_SPCR_SIGNATURE         0x52435053 /* Serial Port Console Redirection Table */
-#define ACPI_SRAT_SIGNATURE         0x54415253 /* Static Resource Affinity Table */
-#define ACPI_SSDT_SIGNATURE         0x54445353 /* Secondary System Descriptor Table */
-#define ACPI_TPM2_SIGNATURE         0x324D5054 /* ACPI TPM 2.0 Table */
-#define ACPI_WAET_SIGNATURE         0x54454157 /* Windows ACPI Enlightenment Table */
-#define ACPI_WDAT_SIGNATURE         0x54414457 /* Watch Dog Action Table */
-#define ACPI_WDTT_SIGNATURE         0x54524457 /* Watchdog Timer Resource Table */
-#define ACPI_WPBT_SIGNATURE         0x54425057 /* Windows Platform Binary Table */
-#define ACPI_WSMT_SIGNATURE         0x544D5357 /* Windows SMM Security Mitigation Table */
-#define ACPI_XSDT_SIGNATURE         0x54445358 /* eXtended System Descriptor Table */
+#define ACPI_BERT_SIGNATURE                         0x54524542 /* Boot Error Record Table */
+#define ACPI_BGRT_SIGNATURE                         0x54524742 /* Boot Graphics Record Table */
+#define ACPI_BOOT_SIGNATURE                         0x544F4F42 /* ACPI BOOT Table */
+#define ACPI_CPEP_SIGNATURE                         0x50455043 /* Corrected Platform Error Polling Table */
+#define ACPI_DBG2_SIGNATURE                         0x32474244 /* Debug Port Table v2 */
+#define ACPI_DBGP_SIGNATURE                         0x50474244 /* Debug Port Table */
+#define ACPI_DMAR_SIGNATURE                         0x52414D44 /* DMA Remapping Table */
+#define ACPI_DSDT_SIGNATURE                         0x54445344 /* Differentiated System Description Table */
+#define ACPI_ECDT_SIGNATURE                         0x54444345 /* Embedded Controller Description Table */
+#define ACPI_ERST_SIGNATURE                         0x54535245 /* Error Record Serialization Table */
+#define ACPI_FACS_SIGNATURE                         0x53434146 /* Firmware ACPI Control Structure */
+#define ACPI_FADT_SIGNATURE                         0x50434146 /* Fixed ACPI Description Table */
+#define ACPI_FBPT_SIGNATURE                         0x54504246 /* Firmware Boot Performance Table */
+#define ACPI_FPDT_SIGNATURE                         0x54445046 /* Firmware Performance Data Table */
+#define ACPI_GTDT_SIGNATURE                         0x54445447 /* Generic Timer Description Table */
+#define ACPI_HPET_SIGNATURE                         0x54455048 /* High Precision Event Timer */
+#define ACPI_IVRS_SIGNATURE                         0x53525649 /* AMD IOMMU Resource Table */
+#define ACPI_MADT_SIGNATURE                         0x43495041 /* MADT/APIC Description Table */
+#define ACPI_MCFG_SIGNATURE                         0x4746434D /* Memory Mapped Configuration Space Access Table */
+#define ACPI_MPST_SIGNATURE                         0x5453504D /* Memory Power State Table*/
+#define ACPI_MSCT_SIGNATURE                         0x5443534D /* Maximum System Characteristics Table */
+#define ACPI_NFIT_SIGNATURE                         0x5449464E /* NVDIMM Firmware Interface Table */
+#define ACPI_PMMT_SIGNATURE                         0x544D4D50 /* Platform Memory Topology Table */
+#define ACPI_PSDT_SIGNATURE                         0x54445350 /* Persistent System Description Table */
+#define ACPI_RAS2_SIGNATURE                         0x32534152 /* ACPI RAS2 Feature Table */
+#define ACPI_RASF_SIGNATURE                         0x46534152 /* ACPI RAS Feature Table */
+#define ACPI_RSDT_SIGNATURE                         0x54445352 /* Root System Description Table */
+#define ACPI_SBST_SIGNATURE                         0x54534253 /* Smart Battery Subsystem Table */
+#define ACPI_SDEV_SIGNATURE                         0x56454453 /* Secure Device Table */
+#define ACPI_SLIT_SIGNATURE                         0x54494C53 /* System Locality Distance Information Table */
+#define ACPI_SPCR_SIGNATURE                         0x52435053 /* Serial Port Console Redirection Table */
+#define ACPI_SRAT_SIGNATURE                         0x54415253 /* Static Resource Affinity Table */
+#define ACPI_SSDT_SIGNATURE                         0x54445353 /* Secondary System Descriptor Table */
+#define ACPI_TPM2_SIGNATURE                         0x324D5054 /* ACPI TPM 2.0 Table */
+#define ACPI_WAET_SIGNATURE                         0x54454157 /* Windows ACPI Enlightenment Table */
+#define ACPI_WDAT_SIGNATURE                         0x54414457 /* Watch Dog Action Table */
+#define ACPI_WDTT_SIGNATURE                         0x54524457 /* Watchdog Timer Resource Table */
+#define ACPI_WPBT_SIGNATURE                         0x54425057 /* Windows Platform Binary Table */
+#define ACPI_WSMT_SIGNATURE                         0x544D5357 /* Windows SMM Security Mitigation Table */
+#define ACPI_XSDT_SIGNATURE                         0x54445358 /* eXtended System Descriptor Table */
 
 /* ACPI FADT flags masks */
-#define ACPI_FADT_32BIT_TIMER       (1<<8)
+#define ACPI_FADT_32BIT_TIMER                       (1<<8)
 
 /* ACPI Timer bit masks */
-#define ACPI_FADT_TIMER_32BIT       0x80000000
-#define ACPI_FADT_TIMER_24BIT       0x00800000
+#define ACPI_FADT_TIMER_32BIT                       0x80000000
+#define ACPI_FADT_TIMER_24BIT                       0x00800000
+
+/* ACPI MADT subtable type definitions */
+#define ACPI_MADT_LOCAL_APIC                        0
+#define ACPI_MADT_IOAPIC                            1
+#define ACPI_MADT_INT_OVERRIDE                      2
+#define ACPI_MADT_NMI_SOURCE                        3
+#define ACPI_MADT_LOCAL_NMI_SOURCE                  4
+#define ACPI_MADT_ADDRESS_EXTENSION                 5
+#define ACPI_MADT_IO_SAPIC                          6
+#define ACPI_MADT_LOCAL_SAPIC                       7
+#define ACPI_MADT_PLATFORM_INTERRUPT_SOURCE         8
+
+/* ACPI MADT Processor Local APIC Flags */
+#define ACPI_MADT_PLACE_ENABLED                     0 /* Processor Local APIC CPU Enabled */
+#define ACPI_MADT_PLAOC_ENABLED                     1 /* Processor Local APIC Online Capable */
 
 /* Default serial port settings */
-#define COMPORT_CLOCK_RATE          0x1C200
-#define COMPORT_WAIT_TIMEOUT        204800
+#define COMPORT_CLOCK_RATE                          0x1C200
+#define COMPORT_WAIT_TIMEOUT                        204800
 
 /* Serial port divisors */
-#define COMPORT_DIV_DLL             0x00 /* Divisor Latch Least */
-#define COMPORT_DIV_DLM             0x01 /* Divisor Latch Most */
+#define COMPORT_DIV_DLL                             0x00 /* Divisor Latch Least */
+#define COMPORT_DIV_DLM                             0x01 /* Divisor Latch Most */
 
 /* Serial port control flags */
-#define COMPORT_FLAG_INIT           0x01 /* Port Initialized */
-#define COMPORT_FLAG_DBR            0x02 /* Default Baud Rate */
-#define COMPORT_FLAG_MC             0x04 /* Modem Control */
+#define COMPORT_FLAG_INIT                           0x01 /* Port Initialized */
+#define COMPORT_FLAG_DBR                            0x02 /* Default Baud Rate */
+#define COMPORT_FLAG_MC                             0x04 /* Modem Control */
 
 /* Serial port Fifo Control Register (FCR) access masks */
-#define COMPORT_FCR_DISABLE         0x00 /* Disable */
-#define COMPORT_FCR_ENABLE          0x01 /* Enable */
-#define COMPORT_FCR_RCVR_RESET      0x02 /* Receiver Reset */
-#define COMPORT_FCR_TXMT_RESET      0x04 /* Transmitter Reset */
+#define COMPORT_FCR_DISABLE                         0x00 /* Disable */
+#define COMPORT_FCR_ENABLE                          0x01 /* Enable */
+#define COMPORT_FCR_RCVR_RESET                      0x02 /* Receiver Reset */
+#define COMPORT_FCR_TXMT_RESET                      0x04 /* Transmitter Reset */
 
 /* Serial port Line Control Register (LCR) access masks */
-#define COMPORT_LCR_1STOP           0x00 /* 1 Stop Bit */
-#define COMPORT_LCR_2STOP           0x04 /* 2 Stop Bits */
-#define COMPORT_LCR_5DATA           0x00 /* 5 Data Bits */
-#define COMPORT_LCR_6DATA           0x01 /* 6 Data Bits */
-#define COMPORT_LCR_7DATA           0x02 /* 7 Data Bits */
-#define COMPORT_LCR_8DATA           0x03 /* 8 Data Bits */
-#define COMPORT_LCR_PARN            0x00 /* None Parity */
-#define COMPORT_LCR_PARO            0x08 /* Odd Parity */
-#define COMPORT_LCR_PARE            0x18 /* Even Parity */
-#define COMPORT_LCR_PARM            0x28 /* Mark Parity */
-#define COMPORT_LCR_PARS            0x38 /* Space Parity */
-#define COMPORT_LCR_BREAK           0x40 /* Break */
-#define COMPORT_LCR_DLAB            0x80 /* Divisor Latch Access Bit */
+#define COMPORT_LCR_1STOP                           0x00 /* 1 Stop Bit */
+#define COMPORT_LCR_2STOP                           0x04 /* 2 Stop Bits */
+#define COMPORT_LCR_5DATA                           0x00 /* 5 Data Bits */
+#define COMPORT_LCR_6DATA                           0x01 /* 6 Data Bits */
+#define COMPORT_LCR_7DATA                           0x02 /* 7 Data Bits */
+#define COMPORT_LCR_8DATA                           0x03 /* 8 Data Bits */
+#define COMPORT_LCR_PARN                            0x00 /* None Parity */
+#define COMPORT_LCR_PARO                            0x08 /* Odd Parity */
+#define COMPORT_LCR_PARE                            0x18 /* Even Parity */
+#define COMPORT_LCR_PARM                            0x28 /* Mark Parity */
+#define COMPORT_LCR_PARS                            0x38 /* Space Parity */
+#define COMPORT_LCR_BREAK                           0x40 /* Break */
+#define COMPORT_LCR_DLAB                            0x80 /* Divisor Latch Access Bit */
 
 /* Serial port Line Status Register (LSR) access masks */
-#define COMPORT_LSR_DIS             0x00 /* Disable */
-#define COMPORT_LSR_DR              0x01 /* Data Ready */
-#define COMPORT_LSR_OE              0x02 /* Overrun Error */
-#define COMPORT_LSR_PE              0x04 /* Parity Error */
-#define COMPORT_LSR_FE              0x08 /* Framing Error */
-#define COMPORT_LSR_BI              0x10 /* Break Interrupt */
-#define COMPORT_LSR_THRE            0x20 /* Transmit Holding Register Empty */
-#define COMPORT_LSR_TEMPTY          0x40 /* Transmitter Empty */
-#define COMPORT_LSR_FIFOE           0x80 /* FIFO Error */
+#define COMPORT_LSR_DIS                             0x00 /* Disable */
+#define COMPORT_LSR_DR                              0x01 /* Data Ready */
+#define COMPORT_LSR_OE                              0x02 /* Overrun Error */
+#define COMPORT_LSR_PE                              0x04 /* Parity Error */
+#define COMPORT_LSR_FE                              0x08 /* Framing Error */
+#define COMPORT_LSR_BI                              0x10 /* Break Interrupt */
+#define COMPORT_LSR_THRE                            0x20 /* Transmit Holding Register Empty */
+#define COMPORT_LSR_TEMPTY                          0x40 /* Transmitter Empty */
+#define COMPORT_LSR_FIFOE                           0x80 /* FIFO Error */
 
 /* Serial port Modem Control Register (MCR) access masks */
-#define COMPORT_MCR_DTR             0x01 /* Data Terminal Ready */
-#define COMPORT_MCR_RTS             0x02 /* Ready To Send */
-#define COMPORT_MCR_OUT1            0x04 /* Generic Output 1 */
-#define COMPORT_MCR_OUT2            0x08 /* Generic Output 2 */
-#define COMPORT_MCR_NOM             0x0F /* Normal Operation Mode */
-#define COMPORT_MCR_LOOP            0x10 /* Loopback Testing Mode */
+#define COMPORT_MCR_DTR                             0x01 /* Data Terminal Ready */
+#define COMPORT_MCR_RTS                             0x02 /* Ready To Send */
+#define COMPORT_MCR_OUT1                            0x04 /* Generic Output 1 */
+#define COMPORT_MCR_OUT2                            0x08 /* Generic Output 2 */
+#define COMPORT_MCR_NOM                             0x0F /* Normal Operation Mode */
+#define COMPORT_MCR_LOOP                            0x10 /* Loopback Testing Mode */
 
 /* Serial port Modem Status Register (MSR) access masks */
-#define COMPORT_MSR_DCTS            0x01 /* Delta Clear To Send */
-#define COMPORT_MSR_DDSR            0x02 /* Delta Data Set Ready */
-#define COMPORT_MSR_DTRRTS          0x03 /* DTR and RTS */
-#define COMPORT_MSR_TERI            0x04 /* Trailing Edge Ring Indicator */
-#define COMPORT_MSR_DDCD            0x08 /* Delta Data Carrier Detect */
-#define COMPORT_MSR_CTS             0x10 /* Clear To Send */
-#define COMPORT_MSR_DSR             0x20 /* Data Set Ready */
-#define COMPORT_MSR_RI              0x40 /* Ring Indicator */
-#define COMPORT_MSR_DCD             0x80 /* Data Carrier Detect */
-#define COMPORT_MSR_DSRCTSCD        0xB0 /* DSR, CTS and CD */
-#define COMPORT_MSR_TST             0xAE /* Test Pattern */
+#define COMPORT_MSR_DCTS                            0x01 /* Delta Clear To Send */
+#define COMPORT_MSR_DDSR                            0x02 /* Delta Data Set Ready */
+#define COMPORT_MSR_DTRRTS                          0x03 /* DTR and RTS */
+#define COMPORT_MSR_TERI                            0x04 /* Trailing Edge Ring Indicator */
+#define COMPORT_MSR_DDCD                            0x08 /* Delta Data Carrier Detect */
+#define COMPORT_MSR_CTS                             0x10 /* Clear To Send */
+#define COMPORT_MSR_DSR                             0x20 /* Data Set Ready */
+#define COMPORT_MSR_RI                              0x40 /* Ring Indicator */
+#define COMPORT_MSR_DCD                             0x80 /* Data Carrier Detect */
+#define COMPORT_MSR_DSRCTSCD                        0xB0 /* DSR, CTS and CD */
+#define COMPORT_MSR_TST                             0xAE /* Test Pattern */
 
 /* Serial port offsets of the various registers */
-#define COMPORT_REG_RBR             0x00 /* Receive Buffer Register */
-#define COMPORT_REG_THR             0x00 /* Transmit Holding Register */
-#define COMPORT_REG_IER             0x01 /* Interrupt Enable Register */
-#define COMPORT_REG_IIR             0x02 /* Interrupt Identity Register */
-#define COMPORT_REG_FCR             0x02 /* FIFO Control Register */
-#define COMPORT_REG_LCR             0x03 /* Line Control Register */
-#define COMPORT_REG_MCR             0x04 /* Modem Control Register */
-#define COMPORT_REG_LSR             0x05 /* Line Status Register */
-#define COMPORT_REG_MSR             0x06 /* Modem Status Register */
-#define COMPORT_REG_SR              0x07 /* Scratch Register */
-
-/* APIC Register Address Map */
-typedef enum _APIC_REGISTER
-{
-    APIC_ID                       = 0x02, /* APIC ID Register */
-    APIC_VER                      = 0x03, /* APIC Version Register */
-    APIC_TPR                      = 0x08, /* Task Priority Register */
-    APIC_APR                      = 0x09, /* Arbitration Priority Register */
-    APIC_PPR                      = 0x0A, /* Processor Priority Register (R) */
-    APIC_EOI                      = 0x0B, /* EOI Register */
-    APIC_RRR                      = 0x0C, /* Remote Read Register */
-    APIC_LDR                      = 0x0D, /* Logical Destination Register */
-    APIC_DFR                      = 0x0E, /* Destination Format Register (not available in extended mode) */
-    APIC_SIVR                     = 0x0F, /* Spurious Interrupt Vector Register */
-    APIC_ISR                      = 0x10, /* Interrupt Service Register*/
-    APIC_TMR                      = 0x18, /* Trigger Mode Register */
-    APIC_IRR                      = 0x20, /* Interrupt Request Register */
-    APIC_ESR                      = 0x28, /* Error Status Register */
-    APIC_ICR0                     = 0x30, /* Interrupt Command Register */
-    APIC_ICR1                     = 0x31, /* Interrupt Command Register (not available in extended mode) */
-    APIC_TMRLVTR                  = 0x32, /* Timer Local Vector Table */
-    APIC_THRMLVTR                 = 0x33, /* Thermal Local Vector Table */
-    APIC_PCLVTR                   = 0x34, /* Performance Counter Local Vector Table */
-    APIC_LINT0                    = 0x35, /* LINT0 Local Vector Table */
-    APIC_LINT1                    = 0x36, /* LINT1 Local Vector Table */
-    APIC_ERRLVTR                  = 0x37, /* Error Local Vector Table */
-    APIC_TICR                     = 0x38, /* Initial Count Register for Timer */
-    APIC_TCCR                     = 0x39, /* Current Count Register for Timer */
-    APIC_TDCR                     = 0x3E, /* Timer Divide Configuration Register */
-    APIC_EAFR                     = 0x40, /* extended APIC Feature register */
-    APIC_EACR                     = 0x41, /* Extended APIC Control Register */
-    APIC_SEOI                     = 0x42, /* Specific End Of Interrupt Register */
-    APIC_EXT0LVTR                 = 0x50, /* Extended Interrupt 0 Local Vector Table */
-    APIC_EXT1LVTR                 = 0x51, /* Extended Interrupt 1 Local Vector Table */
-    APIC_EXT2LVTR                 = 0x52, /* Extended Interrupt 2 Local Vector Table */
-    APIC_EXT3LVTR                 = 0x53  /* Extended Interrupt 3 Local Vector Table */
-} APIC_REGISTER, *PAPIC_REGISTER;
-
-/* APIC mode list */
-typedef enum _HAL_APIC_MODE
-{
-    APIC_MODE_COMPAT,
-    APIC_MODE_X2APIC
-} HAL_APIC_MODE, *PHAL_APIC_MODE;
+#define COMPORT_REG_RBR                             0x00 /* Receive Buffer Register */
+#define COMPORT_REG_THR                             0x00 /* Transmit Holding Register */
+#define COMPORT_REG_IER                             0x01 /* Interrupt Enable Register */
+#define COMPORT_REG_IIR                             0x02 /* Interrupt Identity Register */
+#define COMPORT_REG_FCR                             0x02 /* FIFO Control Register */
+#define COMPORT_REG_LCR                             0x03 /* Line Control Register */
+#define COMPORT_REG_MCR                             0x04 /* Modem Control Register */
+#define COMPORT_REG_LSR                             0x05 /* Line Status Register */
+#define COMPORT_REG_MSR                             0x06 /* Modem Status Register */
+#define COMPORT_REG_SR                              0x07 /* Scratch Register */
 
 /* Generic Address structure */
 typedef struct _GENERIC_ADDRESS
@@ -211,6 +183,13 @@ typedef struct _ACPI_DESCRIPTION_HEADER
     UCHAR CreatorID[4];
     ULONG CreatorRev;
 } ACPI_DESCRIPTION_HEADER, *PACPI_DESCRIPTION_HEADER;
+
+/* Each ACPI subtable description header structure */
+typedef struct _ACPI_SUBTABLE_HEADER
+{
+    UCHAR Type;
+    UCHAR Length;
+} ACPI_SUBTABLE_HEADER, *PACPI_SUBTABLE_HEADER;
 
 /* ACPI cache list structure */
 typedef struct _ACPI_CACHE_LIST
@@ -306,6 +285,39 @@ typedef struct _ACPI_FADT
     GENERIC_ADDRESS SleepControlReg;
     GENERIC_ADDRESS SleepStatusReg;
 } ACPI_FADT, *PACPI_FADT;
+
+/* ACPI Multiple APIC Description Table (MADT) structure */
+typedef struct _ACPI_MADT
+{
+    ACPI_DESCRIPTION_HEADER Header;
+    ULONG LocalApicAddress;
+    ULONG Flags;
+    ULONG ApicTables[];
+} ACPI_MADT, *PACPI_MADT;
+
+typedef struct _ACPI_MADT_TABLE_LOCAL_APIC
+{
+    ACPI_SUBTABLE_HEADER Header;
+    UCHAR ProcessorId;
+    UCHAR Id;
+    ULONG LapicFlags;
+} ACPI_MADT_TABLE_LOCAL_APIC, *PACPI_MADT_TABLE_LOCAL_APIC;
+
+/* ACPI System Information */
+typedef struct _ACPI_SYSTEM_INFO
+{
+    ULONG CpuCount;
+    ULONG RunningCpus;
+    ULONG BusCount;
+    ULONG IoApicCount;
+    ULONG IntiCount;
+    ULONG LintiCount;
+    ULONG ImcrPresent;
+    ULONG ApicBase;
+    ULONG IoApicPhysicalBase[APIC_MAX_IOAPICS];
+    PULONG IoApicVirtualBase[APIC_MAX_IOAPICS];
+    ULONG IoApicIntiBase[APIC_MAX_IOAPICS];
+} ACPI_SYSTEM_INFO, *PACPI_SYSTEM_INFO;
 
 /* ACPI Timer information structure */
 typedef struct _ACPI_TIMER_INFO

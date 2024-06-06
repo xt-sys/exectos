@@ -22,7 +22,7 @@ ACPI_TIMER_INFO HlpAcpiTimerInfo;
 KAFFINITY HlpActiveProcessors;
 
 /* APIC mode */
-HAL_APIC_MODE HlpApicMode;
+APIC_MODE HlpApicMode;
 
 /* FrameBuffer information */
 HAL_FRAMEBUFFER_DATA HlpFrameBufferData;

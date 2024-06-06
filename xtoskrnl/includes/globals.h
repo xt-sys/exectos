@@ -25,7 +25,7 @@ EXTERN ACPI_TIMER_INFO HlpAcpiTimerInfo;
 EXTERN KAFFINITY HlpActiveProcessors;
 
 /* APIC mode */
-EXTERN HAL_APIC_MODE HlpApicMode;
+EXTERN APIC_MODE HlpApicMode;
 
 /* FrameBuffer information */
 EXTERN HAL_FRAMEBUFFER_DATA HlpFrameBufferData;
