@@ -33,9 +33,6 @@ EXTERN APIC_MODE HlpApicMode;
 /* FrameBuffer information */
 EXTERN HAL_FRAMEBUFFER_DATA HlpFrameBufferData;
 
-/* Processors identity table */
-EXTERN PROCESSOR_IDENTITY HlpProcessorsIdentity[MAXIMUM_PROCESSORS];
-
 /* Pointer to boot loader provided DbgPrint() routine */
 EXTERN VOID (*KeDbgPrint)(IN PWCHAR Format, IN ...);
 

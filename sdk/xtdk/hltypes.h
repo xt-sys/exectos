@@ -315,6 +315,7 @@ typedef struct _ACPI_SYSTEM_INFO
     ULONG LintiCount;
     ULONG ImcrPresent;
     ULONG ApicBase;
+    PPROCESSOR_IDENTITY CpuInfo;
     ULONG IoApicPhysicalBase[APIC_MAX_IOAPICS];
     PULONG IoApicVirtualBase[APIC_MAX_IOAPICS];
     ULONG IoApicIntiBase[APIC_MAX_IOAPICS];
@@ -365,9 +366,9 @@ typedef struct _PROCESSOR_IDENTITY
 {
     UCHAR Id;
     UCHAR CpuId;
+    UCHAR CpuNumber;
     BOOLEAN Bsp;
     BOOLEAN Started;
-    PKPROCESSOR_BLOCK ProcessorBlock;
 } PROCESSOR_IDENTITY, *PPROCESSOR_IDENTITY;
 
 /* SMBIOS table header structure */

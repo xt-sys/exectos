@@ -33,9 +33,6 @@ HlInitializeProcessor(VOID)
     ProcessorBlock->StallScaleFactor = INITIAL_STALL_FACTOR;
     ProcessorBlock->Idr = 0xFFFFFFFF;
 
-    /* Record processor block in the processors table */
-    HlpProcessorsIdentity[ProcessorBlock->CpuNumber].ProcessorBlock = ProcessorBlock;
-
     /* Set processor affinity */
     Affinity = (KAFFINITY) 1 << ProcessorBlock->CpuNumber;
 

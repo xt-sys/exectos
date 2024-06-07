@@ -29,6 +29,3 @@ APIC_MODE HlpApicMode;
 
 /* FrameBuffer information */
 HAL_FRAMEBUFFER_DATA HlpFrameBufferData;
-
-/* Processors identity table */
-PROCESSOR_IDENTITY HlpProcessorsIdentity[MAXIMUM_PROCESSORS] = {{0}};
