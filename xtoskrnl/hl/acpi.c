@@ -289,18 +289,31 @@ HlpInitializeAcpiSystemInformation(VOID)
     while(MadtTable <= ((PUCHAR)Madt + Madt->Header.Length))
     {
         /* Check if this is a local APIC subtable */
-        if((((PACPI_MADT_TABLE_LOCAL_APIC)MadtTable)->Header.Type == ACPI_MADT_LOCAL_APIC) &&
-           (((PACPI_MADT_TABLE_LOCAL_APIC)MadtTable)->Header.Length == sizeof(ACPI_MADT_TABLE_LOCAL_APIC)))
+        if((((PACPI_MADT_LOCAL_APIC)MadtTable)->Header.Type == ACPI_MADT_TYPE_LOCAL_APIC) &&
+           (((PACPI_MADT_LOCAL_APIC)MadtTable)->Header.Length == sizeof(ACPI_MADT_LOCAL_APIC)))
         {
             /* Make sure, this CPU can be enabled */
-            if(((PACPI_MADT_TABLE_LOCAL_APIC)MadtTable)->LapicFlags & ACPI_MADT_PLAOC_ENABLED)
+            if(((PACPI_MADT_LOCAL_APIC)MadtTable)->LapicFlags & ACPI_MADT_PLAOC_ENABLED)
             {
                 /* Increment number of CPUs */
                 CpuCount++;
             }
 
             /* Go to the next MADT table */
-            MadtTable += ((PACPI_MADT_TABLE_LOCAL_APIC)MadtTable)->Header.Length;
+            MadtTable += ((PACPI_MADT_LOCAL_APIC)MadtTable)->Header.Length;
+        }
+        else if((((PACPI_MADT_LOCAL_X2APIC)MadtTable)->Header.Type == ACPI_MADT_TYPE_LOCAL_X2APIC) &&
+                (((PACPI_MADT_LOCAL_X2APIC)MadtTable)->Header.Length == sizeof(ACPI_MADT_LOCAL_X2APIC)))
+        {
+            /* Make sure, this CPU can be enabled */
+            if(((PACPI_MADT_LOCAL_X2APIC)MadtTable)->LapicFlags & ACPI_MADT_PLAOC_ENABLED)
+            {
+                /* Increment number of CPUs */
+                CpuCount++;
+            }
+
+            /* Go to the next MADT table */
+            MadtTable += ((PACPI_MADT_LOCAL_X2APIC)MadtTable)->Header.Length;
         }
         else
         {

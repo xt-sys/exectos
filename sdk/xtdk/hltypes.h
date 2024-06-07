@@ -68,15 +68,34 @@
 #define ACPI_FADT_TIMER_24BIT                       0x00800000
 
 /* ACPI MADT subtable type definitions */
-#define ACPI_MADT_LOCAL_APIC                        0
-#define ACPI_MADT_IOAPIC                            1
-#define ACPI_MADT_INT_OVERRIDE                      2
-#define ACPI_MADT_NMI_SOURCE                        3
-#define ACPI_MADT_LOCAL_NMI_SOURCE                  4
-#define ACPI_MADT_ADDRESS_EXTENSION                 5
-#define ACPI_MADT_IO_SAPIC                          6
-#define ACPI_MADT_LOCAL_SAPIC                       7
-#define ACPI_MADT_PLATFORM_INTERRUPT_SOURCE         8
+#define ACPI_MADT_TYPE_LOCAL_APIC                   0
+#define ACPI_MADT_TYPE_IOAPIC                       1
+#define ACPI_MADT_TYPE_INT_OVERRIDE                 2
+#define ACPI_MADT_TYPE_NMI_SOURCE                   3
+#define ACPI_MADT_TYPE_LOCAL_APIC_NMI               4
+#define ACPI_MADT_TYPE_LOCAL_APIC_OVERRIDE          5
+#define ACPI_MADT_TYPE_IO_SAPIC                     6
+#define ACPI_MADT_TYPE_LOCAL_SAPIC                  7
+#define ACPI_MADT_TYPE_INTERRUPT_SOURCE             8
+#define ACPI_MADT_TYPE_LOCAL_X2APIC                 9
+#define ACPI_MADT_TYPE_LOCAL_X2APIC_NMI             10
+#define ACPI_MADT_TYPE_GENERIC_INTERRUPT            11
+#define ACPI_MADT_TYPE_GENERIC_DISTRIBUTOR          12
+#define ACPI_MADT_TYPE_GENERIC_MSI_FRAME            13
+#define ACPI_MADT_TYPE_GENERIC_REDISTRIBUTOR        14
+#define ACPI_MADT_TYPE_GENERIC_TRANSLATOR           15
+#define ACPI_MADT_TYPE_MULTIPROC_WAKEUP             16
+#define ACPI_MADT_TYPE_CORE_PIC                     17
+#define ACPI_MADT_TYPE_LIO_PIC                      18
+#define ACPI_MADT_TYPE_HT_PIC                       19
+#define ACPI_MADT_TYPE_EIO_PIC                      20
+#define ACPI_MADT_TYPE_MSI_PIC                      21
+#define ACPI_MADT_TYPE_BIO_PIC                      22
+#define ACPI_MADT_TYPE_LPC_PIC                      23
+#define ACPI_MADT_TYPE_RINTC                        24
+#define ACPI_MADT_TYPE_IMSIC                        25
+#define ACPI_MADT_TYPE_APLIC                        26
+#define ACPI_MADT_TYPE_PLIC                         27
 
 /* ACPI MADT Processor Local APIC Flags */
 #define ACPI_MADT_PLACE_ENABLED                     0 /* Processor Local APIC CPU Enabled */
@@ -296,13 +315,23 @@ typedef struct _ACPI_MADT
 } ACPI_MADT, *PACPI_MADT;
 
 /* ACPI Local APIC MADT subtable structure */
-typedef struct _ACPI_MADT_TABLE_LOCAL_APIC
+typedef struct _ACPI_MADT_LOCAL_APIC
 {
     ACPI_SUBTABLE_HEADER Header;
     UCHAR ProcessorId;
     UCHAR Id;
     ULONG LapicFlags;
-} ACPI_MADT_TABLE_LOCAL_APIC, *PACPI_MADT_TABLE_LOCAL_APIC;
+} ACPI_MADT_LOCAL_APIC, *PACPI_MADT_LOCAL_APIC;
+
+/* ACPI Local X2APIC MADT subtable structure */
+typedef struct _ACPI_MADT_LOCAL_X2APIC
+{
+    ACPI_SUBTABLE_HEADER Header;
+    USHORT Reserved;
+    ULONG Id;
+    ULONG LapicFlags;
+    ULONG ProcessorId;
+} ACPI_MADT_LOCAL_X2APIC, *PACPI_MADT_LOCAL_X2APIC;
 
 /* ACPI System Information structure */
 typedef struct _ACPI_SYSTEM_INFO
