@@ -67,19 +67,16 @@
 #define CONCATENATE(Str1, Str2)                CONCAT_STRING(Str1, Str2)
 
 /* Macro for accessing the base address of a structure from a structure member */
-#define CONTAIN_RECORD(Address, Type, Field)   ((Type *)(((ULONG_PTR)Address) - (ULONG_PTR)(&(((Type *)0)->Field))))
+#define CONTAIN_RECORD(Address, Type, Field)   ((Type *)((char *)(Address) - FIELD_OFFSET(Type, Field)))
 
 /* EFI size to pages conversion macro */
 #define EFI_SIZE_TO_PAGES(Size)                (((Size) >> EFI_PAGE_SHIFT) + (((Size) & EFI_PAGE_MASK) ? 1 : 0))
 
 /* Macro for calculating byte offset of a field in the structure */
-#define FIELD_OFFSET(Structure, Field)         ((LONG)(LONG_PTR)&(((Structure *)0)->Field))
+#define FIELD_OFFSET(Structure, Field)         __builtin_offsetof(Structure, Field)
 
 /* Macro for calculating size of a field in the structure */
 #define FIELD_SIZE(Structure, Field)           (sizeof(((Structure *)0)->Field))
-
-/* Macro that yields field type in the structure */
-#define FIELD_TYPE(Structure, Field)           (((Structure*)0)->Field)
 
 /* Macro that page-aligns a virtual address */
 #define PAGE_ALIGN(VirtualAddress)             ((PVOID)((ULONG_PTR)VirtualAddress & ~MM_PAGE_MASK))
