@@ -465,7 +465,7 @@ BlpFindParentBlockDevice(IN PLIST_ENTRY BlockDevices,
                          OUT PEFI_BLOCK_DEVICE_DATA ParentNode);
 
 XTCDECL
-LOADER_MEMORY_TYPE
+LONG
 BlpGetLoaderMemoryType(IN EFI_MEMORY_TYPE EfiMemoryType);
 
 XTCDECL

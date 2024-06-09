@@ -292,7 +292,7 @@ BlMapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
     if(GetMemoryTypeRoutine == NULL)
     {
         /* Use default memory type routine */
-        GetMemoryTypeRoutine = (PBL_GET_MEMTYPE_ROUTINE)BlpGetLoaderMemoryType;
+        GetMemoryTypeRoutine = BlpGetLoaderMemoryType;
     }
 
     /* Allocate and zero-fill buffer for EFI memory map */
@@ -703,7 +703,7 @@ BlPhysicalListToVirtual(IN PXTBL_PAGE_MAPPING PageMap,
  * @since XT 1.0
  */
 XTCDECL
-LOADER_MEMORY_TYPE
+LONG
 BlpGetLoaderMemoryType(IN EFI_MEMORY_TYPE EfiMemoryType)
 {
     LOADER_MEMORY_TYPE MemoryType;

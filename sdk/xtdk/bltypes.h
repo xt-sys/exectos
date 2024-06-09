@@ -40,7 +40,7 @@
 #define XTBL_TUI_MAX_DIALOG_WIDTH                                   100
 
 /* XTLDR Routine pointers */
-typedef LONG (*PBL_GET_MEMTYPE_ROUTINE)(IN LONG EfiMemoryType);
+typedef LONG (*PBL_GET_MEMTYPE_ROUTINE)(IN EFI_MEMORY_TYPE EfiMemoryType);
 
 /* Boot Loader protocol routine pointers */
 typedef EFI_STATUS (*PBL_ALLOCATE_PAGES)(IN ULONGLONG Size, OUT PEFI_PHYSICAL_ADDRESS Memory);
