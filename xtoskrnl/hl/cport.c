@@ -9,9 +9,6 @@
 #include <xtos.h>
 
 
-/* COM port I/O addresses */
-ULONG ComPortAddress[] = COMPORT_ADDRESSES;
-
 /**
  * This routine gets a byte from serial port.
  *
@@ -212,37 +209,16 @@ HlComPortReadLsr(IN PCPPORT Port,
 XTCDECL
 XTSTATUS
 HlInitializeComPort(IN OUT PCPPORT Port,
-                    IN ULONG PortNumber,
                     IN PUCHAR PortAddress,
                     IN ULONG BaudRate)
 {
-    USHORT Flags = 0;
-    UCHAR Byte = 0;
-    PUCHAR Address;
+    USHORT Flags;
+    UCHAR Byte;
     ULONG Mode;
 
-    /* We support only a pre-defined number of ports */
-    if(PortNumber > ARRAY_SIZE(ComPortAddress))
-    {
-        /* Fail if wrong/unsupported port used */
-        return STATUS_INVALID_PARAMETER;
-    }
-
-    /* Check if serial port is set */
-    if(PortNumber == 0)
-    {
-        /* Check if port address supplied instead */
-        if(PortAddress)
-        {
-            /* Set custom port address */
-            ComPortAddress[PortNumber] = PtrToUlong(PortAddress);
-        }
-        else
-        {
-            /* Use COM1 by default */
-            PortNumber = 1;
-        }
-    }
+    /* Initialize variables */
+    Byte = 0;
+    Flags = 0;
 
     /* Check if baud rate is set */
     if(BaudRate == 0)
@@ -252,11 +228,8 @@ HlInitializeComPort(IN OUT PCPPORT Port,
         Flags |= COMPORT_FLAG_DBR;
     }
 
-    /* Store COM pointer */
-    Address = UlongToPtr(ComPortAddress[PortNumber]);
-
     /* Check whether this port is not already initialized */
-    if((Port->Address == Address) && (Port->Baud == BaudRate))
+    if((Port->Address == PortAddress) && (Port->Baud == BaudRate))
     {
         return STATUS_SUCCESS;
     }
@@ -265,8 +238,8 @@ HlInitializeComPort(IN OUT PCPPORT Port,
     do
     {
         /* Check whether the 16450/16550 scratch register exists */
-        HlIoPortOutByte(PtrToUshort(Address + (ULONG)COMPORT_REG_SR), Byte);
-        if(HlIoPortInByte(PtrToUshort(Address + (ULONG)COMPORT_REG_SR)) != Byte)
+        HlIoPortOutByte(PtrToUshort(PortAddress + (ULONG)COMPORT_REG_SR), Byte);
+        if(HlIoPortInByte(PtrToUshort(PortAddress + (ULONG)COMPORT_REG_SR)) != Byte)
         {
             return STATUS_NOT_FOUND;
         }
@@ -274,40 +247,40 @@ HlInitializeComPort(IN OUT PCPPORT Port,
     while(++Byte != 0);
 
     /* Disable interrupts */
-    HlIoPortOutByte(PtrToUshort(Address + (ULONG)COMPORT_REG_LCR), COMPORT_LSR_DIS);
-    HlIoPortOutByte(PtrToUshort(Address + (ULONG)COMPORT_REG_IER), COMPORT_LSR_DIS);
+    HlIoPortOutByte(PtrToUshort(PortAddress + (ULONG)COMPORT_REG_LCR), COMPORT_LSR_DIS);
+    HlIoPortOutByte(PtrToUshort(PortAddress + (ULONG)COMPORT_REG_IER), COMPORT_LSR_DIS);
 
     /* Enable Divisor Latch Access Bit (DLAB) */
-    HlIoPortOutByte(PtrToUshort(Address + (ULONG)COMPORT_REG_LCR), COMPORT_LCR_DLAB);
+    HlIoPortOutByte(PtrToUshort(PortAddress + (ULONG)COMPORT_REG_LCR), COMPORT_LCR_DLAB);
 
     /* Set baud rate */
     Mode = COMPORT_CLOCK_RATE / BaudRate;
-    HlIoPortOutByte(PtrToUshort(Address + (ULONG)COMPORT_DIV_DLL), (UCHAR)(Mode & 0xFF));
-    HlIoPortOutByte(PtrToUshort(Address + (ULONG)COMPORT_DIV_DLM), (UCHAR)((Mode >> 8) & 0xFF));
+    HlIoPortOutByte(PtrToUshort(PortAddress + (ULONG)COMPORT_DIV_DLL), (UCHAR)(Mode & 0xFF));
+    HlIoPortOutByte(PtrToUshort(PortAddress + (ULONG)COMPORT_DIV_DLM), (UCHAR)((Mode >> 8) & 0xFF));
 
     /* Set 8 data bits, 1 stop bits, no parity (8n1) */
-    HlIoPortOutByte(PtrToUshort(Address + (ULONG)COMPORT_REG_LCR),
+    HlIoPortOutByte(PtrToUshort(PortAddress + (ULONG)COMPORT_REG_LCR),
                        COMPORT_LCR_8DATA | COMPORT_LCR_1STOP | COMPORT_LCR_PARN);
 
     /* Enable DTR, RTS and OUT2 */
-    HlIoPortOutByte(PtrToUshort(Address + (ULONG)COMPORT_REG_MCR),
+    HlIoPortOutByte(PtrToUshort(PortAddress + (ULONG)COMPORT_REG_MCR),
                        COMPORT_MCR_DTR | COMPORT_MCR_RTS | COMPORT_MCR_OUT2);
 
     /* Enable FIFO */
-    HlIoPortOutByte(PtrToUshort(Address + (ULONG)COMPORT_REG_FCR),
+    HlIoPortOutByte(PtrToUshort(PortAddress + (ULONG)COMPORT_REG_FCR),
                        COMPORT_FCR_ENABLE | COMPORT_FCR_RCVR_RESET | COMPORT_FCR_TXMT_RESET);
 
     /* Mark port as fully initialized */
     Flags |= COMPORT_FLAG_INIT;
 
     /* Make sure port works in Normal Operation Mode (NOM) */
-    HlIoPortOutByte(PtrToUshort(Address + (ULONG)COMPORT_REG_MCR), COMPORT_MCR_NOM);
+    HlIoPortOutByte(PtrToUshort(PortAddress + (ULONG)COMPORT_REG_MCR), COMPORT_MCR_NOM);
 
     /* Read junk data out of the Receive Buffer Register (RBR) */
     HlIoPortInByte(PtrToUshort(Port->Address + (ULONG)COMPORT_REG_RBR));
 
     /* Store port details */
-    Port->Address = Address;
+    Port->Address = PortAddress;
     Port->Baud = BaudRate;
     Port->Flags = Flags;
 

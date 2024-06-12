@@ -23,7 +23,6 @@ HlComPortPutByte(IN PCPPORT Port,
 XTCDECL
 XTSTATUS
 HlInitializeComPort(IN OUT PCPPORT Port,
-                    IN ULONG PortNumber,
                     IN PUCHAR PortAddress,
                     IN ULONG BaudRate);
 

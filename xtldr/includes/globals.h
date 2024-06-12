@@ -15,6 +15,9 @@
 /* XT Boot Loader registered boot protocol list */
 EXTERN LIST_ENTRY BlpBootProtocols;
 
+/* XT Boot Loader serial ports list */
+EXTERN ULONG BlComPortList[COMPORT_COUNT];
+
 /* XT Boot Loader configuration list */
 EXTERN LIST_ENTRY BlpConfig;
 

@@ -232,18 +232,35 @@ BlpInitializeSerialPort(IN ULONG PortNumber,
     EFI_STATUS EfiStatus;
     XTSTATUS Status;
 
-    /* Print debug message depending on port settings */
-    if(PortAddress)
+    /* Check if custom COM port address supplied */
+    if(!PortAddress)
     {
-        BlConsolePrint(L"Initializing serial console at COM port address: 0x%lX\n", PortAddress);
+        /* We support only a pre-defined number of ports */
+        if(PortNumber > COMPORT_COUNT)
+        {
+            /* Fail if wrong/unsupported port used */
+            return STATUS_INVALID_PARAMETER;
+        }
+
+        /* Check if serial port is set */
+        if(PortNumber == 0)
+        {
+            /* Use COM1 by default */
+            PortNumber = 1;
+        }
+
+        /* Set custom port address based on the port number and print debug message */
+        PortAddress = BlComPortList[PortNumber - 1];
+        BlConsolePrint(L"Initializing serial console at port COM%d\n", PortNumber);
     }
     else
     {
-        BlConsolePrint(L"Initializing serial console at port COM%d\n", PortNumber);
+        /* Custom port address supplied, print debug message */
+        BlConsolePrint(L"Initializing serial console at COM port address: 0x%lX\n", PortAddress);
     }
 
     /* Initialize COM port */
-    Status = HlInitializeComPort(&BlpStatus.SerialPort, PortNumber, UlongToPtr(PortAddress), BaudRate);
+    Status = HlInitializeComPort(&BlpStatus.SerialPort, UlongToPtr(PortAddress), BaudRate);
 
     /* Port not found under supplied address */
     if(Status == STATUS_NOT_FOUND && PortAddress)
@@ -254,7 +271,7 @@ BlpInitializeSerialPort(IN ULONG PortNumber,
         {
             /* Try to reinitialize COM port */
             BlConsolePrint(L"Enabled I/O space access for all PCI(E) serial controllers found\n");
-            Status = HlInitializeComPort(&BlpStatus.SerialPort, PortNumber, UlongToPtr(PortAddress), BaudRate);
+            Status = HlInitializeComPort(&BlpStatus.SerialPort, UlongToPtr(PortAddress), BaudRate);
         }
     }
 

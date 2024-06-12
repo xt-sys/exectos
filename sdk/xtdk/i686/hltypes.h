@@ -75,8 +75,9 @@
 /* PIC vector definitions */
 #define PIC1_VECTOR_SPURIOUS                            0x37
 
-/* Serial port I/O addresses */
-#define COMPORT_ADDRESSES                               {0x000, 0x3F8, 0x2F8, 0x3E8, 0x2E8, 0x5F8, 0x4F8, 0x5E8, 0x4E8}
+/* Serial ports information */
+#define COMPORT_ADDRESS                                 {0x3F8, 0x2F8, 0x3E8, 0x2E8, 0x5F8, 0x4F8, 0x5E8, 0x4E8}
+#define COMPORT_COUNT                                   8
 
 /* Initial stall factor */
 #define INITIAL_STALL_FACTOR                            100
