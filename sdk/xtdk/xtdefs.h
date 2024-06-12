@@ -62,7 +62,7 @@
 /* Macro for calculating size of an array */
 #define ARRAY_SIZE(Array)                      (sizeof(Array) / sizeof(*Array))
 
-/* Macro for concatenating two strings */
+/* Macros for concatenating two strings */
 #define CONCAT_STRING(Str1, Str2)              Str1##Str2
 #define CONCATENATE(Str1, Str2)                CONCAT_STRING(Str1, Str2)
 
