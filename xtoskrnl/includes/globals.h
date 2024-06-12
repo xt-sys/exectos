@@ -57,6 +57,9 @@ EXTERN LIST_ENTRY KepSystemResourcesListHead;
 /* Kernel system resources lock */
 EXTERN KSPIN_LOCK KepSystemResourcesLock;
 
+/* Kernel UBSAN active frame flag */
+EXTERN BOOLEAN KepUbsanActiveFrame;
+
 /* Biggest free memory descriptor */
 EXTERN PLOADER_MEMORY_DESCRIPTOR MmFreeDescriptor;
 

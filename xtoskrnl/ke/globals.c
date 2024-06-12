@@ -32,3 +32,6 @@ LIST_ENTRY KepSystemResourcesListHead;
 
 /* Kernel system resources lock */
 KSPIN_LOCK KepSystemResourcesLock;
+
+/* Kernel UBSAN active frame flag */
+BOOLEAN KepUbsanActiveFrame = FALSE;

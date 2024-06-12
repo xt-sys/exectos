@@ -198,6 +198,14 @@ typedef enum _WAIT_TYPE
     WaitAny
 } WAIT_TYPE, *PWAIT_TYPE;
 
+/* Kernel UBSAN data types enumeration list */
+typedef enum _KUBSAN_DATA_TYPE
+{
+    DataTypeInt,
+    DataTypeFloat,
+    DataTypeUnknown = 0xFFFF
+} KUBSAN_DATA_TYPE, *PKUBSAN_DATA_TYPE;
+
 /* Kernel routine callbacks */
 typedef EXCEPTION_DISPOSITION (XTCDECL *PEXCEPTION_ROUTINE)(IN PEXCEPTION_RECORD ExceptionRecord, IN PVOID EstablisherFrame, IN OUT PCONTEXT ContextRecord, IN OUT PVOID DispatcherContext);
 typedef VOID (XTAPI *PKDEFERRED_ROUTINE)(IN PKDPC Dpc, IN PVOID DeferredContext, IN PVOID SystemArgument1, IN PVOID SystemArgument2);
@@ -550,5 +558,91 @@ typedef struct _SYSTEM_RESOURCE_FRAMEBUFFER
         USHORT ReservedSize;
     } Pixels;
 } SYSTEM_RESOURCE_FRAMEBUFFER, *PSYSTEM_RESOURCE_FRAMEBUFFER;
+
+/* Kernel UBSAN source location structure definition */
+typedef struct _KUBSAN_SOURCE_LOCATION
+{
+    PCCHAR FileName;
+    union
+    {
+        ULONG Reported;
+        struct
+        {
+            UINT Line;
+            UINT Column;
+        };
+    };
+} KUBSAN_SOURCE_LOCATION, *PKUBSAN_SOURCE_LOCATION;
+
+/* Kernel UBSAN type descriptor structure definition */
+typedef struct _KUBSAN_TYPE_DESCRIPTOR
+{
+    USHORT DataType;
+    USHORT TypeInfo;
+    CHAR TypeName[1];
+} KUBSAN_TYPE_DESCRIPTOR, *PKUBSAN_TYPE_DESCRIPTOR;
+
+/* Kernel UBSAN float cast overflow data structure definition */
+typedef struct _KUBSAN_FLOAT_CAST_OVERFLOW_DATA
+{
+    KUBSAN_SOURCE_LOCATION Location;
+    PKUBSAN_TYPE_DESCRIPTOR LhsType;
+    PKUBSAN_TYPE_DESCRIPTOR RhsType;
+} KUBSAN_FLOAT_CAST_OVERFLOW_DATA, *PKUBSAN_FLOAT_CAST_OVERFLOW_DATA;
+
+/* Kernel UBSAN function type mismatch data structure definition */
+typedef struct _KUBSAN_FUNCTION_TYPE_MISMATCH_DATA
+{
+    KUBSAN_SOURCE_LOCATION Location;
+    PKUBSAN_TYPE_DESCRIPTOR Type;
+} KUBSAN_FUNCTION_TYPE_MISMATCH_DATA, *PKUBSAN_FUNCTION_TYPE_MISMATCH_DATA;
+
+/* Kernel UBSAN invalid builtin data structure definition */
+typedef struct _KUBSAN_INVALID_BUILTIN_DATA
+{
+    KUBSAN_SOURCE_LOCATION Location;
+    UCHAR Kind;
+} KUBSAN_INVALID_BUILTIN_DATA, *PKUBSAN_INVALID_BUILTIN_DATA;
+
+/* Kernel UBSAN shift out of bounds data structure definition */
+typedef struct _KUBSAN_SHIFT_OUT_OF_BOUNDS_DATA
+{
+    KUBSAN_SOURCE_LOCATION Location;
+    PKUBSAN_TYPE_DESCRIPTOR LhsType;
+    PKUBSAN_TYPE_DESCRIPTOR RhsType;
+} KUBSAN_SHIFT_OUT_OF_BOUNDS_DATA, *PKUBSAN_SHIFT_OUT_OF_BOUNDS_DATA;
+
+/* Kernel UBSAN out of bounds data structure definition */
+typedef struct _KUBSAN_OUT_OF_BOUNDS_DATA
+{
+    KUBSAN_SOURCE_LOCATION Location;
+    PKUBSAN_TYPE_DESCRIPTOR ArrayType;
+    PKUBSAN_TYPE_DESCRIPTOR IndexType;
+} KUBSAN_OUT_OF_BOUNDS_DATA, *PKUBSAN_OUT_OF_BOUNDS_DATA;
+
+/* Kernel UBSAN overflow data structure definition */
+typedef struct _KUBSAN_OVERFLOW_DATA
+{
+    KUBSAN_SOURCE_LOCATION Location;
+    PKUBSAN_TYPE_DESCRIPTOR Type;
+} KUBSAN_OVERFLOW_DATA, *PKUBSAN_OVERFLOW_DATA;
+
+/* Kernel UBSAN type mismatch data structure definition */
+typedef struct _KUBSAN_TYPE_MISMATCH_DATA
+{
+    KUBSAN_SOURCE_LOCATION Location;
+    PKUBSAN_TYPE_DESCRIPTOR Type;
+    ULONG Alignment;
+    UCHAR TypeCheckKind;
+} KUBSAN_TYPE_MISMATCH_DATA, *PKUBSAN_TYPE_MISMATCH_DATA;
+
+/* Kernel UBSAN type mismatch data structure definition */
+typedef struct _KUBSAN_TYPE_MISMATCH_DATA_V1
+{
+    KUBSAN_SOURCE_LOCATION Location;
+    PKUBSAN_TYPE_DESCRIPTOR Type;
+    UCHAR LogAlignment;
+    UCHAR TypeCheckKind;
+} KUBSAN_TYPE_MISMATCH_DATA_V1, *PKUBSAN_TYPE_MISMATCH_DATA_V1;
 
 #endif /* __XTDK_KEFUNCS_H */

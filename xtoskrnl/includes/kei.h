@@ -86,9 +86,23 @@ XTAPI
 VOID
 KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters);
 
+XTCDECL
+BOOLEAN
+KepCheckUbsanReport(PKUBSAN_SOURCE_LOCATION Location);
+
+XTCDECL
+VOID
+KepEnterUbsanFrame(PKUBSAN_SOURCE_LOCATION Location,
+                   PCCHAR Reason);
+
 XTFASTCALL
 VOID
 KepExitDispatcher(IN KRUNLEVEL OldRunLevel);
+
+XTCDECL
+LONGLONG
+KepGetSignedUbsanValue(PKUBSAN_TYPE_DESCRIPTOR Type,
+                       PVOID Value);
 
 XTAPI
 VOID
@@ -96,9 +110,90 @@ KepGetSystemResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
                      IN BOOLEAN Acquire,
                      OUT PSYSTEM_RESOURCE_HEADER *ResourceHeader);
 
+XTCDECL
+PCCHAR
+KepGetUbsanTypeKind(UCHAR TypeCheckKind);
+
+XTCDECL
+ULONGLONG
+KepGetUnsignedUbsanValue(PKUBSAN_TYPE_DESCRIPTOR Type,
+                         PVOID Value);
+
+XTCDECL
+VOID
+KepHandleUbsanDivisionOverflow(PKUBSAN_OVERFLOW_DATA Data,
+                               PVOID Lhs,
+                               PVOID Rhs);
+
+XTCDECL
+VOID
+KepHandleUbsanFloatCastOverflow(PKUBSAN_FLOAT_CAST_OVERFLOW_DATA Data,
+                                ULONG_PTR Lhs,
+                                ULONG_PTR Rhs);
+
+XTCDECL
+VOID
+KepHandleUbsanFunctionTypeMismatch(PKUBSAN_FUNCTION_TYPE_MISMATCH_DATA Data,
+                                   ULONG_PTR Pointer);
+
+XTCDECL
+VOID
+KepHandleUbsanIntegerOverflow(PKUBSAN_OVERFLOW_DATA Data,
+                                 ULONG_PTR Lhs,
+                                 ULONG_PTR Rhs);
+
+XTCDECL
+VOID
+KepHandleUbsanInvalidBuiltin(PKUBSAN_INVALID_BUILTIN_DATA Data);
+
+XTCDECL
+VOID
+KepHandleUbsanMisalignedAccess(PKUBSAN_TYPE_MISMATCH_DATA Data,
+                               ULONG_PTR Pointer);
+
+XTCDECL
+VOID
+KepHandleUbsanNegateOverflow(PKUBSAN_OVERFLOW_DATA Data,
+                             ULONG_PTR OldValue);
+
+XTCDECL
+VOID
+KepHandleUbsanNullPointerDereference(PKUBSAN_TYPE_MISMATCH_DATA Data);
+
+XTCDECL
+VOID
+KepHandleUbsanObjectSizeMismatch(PKUBSAN_TYPE_MISMATCH_DATA Data,
+                                 ULONG_PTR Pointer);
+
+XTCDECL
+VOID
+KepHandleUbsanOutOfBounds(PKUBSAN_OUT_OF_BOUNDS_DATA Data,
+                          ULONG_PTR Index);
+
+XTCDECL
+VOID
+KepHandleUbsanPointerOverflow(PKUBSAN_OVERFLOW_DATA Data,
+                              ULONG_PTR Lhs,
+                              ULONG_PTR Rhs);
+
+XTCDECL
+VOID
+KepHandleUbsanShiftOutOfBounds(PKUBSAN_SHIFT_OUT_OF_BOUNDS_DATA Data,
+                               ULONG_PTR Lhs,
+                               ULONG_PTR Rhs);
+
+XTCDECL
+VOID
+KepHandleUbsanTypeMismatch(PKUBSAN_TYPE_MISMATCH_DATA Data,
+                           ULONG_PTR Pointer);
+
 XTAPI
 VOID
 KepInitializeSystemResources(VOID);
+
+XTCDECL
+VOID
+KepLeaveUbsanFrame();
 
 XTAPI
 VOID
