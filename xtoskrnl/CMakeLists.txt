@@ -1,4 +1,5 @@
-# XT Kernel
+# XT Kernel and library
+PROJECT(LIBXTOS)
 PROJECT(XTOSKRNL)
 
 # Specify include directories
@@ -6,7 +7,20 @@ include_directories(
     ${EXECTOS_SOURCE_DIR}/sdk/xtdk
     ${XTOSKRNL_SOURCE_DIR}/includes)
 
-# Specify list of source code files
+# Specify list of library source code files
+list(APPEND LIBXTOS_SOURCE
+    ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/cpufunc.c
+    ${XTOSKRNL_SOURCE_DIR}/hl/cport.c
+    ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/ioport.c
+    ${XTOSKRNL_SOURCE_DIR}/rtl/globals.c
+    ${XTOSKRNL_SOURCE_DIR}/rtl/guid.c
+    ${XTOSKRNL_SOURCE_DIR}/rtl/math.c
+    ${XTOSKRNL_SOURCE_DIR}/rtl/memory.c
+    ${XTOSKRNL_SOURCE_DIR}/rtl/plist.c
+    ${XTOSKRNL_SOURCE_DIR}/rtl/string.c
+    ${XTOSKRNL_SOURCE_DIR}/rtl/widestr.c)
+
+# Specify list of kernel source code files
 list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/archsup.S
     ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/cpufunc.c
@@ -67,7 +81,7 @@ list(APPEND XTOSKRNL_SOURCE
 set_specfile(xtoskrnl.spec xtoskrnl.exe)
 
 # Link static XTOS library
-add_library(libxtos ${XTOSKRNL_SOURCE})
+add_library(libxtos ${LIBXTOS_SOURCE})
 
 # Link kernel executable
 add_executable(xtoskrnl
