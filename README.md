@@ -21,7 +21,7 @@
     <img alt="Sponsor" src="https://img.shields.io/badge/Sponsor-%E2%9D%A4-red?logo=GitHub">
   </a>
   <a href="https://discord.com/invite/zBzJ5qMGX7">
-    <img alt="Discord" src="https://img.shields.io/discord/723186294540206100?label=Chat">
+    <img alt="Discord" src="https://img.shields.io/badge/Chat-Join%20Discord-success">
   </a>
 </p>
 
