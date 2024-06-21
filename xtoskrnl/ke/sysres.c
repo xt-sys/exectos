@@ -2,7 +2,8 @@
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
  * FILE:            xtoskrnl/ke/sysres.c
- * DESCRIPTION:     Builtin system resources management
+ * DESCRIPTION:     System resources management; This code is based on the MinocaOS implementation
+ *                  Copyright(C) 2012 Minoca Corp. (https://github.com/minoca/os/blob/master/kernel/ke/sysres.c)
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
