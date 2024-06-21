@@ -86,67 +86,6 @@ KeReleaseSystemResource(IN PSYSTEM_RESOURCE_HEADER ResourceHeader)
 }
 
 /**
- * Initializes system resource management.
- *
- * @return This routine returns a status code.
- *
- * @since XT 1.0
- */
-XTAPI
-VOID
-KepInitializeSystemResources(VOID)
-{
-    PSYSTEM_RESOURCE_HEADER ResourceHeader;
-    PLIST_ENTRY ListEntry, NextListEntry;
-    ULONG ResourceSize;
-
-    /* Initialize system resources spin lock and resource list */
-    KeInitializeSpinLock(&KepSystemResourcesLock);
-    RtlInitializeListHead(&KepSystemResourcesListHead);
-
-    /* Make sure there are some system resources available */
-    if(!RtlListEmpty(&KeInitializationBlock->SystemResourcesListHead))
-    {
-        /* Iterate through system resources list */
-        ListEntry = KeInitializationBlock->SystemResourcesListHead.Flink;
-        while(ListEntry != &KeInitializationBlock->SystemResourcesListHead)
-        {
-            /* Get resource header and next list entry */
-            ResourceHeader = CONTAIN_RECORD(ListEntry, SYSTEM_RESOURCE_HEADER, ListEntry);
-            NextListEntry = ListEntry->Flink;
-
-            /* Basic resource type validation */
-            switch(ResourceHeader->ResourceType)
-            {
-                case SystemResourceAcpi:
-                    /* ACPI system resource */
-                    ResourceSize = sizeof(SYSTEM_RESOURCE_ACPI);
-                    break;
-                case SystemResourceFrameBuffer:
-                    /* FrameBuffer system resource */
-                    ResourceSize = sizeof(SYSTEM_RESOURCE_FRAMEBUFFER);
-                    break;
-                default:
-                    /* Unknown system resource type, skip it */
-                    ResourceSize = 0;
-                    break;
-            }
-
-            /* Validate resource size */
-            if(ResourceSize != 0 && ResourceSize == ResourceHeader->ResourceSize)
-            {
-                /* Move valid resource to the internal kernel list of system resources */
-                RtlRemoveEntryList(&ResourceHeader->ListEntry);
-                RtlInsertTailList(&KepSystemResourcesListHead, &ResourceHeader->ListEntry);
-            }
-
-            /* Go to the next list entry */
-            ListEntry = NextListEntry;
-        }
-    }
-}
-
-/**
  * Looks for an unacquired system resource of the specified type.
  *
  * @param ResourceType
@@ -221,4 +160,65 @@ KepGetSystemResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
 
     /* Return resource header */
     *ResourceHeader = Resource;
+}
+
+/**
+ * Initializes system resource management.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KepInitializeSystemResources(VOID)
+{
+    PSYSTEM_RESOURCE_HEADER ResourceHeader;
+    PLIST_ENTRY ListEntry, NextListEntry;
+    ULONG ResourceSize;
+
+    /* Initialize system resources spin lock and resource list */
+    KeInitializeSpinLock(&KepSystemResourcesLock);
+    RtlInitializeListHead(&KepSystemResourcesListHead);
+
+    /* Make sure there are some system resources available */
+    if(!RtlListEmpty(&KeInitializationBlock->SystemResourcesListHead))
+    {
+        /* Iterate through system resources list */
+        ListEntry = KeInitializationBlock->SystemResourcesListHead.Flink;
+        while(ListEntry != &KeInitializationBlock->SystemResourcesListHead)
+        {
+            /* Get resource header and next list entry */
+            ResourceHeader = CONTAIN_RECORD(ListEntry, SYSTEM_RESOURCE_HEADER, ListEntry);
+            NextListEntry = ListEntry->Flink;
+
+            /* Basic resource type validation */
+            switch(ResourceHeader->ResourceType)
+            {
+                case SystemResourceAcpi:
+                    /* ACPI system resource */
+                    ResourceSize = sizeof(SYSTEM_RESOURCE_ACPI);
+                    break;
+                case SystemResourceFrameBuffer:
+                    /* FrameBuffer system resource */
+                    ResourceSize = sizeof(SYSTEM_RESOURCE_FRAMEBUFFER);
+                    break;
+                default:
+                    /* Unknown system resource type, skip it */
+                    ResourceSize = 0;
+                    break;
+            }
+
+            /* Validate resource size */
+            if(ResourceSize != 0 && ResourceSize == ResourceHeader->ResourceSize)
+            {
+                /* Move valid resource to the internal kernel list of system resources */
+                RtlRemoveEntryList(&ResourceHeader->ListEntry);
+                RtlInsertTailList(&KepSystemResourcesListHead, &ResourceHeader->ListEntry);
+            }
+
+            /* Go to the next list entry */
+            ListEntry = NextListEntry;
+        }
+    }
 }
