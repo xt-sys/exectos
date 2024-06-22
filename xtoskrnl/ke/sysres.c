@@ -28,11 +28,8 @@ XTSTATUS
 KeAcquireSystemResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
                         OUT PSYSTEM_RESOURCE_HEADER *ResourceHeader)
 {
-    /* Acquire system resource */
-    KepGetSystemResource(ResourceType, TRUE, ResourceHeader);
-
-    /* Return status code */
-    return (*ResourceHeader == NULL) ? STATUS_NOT_FOUND : STATUS_SUCCESS;
+    /* Get system resource and acquire an ownership */
+    return KepGetSystemResource(ResourceType, TRUE, ResourceHeader);
 }
 
 /**
@@ -53,11 +50,8 @@ XTSTATUS
 KeGetSystemResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
                     OUT PSYSTEM_RESOURCE_HEADER *ResourceHeader)
 {
-    /* Get system resource */
-    KepGetSystemResource(ResourceType, FALSE, ResourceHeader);
-
-    /* Return status code */
-    return (*ResourceHeader == NULL) ? STATUS_NOT_FOUND : STATUS_SUCCESS;
+    /* Get system resource without acquiring an ownership */
+    return KepGetSystemResource(ResourceType, FALSE, ResourceHeader);
 }
 
 /**
@@ -78,8 +72,8 @@ KeReleaseSystemResource(IN PSYSTEM_RESOURCE_HEADER ResourceHeader)
     ArClearInterruptFlag();
     KeAcquireSpinLock(&KepSystemResourcesLock);
 
-    /* Release system resource */
-    ResourceHeader->Acquired = FALSE;
+    /* Release resource lock */
+    ResourceHeader->ResourceLocked = FALSE;
 
     /* Release spinlock and enable interrupts */
     KeReleaseSpinLock(&KepSystemResourcesLock);
@@ -103,14 +97,18 @@ KeReleaseSystemResource(IN PSYSTEM_RESOURCE_HEADER ResourceHeader)
  * @since XT 1.0
  */
 XTAPI
-VOID
+XTSTATUS
 KepGetSystemResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
-                     IN BOOLEAN Acquire,
+                     IN BOOLEAN ResourceLock,
                      OUT PSYSTEM_RESOURCE_HEADER *ResourceHeader)
 {
     PSYSTEM_RESOURCE_HEADER Resource;
     PLIST_ENTRY ListEntry;
     BOOLEAN Interrupts;
+    XTSTATUS Status;
+
+    /* Assume resource found successfully */
+    Status = STATUS_SUCCESS;
 
     /* Check if interrupts are enabled */
     Interrupts = ArInterruptsEnabled();
@@ -126,14 +124,22 @@ KepGetSystemResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
         /* Get resource header */
         Resource = CONTAIN_RECORD(ListEntry, SYSTEM_RESOURCE_HEADER, ListEntry);
 
-        /* Check if resource type matches and it's not already acquired */
-        if(Resource->ResourceType == ResourceType && Resource->Acquired == FALSE)
+        /* Check if resource type matches */
+        if(Resource->ResourceType == ResourceType)
         {
-            /* Check if resource should be acquired */
-            if(Acquire)
+            /* Check if resource is locked */
+            if(Resource->ResourceLocked)
             {
-                /* Mark resource as acquired */
-                Resource->Acquired = TRUE;
+                /* Resource locked, set status code and stop browsing a list */
+                Status = STATUS_RESOURCE_LOCKED;
+                break;
+            }
+
+            /* Check if resource lock should be acquired */
+            if(ResourceLock)
+            {
+                /* Acquire resource lock */
+                Resource->ResourceLocked = TRUE;
             }
 
             /* Stop browsing a list */
@@ -149,6 +155,7 @@ KepGetSystemResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
     {
         /* Resource not found, return NULL */
         Resource = NULL;
+        Status = STATUS_NOT_FOUND;
     }
 
     /* Release spinlock and re-enable interrupts if necessary */
@@ -159,8 +166,9 @@ KepGetSystemResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
         ArSetInterruptFlag();
     }
 
-    /* Return resource header */
+    /* Return resource header and status code */
     *ResourceHeader = Resource;
+    return Status;
 }
 
 /**

@@ -521,10 +521,10 @@ typedef struct _SYSTEM_RESOURCE_HEADER
 {
     LIST_ENTRY ListEntry;
     SYSTEM_RESOURCE_TYPE ResourceType;
+    BOOLEAN ResourceLocked;
     ULONG ResourceSize;
     PVOID PhysicalAddress;
     PVOID VirtualAddress;
-    BOOLEAN Acquired;
 } SYSTEM_RESOURCE_HEADER, *PSYSTEM_RESOURCE_HEADER;
 
 /* ACPI system resource structure definition */
