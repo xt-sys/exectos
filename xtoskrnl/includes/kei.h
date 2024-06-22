@@ -105,7 +105,7 @@ KepGetSignedUbsanValue(PKUBSAN_TYPE_DESCRIPTOR Type,
                        PVOID Value);
 
 XTAPI
-VOID
+XTSTATUS
 KepGetSystemResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
                      IN BOOLEAN Acquire,
                      OUT PSYSTEM_RESOURCE_HEADER *ResourceHeader);
