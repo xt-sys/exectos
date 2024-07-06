@@ -149,9 +149,9 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
 XTCDECL
 EFI_STATUS
 BlMapPage(IN PXTBL_PAGE_MAPPING PageMap,
-          IN UINT_PTR VirtualAddress,
-          IN UINT_PTR PhysicalAddress,
-          IN UINT NumberOfPages)
+          IN ULONG_PTR VirtualAddress,
+          IN ULONG_PTR PhysicalAddress,
+          IN ULONG NumberOfPages)
 {
     SIZE_T Pml1Entry, Pml2Entry, Pml3Entry, Pml4Entry, Pml5Entry;
     PHARDWARE_PTE Pml1, Pml2, Pml3, Pml4, Pml5;

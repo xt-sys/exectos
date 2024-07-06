@@ -12,7 +12,7 @@
 /**
  * This routine allocates one or more 4KB pages.
  *
- * @param Pages
+ * @param NumberOfPages
  *        The number of contiguous 4KB pages to allocate.
  *
  * @param Memory
@@ -24,10 +24,10 @@
  */
 XTCDECL
 EFI_STATUS
-BlAllocateMemoryPages(IN ULONGLONG Pages,
+BlAllocateMemoryPages(IN ULONGLONG NumberOfPages,
                       OUT PEFI_PHYSICAL_ADDRESS Memory)
 {
-    return EfiSystemTable->BootServices->AllocatePages(AllocateAnyPages, EfiLoaderData, Pages, Memory);
+    return EfiSystemTable->BootServices->AllocatePages(AllocateAnyPages, EfiLoaderData, NumberOfPages, Memory);
 }
 
 /**
@@ -55,7 +55,7 @@ BlAllocateMemoryPool(IN UINT_PTR Size,
 /**
  * This routine frees memory pages.
  *
- * @param Pages
+ * @param NumberOfPages
  *        The number of contiguous 4 KB pages to free.
  *
  * @param Memory
@@ -67,10 +67,10 @@ BlAllocateMemoryPool(IN UINT_PTR Size,
  */
 XTCDECL
 EFI_STATUS
-BlFreeMemoryPages(IN ULONGLONG Pages,
+BlFreeMemoryPages(IN ULONGLONG NumberOfPages,
                   IN EFI_PHYSICAL_ADDRESS Memory)
 {
-    return EfiSystemTable->BootServices->FreePages(Memory, Pages);
+    return EfiSystemTable->BootServices->FreePages(Memory, NumberOfPages);
 }
 
 /**

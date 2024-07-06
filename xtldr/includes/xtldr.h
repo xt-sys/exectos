@@ -18,7 +18,7 @@
 /* XTLDR routines forward references */
 XTCDECL
 EFI_STATUS
-BlAllocateMemoryPages(IN ULONGLONG Pages,
+BlAllocateMemoryPages(IN ULONGLONG NumberOfPages,
                       OUT PEFI_PHYSICAL_ADDRESS Memory);
 
 XTCDECL
@@ -121,7 +121,7 @@ BlFindVolumeDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL FsHandle,
 
 XTCDECL
 EFI_STATUS
-BlFreeMemoryPages(IN ULONGLONG Pages,
+BlFreeMemoryPages(IN ULONGLONG NumberOfPages,
                   IN EFI_PHYSICAL_ADDRESS Memory);
 
 XTCDECL
@@ -249,9 +249,9 @@ BlMapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
 XTCDECL
 EFI_STATUS
 BlMapPage(IN PXTBL_PAGE_MAPPING PageMap,
-          IN UINT_PTR VirtualAddress,
-          IN UINT_PTR PhysicalAddress,
-          IN UINT NumberOfPages);
+          IN ULONG_PTR VirtualAddress,
+          IN ULONG_PTR PhysicalAddress,
+          IN ULONG NumberOfPages);
 
 XTCDECL
 EFI_STATUS
