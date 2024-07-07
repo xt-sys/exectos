@@ -187,7 +187,7 @@ typedef struct _GENERIC_ADDRESS
     UCHAR BitOffset;
     UCHAR Reserved;
     PHYSICAL_ADDRESS Address;
-} GENERIC_ADDRESS, *PGENERIC_ADDRESS;
+} PACKED GENERIC_ADDRESS, *PGENERIC_ADDRESS;
 
 /* Each ACPI table description header structure */
 typedef struct _ACPI_DESCRIPTION_HEADER
@@ -201,14 +201,14 @@ typedef struct _ACPI_DESCRIPTION_HEADER
     ULONG OemRevision;
     UCHAR CreatorID[4];
     ULONG CreatorRev;
-} ACPI_DESCRIPTION_HEADER, *PACPI_DESCRIPTION_HEADER;
+} PACKED ACPI_DESCRIPTION_HEADER, *PACPI_DESCRIPTION_HEADER;
 
 /* Each ACPI subtable description header structure */
 typedef struct _ACPI_SUBTABLE_HEADER
 {
     UCHAR Type;
     UCHAR Length;
-} ACPI_SUBTABLE_HEADER, *PACPI_SUBTABLE_HEADER;
+} PACKED ACPI_SUBTABLE_HEADER, *PACPI_SUBTABLE_HEADER;
 
 /* ACPI cache list structure */
 typedef struct _ACPI_CACHE_LIST
@@ -229,14 +229,14 @@ typedef struct _ACPI_RSDP
     ULONGLONG XsdtAddress;
     UCHAR XChecksum;
     UCHAR Reserved[3];
-} ACPI_RSDP, *PACPI_RSDP;
+} PACKED ACPI_RSDP, *PACPI_RSDP;
 
 /* ACPI Root System Description Table (RSDT) structure */
 typedef struct _ACPI_RSDT
 {
     ACPI_DESCRIPTION_HEADER Header;
     ULONG Tables[];
-} ACPI_RSDT, *PACPI_RSDT;
+} PACKED ACPI_RSDT, *PACPI_RSDT;
 
 /* ACPI eXtended Root System Description Table (XSDT) structure */
 typedef struct _ACPI_XSDT
@@ -303,7 +303,7 @@ typedef struct _ACPI_FADT
     GENERIC_ADDRESS XGp1Blk;
     GENERIC_ADDRESS SleepControlReg;
     GENERIC_ADDRESS SleepStatusReg;
-} ACPI_FADT, *PACPI_FADT;
+} PACKED ACPI_FADT, *PACPI_FADT;
 
 /* ACPI Multiple APIC Description Table (MADT) structure */
 typedef struct _ACPI_MADT
@@ -312,7 +312,7 @@ typedef struct _ACPI_MADT
     ULONG LocalApicAddress;
     ULONG Flags;
     ULONG ApicTables[];
-} ACPI_MADT, *PACPI_MADT;
+} PACKED ACPI_MADT, *PACPI_MADT;
 
 /* ACPI Local APIC MADT subtable structure */
 typedef struct _ACPI_MADT_LOCAL_APIC
@@ -321,7 +321,7 @@ typedef struct _ACPI_MADT_LOCAL_APIC
     UCHAR ProcessorId;
     UCHAR Id;
     ULONG LapicFlags;
-} ACPI_MADT_LOCAL_APIC, *PACPI_MADT_LOCAL_APIC;
+} PACKED ACPI_MADT_LOCAL_APIC, *PACPI_MADT_LOCAL_APIC;
 
 /* ACPI Local X2APIC MADT subtable structure */
 typedef struct _ACPI_MADT_LOCAL_X2APIC
@@ -331,7 +331,7 @@ typedef struct _ACPI_MADT_LOCAL_X2APIC
     ULONG Id;
     ULONG LapicFlags;
     ULONG ProcessorId;
-} ACPI_MADT_LOCAL_X2APIC, *PACPI_MADT_LOCAL_X2APIC;
+} PACKED ACPI_MADT_LOCAL_X2APIC, *PACPI_MADT_LOCAL_X2APIC;
 
 /* ACPI System Information structure */
 typedef struct _ACPI_SYSTEM_INFO
