@@ -265,7 +265,7 @@ XTAPI
 XTSTATUS
 HlpInitializeAcpiSystemInformation(VOID)
 {
-    PUCHAR MadtTable;
+    ULONG_PTR MadtTable;
     PACPI_MADT Madt;
     XTSTATUS Status;
     ULONG CpuCount;
@@ -282,11 +282,11 @@ HlpInitializeAcpiSystemInformation(VOID)
     }
 
     /* Set APIC table traverse pointer and initialize number of CPUs */
-    MadtTable = (PUCHAR)Madt->ApicTables;
+    MadtTable = (ULONG_PTR)Madt->ApicTables;
     CpuCount = 0;
 
     /* Traverse all MADT tables to get number of processors */
-    while(MadtTable <= ((PUCHAR)Madt + Madt->Header.Length))
+    while(MadtTable <= ((ULONG_PTR)Madt + Madt->Header.Length))
     {
         /* Check if this is a local APIC subtable */
         if((((PACPI_MADT_LOCAL_APIC)MadtTable)->Header.Type == ACPI_MADT_TYPE_LOCAL_APIC) &&
