@@ -452,6 +452,9 @@ HlpQueryAcpiTables(IN ULONG Signature,
         return STATUS_INVALID_PARAMETER;
     }
 
+    /* Ensure that table header is not set before attempting to find ACPI table */
+    TableHeader = NULL;
+
     /* Check if DSDT or FACS table requested */
     if(Signature == ACPI_DSDT_SIGNATURE || Signature == ACPI_FACS_SIGNATURE)
     {
