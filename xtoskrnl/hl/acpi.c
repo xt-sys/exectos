@@ -385,8 +385,12 @@ XTSTATUS
 HlpQueryAcpiCache(IN ULONG Signature,
                   OUT PACPI_DESCRIPTION_HEADER *AcpiTable)
 {
+    PACPI_DESCRIPTION_HEADER TableHeader;
     PACPI_CACHE_LIST AcpiCache;
     PLIST_ENTRY ListEntry;
+
+    /* Initialize variables */
+    TableHeader = NULL;
 
     /* Iterate through ACPI tables cache list */
     ListEntry = HlpAcpiCacheList.Flink;
@@ -399,7 +403,7 @@ HlpQueryAcpiCache(IN ULONG Signature,
         if(AcpiCache->Header.Signature == Signature)
         {
             /* ACPI table found in cache, return it */
-            *AcpiTable = &AcpiCache->Header;
+            TableHeader = &AcpiCache->Header;
             break;
         }
 
@@ -408,13 +412,14 @@ HlpQueryAcpiCache(IN ULONG Signature,
     }
 
     /* Check if the requested ACPI table was found in the cache */
-    if(*AcpiTable == NULL)
+    if(TableHeader == NULL)
     {
         /* ACPI table not found in cache, return error */
         return STATUS_NOT_FOUND;
     }
 
-    /* Return success */
+    /* Return table header and status code */
+    *AcpiTable = TableHeader;
     return STATUS_SUCCESS;
 }
 
