@@ -273,7 +273,7 @@ HlpInitializeAcpiSystemInformation(VOID)
     /* Zero the ACPI system information structure */
     RtlZeroMemory(&HlpAcpiSystemInfo, sizeof(ACPI_SYSTEM_INFO));
 
-    /* Get Multi-APIC Description Table (MADT) */
+    /* Get Multiple APIC Description Table (MADT) */
     Status = HlGetAcpiTable(ACPI_MADT_SIGNATURE, (PACPI_DESCRIPTION_HEADER*)&Madt);
     if(Status != STATUS_SUCCESS)
     {
