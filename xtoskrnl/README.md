@@ -9,7 +9,7 @@ This is a list of them:
 
  * Ar - Architecture library
  * Ex - Kernel Executive
- * Hl - Hardware Abstraction Layer (HAL)
+ * Hl - Hardware Layer
  * Ke - Core kernel library
  * Mm - Memory manager
  * Po - Plug&Play and Power Manager
@@ -26,10 +26,10 @@ The kernel executive supplies heap management, including support for allocating 
 pools, as well as synchronization primitives like push locks and fast mutexes, interlocked memory access, and worker
 threads.
 
-### HL: Hardware Abstraction Layer
-Hardware Abstraction Layer (HAL), is a layer between the physical hardware of the computer and the rest of the operating
-system. It was designed to hide differences in hardware and therefore it provides a consistent platform on which
-the system and applications may run.
+### HL: Hardware Layer
+Hardware Layer, is a layer between the physical hardware of the computer and the rest of the operating system. It was
+designed to hide differences in hardware and therefore it provides a consistent platform on which the system and
+applications may run.
 
 ### KE: Kernel Library
 The kernel implements its core functionality that everything else in the system depends upon. This includes basic
