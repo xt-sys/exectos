@@ -44,7 +44,7 @@ set(CMAKE_TOOLCHAIN_FILE "sdk/cmake/toolchain.cmake")
 project(EXECTOS)
 
 # Load all the CMake SDK
-include(sdk/cmake/baseaddress.cmake)
+include(sdk/cmake/baseaddress/${ARCH}.cmake)
 include(sdk/cmake/emulation.cmake)
 include(sdk/cmake/functions.cmake)
 include(sdk/cmake/version.cmake)
