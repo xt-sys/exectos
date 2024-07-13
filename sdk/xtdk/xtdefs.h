@@ -95,7 +95,8 @@
 #define SIGNATURE32(A, B, C, D)                (SIGNATURE16(A, B) | (SIGNATURE16(C, D) << 16))
 #define SIGNATURE64(A, B, C, D, E, F, G, H)    (SIGNATURE32(A, B, C, D) | ((UINT64)(SIGNATURE32(E, F, G, H)) << 32))
 
-/* XT size to pages conversion macro */
+/* XT size <-> pages conversion macro */
+#define PAGES_TO_SIZE(Pages)                   ((Pages) << MM_PAGE_SHIFT)
 #define SIZE_TO_PAGES(Size)                    (((Size) >> MM_PAGE_SHIFT) + (((Size) & (MM_PAGE_MASK)) ? 1 : 0))
 
 /* Macros for concatenating strings */
