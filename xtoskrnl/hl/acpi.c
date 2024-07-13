@@ -265,13 +265,110 @@ XTAPI
 XTSTATUS
 HlpInitializeAcpiSystemInformation(VOID)
 {
+    PACPI_MADT_LOCAL_X2APIC LocalX2Apic;
+    PACPI_MADT_LOCAL_APIC LocalApic;
     ULONG_PTR MadtTable;
     PACPI_MADT Madt;
     XTSTATUS Status;
     ULONG CpuCount;
 
-    /* Zero the ACPI system information structure */
-    RtlZeroMemory(&HlpAcpiSystemInfo, sizeof(ACPI_SYSTEM_INFO));
+    /* Allocate memory for ACPI system information structure */
+    Status = HlpInitializeAcpiSystemStructure();
+    if(Status != STATUS_SUCCESS)
+    {
+        /* Failed to allocate memory, return error */
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    /* Get Multiple APIC Description Table (MADT) */
+    Status = HlGetAcpiTable(ACPI_MADT_SIGNATURE, (PACPI_DESCRIPTION_HEADER*)&Madt);
+    if(Status != STATUS_SUCCESS)
+    {
+        /* Failed to get MADT, return error */
+        return STATUS_NOT_FOUND;
+    }
+
+    /* Set APIC table traverse pointer and initialize number of CPUs */
+    MadtTable = (ULONG_PTR)Madt->ApicTables;
+    CpuCount = 0;
+
+    /* Traverse all MADT tables to get system information */
+    while(MadtTable <= ((ULONG_PTR)Madt + Madt->Header.Length))
+    {
+        /* Check if this is a local APIC subtable */
+        if((((PACPI_SUBTABLE_HEADER)MadtTable)->Type == ACPI_MADT_TYPE_LOCAL_APIC) &&
+           (((PACPI_SUBTABLE_HEADER)MadtTable)->Length == sizeof(ACPI_MADT_LOCAL_APIC)))
+        {
+            /* Get local APIC subtable */
+            LocalApic = (PACPI_MADT_LOCAL_APIC)MadtTable;
+
+            /* Make sure, this CPU can be enabled */
+            if(LocalApic->LapicFlags & ACPI_MADT_PLAOC_ENABLED)
+            {
+                /* Store CPU number, APIC ID and CPU ID */
+                HlpAcpiSystemInfo.CpuInfo[CpuCount].CpuNumber = CpuCount;
+                HlpAcpiSystemInfo.CpuInfo[CpuCount].CpuId = LocalApic->ProcessorId;
+                HlpAcpiSystemInfo.CpuInfo[CpuCount].Id = LocalApic->Id;
+
+                /* Increment number of CPUs */
+                CpuCount++;
+            }
+
+            /* Go to the next MADT table */
+            MadtTable += ((PACPI_SUBTABLE_HEADER)MadtTable)->Length;
+        }
+        else if((((PACPI_SUBTABLE_HEADER)MadtTable)->Type == ACPI_MADT_TYPE_LOCAL_X2APIC) &&
+                (((PACPI_SUBTABLE_HEADER)MadtTable)->Length == sizeof(ACPI_MADT_LOCAL_X2APIC)))
+        {
+            /* Get local X2APIC subtable */
+            LocalX2Apic = (PACPI_MADT_LOCAL_X2APIC)MadtTable;
+
+            /* Make sure, this CPU can be enabled */
+            if(LocalX2Apic->LapicFlags & ACPI_MADT_PLAOC_ENABLED)
+            {
+                /* Store CPU number, APIC ID and CPU ID */
+                HlpAcpiSystemInfo.CpuInfo[CpuCount].CpuNumber = CpuCount;
+                HlpAcpiSystemInfo.CpuInfo[CpuCount].CpuId = LocalX2Apic->ProcessorId;
+                HlpAcpiSystemInfo.CpuInfo[CpuCount].Id = LocalX2Apic->Id;
+
+                /* Increment number of CPUs */
+                CpuCount++;
+            }
+
+            /* Go to the next MADT table */
+            MadtTable += ((PACPI_SUBTABLE_HEADER)MadtTable)->Length;
+        }
+        else
+        {
+            /* Any other MADT table, try to go to the next one byte-by-byte */
+            MadtTable += 1;
+        }
+    }
+
+    /* Store number of CPUs */
+    HlpAcpiSystemInfo.CpuCount = CpuCount;
+
+    /* Return success */
+    return STATUS_SUCCESS;
+}
+
+/**
+ * Initializes ACPI System Information data structure based on the size of available ACPI data.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+HlpInitializeAcpiSystemStructure(VOID)
+{
+    PHYSICAL_ADDRESS PhysicalAddress;
+    PFN_NUMBER PageCount;
+    ULONG_PTR MadtTable;
+    PACPI_MADT Madt;
+    XTSTATUS Status;
+    ULONG CpuCount;
 
     /* Get Multiple APIC Description Table (MADT) */
     Status = HlGetAcpiTable(ACPI_MADT_SIGNATURE, (PACPI_DESCRIPTION_HEADER*)&Madt);
@@ -289,8 +386,8 @@ HlpInitializeAcpiSystemInformation(VOID)
     while(MadtTable <= ((ULONG_PTR)Madt + Madt->Header.Length))
     {
         /* Check if this is a local APIC subtable */
-        if((((PACPI_MADT_LOCAL_APIC)MadtTable)->Header.Type == ACPI_MADT_TYPE_LOCAL_APIC) &&
-           (((PACPI_MADT_LOCAL_APIC)MadtTable)->Header.Length == sizeof(ACPI_MADT_LOCAL_APIC)))
+        if((((PACPI_SUBTABLE_HEADER)MadtTable)->Type == ACPI_MADT_TYPE_LOCAL_APIC) &&
+           (((PACPI_SUBTABLE_HEADER)MadtTable)->Length == sizeof(ACPI_MADT_LOCAL_APIC)))
         {
             /* Make sure, this CPU can be enabled */
             if(((PACPI_MADT_LOCAL_APIC)MadtTable)->LapicFlags & ACPI_MADT_PLAOC_ENABLED)
@@ -300,10 +397,10 @@ HlpInitializeAcpiSystemInformation(VOID)
             }
 
             /* Go to the next MADT table */
-            MadtTable += ((PACPI_MADT_LOCAL_APIC)MadtTable)->Header.Length;
+            MadtTable += ((PACPI_SUBTABLE_HEADER)MadtTable)->Length;
         }
-        else if((((PACPI_MADT_LOCAL_X2APIC)MadtTable)->Header.Type == ACPI_MADT_TYPE_LOCAL_X2APIC) &&
-                (((PACPI_MADT_LOCAL_X2APIC)MadtTable)->Header.Length == sizeof(ACPI_MADT_LOCAL_X2APIC)))
+        else if((((PACPI_SUBTABLE_HEADER)MadtTable)->Type == ACPI_MADT_TYPE_LOCAL_X2APIC) &&
+                (((PACPI_SUBTABLE_HEADER)MadtTable)->Length == sizeof(ACPI_MADT_LOCAL_X2APIC)))
         {
             /* Make sure, this CPU can be enabled */
             if(((PACPI_MADT_LOCAL_X2APIC)MadtTable)->LapicFlags & ACPI_MADT_PLAOC_ENABLED)
@@ -313,7 +410,7 @@ HlpInitializeAcpiSystemInformation(VOID)
             }
 
             /* Go to the next MADT table */
-            MadtTable += ((PACPI_MADT_LOCAL_X2APIC)MadtTable)->Header.Length;
+            MadtTable += ((PACPI_SUBTABLE_HEADER)MadtTable)->Length;
         }
         else
         {
@@ -321,6 +418,31 @@ HlpInitializeAcpiSystemInformation(VOID)
             MadtTable += 1;
         }
     }
+
+    /* Zero the ACPI system information structure */
+    RtlZeroMemory(&HlpAcpiSystemInfo, sizeof(ACPI_SYSTEM_INFO));
+
+    /* Calculate number of pages needed to store CPU information */
+    PageCount = SIZE_TO_PAGES(CpuCount * sizeof(PROCESSOR_IDENTITY));
+
+    /* Allocate memory for CPU information */
+    Status = MmAllocateHardwareMemory(PageCount, TRUE, &PhysicalAddress);
+    if(Status != STATUS_SUCCESS)
+    {
+        /* Failed to allocate memory, return error */
+        return Status;
+    }
+
+    /* Map physical address to the virtual memory area */
+    Status = MmMapHardwareMemory(PhysicalAddress, PageCount, TRUE, (PVOID *)&HlpAcpiSystemInfo.CpuInfo);
+    if(Status != STATUS_SUCCESS)
+    {
+        /* Failed to map memory, return error */
+        return Status;
+    }
+
+    /* Zero the CPU information structure */
+    RtlZeroMemory(HlpAcpiSystemInfo.CpuInfo, PAGES_TO_SIZE(PageCount));
 
     /* Return success */
     return STATUS_SUCCESS;

@@ -104,6 +104,10 @@ HlpInitializeAcpiSystemInformation(VOID);
 
 XTAPI
 XTSTATUS
+HlpInitializeAcpiSystemStructure(VOID);
+
+XTAPI
+XTSTATUS
 HlpInitializeAcpiTimer(VOID);
 
 XTAPI
