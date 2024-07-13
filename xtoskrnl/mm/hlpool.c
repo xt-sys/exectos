@@ -29,7 +29,7 @@ XTAPI
 XTSTATUS
 MmAllocateHardwareMemory(IN PFN_NUMBER PageCount,
                          IN BOOLEAN Aligned,
-                         OUT PULONG_PTR Buffer)
+                         OUT PPHYSICAL_ADDRESS Buffer)
 {
     PLOADER_MEMORY_DESCRIPTOR Descriptor, ExtraDescriptor, HardwareDescriptor;
     PFN_NUMBER Alignment, MaxPage;
@@ -37,7 +37,7 @@ MmAllocateHardwareMemory(IN PFN_NUMBER PageCount,
     PLIST_ENTRY ListEntry;
 
     /* Assume failure */
-    *Buffer = 0;
+    (*Buffer).QuadPart = 0;
 
     /* Calculate maximum page address */
     MaxPage = MM_MAXIMUM_PHYSICAL_ADDRESS >> MM_PAGE_SHIFT;
@@ -135,7 +135,7 @@ MmAllocateHardwareMemory(IN PFN_NUMBER PageCount,
     }
 
     /* Return physical address */
-    *Buffer = PhysicalAddress;
+    (*Buffer).QuadPart = PhysicalAddress;
     return STATUS_SUCCESS;
 }
 

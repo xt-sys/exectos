@@ -17,7 +17,7 @@ XTAPI
 XTSTATUS
 MmAllocateHardwareMemory(IN PFN_NUMBER PageCount,
                          IN BOOLEAN Aligned,
-                         OUT PULONG_PTR Buffer);
+                         OUT PPHYSICAL_ADDRESS Buffer);
 
 XTAPI
 XTSTATUS
