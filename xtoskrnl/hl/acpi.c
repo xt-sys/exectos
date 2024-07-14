@@ -267,7 +267,6 @@ HlpInitializeAcpiSystemInformation(VOID)
 {
     PACPI_MADT_LOCAL_X2APIC LocalX2Apic;
     PACPI_MADT_LOCAL_APIC LocalApic;
-    PACPI_MADT_IOAPIC IoApic;
     ULONG_PTR MadtTable;
     PACPI_MADT Madt;
     XTSTATUS Status;
