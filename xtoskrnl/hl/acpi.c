@@ -267,6 +267,7 @@ HlpInitializeAcpiSystemInformation(VOID)
 {
     PACPI_MADT_LOCAL_X2APIC LocalX2Apic;
     PACPI_MADT_LOCAL_APIC LocalApic;
+    PACPI_MADT_IOAPIC IoApic;
     ULONG_PTR MadtTable;
     PACPI_MADT Madt;
     XTSTATUS Status;
@@ -306,9 +307,9 @@ HlpInitializeAcpiSystemInformation(VOID)
             if(LocalApic->LapicFlags & ACPI_MADT_PLAOC_ENABLED)
             {
                 /* Store CPU number, APIC ID and CPU ID */
-                HlpAcpiSystemInfo.CpuInfo[CpuCount].CpuNumber = CpuCount;
-                HlpAcpiSystemInfo.CpuInfo[CpuCount].CpuId = LocalApic->ProcessorId;
-                HlpAcpiSystemInfo.CpuInfo[CpuCount].Id = LocalApic->Id;
+                HlpSystemInfo.CpuInfo[CpuCount].CpuNumber = CpuCount;
+                HlpSystemInfo.CpuInfo[CpuCount].CpuId = LocalApic->ProcessorId;
+                HlpSystemInfo.CpuInfo[CpuCount].Id = LocalApic->Id;
 
                 /* Increment number of CPUs */
                 CpuCount++;
@@ -327,9 +328,9 @@ HlpInitializeAcpiSystemInformation(VOID)
             if(LocalX2Apic->LapicFlags & ACPI_MADT_PLAOC_ENABLED)
             {
                 /* Store CPU number, APIC ID and CPU ID */
-                HlpAcpiSystemInfo.CpuInfo[CpuCount].CpuNumber = CpuCount;
-                HlpAcpiSystemInfo.CpuInfo[CpuCount].CpuId = LocalX2Apic->ProcessorId;
-                HlpAcpiSystemInfo.CpuInfo[CpuCount].Id = LocalX2Apic->Id;
+                HlpSystemInfo.CpuInfo[CpuCount].CpuNumber = CpuCount;
+                HlpSystemInfo.CpuInfo[CpuCount].CpuId = LocalX2Apic->ProcessorId;
+                HlpSystemInfo.CpuInfo[CpuCount].Id = LocalX2Apic->Id;
 
                 /* Increment number of CPUs */
                 CpuCount++;
@@ -346,7 +347,7 @@ HlpInitializeAcpiSystemInformation(VOID)
     }
 
     /* Store number of CPUs */
-    HlpAcpiSystemInfo.CpuCount = CpuCount;
+    HlpSystemInfo.CpuCount = CpuCount;
 
     /* Return success */
     return STATUS_SUCCESS;
@@ -420,7 +421,7 @@ HlpInitializeAcpiSystemStructure(VOID)
     }
 
     /* Zero the ACPI system information structure */
-    RtlZeroMemory(&HlpAcpiSystemInfo, sizeof(ACPI_SYSTEM_INFO));
+    RtlZeroMemory(&HlpSystemInfo, sizeof(ACPI_SYSTEM_INFO));
 
     /* Calculate number of pages needed to store CPU information */
     PageCount = SIZE_TO_PAGES(CpuCount * sizeof(PROCESSOR_IDENTITY));
@@ -434,7 +435,7 @@ HlpInitializeAcpiSystemStructure(VOID)
     }
 
     /* Map physical address to the virtual memory area */
-    Status = MmMapHardwareMemory(PhysicalAddress, PageCount, TRUE, (PVOID *)&HlpAcpiSystemInfo.CpuInfo);
+    Status = MmMapHardwareMemory(PhysicalAddress, PageCount, TRUE, (PVOID *)&HlpSystemInfo.CpuInfo);
     if(Status != STATUS_SUCCESS)
     {
         /* Failed to map memory, return error */
@@ -442,7 +443,7 @@ HlpInitializeAcpiSystemStructure(VOID)
     }
 
     /* Zero the CPU information structure */
-    RtlZeroMemory(HlpAcpiSystemInfo.CpuInfo, PAGES_TO_SIZE(PageCount));
+    RtlZeroMemory(HlpSystemInfo.CpuInfo, PAGES_TO_SIZE(PageCount));
 
     /* Return success */
     return STATUS_SUCCESS;

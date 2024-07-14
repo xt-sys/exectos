@@ -18,9 +18,6 @@ EXTERN LIST_ENTRY HlpAcpiCacheList;
 /* ACPI Root System Description Pointer (RSDP) */
 EXTERN PACPI_RSDP HlpAcpiRsdp;
 
-/* ACPI system information */
-EXTERN ACPI_SYSTEM_INFO HlpAcpiSystemInfo;
-
 /* ACPI timer information */
 EXTERN ACPI_TIMER_INFO HlpAcpiTimerInfo;
 
@@ -32,6 +29,9 @@ EXTERN APIC_MODE HlpApicMode;
 
 /* FrameBuffer information */
 EXTERN HAL_FRAMEBUFFER_DATA HlpFrameBufferData;
+
+/* System information */
+EXTERN ACPI_SYSTEM_INFO HlpSystemInfo;
 
 /* Pointer to boot loader provided DbgPrint() routine */
 EXTERN VOID (*KeDbgPrint)(IN PWCHAR Format, IN ...);

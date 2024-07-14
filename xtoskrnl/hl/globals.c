@@ -15,9 +15,6 @@ LIST_ENTRY HlpAcpiCacheList;
 /* ACPI Root System Description Pointer (RSDP) */
 PACPI_RSDP HlpAcpiRsdp;
 
-/* ACPI system information */
-ACPI_SYSTEM_INFO HlpAcpiSystemInfo;
-
 /* ACPI timer information */
 ACPI_TIMER_INFO HlpAcpiTimerInfo;
 
@@ -29,3 +26,6 @@ APIC_MODE HlpApicMode;
 
 /* FrameBuffer information */
 HAL_FRAMEBUFFER_DATA HlpFrameBufferData;
+
+/* System information */
+ACPI_SYSTEM_INFO HlpSystemInfo;
