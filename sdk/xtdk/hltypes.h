@@ -318,9 +318,9 @@ typedef struct _ACPI_MADT
 typedef struct _ACPI_MADT_LOCAL_APIC
 {
     ACPI_SUBTABLE_HEADER Header;
-    UCHAR ProcessorId;
-    UCHAR Id;
-    ULONG LapicFlags;
+    UCHAR AcpiId;
+    UCHAR ApicId;
+    ULONG Flags;
 } PACKED ACPI_MADT_LOCAL_APIC, *PACPI_MADT_LOCAL_APIC;
 
 /* ACPI Local X2APIC MADT subtable structure */
@@ -328,9 +328,9 @@ typedef struct _ACPI_MADT_LOCAL_X2APIC
 {
     ACPI_SUBTABLE_HEADER Header;
     USHORT Reserved;
-    ULONG Id;
-    ULONG LapicFlags;
-    ULONG ProcessorId;
+    ULONG ApicId;
+    ULONG Flags;
+    ULONG AcpiId;
 } PACKED ACPI_MADT_LOCAL_X2APIC, *PACPI_MADT_LOCAL_X2APIC;
 
 /* ACPI System Information structure */
@@ -342,12 +342,12 @@ typedef struct _ACPI_SYSTEM_INFO
     ULONG IoApicCount;
     ULONG IntiCount;
     ULONG LintiCount;
-    ULONG ImcrPresent;
+    BOOLEAN ImcrPresent;
     ULONG ApicBase;
     PPROCESSOR_IDENTITY CpuInfo;
     ULONG IoApicPhysicalBase[APIC_MAX_IOAPICS];
-    PULONG IoApicVirtualBase[APIC_MAX_IOAPICS];
-    ULONG IoApicIntiBase[APIC_MAX_IOAPICS];
+    ULONG IoApicVirtualBase[APIC_MAX_IOAPICS];
+    ULONG IoApicVectorBase[APIC_MAX_IOAPICS];
 } ACPI_SYSTEM_INFO, *PACPI_SYSTEM_INFO;
 
 /* ACPI Timer information structure */
@@ -393,9 +393,9 @@ typedef struct _HAL_FRAMEBUFFER_DATA
 /* Processor identity structure */
 typedef struct _PROCESSOR_IDENTITY
 {
-    UCHAR Id;
-    UCHAR CpuId;
-    UCHAR CpuNumber;
+    ULONG AcpiId;
+    ULONG ApicId;
+    USHORT CpuNumber;
     BOOLEAN Bsp;
     BOOLEAN Started;
 } PROCESSOR_IDENTITY, *PPROCESSOR_IDENTITY;

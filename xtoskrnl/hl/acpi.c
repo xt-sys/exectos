@@ -270,7 +270,7 @@ HlpInitializeAcpiSystemInformation(VOID)
     ULONG_PTR MadtTable;
     PACPI_MADT Madt;
     XTSTATUS Status;
-    ULONG CpuCount;
+    USHORT CpuCount;
 
     /* Allocate memory for ACPI system information structure */
     Status = HlpInitializeAcpiSystemStructure();
@@ -303,12 +303,12 @@ HlpInitializeAcpiSystemInformation(VOID)
             LocalApic = (PACPI_MADT_LOCAL_APIC)MadtTable;
 
             /* Make sure, this CPU can be enabled */
-            if(LocalApic->LapicFlags & ACPI_MADT_PLAOC_ENABLED)
+            if(LocalApic->Flags & ACPI_MADT_PLAOC_ENABLED)
             {
                 /* Store CPU number, APIC ID and CPU ID */
+                HlpSystemInfo.CpuInfo[CpuCount].AcpiId = LocalApic->AcpiId;
+                HlpSystemInfo.CpuInfo[CpuCount].ApicId = LocalApic->ApicId;
                 HlpSystemInfo.CpuInfo[CpuCount].CpuNumber = CpuCount;
-                HlpSystemInfo.CpuInfo[CpuCount].CpuId = LocalApic->ProcessorId;
-                HlpSystemInfo.CpuInfo[CpuCount].Id = LocalApic->Id;
 
                 /* Increment number of CPUs */
                 CpuCount++;
@@ -324,12 +324,12 @@ HlpInitializeAcpiSystemInformation(VOID)
             LocalX2Apic = (PACPI_MADT_LOCAL_X2APIC)MadtTable;
 
             /* Make sure, this CPU can be enabled */
-            if(LocalX2Apic->LapicFlags & ACPI_MADT_PLAOC_ENABLED)
+            if(LocalX2Apic->Flags & ACPI_MADT_PLAOC_ENABLED)
             {
                 /* Store CPU number, APIC ID and CPU ID */
+                HlpSystemInfo.CpuInfo[CpuCount].AcpiId = LocalX2Apic->AcpiId;
+                HlpSystemInfo.CpuInfo[CpuCount].ApicId = LocalX2Apic->ApicId;
                 HlpSystemInfo.CpuInfo[CpuCount].CpuNumber = CpuCount;
-                HlpSystemInfo.CpuInfo[CpuCount].CpuId = LocalX2Apic->ProcessorId;
-                HlpSystemInfo.CpuInfo[CpuCount].Id = LocalX2Apic->Id;
 
                 /* Increment number of CPUs */
                 CpuCount++;
@@ -390,7 +390,7 @@ HlpInitializeAcpiSystemStructure(VOID)
            (((PACPI_SUBTABLE_HEADER)MadtTable)->Length == sizeof(ACPI_MADT_LOCAL_APIC)))
         {
             /* Make sure, this CPU can be enabled */
-            if(((PACPI_MADT_LOCAL_APIC)MadtTable)->LapicFlags & ACPI_MADT_PLAOC_ENABLED)
+            if(((PACPI_MADT_LOCAL_APIC)MadtTable)->Flags & ACPI_MADT_PLAOC_ENABLED)
             {
                 /* Increment number of CPUs */
                 CpuCount++;
@@ -403,7 +403,7 @@ HlpInitializeAcpiSystemStructure(VOID)
                 (((PACPI_SUBTABLE_HEADER)MadtTable)->Length == sizeof(ACPI_MADT_LOCAL_X2APIC)))
         {
             /* Make sure, this CPU can be enabled */
-            if(((PACPI_MADT_LOCAL_X2APIC)MadtTable)->LapicFlags & ACPI_MADT_PLAOC_ENABLED)
+            if(((PACPI_MADT_LOCAL_X2APIC)MadtTable)->Flags & ACPI_MADT_PLAOC_ENABLED)
             {
                 /* Increment number of CPUs */
                 CpuCount++;
