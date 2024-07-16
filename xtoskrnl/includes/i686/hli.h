@@ -18,7 +18,7 @@ VOID
 HlClearApicErrors(VOID);
 
 XTFASTCALL
-ULONG
+ULONGLONG
 HlReadApicRegister(IN APIC_REGISTER Register);
 
 XTAPI
@@ -28,7 +28,7 @@ HlSendEoi(VOID);
 XTFASTCALL
 VOID
 HlWriteApicRegister(IN APIC_REGISTER Register,
-                    IN ULONG Value);
+                    IN ULONGLONG Value);
 
 XTAPI
 BOOLEAN

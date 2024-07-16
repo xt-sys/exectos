@@ -35,7 +35,7 @@ HlClearApicErrors(VOID)
  * @since XT 1.0
  */
 XTFASTCALL
-ULONG
+ULONGLONG
 HlReadApicRegister(IN APIC_REGISTER Register)
 {
     if(HlpApicMode == APIC_MODE_X2APIC)
@@ -81,7 +81,7 @@ HlSendEoi(VOID)
 XTFASTCALL
 VOID
 HlWriteApicRegister(IN APIC_REGISTER Register,
-                    IN ULONG Value)
+                    IN ULONGLONG Value)
 {
     if(HlpApicMode == APIC_MODE_X2APIC)
     {
