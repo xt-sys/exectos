@@ -34,6 +34,10 @@ XTAPI
 BOOLEAN
 HlpCheckX2ApicSupport(VOID);
 
+XTAPI
+ULONG
+HlpGetCpuApicId(VOID);
+
 XTCDECL
 VOID
 HlpHandleApicSpuriousService(VOID);

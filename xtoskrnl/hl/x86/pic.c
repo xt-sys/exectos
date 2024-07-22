@@ -134,6 +134,26 @@ HlpCheckX2ApicSupport(VOID)
 }
 
 /**
+ * Gets the local APIC ID of the current processor.
+ *
+ * @return This routine returns the current processor's local APIC ID.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG
+HlpGetCpuApicId(VOID)
+{
+    ULONG ApicId;
+
+    /* Read APIC ID register */
+    ApicId = HlReadApicRegister(APIC_ID);
+
+    /* Return logical CPU ID depending on current APIC mode */
+    return (HlpApicMode == APIC_MODE_COMPAT) ? ((ApicId & 0xFFFFFFFF) >> APIC_XAPIC_LDR_SHIFT) : ApicId;
+}
+
+/**
  * Allows an APIC spurious interrupts to end up.
  *
  * @return This routine does not return any value.
