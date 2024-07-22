@@ -371,3 +371,35 @@ HlpInitializePic(VOID)
     /* Initialize legacy PIC */
     HlpInitializeLegacyPic();
 }
+
+/**
+ * Sends an IPI (Inter-Processor Interrupt) to the specified CPU.
+ *
+ * @param ApicId
+ *        Supplies a CPU APIC ID to send an IPI to.
+ *
+ * @param Vector
+ *        Supplies the IPI vector to send.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+HlpSendIpi(ULONG ApicId,
+           ULONG Vector)
+{
+    /* Check current APIC mode */
+    if(HlpApicMode == APIC_MODE_X2APIC)
+    {
+        /* Send IPI using x2APIC mode */
+        HlWriteApicRegister(APIC_ICR0, ((ULONGLONG)ApicId << 32) | Vector);
+    }
+    else
+    {
+        /* Send IPI using xAPIC compatibility mode */
+        HlWriteApicRegister(APIC_ICR1, ApicId << 24);
+        HlWriteApicRegister(APIC_ICR0, Vector);
+    }
+}

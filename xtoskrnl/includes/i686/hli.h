@@ -54,6 +54,11 @@ XTAPI
 VOID
 HlpInitializePic(VOID);
 
+XTAPI
+VOID
+HlpSendIpi(ULONG ApicId,
+           ULONG Vector);
+
 XTFASTCALL
 KRUNLEVEL
 HlpTransformApicTprToRunLevel(IN UCHAR Tpr);
