@@ -48,18 +48,22 @@
 #define APIC_DF_CLUSTER                                 0x0FFFFFFF
 
 /* APIC delivery modes */
-#define APIC_DM_FIXED                                   0
-#define APIC_DM_LOWPRIO                                 1
-#define APIC_DM_SMI                                     2
-#define APIC_DM_REMOTE                                  3
-#define APIC_DM_NMI                                     4
-#define APIC_DM_INIT                                    5
-#define APIC_DM_STARTUP                                 6
-#define APIC_DM_EXTINT                                  7
+#define APIC_DM_FIXED                                   0x00000000
+#define APIC_DM_LOWPRIO                                 0x00000100
+#define APIC_DM_SMI                                     0x00000200
+#define APIC_DM_REMOTE                                  0x00000300
+#define APIC_DM_NMI                                     0x00000400
+#define APIC_DM_INIT                                    0x00000500
+#define APIC_DM_STARTUP                                 0x00000600
+#define APIC_DM_EXTINT                                  0x00000700
 
 /* APIC trigger modes */
 #define APIC_TGM_EDGE                                   0
 #define APIC_TGM_LEVEL                                  1
+
+/* APIC LDR (Logical Destination Register) shifts */
+#define APIC_X2APIC_LDR_SHIFT                           16
+#define APIC_XAPIC_LDR_SHIFT                            24
 
 /* Maximum number of I/O APICs */
 #define APIC_MAX_IOAPICS                                64
