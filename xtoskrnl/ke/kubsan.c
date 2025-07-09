@@ -1035,13 +1035,13 @@ VOID
 __ubsan_handle_type_mismatch_v1(IN PKUBSAN_TYPE_MISMATCH_DATA_V1 Data,
                                 IN ULONG_PTR Pointer)
 {
+    KUBSAN_TYPE_MISMATCH_DATA MismatchData;
+
     /* Prepare UBSAN type mismatch data in old format */
-    KUBSAN_TYPE_MISMATCH_DATA MismatchData = {
-        .Location = Data->Location,
-        .Type = Data->Type,
-        .Alignment = 1UL << Data->LogAlignment,
-        .TypeCheckKind = Data->TypeCheckKind,
-    };
+    MismatchData.Alignment = 1UL << Data->LogAlignment;
+    MismatchData.Location = Data->Location;
+    MismatchData.Type = Data->Type;
+    MismatchData.TypeCheckKind = Data->TypeCheckKind;
 
     /* Call UBSAN type mismatch handler */
     KepHandleUbsanTypeMismatch(&MismatchData, Pointer);
