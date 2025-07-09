@@ -1,8 +1,5 @@
-# Detect XTChain toolchain
+# Minimum CMake version requirement
 cmake_minimum_required(VERSION 3.19.0)
-if(NOT CMAKE_VERSION MATCHES "XTC")
-    message(FATAL_ERROR "XTChain not detected or corrupted!")
-endif()
 
 # Lowercase target architecture
 string(TOLOWER ${ARCH} ARCH)
