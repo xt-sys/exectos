@@ -1,4 +1,10 @@
 #!/bin/bash
+# PROJECT:     ExectOS
+# LICENSE:     See the COPYING.md in the top level directory
+# FILE:        configure.sh
+# DESCRIPTION: Project configuration script for preparing the build environment
+# DEVELOPERS:  Rafal Kupiec <belliash@codingworkshop.eu.org>
+
 
 # Check XTCHain
 if [ "x${XTCVER}" = "x" ]; then
