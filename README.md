@@ -14,8 +14,8 @@
   <a href="https://git.codingworkshop.eu.org/xt-sys/exectos/src/branch/master/COPYING.md">
     <img alt="License" src="https://img.shields.io/badge/License-GPLv3-blue.svg">
   </a>
-  <a href="https://codeium.com/">
-    <img alt="Codeium" src="https://img.shields.io/badge/Powered%20By-Codeium-09B6A2?logo=Codeium">
+  <a href="https://exectos.eu.org/ai-assisted">
+    <img alt="AI Assisted" src="https://img.shields.io/badge/AI-Assisted-darkcyan">
   </a>
   <a href="https://github.com/sponsors/xt-sys/">
     <img alt="Sponsor" src="https://img.shields.io/badge/Sponsor-%E2%9D%A4-red?logo=GitHub">
@@ -69,15 +69,12 @@ design, it requires a modern EFI enabled hardware. It is not possible currently 
 | xtldr       | XTOS boot loader source code                             |
 
 # Build
-XTOS can be built only by using [XTChain](https://git.codingworkshop.eu.org/xt-sys/xtchain), a special toolchain
-prepared for compiling XT software. Currently, there is only a Linux version available, so a Linux distribution or WSL
-is needed. If XTChain is already installed and available, then building ExectOS is quiet easy. First, open a terminal
-or WSL console and type the following command to launch XTChain build console:
-```
-xtchain
-```
-While the console is already running, navigate to the directory containing ExectOS source code and use the following
-commands to first set target build architecture and configure the sources:
+XTOS can only be built using [XTchain](https://git.codingworkshop.eu.org/xt-sys/xtchain), a dedicated toolchain designed
+specifically for compiling XT software. XTChain is currently available for both Linux and Windows. Detailed instructions
+on how to configure and run XTChain can be found [here](https://exectos.eu.org/contributing/setting-up-xtchain).
+
+With the XTchain environment already running, navigate to the directory containing the ExectOS source code and use the
+following commands to set the target build architecture and configure the sources:
 ```
 charch [i686|amd64]
 chbuild [DEBUG|RELEASE]
