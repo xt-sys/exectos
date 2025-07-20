@@ -12,9 +12,6 @@ This is a list of ideas that migh but not must be realized.
  - [ ] Rewrite memory mapping and paging support in bootloader to make it more flexible and architecture independent.
        This should support paging levels, thus allowing to make a use of PML5 on modern AMD64 processors and increasing
        the addressable virtual memory from 256TB to 128PB. This is partially done.
- - [ ] Implement a scrolling mechanism to boot menu allowing to show more boot entries than can fit in the box.
-       Currently, the limit is not set, nor check, thus adding more menu items will result in positions displayed under
-       the box.
  - [ ] Implement editing boot menu entries directly from the boot menu. Changes should be runtime only (not stored on
        disk).
 
