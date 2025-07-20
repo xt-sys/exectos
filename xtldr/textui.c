@@ -4,6 +4,7 @@
  * FILE:            xtldr/textui.c
  * DESCRIPTION:     Text console User Interface (TUI) support for XT Boot Loader
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ *                  Aiken Harris <harraiken91@gmail.com>
  */
 
 #include <xtldr.h>
@@ -22,7 +23,8 @@ BlDisplayBootMenu()
 {
     XTBL_DIALOG_HANDLE Handle;
     PXTBL_BOOTMENU_ITEM MenuEntries = NULL;
-    ULONG Index, NumberOfEntries, HighligtedEntryId;
+    ULONG Index;
+    ULONG HighligtedEntryId, NumberOfEntries, TopVisibleEntry, VisibleEntries;
     UINT_PTR EventIndex;
     EFI_EVENT Events[2];
     EFI_INPUT_KEY Key;
@@ -32,11 +34,25 @@ BlDisplayBootMenu()
     PWCHAR TimeOutString;
 
     /* Initialize boot menu list */
+    TopVisibleEntry = 0;
     Status = BlInitializeBootMenuList(&MenuEntries, &NumberOfEntries, &HighligtedEntryId);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to initialize boot menu list, exit into XTLDR shell */
         return;
+    }
+
+    /* Draw boot menu */
+    BlpDrawBootMenu(&Handle);
+
+    /* Calculate how many entries can be visible in the menu box */
+    VisibleEntries = Handle.Height - 2;
+
+    /* Adjust the view if the default entry is not initially visible */
+    if(HighligtedEntryId >= VisibleEntries)
+    {
+        /* Scroll the view to make the highlighted entry the last visible one */
+        TopVisibleEntry = HighligtedEntryId - VisibleEntries + 1;
     }
 
     /* Get timeout from the configuration */
@@ -59,23 +75,24 @@ BlDisplayBootMenu()
     /* Infinite boot menu loop */
     while(TRUE)
     {
-        /* Draw boot menu */
+        /* Redraw boot menu */
         BlpDrawBootMenu(&Handle);
 
-        /* Check if there is anything to show in the boot menu */
-        if(NumberOfEntries > 0) {
-            /* Check if all menu entries will fit into the menu box */
-            if(NumberOfEntries > Handle.Height - 2)
-            {
-                /* Too many menu entries, limit entries to match box height (-2 for upper and bottom borders) */
-                NumberOfEntries = Handle.Height - 2;
-            }
+        /* Sanity check to ensure we do not display more entries than possible */
+        if (VisibleEntries > NumberOfEntries)
+        {
+            VisibleEntries = NumberOfEntries;
+        }
 
+        /* Check if there is anything to show in the boot menu */
+        if(NumberOfEntries > 0)
+        {
             /* Iterate through all menu entries */
-            for(Index = 0; Index < NumberOfEntries; Index++)
+            for(Index = 0; Index < VisibleEntries; Index++)
             {
                 /* Draw menu entry */
-                BlpDrawBootMenuEntry(&Handle, MenuEntries[Index].EntryName, Index, Index == HighligtedEntryId);
+                BlpDrawBootMenuEntry(&Handle, MenuEntries[TopVisibleEntry + Index].EntryName,
+                                     Index, (TopVisibleEntry + Index) == HighligtedEntryId);
             }
         }
         else
@@ -159,14 +176,14 @@ BlDisplayBootMenu()
                 else if(Key.ScanCode == 0x01)
                 {
                     /* UpArrow key pressed, go to previous entry if possible */
-                    if(HighligtedEntryId > 0)
+                    if (HighligtedEntryId > 0)
                     {
-                        /* Highlight previous entry */
                         HighligtedEntryId--;
-                        BlpDrawBootMenuEntry(&Handle, MenuEntries[HighligtedEntryId + 1].EntryName,
-                                             HighligtedEntryId + 1, FALSE);
-                        BlpDrawBootMenuEntry(&Handle, MenuEntries[HighligtedEntryId].EntryName,
-                                             HighligtedEntryId, TRUE);
+                        if (HighligtedEntryId < TopVisibleEntry)
+                        {
+                            TopVisibleEntry = HighligtedEntryId;
+                        }
+                        break;
                     }
                 }
                 else if(Key.ScanCode == 0x02)
@@ -174,12 +191,12 @@ BlDisplayBootMenu()
                     /* DownArrow key pressed, go to next entry if possible */
                     if(HighligtedEntryId < NumberOfEntries - 1)
                     {
-                        /* Highlight next entry */
                         HighligtedEntryId++;
-                        BlpDrawBootMenuEntry(&Handle, MenuEntries[HighligtedEntryId - 1].EntryName,
-                                             HighligtedEntryId - 1, FALSE);
-                        BlpDrawBootMenuEntry(&Handle, MenuEntries[HighligtedEntryId].EntryName,
-                                             HighligtedEntryId, TRUE);
+                        if (HighligtedEntryId >= TopVisibleEntry + VisibleEntries)
+                        {
+                            TopVisibleEntry = HighligtedEntryId - VisibleEntries + 1;
+                        }
+                        break;
                     }
                 }
                 else if(Key.ScanCode == 0x09)
@@ -188,12 +205,9 @@ BlDisplayBootMenu()
                     if(HighligtedEntryId != 0)
                     {
                         /* Highlight first entry */
-                        BlpDrawBootMenuEntry(&Handle, MenuEntries[HighligtedEntryId].EntryName,
-                                             HighligtedEntryId, FALSE);
-                        BlpDrawBootMenuEntry(&Handle, MenuEntries[0].EntryName, 0, TRUE);
-
-                        /* Update highlighted entry ID */
                         HighligtedEntryId = 0;
+                        TopVisibleEntry = 0;
+                        break;
                     }
                 }
                 else if(Key.ScanCode == 0x0A)
@@ -202,13 +216,9 @@ BlDisplayBootMenu()
                     if(HighligtedEntryId != NumberOfEntries - 1)
                     {
                         /* Highlight last entry */
-                        BlpDrawBootMenuEntry(&Handle, MenuEntries[HighligtedEntryId].EntryName,
-                                             HighligtedEntryId, FALSE);
-                        BlpDrawBootMenuEntry(&Handle, MenuEntries[NumberOfEntries - 1].EntryName,
-                                             NumberOfEntries - 1, TRUE);
-
-                        /* Update highlighted entry ID */
                         HighligtedEntryId = NumberOfEntries - 1;
+                        TopVisibleEntry = (NumberOfEntries > VisibleEntries) ? (NumberOfEntries - VisibleEntries) : 0;
+                        break;
                     }
                 }
                 else if(Key.ScanCode == 0x0B)
@@ -870,8 +880,8 @@ BlpDrawBootMenu(OUT PXTBL_DIALOG_HANDLE Handle)
     BlSetCursorPosition(0, Handle->PosY + Handle->Height);
     BlSetConsoleAttributes(EFI_TEXT_BGCOLOR_BLACK | EFI_TEXT_FGCOLOR_LIGHTGRAY);
     BlConsolePrint(L"    Use cursors to change the selection. Press ENTER key to boot the chosen\n"
-                    "    Operating System, 'e' to edit it before booting or 's' for XTLDR shell.\n"
-                    "    Additional help available after pressing F1 key.");
+                   L"    Operating System, 'e' to edit it before booting or 's' for XTLDR shell.\n"
+                   L"    Additional help available after pressing F1 key.");
 }
 
 /**
