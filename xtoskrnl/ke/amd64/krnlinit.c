@@ -93,7 +93,7 @@ KepStartKernel(VOID)
     RtlInitializeListHead(&KepProcessListHead);
     PageDirectory[0] = 0;
     PageDirectory[1] = 0;
-    KeInitializeProcess(CurrentProcess, 0, 0xFFFFFFFF, PageDirectory, FALSE);
+    KeInitializeProcess(CurrentProcess, 0, MAXULONG_PTR, PageDirectory, FALSE);
     CurrentProcess->Quantum = MAXCHAR;
 
     /* Initialize Idle thread */
