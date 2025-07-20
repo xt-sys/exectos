@@ -277,7 +277,7 @@ HlInitializeComPort(IN OUT PCPPORT Port,
     HlIoPortOutByte(PtrToUshort(PortAddress + (ULONG)COMPORT_REG_MCR), COMPORT_MCR_NOM);
 
     /* Read junk data out of the Receive Buffer Register (RBR) */
-    HlIoPortInByte(PtrToUshort(Port->Address + (ULONG)COMPORT_REG_RBR));
+    HlIoPortInByte(PtrToUshort(PortAddress + (ULONG)COMPORT_REG_RBR));
 
     /* Store port details */
     Port->Address = PortAddress;
