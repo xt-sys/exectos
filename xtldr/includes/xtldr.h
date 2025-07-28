@@ -462,7 +462,7 @@ XTCDECL
 BOOLEAN
 BlpFindParentBlockDevice(IN PLIST_ENTRY BlockDevices,
                          IN PEFI_BLOCK_DEVICE_DATA ChildNode,
-                         OUT PEFI_BLOCK_DEVICE_DATA ParentNode);
+                         OUT PEFI_BLOCK_DEVICE_DATA *ParentNode);
 
 XTCDECL
 LONG
