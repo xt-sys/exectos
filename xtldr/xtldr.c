@@ -151,7 +151,8 @@ BlInitializeBootMenuList(OUT PXTBL_BOOTMENU_ITEM *MenuEntries,
         MenuEntrySection = CONTAIN_RECORD(MenuEntrySectionList, XTBL_CONFIG_SECTION, Flink);
 
         /* Check if this is the default menu entry */
-        if(RtlCompareWideStringInsensitive(MenuEntrySection->SectionName, DefaultMenuEntry, 0) == 0)
+        if((RtlWideStringLength(MenuEntrySection->SectionName, 0) == RtlWideStringLength(DefaultMenuEntry, 0)) &&
+           (RtlCompareWideStringInsensitive(MenuEntrySection->SectionName, DefaultMenuEntry, 0) == 0))
         {
             /* Set default OS ID */
             DefaultOS = NumberOfEntries;
