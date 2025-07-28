@@ -60,6 +60,6 @@ KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
     /* Raise to HIGH runlevel */
     KeRaiseRunLevel(HIGH_LEVEL);
 
-    /* Switch the boot stack, setting the pointer to the top of the buffer and aligning it to a 4-byte boundary */
-    KepSwitchBootStack(((ULONG_PTR)&ArKernelBootStack + KERNEL_STACK_SIZE) & ~0x3);
+    /* Switch the boot stack, setting the pointer to the top of the buffer and aligning it as required by the ABI */
+    KepSwitchBootStack(((ULONG_PTR)&ArKernelBootStack + KERNEL_STACK_SIZE) & ~(STACK_ALIGNMENT - 1));
 }
