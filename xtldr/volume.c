@@ -155,7 +155,7 @@ BlEnumerateBlockDevices()
                            DriveNumber, Media->MediaPresent);
             }
 
-            if(!BlpFindParentBlockDevice(&BlockDevices, BlockDeviceData, ParentNode))
+            if(!BlpFindParentBlockDevice(&BlockDevices, BlockDeviceData, &ParentNode))
             {
                 BlDebugPrint(L"WARNING: No parent device found, skipping orphaned media device path\n");
                 continue;
@@ -1016,7 +1016,7 @@ XTCDECL
 BOOLEAN
 BlpFindParentBlockDevice(IN PLIST_ENTRY BlockDevices,
                          IN PEFI_BLOCK_DEVICE_DATA ChildNode,
-                         OUT PEFI_BLOCK_DEVICE_DATA ParentNode)
+                         OUT PEFI_BLOCK_DEVICE_DATA *ParentNode)
 {
     PEFI_DEVICE_PATH_PROTOCOL ChildDevicePath, ParentDevicePath;
     PEFI_BLOCK_DEVICE_DATA BlockDeviceData;
@@ -1039,7 +1039,7 @@ BlpFindParentBlockDevice(IN PLIST_ENTRY BlockDevices,
             if(ParentDevicePath->Type == EFI_END_DEVICE_PATH)
             {
                 /* Parent device is a match */
-                ParentNode = BlockDeviceData;
+                *ParentNode = BlockDeviceData;
                 return TRUE;
             }
 
