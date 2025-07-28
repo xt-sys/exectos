@@ -29,6 +29,7 @@
     #define MEMORY_ALIGNMENT                        8
     #define MM_USERPAGE_TABLES                      1536
     #define MM_VIRTUAL_PAGESIZE                     20
+    #define STACK_ALIGNMENT                         4
 #elif defined(__amd64__) || defined(__x86_64__)
     #define _ARCH                                   amd64
     #define _ARCH_AMD64                             1
@@ -43,6 +44,7 @@
     #define MEMORY_ALIGNMENT                        16
     #define MM_USERPAGE_TABLES                      4194304
     #define MM_VIRTUAL_PAGESIZE                     52
+    #define STACK_ALIGNMENT                         16
 #else
     #error Unknown architecture
 #endif
