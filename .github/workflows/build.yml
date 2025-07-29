@@ -7,6 +7,7 @@ jobs:
     strategy:
       matrix:
         arch: [amd64, i686]
+        build: [debug, release]
     runs-on: oscw
     container:
       image: codingworkshop/oscw-runner:latest
@@ -17,7 +18,7 @@ jobs:
           fetch-depth: 0
       - name: Build ExectOS
         run: |
-          echo "charch ${{ matrix.arch }} && ./configure.sh && cd build-${{ matrix.arch }}-xtchain && xbuild -v && xbuild diskimg -v" > build.cmds
+          echo "charch ${{ matrix.arch }} && chbuild ${{ matrix.build }} && ./configure.sh && cd build-${{ matrix.arch }}-${{ matrix.build }} && xbuild -v && xbuild diskimg -v" > build.cmds
           xtchain < build.cmds
       - name: Publish binaries
         if: ${{ github.ref == 'refs/heads/master' }}
@@ -26,8 +27,8 @@ jobs:
           OSCW_ARTIFACTS_USERNAME: ${{ secrets.OSCW_ARTIFACTS_USERNAME }}
           OSCW_ARTIFACTS_USERKEY: ${{ secrets.OSCW_ARTIFACTS_USERKEY }}
         run: |
-          tar -I 'gzip' -cpf ExectOS-$(date +'%Y%m%d')-${GITHUB_SHA:0:10}-${{ matrix.arch }}-bin.tar.gz -C build-${{ matrix.arch }}-xtchain/output/binaries .
-          tar -I 'gzip' -cpf ExectOS-$(date +'%Y%m%d')-${GITHUB_SHA:0:10}-${{ matrix.arch }}-lib.tar.gz -C build-${{ matrix.arch }}-xtchain/output/library .
-          tar -I 'gzip' -cpf ExectOS-$(date +'%Y%m%d')-${GITHUB_SHA:0:10}-${{ matrix.arch }}-sym.tar.gz -C build-${{ matrix.arch }}-xtchain/output/symbols .
-          gzip -c build-${{ matrix.arch }}-xtchain/output/disk.img > ExectOS-$(date +'%Y%m%d')-${GITHUB_SHA:0:10}-${{ matrix.arch }}.img.gz
-          artifact_publish "ExectOS-$(date +'%Y%m%d')-${GITHUB_SHA:0:10}-${{ matrix.arch }}*.gz" ExectOS
+          tar -I 'gzip' -cpf ExectOS-$(date +'%Y%m%d')-${GITHUB_SHA:0:10}-${{ matrix.arch }}-bin.tar.gz -C build-${{ matrix.arch }}-${{ matrix.build }}/output/binaries .
+          tar -I 'gzip' -cpf ExectOS-$(date +'%Y%m%d')-${GITHUB_SHA:0:10}-${{ matrix.arch }}-lib.tar.gz -C build-${{ matrix.arch }}-${{ matrix.build }}/output/library .
+          tar -I 'gzip' -cpf ExectOS-$(date +'%Y%m%d')-${GITHUB_SHA:0:10}-${{ matrix.arch }}-sym.tar.gz -C build-${{ matrix.arch }}-${{ matrix.build }}/output/symbols .
+          gzip -c build-${{ matrix.arch }}-${{ matrix.build }}/output/disk.img > ExectOS-$(date +'%Y%m%d')-${GITHUB_SHA:0:10}-${{ matrix.arch }}-${{ matrix.build }}.img.gz
+          artifact_publish "ExectOS-$(date +'%Y%m%d')-${GITHUB_SHA:0:10}-${{ matrix.arch }}-${{ matrix.build }}*.gz" ExectOS
