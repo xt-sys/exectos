@@ -47,6 +47,9 @@ add_compiler_ccxxflags("-nostdinc -Wno-char-subscripts -Wno-incompatible-library
 add_compiler_ccxxflags("-Wno-microsoft-enum-forward-reference -Wno-multichar -Wno-parentheses-equality -Wno-undefined-inline")
 add_compiler_ccxxflags("-Wno-gnu-folding-constant")
 
+# Disable compiler builtins
+add_compiler_ccxxflags("-fno-builtin")
+
 # Set debugging symbols output directory
 set(CMAKE_PDB_OUTPUT_DIRECTORY "${EXECTOS_BINARY_DIR}/output/symbols")
 
