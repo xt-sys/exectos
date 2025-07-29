@@ -4,6 +4,7 @@
  * FILE:            xtldr/volume.c
  * DESCRIPTION:     XTLDR volume support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ *                  Aiken Harris <harraiken91@gmail.com>
  */
 
 #include <xtldr.h>
@@ -78,20 +79,40 @@ BlEnumerateBlockDevices()
     ListEntry = BlockDevices.Flink;
     while(ListEntry != &BlockDevices)
     {
-        /* Take block device from the list */
+        /* Get data for the next discovered device. */
         BlockDeviceData = CONTAIN_RECORD(ListEntry, EFI_BLOCK_DEVICE_DATA, ListEntry);
 
         /* Find last node */
         Status = BlpFindLastBlockDeviceNode(BlockDeviceData->DevicePath, &LastNode);
         if(Status != STATUS_EFI_SUCCESS)
         {
+            /* Skip this device if its last node cannot be found, as it is required for classification */
             BlDebugPrint(L"WARNING: Block device last node not found\n");
             ListEntry = ListEntry->Flink;
             continue;
         }
 
-        /* Set drive type to 'unknown' by default */
+        /* Initialize drive type before attempting to classify the device */
         DriveType = XTBL_BOOT_DEVICE_UNKNOWN;
+
+        /* Locate the parent for this block device to ensure it is not an orphaned entry */
+        if(!BlpFindParentBlockDevice(&BlockDevices, BlockDeviceData, &ParentNode))
+        {
+            /* Orphaned device found. Log a warning and skip it as it cannot be properly classified */
+            BlDebugPrint(L"WARNING: No parent device found, skipping orphaned media device path\n");
+            ListEntry = ListEntry->Flink;
+            continue;
+        }
+
+        /* Verify that media information is available, as some devices may not report it */
+        if(!BlockDeviceData->BlockIo->Media)
+        {
+            /* The device is unusable without media info, log a warning and skip it */
+            BlDebugPrint(L"WARNING: Block device is missing media information\n");
+            ListEntry = ListEntry->Flink;
+            continue;
+        }
+        Media = BlockDeviceData->BlockIo->Media;
 
         /* Check last node type */
         if(LastNode->Type == EFI_ACPI_DEVICE_PATH && LastNode->SubType == EFI_ACPI_DP)
@@ -101,65 +122,54 @@ BlEnumerateBlockDevices()
             if(AcpiDevice->HID == 0x60441D0 || AcpiDevice->HID == 0x70041D0 || AcpiDevice->HID == 0x70141D1)
             {
                 /* Floppy drive found */
-                Media = BlockDeviceData->BlockIo->Media;
                 DriveType = XTBL_BOOT_DEVICE_FLOPPY;
                 DriveNumber = FDCount++;
                 PartitionNumber = 0;
 
                 /* Print debug message */
                 BlDebugPrint(L"Found Floppy Disk (DiskNumber: %lu, MediaPresent: %u, RO: %u)\n",
-                           DriveNumber, Media->MediaPresent, Media->ReadOnly);
+                             DriveNumber, Media->MediaPresent, Media->ReadOnly);
             }
         }
-        else if(LastNode->Type == EFI_MEDIA_DEVICE_PATH)
+        else if((LastNode->Type == EFI_MEDIA_DEVICE_PATH && LastNode->SubType == EFI_MEDIA_CDROM_DP) ||
+                (LastNode->Type == EFI_MESSAGING_DEVICE_PATH &&
+                 (LastNode->SubType == EFI_MESSAGING_ATAPI_DP || LastNode->SubType == EFI_MESSAGING_SATA_DP) &&
+                 Media->MediaPresent && Media->RemovableMedia))
         {
-            /* Media device path found */
-            if(LastNode->SubType == EFI_MEDIA_CDROM_DP)
-            {
-                /* Optical drive found */
-                Media = BlockDeviceData->BlockIo->Media;
-                DriveType = XTBL_BOOT_DEVICE_CDROM;
-                DriveNumber = CDCount++;
-                PartitionNumber = 0;
+            /* Optical drive found */
+            DriveType = XTBL_BOOT_DEVICE_CDROM;
+            DriveNumber = CDCount++;
+            PartitionNumber = 0;
 
-                /* Print debug message */
-                BlDebugPrint(L"Found CD-ROM drive (DriveNumber: %lu, MediaPresent: %u, RemovableMedia: %u, RO: %u)\n",
-                           DriveNumber, Media->MediaPresent, Media->RemovableMedia, Media->ReadOnly);
-            }
-            else if(LastNode->SubType == EFI_MEDIA_HARDDRIVE_DP)
-            {
-                /* Hard disk partition found */
-                Media = BlockDeviceData->BlockIo->Media;
-                HDPath = (PEFI_HARDDRIVE_DEVICE_PATH)LastNode;
-                DriveType = XTBL_BOOT_DEVICE_HARDDISK;
-                DriveNumber = (HDPath->PartitionNumber == 1) ? HDCount++ : HDCount - 1;
-                PartitionNumber = HDPath->PartitionNumber;
-                PartitionGuid = (PEFI_GUID)HDPath->Signature;
+            /* Print debug message */
+            BlDebugPrint(L"Found CD-ROM drive (DriveNumber: %lu, MediaPresent: %u, RemovableMedia: %u, RO: %u)\n",
+                         DriveNumber, Media->MediaPresent, Media->RemovableMedia, Media->ReadOnly);
+        }
+        else if(LastNode->Type == EFI_MEDIA_DEVICE_PATH && LastNode->SubType == EFI_MEDIA_HARDDRIVE_DP)
+        {
+            /* Hard disk partition found */
+            HDPath = (PEFI_HARDDRIVE_DEVICE_PATH)LastNode;
+            DriveType = XTBL_BOOT_DEVICE_HARDDISK;
+            DriveNumber = (HDPath->PartitionNumber == 1) ? HDCount++ : HDCount - 1;
+            PartitionNumber = HDPath->PartitionNumber;
+            PartitionGuid = (PEFI_GUID)HDPath->Signature;
 
-                /* Print debug message */
-                BlDebugPrint(L"Found Hard Disk partition (DiskNumber: %lu, PartNumber: %lu, "
-                           L"MBRType: %u, GUID: {%V}, PartSize: %uB)\n",
-                           DriveNumber, PartitionNumber, HDPath->MBRType,
-                           PartitionGuid, HDPath->PartitionSize * Media->BlockSize);
-            }
-            else if(LastNode->SubType == EFI_MEDIA_RAMDISK_DP)
-            {
-                /* RAM disk found */
-                Media = BlockDeviceData->BlockIo->Media;
-                DriveType = XTBL_BOOT_DEVICE_RAMDISK;
-                DriveNumber = RDCount++;
-                PartitionNumber = 0;
+            /* Print debug message */
+            BlDebugPrint(L"Found Hard Disk partition (DiskNumber: %lu, PartNumber: %lu, "
+                         L"MBRType: %u, GUID: {%V}, PartSize: %uB)\n",
+                         DriveNumber, PartitionNumber, HDPath->MBRType,
+                         PartitionGuid, HDPath->PartitionSize * Media->BlockSize);
+        }
+        else if(LastNode->Type == EFI_MEDIA_DEVICE_PATH && LastNode->SubType == EFI_MEDIA_RAMDISK_DP)
+        {
+            /* RAM disk found */
+            DriveType = XTBL_BOOT_DEVICE_RAMDISK;
+            DriveNumber = RDCount++;
+            PartitionNumber = 0;
 
-                /* Print debug message */
-                BlDebugPrint(L"Found RAM Disk (DiskNumber: %lu, MediaPresent: %u)\n",
-                           DriveNumber, Media->MediaPresent);
-            }
-
-            if(!BlpFindParentBlockDevice(&BlockDevices, BlockDeviceData, &ParentNode))
-            {
-                BlDebugPrint(L"WARNING: No parent device found, skipping orphaned media device path\n");
-                continue;
-            }
+            /* Print debug message */
+            BlDebugPrint(L"Found RAM Disk (DiskNumber: %lu, MediaPresent: %u)\n",
+                         DriveNumber, Media->MediaPresent);
         }
 
         /* Make sure the device found has valid type set */
