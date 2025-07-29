@@ -8,7 +8,7 @@
   <a href="https://git.codingworkshop.eu.org/xt-sys/exectos/actions">
     <img alt="Build Status" src="https://codingworkshop.eu.org/actions.php?project=xt-sys/exectos">
   </a>
-  <a href="https://artifacts.codingworkshop.eu.org/ExectOS">
+  <a href="https://artifacts.codingworkshop.eu.org/ExectOS/?C=M&O=D">
     <img alt="CI/CD Artifacts" src="https://img.shields.io/badge/Download-%F0%9F%A1%87-blueviolet">
   </a>
   <a href="https://git.codingworkshop.eu.org/xt-sys/exectos/src/branch/master/COPYING.md">
