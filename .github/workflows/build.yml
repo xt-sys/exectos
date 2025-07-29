@@ -27,8 +27,8 @@ jobs:
           OSCW_ARTIFACTS_USERNAME: ${{ secrets.OSCW_ARTIFACTS_USERNAME }}
           OSCW_ARTIFACTS_USERKEY: ${{ secrets.OSCW_ARTIFACTS_USERKEY }}
         run: |
-          tar -I 'gzip' -cpf ExectOS-$(date +'%Y%m%d')-${GITHUB_SHA:0:10}-${{ matrix.arch }}-bin.tar.gz -C build-${{ matrix.arch }}-${{ matrix.build }}/output/binaries .
-          tar -I 'gzip' -cpf ExectOS-$(date +'%Y%m%d')-${GITHUB_SHA:0:10}-${{ matrix.arch }}-lib.tar.gz -C build-${{ matrix.arch }}-${{ matrix.build }}/output/library .
-          tar -I 'gzip' -cpf ExectOS-$(date +'%Y%m%d')-${GITHUB_SHA:0:10}-${{ matrix.arch }}-sym.tar.gz -C build-${{ matrix.arch }}-${{ matrix.build }}/output/symbols .
+          tar -I 'gzip' -cpf ExectOS-$(date +'%Y%m%d')-${GITHUB_SHA:0:10}-${{ matrix.arch }}-${{ matrix.build }}-bin.tar.gz -C build-${{ matrix.arch }}-${{ matrix.build }}/output/binaries .
+          tar -I 'gzip' -cpf ExectOS-$(date +'%Y%m%d')-${GITHUB_SHA:0:10}-${{ matrix.arch }}-${{ matrix.build }}-lib.tar.gz -C build-${{ matrix.arch }}-${{ matrix.build }}/output/library .
+          tar -I 'gzip' -cpf ExectOS-$(date +'%Y%m%d')-${GITHUB_SHA:0:10}-${{ matrix.arch }}-${{ matrix.build }}-sym.tar.gz -C build-${{ matrix.arch }}-${{ matrix.build }}/output/symbols .
           gzip -c build-${{ matrix.arch }}-${{ matrix.build }}/output/disk.img > ExectOS-$(date +'%Y%m%d')-${GITHUB_SHA:0:10}-${{ matrix.arch }}-${{ matrix.build }}.img.gz
           artifact_publish "ExectOS-$(date +'%Y%m%d')-${GITHUB_SHA:0:10}-${{ matrix.arch }}-${{ matrix.build }}*.gz" ExectOS
