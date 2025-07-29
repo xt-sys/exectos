@@ -927,17 +927,25 @@ BlpDuplicateDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath)
     EFI_STATUS Status;
     UINT Length = 0;
 
+    /* Check if the input device path is NULL */
+    if(!DevicePath)
+    {
+        /* Nothing to duplicate */
+        return NULL;
+    }
+
+    /* Start iterating from the beginning of the device path */
     DevicePathNode = DevicePath;
 
     /* Get the device path length */
     while(TRUE)
     {
-        Length += *(PUSHORT)DevicePath->Length;
+        Length += *(PUSHORT)DevicePathNode->Length;
         if(DevicePathNode->Type == EFI_END_DEVICE_PATH)
         {
             break;
         }
-        DevicePathNode = (PEFI_DEVICE_PATH_PROTOCOL)((PUCHAR)DevicePathNode + *(PUSHORT)DevicePath->Length);
+        DevicePathNode = (PEFI_DEVICE_PATH_PROTOCOL)((PUCHAR)DevicePathNode + *(PUSHORT)DevicePathNode->Length);
     }
 
     /* Check length */
