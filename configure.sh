@@ -22,13 +22,12 @@ fi
 
 # Set variables
 EXECTOS_SOURCE_DIR=$(cd `dirname ${0}` && pwd)
-EXECTOS_BINARY_DIR=build-${ARCH}-xtchain
+EXECTOS_BINARY_DIR=build-${ARCH}-${BUILD_TYPE,,}
 
 # Create directories if needed
 if [ "${EXECTOS_SOURCE_DIR}" = "${PWD}" ]; then
 	echo Creating directories in ${EXECTOS_BINARY_DIR}
 	mkdir -p "${EXECTOS_BINARY_DIR}"
-	ln -sf ${EXECTOS_BINARY_DIR} build
 	cd "${EXECTOS_BINARY_DIR}"
 fi
 
