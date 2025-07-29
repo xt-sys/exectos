@@ -25,7 +25,7 @@ if (-not $env:BUILD_TYPE) {
 
 # Set variables
 $EXECTOS_SOURCE_DIR = (Get-Location).Path
-$EXECTOS_BINARY_DIR = "build-$($ARCH)-xtchain"
+$EXECTOS_BINARY_DIR = "build-$($ARCH)-$($env:BUILD_TYPE.ToLower())"
 
 # Create directories if needed
 if ($EXECTOS_SOURCE_DIR -eq (Get-Location).Path) {
