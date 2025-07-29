@@ -47,7 +47,7 @@ ChBootSystem(IN PXTBL_BOOT_PARAMETERS Parameters)
     }
 
     /* Open EFI volume */
-    Status = XtLdrProtocol->Disk.OpenVolume(NULL, &DiskHandle, &FsHandle);
+    Status = XtLdrProtocol->Disk.OpenVolume(Parameters->DevicePath, &DiskHandle, &FsHandle);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to open a volume, return error code */
