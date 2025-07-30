@@ -25,7 +25,7 @@ XtpMapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
 {
     PHARDWARE_PTE PdeBase, PpeBase, PxeBase;
     EFI_PHYSICAL_ADDRESS Address;
-    XTSTATUS Status;
+    EFI_STATUS Status;
 
     /* Check page map level */
     if(PageMap->PageMapLevel > 4)
