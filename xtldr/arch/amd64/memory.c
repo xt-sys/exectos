@@ -216,6 +216,7 @@ BlMapPage(IN PXTBL_PAGE_MAPPING PageMap,
         }
 
         /* Set paging entry settings */
+        RtlZeroMemory(&Pml1[Pml1Entry], sizeof(HARDWARE_PTE));
         Pml1[Pml1Entry].PageFrameNumber = PageFrameNumber;
         Pml1[Pml1Entry].Valid = 1;
         Pml1[Pml1Entry].Writable = 1;
@@ -250,7 +251,11 @@ EFI_STATUS
 BlpSelfMapPml(IN PXTBL_PAGE_MAPPING PageMap,
               IN ULONG_PTR SelfMapAddress)
 {
+    PHARDWARE_PTE PmlBase;
     ULONGLONG PmlIndex;
+
+    /* Initialize PML base pointer */
+    PmlBase = (PHARDWARE_PTE)PageMap->PtePointer;
 
     /* Check page map level */
     if(PageMap->PageMapLevel == 5)
@@ -265,9 +270,10 @@ BlpSelfMapPml(IN PXTBL_PAGE_MAPPING PageMap,
         PmlIndex = (SelfMapAddress >> MM_PXI_SHIFT) & 0x1FF;
 
         /* Add self-mapping for PML4 */
-        ((PHARDWARE_PTE)PageMap->PtePointer)[PmlIndex].PageFrameNumber = (UINT_PTR)PageMap->PtePointer / EFI_PAGE_SIZE;
-        ((PHARDWARE_PTE)PageMap->PtePointer)[PmlIndex].Valid = 1;
-        ((PHARDWARE_PTE)PageMap->PtePointer)[PmlIndex].Writable = 1;
+        RtlZeroMemory(&PmlBase[PmlIndex], sizeof(HARDWARE_PTE));
+        PmlBase[PmlIndex].PageFrameNumber = PmlBasePfn;
+        PmlBase[PmlIndex].Valid = 1;
+        PmlBase[PmlIndex].Writable = 1;
     }
 
     /* Return success */
