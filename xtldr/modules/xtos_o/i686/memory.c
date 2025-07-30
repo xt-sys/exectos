@@ -26,7 +26,7 @@ XtpMapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
     EFI_PHYSICAL_ADDRESS Address;
     PHARDWARE_LEGACY_PTE LegacyPdeBase;
     PHARDWARE_PTE PdeBase;
-    XTSTATUS Status;
+    EFI_STATUS Status;
 
     /* Allocate memory */
     Status = XtLdrProtocol->Memory.AllocatePages(1, &Address);
@@ -39,7 +39,7 @@ XtpMapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
     /* Zero fill allocated memory */
     RtlZeroMemory((PVOID)Address, EFI_PAGE_SIZE);
 
-    /* Check page map level */
+    /* Check if PAE is enabled (3-level paging) */
     if(PageMap->PageMapLevel == 3)
     {
         /* Get PDE base address (PAE enabled) */
