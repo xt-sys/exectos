@@ -271,7 +271,7 @@ BlpSelfMapPml(IN PXTBL_PAGE_MAPPING PageMap,
 
         /* Add self-mapping for PML4 */
         RtlZeroMemory(&PmlBase[PmlIndex], sizeof(HARDWARE_PTE));
-        PmlBase[PmlIndex].PageFrameNumber = PmlBasePfn;
+        PmlBase[PmlIndex].PageFrameNumber = (UINT_PTR)PageMap->PtePointer / EFI_PAGE_SIZE;
         PmlBase[PmlIndex].Valid = 1;
         PmlBase[PmlIndex].Writable = 1;
     }
