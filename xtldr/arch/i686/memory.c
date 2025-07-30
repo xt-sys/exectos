@@ -58,6 +58,7 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
     for(Index = 0; Index < 4; Index++)
     {
         /* Set paging entry settings */
+        RtlZeroMemory(&((PHARDWARE_PTE)PageMap->PtePointer)[Index], sizeof(HARDWARE_PTE));
         ((PHARDWARE_PTE)PageMap->PtePointer)[Index].PageFrameNumber = DirectoryAddress / EFI_PAGE_SIZE;
         ((PHARDWARE_PTE)PageMap->PtePointer)[Index].Valid = 1;
 
@@ -218,6 +219,7 @@ BlMapPage(IN PXTBL_PAGE_MAPPING PageMap,
         }
 
         /* Set paging entry settings */
+        RtlZeroMemory(&Pml1[Pml1Entry], sizeof(HARDWARE_PTE));
         Pml1[Pml1Entry].PageFrameNumber = PageFrameNumber;
         Pml1[Pml1Entry].Valid = 1;
         Pml1[Pml1Entry].Writable = 1;
@@ -252,8 +254,9 @@ EFI_STATUS
 BlpSelfMapPml(IN PXTBL_PAGE_MAPPING PageMap,
               IN ULONG_PTR SelfMapAddress)
 {
-    ULONGLONG PmlIndex;
+    PHARDWARE_LEGACY_PTE LegacyPml;
     PHARDWARE_PTE Pml;
+    ULONGLONG PmlIndex;
     ULONG Index;
 
     /* Check page map level */
@@ -268,6 +271,7 @@ BlpSelfMapPml(IN PXTBL_PAGE_MAPPING PageMap,
         /* Add self-mapping for PML3 (PAE enabled) */
         for(Index = 0; Index < 4; Index++)
         {
+            RtlZeroMemory(&Pml[PmlIndex + Index], sizeof(HARDWARE_PTE));
             Pml[PmlIndex + Index].PageFrameNumber = ((PHARDWARE_PTE)PageMap->PtePointer)[Index].PageFrameNumber;
             Pml[PmlIndex + Index].Valid = 1;
             Pml[PmlIndex + Index].Writable = 1;
@@ -275,13 +279,16 @@ BlpSelfMapPml(IN PXTBL_PAGE_MAPPING PageMap,
     }
     else
     {
+        LegacyPml = (PHARDWARE_LEGACY_PTE)PageMap->PtePointer;
+
         /* Calculate PML index based on provided self map address */
         PmlIndex = (SelfMapAddress >> MM_PDI_LEGACY_SHIFT);
 
         /* Add self-mapping for PML2 (PAE disabled) */
-        ((PHARDWARE_LEGACY_PTE)PageMap->PtePointer)[PmlIndex].PageFrameNumber = (UINT_PTR)PageMap->PtePointer / EFI_PAGE_SIZE;
-        ((PHARDWARE_LEGACY_PTE)PageMap->PtePointer)[PmlIndex].Valid = 1;
-        ((PHARDWARE_LEGACY_PTE)PageMap->PtePointer)[PmlIndex].Writable = 1;
+        RtlZeroMemory(&LegacyPml[PmlIndex], sizeof(HARDWARE_LEGACY_PTE));
+        LegacyPml[PmlIndex].PageFrameNumber = (UINT_PTR)PageMap->PtePointer / EFI_PAGE_SIZE;
+        LegacyPml[PmlIndex].Valid = 1;
+        LegacyPml[PmlIndex].Writable = 1;
     }
 
     /* Return success */
