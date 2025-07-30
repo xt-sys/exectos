@@ -168,6 +168,9 @@ XtEnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
     /* Write PML4 to CR3 */
     ArWriteControlRegister(3, (UINT_PTR)PageMap->PtePointer);
 
+    /* Enable paging */
+    ArWriteControlRegister(0, ArReadControlRegister(0) | CR0_PG);
+
     /* Return success */
     return STATUS_EFI_SUCCESS;
 }
