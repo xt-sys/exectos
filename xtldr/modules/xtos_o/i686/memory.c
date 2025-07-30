@@ -24,6 +24,7 @@ EFI_STATUS
 XtpMapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
 {
     EFI_PHYSICAL_ADDRESS Address;
+    PHARDWARE_LEGACY_PTE LegacyPdeBase;
     PHARDWARE_PTE PdeBase;
     XTSTATUS Status;
 
@@ -45,6 +46,7 @@ XtpMapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
         PdeBase = (PHARDWARE_PTE)(((PHARDWARE_PTE)PageMap->PtePointer)[MM_HARDWARE_VA_START >> MM_PPI_SHIFT].PageFrameNumber << MM_PAGE_SHIFT);
 
         /* Make PDE valid */
+        RtlZeroMemory(&PdeBase[(MM_HARDWARE_VA_START >> MM_PDI_SHIFT) & 0x1FF], sizeof(HARDWARE_PTE));
         PdeBase[(MM_HARDWARE_VA_START >> MM_PDI_SHIFT) & 0x1FF].PageFrameNumber = Address >> MM_PAGE_SHIFT;
         PdeBase[(MM_HARDWARE_VA_START >> MM_PDI_SHIFT) & 0x1FF].Valid = 1;
         PdeBase[(MM_HARDWARE_VA_START >> MM_PDI_SHIFT) & 0x1FF].Writable = 1;
@@ -52,9 +54,11 @@ XtpMapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
     else
     {
         /* Make PDE valid (PAE disabled) */
-        ((PHARDWARE_LEGACY_PTE)PageMap->PtePointer)[MM_HARDWARE_VA_START >> MM_PDI_LEGACY_SHIFT].Valid = 1;
-        ((PHARDWARE_LEGACY_PTE)PageMap->PtePointer)[MM_HARDWARE_VA_START >> MM_PDI_LEGACY_SHIFT].PageFrameNumber = Address >> MM_PAGE_SHIFT;
-        ((PHARDWARE_LEGACY_PTE)PageMap->PtePointer)[MM_HARDWARE_VA_START >> MM_PDI_LEGACY_SHIFT].Writable = 1;
+        LegacyPdeBase = (PHARDWARE_LEGACY_PTE)PageMap->PtePointer;
+        RtlZeroMemory(&LegacyPdeBase[MM_HARDWARE_VA_START >> MM_PDI_LEGACY_SHIFT], sizeof(HARDWARE_LEGACY_PTE));
+        LegacyPdeBase[MM_HARDWARE_VA_START >> MM_PDI_LEGACY_SHIFT].Valid = 1;
+        LegacyPdeBase[MM_HARDWARE_VA_START >> MM_PDI_LEGACY_SHIFT].PageFrameNumber = Address >> MM_PAGE_SHIFT;
+        LegacyPdeBase[MM_HARDWARE_VA_START >> MM_PDI_LEGACY_SHIFT].Writable = 1;
     }
 
     /* Return success */
