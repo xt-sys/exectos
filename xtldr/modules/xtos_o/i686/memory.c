@@ -79,22 +79,18 @@ XTCDECL
 EFI_STATUS
 XtEnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
 {
-    PCPUID_REGISTERS CpuRegisters = NULL;
+    CPUID_REGISTERS CpuRegisters;
     EFI_STATUS Status;
 
     /* Prepare CPUID registers */
-    CpuRegisters->Leaf = CPUID_GET_CPU_FEATURES;
-    CpuRegisters->SubLeaf = 0;
-    CpuRegisters->Eax = 0;
-    CpuRegisters->Ebx = 0;
-    CpuRegisters->Ecx = 0;
-    CpuRegisters->Edx = 0;
+    RtlZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
+    CpuRegisters.Leaf = CPUID_GET_CPU_FEATURES;
 
     /* Get CPUID */
-    ArCpuId(CpuRegisters);
+    ArCpuId(&CpuRegisters);
 
     /* Store PAE status from the CPUID results */
-    if(!(CpuRegisters->Edx & CPUID_FEATURES_EDX_PAE))
+    if(!(CpuRegisters.Edx & CPUID_FEATURES_EDX_PAE))
     {
         /* No PAE support */
         XtLdrProtocol->Debug.Print(L"ERROR: PAE extension not supported by the CPU\n");
