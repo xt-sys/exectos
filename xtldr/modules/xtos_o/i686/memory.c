@@ -125,8 +125,21 @@ XtEnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
         return STATUS_EFI_ABORTED;
     }
 
-    /* Enable Physical Address Extension (PAE) */
-    ArWriteControlRegister(4, ArReadControlRegister(4) | CR4_PAE);
+    /* Disable paging */
+    ArWriteControlRegister(0, ArReadControlRegister(0) & ~CR0_PG);
+
+    if(PageMap->PageMapLevel == 3)
+    {
+        /* Enable Physical Address Extension (PAE) */
+        XtLdrProtocol->Debug.Print(L"Enabling Physical Address Extension (PAE)\n");
+        ArWriteControlRegister(4, ArReadControlRegister(4) | CR4_PAE);
+    }
+    else
+    {
+        /* Disable Physical Address Extension (PAE) */
+        XtLdrProtocol->Debug.Print(L"Disabling Physical Address Extension (PAE)\n");
+        ArWriteControlRegister(4, ArReadControlRegister(4) & ~CR4_PAE);
+    }
 
     /* Write page mappings to CR3 */
     ArWriteControlRegister(3, (UINT_PTR)PageMap->PtePointer);
