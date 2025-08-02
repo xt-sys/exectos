@@ -128,6 +128,7 @@ XtEnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
     /* Disable paging */
     ArWriteControlRegister(0, ArReadControlRegister(0) & ~CR0_PG);
 
+    /* Check the configured page map level to set the PAE state accordingly */
     if(PageMap->PageMapLevel == 3)
     {
         /* Enable Physical Address Extension (PAE) */
