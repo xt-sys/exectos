@@ -31,39 +31,54 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
     EFI_STATUS Status;
     ULONG Index;
 
-    /* Allocate pages for the Page Map */
-    Status = BlAllocateMemoryPages(1, &Address);
-    if(Status != STATUS_EFI_SUCCESS)
+    /* Check the page map level to determine which paging structure to create. */
+    if(PageMap->PageMapLevel == 3)
     {
-        /* Memory allocation failure */
-        return Status;
+        /* Allocate a page for the 3-level page map structure (PAE enabled) */
+        Status = BlAllocateMemoryPages(1, &Address);
+        if(Status != STATUS_EFI_SUCCESS)
+        {
+            /* Memory allocation failed, cannot proceed with page map creation */
+            return Status;
+        }
+
+        /* Assign the allocated page to the page map and zero it out */
+        PageMap->PtePointer = (PVOID)(UINT_PTR)Address;
+        RtlZeroMemory(PageMap->PtePointer, EFI_PAGE_SIZE);
+
+        /* Allocate 4 pages for the Page Directories (PDs) */
+        Status = BlAllocateMemoryPages(4, &DirectoryAddress);
+        if(Status != STATUS_EFI_SUCCESS)
+        {
+            /* Memory allocation failed, cannot proceed with page map creation */
+            return Status;
+        }
+
+        /* Zero-fill the allocated memory for the Page Directories */
+        RtlZeroMemory((PVOID)DirectoryAddress, EFI_PAGE_SIZE * 4);
+
+        /* Fill the PDPT with pointers to the Page Directories */
+        for(Index = 0; Index < 4; Index++)
+        {
+            RtlZeroMemory(&((PHARDWARE_PTE)PageMap->PtePointer)[Index], sizeof(HARDWARE_PTE));
+            ((PHARDWARE_PTE)PageMap->PtePointer)[Index].PageFrameNumber = DirectoryAddress / EFI_PAGE_SIZE;
+            ((PHARDWARE_PTE)PageMap->PtePointer)[Index].Valid = 1;
+            DirectoryAddress += EFI_PAGE_SIZE;
+        }
     }
-
-    /* Assign and zero-fill memory used by page mappings */
-    PageMap->PtePointer = (PVOID)(UINT_PTR)Address;
-    RtlZeroMemory(PageMap->PtePointer, EFI_PAGE_SIZE);
-
-    /* Allocate pages for the Page Directory */
-    Status = BlAllocateMemoryPages(4, &DirectoryAddress);
-    if(Status != STATUS_EFI_SUCCESS)
+    else
     {
-        /* Memory allocation failure */
-        return Status;
-    }
+        /* Allocate a page for the 2-level page map structure (PAE disabled) */
+        Status = BlAllocateMemoryPages(1, &Address);
+        if(Status != STATUS_EFI_SUCCESS)
+        {
+            /* Memory allocation failed, cannot proceed with page map creation */
+            return Status;
+        }
 
-    /* Zero fill memory used by Page Directory */
-    RtlZeroMemory((PVOID)DirectoryAddress, EFI_PAGE_SIZE * 4);
-
-    /* Set the page directory into the PDPT and mark it present */
-    for(Index = 0; Index < 4; Index++)
-    {
-        /* Set paging entry settings */
-        RtlZeroMemory(&((PHARDWARE_PTE)PageMap->PtePointer)[Index], sizeof(HARDWARE_PTE));
-        ((PHARDWARE_PTE)PageMap->PtePointer)[Index].PageFrameNumber = DirectoryAddress / EFI_PAGE_SIZE;
-        ((PHARDWARE_PTE)PageMap->PtePointer)[Index].Valid = 1;
-
-        /* Next valid PFN address */
-        DirectoryAddress += EFI_PAGE_SIZE;
+        /* Assign the allocated page to the page map and zero it out */
+        PageMap->PtePointer = (PVOID)(UINT_PTR)Address;
+        RtlZeroMemory(PageMap->PtePointer, EFI_PAGE_SIZE);
     }
 
     /* Add page mapping itself to memory mapping */
