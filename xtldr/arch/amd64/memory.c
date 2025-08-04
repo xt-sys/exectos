@@ -4,6 +4,7 @@
  * FILE:            xtldr/arch/amd64/memory.c
  * DESCRIPTION:     XT Boot Loader AMD64 specific memory management
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ *                  Aiken Harris <harraiken91@gmail.com>
  */
 
 #include <xtldr.h>
@@ -153,8 +154,9 @@ BlMapPage(IN PXTBL_PAGE_MAPPING PageMap,
           IN ULONG_PTR PhysicalAddress,
           IN ULONG NumberOfPages)
 {
+    PVOID Pml1, Pml2, Pml3, Pml4, Pml5;
     SIZE_T Pml1Entry, Pml2Entry, Pml3Entry, Pml4Entry, Pml5Entry;
-    PHARDWARE_PTE Pml1, Pml2, Pml3, Pml4, Pml5;
+    PHARDWARE_PTE PmlTable;
     SIZE_T PageFrameNumber;
     EFI_STATUS Status;
 
@@ -175,7 +177,7 @@ BlMapPage(IN PXTBL_PAGE_MAPPING PageMap,
         if(PageMap->PageMapLevel == 5)
         {
             /* Five level Page Map */
-            Pml5 = ((PHARDWARE_PTE)(PageMap->PtePointer));
+            Pml5 = PageMap->PtePointer;
 
             /* Get PML4 */
             Status = BlpGetNextPageTable(PageMap, Pml5, Pml5Entry, &Pml4);
@@ -188,7 +190,7 @@ BlMapPage(IN PXTBL_PAGE_MAPPING PageMap,
         else
         {
             /* Four level Page Map */
-            Pml4 = ((PHARDWARE_PTE)(PageMap->PtePointer));
+            Pml4 = PageMap->PtePointer;
         }
 
         /* Get PML3 */
@@ -216,10 +218,11 @@ BlMapPage(IN PXTBL_PAGE_MAPPING PageMap,
         }
 
         /* Set paging entry settings */
-        RtlZeroMemory(&Pml1[Pml1Entry], sizeof(HARDWARE_PTE));
-        Pml1[Pml1Entry].PageFrameNumber = PageFrameNumber;
-        Pml1[Pml1Entry].Valid = 1;
-        Pml1[Pml1Entry].Writable = 1;
+        PmlTable = (PHARDWARE_PTE)Pml1;
+        RtlZeroMemory(&PmlTable[Pml1Entry], sizeof(HARDWARE_PTE));
+        PmlTable[Pml1Entry].PageFrameNumber = PageFrameNumber;
+        PmlTable[Pml1Entry].Valid = 1;
+        PmlTable[Pml1Entry].Writable = 1;
 
         /* Take next virtual address and PFN */
         VirtualAddress += EFI_PAGE_SIZE;
@@ -228,6 +231,81 @@ BlMapPage(IN PXTBL_PAGE_MAPPING PageMap,
         /* Decrease number of pages left */
         NumberOfPages--;
     }
+
+    /* Return success */
+    return STATUS_EFI_SUCCESS;
+}
+
+/**
+ * Returns next level of the Page Table.
+ *
+ * @param PageMap
+ *        Supplies a pointer to the page mapping structure.
+ *
+ * @param PageTable
+ *        Supplies a pointer to the current Page Table.
+ *
+ * @param Entry
+ *        Supplies an index of the current Page Table entry.
+ *
+ * @param NextPageTable
+ *        Supplies a pointer to the memory area where the next Page Table level is returned.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+BlpGetNextPageTable(IN PXTBL_PAGE_MAPPING PageMap,
+                    IN PVOID PageTable,
+                    IN SIZE_T Entry,
+                    OUT PVOID *NextPageTable)
+{
+    EFI_PHYSICAL_ADDRESS Address;
+    ULONGLONG PmlPointer = 0;
+    PHARDWARE_PTE PmlTable;
+    EFI_STATUS Status;
+
+    PmlTable = (PHARDWARE_PTE)PageTable;
+
+    /* Check if this is a valid table */
+    if(PmlTable[Entry].Valid)
+    {
+        /* Get PML pointer */
+        PmlPointer = PmlTable[Entry].PageFrameNumber;
+        PmlPointer <<= EFI_PAGE_SHIFT;
+    }
+    else
+    {
+        /* Allocate pages for new PML entry */
+        Status = BlAllocateMemoryPages(1, &Address);
+        if(Status != STATUS_EFI_SUCCESS)
+        {
+            /* Memory allocation failure */
+            return Status;
+        }
+
+        /* Add new memory mapping */
+        Status = BlMapVirtualMemory(PageMap, NULL, (PVOID)(UINT_PTR)Address, 1, LoaderMemoryData);
+        if(Status != STATUS_EFI_SUCCESS)
+        {
+            /* Memory mapping failure */
+            return Status;
+        }
+
+        /* Fill allocated memory with zeros */
+        RtlZeroMemory((PVOID)(ULONGLONG)Address, EFI_PAGE_SIZE);
+
+        /* Set paging entry settings */
+        PmlTable[Entry].PageFrameNumber = Address / EFI_PAGE_SIZE;
+        PmlTable[Entry].Valid = 1;
+        PmlTable[Entry].Writable = 1;
+        PmlPointer = (ULONGLONG)Address;
+    }
+
+    /* Set next Page Map Level (PML) */
+    *NextPageTable = (PVOID)(ULONGLONG)PmlPointer;
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
