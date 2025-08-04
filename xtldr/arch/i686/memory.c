@@ -31,7 +31,7 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
     EFI_STATUS Status;
     ULONG Index;
 
-    /* Check the page map level to determine which paging structure to create. */
+    /* Check the page map level to determine which paging structure to create */
     if(PageMap->PageMapLevel == 3)
     {
         /* Allocate a page for the 3-level page map structure (PAE enabled) */
@@ -189,55 +189,77 @@ BlMapPage(IN PXTBL_PAGE_MAPPING PageMap,
           IN ULONG_PTR PhysicalAddress,
           IN ULONG NumberOfPages)
 {
-    SIZE_T Pml1Entry, Pml2Entry, Pml3Entry;
-    PHARDWARE_PTE Pml1, Pml2, Pml3;
     SIZE_T PageFrameNumber;
+    PVOID Pml1, Pml2, Pml3;
+    SIZE_T Pml1Entry, Pml2Entry, Pml3Entry;
+    PHARDWARE_PTE PmlTable;
+    PHARDWARE_LEGACY_PTE LegacyPmlTable;
     EFI_STATUS Status;
 
     /* Set the Page Frame Number (PFN) */
     PageFrameNumber = PhysicalAddress >> EFI_PAGE_SHIFT;
 
-    /* Do the recursive mapping */
+    /* Map all requested pages */
     while(NumberOfPages > 0)
     {
-        /* Calculate the indices in the various Page Tables from the virtual address */
-        Pml3Entry = (VirtualAddress & ((ULONGLONG)0x1FF << 30)) >> 30;
-        Pml2Entry = (VirtualAddress & ((ULONGLONG)0x1FF << 21)) >> 21;
-        Pml1Entry = (VirtualAddress & ((ULONGLONG)0x1FF << 12)) >> 12;
-
-        /* Check page map level */
+        /* Check the paging mode to use the correct page table structure */
         if(PageMap->PageMapLevel == 3)
         {
-            /* Three level Page Map */
-            Pml3 = ((PHARDWARE_PTE)(PageMap->PtePointer));
+            /* Calculate the indices for PAE page tables */
+            Pml3Entry = (VirtualAddress >> 30) & 0x3;
+            Pml2Entry = (VirtualAddress >> 21) & 0x1FF;
+            Pml1Entry = (VirtualAddress >> 12) & 0x1FF;
 
-            /* Get PML2 */
+            /* Get Page Directory Pointer Table (PML3) */
+            Pml3 = PageMap->PtePointer;
+
+            /* Get Page Directory (PML2) */
             Status = BlpGetNextPageTable(PageMap, Pml3, Pml3Entry, &Pml2);
             if(Status != STATUS_EFI_SUCCESS)
             {
-                /* Memory mapping failure */
+                /* Failed to get the Page Table, abort mapping */
                 return Status;
             }
+
+            /* Get Page Table (PML1) */
+            Status = BlpGetNextPageTable(PageMap, Pml2, Pml2Entry, &Pml1);
+            if(Status != STATUS_EFI_SUCCESS)
+            {
+                /* Failed to get the Page Table, abort mapping */
+                return Status;
+            }
+
+            /* Set the 64-bit PTE entry */
+            PmlTable = (PHARDWARE_PTE)Pml1;
+            RtlZeroMemory(&PmlTable[Pml1Entry], sizeof(HARDWARE_PTE));
+            PmlTable[Pml1Entry].PageFrameNumber = PageFrameNumber;
+            PmlTable[Pml1Entry].Valid = 1;
+            PmlTable[Pml1Entry].Writable = 1;
         }
         else
         {
-            /* Two level Page Map */
-            Pml2 = ((PHARDWARE_PTE)(PageMap->PtePointer));
-        }
+            /* Calculate the indices for non-PAE page tables */
+            Pml2Entry = (VirtualAddress >> 22) & 0x3FF;
+            Pml1Entry = (VirtualAddress >> 12) & 0x3FF;
 
-        /* Get PML1 */
-        Status = BlpGetNextPageTable(PageMap, Pml2, Pml2Entry, &Pml1);
-        if(Status != STATUS_EFI_SUCCESS)
-        {
-            /* Memory mapping failure */
-            return Status;
-        }
+            /* Get Page Directory (PML2) */
+            Pml2 = PageMap->PtePointer;
 
-        /* Set paging entry settings */
-        RtlZeroMemory(&Pml1[Pml1Entry], sizeof(HARDWARE_PTE));
-        Pml1[Pml1Entry].PageFrameNumber = PageFrameNumber;
-        Pml1[Pml1Entry].Valid = 1;
-        Pml1[Pml1Entry].Writable = 1;
+            /* Get Page Table (PML1) */
+            Status = BlpGetNextPageTable(PageMap, Pml2, Pml2Entry, &Pml1);
+            if(Status != STATUS_EFI_SUCCESS)
+            {
+                /* Failed to get the Page Table, abort mapping */
+                return Status;
+            }
+
+            /* Set the 32-bit PTE entry */
+            LegacyPmlTable = (PHARDWARE_LEGACY_PTE)Pml1;
+            RtlZeroMemory(&LegacyPmlTable[Pml1Entry], sizeof(HARDWARE_LEGACY_PTE));
+            LegacyPmlTable[Pml1Entry].PageFrameNumber = (UINT32)PageFrameNumber;
+            LegacyPmlTable[Pml1Entry].Valid = 1;
+            LegacyPmlTable[Pml1Entry].Writable = 1;
+        }
 
         /* Take next virtual address and PFN */
         VirtualAddress += EFI_PAGE_SIZE;
