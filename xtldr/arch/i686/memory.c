@@ -4,6 +4,7 @@
  * FILE:            xtldr/arch/i686/memory.c
  * DESCRIPTION:     XT Boot Loader i686 specific memory management
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ *                  Aiken Harris <harraiken91@gmail.com>
  */
 
 #include <xtldr.h>
