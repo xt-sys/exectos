@@ -275,6 +275,119 @@ BlMapPage(IN PXTBL_PAGE_MAPPING PageMap,
 }
 
 /**
+ * Returns next level of the Page Table.
+ *
+ * @param PageMap
+ *        Supplies a pointer to the page mapping structure.
+ *
+ * @param PageTable
+ *        Supplies a pointer to the current Page Table.
+ *
+ * @param Entry
+ *        Supplies an index of the current Page Table entry.
+ *
+ * @param NextPageTable
+ *        Supplies a pointer to the memory area where the next Page Table level is returned.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+BlpGetNextPageTable(IN PXTBL_PAGE_MAPPING PageMap,
+                    IN PVOID PageTable,
+                    IN SIZE_T Entry,
+                    OUT PVOID *NextPageTable)
+{
+    EFI_PHYSICAL_ADDRESS Address;
+    ULONGLONG PmlPointer = 0;
+    EFI_STATUS Status;
+    PHARDWARE_LEGACY_PTE LegacyPmlTable;
+    PHARDWARE_PTE PmlTable;
+    BOOLEAN ValidPte = FALSE;
+
+    /* Check page map level to determine PTE size */
+    if(PageMap->PageMapLevel >= 3)
+    {
+        /* 64-bit PTE for PML3 (PAE enabled) */
+        PmlTable = (PHARDWARE_PTE)PageTable;
+        if(PmlTable[Entry].Valid)
+        {
+            /* Get page frame number from page table entry */
+            PmlPointer = PmlTable[Entry].PageFrameNumber;
+            ValidPte = TRUE;
+        }
+    }
+    else
+    {
+        /* 32-bit PTE for PML2 (PAE disabled) */
+        LegacyPmlTable = (PHARDWARE_LEGACY_PTE)PageTable;
+        if(LegacyPmlTable[Entry].Valid)
+        {
+            /* Get page frame number from page table entry */
+            PmlPointer = LegacyPmlTable[Entry].PageFrameNumber;
+            ValidPte = TRUE;
+        }
+    }
+
+    /* Check if page table entry is valid */
+    if(ValidPte)
+    {
+        /* Calculate the base address of the next page table */
+        PmlPointer <<= EFI_PAGE_SHIFT;
+    }
+    else
+    {
+        /* Allocate pages for new PML entry */
+        Status = BlAllocateMemoryPages(1, &Address);
+        if(Status != STATUS_EFI_SUCCESS)
+        {
+            /* Memory allocation failure */
+            return Status;
+        }
+
+        /* Add new memory mapping */
+        Status = BlMapVirtualMemory(PageMap, NULL, (PVOID)(UINT_PTR)Address, 1, LoaderMemoryData);
+        if(Status != STATUS_EFI_SUCCESS)
+        {
+            /* Memory mapping failure */
+            return Status;
+        }
+
+        /* Fill allocated memory with zeros */
+        RtlZeroMemory((PVOID)(ULONGLONG)Address, EFI_PAGE_SIZE);
+
+        /* Set paging entry settings based on level */
+        if(PageMap->PageMapLevel >= 3)
+        {
+            /* 64-bit PTE for PML3 (PAE enabled) */
+            PmlTable = (PHARDWARE_PTE)PageTable;
+            PmlTable[Entry].PageFrameNumber = Address / EFI_PAGE_SIZE;
+            PmlTable[Entry].Valid = 1;
+            PmlTable[Entry].Writable = 1;
+        }
+        else
+        {
+            /* 32-bit PTE for PML2 (PAE disabled) */
+            LegacyPmlTable = (PHARDWARE_LEGACY_PTE)PageTable;
+            LegacyPmlTable[Entry].PageFrameNumber = (UINT32)(Address / EFI_PAGE_SIZE);
+            LegacyPmlTable[Entry].Valid = 1;
+            LegacyPmlTable[Entry].Writable = 1;
+        }
+
+        /* Return the address of the new page table */
+        PmlPointer = (ULONGLONG)Address;
+    }
+
+    /* Set next Page Map Level (PML) */
+    *NextPageTable = (PVOID)(ULONGLONG)PmlPointer;
+
+    /* Return success */
+    return STATUS_EFI_SUCCESS;
+}
+
+/**
  * Creates a recursive self mapping for all PML levels.
  *
  * @param PageMap
