@@ -484,9 +484,9 @@ BlpGetModuleInfoStrings(IN PWCHAR SectionData,
 XTCDECL
 EFI_STATUS
 BlpGetNextPageTable(IN PXTBL_PAGE_MAPPING PageMap,
-                    IN PHARDWARE_PTE PageTable,
+                    IN PVOID PageTable,
                     IN SIZE_T Entry,
-                    OUT PHARDWARE_PTE *NextPageTable);
+                    OUT PVOID *NextPageTable);
 
 XTCDECL
 EFI_STATUS
