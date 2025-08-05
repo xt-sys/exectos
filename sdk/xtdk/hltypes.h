@@ -357,12 +357,13 @@ typedef struct _ACPI_TIMER_INFO
     ULONG MsbMask;
 } ACPI_TIMER_INFO, *PACPI_TIMER_INFO;
 
-/* Serial (COM) port initial state */
+/* Serial (COM) port state */
 typedef struct _CPPORT
 {
     PUCHAR Address;
     ULONG Baud;
     USHORT Flags;
+    UCHAR Ring;
 } CPPORT, *PCPPORT;
 
 /* HAL framebuffer data structure */
