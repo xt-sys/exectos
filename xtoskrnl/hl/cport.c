@@ -165,7 +165,6 @@ HlComPortReadLsr(IN PCPPORT Port,
                  IN UCHAR Byte)
 {
     UCHAR Lsr, Msr;
-    STATIC UCHAR RingFlag;
 
     /* Read the Line Status Register (LSR) */
     Lsr = HlIoPortInByte(PtrToUshort(Port->Address + (ULONG)COMPORT_REG_LSR));
@@ -175,8 +174,8 @@ HlComPortReadLsr(IN PCPPORT Port,
     {
         /* Check Modem Status Register (MSR) for ring indicator */
         Msr = HlIoPortInByte(PtrToUshort(Port->Address + (ULONG)COMPORT_REG_MSR));
-        RingFlag |= (Msr & COMPORT_MSR_RI) ? 1 : 2;
-        if(RingFlag == 3)
+        Port->Ring |= (Msr & COMPORT_MSR_RI) ? 1 : 2;
+        if(Port->Ring == 3)
         {
             /* Ring indicator toggled, use modem control */
             Port->Flags |= COMPORT_FLAG_MC;
@@ -283,6 +282,7 @@ HlInitializeComPort(IN OUT PCPPORT Port,
     Port->Address = PortAddress;
     Port->Baud = BaudRate;
     Port->Flags = Flags;
+    Port->Ring = 0;
 
     /* Return success */
     return STATUS_SUCCESS;
