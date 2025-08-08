@@ -4,13 +4,14 @@
  * FILE:            xtldr/i686/memory.c
  * DESCRIPTION:     EFI memory management for i686 target
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ *                  Aiken Harris <harraiken91@gmail.com>
  */
 
 #include <xtos.h>
 
 
 /**
- * Maps the page table for hardware layer addess space.
+ * Allocates and maps the 4MB hardware layer memory pool.
  *
  * @param PageMap
  *        Supplies a pointer to the page mapping structure.
@@ -24,41 +25,23 @@ EFI_STATUS
 XtpMapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
 {
     EFI_PHYSICAL_ADDRESS Address;
-    PHARDWARE_LEGACY_PTE LegacyPdeBase;
-    PHARDWARE_PTE PdeBase;
     EFI_STATUS Status;
 
-    /* Allocate memory */
-    Status = XtLdrProtocol->Memory.AllocatePages(1, &Address);
+    /* Allocate a contiguous 4MB block of physical memory */
+    Status = XtLdrProtocol->Memory.AllocatePages(MM_HARDWARE_POOL_PAGE_COUNT, &Address);
     if(Status != STATUS_EFI_SUCCESS)
     {
-        /* Memory allocation failure, return error */
+        /* Memory allocation failed, return error */
         return Status;
     }
 
-    /* Zero fill allocated memory */
-    RtlZeroMemory((PVOID)Address, EFI_PAGE_SIZE);
-
-    /* Check if PAE is enabled (3-level paging) */
-    if(PageMap->PageMapLevel == 3)
+    /* Map all the memory for the hardware layer */
+    Status = XtLdrProtocol->Memory.MapPage(PageMap, MM_HARDWARE_VA_START, Address, MM_HARDWARE_POOL_PAGE_COUNT);
+    if(Status != STATUS_EFI_SUCCESS)
     {
-        /* Get PDE base address (PAE enabled) */
-        PdeBase = (PHARDWARE_PTE)(((PHARDWARE_PTE)PageMap->PtePointer)[MM_HARDWARE_VA_START >> MM_PPI_SHIFT].PageFrameNumber << MM_PAGE_SHIFT);
-
-        /* Make PDE valid */
-        RtlZeroMemory(&PdeBase[(MM_HARDWARE_VA_START >> MM_PDI_SHIFT) & 0x1FF], sizeof(HARDWARE_PTE));
-        PdeBase[(MM_HARDWARE_VA_START >> MM_PDI_SHIFT) & 0x1FF].PageFrameNumber = Address >> MM_PAGE_SHIFT;
-        PdeBase[(MM_HARDWARE_VA_START >> MM_PDI_SHIFT) & 0x1FF].Valid = 1;
-        PdeBase[(MM_HARDWARE_VA_START >> MM_PDI_SHIFT) & 0x1FF].Writable = 1;
-    }
-    else
-    {
-        /* Make PDE valid (PAE disabled) */
-        LegacyPdeBase = (PHARDWARE_LEGACY_PTE)PageMap->PtePointer;
-        RtlZeroMemory(&LegacyPdeBase[MM_HARDWARE_VA_START >> MM_PDI_LEGACY_SHIFT], sizeof(HARDWARE_LEGACY_PTE));
-        LegacyPdeBase[MM_HARDWARE_VA_START >> MM_PDI_LEGACY_SHIFT].Valid = 1;
-        LegacyPdeBase[MM_HARDWARE_VA_START >> MM_PDI_LEGACY_SHIFT].PageFrameNumber = Address >> MM_PAGE_SHIFT;
-        LegacyPdeBase[MM_HARDWARE_VA_START >> MM_PDI_LEGACY_SHIFT].Writable = 1;
+        /* Memory mapping failed, free memory and return error */
+        XtLdrProtocol->Memory.FreePages(MM_HARDWARE_POOL_PAGE_COUNT, Address);
+        return Status;
     }
 
     /* Return success */
@@ -111,7 +94,7 @@ XtEnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to map memory for hardware layer */
-        XtLdrProtocol->Debug.Print(L"Failed to map memory for hardware leyer (Status code: %zX)\n", Status);
+        XtLdrProtocol->Debug.Print(L"Failed to map memory for hardware layer (Status code: %zX)\n", Status);
         return Status;
     }
 
