@@ -43,9 +43,6 @@
 /* Kernel HAL heap initial start address */
 #define MM_HARDWARE_HEAP_START_ADDRESS             ((PVOID)(((ULONG_PTR)MM_HARDWARE_VA_START) + 1024 * 1024))
 
-/* HAL memory pool page count */
-#define MM_HARDWARE_POOL_PAGE_COUNT                (4194304 / MM_PAGE_SIZE)
-
 /* HAL memory pool virtual address start */
 #define MM_HARDWARE_VA_START                       0xFFC00000
 
