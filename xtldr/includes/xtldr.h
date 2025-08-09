@@ -130,6 +130,11 @@ BlFreeMemoryPool(IN PVOID Memory);
 
 XTCDECL
 BOOLEAN
+BlGetBooleanParameter(IN CONST PWCHAR Parameters,
+                      IN CONST PWCHAR Needle);
+
+XTCDECL
+BOOLEAN
 BlGetConfigBooleanValue(IN CONST PWCHAR ConfigName);
 
 XTCDECL
