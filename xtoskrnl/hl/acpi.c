@@ -139,12 +139,11 @@ XTAPI
 XTSTATUS
 HlpInitializeAcpiCache(VOID)
 {
-    PACPI_DESCRIPTION_HEADER Rsdt;
+    ACPI_DESCRIPTION_HEADER Rsdt;
     XTSTATUS Status;
 
     /* Initialize ACPI cache list */
     RtlInitializeListHead(&HlpAcpiCacheList);
-
     /* Get XSDT/RSDT */
     Status = HlpInitializeAcpiSystemDescriptionTable(&Rsdt);
     if(Status != STATUS_SUCCESS)
@@ -154,7 +153,7 @@ HlpInitializeAcpiCache(VOID)
     }
 
     /* Cache XSDT/RSDT table */
-    HlpCacheAcpiTable(Rsdt);
+    HlpCacheAcpiTable(&Rsdt);
 
     /* Return success */
     return STATUS_SUCCESS;
@@ -172,7 +171,7 @@ HlpInitializeAcpiCache(VOID)
  */
 XTAPI
 XTSTATUS
-HlpInitializeAcpiSystemDescriptionTable(OUT PACPI_DESCRIPTION_HEADER *AcpiTable)
+HlpInitializeAcpiSystemDescriptionTable(OUT PACPI_DESCRIPTION_HEADER AcpiTable)
 {
     PHYSICAL_ADDRESS RsdpAddress, RsdtAddress;
     PSYSTEM_RESOURCE_HEADER ResourceHeader;
@@ -182,7 +181,7 @@ HlpInitializeAcpiSystemDescriptionTable(OUT PACPI_DESCRIPTION_HEADER *AcpiTable)
     XTSTATUS Status;
 
     /* Assume ACPI table not found */
-    *AcpiTable = NULL;
+    AcpiTable = NULL;
 
     /* Get ACPI system resource */
     Status = KeGetSystemResource(SystemResourceAcpi, &ResourceHeader);
@@ -250,7 +249,7 @@ HlpInitializeAcpiSystemDescriptionTable(OUT PACPI_DESCRIPTION_HEADER *AcpiTable)
     }
 
     /* Get ACPI table header and return success */
-    *AcpiTable = &Rsdt->Header;
+    AcpiTable = &Rsdt->Header;
     return STATUS_SUCCESS;
 }
 
