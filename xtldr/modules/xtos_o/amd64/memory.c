@@ -4,10 +4,57 @@
  * FILE:            xtldr/amd64/memory.c
  * DESCRIPTION:     EFI memory management for AMD64 target
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ *                  Aiken Harris <harraiken91@gmail.com>
  */
 
 #include <xtos.h>
 
+
+/**
+ * Determines the appropriate paging level (PML) for the AMD64 architecture.
+ *
+ * @param Parameters
+ *        A pointer to the wide character string containing the kernel boot parameters.
+ *
+ * @return This routine returns the appropriate page map level (5 if LA57 is enabled, 4 otherwise).
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+ULONG
+XtpDeterminePagingLevel(IN CONST PWCHAR Parameters)
+{
+    CPUID_REGISTERS CpuRegisters;
+
+    /* Prepare CPUID registers to query for STD7 features */
+    RtlZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
+    CpuRegisters.Leaf = CPUID_GET_VENDOR_STRING;
+
+    /* Query CPUID */
+    ArCpuId(&CpuRegisters);
+
+    /* Verify if the CPU supports the STD7 feature leaf (0x00000007) */
+    if(CpuRegisters.Eax >= CPUID_GET_STANDARD7_FEATURES)
+    {
+        /* Prepare CPUID registers to query for LA57 support */
+        RtlZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
+        CpuRegisters.Leaf = CPUID_GET_STANDARD7_FEATURES;
+
+        /* Query CPUID */
+        ArCpuId(&CpuRegisters);
+
+        /* Check if eXtended Physical Addressing (XPA) is enabled and if LA57 is supported by the CPU */
+        if((CpuRegisters.Ecx & CPUID_FEATURES_ECX_LA57) &&
+           !(XtLdrProtocol->BootUtil.GetBooleanParameter(Parameters, L"NOXPA")))
+        {
+            /* Enable LA57 (PML5) */
+            return 5;
+        }
+    }
+
+    /* Disable LA57 and use PML4 by default */
+    return 4;
+}
 
 /**
  * Maps the page table for hardware layer addess space.
