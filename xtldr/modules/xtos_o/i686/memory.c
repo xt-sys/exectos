@@ -10,6 +10,41 @@
 
 
 /**
+ * Determines the appropriate paging level (PML) for the i686 architecture.
+ *
+ * @param Parameters
+ *        A pointer to the wide character string containing the kernel boot parameters.
+ *
+ * @return This routine returns the appropriate page map level (3 if PAE is enabled, 2 otherwise).
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+ULONG
+XtpDeterminePagingLevel(IN CONST PWCHAR Parameters)
+{
+    CPUID_REGISTERS CpuRegisters;
+
+    /* Prepare CPUID registers to query for PAE support */
+    RtlZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
+    CpuRegisters.Leaf = CPUID_GET_CPU_FEATURES;
+
+    /* Query CPUID */
+    ArCpuId(&CpuRegisters);
+
+    /* Check if eXtended Physical Addressing (XPA) is enabled and if PAE is supported by the CPU */
+    if((CpuRegisters.Edx & CPUID_FEATURES_EDX_PAE) &&
+       !(XtLdrProtocol->BootUtil.GetBooleanParameter(Parameters, L"NOXPA")))
+    {
+        /* Enable PAE (PML3) */
+        return 3;
+    }
+
+    /* Disable PAE and use PML2 by default */
+    return 2;
+}
+
+/**
  * Maps the page table for hardware layer addess space.
  *
  * @param PageMap
