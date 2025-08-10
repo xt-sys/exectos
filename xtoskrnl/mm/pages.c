@@ -29,7 +29,7 @@ MmFlushTlb(VOID)
     ArClearInterruptFlag();
 
     /* Get CPU features */
-    CpuRegisters.Leaf = CPUID_GET_CPU_FEATURES;
+    CpuRegisters.Leaf = CPUID_GET_STANDARD1_FEATURES;
     ArCpuId(&CpuRegisters);
 
     /* Check if Paging Global Extensions (PGE) is supported */
