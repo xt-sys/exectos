@@ -410,7 +410,7 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
     VirtualAddress = (PVOID)(KSEG0_BASE + KSEG0_KERNEL_BASE);
 
     /* Initialize virtual memory mappings */
-    XtLdrProtocol->Memory.InitializePageMap(&PageMap, 3, Size4K);
+    XtLdrProtocol->Memory.InitializePageMap(&PageMap, XtpDeterminePagingLevel(Parameters->Parameters), Size4K);
 
     Status = XtLdrProtocol->Memory.MapEfiMemory(&PageMap, &VirtualMemoryArea, NULL);
     if(Status != STATUS_EFI_SUCCESS)
@@ -572,7 +572,7 @@ XtpInitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
     LoaderBlock->LoaderInformation.DbgPrint = XtLdrProtocol->Debug.Print;
 
     /* Store page map level */
-    LoaderBlock->LoaderInformation.PageMapLevel = 3;
+    LoaderBlock->LoaderInformation.PageMapLevel = PageMap->PageMapLevel;
 
     /* Attempt to find virtual address of the EFI Runtime Services */
     // Status = XtLdrProtocol->GetVirtualAddress(MemoryMappings, &EfiSystemTable->RuntimeServices->Hdr, &RuntimeServices);
