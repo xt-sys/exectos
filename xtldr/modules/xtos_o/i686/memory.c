@@ -114,23 +114,7 @@ XTCDECL
 EFI_STATUS
 XtEnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
 {
-    CPUID_REGISTERS CpuRegisters;
     EFI_STATUS Status;
-
-    /* Prepare CPUID registers */
-    RtlZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
-    CpuRegisters.Leaf = CPUID_GET_CPU_FEATURES;
-
-    /* Get CPUID */
-    ArCpuId(&CpuRegisters);
-
-    /* Store PAE status from the CPUID results */
-    if(!(CpuRegisters.Edx & CPUID_FEATURES_EDX_PAE))
-    {
-        /* No PAE support */
-        XtLdrProtocol->Debug.Print(L"ERROR: PAE extension not supported by the CPU\n");
-        return STATUS_EFI_UNSUPPORTED;
-    }
 
     /* Build page map */
     Status = XtLdrProtocol->Memory.BuildPageMap(PageMap, 0xC0000000);
@@ -146,7 +130,7 @@ XtEnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to map memory for hardware layer */
-        XtLdrProtocol->Debug.Print(L"Failed to map memory for hardware leyer (Status code: %zX)\n", Status);
+        XtLdrProtocol->Debug.Print(L"Failed to map memory for hardware layer (Status code: %zX)\n", Status);
         return Status;
     }
 
