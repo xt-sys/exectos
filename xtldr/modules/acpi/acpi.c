@@ -185,15 +185,13 @@ XTCDECL
 EFI_STATUS
 AcGetApicBase(OUT PVOID *ApicBase)
 {
-    PCPUID_REGISTERS CpuRegisters = NULL;
+    CPUID_REGISTERS CpuRegisters;
 
-    /* Get CPU features list */
-    CpuRegisters->Leaf = CPUID_GET_CPU_FEATURES;
-    CpuRegisters->SubLeaf = 0;
-    CpuRegisters->Eax = 0;
-    CpuRegisters->Ebx = 0;
-    CpuRegisters->Ecx = 0;
-    CpuRegisters->Edx = 0;
+    /* Prepare CPUID registers to query for APIC support */
+    RtlZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
+    CpuRegisters->Leaf = CPUID_GET_STANDARD1_FEATURES;
+
+    /* Query CPUID */
     ArCpuId(CpuRegisters);
 
     /* Check if APIC present */
