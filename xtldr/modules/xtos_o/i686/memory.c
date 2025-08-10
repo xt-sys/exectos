@@ -27,7 +27,7 @@ XtpDeterminePagingLevel(IN CONST PWCHAR Parameters)
 
     /* Prepare CPUID registers to query for PAE support */
     RtlZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
-    CpuRegisters.Leaf = CPUID_GET_CPU_FEATURES;
+    CpuRegisters.Leaf = CPUID_GET_STANDARD1_FEATURES;
 
     /* Query CPUID */
     ArCpuId(&CpuRegisters);
