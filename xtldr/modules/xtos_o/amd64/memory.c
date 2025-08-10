@@ -212,6 +212,18 @@ XtEnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
         return STATUS_EFI_ABORTED;
     }
 
+    /* Check the configured page map level to set the LA57 state accordingly */
+    if(PageMap->PageMapLevel == 5)
+    {
+        /* Enable Linear Address 57-bit (LA57) extension */
+        XtLdrProtocol->Debug.Print(L"Enabling Linear Address 57-bit (LA57)\n");
+    }
+    else
+    {
+        /* Disable Linear Address 57-bit (LA57) extension */
+        XtLdrProtocol->Debug.Print(L"Disabling Linear Address 57-bit (LA57)\n");
+    }
+
     /* Write PML4 to CR3 */
     ArWriteControlRegister(3, (UINT_PTR)PageMap->PtePointer);
 
