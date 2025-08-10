@@ -50,6 +50,10 @@ LOADER_MEMORY_TYPE
 XtConvertEfiMemoryType(IN EFI_MEMORY_TYPE EfiMemoryType);
 
 XTCDECL
+ULONG
+XtpDeterminePagingLevel(IN CONST PWCHAR Parameters);
+
+XTCDECL
 EFI_STATUS
 XtEnablePaging(IN PXTBL_PAGE_MAPPING PageMap);
 
