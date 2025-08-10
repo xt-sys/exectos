@@ -147,9 +147,9 @@ ArpIdentifyProcessor(VOID)
     *(PULONG)&Prcb->CpuId.VendorName[8] = CpuRegisters.Ecx;
     Prcb->CpuId.VendorName[12] = '\0';
 
-    /* Get CPU features */
+    /* Get CPU standard features */
     RtlZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
-    CpuRegisters.Leaf = CPUID_GET_CPU_FEATURES;
+    CpuRegisters.Leaf = CPUID_GET_STANDARD1_FEATURES;
     ArCpuId(&CpuRegisters);
 
     /* Store CPU signature in processor control block */
