@@ -112,7 +112,7 @@ HlpCheckX2ApicSupport(VOID)
     CPUID_REGISTERS CpuRegisters;
 
     /* Prepare CPUID registers */
-    CpuRegisters.Leaf = CPUID_GET_CPU_FEATURES;
+    CpuRegisters.Leaf = CPUID_GET_STANDARD1_FEATURES;
     CpuRegisters.SubLeaf = 0;
     CpuRegisters.Eax = 0;
     CpuRegisters.Ebx = 0;
