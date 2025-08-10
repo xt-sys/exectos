@@ -189,13 +189,13 @@ AcGetApicBase(OUT PVOID *ApicBase)
 
     /* Prepare CPUID registers to query for APIC support */
     RtlZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
-    CpuRegisters->Leaf = CPUID_GET_STANDARD1_FEATURES;
+    CpuRegisters.Leaf = CPUID_GET_STANDARD1_FEATURES;
 
     /* Query CPUID */
-    ArCpuId(CpuRegisters);
+    ArCpuId(&CpuRegisters);
 
     /* Check if APIC present */
-    if((CpuRegisters->Edx & CPUID_FEATURES_EDX_APIC) == 0)
+    if((CpuRegisters.Edx & CPUID_FEATURES_EDX_APIC) == 0)
     {
         /* APIC is not supported by the CPU */
         return STATUS_EFI_UNSUPPORTED;
