@@ -88,8 +88,17 @@ XtpMapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
     }
     else
     {
-        /* Make PDE valid (PAE disabled) */
+        /* Get PDE base address (PAE disabled) */
         LegacyPdeBase = (PHARDWARE_LEGACY_PTE)PageMap->PtePointer;
+
+        /* Check for a conflicting PDE */
+        if(LegacyPdeBase[MM_HARDWARE_VA_START >> MM_PDI_LEGACY_SHIFT].Valid)
+        {
+            /* PDE already exists and is valid, nothing to do */
+            return STATUS_EFI_SUCCESS;
+        }
+
+        /* Make PDE valid  */
         RtlZeroMemory(&LegacyPdeBase[MM_HARDWARE_VA_START >> MM_PDI_LEGACY_SHIFT], sizeof(HARDWARE_LEGACY_PTE));
         LegacyPdeBase[MM_HARDWARE_VA_START >> MM_PDI_LEGACY_SHIFT].Valid = 1;
         LegacyPdeBase[MM_HARDWARE_VA_START >> MM_PDI_LEGACY_SHIFT].PageFrameNumber = Address >> MM_PAGE_SHIFT;
