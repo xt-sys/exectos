@@ -96,7 +96,7 @@ HlpInitializeAcpiCache(VOID);
 
 XTAPI
 XTSTATUS
-HlpInitializeAcpiSystemDescriptionTable(OUT PACPI_DESCRIPTION_HEADER AcpiTable);
+HlpInitializeAcpiSystemDescriptionTable(OUT PACPI_DESCRIPTION_HEADER *AcpiTable);
 
 XTAPI
 XTSTATUS
