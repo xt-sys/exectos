@@ -20,7 +20,7 @@ XTCDECL
 VOID
 ArClearInterruptFlag(VOID)
 {
-    asm volatile("cli");
+    __asm__ volatile("cli");
 }
 
 /**
@@ -40,12 +40,12 @@ ArCpuId(IN OUT PCPUID_REGISTERS Registers)
     UINT32 MaxLeaf;
 
     /* Get highest function ID available */
-    asm volatile("cpuid"
-                 : "=a" (MaxLeaf)
-                 : "a" (Registers->Leaf & 0x80000000)
-                 : "rbx",
-                   "rcx",
-                   "rdx");
+    __asm__ volatile("cpuid"
+                     : "=a" (MaxLeaf)
+                     : "a" (Registers->Leaf & 0x80000000)
+                     : "rbx",
+                       "rcx",
+                       "rdx");
 
     /* Check if CPU supports this command */
     if(Registers->Leaf > MaxLeaf)
@@ -55,13 +55,13 @@ ArCpuId(IN OUT PCPUID_REGISTERS Registers)
     }
 
     /* Execute CPUID function */
-    asm volatile("cpuid"
-                 : "=a" (Registers->Eax),
-                   "=b" (Registers->Ebx),
-                   "=c" (Registers->Ecx),
-                   "=d" (Registers->Edx)
-                 : "a" (Registers->Leaf),
-                   "c" (Registers->SubLeaf));
+    __asm__ volatile("cpuid"
+                     : "=a" (Registers->Eax),
+                       "=b" (Registers->Ebx),
+                       "=c" (Registers->Ecx),
+                       "=d" (Registers->Edx)
+                     : "a" (Registers->Leaf),
+                       "c" (Registers->SubLeaf));
 
     /* Return TRUE */
     return TRUE;
@@ -96,11 +96,11 @@ ArGetCpuFlags(VOID)
     ULONG_PTR Flags;
 
     /* Get EFLAGS register */
-    asm volatile("pushf\n"
-                 "pop %0\n"
-                 : "=rm" (Flags)
-                 :
-                 : "memory");
+    __asm__ volatile("pushf\n"
+                     "pop %0\n"
+                     : "=rm" (Flags)
+                     :
+                     : "memory");
 
     /* Return flags */
     return Flags;
@@ -119,11 +119,11 @@ ULONG_PTR
 ArGetStackPointer(VOID)
 {
     /* Get current stack pointer */
-    asm volatile("mov %%esp, %%eax\n"
-                 "ret\n"
-                  :
-                  :
-                  :);
+    __asm__ volatile("mov %%esp, %%eax\n"
+                     "ret\n"
+                      :
+                      :
+                      :);
 }
 
 /**
@@ -137,7 +137,7 @@ XTCDECL
 VOID
 ArHalt(VOID)
 {
-    asm volatile("hlt");
+    __asm__ volatile("hlt");
 }
 
 /**
@@ -174,10 +174,10 @@ XTCDECL
 VOID
 ArInvalidateTlbEntry(PVOID Address)
 {
-    asm volatile("invlpg (%0)"
-                 :
-                 : "b" (Address)
-                 : "memory");
+    __asm__ volatile("invlpg (%0)"
+                     :
+                     : "b" (Address)
+                     : "memory");
 }
 
 /**
@@ -194,10 +194,10 @@ XTCDECL
 VOID
 ArLoadGlobalDescriptorTable(IN PVOID Source)
 {
-    asm volatile("lgdt %0"
-                 :
-                 : "m" (*(PSHORT)Source)
-                 : "memory");
+    __asm__ volatile("lgdt %0"
+                     :
+                     : "m" (*(PSHORT)Source)
+                     : "memory");
 }
 
 /**
@@ -214,10 +214,10 @@ XTCDECL
 VOID
 ArLoadInterruptDescriptorTable(IN PVOID Source)
 {
-    asm volatile("lidt %0"
-                 :
-                 : "m" (*(PSHORT)Source)
-                 : "memory");
+    __asm__ volatile("lidt %0"
+                     :
+                     : "m" (*(PSHORT)Source)
+                     : "memory");
 }
 
 /**
@@ -234,9 +234,9 @@ XTCDECL
 VOID
 ArLoadLocalDescriptorTable(IN USHORT Source)
 {
-    asm volatile("lldtw %0"
-                 :
-                 : "g" (Source));
+    __asm__ volatile("lldtw %0"
+                     :
+                     : "g" (Source));
 }
 
 /**
@@ -261,45 +261,45 @@ ArLoadSegment(IN USHORT Segment,
     {
         case SEGMENT_CS:
             /* Load CS Segment */
-            asm volatile("mov %0, %%eax\n"
-                         "push %%eax\n"
-                         "lea label, %%eax\n"
-                         "push %%eax\n"
-                         "lret\n"
-                         "label:"
-                         :
-                         : "ri" (Source)
-                         : "eax");
+            __asm__ volatile("mov %0, %%eax\n"
+                             "push %%eax\n"
+                             "lea label, %%eax\n"
+                             "push %%eax\n"
+                             "lret\n"
+                             "label:"
+                             :
+                             : "ri" (Source)
+                             : "eax");
             break;
         case SEGMENT_DS:
             /* Load DS Segment */
-            asm volatile("movl %0, %%ds"
-                         :
-                         : "r" (Source));
+            __asm__ volatile("movl %0, %%ds"
+                             :
+                             : "r" (Source));
             break;
         case SEGMENT_ES:
             /* Load ES Segment */
-            asm volatile("movl %0, %%es"
-                         :
-                         : "r" (Source));
+            __asm__ volatile("movl %0, %%es"
+                             :
+                             : "r" (Source));
             break;
         case SEGMENT_FS:
             /* Load FS Segment */
-            asm volatile("movl %0, %%fs"
-                         :
-                         : "r" (Source));
+            __asm__ volatile("movl %0, %%fs"
+                             :
+                             : "r" (Source));
             break;
         case SEGMENT_GS:
             /* Load GS Segment */
-            asm volatile("movl %0, %%gs"
-                         :
-                         : "r" (Source));
+            __asm__ volatile("movl %0, %%gs"
+                             :
+                             : "r" (Source));
             break;
         case SEGMENT_SS:
             /* Load SS Segment */
-            asm volatile("movl %0, %%ss"
-                         :
-                         : "r" (Source));
+            __asm__ volatile("movl %0, %%ss"
+                             :
+                             : "r" (Source));
             break;
     }
 }
@@ -318,9 +318,9 @@ XTCDECL
 VOID
 ArLoadTaskRegister(USHORT Source)
 {
-    asm volatile("ltr %0"
-                 :
-                 : "rm" (Source));
+    __asm__ volatile("ltr %0"
+                     :
+                     : "rm" (Source));
 }
 
 /**
@@ -335,10 +335,10 @@ VOID
 ArMemoryBarrier(VOID)
 {
    LONG Barrier;
-   asm volatile("xchg %%eax, %0"
-                :
-                : "m" (Barrier)
-                : "%eax");
+   __asm__ volatile("xchg %%eax, %0"
+                    :
+                    : "m" (Barrier)
+                    : "%eax");
 }
 
 /**
@@ -362,31 +362,31 @@ ArReadControlRegister(IN USHORT ControlRegister)
     {
         case 0:
             /* Read value from CR0 */
-            asm volatile("mov %%cr0, %0"
-                         : "=r" (Value)
-                         :
-                         : "memory");
+            __asm__ volatile("mov %%cr0, %0"
+                             : "=r" (Value)
+                             :
+                             : "memory");
             break;
         case 2:
             /* Read value from CR2 */
-            asm volatile("mov %%cr2, %0"
-                         : "=r" (Value)
-                         :
-                         : "memory");
+            __asm__ volatile("mov %%cr2, %0"
+                             : "=r" (Value)
+                             :
+                             : "memory");
             break;
         case 3:
             /* Read value from CR3 */
-            asm volatile("mov %%cr3, %0"
-                         : "=r" (Value)
-                         :
-                         : "memory");
+            __asm__ volatile("mov %%cr3, %0"
+                             : "=r" (Value)
+                             :
+                             : "memory");
             break;
         case 4:
             /* Read value from CR4 */
-            asm volatile("mov %%cr4, %0"
-                         : "=r" (Value)
-                         :
-                         : "memory");
+            __asm__ volatile("mov %%cr4, %0"
+                             : "=r" (Value)
+                             :
+                             : "memory");
             break;
         default:
             /* Invalid control register set */
@@ -419,43 +419,43 @@ ArReadDebugRegister(IN USHORT DebugRegister)
     {
         case 0:
             /* Read value from DR0 */
-            asm volatile("mov %%dr0, %0"
-                         : "=r" (Value));
+            __asm__ volatile("mov %%dr0, %0"
+                             : "=r" (Value));
             break;
         case 1:
             /* Read value from DR1 */
-            asm volatile("mov %%dr1, %0"
-                         : "=r" (Value));
+            __asm__ volatile("mov %%dr1, %0"
+                             : "=r" (Value));
             break;
         case 2:
             /* Read value from DR2 */
-            asm volatile("mov %%dr2, %0"
-                         : "=r" (Value));
+            __asm__ volatile("mov %%dr2, %0"
+                             : "=r" (Value));
             break;
         case 3:
             /* Read value from DR3 */
-            asm volatile("mov %%dr3, %0"
-                         : "=r" (Value));
+            __asm__ volatile("mov %%dr3, %0"
+                             : "=r" (Value));
             break;
         case 4:
             /* Read value from DR4 */
-            asm volatile("mov %%dr4, %0"
-                         : "=r" (Value));
+            __asm__ volatile("mov %%dr4, %0"
+                             : "=r" (Value));
             break;
         case 5:
             /* Read value from DR5 */
-            asm volatile("mov %%dr5, %0"
-                         : "=r" (Value));
+            __asm__ volatile("mov %%dr5, %0"
+                             : "=r" (Value));
             break;
         case 6:
             /* Read value from DR6 */
-            asm volatile("mov %%dr6, %0"
-                         : "=r" (Value));
+            __asm__ volatile("mov %%dr6, %0"
+                             : "=r" (Value));
             break;
         case 7:
             /* Read value from DR7 */
-            asm volatile("mov %%dr7, %0"
-                         : "=r" (Value));
+            __asm__ volatile("mov %%dr7, %0"
+                             : "=r" (Value));
             break;
         default:
             /* Invalid debug register set */
@@ -482,9 +482,9 @@ ULONG
 ArReadFSDualWord(ULONG Offset)
 {
     ULONG Value;
-    asm volatile("movl %%fs:%a[Offset], %k[Value]"
-                 : [Value] "=r" (Value)
-                 : [Offset] "ir" (Offset));
+    __asm__ volatile("movl %%fs:%a[Offset], %k[Value]"
+                     : [Value] "=r" (Value)
+                     : [Offset] "ir" (Offset));
     return Value;
 }
 
@@ -504,9 +504,9 @@ ArReadModelSpecificRegister(IN ULONG Register)
 {
     ULONGLONG Value;
 
-    asm volatile("rdmsr"
-                 : "=A" (Value)
-                 : "c" (Register));
+    __asm__ volatile("rdmsr"
+                     : "=A" (Value)
+                     : "c" (Register));
     return Value;
 }
 
@@ -537,8 +537,8 @@ ArReadTimeStampCounter(VOID)
 {
     ULONGLONG Value;
 
-    asm volatile("rdtsc"
-                 : "=A" (Value));
+    __asm__ volatile("rdtsc"
+                     : "=A" (Value));
 
     return Value;
 }
@@ -554,10 +554,10 @@ XTCDECL
 VOID
 ArReadWriteBarrier(VOID)
 {
-    asm volatile(""
-                 :
-                 :
-                 : "memory");
+    __asm__ volatile(""
+                     :
+                     :
+                     : "memory");
 }
 
 /**
@@ -571,7 +571,7 @@ XTCDECL
 VOID
 ArSetInterruptFlag(VOID)
 {
-    asm volatile("sti");
+    __asm__ volatile("sti");
 }
 
 /**
@@ -588,10 +588,10 @@ XTCDECL
 VOID
 ArStoreGlobalDescriptorTable(OUT PVOID Destination)
 {
-    asm volatile("sgdt %0"
-                 : "=m" (*(PSHORT)Destination)
-                 :
-                 : "memory");
+    __asm__ volatile("sgdt %0"
+                     : "=m" (*(PSHORT)Destination)
+                     :
+                     : "memory");
 }
 
 /**
@@ -608,10 +608,10 @@ XTCDECL
 VOID
 ArStoreInterruptDescriptorTable(OUT PVOID Destination)
 {
-    asm volatile("sidt %0"
-                 : "=m" (*(PSHORT)Destination)
-                 :
-                 : "memory");
+    __asm__ volatile("sidt %0"
+                     : "=m" (*(PSHORT)Destination)
+                     :
+                     : "memory");
 }
 
 /**
@@ -628,10 +628,10 @@ XTCDECL
 VOID
 ArStoreLocalDescriptorTable(OUT PVOID Destination)
 {
-    asm volatile("sldt %0"
-                 : "=m" (*(PSHORT)Destination)
-                 :
-                 : "memory");
+    __asm__ volatile("sldt %0"
+                     : "=m" (*(PSHORT)Destination)
+                     :
+                     : "memory");
 }
 
 /**
@@ -655,28 +655,28 @@ ArStoreSegment(IN USHORT Segment,
     switch(Segment)
     {
         case SEGMENT_CS:
-            asm volatile("movl %%cs, %0"
-                         : "=r" (*(PUINT)Destination));
+            __asm__ volatile("movl %%cs, %0"
+                             : "=r" (*(PUINT)Destination));
             break;
         case SEGMENT_DS:
-            asm volatile("movl %%ds, %0"
-                         : "=r" (*(PUINT)Destination));
+            __asm__ volatile("movl %%ds, %0"
+                             : "=r" (*(PUINT)Destination));
             break;
         case SEGMENT_ES:
-            asm volatile("movl %%es, %0"
-                         : "=r" (*(PUINT)Destination));
+            __asm__ volatile("movl %%es, %0"
+                             : "=r" (*(PUINT)Destination));
             break;
         case SEGMENT_FS:
-            asm volatile("movl %%fs, %0"
-                         : "=r" (*(PUINT)Destination));
+            __asm__ volatile("movl %%fs, %0"
+                             : "=r" (*(PUINT)Destination));
             break;
         case SEGMENT_GS:
-            asm volatile("movl %%gs, %0"
-                         : "=r" (*(PUINT)Destination));
+            __asm__ volatile("movl %%gs, %0"
+                             : "=r" (*(PUINT)Destination));
             break;
         case SEGMENT_SS:
-            asm volatile("movl %%ss, %0"
-                         : "=r" (*(PUINT)Destination));
+            __asm__ volatile("movl %%ss, %0"
+                             : "=r" (*(PUINT)Destination));
             break;
         default:
             Destination = NULL;
@@ -698,10 +698,10 @@ XTCDECL
 VOID
 ArStoreTaskRegister(OUT PVOID Destination)
 {
-    asm volatile("str %0"
-                 : "=m" (*(PULONG)Destination)
-                 :
-                 : "memory");
+    __asm__ volatile("str %0"
+                     : "=m" (*(PULONG)Destination)
+                     :
+                     : "memory");
 }
 
 /**
@@ -727,31 +727,31 @@ ArWriteControlRegister(IN USHORT ControlRegister,
     {
         case 0:
             /* Write value to CR0 */
-            asm volatile("mov %0, %%cr0"
-                         :
-                         : "r" (Value)
-                         : "memory");
+            __asm__ volatile("mov %0, %%cr0"
+                             :
+                             : "r" (Value)
+                             : "memory");
             break;
         case 2:
             /* Write value to CR2 */
-            asm volatile("mov %0, %%cr2"
-                         :
-                         : "r" (Value)
-                         : "memory");
+            __asm__ volatile("mov %0, %%cr2"
+                             :
+                             : "r" (Value)
+                             : "memory");
             break;
         case 3:
             /* Write value to CR3 */
-            asm volatile("mov %0, %%cr3"
-                         :
-                         : "r" (Value)
-                         : "memory");
+            __asm__ volatile("mov %0, %%cr3"
+                             :
+                             : "r" (Value)
+                             : "memory");
             break;
         case 4:
             /* Write value to CR4 */
-            asm volatile("mov %0, %%cr4"
-                         :
-                         : "r" (Value)
-                         : "memory");
+            __asm__ volatile("mov %0, %%cr4"
+                             :
+                             : "r" (Value)
+                             : "memory");
             break;
     }
 }
@@ -779,52 +779,52 @@ ArWriteDebugRegister(IN USHORT DebugRegister,
     {
         case 0:
             /* Write value to DR0 */
-            asm volatile("mov %0, %%dr0"
-                         :
-                         : "r" (Value)
-                         : "memory");
+            __asm__ volatile("mov %0, %%dr0"
+                             :
+                             : "r" (Value)
+                             : "memory");
         case 1:
             /* Write value to DR1 */
-            asm volatile("mov %0, %%dr1"
-                         :
-                         : "r" (Value)
-                         : "memory");
+            __asm__ volatile("mov %0, %%dr1"
+                             :
+                             : "r" (Value)
+                             : "memory");
         case 2:
             /* Write value to DR2 */
-            asm volatile("mov %0, %%dr2"
-                         :
-                         : "r" (Value)
-                         : "memory");
+            __asm__ volatile("mov %0, %%dr2"
+                             :
+                             : "r" (Value)
+                             : "memory");
         case 3:
             /* Write value to DR3 */
-            asm volatile("mov %0, %%dr3"
-                         :
-                         : "r" (Value)
-                         : "memory");
+            __asm__ volatile("mov %0, %%dr3"
+                             :
+                             : "r" (Value)
+                             : "memory");
         case 4:
             /* Write value to DR4 */
-            asm volatile("mov %0, %%dr4"
-                         :
-                         : "r" (Value)
-                         : "memory");
+            __asm__ volatile("mov %0, %%dr4"
+                             :
+                             : "r" (Value)
+                             : "memory");
         case 5:
             /* Write value to DR5 */
-            asm volatile("mov %0, %%dr5"
-                         :
-                         : "r" (Value)
-                         : "memory");
+            __asm__ volatile("mov %0, %%dr5"
+                             :
+                             : "r" (Value)
+                             : "memory");
         case 6:
             /* Write value to DR6 */
-            asm volatile("mov %0, %%dr6"
-                         :
-                         : "r" (Value)
-                         : "memory");
+            __asm__ volatile("mov %0, %%dr6"
+                             :
+                             : "r" (Value)
+                             : "memory");
         case 7:
             /* Write value to DR7 */
-            asm volatile("mov %0, %%dr7"
-                         :
-                         : "r" (Value)
-                         : "memory");
+            __asm__ volatile("mov %0, %%dr7"
+                             :
+                             : "r" (Value)
+                             : "memory");
     }
 }
 
@@ -842,10 +842,10 @@ XTCDECL
 VOID
 ArWriteEflagsRegister(IN UINT_PTR Value)
 {
-    asm volatile("push %0\n"
-                 "popf"
-                 :
-                 : "rim" (Value));
+    __asm__ volatile("push %0\n"
+                     "popf"
+                     :
+                     : "rim" (Value));
 }
 
 /**
@@ -866,10 +866,10 @@ VOID
 ArWriteModelSpecificRegister(IN ULONG Register,
                              IN ULONGLONG Value)
 {
-    asm volatile("wrmsr"
-                 :
-                 : "c" (Register),
-                   "A" (Value));
+    __asm__ volatile("wrmsr"
+                     :
+                     : "c" (Register),
+                       "A" (Value));
 }
 
 /**
@@ -883,8 +883,8 @@ XTCDECL
 VOID
 ArYieldProcessor(VOID)
 {
-    asm volatile("pause"
-                 :
-                 :
-                 : "memory");
+    __asm__ volatile("pause"
+                     :
+                     :
+                     : "memory");
 }

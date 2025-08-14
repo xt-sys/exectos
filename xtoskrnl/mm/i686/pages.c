@@ -27,12 +27,12 @@ VOID
 MmZeroPages(IN PVOID Address,
             IN ULONG Size)
 {
-    asm volatile("xor %%eax, %%eax\n"
-                 "rep stosb"
-                 : "=D"(Address),
-                   "=c"(Size)
-                 : "0"(Address),
-                   "1"(Size),
-                   "a"(0)
-                 : "memory");
+    __asm__ volatile("xor %%eax, %%eax\n"
+                     "rep stosb"
+                     : "=D"(Address),
+                       "=c"(Size)
+                     : "0"(Address),
+                       "1"(Size),
+                       "a"(0)
+                     : "memory");
 }
