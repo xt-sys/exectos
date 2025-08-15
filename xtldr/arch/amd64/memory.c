@@ -167,7 +167,7 @@ BlMapPage(IN PXTBL_PAGE_MAPPING PageMap,
     while(NumberOfPages > 0)
     {
         /* Calculate the indices in the various Page Tables from the virtual address */
-        Pml5Entry = (VirtualAddress & ((ULONGLONG)0x1FF << MM_LA57_SHIFT)) >> MM_LA57_SHIFT;
+        Pml5Entry = (VirtualAddress & ((ULONGLONG)0x1FF << MM_P5I_SHIFT)) >> MM_P5I_SHIFT;
         Pml4Entry = (VirtualAddress & ((ULONGLONG)0x1FF << MM_PXI_SHIFT)) >> MM_PXI_SHIFT;
         Pml3Entry = (VirtualAddress & ((ULONGLONG)0x1FF << MM_PPI_SHIFT)) >> MM_PPI_SHIFT;
         Pml2Entry = (VirtualAddress & ((ULONGLONG)0x1FF << MM_PDI_SHIFT)) >> MM_PDI_SHIFT;
