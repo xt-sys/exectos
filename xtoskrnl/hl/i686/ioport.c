@@ -24,9 +24,9 @@ UCHAR
 HlIoPortInByte(IN USHORT Port)
 {
     UCHAR Value;
-    asm volatile("inb %1, %0"
-                 : "=a" (Value)
-                 : "Nd" (Port));
+    __asm__ volatile("inb %1, %0"
+                     : "=a" (Value)
+                     : "Nd" (Port));
     return Value;
 }
 
@@ -45,9 +45,9 @@ ULONG
 HlIoPortInLong(IN USHORT Port)
 {
     ULONG Value;
-    asm volatile("inl %1, %0"
-                 : "=a" (Value)
-                 : "Nd" (Port));
+    __asm__ volatile("inl %1, %0"
+                     : "=a" (Value)
+                     : "Nd" (Port));
     return Value;
 }
 
@@ -66,9 +66,9 @@ USHORT
 HlIoPortInShort(IN USHORT Port)
 {
     USHORT Value;
-    asm volatile("inw %1, %0"
-                 : "=a" (Value)
-                 : "Nd" (Port));
+    __asm__ volatile("inw %1, %0"
+                     : "=a" (Value)
+                     : "Nd" (Port));
     return Value;
 }
 
@@ -90,10 +90,10 @@ VOID
 HlIoPortOutByte(IN USHORT Port,
                 IN UCHAR Value)
 {
-    asm volatile("outb %0, %1"
-                 :
-                 : "a" (Value),
-                   "Nd" (Port));
+    __asm__ volatile("outb %0, %1"
+                     :
+                     : "a" (Value),
+                       "Nd" (Port));
 }
 
 /**
@@ -114,10 +114,10 @@ VOID
 HlIoPortOutLong(IN USHORT Port,
                 IN ULONG Value)
 {
-    asm volatile("outl %0, %1"
-                 :
-                 : "a" (Value),
-                   "Nd" (Port));
+    __asm__ volatile("outl %0, %1"
+                     :
+                     : "a" (Value),
+                       "Nd" (Port));
 }
 
 /**
@@ -138,8 +138,8 @@ VOID
 HlIoPortOutShort(IN USHORT Port,
                  IN USHORT Value)
 {
-    asm volatile("outw %0, %1"
-                 :
-                 : "a" (Value),
-                   "Nd" (Port));
+    __asm__ volatile("outw %0, %1"
+                     :
+                     : "a" (Value),
+                       "Nd" (Port));
 }

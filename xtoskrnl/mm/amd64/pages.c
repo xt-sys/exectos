@@ -27,16 +27,16 @@ VOID
 MmZeroPages(IN PVOID Address,
             IN ULONG Size)
 {
-    asm volatile("xor %%rax, %%rax\n"
-                 "mov %0, %%rdi\n"
-                 "mov %1, %%ecx\n"
-                 "shr $3, %%ecx\n"
-                 "rep stosq\n"
-                 :
-                 : "m" (Address),
-                   "m" (Size)
-                 : "rax",
-                   "rdi",
-                   "ecx",
-                   "memory");
+    __asm__ volatile("xor %%rax, %%rax\n"
+                     "mov %0, %%rdi\n"
+                     "mov %1, %%ecx\n"
+                     "shr $3, %%ecx\n"
+                     "rep stosq\n"
+                     :
+                     : "m" (Address),
+                       "m" (Size)
+                     : "rax",
+                       "rdi",
+                       "ecx",
+                       "memory");
 }

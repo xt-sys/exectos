@@ -122,13 +122,13 @@ VOID
 KepSwitchBootStack(IN ULONG_PTR Stack)
 {
     /* Discard old stack frame, switch stack and jump to KepStartKernel() */
-    asm volatile("mov %0, %%rdx\n"
-                 "xor %%rbp, %%rbp\n"
-                 "mov %%rdx, %%rsp\n"
-                 "sub %1, %%rsp\n"
-                 "jmp KepStartKernel\n"
-                 :
-                 : "m" (Stack),
-                   "i" (FLOATING_SAVE_AREA_SIZE | KEXCEPTION_FRAME_SIZE | KSWITCH_FRAME_SIZE | KRETURN_ADDRESS_SIZE),
-                   "p" (KepStartKernel));
+    __asm__ volatile("mov %0, %%rdx\n"
+                     "xor %%rbp, %%rbp\n"
+                     "mov %%rdx, %%rsp\n"
+                     "sub %1, %%rsp\n"
+                     "jmp KepStartKernel\n"
+                     :
+                     : "m" (Stack),
+                       "i" (FLOATING_SAVE_AREA_SIZE | KEXCEPTION_FRAME_SIZE | KSWITCH_FRAME_SIZE | KRETURN_ADDRESS_SIZE),
+                       "p" (KepStartKernel));
 }
