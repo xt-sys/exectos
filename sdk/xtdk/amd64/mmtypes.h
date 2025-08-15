@@ -18,11 +18,18 @@
 #define MM_PAGE_SHIFT                              12L
 #define MM_PAGE_SIZE                               4096
 
-/* Page directory and page base addresses */
-#define MM_PTE_BASE                                0xFFFFF68000000000UI64
-#define MM_PDE_BASE                                0xFFFFF6FB40000000UI64
-#define MM_PPE_BASE                                0xFFFFF6FB7DA00000UI64
-#define MM_PXE_BASE                                0xFFFFF6FB7DBED000UI64
+/* Page directory and page base addresses for 4-level paging */
+#define MM_PTE_BASE                                0xFFFFF68000000000ULL
+#define MM_PDE_BASE                                0xFFFFF6FB40000000ULL
+#define MM_PPE_BASE                                0xFFFFF6FB7DA00000ULL
+#define MM_PXE_BASE                                0xFFFFF6FB7DBED000ULL
+
+/* Page directory and page base addresses for 5-level paging */
+#define MM_PTE_LA57_BASE                           0xFFFFF68000000000ULL
+#define MM_PDE_LA57_BASE                           0xFFFFF78000000000ULL
+#define MM_PPE_LA57_BASE                           0xFFFFF78800000000ULL
+#define MM_PXE_LA57_BASE                           0xFFFFF78840000000ULL
+#define MM_P5E_LA57_BASE                           0xFFFFF78840200000ULL
 
 /* PTE shift values */
 #define MM_PTE_SHIFT                               3
@@ -54,7 +61,7 @@
 #define MM_HARDWARE_VA_START                       0xFFFFFFFFFFC00000ULL
 
 /* Maximum physical address used by HAL allocations */
-#define MM_MAXIMUM_PHYSICAL_ADDRESS                0x00000000FFFFFFFF
+#define MM_MAXIMUM_PHYSICAL_ADDRESS                0x00000000FFFFFFFFULL
 
 /* Page size enumeration list */
 typedef enum _PAGE_SIZE

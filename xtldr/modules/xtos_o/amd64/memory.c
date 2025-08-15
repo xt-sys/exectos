@@ -185,7 +185,7 @@ XtEnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
     EFI_STATUS Status;
 
     /* Build page map */
-    Status = XtLdrProtocol->Memory.BuildPageMap(PageMap, 0xFFFFF6FB7DBED000);
+    Status = XtLdrProtocol->Memory.BuildPageMap(PageMap, (PageMap->PageMapLevel > 4) ? MM_P5E_LA57_BASE : MM_PXE_BASE);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to build page map */
