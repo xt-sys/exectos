@@ -23,6 +23,10 @@ MmZeroPages(IN PVOID Address,
             IN ULONG Size);
 
 XTAPI
+VOID
+MmpClearPte(PHARDWARE_PTE PtePointer);
+
+XTAPI
 BOOLEAN
 MmpGetExtendedPhysicalAddressingStatus(VOID);
 
@@ -41,5 +45,37 @@ MmpGetPteAddress(PVOID Address);
 XTAPI
 VOID
 MmpInitializeArchitecture(VOID);
+
+XTAPI
+BOOLEAN
+MmpPml2PteValid(PHARDWARE_PTE PtePointer);
+
+XTAPI
+VOID
+MmpSetPml2Pte(PHARDWARE_PTE PtePointer,
+              PFN_NUMBER PageFrameNumber,
+              BOOLEAN Writable);
+
+XTAPI
+VOID
+MmpSetPml2PteCaching(PHARDWARE_PTE PtePointer,
+                     BOOLEAN CacheDisable,
+                     BOOLEAN WriteThrough);
+
+XTAPI
+BOOLEAN
+MmpPml3PteValid(PHARDWARE_PTE PtePointer);
+
+XTAPI
+VOID
+MmpSetPml3Pte(PHARDWARE_PTE PtePointer,
+              PFN_NUMBER PageFrameNumber,
+              BOOLEAN Writable);
+
+XTAPI
+VOID
+MmpSetPml3PteCaching(PHARDWARE_PTE PtePointer,
+                     BOOLEAN CacheDisable,
+                     BOOLEAN WriteThrough);
 
 #endif /* __XTOSKRNL_I686_MMI_H */
