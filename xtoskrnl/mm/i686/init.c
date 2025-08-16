@@ -4,6 +4,7 @@
  * FILE:            xtoskrnl/mm/i686/init.c
  * DESCRIPTION:     Architecture specific Memory Manager initialization routines
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ *                  Aiken Harris <harraiken91@gmail.com>
  */
 
 #include <xtos.h>
@@ -23,6 +24,9 @@ MmInitializePageMapSupport(VOID)
     /* Check if XPA is enabled */
     if(MmpGetExtendedPhysicalAddressingStatus())
     {
+        /* XPA enabled, use modern PAE paging (PML3) */
+        MmpPageMapRoutines = &MmpPml3Routines;
+
         /* Set PML3 page map information */
         MmpPageMapInfo.Xpa = TRUE;
 
@@ -36,6 +40,9 @@ MmInitializePageMapSupport(VOID)
     }
     else
     {
+        /* XPA disabled, use legacy i386 paging (PML2) */
+        MmpPageMapRoutines = &MmpPml2Routines;
+
         /* Set PML2 page map information */
         MmpPageMapInfo.Xpa = FALSE;
 
