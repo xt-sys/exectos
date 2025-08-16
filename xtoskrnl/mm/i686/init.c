@@ -20,7 +20,33 @@ XTAPI
 VOID
 MmInitializePageMapSupport(VOID)
 {
-    UNIMPLEMENTED;
+    /* Check if XPA is enabled */
+    if(MmpGetExtendedPhysicalAddressingStatus())
+    {
+        /* Set PML3 page map information */
+        MmpPageMapInfo.Xpa = TRUE;
+
+        /* Set PML3 base addresses */
+        MmpPageMapInfo.PteBase = MM_PTE_BASE;
+        MmpPageMapInfo.PdeBase = MM_PDE_BASE;
+
+        /* Set PML3 shift values */
+        MmpPageMapInfo.PdiShift = MM_PDI_SHIFT;
+        MmpPageMapInfo.PteShift = MM_PTE_SHIFT;
+    }
+    else
+    {
+        /* Set PML2 page map information */
+        MmpPageMapInfo.Xpa = FALSE;
+
+        /* Set PML2 base addresses */
+        MmpPageMapInfo.PteBase = MM_PTE_BASE;
+        MmpPageMapInfo.PdeBase = MM_PDE_LEGACY_BASE;
+
+        /* Set PML2 shift values */
+        MmpPageMapInfo.PdiShift = MM_PDI_LEGACY_SHIFT;
+        MmpPageMapInfo.PteShift = MM_PTE_LEGACY_SHIFT;
+    }
 }
 
 /**
