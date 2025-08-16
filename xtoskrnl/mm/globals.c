@@ -36,5 +36,8 @@ PVOID MmpHardwareHeapStart = MM_HARDWARE_HEAP_START_ADDRESS;
 /* Information about the current page map */
 MMPAGEMAP_INFO MmpPageMapInfo;
 
+/* Pointers to page map routines for the current paging mode */
+PCMMPAGEMAP_ROUTINES MmpPageMapRoutines;
+
 /* Number of used hardware allocation descriptors */
 ULONG MmpUsedHardwareAllocationDescriptors = 0;

@@ -60,6 +60,7 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/mm/init.c
     ${XTOSKRNL_SOURCE_DIR}/mm/kpools.c
     ${XTOSKRNL_SOURCE_DIR}/mm/pages.c
+    ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/globals.c
     ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/init.c
     ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/pages.c
     ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/pmap.c

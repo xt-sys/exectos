@@ -87,6 +87,9 @@ EXTERN PVOID MmpHardwareHeapStart;
 /* Information about the current page map */
 EXTERN MMPAGEMAP_INFO MmpPageMapInfo;
 
+/* Pointers to page map routines for the current paging mode */
+EXTERN PCMMPAGEMAP_ROUTINES MmpPageMapRoutines;
+
 /* Number of used hardware allocation descriptors */
 EXTERN ULONG MmpUsedHardwareAllocationDescriptors;
 

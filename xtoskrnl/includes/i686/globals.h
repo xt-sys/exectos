@@ -34,4 +34,10 @@ EXTERN UCHAR ArKernelBootStack[KERNEL_STACK_SIZE];
 /* Kernel own fault stack */
 EXTERN UCHAR ArKernelFaultStack[KERNEL_STACK_SIZE];
 
+/* Page mapping routines for systems using 2-level paging (PML2) */
+EXTERN CMMPAGEMAP_ROUTINES MmpPml2Routines;
+
+/* Page mapping routines for systems using 3-level paging (PML3) */
+EXTERN CMMPAGEMAP_ROUTINES MmpPml3Routines;
+
 #endif /* __XTOSKRNL_I686_GLOBALS_H */
