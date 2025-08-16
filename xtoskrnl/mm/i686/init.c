@@ -50,48 +50,6 @@ MmInitializePageMapSupport(VOID)
 }
 
 /**
- * Gets the address of the PDE (Page Directory Entry), that maps given address.
- *
- * @param Address
- *        Specifies the address to find the PDE for.
- *
- * @return This routine returns the address of the PDE.
- *
- * @since XT 1.0
- */
-XTAPI
-PMMPTE
-MmpGetPdeAddress(PVOID Address)
-{
-    ULONG Offset;
-
-    /* Calculate offset and return PTE address */
-    Offset = ((((ULONG)(Address)) >> MM_PDI_SHIFT) << MM_PTE_SHIFT);
-    return (PMMPTE)(MM_PDE_BASE + Offset);
-}
-
-/**
- * Gets the address of the PTE (Page Table Entry), that maps given address.
- *
- * @param Address
- *        Specifies the address to find the PTE for.
- *
- * @return This routine returns the address of the PTE.
- *
- * @since XT 1.0
- */
-XTAPI
-PMMPTE
-MmpGetPteAddress(PVOID Address)
-{
-    ULONG Offset;
-
-    /* Calculate offset and return PTE address */
-    Offset = ((((ULONG)(Address)) >> MM_PTI_SHIFT) << MM_PTE_SHIFT);
-    return (PMMPTE)(MM_PTE_BASE + Offset);
-}
-
-/**
  * Performs architecture specific initialization of the XTOS Memory Manager.
  *
  * @return This routine does not return any value.

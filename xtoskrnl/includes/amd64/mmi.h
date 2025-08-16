@@ -27,11 +27,15 @@ BOOLEAN
 MmpGetExtendedPhysicalAddressingStatus(VOID);
 
 XTAPI
-PMMPTE
+PMMP5E
+MmpGetP5eAddress(PVOID Address);
+
+XTAPI
+PMMPDE
 MmpGetPdeAddress(PVOID Address);
 
 XTAPI
-PMMPTE
+PMMPPE
 MmpGetPpeAddress(PVOID Address);
 
 XTAPI
@@ -39,7 +43,7 @@ PMMPTE
 MmpGetPteAddress(PVOID Address);
 
 XTAPI
-PMMPTE
+PMMPXE
 MmpGetPxeAddress(PVOID Address);
 
 XTAPI
