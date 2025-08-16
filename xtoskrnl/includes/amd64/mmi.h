@@ -13,10 +13,18 @@
 
 
 /* AMD64 Memory Manager routines forward references */
+XTAPI
+VOID
+MmInitializePageMapSupport(VOID);
+
 XTFASTCALL
 VOID
 MmZeroPages(IN PVOID Address,
             IN ULONG Size);
+
+XTAPI
+BOOLEAN
+MmpGetExtendedPhysicalAddressingStatus(VOID);
 
 XTAPI
 PMMPTE
@@ -37,9 +45,5 @@ MmpGetPxeAddress(PVOID Address);
 XTAPI
 VOID
 MmpInitializeArchitecture(VOID);
-
-XTAPI
-BOOLEAN
-MmpMemoryExtensionEnabled(VOID);
 
 #endif /* __XTOSKRNL_AMD64_MMI_H */

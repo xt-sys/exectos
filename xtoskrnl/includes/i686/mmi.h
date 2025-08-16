@@ -13,14 +13,26 @@
 
 
 /* i686 Memory Manager routines forward references */
+XTAPI
+VOID
+MmInitializePageMapSupport(VOID);
+
 XTFASTCALL
 VOID
 MmZeroPages(IN PVOID Address,
             IN ULONG Size);
 
 XTAPI
-PMMPTE
+BOOLEAN
+MmpGetExtendedPhysicalAddressingStatus(VOID);
+
+XTAPI
+PMMPDE
 MmpGetPdeAddress(PVOID Address);
+
+XTAPI
+PMMPPE
+MmpGetPpeAddress(PVOID Address);
 
 XTAPI
 PMMPTE
@@ -29,9 +41,5 @@ MmpGetPteAddress(PVOID Address);
 XTAPI
 VOID
 MmpInitializeArchitecture(VOID);
-
-XTAPI
-BOOLEAN
-MmpMemoryExtensionEnabled(VOID);
 
 #endif /* __XTOSKRNL_I686_MMI_H */
