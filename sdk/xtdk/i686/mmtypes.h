@@ -113,6 +113,7 @@ typedef union _HARDWARE_PTE
 typedef struct _MMPAGEMAP_INFO
 {
     BOOLEAN Xpa;
+    ULONG PteBase;
     ULONG PdeBase;
     ULONG PdiShift;
     ULONG PteShift;

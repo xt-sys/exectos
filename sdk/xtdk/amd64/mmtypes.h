@@ -92,6 +92,17 @@ typedef struct _HARDWARE_PTE
     ULONGLONG NoExecute:1;
 } HARDWARE_PTE, *PHARDWARE_PTE;
 
+/* Page map information structure definition */
+typedef struct _MMPAGEMAP_INFO
+{
+    BOOLEAN Xpa;
+    ULONGLONG PteBase;
+    ULONGLONG PdeBase;
+    ULONGLONG PpeBase;
+    ULONGLONG PxeBase;
+    ULONGLONG P5eBase;
+} MMPAGEMAP_INFO, *PMMPAGEMAP_INFO;
+
 /* A Page Table Entry on AMD64 system */
 typedef struct _MMPTE_HARDWARE
 {
