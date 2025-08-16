@@ -571,9 +571,6 @@ XtpInitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
     /* Set LoaderInformation block properties */
     LoaderBlock->LoaderInformation.DbgPrint = XtLdrProtocol->Debug.Print;
 
-    /* Store page map level */
-    LoaderBlock->LoaderInformation.PageMapLevel = PageMap->PageMapLevel;
-
     /* Attempt to find virtual address of the EFI Runtime Services */
     // Status = XtLdrProtocol->GetVirtualAddress(MemoryMappings, &EfiSystemTable->RuntimeServices->Hdr, &RuntimeServices);
     // if(Status == STATUS_EFI_SUCCESS)
