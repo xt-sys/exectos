@@ -43,13 +43,14 @@ XtpDeterminePagingLevel(IN CONST PWCHAR Parameters)
         /* Query CPUID */
         ArCpuId(&CpuRegisters);
 
-        /* Check if eXtended Physical Addressing (XPA) is enabled and if LA57 is supported by the CPU */
-        if((CpuRegisters.Ecx & CPUID_FEATURES_ECX_LA57) &&
-           !(XtLdrProtocol->BootUtil.GetBooleanParameter(Parameters, L"NOXPA")))
-        {
-            /* Enable LA57 (PML5) */
-            return 5;
-        }
+        // TODO: Uncomment the following code when LA57 support is implemented in the bootloader
+        // /* Check if eXtended Physical Addressing (XPA) is enabled and if LA57 is supported by the CPU */
+        // if((CpuRegisters.Ecx & CPUID_FEATURES_ECX_LA57) &&
+        //    !(XtLdrProtocol->BootUtil.GetBooleanParameter(Parameters, L"NOXPA")))
+        // {
+        //     /* Enable LA57 (PML5) */
+        //     return 4;
+        // }
     }
 
     /* Disable LA57 and use PML4 by default */
