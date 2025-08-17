@@ -137,8 +137,8 @@ MmpPml2PteValid(PHARDWARE_PTE PtePointer)
 XTAPI
 VOID
 MmpSetPml2Pte(PHARDWARE_PTE PtePointer,
-            PFN_NUMBER PageFrameNumber,
-            BOOLEAN Writable)
+              PFN_NUMBER PageFrameNumber,
+              BOOLEAN Writable)
 {
     PtePointer->Pml2.PageFrameNumber = PageFrameNumber;
     PtePointer->Pml2.Valid = 1;
@@ -164,8 +164,8 @@ MmpSetPml2Pte(PHARDWARE_PTE PtePointer,
 XTAPI
 VOID
 MmpSetPml2PteCaching(PHARDWARE_PTE PtePointer,
-                    BOOLEAN CacheDisable,
-                    BOOLEAN WriteThrough)
+                     BOOLEAN CacheDisable,
+                     BOOLEAN WriteThrough)
 {
     PtePointer->Pml2.CacheDisable = CacheDisable;
     PtePointer->Pml2.WriteThrough = WriteThrough;
@@ -207,8 +207,8 @@ MmpPml3PteValid(PHARDWARE_PTE PtePointer)
 XTAPI
 VOID
 MmpSetPml3Pte(PHARDWARE_PTE PtePointer,
-            PFN_NUMBER PageFrameNumber,
-            BOOLEAN Writable)
+              PFN_NUMBER PageFrameNumber,
+              BOOLEAN Writable)
 {
     PtePointer->Pml3.PageFrameNumber = PageFrameNumber;
     PtePointer->Pml3.Valid = 1;
@@ -234,8 +234,8 @@ MmpSetPml3Pte(PHARDWARE_PTE PtePointer,
 XTAPI
 VOID
 MmpSetPml3PteCaching(PHARDWARE_PTE PtePointer,
-                    BOOLEAN CacheDisable,
-                    BOOLEAN WriteThrough)
+                     BOOLEAN CacheDisable,
+                     BOOLEAN WriteThrough)
 {
     PtePointer->Pml3.CacheDisable = CacheDisable;
     PtePointer->Pml3.WriteThrough = WriteThrough;
