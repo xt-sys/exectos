@@ -188,3 +188,29 @@ MmpSetPte(PHARDWARE_PTE PtePointer,
     PtePointer->Valid = 1;
     PtePointer->Writable = Writable;
 }
+
+/**
+ * Sets caching attributes for a page table entry (PTE).
+ *
+ * @param PtePointer
+ *        Pointer to the page table entry (PTE) to modify.
+ *
+ * @param CacheDisable
+ *        Indicates whether caching should be disabled for this page.
+ *
+ * @param WriteThrough
+ *        Indicates whether write-through caching should be enabled.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MmpSetPteCaching(PHARDWARE_PTE PtePointer,
+                 BOOLEAN CacheDisable,
+                 BOOLEAN WriteThrough)
+{
+    PtePointer->CacheDisable = CacheDisable;
+    PtePointer->WriteThrough = WriteThrough;
+}
