@@ -10,6 +10,27 @@
 
 
 /**
+ * Clears the contents of a page table entry (PTE).
+ *
+ * @param PtePointer
+ *        Pointer to the page table entry (PTE) to be cleared.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MmpClearPte(PHARDWARE_PTE PtePointer)
+{
+    PtePointer->CacheDisable = 0;
+    PtePointer->PageFrameNumber = 0;
+    PtePointer->Valid = 0;
+    PtePointer->Writable = 0;
+    PtePointer->WriteThrough = 0;
+}
+
+/**
  * Checks if eXtended Physical Addressing (XPA) is enabled.
  *
  * @return This routine returns TRUE if LA57 is enabled, or FALSE otherwise.
@@ -122,4 +143,48 @@ MmpGetPxeAddress(PVOID Address)
 
     Offset = (((ULONGLONG)Address >> MM_PXI_SHIFT) << MM_PTE_SHIFT);
     return (PMMPXE)(MmpPageMapInfo.PxeBase + Offset);
+}
+
+/**
+ * Checks whether the given page table entry (PTE) is valid.
+ *
+ * @param PtePointer
+ *        Pointer to the page table entry (PTE) to check.
+ *
+ * @return Returns TRUE if the entry is valid, FALSE otherwise.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+BOOLEAN
+MmpPteValid(PHARDWARE_PTE PtePointer)
+{
+    return (BOOLEAN)PtePointer->Valid;
+}
+
+/**
+ * Sets a page table entry (PTE) with the specified physical page and access flags.
+ *
+ * @param PtePointer
+ *        Pointer to the page table entry (PTE) to set.
+ *
+ * @param PageFrameNumber
+ *        Physical frame number to map.
+ *
+ * @param Writable
+ *        Indicates whether the page should be writable.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MmpSetPte(PHARDWARE_PTE PtePointer,
+          PFN_NUMBER PageFrameNumber,
+          BOOLEAN Writable)
+{
+    PtePointer->PageFrameNumber = PageFrameNumber;
+    PtePointer->Valid = 1;
+    PtePointer->Writable = Writable;
 }

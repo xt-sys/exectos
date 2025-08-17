@@ -11,16 +11,16 @@
 
 /* Page mapping routines for systems using 4-level paging (PML4) */
 CMMPAGEMAP_ROUTINES MmpPml4Routines = {
-    // .ClearPte = MmpClearPte,
-    // .PteValid = MmpPml2PteValid,
-    // .SetPteCaching = MmpSetPml2PteCaching,
-    // .SetPte = MmpSetPml2Pte,
+    .ClearPte = MmpClearPte,
+    .PteValid = MmpPteValid,
+    .SetPteCaching = MmpSetPteCaching,
+    .SetPte = MmpSetPte,
 };
 
 /* Page mapping routines for systems using 5-level paging (PML5) */
 CMMPAGEMAP_ROUTINES MmpPml5Routines = {
-    // .ClearPte = MmpClearPte,
-    // .PteValid = MmpPml3PteValid,
-    // .SetPteCaching = MmpSetPml3PteCaching,
-    // .SetPte = MmpSetPml3Pte,
+    .ClearPte = MmpClearPte,
+    .PteValid = MmpPteValid,
+    .SetPteCaching = MmpSetPteCaching,
+    .SetPte = MmpSetPte,
 };

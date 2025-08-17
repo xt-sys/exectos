@@ -23,6 +23,10 @@ MmZeroPages(IN PVOID Address,
             IN ULONG Size);
 
 XTAPI
+VOID
+MmpClearPte(PHARDWARE_PTE PtePointer);
+
+XTAPI
 BOOLEAN
 MmpGetExtendedPhysicalAddressingStatus(VOID);
 
@@ -49,5 +53,21 @@ MmpGetPxeAddress(PVOID Address);
 XTAPI
 VOID
 MmpInitializeArchitecture(VOID);
+
+XTAPI
+BOOLEAN
+MmpPteValid(PHARDWARE_PTE PtePointer);
+
+XTAPI
+VOID
+MmpSetPte(PHARDWARE_PTE PtePointer,
+          PFN_NUMBER PageFrameNumber,
+          BOOLEAN Writable);
+
+XTAPI
+VOID
+MmpSetPteCaching(PHARDWARE_PTE PtePointer,
+                 BOOLEAN CacheDisable,
+                 BOOLEAN WriteThrough);
 
 #endif /* __XTOSKRNL_AMD64_MMI_H */
