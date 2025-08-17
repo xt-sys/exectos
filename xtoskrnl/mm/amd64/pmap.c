@@ -61,7 +61,7 @@ MmpGetP5eAddress(PVOID Address)
 {
     ULONGLONG Offset;
 
-    Offset = (((ULONGLONG)Address >> MM_P5I_SHIFT) << MM_PTE_SHIFT);
+    Offset = ((((ULONGLONG)Address & (((ULONGLONG)1 << MmpPageMapInfo.VaBits) - 1)) >> MM_P5I_SHIFT) << MM_PTE_SHIFT);
     return (PMMP5E)((MmpPageMapInfo.P5eBase + Offset) * MmpPageMapInfo.Xpa);
 }
 
@@ -81,7 +81,7 @@ MmpGetPdeAddress(PVOID Address)
 {
     ULONGLONG Offset;
 
-    Offset = (((ULONGLONG)Address >> MM_PDI_SHIFT) << MM_PTE_SHIFT);
+    Offset = ((((ULONGLONG)Address & (((ULONGLONG)1 << MmpPageMapInfo.VaBits) - 1)) >> MM_PDI_SHIFT) << MM_PTE_SHIFT);
     return (PMMPDE)(MmpPageMapInfo.PdeBase + Offset);
 }
 
@@ -101,7 +101,7 @@ MmpGetPpeAddress(PVOID Address)
 {
     ULONGLONG Offset;
 
-    Offset = (((ULONGLONG)Address >> MM_PPI_SHIFT) << MM_PTE_SHIFT);
+    Offset = ((((ULONGLONG)Address & (((ULONGLONG)1 << MmpPageMapInfo.VaBits) - 1)) >> MM_PPI_SHIFT) << MM_PTE_SHIFT);
     return (PMMPPE)(MmpPageMapInfo.PpeBase + Offset);
 }
 
@@ -121,7 +121,7 @@ MmpGetPteAddress(PVOID Address)
 {
     ULONGLONG Offset;
 
-    Offset = (((ULONGLONG)Address >> MM_PTI_SHIFT) << MM_PTE_SHIFT);
+    Offset = ((((ULONGLONG)Address & (((ULONGLONG)1 << MmpPageMapInfo.VaBits) - 1)) >> MM_PTI_SHIFT) << MM_PTE_SHIFT);
     return (PMMPTE)(MmpPageMapInfo.PteBase + Offset);
 }
 
@@ -141,7 +141,7 @@ MmpGetPxeAddress(PVOID Address)
 {
     ULONGLONG Offset;
 
-    Offset = (((ULONGLONG)Address >> MM_PXI_SHIFT) << MM_PTE_SHIFT);
+    Offset = ((((ULONGLONG)Address & (((ULONGLONG)1 << MmpPageMapInfo.VaBits) - 1)) >> MM_PXI_SHIFT) << MM_PTE_SHIFT);
     return (PMMPXE)(MmpPageMapInfo.PxeBase + Offset);
 }
 

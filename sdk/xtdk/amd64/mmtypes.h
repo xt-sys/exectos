@@ -101,6 +101,7 @@ typedef struct _MMPAGEMAP_INFO
     ULONGLONG PpeBase;
     ULONGLONG PxeBase;
     ULONGLONG P5eBase;
+    ULONG VaBits;
 } MMPAGEMAP_INFO, *PMMPAGEMAP_INFO;
 
 /* A Page Table Entry on AMD64 system */

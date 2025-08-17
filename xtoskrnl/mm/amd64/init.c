@@ -36,6 +36,9 @@ MmInitializePageMapSupport(VOID)
         MmpPageMapInfo.PpeBase = MM_PPE_LA57_BASE;
         MmpPageMapInfo.PxeBase = MM_PXE_LA57_BASE;
         MmpPageMapInfo.P5eBase = MM_P5E_LA57_BASE;
+
+        /* PML5 use 57-bit virtual addresses */
+        MmpPageMapInfo.VaBits = 57;
     }
     else
     {
@@ -51,6 +54,9 @@ MmInitializePageMapSupport(VOID)
         MmpPageMapInfo.PpeBase = MM_PPE_BASE;
         MmpPageMapInfo.PxeBase = MM_PXE_BASE;
         MmpPageMapInfo.P5eBase = 0x0;
+
+        /* PML use 48-bit virtual addresses */
+        MmpPageMapInfo.VaBits = 48;
     }
 }
 
