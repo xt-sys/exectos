@@ -338,21 +338,20 @@ BlpSelfMapPml(IN PXTBL_PAGE_MAPPING PageMap,
     /* Check page map level */
     if(PageMap->PageMapLevel == 5)
     {
-        /* Self-mapping for PML5 is not supported */
-        BlDebugPrint(L"PML5 self-mapping not supported yet!\n");
-        return STATUS_EFI_UNSUPPORTED;
+        /* Calculate PML index based on provided self map address for PML5 */
+        PmlIndex = (SelfMapAddress >> MM_P5I_SHIFT) & 0x1FF;
     }
     else
     {
-        /* Calculate PML index based on provided self map address */
+        /* Calculate PML index based on provided self map address for PML4 */
         PmlIndex = (SelfMapAddress >> MM_PXI_SHIFT) & 0x1FF;
-
-        /* Add self-mapping for PML4 */
-        RtlZeroMemory(&PmlBase[PmlIndex], sizeof(HARDWARE_PTE));
-        PmlBase[PmlIndex].PageFrameNumber = (UINT_PTR)PageMap->PtePointer / EFI_PAGE_SIZE;
-        PmlBase[PmlIndex].Valid = 1;
-        PmlBase[PmlIndex].Writable = 1;
     }
+
+    /* Add self-mapping */
+    RtlZeroMemory(&PmlBase[PmlIndex], sizeof(HARDWARE_PTE));
+    PmlBase[PmlIndex].PageFrameNumber = (UINT_PTR)PageMap->PtePointer / EFI_PAGE_SIZE;
+    PmlBase[PmlIndex].Valid = 1;
+    PmlBase[PmlIndex].Writable = 1;
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
