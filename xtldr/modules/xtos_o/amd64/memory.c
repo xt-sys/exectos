@@ -71,19 +71,48 @@ XTCDECL
 EFI_STATUS
 XtpMapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
 {
-    PHARDWARE_PTE PdeBase, PpeBase, PxeBase;
+    PHARDWARE_PTE P5eBase, PdeBase, PpeBase, PxeBase;
     EFI_PHYSICAL_ADDRESS Address;
     EFI_STATUS Status;
 
-    /* Check page map level */
-    if(PageMap->PageMapLevel > 4)
+    if(PageMap->PageMapLevel == 5)
     {
-        /* PML5 (LA57) is not supported yet */
-        return STATUS_EFI_UNSUPPORTED;
-    }
+        /* Get P5E (PML5) base address */
+        P5eBase = (PHARDWARE_PTE)PageMap->PtePointer;
 
-    /* Get PXE (PML4) base address */
-    PxeBase = ((PHARDWARE_PTE)(PageMap->PtePointer));
+        /* Check if P5E entry already exists */
+        if(!P5eBase[(MM_HARDWARE_VA_START >> MM_P5I_SHIFT) & 0x1FF].Valid)
+        {
+            /* No valid P5E, allocate memory */
+            Status = XtLdrProtocol->Memory.AllocatePages(1, &Address);
+            if(Status != STATUS_EFI_SUCCESS)
+            {
+                /* Memory allocation failure, return error */
+                return Status;
+            }
+
+            /* Zero fill memory used by P5E */
+            RtlZeroMemory((PVOID)Address, EFI_PAGE_SIZE);
+
+            /* Make P5E valid */
+            P5eBase[(MM_HARDWARE_VA_START >> MM_P5I_SHIFT) & 0x1FF].Valid = 1;
+            P5eBase[(MM_HARDWARE_VA_START >> MM_P5I_SHIFT) & 0x1FF].PageFrameNumber = Address / EFI_PAGE_SIZE;
+            P5eBase[(MM_HARDWARE_VA_START >> MM_P5I_SHIFT) & 0x1FF].Writable = 1;
+
+            /* Set PXE base address */
+            PxeBase = (PHARDWARE_PTE)(UINT_PTR)Address;
+        }
+        else
+        {
+            /* Set PXE base address based on existing P5E */
+            PxeBase = (PHARDWARE_PTE)((P5eBase[(MM_HARDWARE_VA_START >> MM_P5I_SHIFT) & 0x1FF].PageFrameNumber) << EFI_PAGE_SHIFT);
+        }
+    }
+    else
+    {
+        /* Get PXE (PML4) base address */
+        PxeBase = (PHARDWARE_PTE)PageMap->PtePointer;
+    }
 
     /* Check if PXE entry already exists */
     if(!PxeBase[(MM_HARDWARE_VA_START >> MM_PXI_SHIFT) & 0x1FF].Valid)
