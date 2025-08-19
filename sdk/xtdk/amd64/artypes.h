@@ -53,6 +53,8 @@
 #define CR4_CET                                         0x00800000
 #define CR4_PKS                                         0x01000000
 #define CR4_UINTR                                       0x02000000
+#define CR4_LASS                                        0x08000000
+#define CR4_LAM_SUP                                     0x10000000
 
 /* Descriptors size */
 #define GDT_ENTRIES                                     128
@@ -91,6 +93,7 @@
 #define X86_MSR_FSBASE                                  0xC0000100
 #define X86_MSR_GSBASE                                  0xC0000101
 #define X86_MSR_KERNEL_GSBASE                           0xC0000102
+#define X86_MSR_TSC_AUX                                 0xC0000103
 
 /* Processor features in the EFER MSR */
 #define X86_MSR_EFER_SCE                                (1 <<  0)
@@ -98,6 +101,10 @@
 #define X86_MSR_EFER_LMA                                (1 << 10)
 #define X86_MSR_EFER_NXE                                (1 << 11)
 #define X86_MSR_EFER_SVME                               (1 << 12)
+#define X86_EFER_LMSLE                                  (1 << 13)
+#define X86_EFER_FFXSR                                  (1 << 14)
+#define X86_EFER_TCE                                    (1 << 15)
+#define X86_EFER_AUTOIBRS                               (1 << 21)
 
 /* X86 EFLAG bit masks definitions */
 #define X86_EFLAGS_NF_MASK                              0x00000000 /* None */
