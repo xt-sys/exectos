@@ -53,6 +53,8 @@
 /* Maximum physical address used by HAL allocations */
 #define MM_MAXIMUM_PHYSICAL_ADDRESS                0xFFFFFFFF
 
+/* Trampoline code address */
+#define MM_TRAMPOLINE_ADDRESS                      0x80000
 
 /* Page size enumeration list */
 typedef enum _PAGE_SIZE

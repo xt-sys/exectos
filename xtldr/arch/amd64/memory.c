@@ -54,6 +54,15 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
         return Status;
     }
 
+    /* Map the trampoline code area */
+    Status = BlMapVirtualMemory(PageMap, (PVOID)MM_TRAMPOLINE_ADDRESS,(PVOID)MM_TRAMPOLINE_ADDRESS,
+                                1, LoaderFirmwareTemporary);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Mapping trampoline code failed */
+        return Status;
+    }
+
     /* Get list of XTLDR modules */
     ModulesList = BlGetModulesList();
     ModulesListEntry = ModulesList->Flink;
