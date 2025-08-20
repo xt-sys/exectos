@@ -26,6 +26,10 @@ ArCpuId(IN OUT PCPUID_REGISTERS Registers);
 
 XTCDECL
 VOID
+ArEnableExtendedPhysicalAddressing(IN ULONG_PTR PageMap);
+
+XTCDECL
+VOID
 ArHalt(VOID);
 
 XTCDECL
