@@ -25,11 +25,11 @@
 #define MM_PXE_BASE                                0xFFFFF6FB7DBED000ULL
 
 /* Page directory and page base addresses for 5-level paging */
-#define MM_PTE_LA57_BASE                           0xFFFFF68000000000ULL
-#define MM_PDE_LA57_BASE                           0xFFFFF78000000000ULL
-#define MM_PPE_LA57_BASE                           0xFFFFF78800000000ULL
-#define MM_PXE_LA57_BASE                           0xFFFFF78840000000ULL
-#define MM_P5E_LA57_BASE                           0xFFFFF78840200000ULL
+#define MM_PTE_LA57_BASE                           0xFFFF000000000000ULL
+#define MM_PDE_LA57_BASE                           0xFFFF010000000000ULL
+#define MM_PPE_LA57_BASE                           0xFFFF010800000000ULL
+#define MM_PXE_LA57_BASE                           0xFFFF010840000000ULL
+#define MM_P5E_LA57_BASE                           0xFFFF010840200000ULL
 
 /* PTE shift values */
 #define MM_PTE_SHIFT                               3
