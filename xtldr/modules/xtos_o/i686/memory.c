@@ -64,7 +64,7 @@ XtpMapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
     EFI_STATUS Status;
 
     /* Allocate memory */
-    Status = XtLdrProtocol->Memory.AllocatePages(1, &Address);
+    Status = XtLdrProtocol->Memory.AllocatePages(AllocateAnyPages, 1, &Address);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Memory allocation failure, return error */

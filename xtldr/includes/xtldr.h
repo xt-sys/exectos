@@ -18,7 +18,8 @@
 /* XTLDR routines forward references */
 XTCDECL
 EFI_STATUS
-BlAllocateMemoryPages(IN ULONGLONG NumberOfPages,
+BlAllocateMemoryPages(IN EFI_ALLOCATE_TYPE AllocationType,
+                      IN ULONGLONG NumberOfPages,
                       OUT PEFI_PHYSICAL_ADDRESS Memory);
 
 XTCDECL

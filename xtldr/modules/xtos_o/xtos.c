@@ -75,7 +75,7 @@ XtGetMemoryDescriptorList(IN PXTBL_PAGE_MAPPING PageMap,
 
     Pages = (ULONGLONG)EFI_SIZE_TO_PAGES((PageMap->MapSize + 1) * sizeof(LOADER_MEMORY_DESCRIPTOR));
 
-    Status = XtLdrProtocol->Memory.AllocatePages(Pages, &Address);
+    Status = XtLdrProtocol->Memory.AllocatePages(AllocateAnyPages, Pages, &Address);
     if(Status != STATUS_EFI_SUCCESS)
     {
         return Status;
@@ -136,7 +136,7 @@ XtGetSystemResourcesList(IN PXTBL_PAGE_MAPPING PageMap,
 
     Pages = (ULONGLONG)EFI_SIZE_TO_PAGES(sizeof(SYSTEM_RESOURCE_ACPI) + sizeof(SYSTEM_RESOURCE_FRAMEBUFFER));
 
-    Status = XtLdrProtocol->Memory.AllocatePages(Pages, &Address);
+    Status = XtLdrProtocol->Memory.AllocatePages(AllocateAnyPages, Pages, &Address);
     if(Status != STATUS_EFI_SUCCESS)
     {
         return Status;
@@ -552,7 +552,7 @@ XtpInitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
     BlockPages = EFI_SIZE_TO_PAGES(sizeof(KERNEL_INITIALIZATION_BLOCK));
 
     /* Allocate memory for kernel initialization block */
-    Status = XtLdrProtocol->Memory.AllocatePages(BlockPages, &Address);
+    Status = XtLdrProtocol->Memory.AllocatePages(AllocateAnyPages, BlockPages, &Address);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Memory allocation failure */

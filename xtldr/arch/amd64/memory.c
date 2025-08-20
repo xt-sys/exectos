@@ -35,7 +35,7 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
     EFI_STATUS Status;
 
     /* Allocate pages for the Page Map */
-    Status = BlAllocateMemoryPages(1, &Address);
+    Status = BlAllocateMemoryPages(AllocateAnyPages, 1, &Address);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Memory allocation failure */
@@ -288,7 +288,7 @@ BlpGetNextPageTable(IN PXTBL_PAGE_MAPPING PageMap,
     else
     {
         /* Allocate pages for new PML entry */
-        Status = BlAllocateMemoryPages(1, &Address);
+        Status = BlAllocateMemoryPages(AllocateAnyPages, 1, &Address);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory allocation failure */

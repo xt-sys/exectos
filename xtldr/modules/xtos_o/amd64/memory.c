@@ -84,7 +84,7 @@ XtpMapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
         if(!P5eBase[(MM_HARDWARE_VA_START >> MM_P5I_SHIFT) & 0x1FF].Valid)
         {
             /* No valid P5E, allocate memory */
-            Status = XtLdrProtocol->Memory.AllocatePages(1, &Address);
+            Status = XtLdrProtocol->Memory.AllocatePages(AllocateAnyPages, 1, &Address);
             if(Status != STATUS_EFI_SUCCESS)
             {
                 /* Memory allocation failure, return error */
@@ -118,7 +118,7 @@ XtpMapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
     if(!PxeBase[(MM_HARDWARE_VA_START >> MM_PXI_SHIFT) & 0x1FF].Valid)
     {
         /* No valid PXE, allocate memory */
-        Status = XtLdrProtocol->Memory.AllocatePages(1, &Address);
+        Status = XtLdrProtocol->Memory.AllocatePages(AllocateAnyPages, 1, &Address);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory allocation failure, return error */
@@ -146,7 +146,7 @@ XtpMapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
     if(!PpeBase[(MM_HARDWARE_VA_START >> MM_PPI_SHIFT) & 0x1FF].Valid)
     {
         /* No valid PPE, allocate memory */
-        Status = XtLdrProtocol->Memory.AllocatePages(1, &Address);
+        Status = XtLdrProtocol->Memory.AllocatePages(AllocateAnyPages, 1, &Address);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory allocation failure, return error */
@@ -177,7 +177,7 @@ XtpMapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
         if(!PdeBase[((MM_HARDWARE_VA_START >> MM_PDI_SHIFT) & 0x1FF) + Index].Valid)
         {
             /* No valid PDE, allocate memory */
-            Status = XtLdrProtocol->Memory.AllocatePages(1, &Address);
+            Status = XtLdrProtocol->Memory.AllocatePages(AllocateAnyPages, 1, &Address);
             if(Status != STATUS_EFI_SUCCESS)
             {
                 /* Memory allocation failure, return error */
