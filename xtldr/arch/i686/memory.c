@@ -36,7 +36,7 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
     if(PageMap->PageMapLevel == 3)
     {
         /* Allocate a page for the 3-level page map structure (PAE enabled) */
-        Status = BlAllocateMemoryPages(1, &Address);
+        Status = BlAllocateMemoryPages(AllocateAnyPages, 1, &Address);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory allocation failed, cannot proceed with page map creation */
@@ -48,7 +48,7 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
         RtlZeroMemory(PageMap->PtePointer, EFI_PAGE_SIZE);
 
         /* Allocate 4 pages for the Page Directories (PDs) */
-        Status = BlAllocateMemoryPages(4, &DirectoryAddress);
+        Status = BlAllocateMemoryPages(AllocateAnyPages, 4, &DirectoryAddress);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory allocation failed, cannot proceed with page map creation */
@@ -70,7 +70,7 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
     else
     {
         /* Allocate a page for the 2-level page map structure (PAE disabled) */
-        Status = BlAllocateMemoryPages(1, &Address);
+        Status = BlAllocateMemoryPages(AllocateAnyPages, 1, &Address);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory allocation failed, cannot proceed with page map creation */
@@ -349,7 +349,7 @@ BlpGetNextPageTable(IN PXTBL_PAGE_MAPPING PageMap,
     else
     {
         /* Allocate pages for new PML entry */
-        Status = BlAllocateMemoryPages(1, &Address);
+        Status = BlAllocateMemoryPages(AllocateAnyPages, 1, &Address);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory allocation failure */
