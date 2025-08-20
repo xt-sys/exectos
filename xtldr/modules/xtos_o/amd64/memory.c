@@ -43,14 +43,13 @@ XtpDeterminePagingLevel(IN CONST PWCHAR Parameters)
         /* Query CPUID */
         ArCpuId(&CpuRegisters);
 
-        // TODO: Uncomment the following code when LA57 support is implemented in the bootloader
-        // /* Check if eXtended Physical Addressing (XPA) is enabled and if LA57 is supported by the CPU */
-        // if((CpuRegisters.Ecx & CPUID_FEATURES_ECX_LA57) &&
-        //    !(XtLdrProtocol->BootUtil.GetBooleanParameter(Parameters, L"NOXPA")))
-        // {
-        //     /* Enable LA57 (PML5) */
-        //     return 4;
-        // }
+        /* Check if eXtended Physical Addressing (XPA) is enabled and if LA57 is supported by the CPU */
+        if((CpuRegisters.Ecx & CPUID_FEATURES_ECX_LA57) &&
+           !(XtLdrProtocol->BootUtil.GetBooleanParameter(Parameters, L"NOXPA")))
+        {
+            /* Enable LA57 (PML5) */
+            return 5;
+        }
     }
 
     /* Disable LA57 and use PML4 by default */
@@ -213,6 +212,9 @@ EFI_STATUS
 XtEnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
 {
     EFI_STATUS Status;
+    EFI_PHYSICAL_ADDRESS TrampolineAddress;
+    PXT_TRAMPOLINE_ENTRY TrampolineEntry;
+    ULONG_PTR TrampolineSize;
 
     /* Build page map */
     Status = XtLdrProtocol->Memory.BuildPageMap(PageMap, (PageMap->PageMapLevel > 4) ? MM_P5E_LA57_BASE : MM_PXE_BASE);
@@ -232,6 +234,29 @@ XtEnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
         return Status;
     }
 
+    /* Check the configured page map level to set the LA57 state accordingly */
+    if(PageMap->PageMapLevel == 5)
+    {
+        /* Set the address of the trampoline code below 1MB */
+        TrampolineAddress = MM_TRAMPOLINE_ADDRESS;
+
+        /* Calculate the size of the trampoline code */
+        TrampolineSize = (ULONG_PTR)ArEnableExtendedPhysicalAddressingEnd - (ULONG_PTR)ArEnableExtendedPhysicalAddressing;
+
+        /* Allocate pages for the trampoline */
+        Status = XtLdrProtocol->Memory.AllocatePages(AllocateAddress, EFI_SIZE_TO_PAGES(TrampolineSize), &TrampolineAddress);
+        if(Status != STATUS_EFI_SUCCESS)
+        {
+            /* Failed to allocate memory for trampoline code */
+            XtLdrProtocol->Debug.Print(L"Failed to allocate memory for trampoline code (Status code: %zX)\n", Status);
+            return Status;
+        }
+
+        /* Set the trampoline entry point and copy its code into the allocated buffer */
+        TrampolineEntry = (PXT_TRAMPOLINE_ENTRY)(UINT_PTR)TrampolineAddress;
+        RtlCopyMemory(TrampolineEntry, ArEnableExtendedPhysicalAddressing, TrampolineSize);
+    }
+
     /* Exit EFI Boot Services */
     XtLdrProtocol->Debug.Print(L"Exiting EFI boot services\n");
     Status = XtLdrProtocol->Util.ExitBootServices();
@@ -247,18 +272,19 @@ XtEnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
     {
         /* Enable Linear Address 57-bit (LA57) extension */
         XtLdrProtocol->Debug.Print(L"Enabling Linear Address 57-bit (LA57)\n");
+
+        /* Execute the trampoline to enable LA57 and write PML5 to CR3 */
+        TrampolineEntry((UINT64)PageMap->PtePointer);
     }
     else
     {
         /* Disable Linear Address 57-bit (LA57) extension */
         XtLdrProtocol->Debug.Print(L"Disabling Linear Address 57-bit (LA57)\n");
+
+        /* Write PML4 to CR3 and enable paging */
+        ArWriteControlRegister(3, (UINT_PTR)PageMap->PtePointer);
+        ArWriteControlRegister(0, ArReadControlRegister(0) | CR0_PG);
     }
-
-    /* Write PML4 to CR3 */
-    ArWriteControlRegister(3, (UINT_PTR)PageMap->PtePointer);
-
-    /* Enable paging */
-    ArWriteControlRegister(0, ArReadControlRegister(0) | CR0_PG);
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
