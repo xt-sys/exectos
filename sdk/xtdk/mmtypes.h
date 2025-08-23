@@ -10,7 +10,17 @@
 #define __XTDK_MMTYPES_H
 
 #include <xtbase.h>
+#include ARCH_HEADER(xtstruct.h)
 
+
+/* Page map routines structure definition */
+typedef CONST STRUCT _CMMPAGEMAP_ROUTINES
+{
+    VOID (XTAPI *ClearPte)(PHARDWARE_PTE PtePointer);
+    BOOLEAN (XTAPI *PteValid)(PHARDWARE_PTE PtePointer);
+    VOID (XTAPI *SetPteCaching)(PHARDWARE_PTE PtePointer, BOOLEAN CacheDisable, BOOLEAN WriteThrough);
+    VOID (XTAPI *SetPte)(PHARDWARE_PTE PtePointer, PFN_NUMBER PageFrameNumber, BOOLEAN Writable);
+} CMMPAGEMAP_ROUTINES, *PCMMPAGEMAP_ROUTINES;
 
 /* Color tables structure definition */
 typedef struct _MMCOLOR_TABLES

@@ -13,17 +13,33 @@
 
 
 /* AMD64 Memory Manager routines forward references */
+XTAPI
+VOID
+MmInitializePageMapSupport(VOID);
+
 XTFASTCALL
 VOID
 MmZeroPages(IN PVOID Address,
             IN ULONG Size);
 
 XTAPI
-PMMPTE
+VOID
+MmpClearPte(PHARDWARE_PTE PtePointer);
+
+XTAPI
+BOOLEAN
+MmpGetExtendedPhysicalAddressingStatus(VOID);
+
+XTAPI
+PMMP5E
+MmpGetP5eAddress(PVOID Address);
+
+XTAPI
+PMMPDE
 MmpGetPdeAddress(PVOID Address);
 
 XTAPI
-PMMPTE
+PMMPPE
 MmpGetPpeAddress(PVOID Address);
 
 XTAPI
@@ -31,7 +47,7 @@ PMMPTE
 MmpGetPteAddress(PVOID Address);
 
 XTAPI
-PMMPTE
+PMMPXE
 MmpGetPxeAddress(PVOID Address);
 
 XTAPI
@@ -40,6 +56,18 @@ MmpInitializeArchitecture(VOID);
 
 XTAPI
 BOOLEAN
-MmpMemoryExtensionEnabled(VOID);
+MmpPteValid(PHARDWARE_PTE PtePointer);
+
+XTAPI
+VOID
+MmpSetPte(PHARDWARE_PTE PtePointer,
+          PFN_NUMBER PageFrameNumber,
+          BOOLEAN Writable);
+
+XTAPI
+VOID
+MmpSetPteCaching(PHARDWARE_PTE PtePointer,
+                 BOOLEAN CacheDisable,
+                 BOOLEAN WriteThrough);
 
 #endif /* __XTOSKRNL_AMD64_MMI_H */

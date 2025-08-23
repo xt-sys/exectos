@@ -24,10 +24,11 @@
  */
 XTCDECL
 EFI_STATUS
-BlAllocateMemoryPages(IN ULONGLONG NumberOfPages,
+BlAllocateMemoryPages(IN EFI_ALLOCATE_TYPE AllocationType,
+                      IN ULONGLONG NumberOfPages,
                       OUT PEFI_PHYSICAL_ADDRESS Memory)
 {
-    return EfiSystemTable->BootServices->AllocatePages(AllocateAnyPages, EfiLoaderData, NumberOfPages, Memory);
+    return EfiSystemTable->BootServices->AllocatePages(AllocationType, EfiLoaderData, NumberOfPages, Memory);
 }
 
 /**

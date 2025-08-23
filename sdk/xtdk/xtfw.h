@@ -89,7 +89,6 @@ typedef struct _FIRMWARE_INFORMATION_BLOCK
 typedef struct _LOADER_INFORMATION_BLOCK
 {
     PVOID DbgPrint;
-    ULONG PageMapLevel;
 } LOADER_INFORMATION_BLOCK, *PLOADER_INFORMATION_BLOCK;
 
 /* Boot Loader memory mapping information */

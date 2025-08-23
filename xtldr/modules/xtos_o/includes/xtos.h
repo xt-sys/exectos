@@ -29,8 +29,14 @@ typedef struct _XT_FRAMEBUFFER_PROTOCOL
 /* EFI XT Loader Protocol */
 EXTERN PXTBL_LOADER_PROTOCOL XtLdrProtocol;
 
+/* XTOS trampoline end address to calculate trampoline size */
+EXTERN PVOID ArEnableExtendedPhysicalAddressingEnd[];
+
 /* XTOS kernel entry point */
 typedef VOID (XTAPI *PXT_ENTRY_POINT)(IN PKERNEL_INITIALIZATION_BLOCK BootParameters);
+
+/* XTOS trampoline entry point */
+typedef VOID (*PXT_TRAMPOLINE_ENTRY)(UINT64 PageMap);
 
 /* XTOS boot protocol related routines forward references */
 XTCDECL

@@ -35,7 +35,7 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
     EFI_STATUS Status;
 
     /* Allocate pages for the Page Map */
-    Status = BlAllocateMemoryPages(1, &Address);
+    Status = BlAllocateMemoryPages(AllocateAnyPages, 1, &Address);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Memory allocation failure */
@@ -51,6 +51,15 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* PML mapping failed */
+        return Status;
+    }
+
+    /* Map the trampoline code area */
+    Status = BlMapVirtualMemory(PageMap, (PVOID)MM_TRAMPOLINE_ADDRESS,(PVOID)MM_TRAMPOLINE_ADDRESS,
+                                1, LoaderFirmwareTemporary);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Mapping trampoline code failed */
         return Status;
     }
 
@@ -167,7 +176,7 @@ BlMapPage(IN PXTBL_PAGE_MAPPING PageMap,
     while(NumberOfPages > 0)
     {
         /* Calculate the indices in the various Page Tables from the virtual address */
-        Pml5Entry = (VirtualAddress & ((ULONGLONG)0x1FF << MM_LA57_SHIFT)) >> MM_LA57_SHIFT;
+        Pml5Entry = (VirtualAddress & ((ULONGLONG)0x1FF << MM_P5I_SHIFT)) >> MM_P5I_SHIFT;
         Pml4Entry = (VirtualAddress & ((ULONGLONG)0x1FF << MM_PXI_SHIFT)) >> MM_PXI_SHIFT;
         Pml3Entry = (VirtualAddress & ((ULONGLONG)0x1FF << MM_PPI_SHIFT)) >> MM_PPI_SHIFT;
         Pml2Entry = (VirtualAddress & ((ULONGLONG)0x1FF << MM_PDI_SHIFT)) >> MM_PDI_SHIFT;
@@ -279,7 +288,7 @@ BlpGetNextPageTable(IN PXTBL_PAGE_MAPPING PageMap,
     else
     {
         /* Allocate pages for new PML entry */
-        Status = BlAllocateMemoryPages(1, &Address);
+        Status = BlAllocateMemoryPages(AllocateAnyPages, 1, &Address);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory allocation failure */
@@ -338,21 +347,20 @@ BlpSelfMapPml(IN PXTBL_PAGE_MAPPING PageMap,
     /* Check page map level */
     if(PageMap->PageMapLevel == 5)
     {
-        /* Self-mapping for PML5 is not supported */
-        BlDebugPrint(L"PML5 self-mapping not supported yet!\n");
-        return STATUS_EFI_UNSUPPORTED;
+        /* Calculate PML index based on provided self map address for PML5 */
+        PmlIndex = (SelfMapAddress >> MM_P5I_SHIFT) & 0x1FF;
     }
     else
     {
-        /* Calculate PML index based on provided self map address */
+        /* Calculate PML index based on provided self map address for PML4 */
         PmlIndex = (SelfMapAddress >> MM_PXI_SHIFT) & 0x1FF;
-
-        /* Add self-mapping for PML4 */
-        RtlZeroMemory(&PmlBase[PmlIndex], sizeof(HARDWARE_PTE));
-        PmlBase[PmlIndex].PageFrameNumber = (UINT_PTR)PageMap->PtePointer / EFI_PAGE_SIZE;
-        PmlBase[PmlIndex].Valid = 1;
-        PmlBase[PmlIndex].Writable = 1;
     }
+
+    /* Add self-mapping */
+    RtlZeroMemory(&PmlBase[PmlIndex], sizeof(HARDWARE_PTE));
+    PmlBase[PmlIndex].PageFrameNumber = (UINT_PTR)PageMap->PtePointer / EFI_PAGE_SIZE;
+    PmlBase[PmlIndex].Valid = 1;
+    PmlBase[PmlIndex].Writable = 1;
 
     /* Return success */
     return STATUS_EFI_SUCCESS;

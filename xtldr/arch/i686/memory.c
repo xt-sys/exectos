@@ -36,7 +36,7 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
     if(PageMap->PageMapLevel == 3)
     {
         /* Allocate a page for the 3-level page map structure (PAE enabled) */
-        Status = BlAllocateMemoryPages(1, &Address);
+        Status = BlAllocateMemoryPages(AllocateAnyPages, 1, &Address);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory allocation failed, cannot proceed with page map creation */
@@ -48,7 +48,7 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
         RtlZeroMemory(PageMap->PtePointer, EFI_PAGE_SIZE);
 
         /* Allocate 4 pages for the Page Directories (PDs) */
-        Status = BlAllocateMemoryPages(4, &DirectoryAddress);
+        Status = BlAllocateMemoryPages(AllocateAnyPages, 4, &DirectoryAddress);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory allocation failed, cannot proceed with page map creation */
@@ -61,16 +61,16 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
         /* Fill the PDPT with pointers to the Page Directories */
         for(Index = 0; Index < 4; Index++)
         {
-            RtlZeroMemory(&((PHARDWARE_PTE)PageMap->PtePointer)[Index], sizeof(HARDWARE_PTE));
-            ((PHARDWARE_PTE)PageMap->PtePointer)[Index].PageFrameNumber = DirectoryAddress / EFI_PAGE_SIZE;
-            ((PHARDWARE_PTE)PageMap->PtePointer)[Index].Valid = 1;
+            RtlZeroMemory(&((PHARDWARE_MODERN_PTE)PageMap->PtePointer)[Index], sizeof(HARDWARE_MODERN_PTE));
+            ((PHARDWARE_MODERN_PTE)PageMap->PtePointer)[Index].PageFrameNumber = DirectoryAddress / EFI_PAGE_SIZE;
+            ((PHARDWARE_MODERN_PTE)PageMap->PtePointer)[Index].Valid = 1;
             DirectoryAddress += EFI_PAGE_SIZE;
         }
     }
     else
     {
         /* Allocate a page for the 2-level page map structure (PAE disabled) */
-        Status = BlAllocateMemoryPages(1, &Address);
+        Status = BlAllocateMemoryPages(AllocateAnyPages, 1, &Address);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory allocation failed, cannot proceed with page map creation */
@@ -87,6 +87,15 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* PML mapping failed */
+        return Status;
+    }
+
+    /* Map the trampoline code area */
+    Status = BlMapVirtualMemory(PageMap, (PVOID)MM_TRAMPOLINE_ADDRESS,(PVOID)MM_TRAMPOLINE_ADDRESS,
+                                1, LoaderFirmwareTemporary);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Mapping trampoline code failed */
         return Status;
     }
 
@@ -193,8 +202,8 @@ BlMapPage(IN PXTBL_PAGE_MAPPING PageMap,
     SIZE_T PageFrameNumber;
     PVOID Pml1, Pml2, Pml3;
     SIZE_T Pml1Entry, Pml2Entry, Pml3Entry;
-    PHARDWARE_PTE PmlTable;
     PHARDWARE_LEGACY_PTE LegacyPmlTable;
+    PHARDWARE_MODERN_PTE PmlTable;
     EFI_STATUS Status;
 
     /* Set the Page Frame Number (PFN) */
@@ -231,8 +240,8 @@ BlMapPage(IN PXTBL_PAGE_MAPPING PageMap,
             }
 
             /* Set the 64-bit PTE entry */
-            PmlTable = (PHARDWARE_PTE)Pml1;
-            RtlZeroMemory(&PmlTable[Pml1Entry], sizeof(HARDWARE_PTE));
+            PmlTable = (PHARDWARE_MODERN_PTE)Pml1;
+            RtlZeroMemory(&PmlTable[Pml1Entry], sizeof(HARDWARE_MODERN_PTE));
             PmlTable[Pml1Entry].PageFrameNumber = PageFrameNumber;
             PmlTable[Pml1Entry].Valid = 1;
             PmlTable[Pml1Entry].Writable = 1;
@@ -304,14 +313,14 @@ BlpGetNextPageTable(IN PXTBL_PAGE_MAPPING PageMap,
     ULONGLONG PmlPointer = 0;
     EFI_STATUS Status;
     PHARDWARE_LEGACY_PTE LegacyPmlTable;
-    PHARDWARE_PTE PmlTable;
+    PHARDWARE_MODERN_PTE PmlTable;
     BOOLEAN ValidPte = FALSE;
 
     /* Check page map level to determine PTE size */
     if(PageMap->PageMapLevel >= 3)
     {
         /* 64-bit PTE for PML3 (PAE enabled) */
-        PmlTable = (PHARDWARE_PTE)PageTable;
+        PmlTable = (PHARDWARE_MODERN_PTE)PageTable;
         if(PmlTable[Entry].Valid)
         {
             /* Get page frame number from page table entry */
@@ -340,7 +349,7 @@ BlpGetNextPageTable(IN PXTBL_PAGE_MAPPING PageMap,
     else
     {
         /* Allocate pages for new PML entry */
-        Status = BlAllocateMemoryPages(1, &Address);
+        Status = BlAllocateMemoryPages(AllocateAnyPages, 1, &Address);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory allocation failure */
@@ -362,7 +371,7 @@ BlpGetNextPageTable(IN PXTBL_PAGE_MAPPING PageMap,
         if(PageMap->PageMapLevel >= 3)
         {
             /* 64-bit PTE for PML3 (PAE enabled) */
-            PmlTable = (PHARDWARE_PTE)PageTable;
+            PmlTable = (PHARDWARE_MODERN_PTE)PageTable;
             PmlTable[Entry].PageFrameNumber = Address / EFI_PAGE_SIZE;
             PmlTable[Entry].Valid = 1;
             PmlTable[Entry].Writable = 1;
@@ -406,7 +415,7 @@ BlpSelfMapPml(IN PXTBL_PAGE_MAPPING PageMap,
               IN ULONG_PTR SelfMapAddress)
 {
     PHARDWARE_LEGACY_PTE LegacyPml;
-    PHARDWARE_PTE Pml;
+    PHARDWARE_MODERN_PTE Pml;
     ULONGLONG PmlIndex;
     ULONG Index;
 
@@ -417,13 +426,13 @@ BlpSelfMapPml(IN PXTBL_PAGE_MAPPING PageMap,
         PmlIndex = (SelfMapAddress >> MM_PDI_SHIFT) & 0x1FF;
 
         /* Get Page Directory */
-        Pml = (PHARDWARE_PTE)(((PHARDWARE_PTE)PageMap->PtePointer)[SelfMapAddress >> MM_PPI_SHIFT].PageFrameNumber * EFI_PAGE_SIZE);
+        Pml = (PHARDWARE_MODERN_PTE)(((PHARDWARE_MODERN_PTE)PageMap->PtePointer)[SelfMapAddress >> MM_PPI_SHIFT].PageFrameNumber * EFI_PAGE_SIZE);
 
         /* Add self-mapping for PML3 (PAE enabled) */
         for(Index = 0; Index < 4; Index++)
         {
-            RtlZeroMemory(&Pml[PmlIndex + Index], sizeof(HARDWARE_PTE));
-            Pml[PmlIndex + Index].PageFrameNumber = ((PHARDWARE_PTE)PageMap->PtePointer)[Index].PageFrameNumber;
+            RtlZeroMemory(&Pml[PmlIndex + Index], sizeof(HARDWARE_MODERN_PTE));
+            Pml[PmlIndex + Index].PageFrameNumber = ((PHARDWARE_MODERN_PTE)PageMap->PtePointer)[Index].PageFrameNumber;
             Pml[PmlIndex + Index].Valid = 1;
             Pml[PmlIndex + Index].Writable = 1;
         }

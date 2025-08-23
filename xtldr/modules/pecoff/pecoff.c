@@ -409,7 +409,7 @@ PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
     Pages = EFI_SIZE_TO_PAGES(ImageData->FileSize);
 
     /* Allocate pages */
-    Status = XtLdrProtocol->Memory.AllocatePages(Pages, &Address);
+    Status = XtLdrProtocol->Memory.AllocatePages(AllocateAnyPages, Pages, &Address);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Pages allocation failure */
@@ -472,7 +472,7 @@ PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
     ImageData->ImagePages = EFI_SIZE_TO_PAGES(ImageData->ImageSize);
 
     /* Allocate image pages */
-    Status = XtLdrProtocol->Memory.AllocatePages(ImageData->ImagePages, &Address);
+    Status = XtLdrProtocol->Memory.AllocatePages(AllocateAnyPages, ImageData->ImagePages, &Address);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Pages reallocation failure */

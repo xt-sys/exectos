@@ -4,89 +4,60 @@
  * FILE:            xtoskrnl/mm/amd64/init.c
  * DESCRIPTION:     Architecture specific Memory Manager initialization routines
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ *                  Aiken Harris <harraiken91@gmail.com>
  */
 
 #include <xtos.h>
 
 
 /**
- * Gets the address of the PDE (Page Directory Entry), that maps given address.
+ * Detects if eXtended Physical Addressing (XPA) is enabled and initializes page map support.
  *
- * @param Address
- *        Specifies the address to find the PDE for.
- *
- * @return This routine returns the address of the PDE.
+ * @return This routine does not return any value.
  *
  * @since XT 1.0
  */
 XTAPI
-PMMPTE
-MmpGetPdeAddress(PVOID Address)
+VOID
+MmInitializePageMapSupport(VOID)
 {
-    ULONGLONG Offset;
+    /* Check if XPA is enabled */
+    if(MmpGetExtendedPhysicalAddressingStatus())
+    {
+        /* XPA enabled, use LA57 paging (PML5) */
+        MmpPageMapRoutines = &MmpPml5Routines;
 
-    Offset = ((((ULONGLONG)Address & (((ULONGLONG)1 << 48) - 1)) >> MM_PDI_SHIFT) << MM_PTE_SHIFT);
-    return (PMMPTE)(MM_PDE_BASE + Offset);
-}
+        /* Set PML5 page map information */
+        MmpPageMapInfo.Xpa = TRUE;
 
-/**
- * Gets the address of the PPE (Page Directory Pointer Table Entry), that maps given address.
- *
- * @param Address
- *        Specifies the address to find the PPE for.
- *
- * @return This routine returns the address of the PPE.
- *
- * @since XT 1.0
- */
-XTAPI
-PMMPTE
-MmpGetPpeAddress(PVOID Address)
-{
-    ULONGLONG Offset;
+        /* Set PML5 base addresses */
+        MmpPageMapInfo.PteBase = MM_PTE_LA57_BASE;
+        MmpPageMapInfo.PdeBase = MM_PDE_LA57_BASE;
+        MmpPageMapInfo.PpeBase = MM_PPE_LA57_BASE;
+        MmpPageMapInfo.PxeBase = MM_PXE_LA57_BASE;
+        MmpPageMapInfo.P5eBase = MM_P5E_LA57_BASE;
 
-    Offset = ((((ULONGLONG)Address & (((ULONGLONG)1 << 48) - 1)) >> MM_PPI_SHIFT) << MM_PTE_SHIFT);
-    return (PMMPTE)(MM_PPE_BASE + Offset);
-}
+        /* PML5 use 57-bit virtual addresses */
+        MmpPageMapInfo.VaBits = 57;
+    }
+    else
+    {
+        /* XPA disabled, use LA48 paging (PML4) */
+        MmpPageMapRoutines = &MmpPml4Routines;
 
-/**
- * Gets the address of the PTE (Page Table Entry), that maps given address.
- *
- * @param Address
- *        Specifies the address to find the PTE for.
- *
- * @return This routine returns the address of the PTE.
- *
- * @since XT 1.0
- */
-XTAPI
-PMMPTE
-MmpGetPteAddress(PVOID Address)
-{
-    ULONGLONG Offset;
+        /* Set PML4 page map information */
+        MmpPageMapInfo.Xpa = FALSE;
 
-    Offset = ((((ULONGLONG)Address & (((ULONGLONG)1 << 48) - 1)) >> MM_PTI_SHIFT) << MM_PTE_SHIFT);
-    return (PMMPTE)(MM_PTE_BASE + Offset);
-}
+        /* Set PML4 base addresses */
+        MmpPageMapInfo.PteBase = MM_PTE_BASE;
+        MmpPageMapInfo.PdeBase = MM_PDE_BASE;
+        MmpPageMapInfo.PpeBase = MM_PPE_BASE;
+        MmpPageMapInfo.PxeBase = MM_PXE_BASE;
+        MmpPageMapInfo.P5eBase = 0x0;
 
-/**
- * Gets the address of the PXE (Extended Page Entry), that maps given address.
- *
- * @param Address
- *        Specifies the address to find the PXE for.
- *
- * @return This routine returns the address of the PXE.
- *
- * @since XT 1.0
- */
-XTAPI
-PMMPTE
-MmpGetPxeAddress(PVOID Address)
-{
-    ULONGLONG Offset;
-
-    Offset = (((ULONGLONG)Address >> MM_PXI_SHIFT) & (MM_PXE_PER_PAGE - 1));
-    return (PMMPTE)(MM_PXE_BASE + Offset);
+        /* PML use 48-bit virtual addresses */
+        MmpPageMapInfo.VaBits = 48;
+    }
 }
 
 /**
@@ -101,19 +72,4 @@ VOID
 MmpInitializeArchitecture(VOID)
 {
     UNIMPLEMENTED;
-}
-
-/**
- * Checks if LA57 (PML5) is enabled.
- *
- * @return This routine returns TRUE if LA57 is enabled, or FALSE otherwise.
- *
- * @since XT 1.0
- */
-XTAPI
-BOOLEAN
-MmpMemoryExtensionEnabled(VOID)
-{
-    /* Check if LA57 (PML5) is enabled */
-    return ((ArReadControlRegister(4) & CR4_LA57) != 0) ? TRUE : FALSE;
 }

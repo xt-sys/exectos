@@ -10,6 +10,21 @@
 #define __XTOSKRNL_AMD64_ASMSUP_H
 
 
+/* Control Register bit definitions */
+#define CR0_PG                                  0x80000000
+#define CR4_PGE                                 0x00000080
+#define CR4_LA57                                0x00001000
+#define CR4_PCIDE                               0x00020000
+
+/* GDT selectors */
+#define GDT_R0_CMCODE                           0x08
+#define GDT_R0_CODE                             0x10
+#define GDT_R0_DATA                             0x18
+
+/* MSR registers */
+#define X86_MSR_EFER                            0xC0000080
+#define X86_MSR_EFER_LME                        (1 <<  8)
+
 /* KTRAP_FRAME structure offsets */
 #define TrapXmm0                                0
 #define TrapXmm1                                16

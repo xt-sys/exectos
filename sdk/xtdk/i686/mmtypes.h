@@ -28,7 +28,11 @@
 #define MM_PDI_SHIFT                               21
 #define MM_PPI_SHIFT                               30
 
+/* Page directory and page base legacy address */
+#define MM_PDE_LEGACY_BASE                         0xC0300000
+
 /* PTE legacy shift values */
+#define MM_PTE_LEGACY_SHIFT                        2
 #define MM_PDI_LEGACY_SHIFT                        22
 
 /* Minimum number of physical pages needed by the system */
@@ -49,6 +53,8 @@
 /* Maximum physical address used by HAL allocations */
 #define MM_MAXIMUM_PHYSICAL_ADDRESS                0xFFFFFFFF
 
+/* Trampoline code address */
+#define MM_TRAMPOLINE_ADDRESS                      0x80000
 
 /* Page size enumeration list */
 typedef enum _PAGE_SIZE
@@ -58,8 +64,26 @@ typedef enum _PAGE_SIZE
     Size4M
 } PAGE_SIZE, *PPAGE_SIZE;
 
-/* Page Table entry structure definition (with PAE support) */
-typedef struct _HARDWARE_PTE
+/* Legacy Page Table entry structure definition (PML2) */
+typedef struct _HARDWARE_LEGACY_PTE
+{
+    ULONG Valid:1;
+    ULONG Writable:1;
+    ULONG Owner:1;
+    ULONG WriteThrough:1;
+    ULONG CacheDisable:1;
+    ULONG Accessed:1;
+    ULONG Dirty:1;
+    ULONG LargePage:1;
+    ULONG Global:1;
+    ULONG CopyOnWrite:1;
+    ULONG Prototype:1;
+    ULONG Reserved0:1;
+    ULONG PageFrameNumber:20;
+} HARDWARE_LEGACY_PTE, *PHARDWARE_LEGACY_PTE;
+
+/* Page Table entry structure definition (PML3) */
+typedef struct _HARDWARE_MODERN_PTE
 {
     ULONGLONG Valid:1;
     ULONGLONG Writable:1;
@@ -77,10 +101,117 @@ typedef struct _HARDWARE_PTE
     ULONGLONG Reserved1:14;
     ULONGLONG SoftwareWsIndex:11;
     ULONGLONG NoExecute:1;
+} HARDWARE_MODERN_PTE, *PHARDWARE_MODERN_PTE;
+
+/* Generic Page Table entry union to abstract PML2 and PML3 formats */
+typedef union _HARDWARE_PTE
+{
+    ULONGLONG Long;
+    HARDWARE_LEGACY_PTE Pml2;
+    HARDWARE_MODERN_PTE Pml3;
 } HARDWARE_PTE, *PHARDWARE_PTE;
 
-/* Page Table Entry on PAE enabled system */
-typedef struct _MMPTE_HARDWARE
+/* Page map information structure definition */
+typedef struct _MMPAGEMAP_INFO
+{
+    BOOLEAN Xpa;
+    ULONG PteBase;
+    ULONG PdeBase;
+    ULONG PdiShift;
+    ULONG PteShift;
+} MMPAGEMAP_INFO, *PMMPAGEMAP_INFO;
+
+/* Legacy Page Table Entry hardware structure definition (PML2) */
+typedef struct _MMPML2_PTE_HARDWARE
+{
+    ULONG Valid:1;
+    ULONG Writable:1;
+    ULONG Owner:1;
+    ULONG WriteThrough:1;
+    ULONG CacheDisable:1;
+    ULONG Accessed:1;
+    ULONG Dirty:1;
+    ULONG LargePage:1;
+    ULONG Global:1;
+    ULONG CopyOnWrite:1;
+    ULONG Prototype:1;
+    ULONG Write:1;
+    ULONG PageFrameNumber:20;
+} MMPML2_PTE_HARDWARE, *PMMPML2_PTE_HARDWARE;
+
+/* Legacy Page Table Entry list structure definition (PML2) */
+typedef struct _MMPML2_PTE_LIST
+{
+    ULONG Valid:1;
+    ULONG OneEntry:1;
+    ULONG Reserved0:8;
+    ULONG Prototype:1;
+    ULONG Reserved1:1;
+    ULONG NextEntry:20;
+} MMPML2_PTE_LIST, *PMMPML2_PTE_LIST;
+
+/* Legacy Page Table Entry subsection structure definition (PML2) */
+typedef struct _MMPML2_PTE_PROTOTYPE
+{
+    ULONG Valid:1;
+    ULONG ProtoAddressLow:7;
+    ULONG ReadOnly:1;
+    ULONG WhichPool:1;
+    ULONG Prototype:1;
+    ULONG ProtoAddressHigh:21;
+} MMPML2_PTE_PROTOTYPE, *PMMPML2_PTE_PROTOTYPE;
+
+/* Legacy Page Table Entry software structure definition (PML2) */
+typedef struct _MMPML2_PTE_SOFTWARE
+{
+    ULONG Valid:1;
+    ULONG PageFileLow:4;
+    ULONG Protection:5;
+    ULONG Prototype:1;
+    ULONG Transition:1;
+    ULONG PageFileHigh:20;
+} MMPML2_PTE_SOFTWARE, *PMMPML2_PTE_SOFTWARE;
+
+/* Legacy Page Table Entry subsection structure definition (PML2) */
+typedef struct _MMPML2_PTE_SUBSECTION
+{
+    ULONG Valid:1;
+    ULONG SubsectionAddressLow:4;
+    ULONG Protection:5;
+    ULONG Prototype:1;
+    ULONG SubsectionAddressHigh:20;
+    ULONG WhichPool:1;
+} MMPML2_PTE_SUBSECTION, *PMMPML2_PTE_SUBSECTION;
+
+/* Legacy Page Table Entry transition structure definition (PML2) */
+typedef struct _MMPML2_PTE_TRANSITION
+{
+    ULONG Valid:1;
+    ULONG Write:1;
+    ULONG Owner:1;
+    ULONG WriteThrough:1;
+    ULONG CacheDisable:1;
+    ULONG Protection:5;
+    ULONG Prototype:1;
+    ULONG Transition:1;
+    ULONG PageFrameNumber:20;
+} MMPML2_PTE_TRANSITION, *PMMPML2_PTE_TRANSITION;
+
+/* Legacy Page Table Entry union definition (PML2) */
+typedef union _MMPML2_PTE
+{
+    ULONG Long;
+    HARDWARE_PTE Flush;
+    MMPML2_PTE_HARDWARE Hard;
+    MMPML2_PTE_PROTOTYPE Proto;
+    MMPML2_PTE_SOFTWARE Soft;
+    MMPML2_PTE_TRANSITION Trans;
+    MMPML2_PTE_SUBSECTION Subsect;
+    MMPML2_PTE_LIST List;
+} MMPML2_PTE, *PMMPML2_PTE;
+
+/* Page Table Entry hardware structure definition (PML3) */
+typedef struct _MMPML3_PTE_HARDWARE
 {
     ULONGLONG Valid:1;
     ULONGLONG Writable:1;
@@ -95,59 +226,59 @@ typedef struct _MMPTE_HARDWARE
     ULONGLONG Prototype:1;
     ULONGLONG Write:1;
     ULONGLONG PageFrameNumber:26;
-    ULONGLONG Reserved1:25;
+    ULONGLONG Reserved0:25;
     ULONGLONG NoExecute:1;
-} MMPTE_HARDWARE, *PMMPTE_HARDWARE;
+} MMPML3_PTE_HARDWARE, *PMMPML3_PTE_HARDWARE;
 
-/* Page Table Entry list structure definition (with PAE support) */
-typedef struct _MMPTE_LIST
+/* Page Table Entry list structure definition (PML3) */
+typedef struct _MMPML3_PTE_LIST
 {
     ULONGLONG Valid:1;
     ULONGLONG OneEntry:1;
-    ULONGLONG Reserved1:8;
+    ULONGLONG Reserved0:8;
     ULONGLONG Prototype:1;
-    ULONGLONG Reserved2:21;
+    ULONGLONG Reserved1:21;
     ULONGLONG NextEntry:32;
-} MMPTE_LIST, *PMMPTE_LIST;
+} MMPML3_PTE_LIST, *PMMPML3_PTE_LIST;
 
-/* Page Table Entry subsection structure definition (with PAE support) */
-typedef struct _MMPTE_PROTOTYPE
+/* Page Table Entry subsection structure definition (PML3) */
+typedef struct _MMPML3_PTE_PROTOTYPE
 {
     ULONGLONG Valid:1;
-    ULONGLONG Reserved1:7;
+    ULONGLONG Reserved0:7;
     ULONGLONG ReadOnly:1;
-    ULONGLONG Reserved2:1;
+    ULONGLONG Reserved1:1;
     ULONGLONG Prototype:1;
     ULONGLONG Protection:5;
-    ULONGLONG Reserved3:16;
+    ULONGLONG Reserved2:16;
     ULONGLONG ProtoAddress:32;
-} MMPTE_PROTOTYPE, *PMMPTE_PROTOTYPE;
+} MMPML3_PTE_PROTOTYPE, *PMMPML3_PTE_PROTOTYPE;
 
-/* Page Table Entry software structure definition (with PAE support) */
-typedef struct _MMPTE_SOFTWARE
+/* Page Table Entry software structure definition (PML3) */
+typedef struct _MMPML3_PTE_SOFTWARE
 {
     ULONGLONG Valid:1;
     ULONGLONG PageFileLow:4;
     ULONGLONG Protection:5;
     ULONGLONG Prototype:1;
     ULONGLONG Transition:1;
-    ULONGLONG Reserved1:20;
+    ULONGLONG Reserved0:20;
     ULONGLONG PageFileHigh:32;
-} MMPTE_SOFTWARE, *PMMPTE_SOFTWARE;
+} MMPML3_PTE_SOFTWARE, *PMMPML3_PTE_SOFTWARE;
 
-/* Page Table Entry subsection structure definition (with PAE support) */
-typedef struct _MMPTE_SUBSECTION
+/* Page Table Entry subsection structure definition (PML3) */
+typedef struct _MMPML3_PTE_SUBSECTION
 {
     ULONGLONG Valid:1;
-    ULONGLONG Reserved1:4;
+    ULONGLONG Reserved0:4;
     ULONGLONG Protection:5;
     ULONGLONG Prototype:1;
-    ULONGLONG Reserved2:21;
+    ULONGLONG Reserved1:21;
     ULONGLONG SubsectionAddress:32;
-} MMPTE_SUBSECTION, *PMMPTE_SUBSECTION;
+} MMPML3_PTE_SUBSECTION, *PMMPML3_PTE_SUBSECTION;
 
-/* Page Table Entry transition structure definition (with PAE support) */
-typedef struct _MMPTE_TRANSITION
+/* Page Table Entry transition structure definition (PML3) */
+typedef struct _MMPML3_PTE_TRANSITION
 {
     ULONGLONG Valid:1;
     ULONGLONG Write:1;
@@ -159,38 +290,28 @@ typedef struct _MMPTE_TRANSITION
     ULONGLONG Transition:1;
     ULONGLONG PageFrameNumber:26;
     ULONGLONG Unused:26;
-} MMPTE_TRANSITION, *PMMPTE_TRANSITION;
+} MMPML3_PTE_TRANSITION, *PMMPML3_PTE_TRANSITION;
 
-/* Page Table Entry structure definition (with PAE support) */
-typedef union _MMPTE
+/* Page Table Entry union definition (PML3) */
+typedef union _MMPML3_PTE
 {
     ULONGLONG Long;
     HARDWARE_PTE Flush;
-    MMPTE_HARDWARE Hardware;
-    MMPTE_PROTOTYPE Prototype;
-    MMPTE_SOFTWARE Software;
-    MMPTE_TRANSITION Transition;
-    MMPTE_SUBSECTION Subsection;
-    MMPTE_LIST List;
-} MMPTE, *PMMPTE;
+    MMPML3_PTE_HARDWARE Hardware;
+    MMPML3_PTE_PROTOTYPE Prototype;
+    MMPML3_PTE_SOFTWARE Software;
+    MMPML3_PTE_TRANSITION Transition;
+    MMPML3_PTE_SUBSECTION Subsection;
+    MMPML3_PTE_LIST List;
+} MMPML3_PTE, *PMMPML3_PTE;
 
-/* Legacy Page Table entry structure definition (without PAE support) */
-typedef struct _HARDWARE_LEGACY_PTE
+/* Generic Page Table Entry union to abstract PML2 and PML3 formats */
+typedef union _MMPTE
 {
-    ULONG Valid:1;
-    ULONG Writable:1;
-    ULONG Owner:1;
-    ULONG WriteThrough:1;
-    ULONG CacheDisable:1;
-    ULONG Accessed:1;
-    ULONG Dirty:1;
-    ULONG LargePage:1;
-    ULONG Global:1;
-    ULONG CopyOnWrite:1;
-    ULONG Prototype:1;
-    ULONG Reserved0:1;
-    ULONG PageFrameNumber:20;
-} HARDWARE_LEGACY_PTE, *PHARDWARE_LEGACY_PTE;
+    ULONGLONG Long;
+    MMPML2_PTE Pml2;
+    MMPML3_PTE Pml3;
+} MMPTE, *PMMPTE;
 
 /* Page Frame Number structure definition */
 typedef struct _MMPFN

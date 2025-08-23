@@ -190,7 +190,7 @@ MmMapHardwareMemory(IN PHYSICAL_ADDRESS PhysicalAddress,
         ReturnAddress = (PVOID)(ULONG_PTR)ReturnAddress + MM_PAGE_SIZE;
 
         /* Check if PTE is valid */
-        if(PtePointer->Valid)
+        if(MmpPageMapRoutines->PteValid(PtePointer))
         {
             /* PTE is not available, go to the next one */
             BaseAddress = ReturnAddress;
@@ -219,9 +219,7 @@ MmMapHardwareMemory(IN PHYSICAL_ADDRESS PhysicalAddress,
         PtePointer = (PHARDWARE_PTE)MmpGetPteAddress(BaseAddress);
 
         /* Fill the PTE */
-        PtePointer->PageFrameNumber = (PFN_NUMBER)(PhysicalAddress.QuadPart >> MM_PAGE_SHIFT);
-        PtePointer->Valid = 1;
-        PtePointer->Writable = 1;
+        MmpPageMapRoutines->SetPte(PtePointer, (PFN_NUMBER)(PhysicalAddress.QuadPart >> MM_PAGE_SHIFT), TRUE);
 
         /* Advance to the next address */
         PhysicalAddress.QuadPart += MM_PAGE_SIZE;
@@ -268,8 +266,7 @@ MmMarkHardwareMemoryWriteThrough(IN PVOID VirtualAddress,
     for(Page = 0; Page < PageCount; Page++)
     {
         /* Mark pages as CD/WT */
-        PtePointer->CacheDisable = 1;
-        PtePointer->WriteThrough = 1;
+        MmpPageMapRoutines->SetPteCaching(PtePointer, TRUE, TRUE);
         PtePointer++;
     }
 }
@@ -302,9 +299,7 @@ MmRemapHardwareMemory(IN PVOID VirtualAddress,
     PtePointer = (PHARDWARE_PTE)MmpGetPteAddress(VirtualAddress);
 
     /* Remap the PTE */
-    PtePointer->PageFrameNumber = (PFN_NUMBER)(PhysicalAddress.QuadPart >> MM_PAGE_SHIFT);
-    PtePointer->Valid = 1;
-    PtePointer->Writable = 1;
+    MmpPageMapRoutines->SetPte(PtePointer, (PFN_NUMBER)(PhysicalAddress.QuadPart >> MM_PAGE_SHIFT), TRUE);
 
     /* Check if TLB needs to be flushed */
     if(FlushTlb)
@@ -356,11 +351,7 @@ MmUnmapHardwareMemory(IN PVOID VirtualAddress,
     for(Page = 0; Page < PageCount; Page++)
     {
         /* Unmap the PTE and get the next one */
-        PtePointer->CacheDisable = 0;
-        PtePointer->Valid = 0;
-        PtePointer->Writable = 0;
-        PtePointer->WriteThrough = 0;
-        PtePointer->PageFrameNumber = 0;
+        MmpPageMapRoutines->ClearPte(PtePointer);
         PtePointer++;
     }
 

@@ -39,13 +39,22 @@
 #define CR4_PCE                                         0x00000100
 #define CR4_FXSR                                        0x00000200
 #define CR4_XMMEXCPT                                    0x00000400
+#define CR4_UMIP                                        0x00000800
 #define CR4_LA57                                        0x00001000
-#define CR4_RESERVED1                                   0x00001800
 #define CR4_VMXE                                        0x00002000
 #define CR4_SMXE                                        0x00004000
-#define CR4_RESERVED2                                   0x00018000
-#define CR4_XSAVE                                       0x00020000
-#define CR4_RESERVED3                                   0xFFFC0000
+#define CR4_FSGSBASE                                    0x00010000
+#define CR4_PCIDE                                       0x00020000
+#define CR4_XSAVE                                       0x00040000
+#define CR4_KL                                          0x00080000
+#define CR4_SMEP                                        0x00100000
+#define CR4_SMAP                                        0x00200000
+#define CR4_PKE                                         0x00400000
+#define CR4_CET                                         0x00800000
+#define CR4_PKS                                         0x01000000
+#define CR4_UINTR                                       0x02000000
+#define CR4_LASS                                        0x08000000
+#define CR4_LAM_SUP                                     0x10000000
 
 /* Descriptors size */
 #define GDT_ENTRIES                                     128

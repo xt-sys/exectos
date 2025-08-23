@@ -70,25 +70,54 @@ XTCDECL
 EFI_STATUS
 XtpMapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
 {
-    PHARDWARE_PTE PdeBase, PpeBase, PxeBase;
+    PHARDWARE_PTE P5eBase, PdeBase, PpeBase, PxeBase;
     EFI_PHYSICAL_ADDRESS Address;
     EFI_STATUS Status;
 
-    /* Check page map level */
-    if(PageMap->PageMapLevel > 4)
+    if(PageMap->PageMapLevel == 5)
     {
-        /* PML5 (LA57) is not supported yet */
-        return STATUS_EFI_UNSUPPORTED;
-    }
+        /* Get P5E (PML5) base address */
+        P5eBase = (PHARDWARE_PTE)PageMap->PtePointer;
 
-    /* Get PXE (PML4) base address */
-    PxeBase = ((PHARDWARE_PTE)(PageMap->PtePointer));
+        /* Check if P5E entry already exists */
+        if(!P5eBase[(MM_HARDWARE_VA_START >> MM_P5I_SHIFT) & 0x1FF].Valid)
+        {
+            /* No valid P5E, allocate memory */
+            Status = XtLdrProtocol->Memory.AllocatePages(AllocateAnyPages, 1, &Address);
+            if(Status != STATUS_EFI_SUCCESS)
+            {
+                /* Memory allocation failure, return error */
+                return Status;
+            }
+
+            /* Zero fill memory used by P5E */
+            RtlZeroMemory((PVOID)Address, EFI_PAGE_SIZE);
+
+            /* Make P5E valid */
+            P5eBase[(MM_HARDWARE_VA_START >> MM_P5I_SHIFT) & 0x1FF].Valid = 1;
+            P5eBase[(MM_HARDWARE_VA_START >> MM_P5I_SHIFT) & 0x1FF].PageFrameNumber = Address / EFI_PAGE_SIZE;
+            P5eBase[(MM_HARDWARE_VA_START >> MM_P5I_SHIFT) & 0x1FF].Writable = 1;
+
+            /* Set PXE base address */
+            PxeBase = (PHARDWARE_PTE)(UINT_PTR)Address;
+        }
+        else
+        {
+            /* Set PXE base address based on existing P5E */
+            PxeBase = (PHARDWARE_PTE)((P5eBase[(MM_HARDWARE_VA_START >> MM_P5I_SHIFT) & 0x1FF].PageFrameNumber) << EFI_PAGE_SHIFT);
+        }
+    }
+    else
+    {
+        /* Get PXE (PML4) base address */
+        PxeBase = (PHARDWARE_PTE)PageMap->PtePointer;
+    }
 
     /* Check if PXE entry already exists */
     if(!PxeBase[(MM_HARDWARE_VA_START >> MM_PXI_SHIFT) & 0x1FF].Valid)
     {
         /* No valid PXE, allocate memory */
-        Status = XtLdrProtocol->Memory.AllocatePages(1, &Address);
+        Status = XtLdrProtocol->Memory.AllocatePages(AllocateAnyPages, 1, &Address);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory allocation failure, return error */
@@ -116,7 +145,7 @@ XtpMapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
     if(!PpeBase[(MM_HARDWARE_VA_START >> MM_PPI_SHIFT) & 0x1FF].Valid)
     {
         /* No valid PPE, allocate memory */
-        Status = XtLdrProtocol->Memory.AllocatePages(1, &Address);
+        Status = XtLdrProtocol->Memory.AllocatePages(AllocateAnyPages, 1, &Address);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory allocation failure, return error */
@@ -147,7 +176,7 @@ XtpMapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
         if(!PdeBase[((MM_HARDWARE_VA_START >> MM_PDI_SHIFT) & 0x1FF) + Index].Valid)
         {
             /* No valid PDE, allocate memory */
-            Status = XtLdrProtocol->Memory.AllocatePages(1, &Address);
+            Status = XtLdrProtocol->Memory.AllocatePages(AllocateAnyPages, 1, &Address);
             if(Status != STATUS_EFI_SUCCESS)
             {
                 /* Memory allocation failure, return error */
@@ -183,9 +212,12 @@ EFI_STATUS
 XtEnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
 {
     EFI_STATUS Status;
+    EFI_PHYSICAL_ADDRESS TrampolineAddress;
+    PXT_TRAMPOLINE_ENTRY TrampolineEntry;
+    ULONG_PTR TrampolineSize;
 
     /* Build page map */
-    Status = XtLdrProtocol->Memory.BuildPageMap(PageMap, 0xFFFFF6FB7DBED000);
+    Status = XtLdrProtocol->Memory.BuildPageMap(PageMap, (PageMap->PageMapLevel > 4) ? MM_P5E_LA57_BASE : MM_PXE_BASE);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to build page map */
@@ -200,6 +232,29 @@ XtEnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
         /* Failed to map memory for hardware layer */
         XtLdrProtocol->Debug.Print(L"Failed to map memory for hardware leyer (Status code: %zX)\n", Status);
         return Status;
+    }
+
+    /* Check the configured page map level to set the LA57 state accordingly */
+    if(PageMap->PageMapLevel == 5)
+    {
+        /* Set the address of the trampoline code below 1MB */
+        TrampolineAddress = MM_TRAMPOLINE_ADDRESS;
+
+        /* Calculate the size of the trampoline code */
+        TrampolineSize = (ULONG_PTR)ArEnableExtendedPhysicalAddressingEnd - (ULONG_PTR)ArEnableExtendedPhysicalAddressing;
+
+        /* Allocate pages for the trampoline */
+        Status = XtLdrProtocol->Memory.AllocatePages(AllocateAddress, EFI_SIZE_TO_PAGES(TrampolineSize), &TrampolineAddress);
+        if(Status != STATUS_EFI_SUCCESS)
+        {
+            /* Failed to allocate memory for trampoline code */
+            XtLdrProtocol->Debug.Print(L"Failed to allocate memory for trampoline code (Status code: %zX)\n", Status);
+            return Status;
+        }
+
+        /* Set the trampoline entry point and copy its code into the allocated buffer */
+        TrampolineEntry = (PXT_TRAMPOLINE_ENTRY)(UINT_PTR)TrampolineAddress;
+        RtlCopyMemory(TrampolineEntry, ArEnableExtendedPhysicalAddressing, TrampolineSize);
     }
 
     /* Exit EFI Boot Services */
@@ -217,18 +272,19 @@ XtEnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
     {
         /* Enable Linear Address 57-bit (LA57) extension */
         XtLdrProtocol->Debug.Print(L"Enabling Linear Address 57-bit (LA57)\n");
+
+        /* Execute the trampoline to enable LA57 and write PML5 to CR3 */
+        TrampolineEntry((UINT64)PageMap->PtePointer);
     }
     else
     {
         /* Disable Linear Address 57-bit (LA57) extension */
         XtLdrProtocol->Debug.Print(L"Disabling Linear Address 57-bit (LA57)\n");
+
+        /* Write PML4 to CR3 and enable paging */
+        ArWriteControlRegister(3, (UINT_PTR)PageMap->PtePointer);
+        ArWriteControlRegister(0, ArReadControlRegister(0) | CR0_PG);
     }
-
-    /* Write PML4 to CR3 */
-    ArWriteControlRegister(3, (UINT_PTR)PageMap->PtePointer);
-
-    /* Enable paging */
-    ArWriteControlRegister(0, ArReadControlRegister(0) | CR0_PG);
 
     /* Return success */
     return STATUS_EFI_SUCCESS;

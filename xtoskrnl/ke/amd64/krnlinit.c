@@ -52,6 +52,9 @@ KepInitializeMachine(VOID)
 
     /* Initialize processor */
     HlInitializeProcessor();
+
+    /* Initialize page map support */
+    MmInitializePageMapSupport();
 }
 
 /**

@@ -13,14 +13,30 @@
 
 
 /* i686 Memory Manager routines forward references */
+XTAPI
+VOID
+MmInitializePageMapSupport(VOID);
+
 XTFASTCALL
 VOID
 MmZeroPages(IN PVOID Address,
             IN ULONG Size);
 
 XTAPI
-PMMPTE
+VOID
+MmpClearPte(PHARDWARE_PTE PtePointer);
+
+XTAPI
+BOOLEAN
+MmpGetExtendedPhysicalAddressingStatus(VOID);
+
+XTAPI
+PMMPDE
 MmpGetPdeAddress(PVOID Address);
+
+XTAPI
+PMMPPE
+MmpGetPpeAddress(PVOID Address);
 
 XTAPI
 PMMPTE
@@ -32,6 +48,34 @@ MmpInitializeArchitecture(VOID);
 
 XTAPI
 BOOLEAN
-MmpMemoryExtensionEnabled(VOID);
+MmpPml2PteValid(PHARDWARE_PTE PtePointer);
+
+XTAPI
+VOID
+MmpSetPml2Pte(PHARDWARE_PTE PtePointer,
+              PFN_NUMBER PageFrameNumber,
+              BOOLEAN Writable);
+
+XTAPI
+VOID
+MmpSetPml2PteCaching(PHARDWARE_PTE PtePointer,
+                     BOOLEAN CacheDisable,
+                     BOOLEAN WriteThrough);
+
+XTAPI
+BOOLEAN
+MmpPml3PteValid(PHARDWARE_PTE PtePointer);
+
+XTAPI
+VOID
+MmpSetPml3Pte(PHARDWARE_PTE PtePointer,
+              PFN_NUMBER PageFrameNumber,
+              BOOLEAN Writable);
+
+XTAPI
+VOID
+MmpSetPml3PteCaching(PHARDWARE_PTE PtePointer,
+                     BOOLEAN CacheDisable,
+                     BOOLEAN WriteThrough);
 
 #endif /* __XTOSKRNL_I686_MMI_H */

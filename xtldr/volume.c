@@ -616,7 +616,7 @@ BlReadFile(IN PEFI_FILE_HANDLE DirHandle,
     Pages = EFI_SIZE_TO_PAGES(FileInfo->FileSize);
 
     /* Allocate pages */
-    Status = BlAllocateMemoryPages(Pages, &Address);
+    Status = BlAllocateMemoryPages(AllocateAnyPages, Pages, &Address);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Pages allocation failure */

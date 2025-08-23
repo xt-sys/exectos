@@ -4,51 +4,56 @@
  * FILE:            xtoskrnl/mm/i686/init.c
  * DESCRIPTION:     Architecture specific Memory Manager initialization routines
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ *                  Aiken Harris <harraiken91@gmail.com>
  */
 
 #include <xtos.h>
 
 
 /**
- * Gets the address of the PDE (Page Directory Entry), that maps given address.
+ * Detects if eXtended Physical Addressing (XPA) is enabled and initializes page map support.
  *
- * @param Address
- *        Specifies the address to find the PDE for.
- *
- * @return This routine returns the address of the PDE.
+ * @return This routine does not return any value.
  *
  * @since XT 1.0
  */
 XTAPI
-PMMPTE
-MmpGetPdeAddress(PVOID Address)
+VOID
+MmInitializePageMapSupport(VOID)
 {
-    ULONG Offset;
+    /* Check if XPA is enabled */
+    if(MmpGetExtendedPhysicalAddressingStatus())
+    {
+        /* XPA enabled, use modern PAE paging (PML3) */
+        MmpPageMapRoutines = &MmpPml3Routines;
 
-    /* Calculate offset and return PTE address */
-    Offset = ((((ULONG)(Address)) >> MM_PDI_SHIFT) << MM_PTE_SHIFT);
-    return (PMMPTE)(MM_PDE_BASE + Offset);
-}
+        /* Set PML3 page map information */
+        MmpPageMapInfo.Xpa = TRUE;
 
-/**
- * Gets the address of the PTE (Page Table Entry), that maps given address.
- *
- * @param Address
- *        Specifies the address to find the PTE for.
- *
- * @return This routine returns the address of the PTE.
- *
- * @since XT 1.0
- */
-XTAPI
-PMMPTE
-MmpGetPteAddress(PVOID Address)
-{
-    ULONG Offset;
+        /* Set PML3 base addresses */
+        MmpPageMapInfo.PteBase = MM_PTE_BASE;
+        MmpPageMapInfo.PdeBase = MM_PDE_BASE;
 
-    /* Calculate offset and return PTE address */
-    Offset = ((((ULONG)(Address)) >> MM_PTI_SHIFT) << MM_PTE_SHIFT);
-    return (PMMPTE)(MM_PTE_BASE + Offset);
+        /* Set PML3 shift values */
+        MmpPageMapInfo.PdiShift = MM_PDI_SHIFT;
+        MmpPageMapInfo.PteShift = MM_PTE_SHIFT;
+    }
+    else
+    {
+        /* XPA disabled, use legacy i386 paging (PML2) */
+        MmpPageMapRoutines = &MmpPml2Routines;
+
+        /* Set PML2 page map information */
+        MmpPageMapInfo.Xpa = FALSE;
+
+        /* Set PML2 base addresses */
+        MmpPageMapInfo.PteBase = MM_PTE_BASE;
+        MmpPageMapInfo.PdeBase = MM_PDE_LEGACY_BASE;
+
+        /* Set PML2 shift values */
+        MmpPageMapInfo.PdiShift = MM_PDI_LEGACY_SHIFT;
+        MmpPageMapInfo.PteShift = MM_PTE_LEGACY_SHIFT;
+    }
 }
 
 /**
@@ -63,19 +68,4 @@ VOID
 MmpInitializeArchitecture(VOID)
 {
     UNIMPLEMENTED;
-}
-
-/**
- * Checks if PAE (Physical Address Extension) is enabled.
- *
- * @return This routine returns TRUE if PAE is enabled, or FALSE otherwise.
- *
- * @since XT 1.0
- */
-XTAPI
-BOOLEAN
-MmpMemoryExtensionEnabled(VOID)
-{
-    /* Check if PAE is enabled */
-    return ((ArReadControlRegister(4) & CR4_PAE) != 0) ? TRUE : FALSE;
 }

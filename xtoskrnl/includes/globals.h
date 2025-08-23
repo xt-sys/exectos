@@ -75,9 +75,6 @@ EXTERN ULONG MmNumberOfPhysicalPages;
 /* Old biggest free memory descriptor */
 EXTERN LOADER_MEMORY_DESCRIPTOR MmOldFreeDescriptor;
 
-/* Page Map Level */
-EXTERN ULONG MmPageMapLevel;
-
 /* Processor structures data (THIS IS A TEMPORARY HACK) */
 EXTERN UCHAR MmProcessorStructuresData[MAXIMUM_PROCESSORS][KPROCESSOR_STRUCTURES_SIZE];
 
@@ -87,8 +84,11 @@ EXTERN LOADER_MEMORY_DESCRIPTOR MmpHardwareAllocationDescriptors[MM_HARDWARE_ALL
 /* Live address of kernel's hardware heap */
 EXTERN PVOID MmpHardwareHeapStart;
 
-/* Architecture-specific memory extension */
-EXTERN BOOLEAN MmpMemoryExtension;
+/* Information about the current page map */
+EXTERN MMPAGEMAP_INFO MmpPageMapInfo;
+
+/* Pointers to page map routines for the current paging mode */
+EXTERN PCMMPAGEMAP_ROUTINES MmpPageMapRoutines;
 
 /* Number of used hardware allocation descriptors */
 EXTERN ULONG MmpUsedHardwareAllocationDescriptors;

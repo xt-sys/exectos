@@ -31,9 +31,6 @@ MmInitializeMemoryManager(VOID)
         KePanic(0);
     }
 
-    /* Store Page Map Level */
-    MmPageMapLevel = KeInitializationBlock->LoaderInformation.PageMapLevel;
-
     /* Proceed with architecture specific initialization */
     MmpInitializeArchitecture();
 }

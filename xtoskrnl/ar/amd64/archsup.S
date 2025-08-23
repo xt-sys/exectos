@@ -13,7 +13,7 @@
 
 
 /**
- * This macro creates a trap handler for the specified vector.
+ * Creates a trap handler for the specified vector.
  *
  * @param Vector
  *        Supplies a trap vector number.

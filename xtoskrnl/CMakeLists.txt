@@ -9,6 +9,7 @@ include_directories(
 
 # Specify list of library source code files
 list(APPEND LIBXTOS_SOURCE
+    ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/boot.S
     ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/cpufunc.c
     ${XTOSKRNL_SOURCE_DIR}/hl/cport.c
     ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/ioport.c
@@ -23,6 +24,7 @@ list(APPEND LIBXTOS_SOURCE
 # Specify list of kernel source code files
 list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/archsup.S
+    ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/boot.S
     ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/cpufunc.c
     ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/globals.c
     ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/procsup.c
@@ -60,8 +62,10 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/mm/init.c
     ${XTOSKRNL_SOURCE_DIR}/mm/kpools.c
     ${XTOSKRNL_SOURCE_DIR}/mm/pages.c
+    ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/globals.c
     ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/init.c
     ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/pages.c
+    ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/pmap.c
     ${XTOSKRNL_SOURCE_DIR}/po/idle.c
     ${XTOSKRNL_SOURCE_DIR}/rtl/atomic.c
     ${XTOSKRNL_SOURCE_DIR}/rtl/bitmap.c

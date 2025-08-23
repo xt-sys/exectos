@@ -60,11 +60,11 @@ XtpMapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
 {
     EFI_PHYSICAL_ADDRESS Address;
     PHARDWARE_LEGACY_PTE LegacyPdeBase;
-    PHARDWARE_PTE PdeBase;
+    PHARDWARE_MODERN_PTE PdeBase;
     EFI_STATUS Status;
 
     /* Allocate memory */
-    Status = XtLdrProtocol->Memory.AllocatePages(1, &Address);
+    Status = XtLdrProtocol->Memory.AllocatePages(AllocateAnyPages, 1, &Address);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Memory allocation failure, return error */
@@ -78,10 +78,10 @@ XtpMapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
     if(PageMap->PageMapLevel == 3)
     {
         /* Get PDE base address (PAE enabled) */
-        PdeBase = (PHARDWARE_PTE)(((PHARDWARE_PTE)PageMap->PtePointer)[MM_HARDWARE_VA_START >> MM_PPI_SHIFT].PageFrameNumber << MM_PAGE_SHIFT);
+        PdeBase = (PHARDWARE_MODERN_PTE)(((PHARDWARE_MODERN_PTE)PageMap->PtePointer)[MM_HARDWARE_VA_START >> MM_PPI_SHIFT].PageFrameNumber << MM_PAGE_SHIFT);
 
         /* Make PDE valid */
-        RtlZeroMemory(&PdeBase[(MM_HARDWARE_VA_START >> MM_PDI_SHIFT) & 0x1FF], sizeof(HARDWARE_PTE));
+        RtlZeroMemory(&PdeBase[(MM_HARDWARE_VA_START >> MM_PDI_SHIFT) & 0x1FF], sizeof(HARDWARE_MODERN_PTE));
         PdeBase[(MM_HARDWARE_VA_START >> MM_PDI_SHIFT) & 0x1FF].PageFrameNumber = Address >> MM_PAGE_SHIFT;
         PdeBase[(MM_HARDWARE_VA_START >> MM_PDI_SHIFT) & 0x1FF].Valid = 1;
         PdeBase[(MM_HARDWARE_VA_START >> MM_PDI_SHIFT) & 0x1FF].Writable = 1;
@@ -126,7 +126,7 @@ XtEnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
     EFI_STATUS Status;
 
     /* Build page map */
-    Status = XtLdrProtocol->Memory.BuildPageMap(PageMap, 0xC0000000);
+    Status = XtLdrProtocol->Memory.BuildPageMap(PageMap, MM_PTE_BASE);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to build page map */
