@@ -34,17 +34,17 @@ BlDisplayBootMenu()
     LONG TimeOut;
     PWCHAR TimeOutString;
 
+    /* Draw boot menu */
+    BlpDrawBootMenu(&Handle);
+
     /* Initialize boot menu list */
     TopVisibleEntry = 0;
-    Status = BlInitializeBootMenuList(&MenuEntries, &NumberOfEntries, &HighligtedEntryId);
+    Status = BlInitializeBootMenuList(Handle.Width - 4, &MenuEntries, &NumberOfEntries, &HighligtedEntryId);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to initialize boot menu list, exit into XTLDR shell */
         return;
     }
-
-    /* Draw boot menu */
-    BlpDrawBootMenu(&Handle);
 
     /* Calculate how many entries can be visible in the menu box */
     VisibleEntries = Handle.Height - 2;
@@ -175,7 +175,7 @@ BlDisplayBootMenu()
                     BlSetConsoleAttributes(Handle.DialogColor | Handle.TextColor);
                     BlClearConsoleLine(Handle.PosY + Handle.Height + 4);
                     BlSetCursorPosition(4, Handle.PosY + Handle.Height + 4);
-                    BlConsolePrint(L"Booting '%S' now...\n", MenuEntries[HighligtedEntryId].EntryName);
+                    BlConsolePrint(L"Booting '%S' now...\n", MenuEntries[HighligtedEntryId].FullName);
 
                     /* Boot the highlighted (chosen) OS */
                     Status = BlInvokeBootProtocol(MenuEntries[HighligtedEntryId].ShortName,
@@ -184,7 +184,7 @@ BlDisplayBootMenu()
                     {
                         /* Failed to boot OS */
                         BlDebugPrint(L"ERROR: Failed to boot '%S' (Status Code: 0x%zX)\n",
-                                     MenuEntries[HighligtedEntryId].EntryName, Status);
+                                     MenuEntries[HighligtedEntryId].FullName, Status);
                         BlDisplayErrorDialog(L"XTLDR", L"Failed to startup the selected Operating System.");
                         RedrawBootMenu = TRUE;
                     }
@@ -356,7 +356,7 @@ BlDisplayBootMenu()
                     BlSetConsoleAttributes(Handle.DialogColor | Handle.TextColor);
                     BlClearConsoleLine(Handle.PosY + Handle.Height + 4);
                     BlSetCursorPosition(4, Handle.PosY + Handle.Height + 4);
-                    BlConsolePrint(L"Booting '%S' now...\n", MenuEntries[HighligtedEntryId].EntryName);
+                    BlConsolePrint(L"Booting '%S' now...\n", MenuEntries[HighligtedEntryId].FullName);
 
                     /* Disable the timer just in case booting OS fails */
                     TimeOut = -1;
@@ -368,7 +368,7 @@ BlDisplayBootMenu()
                     {
                         /* Failed to boot OS */
                         BlDebugPrint(L"ERROR: Failed to boot '%S' (Status Code: 0x%zX)\n",
-                                     MenuEntries[HighligtedEntryId].EntryName, Status);
+                                     MenuEntries[HighligtedEntryId].FullName, Status);
                         BlDisplayErrorDialog(L"XTLDR", L"Failed to startup the selected Operating System.");
                         RedrawBootMenu = TRUE;
                     }

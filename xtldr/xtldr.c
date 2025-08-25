@@ -90,16 +90,17 @@ BlInitializeBootLoader()
  */
 XTCDECL
 EFI_STATUS
-BlInitializeBootMenuList(OUT PXTBL_BOOTMENU_ITEM *MenuEntries,
+BlInitializeBootMenuList(IN ULONG MaxNameLength,
+                         OUT PXTBL_BOOTMENU_ITEM *MenuEntries,
                          OUT PULONG EntriesCount,
                          OUT PULONG DefaultId)
 {
     EFI_GUID VendorGuid = XT_BOOT_LOADER_PROTOCOL_GUID;
-    PWCHAR DefaultMenuEntry, LastBooted, MenuEntryName;
+    PWCHAR DefaultMenuEntry, LastBooted, MenuEntryName, VisibleName;
     PLIST_ENTRY MenuEntrySectionList, MenuEntryList;
     PXTBL_CONFIG_SECTION MenuEntrySection;
     PXTBL_CONFIG_ENTRY MenuEntryOption;
-    ULONG DefaultOS, NumberOfEntries;
+    ULONG DefaultOS, NameLength,NumberOfEntries;
     PXTBL_BOOTMENU_ITEM OsList;
     EFI_STATUS Status;
 
@@ -177,9 +178,35 @@ BlInitializeBootMenuList(OUT PXTBL_BOOTMENU_ITEM *MenuEntries,
         }
 
         /* Add OS to the boot menu list */
-        OsList[NumberOfEntries].EntryName = MenuEntryName;
+        OsList[NumberOfEntries].FullName = MenuEntryName;
         OsList[NumberOfEntries].ShortName = MenuEntrySection->SectionName;
         OsList[NumberOfEntries].Options = &MenuEntrySection->Options;
+
+        /* Check if the menu entry name fits the maximum length */
+        NameLength = RtlWideStringLength(MenuEntryName, 0);
+        if(NameLength > MaxNameLength)
+        {
+            /* Menu entry name is too long, allocate memory for shorter name visible in the boot menu */
+            Status = BlAllocateMemoryPool((MaxNameLength + 1) * sizeof(WCHAR), (PVOID*)&VisibleName);
+            if(Status != STATUS_EFI_SUCCESS)
+            {
+                /* Memory allocation failure */
+                return STATUS_EFI_OUT_OF_RESOURCES;
+            }
+
+            /* Copy shorter name and append "..." at the end */
+            RtlCopyMemory(VisibleName, MenuEntryName, (MaxNameLength - 3) * sizeof(WCHAR));
+            RtlCopyMemory(VisibleName + MaxNameLength - 3, L"...", 3 * sizeof(WCHAR));
+            VisibleName[MaxNameLength] = L'\0';
+
+            /* Set visible menu entry name */
+            OsList[NumberOfEntries].EntryName = VisibleName;
+        }
+        else
+        {
+            /* Menu entry name fits the maximum length, use it as is */
+            OsList[NumberOfEntries].EntryName = MenuEntryName;
+        }
 
         /* Get next menu entry */
         MenuEntrySectionList = MenuEntrySectionList->Flink;
