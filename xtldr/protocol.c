@@ -749,100 +749,96 @@ BlpGetModuleInfoStrings(IN PWCHAR SectionData,
     EFI_STATUS Status;
     PWCHAR *Array;
     PWCHAR String;
+    ULONG DataSize;
 
     /* Check input parameters */
     InfoStrings = SectionData;
     if(!InfoStrings || !SectionSize)
     {
         /* Invalid input parameters */
+        *ModInfo = NULL;
+        *InfoCount = 0;
         return STATUS_EFI_INVALID_PARAMETER;
     }
 
-    /* Skip zero padding */
-    while(InfoStrings[0] == L'\0' && SectionSize > 1)
+    /* Calculate the size of the data based on the size of the section */
+    DataSize = SectionSize / sizeof(WCHAR);
+
+    /* Skip zero padding at the beginning */
+    while(DataSize > 0 && *InfoStrings == L'\0')
     {
-        /* Get next character and decrement section size */
         InfoStrings++;
-        SectionSize--;
+        DataSize--;
     }
 
     /* Make sure there is at least one string available */
-    if(SectionSize <= 1)
+    if(DataSize < 1)
     {
         /* No strings found */
+        *ModInfo = NULL;
+        *InfoCount = 0;
         return STATUS_EFI_END_OF_FILE;
     }
 
     /* Count number of strings */
     Index = 0;
     Count = 0;
-    while(Index < SectionSize)
+    while(Index < DataSize)
     {
-        /* Get to the next string */
-        if(InfoStrings[Index] != L'\0')
-        {
-            /* Get next character */
-            Index++;
-            continue;
-        }
+        /* Found start of a new string */
+        Count++;
 
-        /* Skip zero padding */
-        while(InfoStrings[Index] == L'\0' && Index < SectionSize)
+        /* Go to the end of the string */
+        while(Index < DataSize && InfoStrings[Index] != L'\0')
         {
-            /* Get next character */
             Index++;
         }
-
-        /* New string found, increment counter */
-        Count++;
+        /* Skip all null terminators */
+        while(Index < DataSize && InfoStrings[Index] == L'\0')
+        {
+            Index++;
+        }
     }
 
-    /* Make sure there is no missing string */
-    if(InfoStrings[Index - 1] != L'\0')
-    {
-        /* One more string available */
-        Count++;
-    }
-
-    /* Allocate memory for array of strings */
-    Status = BlAllocateMemoryPool(SectionSize + 1 + sizeof(PWCHAR) * (Count + 1), (PVOID *)&Array);
+    /* Allocate memory for the pointer array and the string data */
+    Status = BlAllocateMemoryPool(sizeof(PWCHAR) * (Count + 1) + (DataSize + 1) * sizeof(WCHAR), (PVOID *)&Array);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to allocate memory */
         return STATUS_EFI_OUT_OF_RESOURCES;
     }
 
-    /* Allocate memory and copy strings read from '.modinfo' section */
-    BlAllocateMemoryPool(SectionSize, (PVOID*)&String);
-    RtlCopyMemory(String, InfoStrings, SectionSize);
+    /* The string buffer is located right after the pointer array */
+    String = (PWCHAR)(Array + Count + 1);
 
-    /* Make sure last string is NULL-terminated */
+    /* Copy the raw string data */
+    RtlCopyMemory(String, InfoStrings, DataSize * sizeof(WCHAR));
+
+    /* Ensure the entire buffer is null-terminated for safety */
+    String[DataSize] = L'\0';
+
+    /* Set the last element of the pointer array to NULL */
     Array[Count] = NULL;
-    Array[0] = String;
 
-    /* Parse strings into array */
+    /* Populate the array with pointers to the strings within the buffer */
     Index = 0;
-    ArrayIndex = 1;
-    while(Index < SectionSize && ArrayIndex < Count)
+    ArrayIndex = 0;
+    while(Index < DataSize && ArrayIndex < Count)
     {
-        /* Get to the next string */
-        if(String[Index] != L'\0')
-        {
-            /* Get next character */
-            Index++;
-            continue;
-        }
+        /* Set pointer to the beginning of the string */
+        Array[ArrayIndex++] = &String[Index];
 
-        /* Skip zero padding */
-        while(InfoStrings[Index] == L'\0' && Index < SectionSize)
+        /* Find the end of the current string */
+        while(Index < DataSize && String[Index] != L'\0')
         {
-            /* Get next character */
             Index++;
         }
 
-        /* Push string into array */
-        Array[ArrayIndex] = &String[Index];
-        ArrayIndex++;
+        /* Skip all null terminators to find the beginning of the next string */
+        while(Index < DataSize && String[Index] == L'\0')
+        {
+            Index++;
+        }
     }
 
     /* Return array of strings and its size */
