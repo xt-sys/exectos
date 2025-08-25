@@ -24,7 +24,8 @@ BlDisplayBootMenu()
     XTBL_DIALOG_HANDLE Handle;
     PXTBL_BOOTMENU_ITEM MenuEntries = NULL;
     ULONG Index;
-    ULONG HighligtedEntryId, NumberOfEntries, TopVisibleEntry, VisibleEntries;
+    ULONG HighligtedEntryId, OldHighligtedEntryId, NumberOfEntries, TopVisibleEntry, VisibleEntries;
+    BOOLEAN RedrawBootMenu, RedrawEntries;
     UINT_PTR EventIndex;
     EFI_EVENT Events[2];
     EFI_INPUT_KEY Key;
@@ -72,14 +73,23 @@ BlDisplayBootMenu()
         }
     }
 
+    /* Set redraw flags to not redraw the menu itself, but fill it with entries */
+    RedrawBootMenu = FALSE;
+    RedrawEntries = TRUE;
+
     /* Infinite boot menu loop */
     while(TRUE)
     {
-        /* Redraw boot menu */
-        BlpDrawBootMenu(&Handle);
+        /* Redraw boot menu frame if requested */
+        if(RedrawBootMenu)
+        {
+            BlpDrawBootMenu(&Handle);
+            RedrawBootMenu = FALSE;
+            RedrawEntries = TRUE;
+        }
 
         /* Sanity check to ensure we do not display more entries than possible */
-        if (VisibleEntries > NumberOfEntries)
+        if(VisibleEntries > NumberOfEntries)
         {
             VisibleEntries = NumberOfEntries;
         }
@@ -87,12 +97,17 @@ BlDisplayBootMenu()
         /* Check if there is anything to show in the boot menu */
         if(NumberOfEntries > 0)
         {
-            /* Iterate through all menu entries */
-            for(Index = 0; Index < VisibleEntries; Index++)
+            /* Check if we need to redraw boot menu entries */
+            if(RedrawEntries)
             {
-                /* Draw menu entry */
-                BlpDrawBootMenuEntry(&Handle, MenuEntries[TopVisibleEntry + Index].EntryName,
-                                     Index, (TopVisibleEntry + Index) == HighligtedEntryId);
+                /* Iterate through all menu entries */
+                for(Index = 0; Index < VisibleEntries; Index++)
+                {
+                    /* Draw menu entry */
+                    BlpDrawBootMenuEntry(&Handle, MenuEntries[TopVisibleEntry + Index].EntryName,
+                                         Index, (TopVisibleEntry + Index) == HighligtedEntryId);
+                }
+                RedrawEntries = FALSE;
             }
         }
         else
@@ -125,6 +140,9 @@ BlDisplayBootMenu()
 
         /* Flush keyboard buffer out of any keystrokes */
         EfiSystemTable->ConIn->Reset(EfiSystemTable->ConIn, FALSE);
+
+        /* Store old highlighted entry */
+        OldHighligtedEntryId = HighligtedEntryId;
 
         /* Infinite boot menu event loop */
         while(TRUE)
@@ -168,6 +186,7 @@ BlDisplayBootMenu()
                         BlDebugPrint(L"ERROR: Failed to boot '%S' (Status Code: 0x%zX)\n",
                                      MenuEntries[HighligtedEntryId].EntryName, Status);
                         BlDisplayErrorDialog(L"XTLDR", L"Failed to startup the selected Operating System.");
+                        RedrawBootMenu = TRUE;
                     }
 
                     /* Break from boot menu event loop to redraw whole boot menu */
@@ -176,14 +195,28 @@ BlDisplayBootMenu()
                 else if(Key.ScanCode == 0x01)
                 {
                     /* UpArrow key pressed, go to previous entry if possible */
-                    if (HighligtedEntryId > 0)
+                    if(HighligtedEntryId > 0)
                     {
+                        /* Highlight previous entry */
                         HighligtedEntryId--;
-                        if (HighligtedEntryId < TopVisibleEntry)
+
+                        /* Check if we need to scroll the view */
+                        if(HighligtedEntryId < TopVisibleEntry)
                         {
+                            /* Scroll the view */
                             TopVisibleEntry = HighligtedEntryId;
+                            RedrawEntries = TRUE;
+                            break;
                         }
-                        break;
+
+                        /* Redraw new highlighted entry and the old one */
+                        BlpDrawBootMenuEntry(&Handle, MenuEntries[OldHighligtedEntryId].EntryName,
+                                             OldHighligtedEntryId - TopVisibleEntry, FALSE);
+                        BlpDrawBootMenuEntry(&Handle, MenuEntries[HighligtedEntryId].EntryName,
+                                             HighligtedEntryId - TopVisibleEntry, TRUE);
+
+                        /* Update old highlighted entry */
+                        OldHighligtedEntryId = HighligtedEntryId;
                     }
                 }
                 else if(Key.ScanCode == 0x02)
@@ -191,12 +224,26 @@ BlDisplayBootMenu()
                     /* DownArrow key pressed, go to next entry if possible */
                     if(HighligtedEntryId < NumberOfEntries - 1)
                     {
+                        /* Highlight next entry */
                         HighligtedEntryId++;
-                        if (HighligtedEntryId >= TopVisibleEntry + VisibleEntries)
+
+                        /* Check if we need to scroll the view */
+                        if(HighligtedEntryId >= TopVisibleEntry + VisibleEntries)
                         {
+                            /* Scroll the view */
                             TopVisibleEntry = HighligtedEntryId - VisibleEntries + 1;
+                            RedrawEntries = TRUE;
+                            break;
                         }
-                        break;
+
+                        /* Redraw new highlighted entry and the old one */
+                        BlpDrawBootMenuEntry(&Handle, MenuEntries[OldHighligtedEntryId].EntryName,
+                                             OldHighligtedEntryId - TopVisibleEntry, FALSE);
+                        BlpDrawBootMenuEntry(&Handle, MenuEntries[HighligtedEntryId].EntryName,
+                                             HighligtedEntryId - TopVisibleEntry, TRUE);
+
+                        /* Update old highlighted entry */
+                        OldHighligtedEntryId = HighligtedEntryId;
                     }
                 }
                 else if(Key.ScanCode == 0x09)
@@ -207,6 +254,7 @@ BlDisplayBootMenu()
                         /* Highlight first entry */
                         HighligtedEntryId = 0;
                         TopVisibleEntry = 0;
+                        RedrawEntries = TRUE;
                         break;
                     }
                 }
@@ -218,6 +266,7 @@ BlDisplayBootMenu()
                         /* Highlight last entry */
                         HighligtedEntryId = NumberOfEntries - 1;
                         TopVisibleEntry = (NumberOfEntries > VisibleEntries) ? (NumberOfEntries - VisibleEntries) : 0;
+                        RedrawEntries = TRUE;
                         break;
                     }
                 }
@@ -241,6 +290,7 @@ BlDisplayBootMenu()
                                                   L"Visit https://exectos.eu.org/ for more information.");
 
                     /* Break from boot menu event loop to redraw whole boot menu */
+                    RedrawBootMenu = TRUE;
                     break;
                 }
                 else if(Key.ScanCode == 0x14)
@@ -248,6 +298,7 @@ BlDisplayBootMenu()
                     /* F10 key pressed, reboot into UEFI setup interface */
                     BlEnterFirmwareSetup();
                     BlDisplayErrorDialog(L"XTLDR", L"Reboot into firmware setup interface not supported!");
+                    RedrawBootMenu = TRUE;
 
                     /* Break from boot menu event loop to redraw whole boot menu */
                     break;
@@ -257,6 +308,7 @@ BlDisplayBootMenu()
                     /* F11 key pressed, reboot the machine */
                     BlRebootSystem();
                     BlDisplayErrorDialog(L"XTLDR", L"Failed to reboot the machine!");
+                    RedrawBootMenu = TRUE;
 
                     /* Break from boot menu event loop to redraw whole boot menu */
                     break;
@@ -266,6 +318,7 @@ BlDisplayBootMenu()
                     /* F12 key pressed, shutdown the machine */
                     BlShutdownSystem();
                     BlDisplayErrorDialog(L"XTLDR", L"Failed to shutdown the machine!");
+                    RedrawBootMenu = TRUE;
 
                     /* Break from boot menu event loop to redraw whole boot menu */
                     break;
@@ -274,6 +327,7 @@ BlDisplayBootMenu()
                 {
                     /* 'e' key pressed, edit the highlighted entry */
                     BlDisplayErrorDialog(L"XTLDR", L"Editing boot menu entries is not implemented yet!");
+                    RedrawBootMenu = TRUE;
 
                     /* Break from boot menu event loop to redraw whole boot menu */
                     break;
@@ -316,6 +370,7 @@ BlDisplayBootMenu()
                         BlDebugPrint(L"ERROR: Failed to boot '%S' (Status Code: 0x%zX)\n",
                                      MenuEntries[HighligtedEntryId].EntryName, Status);
                         BlDisplayErrorDialog(L"XTLDR", L"Failed to startup the selected Operating System.");
+                        RedrawBootMenu = TRUE;
                     }
                     break;
                 }
