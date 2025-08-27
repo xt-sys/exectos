@@ -785,7 +785,6 @@ BlDisplayInputDialog(IN PWCHAR Caption,
         /* Wait for key press and read key stroke */
         BlWaitForEfiEvent(1, &EfiSystemTable->ConIn->WaitForKey, &Index);
         BlReadKeyStroke(&Key);
-        BlResetConsoleInputBuffer();
 
         /* Check key press scan code */
         if(Key.ScanCode == 0x17)
