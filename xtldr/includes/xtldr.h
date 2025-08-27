@@ -73,6 +73,10 @@ BlDisplayBootMenu();
 
 XTCDECL
 VOID
+BlDisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry);
+
+XTCDECL
+VOID
 BlDisplayErrorDialog(IN PWCHAR Caption,
                      IN PWCHAR Message);
 
@@ -135,6 +139,12 @@ BlGetBooleanParameter(IN CONST PWCHAR Parameters,
                       IN CONST PWCHAR Needle);
 
 XTCDECL
+EFI_STATUS
+BlGetBootOptionValue(IN PLIST_ENTRY Options,
+                     IN CONST PWCHAR OptionName,
+                     OUT PWCHAR *OptionValue);
+
+XTCDECL
 BOOLEAN
 BlGetConfigBooleanValue(IN CONST PWCHAR ConfigName);
 
@@ -146,6 +156,11 @@ XTCDECL
 EFI_STATUS
 BlGetConfigurationTable(IN PEFI_GUID TableGuid,
                         OUT PVOID *Table);
+
+XTCDECL
+VOID
+BlGetEditableOptions(OUT CONST PWCHAR **OptionsArray,
+                     OUT PSIZE_T OptionsCount);
 
 XTCDECL
 EFI_STATUS
@@ -334,6 +349,12 @@ BlResetConsoleInputBuffer();
 
 XTCDECL
 EFI_STATUS
+BlSetBootOptionValue(IN PLIST_ENTRY Options,
+                     IN CONST PWCHAR OptionName,
+                     IN CONST PWCHAR OptionValue);
+
+XTCDECL
+EFI_STATUS
 BlSetConfigValue(IN CONST PWCHAR ConfigName,
                  IN CONST PWCHAR ConfigValue);
 
@@ -455,6 +476,18 @@ XTCDECL
 VOID
 BlpDrawDialogProgressBar(IN PXTBL_DIALOG_HANDLE Handle,
                          IN UCHAR Percentage);
+
+XTCDECL
+VOID
+BlpDrawEditMenu(OUT PXTBL_DIALOG_HANDLE Handle);
+
+XTCDECL
+EFI_STATUS
+BlpDrawEditMenuEntry(IN PXTBL_DIALOG_HANDLE Handle,
+                     IN PWCHAR OptionName,
+                     IN PWCHAR OptionValue,
+                     IN UINT Position,
+                     IN BOOLEAN Highlighted);
 
 XTCDECL
 PEFI_DEVICE_PATH_PROTOCOL

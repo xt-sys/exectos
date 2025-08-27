@@ -24,6 +24,9 @@ EXTERN LIST_ENTRY BlpConfig;
 /* XT Boot Loader loaded configuration */
 EXTERN LIST_ENTRY BlpConfigSections;
 
+/* List of user-editable boot options */
+EXTERN PWCHAR BlpEditableConfigOptions[];
+
 /* XT Boot Loader protocol */
 EXTERN XTBL_LOADER_PROTOCOL BlpLdrProtocol;
 

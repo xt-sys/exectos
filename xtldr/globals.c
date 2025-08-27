@@ -21,6 +21,13 @@ LIST_ENTRY BlpConfig;
 /* XT Boot Loader loaded configuration */
 LIST_ENTRY BlpConfigSections;
 
+/* List of user-editable boot options */
+PWCHAR BlpEditableConfigOptions[] = {
+    L"BootModules", L"SystemType", L"SystemPath",
+    L"KernelFile",  L"InitrdFile", L"HalFile",
+    L"Parameters", NULL
+};
+
 /* XT Boot Loader protocol */
 XTBL_LOADER_PROTOCOL BlpLdrProtocol;
 
@@ -41,3 +48,4 @@ EFI_HANDLE EfiImageHandle;
 
 /* EFI System Table */
 PEFI_SYSTEM_TABLE EfiSystemTable;
+

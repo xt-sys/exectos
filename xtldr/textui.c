@@ -107,6 +107,8 @@ BlDisplayBootMenu()
                     BlpDrawBootMenuEntry(&Handle, MenuEntries[TopVisibleEntry + Index].EntryName,
                                          Index, (TopVisibleEntry + Index) == HighligtedEntryId);
                 }
+
+                /* Clear redraw entries flag */
                 RedrawEntries = FALSE;
             }
         }
@@ -198,6 +200,7 @@ BlDisplayBootMenu()
                     if(HighligtedEntryId > 0)
                     {
                         /* Highlight previous entry */
+                        OldHighligtedEntryId = HighligtedEntryId;
                         HighligtedEntryId--;
 
                         /* Check if we need to scroll the view */
@@ -214,9 +217,6 @@ BlDisplayBootMenu()
                                              OldHighligtedEntryId - TopVisibleEntry, FALSE);
                         BlpDrawBootMenuEntry(&Handle, MenuEntries[HighligtedEntryId].EntryName,
                                              HighligtedEntryId - TopVisibleEntry, TRUE);
-
-                        /* Update old highlighted entry */
-                        OldHighligtedEntryId = HighligtedEntryId;
                     }
                 }
                 else if(Key.ScanCode == 0x02)
@@ -225,6 +225,7 @@ BlDisplayBootMenu()
                     if(HighligtedEntryId < NumberOfEntries - 1)
                     {
                         /* Highlight next entry */
+                        OldHighligtedEntryId = HighligtedEntryId;
                         HighligtedEntryId++;
 
                         /* Check if we need to scroll the view */
@@ -241,9 +242,6 @@ BlDisplayBootMenu()
                                              OldHighligtedEntryId - TopVisibleEntry, FALSE);
                         BlpDrawBootMenuEntry(&Handle, MenuEntries[HighligtedEntryId].EntryName,
                                              HighligtedEntryId - TopVisibleEntry, TRUE);
-
-                        /* Update old highlighted entry */
-                        OldHighligtedEntryId = HighligtedEntryId;
                     }
                 }
                 else if(Key.ScanCode == 0x09)
@@ -326,7 +324,7 @@ BlDisplayBootMenu()
                 else if(Key.UnicodeChar == 0x65)
                 {
                     /* 'e' key pressed, edit the highlighted entry */
-                    BlDisplayErrorDialog(L"XTLDR", L"Editing boot menu entries is not implemented yet!");
+                    BlDisplayEditMenu(&MenuEntries[HighligtedEntryId]);
                     RedrawBootMenu = TRUE;
 
                     /* Break from boot menu event loop to redraw whole boot menu */
@@ -375,6 +373,232 @@ BlDisplayBootMenu()
                     break;
                 }
             }
+        }
+    }
+}
+
+/**
+ * Displays a simple TUI-based edit menu.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+BlDisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry)
+{
+    ULONG HighligtedOptionId, Index, NumberOfOptions, OldHighligtedOptionId, TopVisibleEntry, VisibleEntries;
+    XTBL_DIALOG_HANDLE Handle;
+    BOOLEAN RedrawEditMenu, RedrawEntries;
+    EFI_INPUT_KEY Key;
+    UINT_PTR EventIndex;
+    PWCHAR NewValue, OptionName, OriginalValue, Value, ValueToEdit;
+    CONST PWCHAR *EditableOptions;
+
+    /* Draw edit menu */
+    BlpDrawEditMenu(&Handle);
+
+    /* Get the list of user editable options */
+    BlGetEditableOptions(&EditableOptions, &NumberOfOptions);
+
+    /* Calculate how many entries can be visible in the menu box */
+    VisibleEntries = Handle.Height - 2;
+
+    /* Assume the first option is highlighted by default */
+    HighligtedOptionId = 0;
+    OldHighligtedOptionId = 0;
+    TopVisibleEntry = 0;
+
+    /* Set redraw flags to not redraw the menu itself, but fill it with entries */
+    RedrawEditMenu = FALSE;
+    RedrawEntries = TRUE;
+
+    /* Infinite edit menu loop */
+    while(TRUE)
+    {
+        /* Redraw edit menu frame if requested */
+        if(RedrawEditMenu)
+        {
+            BlpDrawEditMenu(&Handle);
+            RedrawEditMenu = FALSE;
+            RedrawEntries = TRUE;
+        }
+
+        /* Sanity check to ensure we do not display more entries than possible */
+        if(VisibleEntries > NumberOfOptions)
+        {
+            VisibleEntries = NumberOfOptions;
+        }
+
+        /* Check if we need to redraw boot menu entries */
+        if(RedrawEntries)
+        {
+            /* Iterate through all menu entries */
+            for(Index = 0; Index < VisibleEntries; Index++)
+            {
+                /* Draw menu entry */
+                BlGetBootOptionValue(MenuEntry->Options, EditableOptions[TopVisibleEntry + Index], &Value);
+                BlpDrawEditMenuEntry(&Handle, EditableOptions[TopVisibleEntry + Index], Value, Index,
+                                     (TopVisibleEntry + Index) == HighligtedOptionId);
+
+                /* Free allocated value string if needed */
+                if(Value != NULL)
+                {
+                    BlFreeMemoryPool(Value);
+                }
+            }
+
+            /* Clear redraw entries flag */
+            RedrawEntries = FALSE;
+        }
+
+        /* Wait for EFI event and read key stroke */
+        BlWaitForEfiEvent(1, &EfiSystemTable->ConIn->WaitForKey, &EventIndex);
+        BlReadKeyStroke(&Key);
+
+        /* Check key press scan code */
+        if(Key.UnicodeChar == 0x0D)
+        {
+            /* ENTER key pressed, edit the highlighted option */
+            OptionName = EditableOptions[HighligtedOptionId];
+            BlGetBootOptionValue(MenuEntry->Options, OptionName, &OriginalValue);
+
+            /* If the original value is NULL, use an empty string for editing */
+            if(OriginalValue == NULL)
+            {
+                ValueToEdit = L"";
+            }
+            else
+            {
+                ValueToEdit = OriginalValue;
+            }
+
+            /* Display input dialog to edit the option value */
+            NewValue = ValueToEdit;
+            BlDisplayInputDialog(OptionName, L"Enter new value:", &NewValue);
+
+            /* Check if the value was changed */
+            if(NewValue != ValueToEdit)
+            {
+                /* Update the boot option with the new value and free the old value */
+                BlSetBootOptionValue(MenuEntry->Options, OptionName, NewValue);
+                BlFreeMemoryPool(NewValue);
+            }
+
+            /* Free the original value if it was allocated */
+            if(OriginalValue != NULL)
+            {
+                BlFreeMemoryPool(OriginalValue);
+            }
+
+            /* Mark the edit menu for redraw */
+            RedrawEditMenu = TRUE;
+        }
+        else if(Key.ScanCode == 0x01)
+        {
+            /* UpArrow key pressed, go to previous entry if possible */
+            if(HighligtedOptionId > 0)
+            {
+                /* Highlight previous entry */
+                OldHighligtedOptionId = HighligtedOptionId;
+                HighligtedOptionId--;
+
+                /* Check if we need to scroll the view */
+                if(HighligtedOptionId < TopVisibleEntry)
+                {
+                    /* Scroll the view */
+                    TopVisibleEntry = HighligtedOptionId;
+                    RedrawEntries = TRUE;
+                    continue;
+                }
+
+                /* Redraw old highlighted entry */
+                BlGetBootOptionValue(MenuEntry->Options, EditableOptions[OldHighligtedOptionId], &Value);
+                BlpDrawEditMenuEntry(&Handle, EditableOptions[OldHighligtedOptionId], Value, OldHighligtedOptionId - TopVisibleEntry, FALSE);
+
+                /* Free allocated value string if needed */
+                if(Value != NULL)
+                {
+                    BlFreeMemoryPool(Value);
+                }
+
+                /* Redraw new highlighted entry */
+                BlGetBootOptionValue(MenuEntry->Options, EditableOptions[HighligtedOptionId], &Value);
+                BlpDrawEditMenuEntry(&Handle, EditableOptions[HighligtedOptionId], Value, HighligtedOptionId - TopVisibleEntry, TRUE);
+
+                /* Free allocated value string if needed */
+                if(Value != NULL)
+                {
+                    BlFreeMemoryPool(Value);
+                }
+            }
+        }
+        else if(Key.ScanCode == 0x02)
+        {
+            /* DownArrow key pressed, go to next entry if possible */
+            if(HighligtedOptionId < NumberOfOptions - 1)
+            {
+                /* Highlight next entry */
+                OldHighligtedOptionId = HighligtedOptionId;
+                HighligtedOptionId++;
+
+                /* Check if we need to scroll the view */
+                if(HighligtedOptionId >= TopVisibleEntry + VisibleEntries)
+                {
+                    /* Scroll the view */
+                    TopVisibleEntry = HighligtedOptionId - VisibleEntries + 1;
+                    RedrawEntries = TRUE;
+                    continue;
+                }
+
+                /* Redraw old highlighted entry */
+                BlGetBootOptionValue(MenuEntry->Options, EditableOptions[OldHighligtedOptionId], &Value);
+                BlpDrawEditMenuEntry(&Handle, EditableOptions[OldHighligtedOptionId], Value, OldHighligtedOptionId - TopVisibleEntry, FALSE);
+
+                /* Free allocated value string if needed */
+                if(Value != NULL)
+                {
+                    BlFreeMemoryPool(Value);
+                }
+
+                /* Redraw new highlighted entry */
+                BlGetBootOptionValue(MenuEntry->Options, EditableOptions[HighligtedOptionId], &Value);
+                BlpDrawEditMenuEntry(&Handle, EditableOptions[HighligtedOptionId], Value, HighligtedOptionId - TopVisibleEntry, TRUE);
+
+                /* Free allocated value string if needed */
+                if(Value != NULL)
+                {
+                    BlFreeMemoryPool(Value);
+                }
+            }
+        }
+        else if(Key.ScanCode == 0x09)
+        {
+            /* PageUp key pressed, go to top entry */
+            if(HighligtedOptionId != 0)
+            {
+                /* Highlight first entry */
+                HighligtedOptionId = 0;
+                TopVisibleEntry = 0;
+                RedrawEntries = TRUE;
+            }
+        }
+        else if(Key.ScanCode == 0x0A)
+        {
+            /* PageDown key pressed, go to bottom entry */
+            if(HighligtedOptionId != NumberOfOptions - 1)
+            {
+                /* Highlight last entry */
+                HighligtedOptionId = NumberOfOptions - 1;
+                TopVisibleEntry = (NumberOfOptions > VisibleEntries) ? (NumberOfOptions - VisibleEntries) : 0;
+                RedrawEntries = TRUE;
+            }
+        }
+        else if(Key.ScanCode == 0x17)
+        {
+            /* ESC key pressed, exit edit menu */
+            break;
         }
     }
 }
@@ -505,12 +729,11 @@ XTCDECL
 VOID
 BlDisplayInputDialog(IN PWCHAR Caption,
                      IN PWCHAR Message,
-                     IN PWCHAR *InputFieldText)
+                     IN OUT PWCHAR *InputFieldText)
 {
     SIZE_T InputFieldLength, TextCursorPosition, TextIndex, TextPosition;
     XTBL_DIALOG_HANDLE Handle;
     PWCHAR InputFieldBuffer;
-    SIZE_T BufferLength;
     EFI_INPUT_KEY Key;
     EFI_STATUS Status;
     UINT_PTR Index;
@@ -535,9 +758,11 @@ BlDisplayInputDialog(IN PWCHAR Caption,
     Key.ScanCode = 0;
     Key.UnicodeChar = 0;
 
-    /* Get initial input text length and allocate a buffer */
-    BufferLength = RtlWideStringLength(*InputFieldText, 0);
-    Status = BlAllocateMemoryPool(BufferLength * sizeof(WCHAR), (PVOID *)&InputFieldBuffer);
+    /* Determine input field length */
+    InputFieldLength = RtlWideStringLength(*InputFieldText, 0);
+
+    /* Allocate a buffer for storing the input field text */
+    Status = BlAllocateMemoryPool(2048 * sizeof(WCHAR), (PVOID *)&InputFieldBuffer);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Memory allocation failure, print error message and return */
@@ -547,15 +772,8 @@ BlDisplayInputDialog(IN PWCHAR Caption,
     }
 
     /* Copy input text into edit buffer */
-    RtlCopyMemory(InputFieldBuffer, *InputFieldText, BufferLength * sizeof(WCHAR));
-    InputFieldBuffer[BufferLength] = L'\0';
-
-    /* Determine input field length */
-    InputFieldLength = BufferLength;
-    if(InputFieldLength > Handle.Width - 8)
-    {
-        InputFieldLength = Handle.Width - 8;
-    }
+    RtlCopyMemory(InputFieldBuffer, *InputFieldText, InputFieldLength * sizeof(WCHAR));
+    InputFieldBuffer[InputFieldLength] = L'\0';
 
     /* Start at first character */
     TextPosition = 0;
@@ -618,12 +836,16 @@ BlDisplayInputDialog(IN PWCHAR Caption,
             /* DELETE key pressed, delete character */
             if(Handle.Attributes & XTBL_TUI_DIALOG_ACTIVE_INPUT)
             {
+                /* Check if buffer is not empty */
                 if(InputFieldLength > 0 && TextPosition < InputFieldLength)
                 {
+                    /* Delete character */
                     RtlMoveMemory(InputFieldBuffer + TextPosition, InputFieldBuffer + TextPosition + 1,
                                   (InputFieldLength - TextPosition) * sizeof(WCHAR));
+
+                    /* Decrement length and null terminate string */
                     InputFieldLength--;
-                    InputFieldBuffer[InputFieldLength] = 0;
+                    InputFieldBuffer[InputFieldLength] = L'\0';
                 }
             }
         }
@@ -632,13 +854,17 @@ BlDisplayInputDialog(IN PWCHAR Caption,
             /* BACKSPACE key pressed, delete character */
             if(Handle.Attributes & XTBL_TUI_DIALOG_ACTIVE_INPUT)
             {
+                /* Check if buffer is not empty */
                 if(InputFieldLength > 0 && TextPosition > 0 && TextPosition <= InputFieldLength)
                 {
-                    TextPosition--;
+                    /* Delete character */
                     RtlMoveMemory(InputFieldBuffer + TextPosition, InputFieldBuffer + TextPosition + 1,
                                   (InputFieldLength - TextPosition) * sizeof(WCHAR));
+
+                    /* Decrement length, position and null terminate string */
+                    TextPosition--;
                     InputFieldLength--;
-                    InputFieldBuffer[InputFieldLength] = 0;
+                    InputFieldBuffer[InputFieldLength] = L'\0';
                 }
             }
         }
@@ -653,15 +879,23 @@ BlDisplayInputDialog(IN PWCHAR Caption,
             /* Other key pressed, add character to the buffer */
             if(Handle.Attributes & XTBL_TUI_DIALOG_ACTIVE_INPUT && Key.UnicodeChar != 0)
             {
-                RtlMoveMemory(InputFieldBuffer + TextPosition + 1, InputFieldBuffer + TextPosition,
-                              (InputFieldLength - TextPosition) * sizeof(WCHAR));
-                InputFieldBuffer[TextPosition] = Key.UnicodeChar;
-                TextPosition++;
-                InputFieldLength++;
-                InputFieldBuffer[InputFieldLength] = 0;
+                /* Check if buffer is full */
+                if(InputFieldLength < 2047)
+                {
+                    /* Insert character at current position */
+                    RtlMoveMemory(InputFieldBuffer + TextPosition + 1, InputFieldBuffer + TextPosition,
+                                  (InputFieldLength - TextPosition) * sizeof(WCHAR));
+                    InputFieldBuffer[TextPosition] = Key.UnicodeChar;
+
+                    /* Increment length, position and null terminate string */
+                    TextPosition++;
+                    InputFieldLength++;
+                    InputFieldBuffer[InputFieldLength] = L'\0';
+                }
             }
         }
 
+        /* Calculate text index and cursor position */
         if(TextPosition > (Handle.Width - 9))
         {
             TextIndex = TextPosition - (Handle.Width - 9);
@@ -677,6 +911,7 @@ BlDisplayInputDialog(IN PWCHAR Caption,
         BlpDrawDialogButton(&Handle);
         BlpDrawDialogInputField(&Handle, &InputFieldBuffer[TextIndex]);
 
+        /* Set cursor position if input field is active */
         if(Handle.Attributes & XTBL_TUI_DIALOG_ACTIVE_INPUT)
         {
             BlSetCursorPosition(Handle.PosX + 4 + TextCursorPosition, Handle.PosY + Handle.Height - 4);
@@ -1394,4 +1629,165 @@ BlpDrawDialogProgressBar(IN PXTBL_DIALOG_HANDLE Handle,
     /* Disable cursor and write progress bar to console */
     BlDisableConsoleCursor();
     BlConsoleWrite(ProgressBar);
+}
+
+/**
+ * Draws a text-based boot edition menu.
+ *
+ * @param Handle
+ *        Supplies a pointer to the edition menu handle.
+ *
+ * @return This function does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+BlpDrawEditMenu(OUT PXTBL_DIALOG_HANDLE Handle)
+{
+    /* Query console screen resolution */
+    BlQueryConsoleMode(&Handle->ResX, &Handle->ResY);
+
+    /* Set boot menu parameters */
+    Handle->Attributes = 0;
+    Handle->DialogColor = EFI_TEXT_BGCOLOR_BLACK;
+    Handle->TextColor = EFI_TEXT_FGCOLOR_LIGHTGRAY;
+    Handle->PosX = 3;
+    Handle->PosY = 3;
+    Handle->Width = Handle->ResX - 6;
+    Handle->Height = Handle->ResY - 10;
+
+    /* Clear screen and disable cursor */
+    BlSetConsoleAttributes(Handle->DialogColor | Handle->TextColor);
+    BlClearConsoleScreen();
+    BlDisableConsoleCursor();
+
+    /* Check if debugging enabled */
+    if(DEBUG)
+    {
+        /* Print debug version of XTLDR banner */
+        BlSetCursorPosition((Handle->ResX - 44) / 2, 1);
+        BlConsolePrint(L"XTLDR Boot Loader v%d.%d (%s-%s)\n",
+                       XTLDR_VERSION_MAJOR, XTLDR_VERSION_MINOR, XTOS_VERSION_DATE, XTOS_VERSION_HASH);
+    }
+    else
+    {
+        /* Print standard XTLDR banner */
+        BlSetCursorPosition((Handle->ResX - 22) / 2, 1);
+        BlConsolePrint(L"XTLDR Boot Loader v%d.%d\n", XTLDR_VERSION_MAJOR, XTLDR_VERSION_MINOR);
+    }
+
+    /* Draw empty dialog box for boot menu */
+    BlpDrawDialogBox(Handle, L"Edit Options", NULL);
+
+    /* Print help message below the edit menu */
+    BlSetCursorPosition(0, Handle->PosY + Handle->Height);
+    BlSetConsoleAttributes(EFI_TEXT_BGCOLOR_BLACK | EFI_TEXT_FGCOLOR_LIGHTGRAY);
+    BlConsolePrint(L"    Use cursors to change the selection. Press ENTER key to edit the chosen\n"
+                   L"    option or ESC to return to the main boot menu.");
+}
+
+/**
+ * Draws edit menu entry at the specified position.
+ *
+ * @param Handle
+ *        Supplies a pointer to the boot menu handle.
+ *
+ * @param OptionName
+ *        Supplies a pointer to the buffer containing a part of the menu entry name (an option name).
+ *
+ * @param OptionValue
+ *        Supplies a pointer to the buffer containing a part of the menu entry name (an option value).
+ *
+ * @param Position
+ *        Specifies entry position on the list in the boot menu.
+ *
+ * @param Highlighted
+ *        Specifies whether this entry should be highlighted or not.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+BlpDrawEditMenuEntry(IN PXTBL_DIALOG_HANDLE Handle,
+                     IN PWCHAR OptionName,
+                     IN PWCHAR OptionValue,
+                     IN UINT Position,
+                     IN BOOLEAN Highlighted)
+{
+    BOOLEAN Allocation;
+    PWCHAR DisplayValue, ShortValue;
+    UINT Index;
+    ULONG OptionNameLength, OptionValueLength, OptionWidth;
+    EFI_STATUS Status;
+
+    /* Assume no allocation was made */
+    Allocation = FALSE;
+
+    /* Set display value depending on input */
+    DisplayValue = (OptionValue != NULL) ? OptionValue : L"";
+
+    /* Determine lengths */
+    OptionNameLength = RtlWideStringLength(OptionName, 0);
+    OptionValueLength = RtlWideStringLength(DisplayValue, 0);
+    OptionWidth = Handle->Width - 4 - (OptionNameLength + 2);
+
+    /* Check if value needs to be truncated */
+    if(OptionValueLength > OptionWidth)
+    {
+        /* Allocate buffer for new, shortened value */
+        Status = BlAllocateMemoryPool((OptionWidth + 1) * sizeof(WCHAR), (PVOID *)&ShortValue);
+        if(Status != STATUS_EFI_SUCCESS)
+        {
+            /* Memory allocation failure, print debug message and return */
+            BlDebugPrint(L"ERROR: Memory allocation failure (Status Code: 0x%zX)\n", Status);
+            return Status;
+        }
+
+        /* Copy a desired value length into the allocated buffer and append "..." */
+        RtlCopyMemory(ShortValue, DisplayValue, (OptionWidth - 3) * sizeof(WCHAR));
+        RtlCopyMemory(ShortValue + OptionWidth - 3, L"...", 3 * sizeof(WCHAR));
+        ShortValue[OptionWidth] = L'\0';
+
+        /* Mark that allocation was made and set new display value */
+        Allocation = TRUE;
+        DisplayValue = ShortValue;
+    }
+
+    /* Move cursor to the right position */
+    BlSetCursorPosition(5, 4 + Position);
+
+    /* Check whether this entry should be highlighted */
+    if(Highlighted)
+    {
+        /* Highlight this entry */
+        BlSetConsoleAttributes(EFI_TEXT_BGCOLOR_LIGHTGRAY | EFI_TEXT_FGCOLOR_BLACK);
+    }
+    else
+    {
+        /* Set default colors */
+        BlSetConsoleAttributes(EFI_TEXT_BGCOLOR_BLACK | EFI_TEXT_FGCOLOR_LIGHTGRAY);
+    }
+
+    /* Clear menu entry */
+    for(Index = 0; Index < Handle->Width - 4; Index++)
+    {
+        BlConsolePrint(L" ");
+    }
+
+    /* Print menu entry */
+    BlSetCursorPosition(5, 4 + Position);
+    BlConsolePrint(L"%S: %S", OptionName, DisplayValue);
+
+    /* Check if allocation was made */
+    if(Allocation)
+    {
+        /* Free allocated memory */
+        BlFreeMemoryPool(DisplayValue);
+    }
+
+    /* Return success */
+    return STATUS_EFI_SUCCESS;
 }
