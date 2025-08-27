@@ -196,6 +196,7 @@ XtLdrModuleMain(IN EFI_HANDLE ImageHandle,
                 IN PEFI_SYSTEM_TABLE SystemTable)
 {
     EFI_STATUS Status;
+    PWCHAR Tune;
 
     /* Open the XTLDR protocol */
     Status = BlGetXtLdrProtocol(SystemTable, ImageHandle, &XtLdrProtocol);
@@ -206,7 +207,8 @@ XtLdrModuleMain(IN EFI_HANDLE ImageHandle,
     }
 
     /* Play the tune set in the configuration */
-    BpPlayTune(XtLdrProtocol->Config.GetValue(L"TUNE"));
+    XtLdrProtocol->Config.GetValue(L"TUNE", &Tune);
+    BpPlayTune(Tune);
 
     /* Return success */
     return STATUS_EFI_SUCCESS;

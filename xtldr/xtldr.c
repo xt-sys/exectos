@@ -109,7 +109,7 @@ BlInitializeBootMenuList(IN ULONG MaxNameLength,
     NumberOfEntries = 0;
 
     /* Get default menu entry from configuration */
-    DefaultMenuEntry = BlGetConfigValue(L"DEFAULT");
+    BlGetConfigValue(L"DEFAULT", &DefaultMenuEntry);
 
     /* Check if configuration allows to use last booted OS */
     if(BlGetConfigBooleanValue(L"KEEPLASTBOOT"))
@@ -391,6 +391,7 @@ EFI_STATUS
 BlStartXtLoader(IN EFI_HANDLE ImageHandle,
                 IN PEFI_SYSTEM_TABLE SystemTable)
 {
+    PWCHAR Modules;
     EFI_STATUS Status;
 
     /* Set the system table and image handle */
@@ -455,8 +456,9 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
         return Status;
     }
 
-    /* Load boot loader modules */
-    Status = BlLoadModules(BlGetConfigValue(L"MODULES"));
+    /* Load all necessary modules */
+    BlGetConfigValue(L"MODULES", &Modules);
+    Status = BlLoadModules(Modules);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to load modules */

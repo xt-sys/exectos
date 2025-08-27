@@ -99,7 +99,7 @@ BlGetConfigBooleanValue(IN CONST PWCHAR ConfigName)
     PWCHAR Value;
 
     /* Get config value */
-    Value = BlGetConfigValue(ConfigName);
+    BlGetConfigValue(ConfigName, &Value);
 
     /* Check if option is enabled */
     if(RtlCompareWideStringInsensitive(Value, L"ENABLED", 0) == 0 ||
@@ -126,14 +126,18 @@ BlGetConfigBooleanValue(IN CONST PWCHAR ConfigName)
  * @since XT 1.0
  */
 XTCDECL
-PWCHAR
-BlGetConfigValue(IN CONST PWCHAR ConfigName)
+EFI_STATUS
+BlGetConfigValue(IN CONST PWCHAR ConfigName,
+                 OUT PWCHAR *ConfigValue)
 {
     PXTBL_CONFIG_ENTRY ConfigEntry;
     PLIST_ENTRY ConfigListEntry;
     SIZE_T KeyLength, ValueLength;
     EFI_STATUS Status;
     PWCHAR Value;
+
+    /* Assume the option will not be found */
+    *ConfigValue = NULL;
 
     /* Get config entry name length */
     KeyLength = RtlWideStringLength(ConfigName, 0);
@@ -157,13 +161,14 @@ BlGetConfigValue(IN CONST PWCHAR ConfigName)
             {
                 /* Memory allocation failure, return NULL */
                 BlDebugPrint(L"ERROR: Memory allocation failure (Status Code: 0x%zX)\n", Status);
-                return NULL;
+                return Status;
             }
 
             /* Copy value and return it */
             RtlCopyMemory(Value, ConfigEntry->Value, ValueLength * sizeof(WCHAR));
             Value[ValueLength] = L'\0';
-            return Value;
+            *ConfigValue = Value;
+            return STATUS_EFI_SUCCESS;
         }
 
         /* Move to the next config entry */
@@ -171,7 +176,7 @@ BlGetConfigValue(IN CONST PWCHAR ConfigName)
     }
 
     /* Config entry not found, return NULL */
-    return NULL;
+    return STATUS_EFI_NOT_FOUND;
 }
 
 /**
@@ -852,6 +857,7 @@ VOID
 BlpUpdateConfiguration(IN PLIST_ENTRY NewConfig)
 {
     PXTBL_CONFIG_ENTRY ConfigEntry;
+    PWCHAR ConfigValue;
     PLIST_ENTRY ConfigListEntry, NextListEntry;
 
     /* Iterate through new config entries */
@@ -865,7 +871,8 @@ BlpUpdateConfiguration(IN PLIST_ENTRY NewConfig)
         NextListEntry = ConfigListEntry->Flink;
 
         /* Make sure config entry does not exist yet */
-        if(BlGetConfigValue(ConfigEntry->Name) == NULL)
+        BlGetConfigValue(ConfigEntry->Name, &ConfigValue);
+        if(ConfigValue == NULL)
         {
             /* Remove new config entry from input list and put it into global config list */
             RtlRemoveEntryList(&ConfigEntry->Flink);

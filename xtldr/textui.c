@@ -57,7 +57,7 @@ BlDisplayBootMenu()
     }
 
     /* Get timeout from the configuration */
-    TimeOutString = BlGetConfigValue(L"TIMEOUT");
+    BlGetConfigValue(L"TIMEOUT", &TimeOutString);
     TimeOut = -1;
 
     /* Check if timeout is specified */

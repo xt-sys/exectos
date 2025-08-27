@@ -105,7 +105,7 @@ BlpInitializeDebugConsole()
     BaudRate = 0;
 
     /* Get debug configuration */
-    DebugConfiguration = BlGetConfigValue(L"DEBUG");
+    BlGetConfigValue(L"DEBUG", &DebugConfiguration);
 
     /* Make sure any debug options are provided and debug console is not initialized yet */
     if(DebugConfiguration && BlpStatus.DebugPort == 0)

@@ -149,8 +149,9 @@ BOOLEAN
 BlGetConfigBooleanValue(IN CONST PWCHAR ConfigName);
 
 XTCDECL
-PWCHAR
-BlGetConfigValue(IN CONST PWCHAR ConfigName);
+EFI_STATUS
+BlGetConfigValue(IN CONST PWCHAR ConfigName,
+                 OUT PWCHAR *ConfigValue);
 
 XTCDECL
 EFI_STATUS
