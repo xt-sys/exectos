@@ -870,7 +870,10 @@ BlpInstallXtLoaderProtocol()
     BlpLdrProtocol.Boot.RegisterProtocol = BlRegisterBootProtocol;
     BlpLdrProtocol.BootUtil.GetBooleanParameter = BlGetBooleanParameter;
     BlpLdrProtocol.Config.GetBooleanValue = BlGetConfigBooleanValue;
+    BlpLdrProtocol.Config.GetBootOptionValue = BlGetBootOptionValue;
+    BlpLdrProtocol.Config.GetEditableOptions = BlGetEditableOptions;
     BlpLdrProtocol.Config.GetValue = BlGetConfigValue;
+    BlpLdrProtocol.Config.SetBootOptionValue = BlSetBootOptionValue;
     BlpLdrProtocol.Console.ClearLine = BlClearConsoleLine;
     BlpLdrProtocol.Console.ClearScreen = BlClearConsoleScreen;
     BlpLdrProtocol.Console.DisableCursor = BlDisableConsoleCursor;
