@@ -161,7 +161,7 @@ BlGetConfigurationTable(IN PEFI_GUID TableGuid,
 XTCDECL
 VOID
 BlGetEditableOptions(OUT CONST PWCHAR **OptionsArray,
-                     OUT PSIZE_T OptionsCount);
+                     OUT PULONG OptionsCount);
 
 XTCDECL
 EFI_STATUS

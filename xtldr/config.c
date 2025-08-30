@@ -195,7 +195,7 @@ BlGetConfigValue(IN CONST PWCHAR ConfigName,
 XTCDECL
 VOID
 BlGetEditableOptions(OUT CONST PWCHAR **OptionsArray,
-                     OUT PSIZE_T OptionsCount)
+                     OUT PULONG OptionsCount)
 {
     ULONG Count = 0;
 
