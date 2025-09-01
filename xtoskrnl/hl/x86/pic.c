@@ -196,19 +196,19 @@ HlpInitializeApic(VOID)
     APIC_LVT_REGISTER LvtRegister;
     ULONG CpuNumber;
 
-    /* Check if this is an x2APIC compatible machine */
+    /* Determine APIC mode (xAPIC compatibility or x2APIC) */
     if(HlpCheckX2ApicSupport())
     {
-        /* Enable x2APIC */
+        /* Enable x2APIC mode */
         HlpApicMode = APIC_MODE_X2APIC;
     }
     else
     {
-        /* Use xAPIC compatibility mode */
+        /* Fall back to xAPIC compatibility mode */
         HlpApicMode = APIC_MODE_COMPAT;
     }
 
-    /* Get processor number */
+    /* Get current processor number */
     CpuNumber = KeGetCurrentProcessorNumber();
 
     /* Enable the APIC */
@@ -218,30 +218,30 @@ HlpInitializeApic(VOID)
     BaseRegister.BootStrapProcessor = (CpuNumber == 0) ? 1 : 0;
     ArWriteModelSpecificRegister(APIC_LAPIC_MSR_BASE, BaseRegister.LongLong);
 
-    /* Raise APIC task priority (TPR) to mask off all interrupts */
+    /* Mask all interrupts by raising Task Priority Register (TPR)  */
     HlWriteApicRegister(APIC_TPR, 0xFF);
 
-    /* xAPIC compatibility mode specific initialization */
+    /* Perform initialization specific to xAPIC compatibility mode */
     if(HlpApicMode == APIC_MODE_COMPAT)
     {
-        /* Initialize Destination Format Register with flat model (not supported in x2APIC mode) */
+        /* Use Flat Model for destination format (not supported in x2APIC) */
         HlWriteApicRegister(APIC_DFR, APIC_DF_FLAT);
 
-        /* Set the logical APIC ID (read-only in x2APIC mode) */
+        /* Set the logical APIC ID for this processor (read-only in x2APIC) */
         HlWriteApicRegister(APIC_LDR, (1UL << CpuNumber) << 24);
     }
 
-    /* Set the spurious interrupt vector */
+    /* Configure the spurious interrupt vector */
     SpuriousRegister.Long = HlReadApicRegister(APIC_SIVR);
     SpuriousRegister.Vector = APIC_VECTOR_SPURIOUS;
     SpuriousRegister.SoftwareEnable = 1;
     SpuriousRegister.CoreChecking = 0;
     HlWriteApicRegister(APIC_SIVR, SpuriousRegister.Long);
 
-    /* Mask LVTR_ERROR first, to prevent local APIC error */
+    /* Setup the LVT Error entry to deliver APIC errors on a dedicated vector */
     HlWriteApicRegister(APIC_ERRLVTR, APIC_VECTOR_ERROR);
 
-    /* Mask TMRLVTR */
+    /* Program the APIC timer for periodic mode */
     LvtRegister.Long = 0;
     LvtRegister.Mask = 1;
     LvtRegister.MessageType = APIC_DM_FIXED;
@@ -250,7 +250,7 @@ HlpInitializeApic(VOID)
     LvtRegister.Vector = APIC_VECTOR_PROFILE;
     HlWriteApicRegister(APIC_TMRLVTR, LvtRegister.Long);
 
-    /* Mask PCLVTR */
+    /* Configure the performance counter overflow */
     LvtRegister.Long = 0;
     LvtRegister.Mask = 0;
     LvtRegister.MessageType = APIC_DM_FIXED;
@@ -259,7 +259,7 @@ HlpInitializeApic(VOID)
     LvtRegister.Vector = APIC_VECTOR_PERF;
     HlWriteApicRegister(APIC_PCLVTR, LvtRegister.Long);
 
-    /* Mask LINT0 */
+    /* Configure the LINT0 pin */
     LvtRegister.Long = 0;
     LvtRegister.Mask = 1;
     LvtRegister.MessageType = APIC_DM_FIXED;
@@ -268,7 +268,7 @@ HlpInitializeApic(VOID)
     LvtRegister.Vector = APIC_VECTOR_SPURIOUS;
     HlWriteApicRegister(APIC_LINT0, LvtRegister.Long);
 
-    /* Mask LINT1 */
+    /* Configure the LINT1 pin */
     LvtRegister.Long = 0;
     LvtRegister.Mask = 0;
     LvtRegister.MessageType = APIC_DM_NMI;
@@ -277,23 +277,23 @@ HlpInitializeApic(VOID)
     LvtRegister.Vector = APIC_VECTOR_NMI;
     HlWriteApicRegister(APIC_LINT1, LvtRegister.Long);
 
-    /* Mask ICR0 */
+    /* Send broadcast INIT IPI */
     CommandRegister.Long0 = 0;
-    CommandRegister.DestinationShortHand = APIC_DSH_Destination;
+    CommandRegister.DestinationShortHand = APIC_DSH_AllIncludingSelf;
     CommandRegister.MessageType = APIC_MT_INIT;
     CommandRegister.DestinationMode = 1;
     CommandRegister.TriggerMode = APIC_TGM_EDGE;
     CommandRegister.Vector = APIC_VECTOR_ZERO;
     HlWriteApicRegister(APIC_ICR0, CommandRegister.Long0);
 
-    /* Register interrupt handlers once the APIC initialization is done */
+    /* Register interrupt handlers */
     KeSetInterruptHandler(APIC_VECTOR_SPURIOUS, HlpHandleApicSpuriousService);
     KeSetInterruptHandler(PIC1_VECTOR_SPURIOUS, HlpHandlePicSpuriousService);
 
-    /* Clear errors after enabling vectors */
+    /* Clear any pre-existing errors */
     HlWriteApicRegister(APIC_ESR, 0);
 
-    /* Lower APIC TPR to re-enable interrupts */
+    /* Re-enable all interrupts by lowering the Task Priority Register */
     HlWriteApicRegister(APIC_TPR, 0x00);
 }
 
