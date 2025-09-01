@@ -395,6 +395,7 @@ BlDisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry)
     UINT_PTR EventIndex;
     PWCHAR NewValue, OptionName, OriginalValue, Value, ValueToEdit;
     CONST PWCHAR *EditableOptions;
+    EFI_STATUS Status;
 
     /* Draw edit menu */
     BlpDrawEditMenu(&Handle);
@@ -594,6 +595,27 @@ BlDisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry)
                 TopVisibleEntry = (NumberOfOptions > VisibleEntries) ? (NumberOfOptions - VisibleEntries) : 0;
                 RedrawEntries = TRUE;
             }
+        }
+        else if(Key.UnicodeChar == 0x02)
+        {
+            /* CTRL-B key pressed, boot the OS */
+            BlSetConsoleAttributes(Handle.DialogColor | Handle.TextColor);
+            BlClearConsoleLine(Handle.PosY + Handle.Height + 4);
+            BlSetCursorPosition(4, Handle.PosY + Handle.Height + 4);
+            BlConsolePrint(L"Booting '%S' now...\n", MenuEntry->FullName);
+
+            /* Boot the OS */
+            Status = BlInvokeBootProtocol(MenuEntry->ShortName, MenuEntry->Options);
+            if(Status != STATUS_SUCCESS)
+            {
+                /* Failed to boot OS */
+                BlDebugPrint(L"ERROR: Failed to boot '%S' (Status Code: 0x%zX)\n", MenuEntry->FullName, Status);
+                BlDisplayErrorDialog(L"XTLDR", L"Failed to startup the selected Operating System.");
+                RedrawEditMenu = TRUE;
+            }
+
+            /* Return to the edit menu */
+            continue;
         }
         else if(Key.ScanCode == 0x17)
         {
@@ -1683,7 +1705,7 @@ BlpDrawEditMenu(OUT PXTBL_DIALOG_HANDLE Handle)
     BlSetCursorPosition(0, Handle->PosY + Handle->Height);
     BlSetConsoleAttributes(EFI_TEXT_BGCOLOR_BLACK | EFI_TEXT_FGCOLOR_LIGHTGRAY);
     BlConsolePrint(L"    Use cursors to change the selection. Press ENTER key to edit the chosen\n"
-                   L"    option or ESC to return to the main boot menu.");
+                   L"    option, ESC to return to the main boot menu or CTRL-B to boot.\n");
 }
 
 /**
