@@ -856,9 +856,9 @@ BlDisplayInputDialog(IN PWCHAR Caption,
                 /* Check if buffer is not empty */
                 if(InputFieldLength > 0 && TextPosition > 0 && TextPosition <= InputFieldLength)
                 {
-                    /* Delete character */
-                    RtlMoveMemory(InputFieldBuffer + TextPosition, InputFieldBuffer + TextPosition + 1,
-                                  (InputFieldLength - TextPosition) * sizeof(WCHAR));
+                    /* Move memory to overwrite the character to the left of the cursor */
+                    RtlMoveMemory(InputFieldBuffer + TextPosition - 1, InputFieldBuffer + TextPosition,
+                                  (InputFieldLength - TextPosition + 1) * sizeof(WCHAR));
 
                     /* Decrement length, position and null terminate string */
                     TextPosition--;
