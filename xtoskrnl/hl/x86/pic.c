@@ -191,7 +191,6 @@ VOID
 HlpInitializeApic(VOID)
 {
     APIC_SPURIOUS_REGISTER SpuriousRegister;
-    APIC_COMMAND_REGISTER CommandRegister;
     APIC_BASE_REGISTER BaseRegister;
     APIC_LVT_REGISTER LvtRegister;
     ULONG CpuNumber;
