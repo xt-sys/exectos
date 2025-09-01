@@ -277,15 +277,6 @@ HlpInitializeApic(VOID)
     LvtRegister.Vector = APIC_VECTOR_NMI;
     HlWriteApicRegister(APIC_LINT1, LvtRegister.Long);
 
-    /* Send broadcast INIT IPI */
-    CommandRegister.Long0 = 0;
-    CommandRegister.DestinationShortHand = APIC_DSH_AllIncludingSelf;
-    CommandRegister.MessageType = APIC_MT_INIT;
-    CommandRegister.DestinationMode = 1;
-    CommandRegister.TriggerMode = APIC_TGM_EDGE;
-    CommandRegister.Vector = APIC_VECTOR_ZERO;
-    HlWriteApicRegister(APIC_ICR0, CommandRegister.Long0);
-
     /* Register interrupt handlers */
     KeSetInterruptHandler(APIC_VECTOR_SPURIOUS, HlpHandleApicSpuriousService);
     KeSetInterruptHandler(PIC1_VECTOR_SPURIOUS, HlpHandlePicSpuriousService);
