@@ -48,7 +48,11 @@ XTCDECL
 EFI_STATUS
 BlEnumerateBlockDevices()
 {
-    PEFI_DEVICE_PATH_PROTOCOL LastNode = NULL;
+    EFI_GUID LoadedImageProtocolGuid = EFI_LOADED_IMAGE_PROTOCOL_GUID;
+    EFI_GUID BlockIoGuid = EFI_BLOCK_IO_PROTOCOL_GUID;
+    EFI_HANDLE BootDeviceHandle = NULL, DeviceHandle = NULL;
+    EFI_LOADED_IMAGE_PROTOCOL* LoadedImage;
+    PEFI_DEVICE_PATH_PROTOCOL DevicePath = NULL, LastNode = NULL;
     PEFI_BLOCK_DEVICE_DATA ParentNode = NULL;
     PEFI_BLOCK_DEVICE_DATA BlockDeviceData;
     PEFI_BLOCK_DEVICE BlockDevice;
@@ -62,6 +66,18 @@ BlEnumerateBlockDevices()
     ULONG DriveNumber, PartitionNumber;
     USHORT DriveType;
     ULONG CDCount = 0, FDCount = 0, HDCount = 0, RDCount = 0;
+
+    /* Get the device handle of the image that is running */
+    Status = EfiSystemTable->BootServices->HandleProtocol(EfiImageHandle, &LoadedImageProtocolGuid, (VOID**)&LoadedImage);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to get boot device handle */
+        BlDebugPrint(L"ERROR: Failed to get boot device handle (Status Code: 0x%zX)\n", Status);
+        return Status;
+    }
+
+    /* Save the boot device handle */
+    BootDeviceHandle = LoadedImage->DeviceHandle;
 
     /* Initialize list entries */
     RtlInitializeListHead(&BlockDevices);
@@ -81,6 +97,7 @@ BlEnumerateBlockDevices()
     {
         /* Get data for the next discovered device. */
         BlockDeviceData = CONTAIN_RECORD(ListEntry, EFI_BLOCK_DEVICE_DATA, ListEntry);
+        PartitionGuid = NULL;
 
         /* Find last node */
         Status = BlpFindLastBlockDeviceNode(BlockDeviceData->DevicePath, &LastNode);
@@ -154,11 +171,30 @@ BlEnumerateBlockDevices()
             PartitionNumber = HDPath->PartitionNumber;
             PartitionGuid = (PEFI_GUID)HDPath->Signature;
 
+            /* Check if this is the EFI System Partition (ESP) */
+            if(BootDeviceHandle != NULL)
+            {
+                /* Allocate memory for device path */
+                DevicePath = BlpDuplicateDevicePath(BlockDeviceData->DevicePath);
+                if(DevicePath != NULL)
+                {
+                    /* Check if this is the boot device */
+                    Status = EfiSystemTable->BootServices->LocateDevicePath(&BlockIoGuid, &DevicePath,
+                                                                            &DeviceHandle);
+                    if(Status == STATUS_EFI_SUCCESS && DeviceHandle == BootDeviceHandle)
+                    {
+                        /* Mark partition as ESP */
+                        DriveType |= XTBL_BOOT_DEVICE_ESP;
+                    }
+                }
+            }
+
             /* Print debug message */
             BlDebugPrint(L"Found Hard Disk partition (DiskNumber: %lu, PartNumber: %lu, "
-                         L"MBRType: %u, GUID: {%V}, PartSize: %uB)\n",
+                         L"MBRType: %u, GUID: {%V}, PartSize: %uB) %S\n",
                          DriveNumber, PartitionNumber, HDPath->MBRType,
-                         PartitionGuid, HDPath->PartitionSize * Media->BlockSize);
+                         PartitionGuid, HDPath->PartitionSize * Media->BlockSize,
+                         (DriveType & XTBL_BOOT_DEVICE_ESP) ? L"(ESP)" : L"");
         }
         else if(LastNode->Type == EFI_MEDIA_DEVICE_PATH && LastNode->SubType == EFI_MEDIA_RAMDISK_DP)
         {
@@ -428,12 +464,26 @@ BlGetVolumeDevicePath(IN PWCHAR SystemPath,
     {
         /* Check if this is the volume we are looking for */
         Device = CONTAIN_RECORD(ListEntry, EFI_BLOCK_DEVICE, ListEntry);
-        if((Device->DriveType == DriveType && Device->DriveNumber == DriveNumber &&
-           Device->PartitionNumber == PartNumber))
+        if(DriveType == XTBL_BOOT_DEVICE_ESP)
         {
-            /* Found volume */
-            *DevicePath = Device->DevicePath;
-            break;
+            /* ESP requested, verify if flag is set for this device */
+            if((Device->DriveType & XTBL_BOOT_DEVICE_ESP) != 0)
+            {
+                /* Found volume */
+                *DevicePath = Device->DevicePath;
+                break;
+            }
+        }
+        else
+        {
+            if(((Device->DriveType & DriveType) == DriveType) &&
+               (Device->DriveNumber == DriveNumber) &&
+               (Device->PartitionNumber == PartNumber))
+            {
+                /* Found volume */
+                *DevicePath = Device->DevicePath;
+                break;
+            }
         }
         ListEntry = ListEntry->Flink;
     }
@@ -441,9 +491,9 @@ BlGetVolumeDevicePath(IN PWCHAR SystemPath,
     /* Check if volume was found */
     if(*DevicePath == NULL)
     {
-        /* Failed to find volume */
+        /* Volume not found */
         BlDebugPrint(L"ERROR: Volume (DriveType: %u, DriveNumber: %lu, PartNumber: %lu) not found\n",
-                   DriveType, DriveNumber, PartNumber);
+                     DriveType, DriveNumber, PartNumber);
         return STATUS_EFI_NOT_FOUND;
     }
 
@@ -786,6 +836,12 @@ BlpDissectVolumeArcPath(IN PWCHAR SystemPath,
         ArcLength = 10;
         *DriveType = XTBL_BOOT_DEVICE_RAMDISK;
     }
+    else if(RtlCompareWideStringInsensitive(SystemPath, L"multi(0)esp(0)", 0) == 0)
+    {
+        /* This is ESP */
+        ArcLength = 14;
+        *DriveType = XTBL_BOOT_DEVICE_ESP;
+    }
     else if(RtlCompareWideStringInsensitive(SystemPath, L"multi(0)disk(0)", 0) == 0)
     {
         /* This is a multi-disk port */
@@ -1047,6 +1103,14 @@ BlpFindParentBlockDevice(IN PLIST_ENTRY BlockDevices,
         /* Take block device from the list */
         BlockDeviceData = CONTAIN_RECORD(ListEntry, EFI_BLOCK_DEVICE_DATA, ListEntry);
 
+        /* A device cannot be its own parent */
+        if (BlockDeviceData == ChildNode)
+        {
+            /* Move to the next device */
+            ListEntry = ListEntry->Flink;
+            continue;
+        }
+
         ChildDevicePath = ChildNode->DevicePath;
         ParentDevicePath = BlockDeviceData->DevicePath;
 
@@ -1065,10 +1129,11 @@ BlpFindParentBlockDevice(IN PLIST_ENTRY BlockDevices,
             ChildLength = *(PUSHORT)ChildDevicePath->Length;
             ParentLength = *(PUSHORT)ParentDevicePath->Length;
 
-            /* Check if lengths match */
-            if(ChildLength != ParentLength)
+            /* Check if nodes match */
+            if((ChildLength != ParentLength) ||
+               (RtlCompareMemory(ChildDevicePath, ParentDevicePath, ParentLength) != ParentLength))
             {
-                /* Lengths do not match, this is not a valid parent */
+                /* Nodes do not match, this is not a valid parent */
                 break;
             }
 

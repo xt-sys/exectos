@@ -18,10 +18,11 @@
 
 /* EFI XT boot devices */
 #define XTBL_BOOT_DEVICE_UNKNOWN                                    0x00
-#define XTBL_BOOT_DEVICE_CDROM                                      0x01
-#define XTBL_BOOT_DEVICE_FLOPPY                                     0x02
-#define XTBL_BOOT_DEVICE_HARDDISK                                   0x03
-#define XTBL_BOOT_DEVICE_RAMDISK                                    0x04
+#define XTBL_BOOT_DEVICE_ESP                                        0x01
+#define XTBL_BOOT_DEVICE_CDROM                                      0x02
+#define XTBL_BOOT_DEVICE_FLOPPY                                     0x04
+#define XTBL_BOOT_DEVICE_HARDDISK                                   0x08
+#define XTBL_BOOT_DEVICE_RAMDISK                                    0x10
 
 /* XTLDR Debug Port type definitions */
 #define XTBL_DEBUGPORT_SCREEN                                       1
