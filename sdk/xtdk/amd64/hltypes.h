@@ -43,14 +43,14 @@
 #define APIC_DF_CLUSTER                                 0x0FFFFFFF
 
 /* APIC delivery modes */
-#define APIC_DM_FIXED                                   0x00000000
-#define APIC_DM_LOWPRIO                                 0x00000100
-#define APIC_DM_SMI                                     0x00000200
-#define APIC_DM_REMOTE                                  0x00000300
-#define APIC_DM_NMI                                     0x00000400
-#define APIC_DM_INIT                                    0x00000500
-#define APIC_DM_STARTUP                                 0x00000600
-#define APIC_DM_EXTINT                                  0x00000700
+#define APIC_DM_FIXED                                   0x0
+#define APIC_DM_LOWPRIO                                 0x1
+#define APIC_DM_SMI                                     0x2
+#define APIC_DM_REMOTE                                  0x3
+#define APIC_DM_NMI                                     0x4
+#define APIC_DM_INIT                                    0x5
+#define APIC_DM_STARTUP                                 0x6
+#define APIC_DM_EXTINT                                  0x7
 
 /* APIC trigger modes */
 #define APIC_TGM_EDGE                                   0
