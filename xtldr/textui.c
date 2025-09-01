@@ -458,9 +458,9 @@ BlDisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry)
         BlReadKeyStroke(&Key);
 
         /* Check key press scan code */
-        if(Key.UnicodeChar == 0x0D)
+        if(Key.UnicodeChar == 0x0D || Key.UnicodeChar == 0x65)
         {
-            /* ENTER key pressed, edit the highlighted option */
+            /* ENTER or 'e' key pressed, edit the highlighted option */
             OptionName = EditableOptions[HighligtedOptionId];
             BlGetBootOptionValue(MenuEntry->Options, OptionName, &OriginalValue);
 
