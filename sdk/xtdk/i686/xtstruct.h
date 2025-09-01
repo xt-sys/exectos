@@ -13,9 +13,9 @@
 
 
 /* Architecture-specific enumeration lists forward references */
+typedef enum _APIC_DM APIC_DM, *PAPIC_DM;
 typedef enum _APIC_DSH APIC_DSH, *PAPIC_DSH;
 typedef enum _APIC_MODE APIC_MODE, *PAPIC_MODE;
-typedef enum _APIC_MT APIC_MT, *PAPIC_MT;
 typedef enum _APIC_REGISTER APIC_REGISTER, *PAPIC_REGISTER;
 typedef enum _CPU_VENDOR CPU_VENDOR, *PCPU_VENDOR;
 typedef enum _CPUID_FEATURES_EXTENDED CPUID_FEATURES_EXTENDED, *PCPUID_FEATURES_EXTENDED;

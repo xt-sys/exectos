@@ -47,16 +47,6 @@
 #define APIC_DF_FLAT                                    0xFFFFFFFF
 #define APIC_DF_CLUSTER                                 0x0FFFFFFF
 
-/* APIC delivery modes */
-#define APIC_DM_FIXED                                   0x0
-#define APIC_DM_LOWPRIO                                 0x1
-#define APIC_DM_SMI                                     0x2
-#define APIC_DM_REMOTE                                  0x3
-#define APIC_DM_NMI                                     0x4
-#define APIC_DM_INIT                                    0x5
-#define APIC_DM_STARTUP                                 0x6
-#define APIC_DM_EXTINT                                  0x7
-
 /* APIC trigger modes */
 #define APIC_TGM_EDGE                                   0
 #define APIC_TGM_LEVEL                                  1
@@ -85,6 +75,35 @@
 
 /* Initial stall factor */
 #define INITIAL_STALL_FACTOR                            100
+
+/* APIC delivery mode enumeration list */
+typedef enum _APIC_DM
+{
+    APIC_DM_FIXED,
+    APIC_DM_LOWPRIO,
+    APIC_DM_SMI,
+    APIC_DM_REMOTE,
+    APIC_DM_NMI,
+    APIC_DM_INIT,
+    APIC_DM_STARTUP,
+    APIC_DM_EXTINT,
+} APIC_DM, *PAPIC_DM;
+
+/* APIC destination short-hand enumeration list */
+typedef enum _APIC_DSH
+{
+    APIC_DSH_Destination,
+    APIC_DSH_Self,
+    APIC_DSH_AllIncludingSelf,
+    APIC_DSH_AllExclusingSelf
+} APIC_DSH, *PAPIC_DSH;
+
+/* APIC mode list */
+typedef enum _APIC_MODE
+{
+    APIC_MODE_COMPAT,
+    APIC_MODE_X2APIC
+} APIC_MODE, *PAPIC_MODE;
 
 /* APIC Register Address Map */
 typedef enum _APIC_REGISTER
@@ -122,35 +141,6 @@ typedef enum _APIC_REGISTER
     APIC_EXT2LVTR = 0x52, /* Extended Interrupt 2 Local Vector Table */
     APIC_EXT3LVTR = 0x53  /* Extended Interrupt 3 Local Vector Table */
 } APIC_REGISTER, *PAPIC_REGISTER;
-
-/* APIC mode list */
-typedef enum _APIC_MODE
-{
-    APIC_MODE_COMPAT,
-    APIC_MODE_X2APIC
-} APIC_MODE, *PAPIC_MODE;
-
-/* APIC destination short-hand enumeration list */
-typedef enum _APIC_DSH
-{
-    APIC_DSH_Destination,
-    APIC_DSH_Self,
-    APIC_DSH_AllIncludingSelf,
-    APIC_DSH_AllExclusingSelf
-} APIC_DSH, *PAPIC_DSH;
-
-/* APIC message type enumeration list */
-typedef enum _APIC_MT
-{
-    APIC_MT_Fixed,
-    APIC_MT_LowestPriority,
-    APIC_MT_SMI,
-    APIC_MT_RemoteRead,
-    APIC_MT_NMI,
-    APIC_MT_INIT,
-    APIC_MT_Startup,
-    APIC_MT_ExtInt,
-} APIC_MT, *PAPIC_MT;
 
 /* I8259 PIC interrupt mode enumeration list */
 typedef enum _PIC_I8259_ICW1_INTERRUPT_MODE
@@ -224,7 +214,7 @@ typedef union _APIC_COMMAND_REGISTER
     struct
     {
         ULONGLONG Vector:8;
-        ULONGLONG MessageType:3;
+        ULONGLONG DeliveryMode:3;
         ULONGLONG DestinationMode:1;
         ULONGLONG DeliveryStatus:1;
         ULONGLONG ReservedMBZ:1;
@@ -244,7 +234,7 @@ typedef union _APIC_LVT_REGISTER
     struct
     {
         ULONG Vector:8;
-        ULONG MessageType:3;
+        ULONG DeliveryMode:3;
         ULONG Reserved1:1;
         ULONG DeliveryStatus:1;
         ULONG Reserved2:1;

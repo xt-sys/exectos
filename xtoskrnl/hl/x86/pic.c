@@ -243,7 +243,7 @@ HlpInitializeApic(VOID)
     /* Program the APIC timer for periodic mode */
     LvtRegister.Long = 0;
     LvtRegister.Mask = 1;
-    LvtRegister.MessageType = APIC_DM_FIXED;
+    LvtRegister.DeliveryMode = APIC_DM_FIXED;
     LvtRegister.TimerMode = 1;
     LvtRegister.TriggerMode = APIC_TGM_EDGE;
     LvtRegister.Vector = APIC_VECTOR_PROFILE;
@@ -252,7 +252,7 @@ HlpInitializeApic(VOID)
     /* Configure the performance counter overflow */
     LvtRegister.Long = 0;
     LvtRegister.Mask = 0;
-    LvtRegister.MessageType = APIC_DM_FIXED;
+    LvtRegister.DeliveryMode = APIC_DM_FIXED;
     LvtRegister.TimerMode = 0;
     LvtRegister.TriggerMode = APIC_TGM_EDGE;
     LvtRegister.Vector = APIC_VECTOR_PERF;
@@ -261,7 +261,7 @@ HlpInitializeApic(VOID)
     /* Configure the LINT0 pin */
     LvtRegister.Long = 0;
     LvtRegister.Mask = 1;
-    LvtRegister.MessageType = APIC_DM_FIXED;
+    LvtRegister.DeliveryMode = APIC_DM_FIXED;
     LvtRegister.TimerMode = 0;
     LvtRegister.TriggerMode = APIC_TGM_EDGE;
     LvtRegister.Vector = APIC_VECTOR_SPURIOUS;
@@ -270,7 +270,7 @@ HlpInitializeApic(VOID)
     /* Configure the LINT1 pin */
     LvtRegister.Long = 0;
     LvtRegister.Mask = 0;
-    LvtRegister.MessageType = APIC_DM_NMI;
+    LvtRegister.DeliveryMode = APIC_DM_NMI;
     LvtRegister.TimerMode = 0;
     LvtRegister.TriggerMode = APIC_TGM_EDGE;
     LvtRegister.Vector = APIC_VECTOR_NMI;
