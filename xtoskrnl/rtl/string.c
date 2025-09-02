@@ -327,27 +327,38 @@ RtlStringToWideString(OUT PWCHAR Destination,
     PCHAR LocalSource = *Source;
     SIZE_T Count = Length;
 
+    /* Check if NULL pointer passed */
     if(Destination == NULL)
     {
+        /* No wide characters written */
         return 0;
     }
 
+    /* Iterate through the string */
     while(Count)
     {
+        /* Copy character */
         if((*Destination = *LocalSource) == 0)
         {
+            /* End of string reached */
             LocalSource = NULL;
             break;
         }
+
+        /* Check if character is valid */
         if(*Destination >= 0x80)
         {
+            /* Invalid character, return error */
             return -1;
         }
+
+        /* Advance pointers */
         LocalSource++;
         Destination++;
         Count--;
     }
 
+    /* Return number of wide characters written */
     return Length - Count;
 }
 
@@ -399,14 +410,18 @@ RtlTokenizeString(IN PCHAR String,
         Span = (PCHAR)Delimiter;
         do
         {
+            /* Check if delimiter found */
             if((SpanChar = *Span++) == Char)
             {
+                /* Check if end of string reached */
                 if(Char == '\0')
                 {
+                    /* End of string reached, no more tokens */
                     String = NULL;
                 }
                 else
                 {
+                    /* Terminate token */
                     String[-1] = '\0';
                 }
 
