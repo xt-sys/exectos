@@ -384,14 +384,18 @@ RtlTokenizeWideString(IN PWCHAR String,
         Span = (PWCHAR)Delimiter;
         do
         {
+            /* Check if delimiter found */
             if((SpanChar = *Span++) == Char)
             {
+                /* Check if end of string reached */
                 if(Char == L'\0')
                 {
+                    /* End of string reached, no more tokens */
                     String = NULL;
                 }
                 else
                 {
+                    /* Terminate token */
                     String[-1] = L'\0';
                 }
 
