@@ -162,6 +162,26 @@ RtlFindSetBits(IN PRTL_BITMAP BitMap,
                IN ULONG_PTR Index);
 
 XTAPI
+PCHAR
+RtlFindString(IN PCHAR Source,
+              IN PCHAR Search);
+
+XTAPI
+PCHAR
+RtlFindStringInsensitive(IN PCHAR Source,
+                         IN PCHAR Search);
+
+XTAPI
+PWCHAR
+RtlFindWideString(IN PWCHAR Source,
+                  IN PWCHAR Search);
+
+XTAPI
+PWCHAR
+RtlFindWideStringInsensitive(IN PWCHAR Source,
+                             IN PWCHAR Search);
+
+XTAPI
 XTSTATUS
 RtlFormatWideString(IN PRTL_PRINT_CONTEXT Context,
                     IN PCWSTR Format,
@@ -254,6 +274,22 @@ PWCHAR
 RtlTokenizeWideString(IN PWCHAR String,
                       IN CONST PWCHAR Delimiter,
                       IN OUT PWCHAR *SavePtr);
+
+XTAPI
+CHAR
+RtlToLowerCharacter(IN CHAR Character);
+
+XTAPI
+WCHAR
+RtlToLowerWideCharacter(IN WCHAR Character);
+
+XTAPI
+CHAR
+RtlToUpperCharacter(IN CHAR Character);
+
+XTAPI
+WCHAR
+RtlToUpperWideCharacter(IN WCHAR Character);
 
 XTAPI
 PCHAR

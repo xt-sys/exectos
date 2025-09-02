@@ -231,6 +231,131 @@ RtlCopyWideString(IN PWCHAR Destination,
 }
 
 /**
+ * Finds the first occurrence of the search wide string in the source wide string.
+ *
+ * @param Source
+ *        Supplies a pointer to the source wide string.
+ *
+ * @param Search
+ *        Supplies a pointer to the search wide string.
+ *
+ * @return This routine returns a pointer to the first occurrence of the search wide string in the source wide string.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PWCHAR
+RtlFindWideString(IN PWCHAR Source,
+                  IN PWCHAR Search)
+{
+    PWCHAR CurrentSource;
+    PWCHAR CurrentSearch;
+
+    /* Validate input parameters */
+    if(!Source || !Search)
+    {
+        /* Invalid input parameters, return NULL */
+        return NULL;
+    }
+
+    /* Check if search string is empty */
+    if(*Search == L'\0')
+    {
+        /* Return the source string */
+        return Source;
+    }
+
+    /* Iterate through the source string */
+    for(; *Source != L'\0'; Source++) {
+
+        /* Initialize pointers */
+        CurrentSource = Source;
+        CurrentSearch = Search;
+
+        /* Check if the substring matches starting at the current position */
+        while(*CurrentSource != L'\0' && *CurrentSearch != L'\0' && *CurrentSource == *CurrentSearch)
+        {
+            /* Go to the next character */
+            CurrentSource++;
+            CurrentSearch++;
+        }
+
+        /* If we reached the end of Search string, it is a match */
+        if(*CurrentSearch == L'\0')
+        {
+            /* Return the source position */
+            return Source;
+        }
+    }
+
+    /* No match found, return NULL */
+    return NULL;
+}
+
+/**
+ * Finds the first case-insensitive occurrence of the search wide string in the source wide string.
+ *
+ * @param Source
+ *        Supplies a pointer to the source wide string.
+ *
+ * @param Search
+ *        Supplies a pointer to the search wide string.
+ *
+ * @return This routine returns a pointer to the first occurrence of the search wide string in the source wide string.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PWCHAR
+RtlFindWideStringInsensitive(IN PWCHAR Source,
+                             IN PWCHAR Search)
+{
+    PWCHAR CurrentSource;
+    PWCHAR CurrentSearch;
+
+    /* Validate input parameters */
+    if(!Source || !Search)
+    {
+        /* Invalid input parameters, return NULL */
+        return NULL;
+    }
+
+    /* Check if search string is empty */
+    if(*Search == L'\0')
+    {
+        /* Return the source string */
+        return Source;
+    }
+
+    /* Iterate through the source string */
+    for(; *Source != L'\0'; Source++) {
+
+        /* Initialize pointers */
+        CurrentSource = Source;
+        CurrentSearch = Search;
+
+        /* Check if the substring matches starting at the current position */
+        while(*CurrentSource != L'\0' && *CurrentSearch != L'\0' &&
+              RtlToLowerWideCharacter(*CurrentSource) == RtlToLowerWideCharacter(*CurrentSearch))
+        {
+            /* Go to the next character */
+            CurrentSource++;
+            CurrentSearch++;
+        }
+
+        /* If we reached the end of Search string, it is a match */
+        if(*CurrentSearch == L'\0')
+        {
+            /* Return the source position */
+            return Source;
+        }
+    }
+
+    /* No match found, return NULL */
+    return NULL;
+}
+
+/**
  * Formats a wide string according to the given printf-alike format string.
  *
  * @param Context
@@ -408,6 +533,56 @@ RtlTokenizeWideString(IN PWCHAR String,
         }
         while(SpanChar != L'\0');
     }
+}
+
+/**
+ * Converts a wide character to lowercase.
+ *
+ * @param Character
+ *        Wide character to be converted.
+ *
+ * @return Converted wide character or original character if it was not uppercase.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+WCHAR
+RtlToLowerWideCharacter(IN WCHAR Character)
+{
+    /* Check if wide character is uppercase */
+    if(Character >= L'A' && Character <= L'Z')
+    {
+        /* Convert wide character to lowercase */
+        return (WCHAR)(Character + (L'a' - L'A'));
+    }
+
+    /* Return original wide character */
+    return Character;
+}
+
+/**
+ * Converts a wide character to uppercase.
+ *
+ * @param Character
+ *        Wide character to be converted.
+ *
+ * @return Converted wide character or original character if it was not lowercase.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+WCHAR
+RtlToUpperWideCharacter(IN WCHAR Character)
+{
+    /* Check if wide character is lowercase */
+    if(Character >= L'a' && Character <= L'z')
+    {
+        /* Convert wide character to uppercase */
+        return (WCHAR)(Character - (L'a' - L'A'));
+    }
+
+    /* Return original wide character */
+    return Character;
 }
 
 /**

@@ -230,6 +230,131 @@ RtlCopyString(IN PCHAR Destination,
 }
 
 /**
+ * Finds the first occurrence of the search string in the source string.
+ *
+ * @param Source
+ *        Supplies a pointer to the source string.
+ *
+ * @param Search
+ *        Supplies a pointer to the search string.
+ *
+ * @return This routine returns a pointer to the first occurrence of the search string in the source string.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PCHAR
+RtlFindString(IN PCHAR Source,
+              IN PCHAR Search)
+{
+    PCHAR CurrentSource;
+    PCHAR CurrentSearch;
+
+    /* Validate input parameters */
+    if(!Source || !Search)
+    {
+        /* Invalid input parameters, return NULL */
+        return NULL;
+    }
+
+    /* Check if search string is empty */
+    if(*Search == '\0')
+    {
+        /* Return the source string */
+        return Source;
+    }
+
+    /* Iterate through the source string */
+    for(; *Source != '\0'; Source++) {
+
+        /* Initialize pointers */
+        CurrentSource = Source;
+        CurrentSearch = Search;
+
+        /* Check if the substring matches starting at the current position */
+        while(*CurrentSource != '\0' && *CurrentSearch != '\0' && *CurrentSource == *CurrentSearch)
+        {
+            /* Go to the next character */
+            CurrentSource++;
+            CurrentSearch++;
+        }
+
+        /* If we reached the end of Search string, it is a match */
+        if(*CurrentSearch == '\0')
+        {
+            /* Return the source position */
+            return Source;
+        }
+    }
+
+    /* No match found, return NULL */
+    return NULL;
+}
+
+/**
+ * Finds the first case-insensitive occurrence of the search string in the source string.
+ *
+ * @param Source
+ *        Supplies a pointer to the source string.
+ *
+ * @param Search
+ *        Supplies a pointer to the search string.
+ *
+ * @return This routine returns a pointer to the first occurrence of the search string in the source string.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PCHAR
+RtlFindStringInsensitive(IN PCHAR Source,
+                         IN PCHAR Search)
+{
+    PCHAR CurrentSource;
+    PCHAR CurrentSearch;
+
+    /* Validate input parameters */
+    if(!Source || !Search)
+    {
+        /* Invalid input parameters, return NULL */
+        return NULL;
+    }
+
+    /* Check if search string is empty */
+    if(*Search == '\0')
+    {
+        /* Return the source string */
+        return Source;
+    }
+
+    /* Iterate through the source string */
+    for(; *Source != '\0'; Source++) {
+
+        /* Initialize pointers */
+        CurrentSource = Source;
+        CurrentSearch = Search;
+
+        /* Check if the substring matches starting at the current position */
+        while(*CurrentSource != '\0' && *CurrentSearch != '\0' &&
+              RtlToLowerCharacter(*CurrentSource) == RtlToLowerCharacter(*CurrentSearch))
+        {
+            /* Go to the next character */
+            CurrentSource++;
+            CurrentSearch++;
+        }
+
+        /* If we reached the end of Search string, it is a match */
+        if(*CurrentSearch == '\0')
+        {
+            /* Return the source position */
+            return Source;
+        }
+    }
+
+    /* No match found, return NULL */
+    return NULL;
+}
+
+/**
  * Reverses a characters order in a string. It modifies the original, input variable.
  *
  * @param String
@@ -434,6 +559,56 @@ RtlTokenizeString(IN PCHAR String,
         }
         while(SpanChar != '\0');
     }
+}
+
+/**
+ * Converts a character to lowercase.
+ *
+ * @param Character
+ *        Character to be converted.
+ *
+ * @return Converted character or original character if it was not uppercase.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+CHAR
+RtlToLowerCharacter(IN CHAR Character)
+{
+    /* Check if character is uppercase */
+    if(Character >= 'A' && Character <= 'Z')
+    {
+        /* Convert character to lowercase */
+        return (CHAR)(Character + ('a' - 'A'));
+    }
+
+    /* Return original character */
+    return Character;
+}
+
+/**
+ * Converts a character to uppercase.
+ *
+ * @param Character
+ *        Character to be converted.
+ *
+ * @return Converted character or original character if it was not lowercase.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+CHAR
+RtlToUpperCharacter(IN CHAR Character)
+{
+    /* Check if character is lowercase */
+    if(Character >= 'a' && Character <= 'z')
+    {
+        /* Convert character to uppercase */
+        return (CHAR)(Character - ('a' - 'A'));
+    }
+
+    /* Return original character */
+    return Character;
 }
 
 /**
