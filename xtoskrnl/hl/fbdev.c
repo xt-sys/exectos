@@ -24,9 +24,10 @@ XTAPI
 VOID
 HlClearScreen(IN ULONG Color)
 {
-    SIZE_T Line, PositionX, PositionY;
+    ULONG PositionX, PositionY;
     ULONG BackgroundColor;
-    PULONG FrameBuf;
+    PCHAR CurrentLine;
+    PULONG Pixel;
 
     /* Make sure frame buffer is already initialized */
     if(HlpFrameBufferData.Initialized == FALSE)
@@ -35,19 +36,19 @@ HlClearScreen(IN ULONG Color)
         return;
     }
 
-    /* Get pointer to frame buffer */
-    FrameBuf = HlpFrameBufferData.Address;
-
-    /* Convert background color */
+    /* Convert background color and get pointer to frame buffer */
     BackgroundColor = HlpRGBColor(Color);
+    CurrentLine = HlpFrameBufferData.Address;
 
-    /* Fill the screen with a black box */
-    for(PositionY = 0; PositionY < HlpFrameBufferData.Height; PositionY++)
+    /* Fill the screen with the specified color */
+    for(PositionY = 0; PositionY < HlpFrameBufferData.Height; PositionY++, CurrentLine += HlpFrameBufferData.Pitch)
     {
-        Line = PositionY * HlpFrameBufferData.PixelsPerScanLine;
+        /* Fill the current line with the specified color */
+        Pixel = (PULONG)CurrentLine;
         for(PositionX = 0; PositionX < HlpFrameBufferData.Width; PositionX++)
         {
-            FrameBuf[Line + PositionX] = BackgroundColor;
+            /* Set the color of the pixel */
+            Pixel[PositionX] = BackgroundColor;
         }
     }
 }
@@ -74,7 +75,7 @@ HlDrawPixel(IN ULONG PositionX,
             IN ULONG PositionY,
             IN ULONG Color)
 {
-    SIZE_T FrameBufferIndex;
+    PCHAR PixelAddress;
 
     /* Make sure frame buffer is already initialized */
     if(HlpFrameBufferData.Initialized == FALSE)
@@ -90,11 +91,12 @@ HlDrawPixel(IN ULONG PositionX,
         return;
     }
 
-    /* Calculate the index of the pixel in the frame buffer memory using the provided x and y coordinates */
-    FrameBufferIndex = 4 * HlpFrameBufferData.PixelsPerScanLine * PositionY + 4 * PositionX;
+    /* Calculate the address of the pixel in the frame buffer memory */
+    PixelAddress = (PCHAR)HlpFrameBufferData.Address + (PositionY * HlpFrameBufferData.Pitch) +
+                          (PositionX * HlpFrameBufferData.BytesPerPixel);
 
     /* Set the color of the pixel by writing to the corresponding memory location */
-    *((PULONG)(HlpFrameBufferData.Address + FrameBufferIndex)) = HlpRGBColor(Color);
+    *((PULONG)PixelAddress) = HlpRGBColor(Color);
 }
 
 /**
@@ -154,6 +156,7 @@ HlInitializeFrameBuffer(VOID)
     HlpFrameBufferData.Width = FrameBufferResource->Width;
     HlpFrameBufferData.Height = FrameBufferResource->Height;
     HlpFrameBufferData.BitsPerPixel = FrameBufferResource->BitsPerPixel;
+    HlpFrameBufferData.BytesPerPixel = FrameBufferResource->BitsPerPixel / 8;
     HlpFrameBufferData.PixelsPerScanLine = FrameBufferResource->PixelsPerScanLine;
     HlpFrameBufferData.Pitch = FrameBufferResource->Pitch;
     HlpFrameBufferData.Pixels.BlueShift = FrameBufferResource->Pixels.BlueShift;
@@ -261,7 +264,8 @@ HlPutCharacter(IN ULONG PositionX,
     }
 
     /* Find the glyph position on the frame buffer and set font color */
-    GlyphPixel = (UINT_PTR)HlpFrameBufferData.Address + PositionY * HlpFrameBufferData.Pitch + PositionX * 4;
+    GlyphPixel = (UINT_PTR)HlpFrameBufferData.Address + PositionY * HlpFrameBufferData.Pitch +
+                           PositionX * HlpFrameBufferData.BytesPerPixel;
     FontColor = HlpRGBColor(Color);
 
     /* Check all kerning fragments */
@@ -321,7 +325,7 @@ HlPutCharacter(IN ULONG PositionX,
                 }
 
                 /* Advance pixel pointer */
-                Pixel += 4;
+                Pixel += HlpFrameBufferData.BytesPerPixel;
                 CurrentFragment <<= 1;
             }
 

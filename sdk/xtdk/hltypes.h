@@ -376,6 +376,7 @@ typedef struct _HAL_FRAMEBUFFER_DATA
     UINT Height;
     UINT PixelsPerScanLine;
     UINT BitsPerPixel;
+    UINT BytesPerPixel;
     UINT Pitch;
     PVOID Font;
     struct
