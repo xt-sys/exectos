@@ -43,6 +43,7 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/ke/dpc.c
     ${XTOSKRNL_SOURCE_DIR}/ke/event.c
     ${XTOSKRNL_SOURCE_DIR}/ke/globals.c
+    ${XTOSKRNL_SOURCE_DIR}/ke/info.c
     ${XTOSKRNL_SOURCE_DIR}/ke/kprocess.c
     ${XTOSKRNL_SOURCE_DIR}/ke/krnlinit.c
     ${XTOSKRNL_SOURCE_DIR}/ke/kthread.c

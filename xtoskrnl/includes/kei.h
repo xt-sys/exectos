@@ -22,6 +22,15 @@ VOID
 KeClearTimer(IN PKTIMER Timer);
 
 XTAPI
+SYSTEM_FIRMWARE_TYPE
+KeGetFirmwareType(VOID);
+
+XTAPI
+XTSTATUS
+KeGetKernelParameter(IN PCWSTR ParameterName,
+                     OUT PCWSTR *Parameter);
+
+XTAPI
 VOID
 KeHaltSystem(VOID);
 
