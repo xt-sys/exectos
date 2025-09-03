@@ -547,9 +547,13 @@ XtpInitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
     // PVOID RuntimeServices;
     EFI_STATUS Status;
     UINT BlockPages;
+    UINT ParametersSize;
+
+    /* Calculate size of parameters */
+    ParametersSize = (RtlWideStringLength(Parameters->Parameters, 0) + 1) * sizeof(WCHAR);
 
     /* Calculate number of pages needed for initialization block */
-    BlockPages = EFI_SIZE_TO_PAGES(sizeof(KERNEL_INITIALIZATION_BLOCK));
+    BlockPages = EFI_SIZE_TO_PAGES(sizeof(KERNEL_INITIALIZATION_BLOCK) + ParametersSize);
 
     /* Allocate memory for kernel initialization block */
     Status = XtLdrProtocol->Memory.AllocatePages(AllocateAnyPages, BlockPages, &Address);
@@ -561,7 +565,7 @@ XtpInitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
 
     /* Initialize and zero-fill kernel initialization block */
     LoaderBlock = (PKERNEL_INITIALIZATION_BLOCK)(UINT_PTR)Address;
-    RtlZeroMemory(LoaderBlock, sizeof(KERNEL_INITIALIZATION_BLOCK));
+    RtlZeroMemory(LoaderBlock, sizeof(KERNEL_INITIALIZATION_BLOCK) + ParametersSize);
 
     /* Set basic loader block properties */
     LoaderBlock->BlockSize = sizeof(KERNEL_INITIALIZATION_BLOCK);
@@ -587,8 +591,10 @@ XtpInitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
     // }
 
     /* Copy parameters to kernel initialization block */
-    RtlCopyMemory(LoaderBlock->KernelParameters, Parameters->Parameters,
-                  (RtlWideStringLength(Parameters->Parameters, 0) + 1) * sizeof(WCHAR));
+    LoaderBlock->KernelParameters = (PWCHAR)((UINT_PTR)*VirtualAddress + sizeof(KERNEL_INITIALIZATION_BLOCK));
+    RtlCopyMemory((PVOID)((UINT_PTR)LoaderBlock + sizeof(KERNEL_INITIALIZATION_BLOCK)),
+                  Parameters->Parameters,
+                  ParametersSize);
 
     /* Map kernel initialization block */
     XtLdrProtocol->Memory.MapVirtualMemory(PageMap, *VirtualAddress, (PVOID)LoaderBlock,
