@@ -51,16 +51,16 @@ BlCloseVolume(IN PEFI_HANDLE VolumeHandle);
 
 XTCDECL
 VOID
-BlConsolePrint(IN PUSHORT Format,
+BlConsolePrint(IN PCWSTR Format,
                IN ...);
 
 XTCDECL
 VOID
-BlConsoleWrite(IN PUSHORT String);
+BlConsoleWrite(IN PCWSTR String);
 
 XTCDECL
 VOID
-BlDebugPrint(IN PUSHORT Format,
+BlDebugPrint(IN PCWSTR Format,
              IN ...);
 
 XTCDECL
@@ -418,11 +418,11 @@ BlpActivateSerialIOController();
 
 XTCDECL
 XTSTATUS
-BlpConsolePutChar(IN USHORT Character);
+BlpConsolePutChar(IN WCHAR Character);
 
 XTCDECL
 XTSTATUS
-BlpDebugPutChar(IN USHORT Character);
+BlpDebugPutChar(IN WCHAR Character);
 
 XTCDECL
 VOID

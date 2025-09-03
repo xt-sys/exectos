@@ -95,7 +95,7 @@ BlEnableConsoleCursor()
  */
 XTCDECL
 VOID
-BlConsolePrint(IN PUSHORT Format,
+BlConsolePrint(IN PCWSTR Format,
                IN ...)
 {
     RTL_PRINT_CONTEXT ConsolePrintContext, SerialPrintContext;
@@ -138,9 +138,9 @@ BlConsolePrint(IN PUSHORT Format,
  */
 XTCDECL
 VOID
-BlConsoleWrite(IN PUSHORT String)
+BlConsoleWrite(IN PCWSTR String)
 {
-    EfiSystemTable->ConOut->OutputString(EfiSystemTable->ConOut, String);
+    EfiSystemTable->ConOut->OutputString(EfiSystemTable->ConOut, (PWSTR)String);
 }
 
 /**
@@ -292,9 +292,9 @@ BlSetCursorPosition(IN ULONGLONG PosX,
  */
 XTCDECL
 XTSTATUS
-BlpConsolePutChar(IN USHORT Character)
+BlpConsolePutChar(IN WCHAR Character)
 {
-    USHORT Buffer[2];
+    WCHAR Buffer[2];
 
     /* Check if character is a newline ('\n') */
     if(Character == L'\n')

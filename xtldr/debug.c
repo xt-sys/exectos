@@ -24,7 +24,7 @@
  */
 XTCDECL
 VOID
-BlDebugPrint(IN PUSHORT Format,
+BlDebugPrint(IN PCWSTR Format,
              IN ...)
 {
     RTL_PRINT_CONTEXT ConsolePrintContext, SerialPrintContext;
@@ -71,9 +71,9 @@ BlDebugPrint(IN PUSHORT Format,
  */
 XTCDECL
 XTSTATUS
-BlpDebugPutChar(IN USHORT Character)
+BlpDebugPutChar(IN WCHAR Character)
 {
-    USHORT Buffer[2];
+    WCHAR Buffer[2];
 
     /* Write character to the serial console */
     Buffer[0] = Character;
