@@ -34,7 +34,7 @@ EXTERN HAL_FRAMEBUFFER_DATA HlpFrameBufferData;
 EXTERN ACPI_SYSTEM_INFO HlpSystemInfo;
 
 /* Pointer to boot loader provided DbgPrint() routine */
-EXTERN VOID (*KeDbgPrint)(IN PWCHAR Format, IN ...);
+EXTERN VOID (*KeDbgPrint)(IN PCWSTR Format, IN ...);
 
 /* Kernel initialization block passed by boot loader */
 EXTERN PKERNEL_INITIALIZATION_BLOCK KeInitializationBlock;

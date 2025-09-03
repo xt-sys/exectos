@@ -10,7 +10,7 @@
 
 
 /* Pointer to boot loader provided DbgPrint() routine */
-VOID (*KeDbgPrint)(IN PWCHAR Format, IN ...) = NULL;
+VOID (*KeDbgPrint)(IN PCWSTR Format, IN ...) = NULL;
 
 /* Kernel initialization block passed by boot loader */
 PKERNEL_INITIALIZATION_BLOCK KeInitializationBlock;
