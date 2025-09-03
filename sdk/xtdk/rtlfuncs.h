@@ -83,26 +83,26 @@ RtlCompareMemory(IN PCVOID LeftBuffer,
 
 XTAPI
 SIZE_T
-RtlCompareString(IN CONST PCHAR String1,
-                 IN CONST PCHAR String2,
+RtlCompareString(IN PCSTR String1,
+                 IN PCSTR String2,
                  IN SIZE_T Length);
 
 XTAPI
 SIZE_T
-RtlCompareStringInsensitive(IN CONST PCHAR String1,
-                            IN CONST PCHAR String2,
+RtlCompareStringInsensitive(IN PCSTR String1,
+                            IN PCSTR String2,
                             IN SIZE_T Length);
 
 XTAPI
 SIZE_T
-RtlCompareWideString(IN CONST PWCHAR String1,
-                     IN CONST PWCHAR String2,
+RtlCompareWideString(IN PCWSTR String1,
+                     IN PCWSTR String2,
                      IN SIZE_T Length);
 
 XTAPI
 SIZE_T
-RtlCompareWideStringInsensitive(IN CONST PWCHAR String1,
-                                IN CONST PWCHAR String2,
+RtlCompareWideStringInsensitive(IN PCWSTR String1,
+                                IN PCWSTR String2,
                                 IN SIZE_T Length);
 
 XTAPI
@@ -134,13 +134,13 @@ RtlCopyMemory(OUT PVOID Destination,
 XTAPI
 VOID
 RtlCopyString(IN PCHAR Destination,
-              IN PCCHAR Source,
+              IN PCSTR Source,
               IN ULONG Length);
 
 XTAPI
 VOID
 RtlCopyWideString(IN PWCHAR Destination,
-                  IN CONST PWCHAR Source,
+                  IN PCWSTR Source,
                   IN ULONG Length);
 
 XTAPI
@@ -162,24 +162,24 @@ RtlFindSetBits(IN PRTL_BITMAP BitMap,
                IN ULONG_PTR Index);
 
 XTAPI
-PCHAR
-RtlFindString(IN PCHAR Source,
-              IN PCHAR Search);
+PCSTR
+RtlFindString(IN PCSTR Source,
+              IN PCSTR Search);
 
 XTAPI
-PCHAR
-RtlFindStringInsensitive(IN PCHAR Source,
-                         IN PCHAR Search);
+PCSTR
+RtlFindStringInsensitive(IN PCSTR Source,
+                         IN PCSTR Search);
 
 XTAPI
-PWCHAR
-RtlFindWideString(IN PWCHAR Source,
-                  IN PWCHAR Search);
+PCWSTR
+RtlFindWideString(IN PCWSTR Source,
+                  IN PCWSTR Search);
 
 XTAPI
-PWCHAR
-RtlFindWideStringInsensitive(IN PWCHAR Source,
-                             IN PWCHAR Search);
+PCWSTR
+RtlFindWideStringInsensitive(IN PCWSTR Source,
+                             IN PCWSTR Search);
 
 XTAPI
 XTSTATUS
@@ -249,13 +249,13 @@ RtlSetMemory(OUT PVOID Destination,
 
 XTAPI
 SIZE_T
-RtlStringLength(IN CONST PCHAR String,
+RtlStringLength(IN PCSTR String,
                 IN SIZE_T MaxLength);
 
 XTAPI
 SIZE_T
 RtlStringToWideString(OUT PWCHAR Destination,
-                      IN CONST PCHAR *Source,
+                      IN PCSTR *Source,
                       IN SIZE_T Length);
 
 XTAPI
@@ -266,13 +266,13 @@ RtlTestBit(IN PRTL_BITMAP BitMap,
 XTAPI
 PCHAR
 RtlTokenizeString(IN PCHAR String,
-                  IN CONST PCHAR Delimiter,
+                  IN PCSTR Delimiter,
                   IN OUT PCHAR *SavePtr);
 
 XTAPI
 PWCHAR
 RtlTokenizeWideString(IN PWCHAR String,
-                      IN CONST PWCHAR Delimiter,
+                      IN PCWSTR Delimiter,
                       IN OUT PWCHAR *SavePtr);
 
 XTAPI
@@ -293,31 +293,31 @@ RtlToUpperWideCharacter(IN WCHAR Character);
 
 XTAPI
 PCHAR
-RtlTrimLeftString(IN CONST PCHAR String);
+RtlTrimLeftString(IN PCHAR String);
 
 XTAPI
 PWCHAR
-RtlTrimLeftWideString(IN CONST PWCHAR String);
+RtlTrimLeftWideString(IN PWCHAR String);
 
 XTAPI
 PCHAR
-RtlTrimRightString(IN CONST PCHAR String);
+RtlTrimRightString(IN PCHAR String);
 
 XTAPI
 PWCHAR
-RtlTrimRightWideString(IN CONST PWCHAR String);
+RtlTrimRightWideString(IN PWCHAR String);
 
 XTAPI
 PCHAR
-RtlTrimString(IN CONST PCHAR String);
+RtlTrimString(IN PCHAR String);
 
 XTAPI
 PWCHAR
-RtlTrimWideString(IN CONST PWCHAR String);
+RtlTrimWideString(IN PWCHAR String);
 
 XTAPI
 SIZE_T
-RtlWideStringLength(IN CONST PWCHAR String,
+RtlWideStringLength(IN PCWSTR String,
                     IN SIZE_T MaxLength);
 
 XTAPI

@@ -27,8 +27,8 @@
  */
 XTAPI
 SIZE_T
-RtlCompareString(IN CONST PCHAR String1,
-                 IN CONST PCHAR String2,
+RtlCompareString(IN PCSTR String1,
+                 IN PCSTR String2,
                  IN SIZE_T Length)
 {
     SIZE_T Index;
@@ -79,8 +79,8 @@ RtlCompareString(IN CONST PCHAR String1,
  */
 XTAPI
 SIZE_T
-RtlCompareStringInsensitive(IN CONST PCHAR String1,
-                            IN CONST PCHAR String2,
+RtlCompareStringInsensitive(IN PCSTR String1,
+                            IN PCSTR String2,
                             IN SIZE_T Length)
 {
     CHAR Character1;
@@ -206,7 +206,7 @@ RtlConcatenateString(OUT PCHAR Destination,
 XTAPI
 VOID
 RtlCopyString(IN PCHAR Destination,
-              IN PCCHAR Source,
+              IN PCSTR Source,
               IN ULONG Length)
 {
     ULONG Index;
@@ -243,12 +243,12 @@ RtlCopyString(IN PCHAR Destination,
  * @since XT 1.0
  */
 XTAPI
-PCHAR
-RtlFindString(IN PCHAR Source,
-              IN PCHAR Search)
+PCSTR
+RtlFindString(IN PCSTR Source,
+              IN PCSTR Search)
 {
-    PCHAR CurrentSource;
-    PCHAR CurrentSearch;
+    PCSTR CurrentSource;
+    PCSTR CurrentSearch;
 
     /* Validate input parameters */
     if(!Source || !Search)
@@ -305,12 +305,12 @@ RtlFindString(IN PCHAR Source,
  * @since XT 1.0
  */
 XTAPI
-PCHAR
-RtlFindStringInsensitive(IN PCHAR Source,
-                         IN PCHAR Search)
+PCSTR
+RtlFindStringInsensitive(IN PCSTR Source,
+                         IN PCSTR Search)
 {
-    PCHAR CurrentSource;
-    PCHAR CurrentSearch;
+    PCSTR CurrentSource;
+    PCSTR CurrentSearch;
 
     /* Validate input parameters */
     if(!Source || !Search)
@@ -400,7 +400,7 @@ RtlReverseString(IN OUT PCHAR String,
  */
 XTAPI
 SIZE_T
-RtlStringLength(IN CONST PCHAR String,
+RtlStringLength(IN PCSTR String,
                 IN SIZE_T MaxLength)
 {
     SIZE_T Length;
@@ -446,10 +446,10 @@ RtlStringLength(IN CONST PCHAR String,
 XTAPI
 SIZE_T
 RtlStringToWideString(OUT PWCHAR Destination,
-                      IN CONST PCHAR *Source,
+                      IN PCSTR *Source,
                       IN SIZE_T Length)
 {
-    PCHAR LocalSource = *Source;
+    PCSTR LocalSource = *Source;
     SIZE_T Count = Length;
 
     /* Check if NULL pointer passed */
@@ -506,7 +506,7 @@ RtlStringToWideString(OUT PWCHAR Destination,
 XTAPI
 PCHAR
 RtlTokenizeString(IN PCHAR String,
-                  IN CONST PCHAR Delimiter,
+                  IN PCSTR Delimiter,
                   IN OUT PCHAR *SavePtr)
 {
     PCHAR Span, Token;
@@ -623,7 +623,7 @@ RtlToUpperCharacter(IN CHAR Character)
  */
 XTAPI
 PCHAR
-RtlTrimLeftString(IN CONST PCHAR String)
+RtlTrimLeftString(IN PCHAR String)
 {
     PCHAR Start;
 
@@ -653,7 +653,7 @@ RtlTrimLeftString(IN CONST PCHAR String)
  */
 XTAPI
 PCHAR
-RtlTrimRightString(IN CONST PCHAR String)
+RtlTrimRightString(IN PCHAR String)
 {
     PCHAR End;
 
@@ -686,7 +686,7 @@ RtlTrimRightString(IN CONST PCHAR String)
  */
 XTAPI
 PCHAR
-RtlTrimString(IN CONST PCHAR String)
+RtlTrimString(IN PCHAR String)
 {
     return RtlTrimLeftString(RtlTrimRightString(String));
 }

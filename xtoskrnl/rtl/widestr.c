@@ -27,8 +27,8 @@
  */
 XTAPI
 SIZE_T
-RtlCompareWideString(IN CONST PWCHAR String1,
-                     IN CONST PWCHAR String2,
+RtlCompareWideString(IN PCWSTR String1,
+                     IN PCWSTR String2,
                      IN SIZE_T Length)
 {
     SIZE_T Index;
@@ -79,8 +79,8 @@ RtlCompareWideString(IN CONST PWCHAR String1,
  */
 XTAPI
 SIZE_T
-RtlCompareWideStringInsensitive(IN CONST PWCHAR String1,
-                                IN CONST PWCHAR String2,
+RtlCompareWideStringInsensitive(IN PCWSTR String1,
+                                IN PCWSTR String2,
                                 IN SIZE_T Length)
 {
     WCHAR Character1;
@@ -124,7 +124,7 @@ RtlCompareWideStringInsensitive(IN CONST PWCHAR String1,
         Index++;
     }
 
-    /* Wide strings are equal */
+    /* Strings are equal */
     return 0;
 }
 
@@ -207,7 +207,7 @@ RtlConcatenateWideString(OUT PWCHAR Destination,
 XTAPI
 VOID
 RtlCopyWideString(IN PWCHAR Destination,
-                  IN CONST PWCHAR Source,
+                  IN PCWSTR Source,
                   IN ULONG Length)
 {
     ULONG Index;
@@ -244,12 +244,12 @@ RtlCopyWideString(IN PWCHAR Destination,
  * @since XT 1.0
  */
 XTAPI
-PWCHAR
-RtlFindWideString(IN PWCHAR Source,
-                  IN PWCHAR Search)
+PCWSTR
+RtlFindWideString(IN PCWSTR Source,
+                  IN PCWSTR Search)
 {
-    PWCHAR CurrentSource;
-    PWCHAR CurrentSearch;
+    PCWSTR CurrentSource;
+    PCWSTR CurrentSearch;
 
     /* Validate input parameters */
     if(!Source || !Search)
@@ -306,12 +306,12 @@ RtlFindWideString(IN PWCHAR Source,
  * @since XT 1.0
  */
 XTAPI
-PWCHAR
-RtlFindWideStringInsensitive(IN PWCHAR Source,
-                             IN PWCHAR Search)
+PCWSTR
+RtlFindWideStringInsensitive(IN PCWSTR Source,
+                             IN PCWSTR Search)
 {
-    PWCHAR CurrentSource;
-    PWCHAR CurrentSearch;
+    PCWSTR CurrentSource;
+    PCWSTR CurrentSearch;
 
     /* Validate input parameters */
     if(!Source || !Search)
@@ -480,7 +480,7 @@ RtlReverseWideString(IN OUT PWCHAR String,
 XTAPI
 PWCHAR
 RtlTokenizeWideString(IN PWCHAR String,
-                      IN CONST PWCHAR Delimiter,
+                      IN PCWSTR Delimiter,
                       IN OUT PWCHAR *SavePtr)
 {
     PWCHAR Span, Token;
@@ -597,7 +597,7 @@ RtlToUpperWideCharacter(IN WCHAR Character)
  */
 XTAPI
 PWCHAR
-RtlTrimLeftWideString(IN CONST PWCHAR String)
+RtlTrimLeftWideString(IN PWCHAR String)
 {
     PWCHAR Start;
 
@@ -627,7 +627,7 @@ RtlTrimLeftWideString(IN CONST PWCHAR String)
  */
 XTAPI
 PWCHAR
-RtlTrimRightWideString(IN CONST PWCHAR String)
+RtlTrimRightWideString(IN PWCHAR String)
 {
     PWCHAR End;
 
@@ -660,7 +660,7 @@ RtlTrimRightWideString(IN CONST PWCHAR String)
  */
 XTAPI
 PWCHAR
-RtlTrimWideString(IN CONST PWCHAR String)
+RtlTrimWideString(IN PWCHAR String)
 {
     return RtlTrimLeftWideString(RtlTrimRightWideString(String));
 }
@@ -680,7 +680,7 @@ RtlTrimWideString(IN CONST PWCHAR String)
  */
 XTAPI
 SIZE_T
-RtlWideStringLength(IN CONST PWCHAR String,
+RtlWideStringLength(IN PCWSTR String,
                     IN SIZE_T MaxLength)
 {
     SIZE_T Length;

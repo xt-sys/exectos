@@ -681,7 +681,7 @@ BlpParseConfigFile(IN CONST PCHAR RawConfig,
 
             /* Initialize new section and convert its name to wide string */
             RtlInitializeListHead(&Section->Options);
-            RtlStringToWideString(Section->SectionName, &SectionName, SectionLength);
+            RtlStringToWideString(Section->SectionName, (PCSTR*)&SectionName, SectionLength);
 
             /* Ensure string is NULL-terminated and add new section to the configuration list */
             Section->SectionName[SectionLength] = L'\0';
@@ -770,8 +770,8 @@ BlpParseConfigFile(IN CONST PCHAR RawConfig,
             }
 
             /* Convert key and value to wide strings */
-            RtlStringToWideString(Option->Name, &Key, RtlStringLength(Key, 0) + 1);
-            RtlStringToWideString(Option->Value, &Value, RtlStringLength(Value, 0) + 1);
+            RtlStringToWideString(Option->Name, (PCSTR*)&Key, RtlStringLength(Key, 0) + 1);
+            RtlStringToWideString(Option->Value, (PCSTR*)&Value, RtlStringLength(Value, 0) + 1);
 
             /* Ensure strings are NULL-terminated and add new option to the list */
             Option->Name[KeyLength] = L'\0';
