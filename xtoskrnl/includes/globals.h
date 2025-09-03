@@ -28,7 +28,10 @@ EXTERN KAFFINITY HlpActiveProcessors;
 EXTERN APIC_MODE HlpApicMode;
 
 /* FrameBuffer information */
-EXTERN HAL_FRAMEBUFFER_DATA HlpFrameBufferData;
+EXTERN HL_FRAMEBUFFER_DATA HlpFrameBufferData;
+
+/* Scroll region information */
+EXTERN HL_SCROLL_REGION_DATA HlpScrollRegionData;
 
 /* System information */
 EXTERN ACPI_SYSTEM_INFO HlpSystemInfo;

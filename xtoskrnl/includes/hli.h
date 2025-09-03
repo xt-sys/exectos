@@ -34,11 +34,9 @@ UCHAR
 HlComPortReadLsr(IN PCPPORT Port,
                  IN UCHAR Byte);
 
-XTAPI
-VOID
-HlDrawPixel(IN ULONG PosX,
-            IN ULONG PosY,
-            IN ULONG Color);
+XTCDECL
+XTSTATUS
+HlDisplayCharacter(IN WCHAR Character);
 
 XTAPI
 XTSTATUS
@@ -48,6 +46,10 @@ XTAPI
 XTSTATUS
 HlGetAcpiTable(IN ULONG Signature,
                OUT PACPI_DESCRIPTION_HEADER *AcpiTable);
+
+XTAPI
+VOID
+HlGetFrameBufferResolution(OUT PULONG Width, OUT PULONG Height);
 
 XTFASTCALL
 KRUNLEVEL
@@ -68,15 +70,16 @@ VOID
 HlInitializeProcessor(VOID);
 
 XTAPI
-XTSTATUS
-HlInitializeSystem(VOID);
+VOID
+HlInitializeScrollRegion(IN ULONG Left,
+                         IN ULONG Top,
+                         IN ULONG Right,
+                         IN ULONG Bottom,
+                         IN ULONG FontColor);
 
 XTAPI
-VOID
-HlPutCharacter(IN ULONG PositionX,
-               IN ULONG PositionY,
-               IN ULONG Color,
-               IN WCHAR WideCharacter);
+XTSTATUS
+HlInitializeSystem(VOID);
 
 XTFASTCALL
 VOID
@@ -85,6 +88,19 @@ HlSetRunLevel(IN KRUNLEVEL RunLevel);
 XTAPI
 VOID
 HlpCacheAcpiTable(IN PACPI_DESCRIPTION_HEADER AcpiTable);
+
+XTAPI
+VOID
+HlpDrawCharacter(IN ULONG PositionX,
+                 IN ULONG PositionY,
+                 IN ULONG Color,
+                 IN WCHAR WideCharacter);
+
+XTAPI
+VOID
+HlpDrawPixel(IN ULONG PosX,
+             IN ULONG PosY,
+             IN ULONG Color);
 
 XTAPI
 XTSTATUS
@@ -123,6 +139,10 @@ HlpQueryAcpiTables(IN ULONG Signature,
 XTAPI
 ULONG
 HlpRGBColor(IN ULONG Color);
+
+XTAPI
+VOID
+HlpScrollRegion(VOID);
 
 XTAPI
 BOOLEAN

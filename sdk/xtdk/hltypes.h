@@ -366,8 +366,8 @@ typedef struct _CPPORT
     UCHAR Ring;
 } CPPORT, *PCPPORT;
 
-/* HAL framebuffer data structure */
-typedef struct _HAL_FRAMEBUFFER_DATA
+/* Framebuffer data structure */
+typedef struct _HL_FRAMEBUFFER_DATA
 {
     BOOLEAN Initialized;
     PVOID Address;
@@ -375,7 +375,6 @@ typedef struct _HAL_FRAMEBUFFER_DATA
     UINT Width;
     UINT Height;
     UINT PixelsPerScanLine;
-    UINT BitsPerPixel;
     UINT BytesPerPixel;
     UINT Pitch;
     PVOID Font;
@@ -390,7 +389,22 @@ typedef struct _HAL_FRAMEBUFFER_DATA
         USHORT ReservedShift;
         USHORT ReservedSize;
     } Pixels;
-} HAL_FRAMEBUFFER_DATA, *PHAL_FRAMEBUFFER_DATA;
+} HL_FRAMEBUFFER_DATA, *PHL_FRAMEBUFFER_DATA;
+
+/* Scroll region data structure */
+typedef struct _HL_SCROLL_REGION_DATA
+{
+    ULONG Left;
+    ULONG Top;
+    ULONG Right;
+    ULONG Bottom;
+    ULONG WidthInChars;
+    ULONG HeightInChars;
+    ULONG CursorX;
+    ULONG CursorY;
+    ULONG BackgroundColor;
+    ULONG TextColor;
+} HL_SCROLL_REGION_DATA, *PHL_SCROLL_REGION_DATA;
 
 /* Processor identity structure */
 typedef struct _PROCESSOR_IDENTITY

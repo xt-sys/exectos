@@ -4,6 +4,7 @@
  * FILE:            xtoskrnl/hl/fbdev.c
  * DESCRIPTION:     FrameBuffer support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ *                  Aiken Harris <harraiken91@gmail.com>
  */
 
 #include <xtos.h>
@@ -54,16 +55,84 @@ HlClearScreen(IN ULONG Color)
 }
 
 /**
- * Draw a pixel on the screen at the given position and color.
+ * Displays a single character at the current cursor position inside the scroll region.
  *
- * @param PositionX
- *        Supplies the X coordinate of the pixel.
+ * @param Character
+ *        Supplies the character to be displayed.
  *
- * @param PositionY
- *        Supplies the Y coordinate of the pixel.
+ * @return This routine does not return any value.
  *
- * @param Color
- *        Specifies the color of the pixel in (A)RGB format.
+ * @since XT 1.0
+ */
+XTCDECL
+XTSTATUS
+HlDisplayCharacter(IN WCHAR Character)
+{
+    PSSFN_FONT_HEADER FbFont;
+
+    /* Make sure frame buffer is already initialized */
+    if(HlpFrameBufferData.Initialized == FALSE)
+    {
+        /* Unable to operate on non-initialized frame buffer */
+        return STATUS_DEVICE_NOT_READY;
+    }
+
+    /* Get font information */
+    FbFont = (PSSFN_FONT_HEADER)HlpFrameBufferData.Font;
+
+    /* Handle special characters */
+    switch(Character)
+    {
+        case L'\n':
+            /* Move cursor to the beginning of the next line */
+            HlpScrollRegionData.CursorX = HlpScrollRegionData.Left;
+            HlpScrollRegionData.CursorY += FbFont->Height;
+            break;
+        case L'\t':
+            /* Move cursor to the next tab stop */
+            HlpScrollRegionData.CursorX += (8 - (HlpScrollRegionData.CursorX - HlpScrollRegionData.Left) / FbFont->Width % 8) * FbFont->Width;
+            if (HlpScrollRegionData.CursorX >= HlpScrollRegionData.Right)
+            {
+                HlpScrollRegionData.CursorX = HlpScrollRegionData.Left;
+                HlpScrollRegionData.CursorY += FbFont->Height;
+            }
+            break;
+        default:
+            /* Draw the character */
+            HlpDrawCharacter(HlpScrollRegionData.CursorX, HlpScrollRegionData.CursorY, HlpScrollRegionData.TextColor, Character);
+
+            /* Advance cursor */
+            HlpScrollRegionData.CursorX += FbFont->Width;
+
+            /* Check if cursor reached end of line */
+            if(HlpScrollRegionData.CursorX >= HlpScrollRegionData.Right)
+            {
+                HlpScrollRegionData.CursorX = HlpScrollRegionData.Left;
+                HlpScrollRegionData.CursorY += FbFont->Height;
+            }
+            break;
+    }
+
+    /* Check if cursor reached end of scroll region */
+    if(HlpScrollRegionData.CursorY >= HlpScrollRegionData.Bottom)
+    {
+        /* Scroll one line up */
+        HlpScrollRegion();
+        HlpScrollRegionData.CursorY = HlpScrollRegionData.Bottom - FbFont->Height;
+    }
+
+    /* Return success */
+    return STATUS_SUCCESS;
+}
+
+/**
+ * Returns the current resolution of the frame buffer display.
+ *
+ * @param Width
+ *        A pointer to memory area where the screen width will be stored.
+ *
+ * @param Height
+ *        A pointer to memory area where the screen height will be stored.
  *
  * @return This routine does not return any value.
  *
@@ -71,32 +140,10 @@ HlClearScreen(IN ULONG Color)
  */
 XTAPI
 VOID
-HlDrawPixel(IN ULONG PositionX,
-            IN ULONG PositionY,
-            IN ULONG Color)
+HlGetFrameBufferResolution(OUT PULONG Width, OUT PULONG Height)
 {
-    PCHAR PixelAddress;
-
-    /* Make sure frame buffer is already initialized */
-    if(HlpFrameBufferData.Initialized == FALSE)
-    {
-        /* Unable to operate on non-initialized frame buffer */
-        return;
-    }
-
-    /* Make sure point is not offscreen */
-    if(PositionX >= HlpFrameBufferData.Width || PositionY >= HlpFrameBufferData.Height || Color > 0xFFFFFFFF)
-    {
-        /* Invalid pixel position or color given */
-        return;
-    }
-
-    /* Calculate the address of the pixel in the frame buffer memory */
-    PixelAddress = (PCHAR)HlpFrameBufferData.Address + (PositionY * HlpFrameBufferData.Pitch) +
-                          (PositionX * HlpFrameBufferData.BytesPerPixel);
-
-    /* Set the color of the pixel by writing to the corresponding memory location */
-    *((PULONG)PixelAddress) = HlpRGBColor(Color);
+    *Width = HlpFrameBufferData.Width;
+    *Height = HlpFrameBufferData.Height;
 }
 
 /**
@@ -155,7 +202,6 @@ HlInitializeFrameBuffer(VOID)
     HlpFrameBufferData.Address = FrameBufferResource->Header.VirtualAddress;
     HlpFrameBufferData.Width = FrameBufferResource->Width;
     HlpFrameBufferData.Height = FrameBufferResource->Height;
-    HlpFrameBufferData.BitsPerPixel = FrameBufferResource->BitsPerPixel;
     HlpFrameBufferData.BytesPerPixel = FrameBufferResource->BitsPerPixel / 8;
     HlpFrameBufferData.PixelsPerScanLine = FrameBufferResource->PixelsPerScanLine;
     HlpFrameBufferData.Pitch = FrameBufferResource->Pitch;
@@ -177,7 +223,81 @@ HlInitializeFrameBuffer(VOID)
 }
 
 /**
- * Puts a wide character on the framebuffer at the given position and color using the SSFN font.
+ * Sets the scrollable region of the screen and calculates character dimensions.
+ *
+ * @param Left
+ *        Supplies the left pixel coordinate of the scroll region.
+ *
+ * @param Top
+ *        Supplies the top pixel coordinate of the scroll region.
+ *
+ * @param Right
+ *        Supplies the right pixel coordinate of the scroll region.
+ *
+ * @param Bottom
+ *        Supplies the bottom pixel coordinate of the scroll region.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+HlInitializeScrollRegion(IN ULONG Left,
+                         IN ULONG Top,
+                         IN ULONG Right,
+                         IN ULONG Bottom,
+                         IN ULONG FontColor)
+{
+    PSSFN_FONT_HEADER FbFont;
+    PCHAR PixelAddress;
+
+    /* Make sure frame buffer is already initialized */
+    if(HlpFrameBufferData.Initialized == FALSE)
+    {
+        /* Unable to operate on non-initialized frame buffer */
+        return;
+    }
+
+    /* Store pixel coordinates of the scroll region */
+    HlpScrollRegionData.Left = Left;
+    HlpScrollRegionData.Top = Top;
+    HlpScrollRegionData.Right = Right;
+    HlpScrollRegionData.Bottom = Bottom;
+
+    /* Get font information */
+    FbFont = (PSSFN_FONT_HEADER)HlpFrameBufferData.Font;
+
+    /* Validate font information */
+    if(FbFont && FbFont->Width > 0 && FbFont->Height > 0)
+    {
+        /* Calculate character dimensions */
+        HlpScrollRegionData.WidthInChars = (Right - Left) / FbFont->Width;
+        HlpScrollRegionData.HeightInChars = (Bottom - Top) / FbFont->Height;
+
+        /* Ensure the bottom of the scroll region is an exact multiple of the font height */
+        HlpScrollRegionData.Bottom = HlpScrollRegionData.Top + (HlpScrollRegionData.HeightInChars * FbFont->Height);
+    }
+    else
+    {
+        /* Fallback to 0 if font info is not available or invalid */
+        HlpScrollRegionData.WidthInChars = 0;
+        HlpScrollRegionData.HeightInChars = 0;
+    }
+
+    /* Initialize cursor position and font color */
+    HlpScrollRegionData.CursorX = HlpScrollRegionData.Left;
+    HlpScrollRegionData.CursorY = HlpScrollRegionData.Top;
+    HlpScrollRegionData.TextColor = FontColor;
+
+    /* Get the background color by reading the pixel at the top-left corner of the scroll region */
+    PixelAddress = (PCHAR)HlpFrameBufferData.Address + (Top * HlpFrameBufferData.Pitch) +
+                          (Left * HlpFrameBufferData.BytesPerPixel);
+    HlpScrollRegionData.BackgroundColor = *((PULONG)PixelAddress);
+}
+
+/**
+ * Draws a character on the framebuffer at the given position and color using the SSFN font.
  *
  * @param PositionX
  *        Supplies the X coordinate of the character.
@@ -197,10 +317,10 @@ HlInitializeFrameBuffer(VOID)
  */
 XTAPI
 VOID
-HlPutCharacter(IN ULONG PositionX,
-               IN ULONG PositionY,
-               IN ULONG Color,
-               IN WCHAR WideCharacter)
+HlpDrawCharacter(IN ULONG PositionX,
+                 IN ULONG PositionY,
+                 IN ULONG Color,
+                 IN WCHAR WideCharacter)
 {
     UINT CurrentFragment, Glyph, GlyphLimit, Index, Line, Mapping;
     PUCHAR Character, CharacterMapping, Fragment;
@@ -340,6 +460,52 @@ HlPutCharacter(IN ULONG PositionX,
 }
 
 /**
+ * Draw a pixel on the screen at the given position and color.
+ *
+ * @param PositionX
+ *        Supplies the X coordinate of the pixel.
+ *
+ * @param PositionY
+ *        Supplies the Y coordinate of the pixel.
+ *
+ * @param Color
+ *        Specifies the color of the pixel in (A)RGB format.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+HlpDrawPixel(IN ULONG PositionX,
+             IN ULONG PositionY,
+             IN ULONG Color)
+{
+    PCHAR PixelAddress;
+
+    /* Make sure frame buffer is already initialized */
+    if(HlpFrameBufferData.Initialized == FALSE)
+    {
+        /* Unable to operate on non-initialized frame buffer */
+        return;
+    }
+
+    /* Make sure point is not offscreen */
+    if(PositionX >= HlpFrameBufferData.Width || PositionY >= HlpFrameBufferData.Height || Color > 0xFFFFFFFF)
+    {
+        /* Invalid pixel position or color given */
+        return;
+    }
+
+    /* Calculate the address of the pixel in the frame buffer memory */
+    PixelAddress = (PCHAR)HlpFrameBufferData.Address + (PositionY * HlpFrameBufferData.Pitch) +
+                          (PositionX * HlpFrameBufferData.BytesPerPixel);
+
+    /* Set the color of the pixel by writing to the corresponding memory location */
+    *((PULONG)PixelAddress) = HlpRGBColor(Color);
+}
+
+/**
  * Converts color format from (A)RGB one expected by current FrameBuffer.
  *
  * @param Color
@@ -364,4 +530,63 @@ HlpRGBColor(IN ULONG Color)
     /* Return color in FrameBuffer pixel format */
     return (ULONG)((Blue << HlpFrameBufferData.Pixels.BlueShift) | (Green << HlpFrameBufferData.Pixels.GreenShift) |
                    (Red << HlpFrameBufferData.Pixels.RedShift) | (Reserved << HlpFrameBufferData.Pixels.ReservedShift));
+}
+
+/**
+ * Scrolls the content of the scroll region up by one line.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+HlpScrollRegion(VOID)
+{
+    PCHAR Destination, Source;
+    PSSFN_FONT_HEADER FbFont;
+    ULONG Line, PositionX;
+    ULONG LineBytes;
+    PULONG Pixel;
+
+    /* Make sure frame buffer is already initialized */
+    if(HlpFrameBufferData.Initialized == FALSE)
+    {
+        /* Unable to operate on non-initialized frame buffer */
+        return;
+    }
+
+    /* Get font information */
+    FbFont = (PSSFN_FONT_HEADER)HlpFrameBufferData.Font;
+
+    /* Calculate bytes per line in the scroll region */
+    LineBytes = (HlpScrollRegionData.Right - HlpScrollRegionData.Left) * HlpFrameBufferData.BytesPerPixel;
+
+    /* Scroll up each scan line in the scroll region */
+    for(Line = HlpScrollRegionData.Top; Line < HlpScrollRegionData.Bottom - FbFont->Height; Line++)
+    {
+        Destination = (PCHAR)HlpFrameBufferData.Address + Line * HlpFrameBufferData.Pitch +
+                      HlpScrollRegionData.Left * HlpFrameBufferData.BytesPerPixel;
+
+        /* The source is one full text line (FbFont->Height) below the destination */
+        Source = (PCHAR)HlpFrameBufferData.Address + (Line + FbFont->Height) * HlpFrameBufferData.Pitch +
+                 HlpScrollRegionData.Left * HlpFrameBufferData.BytesPerPixel;
+
+        /* Move each scan line in the scroll region up */
+        RtlMoveMemory(Destination, Source, LineBytes);
+    }
+
+    /* Clear the last text line */
+    for(Line = HlpScrollRegionData.Bottom - FbFont->Height; Line < HlpScrollRegionData.Bottom; Line++)
+    {
+        /* Get pointer to the start of the scan line to clear */
+        Pixel = (PULONG)((PCHAR)HlpFrameBufferData.Address + Line * HlpFrameBufferData.Pitch +
+                         HlpScrollRegionData.Left * HlpFrameBufferData.BytesPerPixel);
+
+        /* Clear each pixel in the scan line with the background color */
+        for(PositionX = 0; PositionX < (HlpScrollRegionData.Right - HlpScrollRegionData.Left); PositionX++)
+        {
+            Pixel[PositionX] = HlpScrollRegionData.BackgroundColor;
+        }
+    }
 }

@@ -25,7 +25,10 @@ KAFFINITY HlpActiveProcessors;
 APIC_MODE HlpApicMode;
 
 /* FrameBuffer information */
-HAL_FRAMEBUFFER_DATA HlpFrameBufferData;
+HL_FRAMEBUFFER_DATA HlpFrameBufferData;
+
+/* Scroll region information */
+HL_SCROLL_REGION_DATA HlpScrollRegionData;
 
 /* System information */
 ACPI_SYSTEM_INFO HlpSystemInfo;
