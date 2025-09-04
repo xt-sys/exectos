@@ -36,8 +36,24 @@ EXTERN HL_SCROLL_REGION_DATA HlpScrollRegionData;
 /* System information */
 EXTERN ACPI_SYSTEM_INFO HlpSystemInfo;
 
-/* Pointer to boot loader provided DbgPrint() routine */
-EXTERN VOID (*KeDbgPrint)(IN PCWSTR Format, IN ...);
+/* Pointer to DbgPrint() routine */
+EXTERN PKD_PRINT_ROUTINE KdPrint;
+
+/* Kernel Debugger mode */
+EXTERN KD_DEBUG_MODE KdpDebugMode;
+
+/* Debugger I/O providers initialization routines */
+EXTERN PKD_INIT_ROUTINE KdpIoProvidersInitRoutines[KDBG_PROVIDERS_COUNT];
+
+/* List of active I/O providers */
+EXTERN LIST_ENTRY KdpProviders;
+
+/* Debugger's serial port handle */
+EXTERN CPPORT KdpSerialPort;
+
+/* Pre-defined serial port addresses */
+EXTERN ULONG KdpSerialPortList[COMPORT_COUNT];
+
 
 /* Kernel initialization block passed by boot loader */
 EXTERN PKERNEL_INITIALIZATION_BLOCK KeInitializationBlock;

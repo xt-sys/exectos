@@ -15,6 +15,7 @@
 /* Kernel specific headers */
 #include "globals.h"
 #include "hli.h"
+#include "kdi.h"
 #include "kei.h"
 #include "mmi.h"
 #include "poi.h"

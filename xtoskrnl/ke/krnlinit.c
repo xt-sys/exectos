@@ -39,7 +39,21 @@ KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
     if(DEBUG && KeInitializationBlock->LoaderInformation.DbgPrint)
     {
         /* Use loader's provided DbgPrint() routine for early printing to serial console */
-        KeDbgPrint = KeInitializationBlock->LoaderInformation.DbgPrint;
+        KdSetPrintRoutine(KeInitializationBlock->LoaderInformation.DbgPrint);
+        DebugPrint(L"Initializing ExectOS v%d.%d for %s\n", XTOS_VERSION_MAJOR, XTOS_VERSION_MINOR, _ARCH_NAME);
+    }
+
+    /* Initialize boot CPU */
+    ArInitializeProcessor(NULL);
+
+    /* Initialize system resources */
+    KepInitializeSystemResources();
+
+    /* Check if debugging enabled */
+    if(DEBUG)
+    {
+        /* Initialize debug I/O */
+        KdInitializeDebugIoProviders();
     }
 
     /* Announce kernel startup */
@@ -47,12 +61,6 @@ KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
                XTOS_VERSION_MAJOR, XTOS_VERSION_MINOR, _ARCH_NAME, XTOS_VERSION_DATE,
                XTOS_VERSION_BUILD, XTOS_VERSION_ARCH, XTOS_VERSION_HASH,
                XTOS_COMPILER_NAME, XTOS_COMPILER_VERSION);
-
-    /* Initialize boot CPU */
-    ArInitializeProcessor(NULL);
-
-    /* Initialize system resources */
-    KepInitializeSystemResources();
 
     /* Architecture specific kernel initialization */
     KepInitializeMachine();

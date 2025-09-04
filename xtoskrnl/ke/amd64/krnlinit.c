@@ -109,7 +109,6 @@ KepStartKernel(VOID)
     CurrentProcess->ActiveProcessors |= (ULONG_PTR)1 << Prcb->CpuNumber;
 
     /* Enter infinite loop */
-    HlClearScreen(0x7F7F7FFF);
     DebugPrint(L"KepStartKernel() finished. Entering infinite loop.\n");
     for(;;);
 }

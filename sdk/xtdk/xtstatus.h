@@ -59,6 +59,7 @@
 #define STATUS_INVALID_PARAMETER                                           ((XTSTATUS) 0xC000000DL)
 #define STATUS_END_OF_FILE                                                 ((XTSTATUS) 0xC0000011L)
 #define STATUS_NO_MEMORY                                                   ((XTSTATUS) 0xC0000017L)
+#define STATUS_PORT_DISCONNECTED                                           ((XTSTATUS) 0xC0000037L)
 #define STATUS_CRC_ERROR                                                   ((XTSTATUS) 0xC000003FL)
 #define STATUS_INSUFFICIENT_RESOURCES                                      ((XTSTATUS) 0xC000009AL)
 #define STATUS_DEVICE_NOT_READY                                            ((XTSTATUS) 0xC00000A3L)

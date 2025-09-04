@@ -30,6 +30,7 @@
 #include <extypes.h>
 #include <hltypes.h>
 #include <iotypes.h>
+#include <kdtypes.h>
 #include <ketypes.h>
 #include <ldrtypes.h>
 #include <mmtypes.h>
