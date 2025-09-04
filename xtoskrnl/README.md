@@ -1,58 +1,68 @@
 ## XTOSKRNL
-XTOSKRNL is an XT system kernel executable, providing the kernel and executive layers for XTOS kernel space. It is
-a fundamental part of ExectOS, responsible for various core services like hardware abstraction or memory management.
-This kernel, contains the scheduler (called sometimes as Dispatcher), cache, object and memory managers, security
-manager and other kernel executives described below.
+XTOSKRNL is the core kernel executable for ExectOS, providing the fundamental kernel and executive layers that operate
+within the XTOS kernel space. It is responsible for various core services, such as hardware abstraction, memory
+management, and process scheduling. The kernel contains the scheduler (sometimes referred to as the Dispatcher), the
+cache, object, and memory managers, the security manager, and other executive components described below.
 
-All routines in kernel are prefixed to indicate the kernel subsystem they belong and put inside separate directory.
-This is a list of them:
+All routines in the kernel are prefixed to indicate the subsystem they belong to, and their source code is organized
+into corresponding directories. These subsystems include:
 
- * Ar - Architecture library
+ * Ar - Architecture-specific Library
  * Ex - Kernel Executive
  * Hl - Hardware Layer
- * Ke - Core kernel library
- * Mm - Memory manager
+ * Kd - Kernel Debugger
+ * Ke - Core Kernel Library
+ * Mm - Memory Manager
  * Po - Plug&Play and Power Manager
  * Rtl - Runtime library
 
 ### AR: Architecture Library
-This module contains processor architecture specific functions. This includes enabling and disabling interrupts at
-the processor, getting the address of a page fault, getting CPUID information, and performing very early processor
-initialization. This module does not contain any manufacturer or board-specific code, only CPU architecture specific
-code.
+This module contains functions specific to the processor architecture. These include routines for enabling and disabling
+interrupts, retrieving the faulting address on a page fault, querying CPUID information, and performing very early
+processor initialization. This module contains only CPU architecture-specific code, with no manufacturer or
+board-specific implementations.
 
 ### EX: Kernel Executive
-The kernel executive supplies heap management, including support for allocating system memory from paged/non-paged
-pools, as well as synchronization primitives like push locks and fast mutexes, interlocked memory access, and worker
-threads.
+The Kernel Executive provides services for allocating system memory from paged and non-paged pools. It also supplies
+synchronization primitives such as pushlocks and fast mutexes, routines for interlocked memory access, and support for
+worker threads.
 
 ### HL: Hardware Layer
-Hardware Layer, is a layer between the physical hardware of the computer and the rest of the operating system. It was
-designed to hide differences in hardware and therefore it provides a consistent platform on which the system and
-applications may run.
+The Hardware Layer is an abstraction layer between the physical hardware and the rest of the operating system. It is
+designed to abstract away hardware differences, providing a consistent platform on which the kernel and applications
+can run.
+
+### KD: Kernel Debugger
+The Kernel Debugger (KD) subsystem provides debugging support for the kernel. The KD is initialized early in the boot
+process to facilitate debugging from the very beginning of the kernel's execution.
 
 ### KE: Kernel Library
-The kernel implements its core functionality that everything else in the system depends upon. This includes basic
-low-level operations such as routing hardware interrupts.
+The Core Kernel Library implements the core functionality upon which the rest of the system depends. This includes
+fundamental low-level operations, such as routing hardware interrupts and managing dispatcher objects.
 
 ### MM: Memory Manager
-Memory Manager is one of core subsystems. It manages virtual memory, controls memory protection and the paging of memory
-in and out of physical memory to secondary storage. It also implements a general-purpose allocator of physical memory.
+The Memory Manager is one of the core subsystems. It manages virtual memory, controls memory protection, and
+handles paging memory between physical RAM and secondary storage. It also implements a general-purpose allocator for
+physical memory.
 
 ### PO: Plug&Play and Power Manager
-This subsystem deals with power events, such as power-off, stand-by, or hibernate. It also handles Plug&Play and
-supports device detection and installation at boot time. It is responsible for starting and stopping devices on demand.
+This subsystem handles power management events, such as shutdown or standby. It also manages Plug and Play (PnP),
+supporting device detection and installation at boot time. Furthermore, it is responsible for starting and stopping
+devices on demand.
 
 ### RTL: Runtime Library
-This is a required static copy of C runtime objects. It includes many utility functions that can be used by native
-applications.
+The Runtime Library provides a kernel-mode implementation of common C library functions. It includes many utility
+routines, for use by other kernel components.
 
-## Functions Naming Convention
-When naming a kernel functions, certain conventions are used. The function name is usually structured with
-&lt;Prefix&gt;&lt;Operation&gt;&lt;Object&gt;. The prefix denotes the module to which it belongs, thus module
-can be identified simply by the name of the function. Additionally, the prefix identifies the function visibility
-as well. Thus all private functions, that should not be used from outside of the module has added "p" suffix to
-the prefix. For example, KepInitializeStack() routine:
- * Kep - prefix meaning this is private routine belonging to Kernel library (Ke) module,
- * Initialize - operation this function does with the object,
- * Stack - the object is stack.
+## Function Naming Convention
+All kernel functions adhere to a strict naming convention to enhance code readability and maintainability. The structure
+of a function name is generally composed of three parts: &lt;Prefix&gt;&lt;Operation&gt;&lt;Object&gt;
+
+The prefix identifies the component to which the function belongs. Additionally, the prefix indicates the function's
+visibility. Private functions, which should not be called from outside their own module, have a 'p' appended to their
+prefix.
+
+For example, consider the **KepInitializeStack()** routine:
+ * **Kep** - The prefix indicates a private (p) routine belonging to the Core Kernel Library (Ke).
+ * **Initialize** - The operation performed by the function.
+ * **Stack** - The object on which the operation is performed.
