@@ -10,7 +10,6 @@ include_directories(
 # Specify list of library source code files
 list(APPEND LIBXTOS_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/boot.S
-    ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/cpufunc.c
     ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/cpufunc.cc
     ${XTOSKRNL_SOURCE_DIR}/hl/cport.c
     ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/ioport.c
