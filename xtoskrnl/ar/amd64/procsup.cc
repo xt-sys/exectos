@@ -637,40 +637,6 @@ ProcSup::SetIdtGate(IN PKIDTENTRY Idt,
     Idt[Vector].Type = 0xE;
 }
 
-/**
- * Switches execution to a new boot stack and transfers control to the specified routine
- *
- * @param TargetRoutine
- *        Supplies the address of the routine to transfer control to after switching to the new boot stack.
- *
- * @param ReservedStackSize
- *        Specifies the amount of stack space to reserve below the new stack pointer.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTAPI 
-VOID
-ProcSup::SwitchBootStack(PVOID TargetRoutine,
-                         ULONG_PTR ReservedStackSize)
-{
-    /* Calculate the stack pointer at the top of the buffer, ensuring it is properly aligned as required by the ABI */
-    ULONG_PTR Stack = ((ULONG_PTR)&BootStack + KERNEL_STACK_SIZE) & ~(STACK_ALIGNMENT - 1);
-
-    /* Discard old stack frame, switch stack, reserve space, and jump to the target routine */
-    __asm__ volatile("mov %0, %%rax\n"
-                     "xor %%rbp, %%rbp\n"
-                     "mov %%rax, %%rsp\n"
-                     "sub %1, %%rsp\n"
-                     "jmp *%2\n"
-                     :
-                     : "m" (Stack),
-                       "r" (ReservedStackSize),
-                       "r" (TargetRoutine)
-                     : "rax", "rbp", "rsp", "memory");
-}
-
 } /* namespace */
 
 
@@ -690,14 +656,4 @@ VOID
 ArInitializeProcessor(IN PVOID ProcessorStructures)
 {
     AR::ProcSup::InitializeProcessor(ProcessorStructures);
-}
-
-/* TEMPORARY FOR COMPATIBILITY WITH C CODE */
-XTCLINK
-XTAPI
-VOID
-ArSwitchBootStack(IN PVOID TargetRoutine,
-                  IN ULONG_PTR ReservedStackSize)
-{
-    AR::ProcSup::SwitchBootStack(TargetRoutine, ReservedStackSize);
 }
