@@ -14,26 +14,32 @@
 
 
 /* Kernel Executive routines forward references */
+XTCLINK
 XTFASTCALL
 BOOLEAN
 ExAcquireRundownProtection(IN PEX_RUNDOWN_REFERENCE Descriptor);
 
+XTCLINK
 XTFASTCALL
 VOID
 ExCompleteRundownProtection(IN PEX_RUNDOWN_REFERENCE Descriptor);
 
+XTCLINK
 XTFASTCALL
 VOID
 ExInitializeRundownProtection(IN PEX_RUNDOWN_REFERENCE Descriptor);
 
+XTCLINK
 XTFASTCALL
 VOID
 ExReInitializeRundownProtection(IN PEX_RUNDOWN_REFERENCE Descriptor);
 
+XTCLINK
 XTFASTCALL
 VOID
 ExReleaseRundownProtection(IN PEX_RUNDOWN_REFERENCE Descriptor);
 
+XTCLINK
 XTFASTCALL
 VOID
 ExWaitForRundownProtectionRelease(IN PEX_RUNDOWN_REFERENCE Descriptor);

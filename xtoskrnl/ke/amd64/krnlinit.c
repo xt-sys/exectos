@@ -100,7 +100,7 @@ KepStartKernel(VOID)
     CurrentProcess->Quantum = MAXCHAR;
 
     /* Initialize Idle thread */
-    KeInitializeThread(CurrentProcess, CurrentThread, NULL, NULL, NULL, NULL, NULL, ArKernelBootStack, TRUE);
+    KeInitializeThread(CurrentProcess, CurrentThread, NULL, NULL, NULL, NULL, NULL, ArGetBootStack(), TRUE);
     CurrentThread->NextProcessor = Prcb->CpuNumber;
     CurrentThread->Priority = THREAD_HIGH_PRIORITY;
     CurrentThread->State = Running;
@@ -114,16 +114,19 @@ KepStartKernel(VOID)
 }
 
 /**
- * Switches to a new kernel boot stack.
+ * Switches execution to a new boot stack and transfers control to the KepStartKernel() routine.
  *
- * @return This routine does not return any value
+ * @return This routine does not return any value.
  *
  * @since XT 1.0
  */
 XTAPI
 VOID
-KepSwitchBootStack(IN ULONG_PTR Stack)
+KepSwitchBootStack()
 {
+    /* Calculate the stack pointer at the top of the buffer, ensuring it is properly aligned as required by the ABI */
+    ULONG_PTR Stack = ((ULONG_PTR)ArGetBootStack() + KERNEL_STACK_SIZE) & ~(STACK_ALIGNMENT - 1);
+
     /* Discard old stack frame, switch stack and jump to KepStartKernel() */
     __asm__ volatile("mov %0, %%rdx\n"
                      "xor %%rbp, %%rbp\n"
@@ -133,5 +136,6 @@ KepSwitchBootStack(IN ULONG_PTR Stack)
                      :
                      : "m" (Stack),
                        "i" (FLOATING_SAVE_AREA_SIZE | KEXCEPTION_FRAME_SIZE | KSWITCH_FRAME_SIZE | KRETURN_ADDRESS_SIZE),
-                       "p" (KepStartKernel));
+                       "p" (KepStartKernel)
+                     : "rdx", "rbp", "rsp", "memory");
 }

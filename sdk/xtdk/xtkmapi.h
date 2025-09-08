@@ -7,6 +7,7 @@
  */
 
 /* Base XT headers */
+#include <xtcompat.h>
 #include <xtdefs.h>
 #include <xtstatus.h>
 #include <xttarget.h>

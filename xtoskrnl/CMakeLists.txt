@@ -11,6 +11,7 @@ include_directories(
 list(APPEND LIBXTOS_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/boot.S
     ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/cpufunc.c
+    ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/cpufunc.cc
     ${XTOSKRNL_SOURCE_DIR}/hl/cport.c
     ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/ioport.c
     ${XTOSKRNL_SOURCE_DIR}/rtl/globals.c
@@ -25,10 +26,10 @@ list(APPEND LIBXTOS_SOURCE
 list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/archsup.S
     ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/boot.S
-    ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/cpufunc.c
-    ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/globals.c
-    ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/procsup.c
-    ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/traps.c
+    ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/cpufunc.cc
+    ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/data.cc
+    ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/procsup.cc
+    ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/traps.cc
     ${XTOSKRNL_SOURCE_DIR}/ex/rundown.c
     ${XTOSKRNL_SOURCE_DIR}/hl/acpi.c
     ${XTOSKRNL_SOURCE_DIR}/hl/cport.c

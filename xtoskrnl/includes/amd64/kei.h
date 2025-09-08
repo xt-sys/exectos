@@ -55,6 +55,6 @@ KepStartKernel(VOID);
 
 XTAPI
 VOID
-KepSwitchBootStack(IN ULONG_PTR Stack);
+KepSwitchBootStack();
 
 #endif /* __XTOSKRNL_AMD64_KEI_H */

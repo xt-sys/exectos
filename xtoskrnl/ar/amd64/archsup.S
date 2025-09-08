@@ -22,9 +22,9 @@
  *
  * @since XT 1.0
  */
-.macro ArpCreateTrapHandler Vector
-.global ArpTrap\Vector
-ArpTrap\Vector:
+.macro ArCreateTrapHandler Vector
+.global ArTrap\Vector
+ArTrap\Vector:
     /* Push fake error code for non-error vectors */
     .if \Vector != 8 && \Vector != 10 && \Vector != 11 && \Vector != 12 && \Vector != 13 && \Vector != 14 && \Vector != 17 && \Vector != 30
         push $0
@@ -113,7 +113,7 @@ KernelMode$\Vector:
     /* Push Frame Pointer, clear direction flag and pass to trap dispatcher */
     mov %rsp, %rcx
     cld
-    call ArpDispatchTrap
+    call ArDispatchTrap
 
     /* Test previous mode and swapgs if needed */
     testb $1, TrapPreviousMode(%rbp)
@@ -176,6 +176,6 @@ KernelModeReturn$\Vector:
 /* Populate common trap handlers */
 .irp i,0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F
     .irp j,0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F
-        ArpCreateTrapHandler 0x\i\j
+        ArCreateTrapHandler 0x\i\j
     .endr
 .endr

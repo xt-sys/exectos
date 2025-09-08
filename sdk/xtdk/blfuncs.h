@@ -14,6 +14,7 @@
 
 
 /* XT BootLoader routines forward references */
+XTCLINK
 XTCDECL
 EFI_STATUS
 BlGetXtLdrProtocol(IN PEFI_SYSTEM_TABLE SystemTable,

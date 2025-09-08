@@ -25,6 +25,10 @@ XTCDECL
 VOID
 ArFlushTlb(VOID);
 
+XTAPI
+PVOID
+ArGetBootStack(VOID);
+
 XTCDECL
 ULONG
 ArGetCpuFlags(VOID);

@@ -10,6 +10,7 @@
 #define __XTDK_XTTYPES_H
 
 #include <xttarget.h>
+#include <xtcompat.h>
 
 
 /* Standard C types */
@@ -128,7 +129,7 @@ typedef CHAR SZ, *PSZ;
 typedef const CHAR CSZ, *PCSZ;
 
 /* UNICODE character types */
-typedef USHORT WCHAR, *PWCHAR;
+typedef wchar WCHAR, *PWCHAR;
 typedef WCHAR *PWCH, *LPWCH;
 typedef const WCHAR *PCWCH, *LPCWCH;
 typedef WCHAR *PWSTR, *LPWSTR, *NWPSTR;

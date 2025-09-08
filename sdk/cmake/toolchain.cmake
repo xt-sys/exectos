@@ -20,8 +20,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_CXX_STANDARD 23)
 
-# Disable standard C libraries
+# Disable standard C and C++ libraries
 set(CMAKE_C_STANDARD_LIBRARIES "" CACHE INTERNAL "")
+set(CMAKE_CXX_STANDARD_LIBRARIES "" CACHE INTERNAL "")
 
 # Clean linker flags
 set(CMAKE_STATIC_LINKER_FLAGS "")

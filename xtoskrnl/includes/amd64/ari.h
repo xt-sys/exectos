@@ -25,6 +25,10 @@ XTCDECL
 VOID
 ArFlushTlb(VOID);
 
+XTAPI
+PVOID
+ArGetBootStack(VOID);
+
 XTCDECL
 ULONG
 ArGetCpuFlags(VOID);
@@ -430,5 +434,9 @@ ArpTrap0x2F(VOID);
 XTCDECL
 VOID
 ArpTrap0xE1(VOID);
+
+XTCDECL
+VOID
+ArpTrap0xFF(VOID);
 
 #endif /* __XTOSKRNL_AMD64_ARI_H */

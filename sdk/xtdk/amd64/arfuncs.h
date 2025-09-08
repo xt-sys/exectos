@@ -16,30 +16,37 @@
 
 
 /* Routines used by XTLDR */
+XTCLINK
 XTCDECL
 VOID
 ArClearInterruptFlag(VOID);
 
+XTCLINK
 XTCDECL
 BOOLEAN
 ArCpuId(IN OUT PCPUID_REGISTERS Registers);
 
+XTCLINK
 XTCDECL
 VOID
 ArEnableExtendedPhysicalAddressing(IN ULONG_PTR PageMap);
 
+XTCLINK
 XTCDECL
 VOID
 ArHalt(VOID);
 
+XTCLINK
 XTCDECL
 ULONG_PTR
 ArReadControlRegister(IN USHORT ControlRegister);
 
+XTCLINK
 XTCDECL
 ULONGLONG
 ArReadModelSpecificRegister(IN ULONG Register);
 
+XTCLINK
 XTCDECL
 VOID
 ArWriteControlRegister(IN USHORT ControlRegister,

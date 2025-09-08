@@ -15,11 +15,13 @@
 
 
 /* Routines used by XTLDR */
+XTCLINK
 XTCDECL
 XTSTATUS
 HlComPortPutByte(IN PCPPORT Port,
                  IN UCHAR Byte);
 
+XTCLINK
 XTCDECL
 XTSTATUS
 HlInitializeComPort(IN OUT PCPPORT Port,
