@@ -1,13 +1,16 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/ex/rundown.c
+ * FILE:            xtoskrnl/ex/rundown.cc
  * DESCRIPTION:     Rundown protection mechanism
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
+
+namespace EX
+{
 
 /**
  * Acquires the rundown protection for given descriptor.
@@ -21,7 +24,7 @@
  */
 XTFASTCALL
 BOOLEAN
-ExAcquireRundownProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
+Rundown::AcquireProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
 {
     ULONG_PTR CurrentValue, NewValue;
 
@@ -69,7 +72,7 @@ ExAcquireRundownProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
  */
 XTFASTCALL
 VOID
-ExCompleteRundownProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
+Rundown::CompleteProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
 {
     RtlAtomicExchangePointer(&Descriptor->Ptr, (PVOID)EX_RUNDOWN_ACTIVE);
 }
@@ -86,7 +89,7 @@ ExCompleteRundownProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
  */
 XTFASTCALL
 VOID
-ExInitializeRundownProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
+Rundown::InitializeProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
 {
     /* Reset descriptor counter */
     Descriptor->Count = 0;
@@ -104,7 +107,7 @@ ExInitializeRundownProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
  */
 XTFASTCALL
 VOID
-ExReInitializeRundownProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
+Rundown::ReInitializeProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
 {
     RtlAtomicExchangePointer(&Descriptor->Ptr, NULL);
 }
@@ -121,7 +124,7 @@ ExReInitializeRundownProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
  */
 XTFASTCALL
 VOID
-ExReleaseRundownProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
+Rundown::ReleaseProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
 {
     ULONG_PTR CurrentValue, NewValue;
     PEX_RUNDOWN_WAIT_BLOCK WaitBlock;
@@ -172,7 +175,9 @@ ExReleaseRundownProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
  */
 XTFASTCALL
 VOID
-ExWaitForRundownProtectionRelease(IN PEX_RUNDOWN_REFERENCE Descriptor)
+Rundown::WaitForProtectionRelease(IN PEX_RUNDOWN_REFERENCE Descriptor)
 {
     UNIMPLEMENTED;
 }
+
+} /* namespace */
