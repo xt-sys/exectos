@@ -29,7 +29,8 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/data.cc
     ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/procsup.cc
     ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/traps.cc
-    ${XTOSKRNL_SOURCE_DIR}/ex/rundown.c
+    ${XTOSKRNL_SOURCE_DIR}/ex/exports.cc
+    ${XTOSKRNL_SOURCE_DIR}/ex/rundown.cc
     ${XTOSKRNL_SOURCE_DIR}/hl/acpi.c
     ${XTOSKRNL_SOURCE_DIR}/hl/cport.c
     ${XTOSKRNL_SOURCE_DIR}/hl/fbdev.c
