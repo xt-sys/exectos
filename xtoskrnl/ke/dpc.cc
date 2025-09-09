@@ -1,13 +1,17 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/ke/dpc.c
+ * FILE:            xtoskrnl/ke/dpc.cc
  * DESCRIPTION:     Deferred Procedure Call (DPC) support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
+
+/* Kernel Library */
+namespace KE
+{
 
 /**
  * Initializes Deferred Procedure Call (DPC) object.
@@ -27,9 +31,9 @@
  */
 XTAPI
 VOID
-KeInitializeDpc(IN PKDPC Dpc,
-                IN PKDEFERRED_ROUTINE DpcRoutine,
-                IN PVOID DpcContext)
+Dpc::InitializeDpc(IN PKDPC Dpc,
+                   IN PKDEFERRED_ROUTINE DpcRoutine,
+                   IN PVOID DpcContext)
 {
     /* Initialize DPC */
     Dpc->Type = DpcObject;
@@ -60,9 +64,9 @@ KeInitializeDpc(IN PKDPC Dpc,
  */
 XTAPI
 VOID
-KeInitializeThreadedDpc(IN PKDPC Dpc,
-                        IN PKDEFERRED_ROUTINE DpcRoutine,
-                        IN PVOID DpcContext)
+Dpc::InitializeThreadedDpc(IN PKDPC Dpc,
+                           IN PKDEFERRED_ROUTINE DpcRoutine,
+                           IN PVOID DpcContext)
 {
     /* Initialize threaded DPC */
     Dpc->Type = ThreadedDpcObject;
@@ -90,7 +94,7 @@ KeInitializeThreadedDpc(IN PKDPC Dpc,
  */
 XTAPI
 VOID
-KeSetTargetProcessorDpc(IN PKDPC Dpc,
+Dpc::SetTargetProcessor(IN PKDPC Dpc,
                         IN CCHAR Number)
 {
     Dpc->Number = MAXIMUM_PROCESSORS + Number;
@@ -108,9 +112,9 @@ KeSetTargetProcessorDpc(IN PKDPC Dpc,
  */
 XTAPI
 VOID
-KeSignalCallDpcDone(IN PVOID SystemArgument)
+Dpc::SignalCallDone(IN PVOID SystemArgument)
 {
-    RtlAtomicDecrement32(SystemArgument);
+    RtlAtomicDecrement32((PLONG)SystemArgument);
 }
 
 /**
@@ -125,7 +129,7 @@ KeSignalCallDpcDone(IN PVOID SystemArgument)
  */
 XTAPI
 BOOLEAN
-KeSignalCallDpcSynchronize(IN PVOID SystemArgument)
+Dpc::SignalCallSynchronize(IN PVOID SystemArgument)
 {
     UNIMPLEMENTED;
 
@@ -145,7 +149,9 @@ KeSignalCallDpcSynchronize(IN PVOID SystemArgument)
  */
 XTFASTCALL
 VOID
-KepRetireDpcList(IN PKPROCESSOR_CONTROL_BLOCK Prcb)
+Dpc::RetireList(IN PKPROCESSOR_CONTROL_BLOCK Prcb)
 {
     UNIMPLEMENTED;
 }
+
+} /* namespace */

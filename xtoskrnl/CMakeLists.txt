@@ -43,25 +43,27 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/kd/dbginit.c
     ${XTOSKRNL_SOURCE_DIR}/kd/dbgio.c
     ${XTOSKRNL_SOURCE_DIR}/kd/globals.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/apc.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/dpc.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/event.c
+    ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/irq.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/krnlinit.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/kthread.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/proc.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/apc.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/bootinfo.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/crash.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/data.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/dpc.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/event.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/exports.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/globals.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/info.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/kprocess.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/krnlinit.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/kthread.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/kubsan.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/panic.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/runlevel.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/semphore.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/spinlock.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/sysres.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/timer.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/irqs.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/krnlinit.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/kthread.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/proc.c
+    ${XTOSKRNL_SOURCE_DIR}/ke/kprocess.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/krnlinit.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/kthread.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/kubsan.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/runlevel.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/semphore.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/spinlock.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/sysres.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/timer.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/globals.c
     ${XTOSKRNL_SOURCE_DIR}/mm/hlpool.c
     ${XTOSKRNL_SOURCE_DIR}/mm/init.c

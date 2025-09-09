@@ -9,6 +9,7 @@
 #include <xtos.hh>
 
 
+/* Kernel Executive */
 namespace EX
 {
 
@@ -139,7 +140,7 @@ Rundown::ReleaseProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
 
             if(!RtlAtomicDecrement64((PLONG_PTR)&WaitBlock->Count))
             {
-                KeSetEvent(&WaitBlock->WakeEvent, 0, FALSE);
+                KE::Event::SetEvent(&WaitBlock->WakeEvent, 0, FALSE);
             }
 
             break;

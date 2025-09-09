@@ -1,13 +1,17 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/ke/i686/irqs.c
+ * FILE:            xtoskrnl/ke/i686/irq.cc
  * DESCRIPTION:     Kernel interrupts support for i686 architecture
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
+
+/* Kernel Library */
+namespace KE
+{
 
 /**
  * Sets new interrupt handler for the existing IDT entry.
@@ -24,7 +28,7 @@
  */
 XTAPI
 VOID
-KeSetInterruptHandler(IN ULONG Vector,
+Irq::SetInterruptHandler(IN ULONG Vector,
                       IN PVOID Handler)
 {
     PKPROCESSOR_BLOCK ProcessorBlock;
@@ -35,4 +39,18 @@ KeSetInterruptHandler(IN ULONG Vector,
     /* Update interrupt handler */
     ProcessorBlock->IdtBase[(UCHAR) Vector].Offset = (USHORT)((ULONG)Handler & 0xFFFF);
     ProcessorBlock->IdtBase[(UCHAR) Vector].ExtendedOffset = (USHORT)((ULONG)Handler >> 16);
+}
+
+} /* namespace */
+
+
+
+/* TEMPORARY FOR COMPATIBILITY WITH C CODE */
+XTCLINK
+XTAPI
+VOID
+KeSetInterruptHandler(IN ULONG Vector,
+                      IN PVOID Handler)
+{
+    KE::Irq::SetInterruptHandler(Vector, Handler);
 }

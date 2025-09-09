@@ -1,14 +1,17 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/ke/sysres.c
+ * FILE:            xtoskrnl/ke/sysres.cc
  * DESCRIPTION:     System resources management; This code is based on the MinocaOS implementation
- *                  Copyright(C) 2012 Minoca Corp. (https://github.com/minoca/os/blob/master/kernel/ke/sysres.c)
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
+
+/* Kernel Library */
+namespace KE
+{
 
 /**
  * Looks for an unacquired system resource of the specified type and acquires it.
@@ -25,59 +28,11 @@
  */
 XTAPI
 XTSTATUS
-KeAcquireSystemResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
-                        OUT PSYSTEM_RESOURCE_HEADER *ResourceHeader)
+SystemResources::AcquireResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
+                                 OUT PSYSTEM_RESOURCE_HEADER *ResourceHeader)
 {
     /* Get system resource and acquire an ownership */
-    return KepGetSystemResource(ResourceType, TRUE, ResourceHeader);
-}
-
-/**
- * Looks for an unacquired system resource of the specified type and returns it without acquiring an ownership.
- *
- * @param ResourceType
- *        Supplies system resource type.
- *
- * @param ResourceHeader
- *        Specifies a memory area where a pointer to the system resource header will be stored.
- *
- * @return This routine returns a status code.
- *
- * @since XT 1.0
- */
-XTAPI
-XTSTATUS
-KeGetSystemResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
-                    OUT PSYSTEM_RESOURCE_HEADER *ResourceHeader)
-{
-    /* Get system resource without acquiring an ownership */
-    return KepGetSystemResource(ResourceType, FALSE, ResourceHeader);
-}
-
-/**
- * Releases system resource.
- *
- * @param ResourceHeader
- *        Specifies a pointer to the system resource header.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTAPI
-VOID
-KeReleaseSystemResource(IN PSYSTEM_RESOURCE_HEADER ResourceHeader)
-{
-    /* Disable interrupts and acquire a spinlock */
-    ArClearInterruptFlag();
-    KeAcquireSpinLock(&KepSystemResourcesLock);
-
-    /* Release resource lock */
-    ResourceHeader->ResourceLocked = FALSE;
-
-    /* Release spinlock and enable interrupts */
-    KeReleaseSpinLock(&KepSystemResourcesLock);
-    ArSetInterruptFlag();
+    return GetSystemResource(ResourceType, TRUE, ResourceHeader);
 }
 
 /**
@@ -98,9 +53,9 @@ KeReleaseSystemResource(IN PSYSTEM_RESOURCE_HEADER ResourceHeader)
  */
 XTAPI
 XTSTATUS
-KepGetSystemResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
-                     IN BOOLEAN ResourceLock,
-                     OUT PSYSTEM_RESOURCE_HEADER *ResourceHeader)
+SystemResources::GetSystemResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
+                                   IN BOOLEAN ResourceLock,
+                                   OUT PSYSTEM_RESOURCE_HEADER *ResourceHeader)
 {
     PSYSTEM_RESOURCE_HEADER Resource;
     PLIST_ENTRY ListEntry;
@@ -111,15 +66,15 @@ KepGetSystemResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
     Status = STATUS_SUCCESS;
 
     /* Check if interrupts are enabled */
-    Interrupts = ArInterruptsEnabled();
+    Interrupts = AR::CpuFunc::InterruptsEnabled();
 
     /* Disable interrupts and acquire a spinlock */
-    ArClearInterruptFlag();
-    KeAcquireSpinLock(&KepSystemResourcesLock);
+    AR::CpuFunc::ClearInterruptFlag();
+    SpinLock::AcquireSpinLock(&ResourcesLock);
 
     /* Iterate through system resources list */
-    ListEntry = KepSystemResourcesListHead.Flink;
-    while(ListEntry != &KepSystemResourcesListHead)
+    ListEntry = ResourcesListHead.Flink;
+    while(ListEntry != &ResourcesListHead)
     {
         /* Get resource header */
         Resource = CONTAIN_RECORD(ListEntry, SYSTEM_RESOURCE_HEADER, ListEntry);
@@ -151,24 +106,46 @@ KepGetSystemResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
     }
 
     /* Check if resource was found */
-    if(ListEntry == &KepSystemResourcesListHead)
+    if(ListEntry == &ResourcesListHead)
     {
         /* Resource not found, return NULL */
-        Resource = NULL;
+        Resource = nullptr;
         Status = STATUS_NOT_FOUND;
     }
 
     /* Release spinlock and re-enable interrupts if necessary */
-    KeReleaseSpinLock(&KepSystemResourcesLock);
+    SpinLock::ReleaseSpinLock(&ResourcesLock);
     if(Interrupts)
     {
         /* Re-enable interrupts */
-        ArSetInterruptFlag();
+        AR::CpuFunc::SetInterruptFlag();
     }
 
     /* Return resource header and status code */
     *ResourceHeader = Resource;
     return Status;
+}
+
+/**
+ * Looks for an unacquired system resource of the specified type and returns it without acquiring an ownership.
+ *
+ * @param ResourceType
+ *        Supplies system resource type.
+ *
+ * @param ResourceHeader
+ *        Specifies a memory area where a pointer to the system resource header will be stored.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+SystemResources::GetResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
+                             OUT PSYSTEM_RESOURCE_HEADER *ResourceHeader)
+{
+    /* Get system resource without acquiring an ownership */
+    return GetSystemResource(ResourceType, FALSE, ResourceHeader);
 }
 
 /**
@@ -180,22 +157,22 @@ KepGetSystemResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
  */
 XTAPI
 VOID
-KepInitializeSystemResources(VOID)
+SystemResources::InitializeResources(VOID)
 {
     PSYSTEM_RESOURCE_HEADER ResourceHeader;
     PLIST_ENTRY ListEntry, NextListEntry;
     ULONG ResourceSize;
 
     /* Initialize system resources spin lock and resource list */
-    KeInitializeSpinLock(&KepSystemResourcesLock);
-    RtlInitializeListHead(&KepSystemResourcesListHead);
+    SpinLock::InitializeSpinLock(&ResourcesLock);
+    RtlInitializeListHead(&ResourcesListHead);
 
     /* Make sure there are some system resources available */
-    if(!RtlListEmpty(&KeInitializationBlock->SystemResourcesListHead))
+    if(!RtlListEmpty(BootInformation::GetSystemResources()))
     {
         /* Iterate through system resources list */
-        ListEntry = KeInitializationBlock->SystemResourcesListHead.Flink;
-        while(ListEntry != &KeInitializationBlock->SystemResourcesListHead)
+        ListEntry = BootInformation::GetSystemResources()->Flink;
+        while(ListEntry != BootInformation::GetSystemResources())
         {
             /* Get resource header and next list entry */
             ResourceHeader = CONTAIN_RECORD(ListEntry, SYSTEM_RESOURCE_HEADER, ListEntry);
@@ -223,7 +200,7 @@ KepInitializeSystemResources(VOID)
             {
                 /* Move valid resource to the internal kernel list of system resources */
                 RtlRemoveEntryList(&ResourceHeader->ListEntry);
-                RtlInsertTailList(&KepSystemResourcesListHead, &ResourceHeader->ListEntry);
+                RtlInsertTailList(&ResourcesListHead, &ResourceHeader->ListEntry);
             }
 
             /* Go to the next list entry */
@@ -231,3 +208,31 @@ KepInitializeSystemResources(VOID)
         }
     }
 }
+
+/**
+ * Releases boot system resource.
+ *
+ * @param ResourceHeader
+ *        Specifies a pointer to the boot system resource header.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+SystemResources::ReleaseResource(IN PSYSTEM_RESOURCE_HEADER ResourceHeader)
+{
+    /* Disable interrupts and acquire a spinlock */
+    AR::CpuFunc::ClearInterruptFlag();
+    SpinLock::AcquireSpinLock(&ResourcesLock);
+
+    /* Release resource lock */
+    ResourceHeader->ResourceLocked = FALSE;
+
+    /* Release spinlock and enable interrupts */
+    SpinLock::ReleaseSpinLock(&ResourcesLock);
+    AR::CpuFunc::SetInterruptFlag();
+}
+
+} /* namespace */

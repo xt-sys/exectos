@@ -1,13 +1,17 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/ke/event.c
+ * FILE:            xtoskrnl/ke/event.cc
  * DESCRIPTION:     Kernel events support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
+
+/* Kernel Library */
+namespace KE
+{
 
 /**
  * Clears the signal state of the event.
@@ -21,7 +25,7 @@
  */
 XTAPI
 VOID
-KeClearEvent(IN PKEVENT Event)
+Event::ClearEvent(IN PKEVENT Event)
 {
     /* Clear event's signal state */
     Event->Header.SignalState = FALSE;
@@ -45,9 +49,9 @@ KeClearEvent(IN PKEVENT Event)
  */
 XTAPI
 VOID
-KeInitializeEvent(OUT PKEVENT Event,
-                  IN KEVENT_TYPE EventType,
-                  IN BOOLEAN InitialState)
+Event::InitializeEvent(OUT PKEVENT Event,
+                       IN KEVENT_TYPE EventType,
+                       IN BOOLEAN InitialState)
 {
     /* Initialize event dispatcher header */
     Event->Header.Type = EventType;
@@ -75,11 +79,13 @@ KeInitializeEvent(OUT PKEVENT Event,
  */
 XTAPI
 LONG
-KeSetEvent(IN PKEVENT Event,
-           IN KPRIORITY Increment,
-           IN BOOLEAN Wait)
+Event::SetEvent(IN PKEVENT Event,
+                IN KPRIORITY Increment,
+                IN BOOLEAN Wait)
 {
     UNIMPLEMENTED;
 
     return 0;
 }
+
+} /* namespace */

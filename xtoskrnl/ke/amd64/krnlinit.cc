@@ -1,13 +1,17 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/ke/amd64/krnlinit.c
+ * FILE:            xtoskrnl/ke/amd64/krnlinit.cc
  * DESCRIPTION:     CPU architecture specific kernel initialization
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
+
+/* Kernel Library */
+namespace KE
+{
 
 /**
  * This routine initializes XT kernel.
@@ -18,7 +22,7 @@
  */
 XTAPI
 VOID
-KepInitializeKernel(VOID)
+KernelInit::InitializeKernel(VOID)
 {
     XTSTATUS Status;
 
@@ -28,7 +32,7 @@ KepInitializeKernel(VOID)
     {
         /* Hardware layer initialization failed, kernel panic */
         DebugPrint(L"Failed to initialize hardware layer subsystem!\n");
-        KePanic(0);
+        Crash::Panic(0);
     }
 }
 
@@ -41,7 +45,7 @@ KepInitializeKernel(VOID)
  */
 XTAPI
 VOID
-KepInitializeMachine(VOID)
+KernelInit::InitializeMachine(VOID)
 {
     /* Re-enable IDE interrupts */
     HlIoPortOutByte(0x376, 0);
@@ -66,7 +70,7 @@ KepInitializeMachine(VOID)
  */
 XTAPI
 VOID
-KepStartKernel(VOID)
+KernelInit::StartKernel(VOID)
 {
     PKPROCESSOR_CONTROL_BLOCK Prcb;
     ULONG_PTR PageDirectory[2];
@@ -74,8 +78,8 @@ KepStartKernel(VOID)
     PKTHREAD CurrentThread;
 
     /* Get processor control block and current thread */
-    Prcb = KeGetCurrentProcessorControlBlock();
-    CurrentThread = KeGetCurrentThread();
+    Prcb = Processor::GetCurrentProcessorControlBlock();
+    CurrentThread = Processor::GetCurrentThread();
 
     /* Get current process */
     CurrentProcess = CurrentThread->ApcState.Process;
@@ -84,23 +88,22 @@ KepStartKernel(VOID)
     PoInitializeProcessorControlBlock(Prcb);
 
     /* Save processor state */
-    KepSaveProcessorState(&Prcb->ProcessorState);
+    Processor::SaveProcessorState(&Prcb->ProcessorState);
 
     /* Lower to APC runlevel */
-    KeLowerRunLevel(APC_LEVEL);
+    RunLevel::LowerRunLevel(APC_LEVEL);
 
     /* Initialize XTOS kernel */
-    KepInitializeKernel();
+    InitializeKernel();
 
     /* Initialize Idle process */
-    RtlInitializeListHead(&KepProcessListHead);
     PageDirectory[0] = 0;
     PageDirectory[1] = 0;
-    KeInitializeProcess(CurrentProcess, 0, MAXULONG_PTR, PageDirectory, FALSE);
+    KProcess::InitializeProcess(CurrentProcess, 0, MAXULONG_PTR, PageDirectory, FALSE);
     CurrentProcess->Quantum = MAXCHAR;
 
     /* Initialize Idle thread */
-    KeInitializeThread(CurrentProcess, CurrentThread, NULL, NULL, NULL, NULL, NULL, ArGetBootStack(), TRUE);
+    KThread::InitializeThread(CurrentProcess, CurrentThread, nullptr, nullptr, nullptr, nullptr, nullptr, ArGetBootStack(), TRUE);
     CurrentThread->NextProcessor = Prcb->CpuNumber;
     CurrentThread->Priority = THREAD_HIGH_PRIORITY;
     CurrentThread->State = Running;
@@ -109,12 +112,12 @@ KepStartKernel(VOID)
     CurrentProcess->ActiveProcessors |= (ULONG_PTR)1 << Prcb->CpuNumber;
 
     /* Enter infinite loop */
-    DebugPrint(L"KepStartKernel() finished. Entering infinite loop.\n");
-    for(;;);
+    DebugPrint(L"KernelInit::StartKernel() finished. Entering infinite loop.\n");
+    Crash::HaltSystem();
 }
 
 /**
- * Switches execution to a new boot stack and transfers control to the KepStartKernel() routine.
+ * Switches execution to a new boot stack and transfers control to the KernelInit::StartKernel() routine.
  *
  * @return This routine does not return any value.
  *
@@ -122,20 +125,28 @@ KepStartKernel(VOID)
  */
 XTAPI
 VOID
-KepSwitchBootStack()
+KernelInit::SwitchBootStack(VOID)
 {
-    /* Calculate the stack pointer at the top of the buffer, ensuring it is properly aligned as required by the ABI */
-    ULONG_PTR Stack = ((ULONG_PTR)ArGetBootStack() + KERNEL_STACK_SIZE) & ~(STACK_ALIGNMENT - 1);
+    ULONG_PTR Stack;
+    PVOID StartKernel;
 
-    /* Discard old stack frame, switch stack and jump to KepStartKernel() */
+    /* Calculate the stack pointer at the top of the buffer, ensuring it is properly aligned as required by the ABI */
+    Stack = ((ULONG_PTR)ArGetBootStack() + KERNEL_STACK_SIZE) & ~(STACK_ALIGNMENT - 1);
+
+    /* Get address of KernelInit::StartKernel() */
+    StartKernel = (PVOID)KernelInit::StartKernel;
+
+    /* Discard old stack frame, switch stack and jump to KernelInit::StartKernel() */
     __asm__ volatile("mov %0, %%rdx\n"
                      "xor %%rbp, %%rbp\n"
                      "mov %%rdx, %%rsp\n"
                      "sub %1, %%rsp\n"
-                     "jmp KepStartKernel\n"
+                     "jmp *%2\n"
                      :
                      : "m" (Stack),
                        "i" (FLOATING_SAVE_AREA_SIZE | KEXCEPTION_FRAME_SIZE | KSWITCH_FRAME_SIZE | KRETURN_ADDRESS_SIZE),
-                       "p" (KepStartKernel)
+                       "r" (StartKernel)
                      : "rdx", "rbp", "rsp", "memory");
 }
+
+} /* namespace */

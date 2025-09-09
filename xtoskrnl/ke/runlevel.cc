@@ -1,13 +1,17 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/ke/runlevel.c
+ * FILE:            xtoskrnl/ke/runlevel.cc
  * DESCRIPTION:     Running Level management support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
+
+/* Kernel Library */
+namespace KE
+{
 
 /**
  * Gets the current running level of the current processor.
@@ -18,7 +22,7 @@
  */
 XTFASTCALL
 KRUNLEVEL
-KeGetCurrentRunLevel(VOID)
+RunLevel::GetCurrentRunLevel(VOID)
 {
     return HlGetRunLevel();
 }
@@ -35,7 +39,7 @@ KeGetCurrentRunLevel(VOID)
  */
 XTFASTCALL
 VOID
-KeLowerRunLevel(IN KRUNLEVEL RunLevel)
+RunLevel::LowerRunLevel(IN KRUNLEVEL RunLevel)
 {
     KRUNLEVEL OldRunLevel;
 
@@ -62,7 +66,7 @@ KeLowerRunLevel(IN KRUNLEVEL RunLevel)
  */
 XTFASTCALL
 KRUNLEVEL
-KeRaiseRunLevel(IN KRUNLEVEL RunLevel)
+RunLevel::RaiseRunLevel(IN KRUNLEVEL RunLevel)
 {
     KRUNLEVEL OldRunLevel;
 
@@ -78,4 +82,34 @@ KeRaiseRunLevel(IN KRUNLEVEL RunLevel)
 
     /* Return old run level */
     return OldRunLevel;
+}
+
+} /* namespace */
+
+
+/* TEMPORARY FOR COMPATIBILITY WITH C CODE */
+XTCLINK
+XTFASTCALL
+KRUNLEVEL
+KeGetCurrentRunLevel(VOID)
+{
+    return KE::RunLevel::GetCurrentRunLevel();
+}
+
+/* TEMPORARY FOR COMPATIBILITY WITH C CODE */
+XTCLINK
+XTFASTCALL
+VOID
+KeLowerRunLevel(KRUNLEVEL RunLevel)
+{
+    KE::RunLevel::LowerRunLevel(RunLevel);
+}
+
+/* TEMPORARY FOR COMPATIBILITY WITH C CODE */
+XTCLINK
+XTFASTCALL
+KRUNLEVEL
+KeRaiseRunLevel(KRUNLEVEL RunLevel)
+{
+    return KE::RunLevel::RaiseRunLevel(RunLevel);
 }

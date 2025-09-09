@@ -1,13 +1,17 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/ke/panic.c
+ * FILE:            xtoskrnl/ke/panic.cc
  * DESCRIPTION:     System shutdown and kernel panic mechanism
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
+
+/* Kernel Library */
+namespace KE
+{
 
 /**
  * Halts the system.
@@ -18,14 +22,14 @@
  */
 XTAPI
 VOID
-KeHaltSystem(VOID)
+Crash::HaltSystem(VOID)
 {
     /* Enter infinite loop */
     for(;;)
     {
         /* Halt system */
-        ArClearInterruptFlag();
-        ArHalt();
+        AR::CpuFunc::ClearInterruptFlag();
+        AR::CpuFunc::Halt();
     }
 }
 
@@ -41,9 +45,9 @@ KeHaltSystem(VOID)
  */
 XTAPI
 VOID
-KePanic(IN ULONG Code)
+Crash::Panic(IN ULONG Code)
 {
-    KePanicEx(Code, 0, 0, 0, 0);
+    PanicEx(Code, 0, 0, 0, 0);
 }
 
 /**
@@ -70,12 +74,33 @@ KePanic(IN ULONG Code)
  */
 XTAPI
 VOID
-KePanicEx(IN ULONG Code,
-          IN ULONG_PTR Parameter1,
-          IN ULONG_PTR Parameter2,
-          IN ULONG_PTR Parameter3,
-          IN ULONG_PTR Parameter4)
+Crash::PanicEx(IN ULONG Code,
+               IN ULONG_PTR Parameter1,
+               IN ULONG_PTR Parameter2,
+               IN ULONG_PTR Parameter3,
+               IN ULONG_PTR Parameter4)
 {
     KdPrint(L"Fatal System Error: 0x%08lx\nKernel Panic!\n\n", Code);
-    KeHaltSystem();
+    HaltSystem();
+}
+
+} /* namespace */
+
+
+/* TEMPORARY FOR COMPATIBILITY WITH C CODE */
+XTCLINK
+XTAPI
+VOID
+KeHaltSystem(VOID)
+{
+    KE::Crash::HaltSystem();
+}
+
+/* TEMPORARY FOR COMPATIBILITY WITH C CODE */
+XTCLINK
+XTAPI
+VOID
+KePanic(ULONG Code)
+{
+    KE::Crash::Panic(Code);
 }

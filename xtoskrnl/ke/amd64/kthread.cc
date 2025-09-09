@@ -1,13 +1,17 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/ke/amd64/kthread.c
+ * FILE:            xtoskrnl/ke/amd64/kthread.cc
  * DESCRIPTION:     AMD64 thread manipulation support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
+
+/* Kernel Library */
+namespace KE
+{
 
 /**
  * Initializes CPU architecture dependent context of a thread.
@@ -33,7 +37,7 @@
  */
 XTAPI
 VOID
-KepInitializeThreadContext(IN PKTHREAD Thread,
+KThread::InitializeThreadContext(IN PKTHREAD Thread,
                            IN PKSYSTEM_ROUTINE SystemRoutine,
                            IN PKSTART_ROUTINE StartRoutine,
                            IN PVOID StartContext,
@@ -116,3 +120,5 @@ KepInitializeThreadContext(IN PKTHREAD Thread,
     /* Set thread stack */
     Thread->KernelStack = &ThreadFrame->SwitchFrame;
 }
+
+} /* namespace */

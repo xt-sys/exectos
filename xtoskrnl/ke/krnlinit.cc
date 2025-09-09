@@ -1,13 +1,16 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/ke/krnlinit.c
+ * FILE:            xtoskrnl/ke/krnlinit.cc
  * DESCRIPTION:     XT kernel initialization
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
+
+/* Use routines from Kernel Library */
+using namespace KE;
 
 /**
  * This routine starts up the XT kernel. It is called by boot loader.
@@ -23,31 +26,31 @@ XTAPI
 VOID
 KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
 {
-    /* Save the kernel initialization block */
-    KeInitializationBlock = Parameters;
-
     /* Verify kernel and boot loader compatibility */
-    if(KeInitializationBlock->BlockSize != sizeof(KERNEL_INITIALIZATION_BLOCK) ||
-       KeInitializationBlock->BlockVersion != INITIALIZATION_BLOCK_VERSION ||
-       KeInitializationBlock->ProtocolVersion != BOOT_PROTOCOL_VERSION)
+    if(Parameters->BlockSize != sizeof(KERNEL_INITIALIZATION_BLOCK) ||
+       Parameters->BlockVersion != INITIALIZATION_BLOCK_VERSION ||
+       Parameters->ProtocolVersion != BOOT_PROTOCOL_VERSION)
     {
         /* Kernel and boot loader version mismatch */
-        KeHaltSystem();
+        Crash::HaltSystem();
     }
 
+    /* Save the kernel initialization block */
+    BootInformation::SetInitializationBlock(Parameters);
+
     /* Check if debugging enabled and if boot loader provided routine for debug printing */
-    if(DEBUG && KeInitializationBlock->LoaderInformation.DbgPrint)
+    if(DEBUG && BootInformation::GetDebugPrint())
     {
         /* Use loader's provided DbgPrint() routine for early printing to serial console */
-        KdSetPrintRoutine(KeInitializationBlock->LoaderInformation.DbgPrint);
+        KdSetPrintRoutine(BootInformation::GetDebugPrint());
         DebugPrint(L"Initializing ExectOS v%d.%d for %s\n", XTOS_VERSION_MAJOR, XTOS_VERSION_MINOR, _ARCH_NAME);
     }
 
     /* Initialize boot CPU */
-    ArInitializeProcessor(NULL);
+    AR::ProcSup::InitializeProcessor(NULL);
 
     /* Initialize system resources */
-    KepInitializeSystemResources();
+    SystemResources::InitializeResources();
 
     /* Check if debugging enabled */
     if(DEBUG)
@@ -63,11 +66,11 @@ KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
                XTOS_COMPILER_NAME, XTOS_COMPILER_VERSION);
 
     /* Architecture specific kernel initialization */
-    KepInitializeMachine();
+    KernelInit::InitializeMachine();
 
     /* Raise to HIGH runlevel */
-    KeRaiseRunLevel(HIGH_LEVEL);
+    RunLevel::RaiseRunLevel(HIGH_LEVEL);
 
     /* Switch the boot stack and transfer control to the KepStartKernel() routine */
-    KepSwitchBootStack();
+    KernelInit::SwitchBootStack();
 }

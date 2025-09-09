@@ -1,13 +1,24 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/ke/info.c
- * DESCRIPTION:     Generic kernel information support
+ * FILE:            xtoskrnl/ke/bootinfo.cc
+ * DESCRIPTION:     Bootloader-provided system information handling support
  * DEVELOPERS:      Aiken Harris <harraiken91@gmail.com>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
+
+/* Kernel Library */
+namespace KE
+{
+
+XTAPI
+PVOID
+BootInformation::GetDebugPrint(VOID)
+{
+    return InitializationBlock->LoaderInformation.DbgPrint;
+}
 
 /**
  * Retrieves the system firmware type (BIOS or UEFI).
@@ -18,9 +29,9 @@
  */
 XTAPI
 SYSTEM_FIRMWARE_TYPE
-KeGetFirmwareType(VOID)
+BootInformation::GetFirmwareType(VOID)
 {
-    return KeInitializationBlock->FirmwareInformation.FirmwareType;
+    return InitializationBlock->FirmwareInformation.FirmwareType;
 }
 
 /**
@@ -38,17 +49,14 @@ KeGetFirmwareType(VOID)
  */
 XTAPI
 XTSTATUS
-KeGetKernelParameter(IN PCWSTR ParameterName,
-                     OUT PCWSTR *Parameter)
+BootInformation::GetKernelParameter(IN PCWSTR ParameterName,
+                                    OUT PCWSTR *Parameter)
 {
-    PCWSTR KernelParameters,Match, SearchStart;
+    PCWSTR Match, SearchStart;
     SIZE_T ParameterNameLength;
 
-    /* Get the kernel parameters */
-    KernelParameters = KeInitializationBlock->KernelParameters;
-
     /* Validate input parameters */
-    if(!KernelParameters || !ParameterName || !Parameter)
+    if(!ParameterName || !Parameter)
     {
         /* Invalid input parameters, return error */
         return STATUS_INVALID_PARAMETER;
@@ -63,16 +71,16 @@ KeGetKernelParameter(IN PCWSTR ParameterName,
     }
 
     /* Assume the requested parameter is not present in the kernel parameters */
-    *Parameter = NULL;
+    *Parameter = nullptr;
 
     /* Start searching from the beginning of the list */
-    SearchStart = KernelParameters;
+    SearchStart = InitializationBlock->KernelParameters;
 
     /* Search for the parameter name */
     while((Match = RtlFindWideStringInsensitive(SearchStart, ParameterName)))
     {
         /* Check if the match is at the start of the string or preceded by a space */
-        if(Match == KernelParameters || *(Match - 1) == L' ')
+        if(Match == InitializationBlock->KernelParameters || *(Match - 1) == L' ')
         {
             /* Check the character after the match to avoid matching prefixes */
             if(Match[ParameterNameLength] == L'\0' ||
@@ -91,4 +99,51 @@ KeGetKernelParameter(IN PCWSTR ParameterName,
 
     /* Parameter not found */
     return STATUS_NOT_FOUND;
+}
+
+/**
+ *
+ *
+ *
+ *
+ */
+XTAPI
+PLIST_ENTRY
+BootInformation::GetSystemResources(VOID)
+{
+    return &InitializationBlock->SystemResourcesListHead;
+}
+
+/**
+ *
+ *
+ *
+ *
+ */
+XTAPI
+VOID
+BootInformation::SetInitializationBlock(IN PKERNEL_INITIALIZATION_BLOCK Block)
+{
+    InitializationBlock = Block;
+}
+
+} /* namespace */
+
+
+/* TEMPORARY FOR COMPATIBILITY WITH C CODE */
+XTCLINK
+XTAPI
+XTSTATUS
+KeGetKernelParameter(IN PCWSTR ParameterName,
+                   OUT PCWSTR *Parameter)
+{
+    return KE::BootInformation::GetKernelParameter(ParameterName, Parameter);
+}
+
+XTCLINK
+XTAPI
+PKERNEL_INITIALIZATION_BLOCK
+KeGetInitializationBlock(VOID)
+{
+    return KE::BootInformation::GetInitializationBlock();
 }

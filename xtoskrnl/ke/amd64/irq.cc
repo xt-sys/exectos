@@ -1,13 +1,17 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/ke/amd64/irqs.c
+ * FILE:            xtoskrnl/ke/amd64/irq.cc
  * DESCRIPTION:     Kernel interrupts support for amd64 architecture
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
+
+/* Kernel Library */
+namespace KE
+{
 
 /**
  * Sets new interrupt handler for the existing IDT entry.
@@ -24,8 +28,8 @@
  */
 XTAPI
 VOID
-KeSetInterruptHandler(IN ULONG Vector,
-                      IN PVOID Handler)
+Irq::SetInterruptHandler(IN ULONG Vector,
+                         IN PVOID Handler)
 {
     PKPROCESSOR_BLOCK ProcessorBlock;
 
@@ -36,4 +40,17 @@ KeSetInterruptHandler(IN ULONG Vector,
     ProcessorBlock->IdtBase[(UCHAR) Vector].OffsetLow = ((ULONG_PTR)Handler & 0xFFFF);
     ProcessorBlock->IdtBase[(UCHAR) Vector].OffsetMiddle = (((ULONG_PTR)Handler >> 16) & 0xFFFF);
     ProcessorBlock->IdtBase[(UCHAR) Vector].OffsetHigh = (ULONG_PTR)Handler >> 32;
+}
+
+} /* namespace */
+
+
+/* TEMPORARY FOR COMPATIBILITY WITH C CODE */
+XTCLINK
+XTAPI
+VOID
+KeSetInterruptHandler(IN ULONG Vector,
+                      IN PVOID Handler)
+{
+    KE::Irq::SetInterruptHandler(Vector, Handler);
 }

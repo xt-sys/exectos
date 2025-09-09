@@ -1,13 +1,24 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/ke/kprocess.c
+ * FILE:            xtoskrnl/ke/kprocess.cc
  * DESCRIPTION:     XT kernel process manipulation support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
+
+/* Kernel Library */
+namespace KE
+{
+
+XTAPI
+PEPROCESS
+KProcess::GetInitialProcess(VOID)
+{
+    return &InitialProcess;
+}
 
 /**
  * Initializes the process.
@@ -33,11 +44,11 @@
  */
 XTAPI
 VOID
-KeInitializeProcess(IN OUT PKPROCESS Process,
-                    IN KPRIORITY Priority,
-                    IN KAFFINITY Affinity,
-                    IN PULONG_PTR DirectoryTable,
-                    IN BOOLEAN Alignment)
+KProcess::InitializeProcess(IN OUT PKPROCESS Process,
+                           IN KPRIORITY Priority,
+                           IN KAFFINITY Affinity,
+                           IN PULONG_PTR DirectoryTable,
+                           IN BOOLEAN Alignment)
 {
     /* Initialize process dispatcher header */
     Process->Header.Type = ProcessObject;
@@ -66,4 +77,20 @@ KeInitializeProcess(IN OUT PKPROCESS Process,
 
     /* Set initial process state */
     Process->State = ProcessInMemory;
+}
+
+} /* namespace */
+
+
+
+/* TEMPORARY FOR COMPATIBILITY WITH C CODE */
+XTAPI
+VOID
+KeInitializeProcess(IN OUT PKPROCESS Process,
+                    IN KPRIORITY Priority,
+                    IN KAFFINITY Affinity,
+                    IN PULONG_PTR DirectoryTable,
+                    IN BOOLEAN Alignment)
+{
+    KE::KProcess::InitializeProcess(Process, Priority, Affinity, DirectoryTable, Alignment);
 }

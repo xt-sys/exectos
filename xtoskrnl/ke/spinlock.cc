@@ -1,13 +1,17 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/ke/spinlock.c
+ * FILE:            xtoskrnl/ke/spinlock.cc
  * DESCRIPTION:     Spinlocks support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
+
+/* Kernel Library */
+namespace KE
+{
 
 /**
  * Acquires a specified queued spinlock.
@@ -21,10 +25,10 @@
  */
 XTFASTCALL
 VOID
-KeAcquireQueuedSpinLock(IN KSPIN_LOCK_QUEUE_LEVEL LockLevel)
+SpinLock::AcquireQueuedSpinLock(IN KSPIN_LOCK_QUEUE_LEVEL LockLevel)
 {
     /* Acquire the queued spinlock */
-    KeAcquireSpinLock(KeGetCurrentProcessorControlBlock()->LockQueue[LockLevel].Lock);
+    AcquireSpinLock(KeGetCurrentProcessorControlBlock()->LockQueue[LockLevel].Lock);
 }
 
 /**
@@ -39,7 +43,7 @@ KeAcquireQueuedSpinLock(IN KSPIN_LOCK_QUEUE_LEVEL LockLevel)
  */
 XTFASTCALL
 VOID
-KeAcquireSpinLock(IN OUT PKSPIN_LOCK SpinLock)
+SpinLock::AcquireSpinLock(IN OUT PKSPIN_LOCK SpinLock)
 {
     /* Try to acquire the lock */
     while(RtlAtomicBitTestAndSet((PLONG)SpinLock, 0))
@@ -68,7 +72,7 @@ KeAcquireSpinLock(IN OUT PKSPIN_LOCK SpinLock)
  */
 XTAPI
 VOID
-KeInitializeSpinLock(IN PKSPIN_LOCK SpinLock)
+SpinLock::InitializeSpinLock(IN PKSPIN_LOCK SpinLock)
 {
     /* Zero initialize spinlock */
     *SpinLock = 0;
@@ -86,10 +90,10 @@ KeInitializeSpinLock(IN PKSPIN_LOCK SpinLock)
  */
 XTFASTCALL
 VOID
-KeReleaseQueuedSpinLock(IN KSPIN_LOCK_QUEUE_LEVEL LockLevel)
+SpinLock::ReleaseQueuedSpinLock(IN KSPIN_LOCK_QUEUE_LEVEL LockLevel)
 {
     /* Clear the lock */
-    KeReleaseSpinLock(KeGetCurrentProcessorControlBlock()->LockQueue[LockLevel].Lock);
+    ReleaseSpinLock(KeGetCurrentProcessorControlBlock()->LockQueue[LockLevel].Lock);
 }
 
 /**
@@ -104,7 +108,7 @@ KeReleaseQueuedSpinLock(IN KSPIN_LOCK_QUEUE_LEVEL LockLevel)
  */
 XTFASTCALL
 VOID
-KeReleaseSpinLock(IN OUT PKSPIN_LOCK SpinLock)
+SpinLock::ReleaseSpinLock(IN OUT PKSPIN_LOCK SpinLock)
 {
     /* Clear the lock */
     RtlAtomicAnd32((PLONG)SpinLock, 0);
@@ -112,3 +116,5 @@ KeReleaseSpinLock(IN OUT PKSPIN_LOCK SpinLock)
     /* Add an explicit memory barrier */
     ArReadWriteBarrier();
 }
+
+} /* namespace */

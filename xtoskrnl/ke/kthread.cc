@@ -1,13 +1,44 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/ke/kthread.c
+ * FILE:            xtoskrnl/ke/kthread.cc
  * DESCRIPTION:     XT kernel thread manipulation support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
+
+/* Kernel Library */
+namespace KE
+{
+
+XTAPI
+PETHREAD
+KThread::GetInitialThread(VOID)
+{
+    return &InitialThread;
+}
+
+/**
+ * Exits the dispatcher, switches context to a new thread and lowers runlevel to its original state.
+ *
+ * @param OldRunLevel
+ *        Supplies the original runlevel state.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+VOID
+KThread::ExitDispatcher(IN KRUNLEVEL OldRunLevel)
+{
+    UNIMPLEMENTED;
+
+    /* Lower runlevel */
+    RunLevel::LowerRunLevel(OldRunLevel);
+}
 
 /**
  * Initializes the thread.
@@ -42,15 +73,15 @@
  */
 XTAPI
 XTSTATUS
-KeInitializeThread(IN PKPROCESS Process,
-                   IN OUT PKTHREAD Thread,
-                   IN PKSYSTEM_ROUTINE SystemRoutine,
-                   IN PKSTART_ROUTINE StartRoutine,
-                   IN PVOID StartContext,
-                   IN PCONTEXT Context,
-                   IN PVOID EnvironmentBlock,
-                   IN PVOID Stack,
-                   IN BOOLEAN StartThread)
+KThread::InitializeThread(IN PKPROCESS Process,
+                          IN OUT PKTHREAD Thread,
+                          IN PKSYSTEM_ROUTINE SystemRoutine,
+                          IN PKSTART_ROUTINE StartRoutine,
+                          IN PVOID StartContext,
+                          IN PCONTEXT Context,
+                          IN PVOID EnvironmentBlock,
+                          IN PVOID Stack,
+                          IN BOOLEAN RunThread)
 {
     PKWAIT_BLOCK TimerWaitBlock;
     BOOLEAN Allocation;
@@ -86,10 +117,7 @@ KeInitializeThread(IN PKPROCESS Process,
     Thread->AdjustReason = AdjustNone;
 
     /* Initialize thread lock */
-    KeInitializeSpinLock(&Thread->ThreadLock);
-
-    /* Set thread service table */
-    Thread->ServiceTable = KeServiceDescriptorTable;
+    SpinLock::InitializeSpinLock(&Thread->ThreadLock);
 
     /* Initialize thread APC */
     Thread->ApcStatePointer[0] = &Thread->ApcState;
@@ -103,17 +131,17 @@ KeInitializeThread(IN PKPROCESS Process,
     RtlInitializeListHead(&Thread->ApcState.ApcListHead[UserMode]);
 
     /* Initialize APC queue lock */
-    KeInitializeSpinLock(&Thread->ApcQueueLock);
+    SpinLock::InitializeSpinLock(&Thread->ApcQueueLock);
 
     /* Initialize kernel-mode suspend APC */
-    KeInitializeApc(&Thread->SuspendApc, Thread, OriginalApcEnvironment, KepSuspendNop,
-                    KepSuspendRundown, KepSuspendThread, KernelMode, NULL);
+    Apc::InitializeApc(&Thread->SuspendApc, Thread, OriginalApcEnvironment, SuspendNop,
+                       SuspendRundown, SuspendThread, KernelMode, NULL);
 
     /* Initialize suspend semaphore */
-    KeInitializeSemaphore(&Thread->SuspendSemaphore, 0, 2);
+    Semaphore::InitializeSemaphore(&Thread->SuspendSemaphore, 0, 2);
 
     /* Initialize the builtin timer */
-    KeInitializeTimer(&Thread->Timer, NotificationTimer);
+    Timer::InitializeTimer(&Thread->Timer, NotificationTimer);
     TimerWaitBlock = &Thread->WaitBlock[KTIMER_WAIT_BLOCK];
     TimerWaitBlock->Object = &Thread->Timer;
     TimerWaitBlock->WaitKey = STATUS_TIMEOUT;
@@ -122,7 +150,7 @@ KeInitializeThread(IN PKPROCESS Process,
     TimerWaitBlock->WaitListEntry.Blink = &(&Thread->Timer)->Header.WaitListHead;
 
     /* Initialize Thread Environment Block*/
-    Thread->EnvironmentBlock = EnvironmentBlock;
+    Thread->EnvironmentBlock = (PTHREAD_ENVIRONMENT_BLOCK)EnvironmentBlock;
 
     /* Make sure there is a valid stack available */
     if(!Stack)
@@ -141,12 +169,12 @@ KeInitializeThread(IN PKPROCESS Process,
 
     Thread->InitialStack = Stack;
     Thread->StackBase = Stack;
-    Thread->StackLimit = Stack - KERNEL_STACK_SIZE;
+    Thread->StackLimit = (PVOID)((ULONG_PTR)Stack - KERNEL_STACK_SIZE);
 
     __try
     {
         /* Initialize thread context */
-        KepInitializeThreadContext(Thread, SystemRoutine, StartRoutine, StartContext, Context);
+        InitializeThreadContext(Thread, SystemRoutine, StartRoutine, StartContext, Context);
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
     {
@@ -167,10 +195,10 @@ KeInitializeThread(IN PKPROCESS Process,
     Thread->State = Initialized;
 
     /* Check if thread should be started */
-    if(StartThread)
+    if(RunThread)
     {
         /* Start thread */
-        KeStartThread(Thread);
+        StartThread(Thread);
     }
 
     /* Return success */
@@ -189,29 +217,9 @@ KeInitializeThread(IN PKPROCESS Process,
  */
 XTAPI
 VOID
-KeStartThread(IN PKTHREAD Thread)
+KThread::StartThread(IN PKTHREAD Thread)
 {
     UNIMPLEMENTED;
-}
-
-/**
- * Exits the dispatcher, switches context to a new thread and lowers runlevel to its original state.
- *
- * @param OldRunLevel
- *        Supplies the original runlevel state.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTFASTCALL
-VOID
-KepExitDispatcher(IN KRUNLEVEL OldRunLevel)
-{
-    UNIMPLEMENTED;
-
-    /* Lower runlevel */
-    KeLowerRunLevel(OldRunLevel);
 }
 
 /**
@@ -238,11 +246,11 @@ KepExitDispatcher(IN KRUNLEVEL OldRunLevel)
  */
 XTAPI
 VOID
-KepSuspendNop(IN PKAPC Apc,
-              IN OUT PKNORMAL_ROUTINE *NormalRoutine,
-              IN OUT PVOID *NormalContext,
-              IN OUT PVOID *SystemArgument1,
-              IN OUT PVOID *SystemArgument2)
+KThread::SuspendNop(IN PKAPC Apc,
+                    IN OUT PKNORMAL_ROUTINE *NormalRoutine,
+                    IN OUT PVOID *NormalContext,
+                    IN OUT PVOID *SystemArgument1,
+                    IN OUT PVOID *SystemArgument2)
 {
     /* No action here */
 }
@@ -259,7 +267,7 @@ KepSuspendNop(IN PKAPC Apc,
  */
 XTAPI
 VOID
-KepSuspendRundown(IN PKAPC Apc)
+KThread::SuspendRundown(IN PKAPC Apc)
 {
     /* No action here */
 }
@@ -282,9 +290,30 @@ KepSuspendRundown(IN PKAPC Apc)
  */
 XTAPI
 VOID
-KepSuspendThread(IN PVOID NormalContext,
-                 IN PVOID SystemArgument1,
-                 IN PVOID SystemArgument2)
+KThread::SuspendThread(IN PVOID NormalContext,
+              IN PVOID SystemArgument1,
+              IN PVOID SystemArgument2)
 {
     UNIMPLEMENTED;
+}
+
+} /* namespace */
+
+
+
+/* TEMPORARY FOR COMPATIBILITY WITH C CODE */
+XTCLINK
+XTAPI
+XTSTATUS
+KeInitializeThread(IN PKPROCESS Process,
+                          IN OUT PKTHREAD Thread,
+                          IN PKSYSTEM_ROUTINE SystemRoutine,
+                          IN PKSTART_ROUTINE StartRoutine,
+                          IN PVOID StartContext,
+                          IN PCONTEXT Context,
+                          IN PVOID EnvironmentBlock,
+                          IN PVOID Stack,
+                          IN BOOLEAN RunThread)
+{
+    return KE::KThread::InitializeThread(Process, Thread, SystemRoutine, StartRoutine, StartContext, Context, EnvironmentBlock, Stack, RunThread);
 }

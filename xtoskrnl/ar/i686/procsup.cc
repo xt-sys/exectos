@@ -303,9 +303,9 @@ ProcSup::InitializeProcessorBlock(OUT PKPROCESSOR_BLOCK ProcessorBlock,
     ProcessorBlock->Prcb.ProcessorState.SpecialRegisters.KernelDr7 = 0;
 
     /* Set process and thread information */
-    ProcessorBlock->Prcb.CurrentThread = &KeInitialThread.ThreadControlBlock;
-    ProcessorBlock->Prcb.CurrentThread->ApcState.Process = &KeInitialProcess.ProcessControlBlock;
-    ProcessorBlock->Prcb.IdleThread = &KeInitialThread.ThreadControlBlock;
+    ProcessorBlock->Prcb.CurrentThread = &(KE::KThread::GetInitialThread())->ThreadControlBlock;
+    ProcessorBlock->Prcb.CurrentThread->ApcState.Process = &(KE::KProcess::GetInitialProcess())->ProcessControlBlock;
+    ProcessorBlock->Prcb.IdleThread = &(KE::KThread::GetInitialThread())->ThreadControlBlock;
     ProcessorBlock->Prcb.NextThread = nullptr;
 
     /* Set initial runlevel */

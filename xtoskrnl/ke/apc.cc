@@ -1,13 +1,17 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/ke/apc.c
+ * FILE:            xtoskrnl/ke/apc.cc
  * DESCRIPTION:     Kernel APC objects support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
+
+/* Kernel Library */
+namespace KE
+{
 
 /**
  * Initializes an APC object.
@@ -42,14 +46,14 @@
  */
 XTAPI
 VOID
-KeInitializeApc(IN PKAPC Apc,
-                IN PKTHREAD Thread,
-                IN KAPC_ENVIRONMENT Environment,
-                IN PKKERNEL_ROUTINE KernelRoutine,
-                IN PKRUNDOWN_ROUTINE RundownRoutine,
-                IN PKNORMAL_ROUTINE NormalRoutine,
-                IN KPROCESSOR_MODE ApcMode,
-                IN PVOID Context)
+Apc::InitializeApc(IN PKAPC Apc,
+                   IN PKTHREAD Thread,
+                   IN KAPC_ENVIRONMENT Environment,
+                   IN PKKERNEL_ROUTINE KernelRoutine,
+                   IN PKRUNDOWN_ROUTINE RundownRoutine,
+                   IN PKNORMAL_ROUTINE NormalRoutine,
+                   IN KPROCESSOR_MODE ApcMode,
+                   IN PVOID Context)
 {
     /* Set APC type and thread */
     Apc->Type = ApcObject;
@@ -89,3 +93,5 @@ KeInitializeApc(IN PKAPC Apc,
     /* Mark APC as not inserted yet */
     Apc->Inserted = FALSE;
 }
+
+} /* namespace */

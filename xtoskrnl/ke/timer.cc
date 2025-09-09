@@ -1,13 +1,16 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/ke/timer.c
+ * FILE:            xtoskrnl/ke/timer.cc
  * DESCRIPTION:     Kernel timer object support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
+
+namespace KE
+{
 
 /**
  * Cancels the timer.
@@ -21,7 +24,7 @@
  */
 XTAPI
 BOOLEAN
-KeCancelTimer(IN PKTIMER Timer)
+Timer::CancelTimer(IN PKTIMER Timer)
 {
     BOOLEAN Result;
     KRUNLEVEL RunLevel;
@@ -31,19 +34,19 @@ KeCancelTimer(IN PKTIMER Timer)
 
     /* Raise run level and acquire dispatcher lock */
     RunLevel = KeRaiseRunLevel(SYNC_LEVEL);
-    KeAcquireQueuedSpinLock(DispatcherLock);
+    SpinLock::AcquireQueuedSpinLock(DispatcherLock);
 
     /* Check timer status */
     if(Timer->Header.Inserted)
     {
         /* Remove the timer from the list */
-        KepRemoveTimer(Timer);
+        RemoveTimer(Timer);
         Result = TRUE;
     }
 
     /* Release dispatcher lock and process the deferred ready list */
-    KeReleaseQueuedSpinLock(DispatcherLock);
-    KepExitDispatcher(RunLevel);
+    SpinLock::ReleaseQueuedSpinLock(DispatcherLock);
+    KThread::ExitDispatcher(RunLevel);
 
     /* Return result */
     return Result;
@@ -61,7 +64,7 @@ KeCancelTimer(IN PKTIMER Timer)
  */
 XTAPI
 VOID
-KeClearTimer(IN PKTIMER Timer)
+Timer::ClearTimer(IN PKTIMER Timer)
 {
     /* Clear signal state */
     Timer->Header.SignalState = 0;
@@ -79,7 +82,7 @@ KeClearTimer(IN PKTIMER Timer)
  */
 XTAPI
 BOOLEAN
-KeGetTimerState(IN PKTIMER Timer)
+Timer::GetState(IN PKTIMER Timer)
 {
     /* Return timer state */
     return (BOOLEAN)Timer->Header.SignalState;
@@ -100,11 +103,11 @@ KeGetTimerState(IN PKTIMER Timer)
  */
 XTAPI
 VOID
-KeInitializeTimer(OUT PKTIMER Timer,
-                  IN KTIMER_TYPE Type)
+Timer::InitializeTimer(OUT PKTIMER Timer,
+                       IN KTIMER_TYPE Type)
 {
     /* Initialize the header */
-    Timer->Header.Type = TimerNotificationObject + Type;
+    Timer->Header.Type = TimerNotificationObject + (UCHAR)Type;
     Timer->Header.Inserted = 0;
     Timer->Header.SignalState = 0;
 
@@ -129,7 +132,7 @@ KeInitializeTimer(OUT PKTIMER Timer,
  */
 XTAPI
 ULONGLONG
-KeQueryTimer(IN PKTIMER Timer)
+Timer::QueryTimer(IN PKTIMER Timer)
 {
     KRUNLEVEL RunLevel;
     ULONGLONG DueTime;
@@ -139,7 +142,7 @@ KeQueryTimer(IN PKTIMER Timer)
 
     /* Raise run level and acquire dispatcher lock */
     RunLevel = KeRaiseRunLevel(SYNC_LEVEL);
-    KeAcquireQueuedSpinLock(DispatcherLock);
+    SpinLock::AcquireQueuedSpinLock(DispatcherLock);
 
     /* Check timer status */
     if(Timer->Header.Inserted)
@@ -149,8 +152,8 @@ KeQueryTimer(IN PKTIMER Timer)
     }
 
     /* Release dispatcher lock and process the deferred ready list */
-    KeReleaseQueuedSpinLock(DispatcherLock);
-    KepExitDispatcher(RunLevel);
+    SpinLock::ReleaseQueuedSpinLock(DispatcherLock);
+    KThread::ExitDispatcher(RunLevel);
 
     /* Return timer's due time */
     return DueTime;
@@ -177,10 +180,10 @@ KeQueryTimer(IN PKTIMER Timer)
  */
 XTAPI
 VOID
-KeSetTimer(IN PKTIMER Timer,
-           IN LARGE_INTEGER DueTime,
-           IN LONG Period,
-           IN PKDPC Dpc)
+Timer::SetTimer(IN PKTIMER Timer,
+                IN LARGE_INTEGER DueTime,
+                IN LONG Period,
+                IN PKDPC Dpc)
 {
     UNIMPLEMENTED;
 }
@@ -197,9 +200,11 @@ KeSetTimer(IN PKTIMER Timer,
  */
 XTAPI
 VOID
-KepRemoveTimer(IN OUT PKTIMER Timer)
+Timer::RemoveTimer(IN OUT PKTIMER Timer)
 {
     /* Remove the timer from the list */
     Timer->Header.Inserted = FALSE;
     RtlRemoveEntryList(&Timer->TimerListEntry);
 }
+
+} /* namespace */

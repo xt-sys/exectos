@@ -50,8 +50,8 @@ MmAllocateHardwareMemory(IN PFN_NUMBER PageCount,
     }
 
     /* Scan memory descriptors provided by the boot loader */
-    ListEntry = KeInitializationBlock->MemoryDescriptorListHead.Flink;
-    while(ListEntry != &KeInitializationBlock->MemoryDescriptorListHead)
+    ListEntry = KeGetInitializationBlock()->MemoryDescriptorListHead.Flink;
+    while(ListEntry != &KeGetInitializationBlock()->MemoryDescriptorListHead)
     {
         Descriptor = CONTAIN_RECORD(ListEntry, LOADER_MEMORY_DESCRIPTOR, ListEntry);
 
@@ -77,7 +77,7 @@ MmAllocateHardwareMemory(IN PFN_NUMBER PageCount,
     }
 
     /* Make sure we found a descriptor */
-    if(ListEntry == &KeInitializationBlock->MemoryDescriptorListHead)
+    if(ListEntry == &KeGetInitializationBlock()->MemoryDescriptorListHead)
     {
         /* Descriptor not found, return error */
         return STATUS_INSUFFICIENT_RESOURCES;

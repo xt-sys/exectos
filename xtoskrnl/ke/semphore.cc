@@ -1,16 +1,19 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/ke/semphore.c
+ * FILE:            xtoskrnl/ke/semphore.cc
  * DESCRIPTION:     Semaphores support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
+
+namespace KE
+{
 
 /**
- * initializes a kernel semaphore object.
+ * Initializes a kernel semaphore object.
  *
  * @param Semaphore
  *        Supplies a pointer to a semaphore object.
@@ -27,9 +30,9 @@
  */
 XTAPI
 VOID
-KeInitializeSemaphore(IN PKSEMAPHORE Semaphore,
-                      IN LONG Count,
-                      IN LONG Limit)
+Semaphore::InitializeSemaphore(IN PKSEMAPHORE Semaphore,
+                               IN LONG Count,
+                               IN LONG Limit)
 {
     /* Initialize semaphore header and limit */
     Semaphore->Header.Type = SemaphoreObject;
@@ -52,7 +55,7 @@ KeInitializeSemaphore(IN PKSEMAPHORE Semaphore,
  */
 XTAPI
 LONG
-KeReadSemaphoreState(IN PKSEMAPHORE Semaphore)
+Semaphore::ReadState(IN PKSEMAPHORE Semaphore)
 {
     /* Return semaphore's signal state */
     return Semaphore->Header.SignalState;
@@ -79,11 +82,13 @@ KeReadSemaphoreState(IN PKSEMAPHORE Semaphore)
  */
 XTAPI
 LONG
-KeReleaseSemaphore(IN PKSEMAPHORE Semaphore,
-                   IN KPRIORITY Increment,
-                   IN LONG Adjustment,
-                   IN BOOLEAN Wait)
+Semaphore::ReleaseSemaphore(IN PKSEMAPHORE Semaphore,
+                            IN KPRIORITY Increment,
+                            IN LONG Adjustment,
+                            IN BOOLEAN Wait)
 {
     UNIMPLEMENTED;
     return 0;
 }
+
+} /* namespace */

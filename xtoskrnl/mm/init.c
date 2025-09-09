@@ -54,8 +54,8 @@ MmpScanMemoryDescriptors(VOID)
     FreePages = 0;
 
     /* Iterate through memory mappings provided by the boot loader */
-    MemoryMappings = KeInitializationBlock->MemoryDescriptorListHead.Flink;
-    while(MemoryMappings != &KeInitializationBlock->MemoryDescriptorListHead)
+    MemoryMappings = KeGetInitializationBlock()->MemoryDescriptorListHead.Flink;
+    while(MemoryMappings != &KeGetInitializationBlock()->MemoryDescriptorListHead)
     {
         /* Get memory descriptor */
         MemoryDescriptor = CONTAIN_RECORD(MemoryMappings, LOADER_MEMORY_DESCRIPTOR, ListEntry);

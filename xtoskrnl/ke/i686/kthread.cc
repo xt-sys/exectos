@@ -1,13 +1,17 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/ke/i686/kthread.c
+ * FILE:            xtoskrnl/ke/i686/kthread.cc
  * DESCRIPTION:     I686 thread manipulation support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
+
+/* Kernel Library */
+namespace KE
+{
 
 /**
  * Initializes CPU architecture dependent context of a thread.
@@ -33,17 +37,17 @@
  */
 XTAPI
 VOID
-KepInitializeThreadContext(IN PKTHREAD Thread,
-                           IN PKSYSTEM_ROUTINE SystemRoutine,
-                           IN PKSTART_ROUTINE StartRoutine,
-                           IN PVOID StartContext,
-                           IN PCONTEXT ContextRecord)
+KThread::InitializeThreadContext(IN PKTHREAD Thread,
+                                 IN PKSYSTEM_ROUTINE SystemRoutine,
+                                 IN PKSTART_ROUTINE StartRoutine,
+                                 IN PVOID StartContext,
+                                 IN PCONTEXT ContextRecord)
 {
     PKTHREAD_INIT_FRAME ThreadFrame;
     PFX_SAVE_FORMAT FxSaveFormat;
 
     /* Set initial thread frame */
-    ThreadFrame = (PKTHREAD_INIT_FRAME)(Thread->InitialStack - sizeof(KTHREAD_INIT_FRAME));
+    ThreadFrame = (PKTHREAD_INIT_FRAME)((ULONG_PTR)Thread->InitialStack - sizeof(KTHREAD_INIT_FRAME));
 
     /* Fill floating point save area with zeroes */
     RtlZeroMemory(&ThreadFrame->NpxFrame, sizeof(FX_SAVE_AREA));
@@ -114,3 +118,5 @@ KepInitializeThreadContext(IN PKTHREAD Thread,
     /* Set thread stack */
     Thread->KernelStack = &ThreadFrame->SwitchFrame;
 }
+
+} /* namespace */

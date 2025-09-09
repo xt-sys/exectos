@@ -1,13 +1,17 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/ke/kubsan.c
+ * FILE:            xtoskrnl/ke/kubsan.cc
  * DESCRIPTION:     Kernel Undefined Behaviour Sanitizer (UBSAN) error reporting handler
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
+
+/* Kernel Library */
+namespace KE
+{
 
 /**
  * Checks whether handled UBSAN error should be reported.
@@ -21,10 +25,10 @@
  */
 XTCDECL
 BOOLEAN
-KepCheckUbsanReport(PKUBSAN_SOURCE_LOCATION Location)
+KUbsan::CheckReport(PKUBSAN_SOURCE_LOCATION Location)
 {
     /* Make sure, this error should be reported */
-    return !KepUbsanActiveFrame;
+    return (BOOLEAN)!ActiveFrame;
 }
 
 /**
@@ -42,11 +46,11 @@ KepCheckUbsanReport(PKUBSAN_SOURCE_LOCATION Location)
  */
 XTCDECL
 VOID
-KepEnterUbsanFrame(PKUBSAN_SOURCE_LOCATION Location,
-                   PCCHAR Reason)
+KUbsan::EnterFrame(PKUBSAN_SOURCE_LOCATION Location,
+                  PCCHAR Reason)
 {
     /* Enter UBSAN frame */
-    KepUbsanActiveFrame = TRUE;
+    ActiveFrame = TRUE;
 
     /* Print generic error message to debug console */
     DebugPrint(L"UBSAN: Undefined behavior (%s) in %s:%d:%d\n",
@@ -68,8 +72,8 @@ KepEnterUbsanFrame(PKUBSAN_SOURCE_LOCATION Location,
  */
 XTCDECL
 LONGLONG
-KepGetSignedUbsanValue(PKUBSAN_TYPE_DESCRIPTOR Type,
-                       PVOID Value)
+KUbsan::GetSignedValue(PKUBSAN_TYPE_DESCRIPTOR Type,
+                      PVOID Value)
 {
     ULONG BitWidth, ExtraBits;
     ULONG_PTR LongValue;
@@ -102,7 +106,7 @@ KepGetSignedUbsanValue(PKUBSAN_TYPE_DESCRIPTOR Type,
  */
 XTCDECL
 PCCHAR
-KepGetUbsanTypeKind(UCHAR TypeCheckKind)
+KUbsan::GetTypeKind(UCHAR TypeCheckKind)
 {
     /* Get type kind name */
     switch(TypeCheckKind)
@@ -147,8 +151,8 @@ KepGetUbsanTypeKind(UCHAR TypeCheckKind)
  */
 XTCDECL
 ULONGLONG
-KepGetUnsignedUbsanValue(PKUBSAN_TYPE_DESCRIPTOR Type,
-                         PVOID Value)
+KUbsan::GetUnsignedValue(PKUBSAN_TYPE_DESCRIPTOR Type,
+                        PVOID Value)
 {
     ULONG BitWidth;
 
@@ -184,22 +188,22 @@ KepGetUnsignedUbsanValue(PKUBSAN_TYPE_DESCRIPTOR Type,
  */
 XTCDECL
 VOID
-KepHandleUbsanDivisionOverflow(PKUBSAN_OVERFLOW_DATA Data,
-                               PVOID Lhs,
-                               PVOID Rhs)
+KUbsan::HandleDivisionOverflow(PKUBSAN_OVERFLOW_DATA Data,
+                              PVOID Lhs,
+                              PVOID Rhs)
 {
     /* Check if this error was already reported */
-    if(!KepCheckUbsanReport(&Data->Location))
+    if(!CheckReport(&Data->Location))
     {
         /* Don't report twice */
         return;
     }
 
     /* Enter UBSAN frame */
-    KepEnterUbsanFrame(&Data->Location, "Division-Overflow");
+    EnterFrame(&Data->Location, "Division-Overflow");
 
     /* Check if signed type, which value is -1 */
-    if((Data->Type->TypeInfo & 1) && (KepGetSignedUbsanValue(Data->Type, Rhs) == -1))
+    if((Data->Type->TypeInfo & 1) && (GetSignedValue(Data->Type, Rhs) == -1))
     {
         /* Division by -1, print error message to debug console */
         DebugPrint(L"UBSAN: Division by -1 cannot be represented in type %s\n", Data->Type->TypeName);
@@ -211,7 +215,7 @@ KepHandleUbsanDivisionOverflow(PKUBSAN_OVERFLOW_DATA Data,
     }
 
     /* Leave UBSAN frame */
-    KepLeaveUbsanFrame();
+    LeaveFrame();
 }
 
 /**
@@ -232,25 +236,25 @@ KepHandleUbsanDivisionOverflow(PKUBSAN_OVERFLOW_DATA Data,
  */
 XTCDECL
 VOID
-KepHandleUbsanFloatCastOverflow(PKUBSAN_FLOAT_CAST_OVERFLOW_DATA Data,
-                                ULONG_PTR Lhs,
-                                ULONG_PTR Rhs)
+KUbsan::HandleFloatCastOverflow(PKUBSAN_FLOAT_CAST_OVERFLOW_DATA Data,
+                               ULONG_PTR Lhs,
+                               ULONG_PTR Rhs)
 {
     /* Check if this error was already reported */
-    if(!KepCheckUbsanReport(&Data->Location))
+    if(!CheckReport(&Data->Location))
     {
         /* Don't report twice */
         return;
     }
 
     /* Enter UBSAN frame */
-    KepEnterUbsanFrame(&Data->Location, "Float-Cast-Overflow");
+    EnterFrame(&Data->Location, "Float-Cast-Overflow");
 
     /* Print error message to debug console */
     DebugPrint(L"Value of type %s is outside the range of type %s\n", Data->LhsType->TypeName, Data->RhsType->TypeName);
 
     /* Leave UBSAN frame */
-    KepLeaveUbsanFrame();
+    LeaveFrame();
 }
 
 /**
@@ -268,25 +272,25 @@ KepHandleUbsanFloatCastOverflow(PKUBSAN_FLOAT_CAST_OVERFLOW_DATA Data,
  */
 XTCDECL
 VOID
-KepHandleUbsanFunctionTypeMismatch(PKUBSAN_FUNCTION_TYPE_MISMATCH_DATA Data,
-                                   ULONG_PTR Pointer)
+KUbsan::HandleFunctionTypeMismatch(PKUBSAN_FUNCTION_TYPE_MISMATCH_DATA Data,
+                                  ULONG_PTR Pointer)
 {
     /* Check if this error was already reported */
-    if(!KepCheckUbsanReport(&Data->Location))
+    if(!CheckReport(&Data->Location))
     {
         /* Don't report twice */
         return;
     }
 
     /* Enter UBSAN frame */
-    KepEnterUbsanFrame(&Data->Location, "Float-Cast-Overflow");
+    EnterFrame(&Data->Location, "Float-Cast-Overflow");
 
     /* Print error message to debug console */
     DebugPrint(L"UBSAN: Indirect function call through %P address of a wrong type %s\n",
                (PVOID)Pointer, Data->Type->TypeName);
 
     /* Leave UBSAN frame */
-    KepLeaveUbsanFrame();
+    LeaveFrame();
 }
 
 /**
@@ -307,25 +311,25 @@ KepHandleUbsanFunctionTypeMismatch(PKUBSAN_FUNCTION_TYPE_MISMATCH_DATA Data,
  */
 XTCDECL
 VOID
-KepHandleUbsanIntegerOverflow(PKUBSAN_OVERFLOW_DATA Data,
-                                 ULONG_PTR Lhs,
-                                 ULONG_PTR Rhs)
+KUbsan::HandleIntegerOverflow(PKUBSAN_OVERFLOW_DATA Data,
+                             ULONG_PTR Lhs,
+                             ULONG_PTR Rhs)
 {
     /* Check if this error was already reported */
-    if(!KepCheckUbsanReport(&Data->Location))
+    if(!CheckReport(&Data->Location))
     {
         /* Don't report twice */
         return;
     }
 
     /* Enter UBSAN frame */
-    KepEnterUbsanFrame(&Data->Location, "Integer-Overflow");
+    EnterFrame(&Data->Location, "Integer-Overflow");
 
     /* Print error message to debug console */
     DebugPrint(L"UBSAN: The result of an arithmetic operation cannot be represented in type %s\n", Data->Type->TypeName);
 
     /* Leave UBSAN frame */
-    KepLeaveUbsanFrame();
+    LeaveFrame();
 }
 
 /**
@@ -340,17 +344,17 @@ KepHandleUbsanIntegerOverflow(PKUBSAN_OVERFLOW_DATA Data,
  */
 XTCDECL
 VOID
-KepHandleUbsanInvalidBuiltin(PKUBSAN_INVALID_BUILTIN_DATA Data)
+KUbsan::HandleInvalidBuiltin(PKUBSAN_INVALID_BUILTIN_DATA Data)
 {
     /* Check if this error was already reported */
-    if(!KepCheckUbsanReport(&Data->Location))
+    if(!CheckReport(&Data->Location))
     {
         /* Don't report twice */
         return;
     }
 
     /* Enter UBSAN frame */
-    KepEnterUbsanFrame(&Data->Location, "Invalid-Builtin");
+    EnterFrame(&Data->Location, "Invalid-Builtin");
 
     /* Check kind of UBSAN error */
     if(Data->Kind == 0 || Data->Kind == 1)
@@ -365,7 +369,7 @@ KepHandleUbsanInvalidBuiltin(PKUBSAN_INVALID_BUILTIN_DATA Data)
     }
 
     /* Leave UBSAN frame */
-    KepLeaveUbsanFrame();
+    LeaveFrame();
 }
 
 /**
@@ -383,25 +387,25 @@ KepHandleUbsanInvalidBuiltin(PKUBSAN_INVALID_BUILTIN_DATA Data)
  */
 XTCDECL
 VOID
-KepHandleUbsanMisalignedAccess(PKUBSAN_TYPE_MISMATCH_DATA Data,
-                               ULONG_PTR Pointer)
+KUbsan::HandleMisalignedAccess(PKUBSAN_TYPE_MISMATCH_DATA Data,
+                              ULONG_PTR Pointer)
 {
     /* Check if this error was already reported */
-    if(!KepCheckUbsanReport(&Data->Location))
+    if(!CheckReport(&Data->Location))
     {
         /* Don't report twice */
         return;
     }
 
     /* Enter UBSAN frame */
-    KepEnterUbsanFrame(&Data->Location, "Misaligned-Access");
+    EnterFrame(&Data->Location, "Misaligned-Access");
 
     /* Print error message to debug console */
     DebugPrint(L"UBSAN: %s misaligned address %p for type %s which requires %ld byte alignment\n",
-               KepGetUbsanTypeKind(Data->TypeCheckKind), (PVOID)Pointer, Data->Type->TypeName, Data->Alignment);
+               GetTypeKind(Data->TypeCheckKind), (PVOID)Pointer, Data->Type->TypeName, Data->Alignment);
 
     /* Leave UBSAN frame */
-    KepLeaveUbsanFrame();
+    LeaveFrame();
 }
 
 /**
@@ -419,24 +423,24 @@ KepHandleUbsanMisalignedAccess(PKUBSAN_TYPE_MISMATCH_DATA Data,
  */
 XTCDECL
 VOID
-KepHandleUbsanNegateOverflow(PKUBSAN_OVERFLOW_DATA Data,
-                             ULONG_PTR OldValue)
+KUbsan::HandleNegateOverflow(PKUBSAN_OVERFLOW_DATA Data,
+                            ULONG_PTR OldValue)
 {
     /* Check if this error was already reported */
-    if(!KepCheckUbsanReport(&Data->Location))
+    if(!CheckReport(&Data->Location))
     {
         /* Don't report twice */
         return;
     }
 
     /* Enter UBSAN frame */
-    KepEnterUbsanFrame(&Data->Location, "Negate-Overflow");
+    EnterFrame(&Data->Location, "Negate-Overflow");
 
     /* Print error message to debug console */
     DebugPrint(L"UBSAN: Negation of %lu cannot be represented in type %s\n", OldValue, Data->Type->TypeName);
 
     /* Leave UBSAN frame */
-    KepLeaveUbsanFrame();
+    LeaveFrame();
 }
 
 
@@ -455,23 +459,23 @@ KepHandleUbsanNegateOverflow(PKUBSAN_OVERFLOW_DATA Data,
  */
 XTCDECL
 VOID
-KepHandleUbsanNullPointerDereference(PKUBSAN_TYPE_MISMATCH_DATA Data)
+KUbsan::HandleNullPointerDereference(PKUBSAN_TYPE_MISMATCH_DATA Data)
 {
     /* Check if this error was already reported */
-    if(!KepCheckUbsanReport(&Data->Location))
+    if(!CheckReport(&Data->Location))
     {
         /* Don't report twice */
         return;
     }
 
     /* Enter UBSAN frame */
-    KepEnterUbsanFrame(&Data->Location, "NULL-Pointer-Dereference");
+    EnterFrame(&Data->Location, "NULL-Pointer-Dereference");
 
     /* Print error message to debug console */
-    DebugPrint(L"UBSAN: %s NULL pointer of type %s\n", KepGetUbsanTypeKind(Data->TypeCheckKind), Data->Type->TypeName);
+    DebugPrint(L"UBSAN: %s NULL pointer of type %s\n", GetTypeKind(Data->TypeCheckKind), Data->Type->TypeName);
 
     /* Leave UBSAN frame */
-    KepLeaveUbsanFrame();
+    LeaveFrame();
 }
 
 /**
@@ -489,25 +493,25 @@ KepHandleUbsanNullPointerDereference(PKUBSAN_TYPE_MISMATCH_DATA Data)
  */
 XTCDECL
 VOID
-KepHandleUbsanObjectSizeMismatch(PKUBSAN_TYPE_MISMATCH_DATA Data,
+KUbsan::HandleObjectSizeMismatch(PKUBSAN_TYPE_MISMATCH_DATA Data,
                                  ULONG_PTR Pointer)
 {
     /* Check if this error was already reported */
-    if(!KepCheckUbsanReport(&Data->Location))
+    if(!CheckReport(&Data->Location))
     {
         /* Don't report twice */
         return;
     }
 
     /* Enter UBSAN frame */
-    KepEnterUbsanFrame(&Data->Location, "Object-Size-Mismatch");
+    EnterFrame(&Data->Location, "Object-Size-Mismatch");
 
     /* Print error message to debug console */
     DebugPrint(L"UBSAN: %s address %p with insufficient space for an object of type %s\n",
-               KepGetUbsanTypeKind(Data->TypeCheckKind), (PVOID)Pointer, Data->Type->TypeName);
+               GetTypeKind(Data->TypeCheckKind), (PVOID)Pointer, Data->Type->TypeName);
 
     /* Leave UBSAN frame */
-    KepLeaveUbsanFrame();
+    LeaveFrame();
 }
 
 /**
@@ -525,24 +529,24 @@ KepHandleUbsanObjectSizeMismatch(PKUBSAN_TYPE_MISMATCH_DATA Data,
  */
 XTCDECL
 VOID
-KepHandleUbsanOutOfBounds(PKUBSAN_OUT_OF_BOUNDS_DATA Data,
-                          ULONG_PTR Index)
+KUbsan::HandleOutOfBounds(PKUBSAN_OUT_OF_BOUNDS_DATA Data,
+                         ULONG_PTR Index)
 {
     /* Check if this error was already reported */
-    if(!KepCheckUbsanReport(&Data->Location))
+    if(!CheckReport(&Data->Location))
     {
         /* Don't report twice */
         return;
     }
 
     /* Enter UBSAN frame */
-    KepEnterUbsanFrame(&Data->Location, "Array-Index-Out-Of-Bounds");
+    EnterFrame(&Data->Location, "Array-Index-Out-Of-Bounds");
 
     /* Print error message to debug console */
     DebugPrint(L"UBSAN: index is out of range for type %s", Data->ArrayType->TypeName);
 
     /* Leave UBSAN frame */
-    KepLeaveUbsanFrame();
+    LeaveFrame();
 }
 
 /**
@@ -563,26 +567,26 @@ KepHandleUbsanOutOfBounds(PKUBSAN_OUT_OF_BOUNDS_DATA Data,
  */
 XTCDECL
 VOID
-KepHandleUbsanPointerOverflow(PKUBSAN_OVERFLOW_DATA Data,
-                              ULONG_PTR Lhs,
-                              ULONG_PTR Rhs)
+KUbsan::HandlePointerOverflow(PKUBSAN_OVERFLOW_DATA Data,
+                             ULONG_PTR Lhs,
+                             ULONG_PTR Rhs)
 {
     /* Check if this error was already reported */
-    if(!KepCheckUbsanReport(&Data->Location))
+    if(!CheckReport(&Data->Location))
     {
         /* Don't report twice */
         return;
     }
 
     /* Enter UBSAN frame */
-    KepEnterUbsanFrame(&Data->Location, "Pointer-Overflow");
+    EnterFrame(&Data->Location, "Pointer-Overflow");
 
     /* Print error message to debug console */
     DebugPrint(L"UBSAN: Pointer operation %s %p to %p\n",
                Lhs > Rhs ? "overflowed" : "underflowed", (PVOID)Lhs, (PVOID)Rhs);
 
     /* Leave UBSAN frame */
-    KepLeaveUbsanFrame();
+    LeaveFrame();
 }
 
 
@@ -604,52 +608,52 @@ KepHandleUbsanPointerOverflow(PKUBSAN_OVERFLOW_DATA Data,
  */
 XTCDECL
 VOID
-KepHandleUbsanShiftOutOfBounds(PKUBSAN_SHIFT_OUT_OF_BOUNDS_DATA Data,
-                               ULONG_PTR Lhs,
-                               ULONG_PTR Rhs)
+KUbsan::HandleShiftOutOfBounds(PKUBSAN_SHIFT_OUT_OF_BOUNDS_DATA Data,
+                              ULONG_PTR Lhs,
+                              ULONG_PTR Rhs)
 {
     ULONG LhsBitWidth;
 
     /* Check if this error was already reported */
-    if(!KepCheckUbsanReport(&Data->Location))
+    if(!CheckReport(&Data->Location))
     {
         /* Don't report twice */
         return;
     }
 
     /* Enter UBSAN frame */
-    KepEnterUbsanFrame(&Data->Location, "Shift-Out-Of-Bounds");
+    EnterFrame(&Data->Location, "Shift-Out-Of-Bounds");
 
     /* Calculate Lhs bit width */
     LhsBitWidth = 1 << (Data->LhsType->TypeInfo >> 1);
 
     /* Check a type of out of bounds error */
-    if((Data->RhsType->TypeInfo & 1) && (KepGetSignedUbsanValue(Data->RhsType, (PVOID)Rhs) < 0))
+    if((Data->RhsType->TypeInfo & 1) && (GetSignedValue(Data->RhsType, (PVOID)Rhs) < 0))
     {
         /* Negative shift exponent, print error message to debug console */
-        DebugPrint(L"UBSAN: Shift exponent %lld is negative\n", KepGetSignedUbsanValue(Data->RhsType, (PVOID)Rhs));
+        DebugPrint(L"UBSAN: Shift exponent %lld is negative\n", GetSignedValue(Data->RhsType, (PVOID)Rhs));
     }
-    else if((Data->LhsType->TypeInfo & 1) && (KepGetSignedUbsanValue(Data->LhsType, (PVOID)Lhs) < 0))
+    else if((Data->LhsType->TypeInfo & 1) && (GetSignedValue(Data->LhsType, (PVOID)Lhs) < 0))
     {
         /* Negative left shift value, print error message to debug console */
-        DebugPrint(L"UBSAN: Left shift of negative value %lld\n", KepGetSignedUbsanValue(Data->LhsType, (PVOID)Lhs));
+        DebugPrint(L"UBSAN: Left shift of negative value %lld\n", GetSignedValue(Data->LhsType, (PVOID)Lhs));
     }
-    else if(KepGetUnsignedUbsanValue(Data->RhsType, (PVOID)Rhs) >= LhsBitWidth)
+    else if(GetUnsignedValue(Data->RhsType, (PVOID)Rhs) >= LhsBitWidth)
     {
         /* Shift exponent too large, print error message to debug console */
         DebugPrint(L"UBSAN: Shift exponent %lld is too large for %u-bit type %s\n",
-                   KepGetUnsignedUbsanValue(Data->RhsType, (PVOID)Rhs), LhsBitWidth, Data->LhsType->TypeName);
+                   GetUnsignedValue(Data->RhsType, (PVOID)Rhs), LhsBitWidth, Data->LhsType->TypeName);
     }
     else
     {
         /* Left shift too large, print error message to debug console */
         DebugPrint(L"UBSAN: Left shift of %lld by %lld places cannot be represented in type %s\n",
-                   KepGetSignedUbsanValue(Data->LhsType, (PVOID)Lhs), KepGetSignedUbsanValue(Data->RhsType, (PVOID)Rhs),
+                   GetSignedValue(Data->LhsType, (PVOID)Lhs), GetSignedValue(Data->RhsType, (PVOID)Rhs),
                    Data->LhsType->TypeName);
     }
 
     /* Leave UBSAN frame */
-    KepLeaveUbsanFrame();
+    LeaveFrame();
 }
 
 /**
@@ -667,24 +671,24 @@ KepHandleUbsanShiftOutOfBounds(PKUBSAN_SHIFT_OUT_OF_BOUNDS_DATA Data,
  */
 XTCDECL
 VOID
-KepHandleUbsanTypeMismatch(PKUBSAN_TYPE_MISMATCH_DATA Data,
-                           ULONG_PTR Pointer)
+KUbsan::HandleTypeMismatch(PKUBSAN_TYPE_MISMATCH_DATA Data,
+                          ULONG_PTR Pointer)
 {
     /* Check the type of mismatch */
     if(!Pointer)
     {
         /* Handle NULL pointer dereference */
-        KepHandleUbsanNullPointerDereference(Data);
+        HandleNullPointerDereference(Data);
     }
-    else if(Data->Alignment && (((Pointer) & ((typeof(Pointer))(Data->Alignment) - 1)) != 0)) 
+    else if(Data->Alignment && (((Pointer) & ((decltype(Pointer))(Data->Alignment) - 1)) != 0)) 
     {
         /* Handle misaligned access */
-        KepHandleUbsanMisalignedAccess(Data, Pointer);
+        HandleMisalignedAccess(Data, Pointer);
     }
     else
     {
         /* Handle object size mismatch */
-        KepHandleUbsanObjectSizeMismatch(Data, Pointer);
+        HandleObjectSizeMismatch(Data, Pointer);
     }
 }
 
@@ -697,11 +701,16 @@ KepHandleUbsanTypeMismatch(PKUBSAN_TYPE_MISMATCH_DATA Data,
  */
 XTCDECL
 VOID
-KepLeaveUbsanFrame()
+KUbsan::LeaveFrame()
 {
     /* Leave UBSAN frame */
-    KepUbsanActiveFrame = FALSE;
+    ActiveFrame = FALSE;
 }
+
+} /* namespace */
+
+
+
 
 /**
  * Handles the addition overflow error. This is internal routine implementing ABI defined by CLANG UBSAN.
@@ -721,6 +730,7 @@ KepLeaveUbsanFrame()
  *
  * @see https://github.com/llvm/llvm-project/blob/release/18.x/clang/lib/CodeGen/CodeGenFunction.h#L113
  */
+XTCLINK
 XTCDECL
 VOID
 __ubsan_handle_add_overflow(IN PKUBSAN_OVERFLOW_DATA Data,
@@ -728,7 +738,7 @@ __ubsan_handle_add_overflow(IN PKUBSAN_OVERFLOW_DATA Data,
                             IN ULONG_PTR Rhs)
 {
     /* Call UBSAN arithmetic overflow handler */
-    KepHandleUbsanIntegerOverflow(Data, Lhs, Rhs);
+    KE::KUbsan::HandleIntegerOverflow(Data, Lhs, Rhs);
 }
 
 /**
@@ -749,6 +759,7 @@ __ubsan_handle_add_overflow(IN PKUBSAN_OVERFLOW_DATA Data,
  *
  * @see https://github.com/llvm/llvm-project/blob/release/18.x/clang/lib/CodeGen/CodeGenFunction.h#L113
  */
+XTCLINK
 XTCDECL
 VOID
 __ubsan_handle_divrem_overflow(IN PKUBSAN_OVERFLOW_DATA Data,
@@ -756,7 +767,7 @@ __ubsan_handle_divrem_overflow(IN PKUBSAN_OVERFLOW_DATA Data,
                                IN PVOID Rhs)
 {
     /* Call UBSAN division overflow handler */
-    KepHandleUbsanDivisionOverflow(Data, Lhs, Rhs);
+    KE::KUbsan::HandleDivisionOverflow(Data, Lhs, Rhs);
 }
 
 /**
@@ -784,7 +795,7 @@ __ubsan_handle_float_cast_overflow(IN PKUBSAN_FLOAT_CAST_OVERFLOW_DATA Data,
                                    IN ULONG_PTR Rhs)
 {
     /* Call UBSAN float cast overflow handler */
-    KepHandleUbsanFloatCastOverflow(Data, Lhs, Rhs);
+    KE::KUbsan::HandleFloatCastOverflow(Data, Lhs, Rhs);
 }
 
 /**
@@ -808,7 +819,7 @@ __ubsan_handle_function_type_mismatch(IN PKUBSAN_FUNCTION_TYPE_MISMATCH_DATA Dat
                                       IN ULONG_PTR Pointer)
 {
     /* Call UBSAN function type mismatch handler */
-    KepHandleUbsanFunctionTypeMismatch(Data, Pointer);
+    KE::KUbsan::HandleFunctionTypeMismatch(Data, Pointer);
 }
 
 /**
@@ -828,7 +839,7 @@ VOID
 __ubsan_handle_invalid_builtin(IN PKUBSAN_INVALID_BUILTIN_DATA Data)
 {
     /* Call UBSAN invalid builtin handler */
-    KepHandleUbsanInvalidBuiltin(Data);
+    KE::KUbsan::HandleInvalidBuiltin(Data);
 }
 
 /**
@@ -856,7 +867,7 @@ __ubsan_handle_mul_overflow(IN PKUBSAN_OVERFLOW_DATA Data,
                             IN ULONG_PTR Rhs)
 {
     /* Call UBSAN arithmetic overflow handler */
-    KepHandleUbsanIntegerOverflow(Data, Lhs, Rhs);
+    KE::KUbsan::HandleIntegerOverflow(Data, Lhs, Rhs);
 }
 
 /**
@@ -880,7 +891,7 @@ __ubsan_handle_negate_overflow(IN PKUBSAN_OVERFLOW_DATA Data,
                                IN ULONG_PTR OldValue)
 {
     /* Call UBSAN negate overflow handler */
-    KepHandleUbsanNegateOverflow(Data, OldValue);
+    KE::KUbsan::HandleNegateOverflow(Data, OldValue);
 }
 
 /**
@@ -904,7 +915,7 @@ __ubsan_handle_out_of_bounds(IN PKUBSAN_OUT_OF_BOUNDS_DATA Data,
                              IN ULONG_PTR Index)
 {
     /* Call UBSAN out of bounds handler */
-    KepHandleUbsanOutOfBounds(Data, Index);
+    KE::KUbsan::HandleOutOfBounds(Data, Index);
 }
 
 /**
@@ -932,7 +943,7 @@ __ubsan_handle_pointer_overflow(IN PKUBSAN_OVERFLOW_DATA Data,
                                 IN ULONG_PTR Rhs)
 {
     /* Call UBSAN pointer overflow handler */
-    KepHandleUbsanPointerOverflow(Data, Lhs, Rhs);
+    KE::KUbsan::HandlePointerOverflow(Data, Lhs, Rhs);
 }
 
 /**
@@ -960,7 +971,7 @@ __ubsan_handle_shift_out_of_bounds(IN PKUBSAN_SHIFT_OUT_OF_BOUNDS_DATA Data,
                                    IN ULONG_PTR Rhs)
 {
     /* Call UBSAN out of bounds handler */
-    KepHandleUbsanShiftOutOfBounds(Data, Lhs, Rhs);
+    KE::KUbsan::HandleShiftOutOfBounds(Data, Lhs, Rhs);
 }
 
 /**
@@ -988,7 +999,7 @@ __ubsan_handle_sub_overflow(IN PKUBSAN_OVERFLOW_DATA Data,
                             IN ULONG_PTR Rhs)
 {
     /* Call UBSAN arithmetic overflow handler */
-    KepHandleUbsanIntegerOverflow(Data, Lhs, Rhs);
+    KE::KUbsan::HandleIntegerOverflow(Data, Lhs, Rhs);
 }
 
 /**
@@ -1012,7 +1023,7 @@ __ubsan_handle_type_mismatch(IN PKUBSAN_TYPE_MISMATCH_DATA Data,
                              IN ULONG_PTR Pointer)
 {
     /* Call UBSAN type mismatch handler */
-    KepHandleUbsanTypeMismatch(Data, Pointer);
+    KE::KUbsan::HandleTypeMismatch(Data, Pointer);
 }
 
 /**
@@ -1044,5 +1055,5 @@ __ubsan_handle_type_mismatch_v1(IN PKUBSAN_TYPE_MISMATCH_DATA_V1 Data,
     MismatchData.TypeCheckKind = Data->TypeCheckKind;
 
     /* Call UBSAN type mismatch handler */
-    KepHandleUbsanTypeMismatch(&MismatchData, Pointer);
+    KE::KUbsan::HandleTypeMismatch(&MismatchData, Pointer);
 }
