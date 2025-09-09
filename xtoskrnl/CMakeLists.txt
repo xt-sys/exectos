@@ -54,7 +54,6 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/ke/dpc.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/event.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/exports.cc
-    ${XTOSKRNL_SOURCE_DIR}/ke/globals.c
     ${XTOSKRNL_SOURCE_DIR}/ke/kprocess.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/krnlinit.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/kthread.cc
