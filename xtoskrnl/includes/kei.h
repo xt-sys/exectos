@@ -14,6 +14,10 @@
 
 /* Kernel services routines forward references */
 XTAPI
+PKERNEL_INITIALIZATION_BLOCK
+KeGetInitializationBlock(VOID);
+
+XTAPI
 VOID
 KeClearEvent(IN PKEVENT Event);
 
