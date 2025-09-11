@@ -30,4 +30,5 @@ extern "C" {
 #include <ex.hh>
 #include <hl.hh>
 #include <ke.hh>
+#include <po.hh>
 #include <rtl.hh>

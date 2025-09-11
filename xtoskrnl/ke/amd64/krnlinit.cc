@@ -85,7 +85,7 @@ KernelInit::StartKernel(VOID)
     CurrentProcess = CurrentThread->ApcState.Process;
 
     /* Initialize CPU power state structures */
-    PoInitializeProcessorControlBlock(Prcb);
+    PO::Idle::InitializeProcessorIdleState(Prcb);
 
     /* Save processor state */
     Processor::SaveProcessorState(&Prcb->ProcessorState);

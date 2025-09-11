@@ -1,12 +1,12 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/po/idle.c
+ * FILE:            xtoskrnl/po/idle.cc
  * DESCRIPTION:     Processor idle functionality support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
 
 /**
@@ -21,7 +21,7 @@
  */
 XTAPI
 VOID
-PoInitializeProcessorControlBlock(IN OUT PKPROCESSOR_CONTROL_BLOCK Prcb)
+PO::Idle::InitializeProcessorIdleState(IN OUT PKPROCESSOR_CONTROL_BLOCK Prcb)
 {
     /* Zero memory */
     RtlZeroMemory(&Prcb->PowerState, sizeof(Prcb->PowerState));
@@ -30,10 +30,10 @@ PoInitializeProcessorControlBlock(IN OUT PKPROCESSOR_CONTROL_BLOCK Prcb)
     Prcb->PowerState.Idle0TimeLimit = 0xFFFFFFFF;
     Prcb->PowerState.CurrentThrottle = 100;
     Prcb->PowerState.CurrentThrottleIndex = 0;
-    Prcb->PowerState.IdleFunction = PopIdle0Function;
+    Prcb->PowerState.IdleFunction = Idle0Function;
 
     /* Initialize DPC and Timer */
-    KeInitializeDpc(&Prcb->PowerState.PerfDpc, PopPerfIdleDpc, Prcb);
+    KeInitializeDpc(&Prcb->PowerState.PerfDpc, PerfIdleDpc, Prcb);
     KeSetTargetProcessorDpc(&Prcb->PowerState.PerfDpc, Prcb->CpuNumber);
     KeInitializeTimer(&Prcb->PowerState.PerfTimer, SynchronizationTimer);
 }
@@ -50,7 +50,7 @@ PoInitializeProcessorControlBlock(IN OUT PKPROCESSOR_CONTROL_BLOCK Prcb)
  */
 XTFASTCALL
 VOID
-PopIdle0Function(IN PPROCESSOR_POWER_STATE PowerState)
+PO::Idle::Idle0Function(IN PPROCESSOR_POWER_STATE PowerState)
 {
     UNIMPLEMENTED;
 }
@@ -67,7 +67,7 @@ PopIdle0Function(IN PPROCESSOR_POWER_STATE PowerState)
  */
 XTAPI
 VOID
-PopPerfIdle(PPROCESSOR_POWER_STATE PowerState)
+PO::Idle::PerfIdle(PPROCESSOR_POWER_STATE PowerState)
 {
     UNIMPLEMENTED;
 }
@@ -93,10 +93,10 @@ PopPerfIdle(PPROCESSOR_POWER_STATE PowerState)
  */
 XTAPI
 VOID
-PopPerfIdleDpc(IN PKDPC Dpc,
-               IN PVOID DeferredContext,
-               IN PVOID SystemArgument1,
-               IN PVOID SystemArgument2)
+PO::Idle::PerfIdleDpc(IN PKDPC Dpc,
+                      IN PVOID DeferredContext,
+                      IN PVOID SystemArgument1,
+                      IN PVOID SystemArgument2)
 {
     UNIMPLEMENTED;
 }
