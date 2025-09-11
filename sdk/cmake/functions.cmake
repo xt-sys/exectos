@@ -89,6 +89,10 @@ function(set_install_target TARGET DESTINATION)
     install(TARGETS ${TARGET} DESTINATION ${EXECTOS_BINARY_DIR}/output/binaries/${DESTINATION})
 endfunction()
 
+function(set_sdk_target FILENAME DESTINATION)
+    install(DIRECTORY ${FILENAME} DESTINATION ${EXECTOS_BINARY_DIR}/output/sdk/${DESTINATION})
+endfunction()
+
 # This function is responsible for compiling module SPEC file
 function(set_specfile SPECFILE EXPORTNAME)
     if(NOT ${ARGC} EQUAL 2)

@@ -65,5 +65,6 @@ set_disk_image_size(32)
 # Build all subprojects
 add_subdirectory(bootdata)
 add_subdirectory(drivers)
+add_subdirectory(sdk)
 add_subdirectory(xtldr)
 add_subdirectory(xtoskrnl)
