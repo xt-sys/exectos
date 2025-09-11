@@ -9,10 +9,6 @@
 #include <xtos.hh>
 
 
-/* Architecture-specific Library */
-namespace AR
-{
-
 /**
  * Gets the base address of the kernel boot stack.
  *
@@ -20,7 +16,9 @@ namespace AR
  *
  * @since XT 1.0
  */
-PVOID ProcSup::GetBootStack(VOID)
+XTAPI
+PVOID
+AR::ProcSup::GetBootStack(VOID)
 {
     return (PVOID)BootStack;
 }
@@ -35,7 +33,7 @@ PVOID ProcSup::GetBootStack(VOID)
  */
 XTAPI
 VOID
-ProcSup::IdentifyProcessor(VOID)
+AR::ProcSup::IdentifyProcessor(VOID)
 {
     PKPROCESSOR_CONTROL_BLOCK Prcb;
     CPUID_REGISTERS CpuRegisters;
@@ -111,7 +109,7 @@ ProcSup::IdentifyProcessor(VOID)
  */
 XTAPI
 VOID
-ProcSup::InitializeProcessor(IN PVOID ProcessorStructures)
+AR::ProcSup::InitializeProcessor(IN PVOID ProcessorStructures)
 {
     KDESCRIPTOR GdtDescriptor, IdtDescriptor;
     PVOID KernelBootStack, KernelFaultStack;
@@ -189,7 +187,7 @@ ProcSup::InitializeProcessor(IN PVOID ProcessorStructures)
  */
 XTAPI
 VOID
-ProcSup::InitializeGdt(IN PKPROCESSOR_BLOCK ProcessorBlock)
+AR::ProcSup::InitializeGdt(IN PKPROCESSOR_BLOCK ProcessorBlock)
 {
     /* Initialize GDT entries */
     SetGdtEntry(ProcessorBlock->GdtBase, KGDT_NULL, 0x0, 0x0, KGDT_TYPE_NONE, KGDT_DPL_SYSTEM, 1);
@@ -218,7 +216,7 @@ ProcSup::InitializeGdt(IN PKPROCESSOR_BLOCK ProcessorBlock)
  */
 XTAPI
 VOID
-ProcSup::InitializeIdt(IN PKPROCESSOR_BLOCK ProcessorBlock)
+AR::ProcSup::InitializeIdt(IN PKPROCESSOR_BLOCK ProcessorBlock)
 {
     UINT Vector;
 
@@ -277,11 +275,11 @@ ProcSup::InitializeIdt(IN PKPROCESSOR_BLOCK ProcessorBlock)
  */
 XTAPI
 VOID
-ProcSup::InitializeProcessorBlock(OUT PKPROCESSOR_BLOCK ProcessorBlock,
-                                  IN PKGDTENTRY Gdt,
-                                  IN PKIDTENTRY Idt,
-                                  IN PKTSS Tss,
-                                  IN PVOID DpcStack)
+AR::ProcSup::InitializeProcessorBlock(OUT PKPROCESSOR_BLOCK ProcessorBlock,
+                                      IN PKGDTENTRY Gdt,
+                                      IN PKIDTENTRY Idt,
+                                      IN PKTSS Tss,
+                                      IN PVOID DpcStack)
 {
     /* Set processor block and processor control block */
     ProcessorBlock->Self = ProcessorBlock;
@@ -327,7 +325,7 @@ ProcSup::InitializeProcessorBlock(OUT PKPROCESSOR_BLOCK ProcessorBlock,
  */
 XTAPI
 VOID
-ProcSup::InitializeProcessorRegisters(VOID)
+AR::ProcSup::InitializeProcessorRegisters(VOID)
 {
     ULONGLONG PatAttributes;
 
@@ -400,12 +398,12 @@ ProcSup::InitializeProcessorRegisters(VOID)
  */
 XTAPI
 VOID
-ProcSup::InitializeProcessorStructures(IN PVOID ProcessorStructures,
-                                       OUT PKGDTENTRY *Gdt,
-                                       OUT PKTSS *Tss,
-                                       OUT PKPROCESSOR_BLOCK *ProcessorBlock,
-                                       OUT PVOID *KernelBootStack,
-                                       OUT PVOID *KernelFaultStack)
+AR::ProcSup::InitializeProcessorStructures(IN PVOID ProcessorStructures,
+                                           OUT PKGDTENTRY *Gdt,
+                                           OUT PKTSS *Tss,
+                                           OUT PKPROCESSOR_BLOCK *ProcessorBlock,
+                                           OUT PVOID *KernelBootStack,
+                                           OUT PVOID *KernelFaultStack)
 {
     UINT_PTR Address;
 
@@ -440,7 +438,7 @@ ProcSup::InitializeProcessorStructures(IN PVOID ProcessorStructures,
  */
 XTAPI
 VOID
-ProcSup::InitializeSegments(VOID)
+AR::ProcSup::InitializeSegments(VOID)
 {
     /* Initialize segments */
     CpuFunc::LoadSegment(SEGMENT_CS, KGDT_R0_CODE);
@@ -466,9 +464,9 @@ ProcSup::InitializeSegments(VOID)
  */
 XTAPI
 VOID
-ProcSup::InitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock,
-                       IN PVOID KernelBootStack,
-                       IN PVOID KernelFaultStack)
+AR::ProcSup::InitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock,
+                           IN PVOID KernelBootStack,
+                           IN PVOID KernelFaultStack)
 {
     /* Fill TSS with zeroes */
     RtlZeroMemory(ProcessorBlock->TssBase, sizeof(KTSS));
@@ -510,13 +508,13 @@ ProcSup::InitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock,
  */
 XTAPI
 VOID
-ProcSup::SetGdtEntry(IN PKGDTENTRY Gdt,
-                     IN USHORT Selector,
-                     IN ULONG_PTR Base,
-                     IN ULONG Limit,
-                     IN UCHAR Type,
-                     IN UCHAR Dpl,
-                     IN UCHAR SegmentMode)
+AR::ProcSup::SetGdtEntry(IN PKGDTENTRY Gdt,
+                         IN USHORT Selector,
+                         IN ULONG_PTR Base,
+                         IN ULONG Limit,
+                         IN UCHAR Type,
+                         IN UCHAR Dpl,
+                         IN UCHAR SegmentMode)
 {
     PKGDTENTRY GdtEntry;
     UCHAR Granularity;
@@ -576,9 +574,9 @@ ProcSup::SetGdtEntry(IN PKGDTENTRY Gdt,
  */
 XTAPI
 VOID
-ProcSup::SetGdtEntryBase(IN PKGDTENTRY Gdt,
-                         IN USHORT Selector,
-                         IN ULONG_PTR Base)
+AR::ProcSup::SetGdtEntryBase(IN PKGDTENTRY Gdt,
+                             IN USHORT Selector,
+                             IN ULONG_PTR Base)
 {
     PKGDTENTRY GdtEntry;
 
@@ -619,12 +617,12 @@ ProcSup::SetGdtEntryBase(IN PKGDTENTRY Gdt,
  */
 XTAPI
 VOID
-ProcSup::SetIdtGate(IN PKIDTENTRY Idt,
-                    IN USHORT Vector,
-                    IN PVOID Handler,
-                    IN USHORT Selector,
-                    IN USHORT Ist,
-                    IN USHORT Access)
+AR::ProcSup::SetIdtGate(IN PKIDTENTRY Idt,
+                        IN USHORT Vector,
+                        IN PVOID Handler,
+                        IN USHORT Selector,
+                        IN USHORT Ist,
+                        IN USHORT Access)
 {
     /* Setup the gate */
     Idt[Vector].OffsetLow = ((ULONG_PTR)Handler & 0xFFFF);
@@ -635,25 +633,4 @@ ProcSup::SetIdtGate(IN PKIDTENTRY Idt,
     Idt[Vector].Present = 1;
     Idt[Vector].Selector = Selector;
     Idt[Vector].Type = 0xE;
-}
-
-} /* namespace */
-
-
-/* TEMPORARY FOR COMPATIBILITY WITH C CODE */
-XTCLINK
-XTAPI
-PVOID
-ArGetBootStack(VOID)
-{
-    return AR::ProcSup::GetBootStack();
-}
-
-/* TEMPORARY FOR COMPATIBILITY WITH C CODE */
-XTCLINK
-XTAPI
-VOID
-ArInitializeProcessor(IN PVOID ProcessorStructures)
-{
-    AR::ProcSup::InitializeProcessor(ProcessorStructures);
 }

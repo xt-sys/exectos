@@ -103,7 +103,7 @@ KernelInit::StartKernel(VOID)
     CurrentProcess->Quantum = MAXCHAR;
 
     /* Initialize Idle thread */
-    KThread::InitializeThread(CurrentProcess, CurrentThread, nullptr, nullptr, nullptr, nullptr, nullptr, ArGetBootStack(), TRUE);
+    KThread::InitializeThread(CurrentProcess, CurrentThread, nullptr, nullptr, nullptr, nullptr, nullptr, AR::ProcSup::GetBootStack(), TRUE);
     CurrentThread->NextProcessor = Prcb->CpuNumber;
     CurrentThread->Priority = THREAD_HIGH_PRIORITY;
     CurrentThread->State = Running;
@@ -131,7 +131,7 @@ KernelInit::SwitchBootStack(VOID)
     PVOID StartKernel;
 
     /* Calculate the stack pointer at the top of the buffer, ensuring it is properly aligned as required by the ABI */
-    Stack = ((ULONG_PTR)ArGetBootStack() + KERNEL_STACK_SIZE) & ~(STACK_ALIGNMENT - 1);
+    Stack = ((ULONG_PTR)AR::ProcSup::GetBootStack() + KERNEL_STACK_SIZE) & ~(STACK_ALIGNMENT - 1);
 
     /* Get address of KernelInit::StartKernel() */
     StartKernel = (PVOID)KernelInit::StartKernel;

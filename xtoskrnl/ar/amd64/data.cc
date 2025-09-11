@@ -9,26 +9,20 @@
 #include <xtos.hh>
 
 
-/* Architecture-specific Library */
-namespace AR
-{
-
 /* Initial kernel boot stack */
-UCHAR ProcSup::BootStack[KERNEL_STACK_SIZE] = {};
+UCHAR AR::ProcSup::BootStack[KERNEL_STACK_SIZE] = {};
 
 /* Initial kernel fault stack */
-UCHAR ProcSup::FaultStack[KERNEL_STACK_SIZE] = {};
+UCHAR AR::ProcSup::FaultStack[KERNEL_STACK_SIZE] = {};
 
 /* Initial GDT */
-KGDTENTRY ProcSup::InitialGdt[GDT_ENTRIES] = {};
+KGDTENTRY AR::ProcSup::InitialGdt[GDT_ENTRIES] = {};
 
 /* Initial IDT */
-KIDTENTRY ProcSup::InitialIdt[IDT_ENTRIES] = {};
+KIDTENTRY AR::ProcSup::InitialIdt[IDT_ENTRIES] = {};
 
 /* Initial Processor Block */
-KPROCESSOR_BLOCK ProcSup::InitialProcessorBlock;
+KPROCESSOR_BLOCK AR::ProcSup::InitialProcessorBlock;
 
 /* Initial TSS */
-KTSS ProcSup::InitialTss;
-
-} /* namespace */
+KTSS AR::ProcSup::InitialTss;

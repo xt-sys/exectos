@@ -9,10 +9,6 @@
 #include <xtos.hh>
 
 
-/* Architecture-specific Library */
-namespace AR
-{
-
 /**
  * Dispatches the trap provided by common trap handler.
  *
@@ -25,7 +21,7 @@ namespace AR
  */
 XTCDECL
 VOID
-Traps::DispatchTrap(IN PKTRAP_FRAME TrapFrame)
+AR::Traps::DispatchTrap(IN PKTRAP_FRAME TrapFrame)
 {
     /* Check vector and call appropriate handler */
     switch(TrapFrame->Vector)
@@ -145,7 +141,7 @@ Traps::DispatchTrap(IN PKTRAP_FRAME TrapFrame)
  */
 XTCDECL
 VOID
-Traps::HandleTrap00(IN PKTRAP_FRAME TrapFrame)
+AR::Traps::HandleTrap00(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Division-By-Zero Error (0x00)!\n");
     for(;;);
@@ -163,7 +159,7 @@ Traps::HandleTrap00(IN PKTRAP_FRAME TrapFrame)
  */
 XTCDECL
 VOID
-Traps::HandleTrap01(IN PKTRAP_FRAME TrapFrame)
+AR::Traps::HandleTrap01(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Debug exception (0x01)!\n");
     for(;;);
@@ -181,7 +177,7 @@ Traps::HandleTrap01(IN PKTRAP_FRAME TrapFrame)
  */
 XTCDECL
 VOID
-Traps::HandleTrap02(IN PKTRAP_FRAME TrapFrame)
+AR::Traps::HandleTrap02(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Non-Maskable-Interrupt (0x02)!\n");
     for(;;);
@@ -199,7 +195,7 @@ Traps::HandleTrap02(IN PKTRAP_FRAME TrapFrame)
  */
 XTCDECL
 VOID
-Traps::HandleTrap03(IN PKTRAP_FRAME TrapFrame)
+AR::Traps::HandleTrap03(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled INT3 (0x03)!\n");
     for(;;);
@@ -217,7 +213,7 @@ Traps::HandleTrap03(IN PKTRAP_FRAME TrapFrame)
  */
 XTCDECL
 VOID
-Traps::HandleTrap04(IN PKTRAP_FRAME TrapFrame)
+AR::Traps::HandleTrap04(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Overflow exception (0x04)!\n");
     for(;;);
@@ -235,7 +231,7 @@ Traps::HandleTrap04(IN PKTRAP_FRAME TrapFrame)
  */
 XTCDECL
 VOID
-Traps::HandleTrap05(IN PKTRAP_FRAME TrapFrame)
+AR::Traps::HandleTrap05(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Bound-Range-Exceeded exception (0x05)!\n");
     for(;;);
@@ -253,7 +249,7 @@ Traps::HandleTrap05(IN PKTRAP_FRAME TrapFrame)
  */
 XTCDECL
 VOID
-Traps::HandleTrap06(IN PKTRAP_FRAME TrapFrame)
+AR::Traps::HandleTrap06(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Invalid Opcode exception (0x06)!\n");
     for(;;);
@@ -271,7 +267,7 @@ Traps::HandleTrap06(IN PKTRAP_FRAME TrapFrame)
  */
 XTCDECL
 VOID
-Traps::HandleTrap07(IN PKTRAP_FRAME TrapFrame)
+AR::Traps::HandleTrap07(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Device Not Available exception (0x07)!\n");
     for(;;);
@@ -289,7 +285,7 @@ Traps::HandleTrap07(IN PKTRAP_FRAME TrapFrame)
  */
 XTCDECL
 VOID
-Traps::HandleTrap08(IN PKTRAP_FRAME TrapFrame)
+AR::Traps::HandleTrap08(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Double-Fault exception (0x08)!\n");
     for(;;);
@@ -307,7 +303,7 @@ Traps::HandleTrap08(IN PKTRAP_FRAME TrapFrame)
  */
 XTCDECL
 VOID
-Traps::HandleTrap09(IN PKTRAP_FRAME TrapFrame)
+AR::Traps::HandleTrap09(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Segment-Overrun exception (0x09)!\n");
     for(;;);
@@ -325,7 +321,7 @@ Traps::HandleTrap09(IN PKTRAP_FRAME TrapFrame)
  */
 XTCDECL
 VOID
-Traps::HandleTrap0A(IN PKTRAP_FRAME TrapFrame)
+AR::Traps::HandleTrap0A(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Invalid-TSS exception (0x0A)!\n");
     for(;;);
@@ -343,7 +339,7 @@ Traps::HandleTrap0A(IN PKTRAP_FRAME TrapFrame)
  */
 XTCDECL
 VOID
-Traps::HandleTrap0B(IN PKTRAP_FRAME TrapFrame)
+AR::Traps::HandleTrap0B(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Segment-Not-Present exception (0x0B)!\n");
     for(;;);
@@ -361,7 +357,7 @@ Traps::HandleTrap0B(IN PKTRAP_FRAME TrapFrame)
  */
 XTCDECL
 VOID
-Traps::HandleTrap0C(IN PKTRAP_FRAME TrapFrame)
+AR::Traps::HandleTrap0C(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Stack-Segment-Fault exception (0x0C)!\n");
     for(;;);
@@ -379,7 +375,7 @@ Traps::HandleTrap0C(IN PKTRAP_FRAME TrapFrame)
  */
 XTCDECL
 VOID
-Traps::HandleTrap0D(IN PKTRAP_FRAME TrapFrame)
+AR::Traps::HandleTrap0D(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled General-Protection-Fault (0x0D)!\n");
     for(;;);
@@ -397,7 +393,7 @@ Traps::HandleTrap0D(IN PKTRAP_FRAME TrapFrame)
  */
 XTCDECL
 VOID
-Traps::HandleTrap0E(IN PKTRAP_FRAME TrapFrame)
+AR::Traps::HandleTrap0E(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Page-Fault exception (0x0E)!\n");
     for(;;);
@@ -415,7 +411,7 @@ Traps::HandleTrap0E(IN PKTRAP_FRAME TrapFrame)
  */
 XTCDECL
 VOID
-Traps::HandleTrap10(IN PKTRAP_FRAME TrapFrame)
+AR::Traps::HandleTrap10(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled x87 Floating-Point exception (0x10)!\n");
     for(;;);
@@ -433,7 +429,7 @@ Traps::HandleTrap10(IN PKTRAP_FRAME TrapFrame)
  */
 XTCDECL
 VOID
-Traps::HandleTrap11(IN PKTRAP_FRAME TrapFrame)
+AR::Traps::HandleTrap11(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Alignment-Check exception (0x11)!\n");
     for(;;);
@@ -451,7 +447,7 @@ Traps::HandleTrap11(IN PKTRAP_FRAME TrapFrame)
  */
 XTCDECL
 VOID
-Traps::HandleTrap12(IN PKTRAP_FRAME TrapFrame)
+AR::Traps::HandleTrap12(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Machine-Check exception (0x12)!\n");
     for(;;);
@@ -469,7 +465,7 @@ Traps::HandleTrap12(IN PKTRAP_FRAME TrapFrame)
  */
 XTCDECL
 VOID
-Traps::HandleTrap13(IN PKTRAP_FRAME TrapFrame)
+AR::Traps::HandleTrap13(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled SIMD Floating-Point exception (0x13)!\n");
     for(;;);
@@ -487,7 +483,7 @@ Traps::HandleTrap13(IN PKTRAP_FRAME TrapFrame)
  */
 XTCDECL
 VOID
-Traps::HandleTrap2A(IN PKTRAP_FRAME TrapFrame)
+AR::Traps::HandleTrap2A(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Unhandled Tick Count service request (0x2A)!\n");
 }
@@ -504,7 +500,7 @@ Traps::HandleTrap2A(IN PKTRAP_FRAME TrapFrame)
  */
 XTCDECL
 VOID
-Traps::HandleTrap2B(IN PKTRAP_FRAME TrapFrame)
+AR::Traps::HandleTrap2B(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Unhandled Callback return service request (0x2B)!\n");
 }
@@ -521,7 +517,7 @@ Traps::HandleTrap2B(IN PKTRAP_FRAME TrapFrame)
  */
 XTCDECL
 VOID
-Traps::HandleTrap2C(IN PKTRAP_FRAME TrapFrame)
+AR::Traps::HandleTrap2C(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Assertion (0x2C)!\n");
     for(;;);
@@ -539,7 +535,7 @@ Traps::HandleTrap2C(IN PKTRAP_FRAME TrapFrame)
  */
 XTCDECL
 VOID
-Traps::HandleTrap2D(IN PKTRAP_FRAME TrapFrame)
+AR::Traps::HandleTrap2D(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Debug-Service-Request (0x2D)!\n");
     for(;;);
@@ -557,7 +553,7 @@ Traps::HandleTrap2D(IN PKTRAP_FRAME TrapFrame)
  */
 XTCDECL
 VOID
-Traps::HandleTrap2E(IN PKTRAP_FRAME TrapFrame)
+AR::Traps::HandleTrap2E(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Unhandled system call (0x2E)!\n");
 }
@@ -574,13 +570,11 @@ Traps::HandleTrap2E(IN PKTRAP_FRAME TrapFrame)
  */
 XTCDECL
 VOID
-Traps::HandleTrapFF(IN PKTRAP_FRAME TrapFrame)
+AR::Traps::HandleTrapFF(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Unexpected-Interrupt (0xFF)!\n");
     for(;;);
 }
-
-} /* namespace */
 
 /**
  * C-linkage wrapper for dispatching the trap provided by common trap handler.
