@@ -18,9 +18,9 @@ namespace RTL
     class Endianness
     {
         public:
-            STATIC XTAPI USHORT SwapByte16(IN USHORT Source);
-            STATIC XTAPI ULONG SwapByte32(IN ULONG Source);
-            STATIC XTAPI ULONGLONG SwapByte64(IN ULONGLONG Source);
+            STATIC XTFASTCALL USHORT SwapByte16(IN USHORT Source);
+            STATIC XTFASTCALL ULONG SwapByte32(IN ULONG Source);
+            STATIC XTFASTCALL ULONGLONG SwapByte64(IN ULONGLONG Source);
     };
 }
 

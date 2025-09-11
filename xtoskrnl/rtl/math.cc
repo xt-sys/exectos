@@ -610,7 +610,7 @@ RTL::Math::GetBaseExponent(IN DOUBLE Value,
  *
  * @since XT 1.0
  */
-XTCDECL
+XTAPI
 BOOLEAN
 RTL::Math::InfiniteDouble(IN DOUBLE Value)
 {
@@ -669,7 +669,7 @@ RTL::Math::MultiplyLargeInteger(IN LARGE_INTEGER Multiplicand,
  *
  * @since XT 1.0
  */
-XTCDECL
+XTAPI
 BOOLEAN
 RTL::Math::NanDouble(IN DOUBLE Value)
 {
