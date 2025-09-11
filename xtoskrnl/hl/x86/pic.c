@@ -46,7 +46,7 @@ HlReadApicRegister(IN APIC_REGISTER Register)
     else
     {
         /* Read from xAPIC */
-        return RtlReadRegisterLong((PULONG)(APIC_BASE + (Register << 4)));
+        return HlReadRegister32((PULONG)(APIC_BASE + (Register << 4)));
     }
 }
 
@@ -91,7 +91,7 @@ HlWriteApicRegister(IN APIC_REGISTER Register,
     else
     {
         /* Write to xAPIC */
-        RtlWriteRegisterLong((PULONG)(APIC_BASE + (Register << 4)), Value);
+        HlWriteRegister32((PULONG)(APIC_BASE + (Register << 4)), Value);
     }
 }
 
