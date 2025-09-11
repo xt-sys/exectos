@@ -12,7 +12,7 @@ endif()
 # Set build optimisation
 if(BUILD_TYPE STREQUAL "DEBUG")
     add_compiler_ccxxflags("/GS- /Zi /Ob0 /Od")
-    add_linker_flags("/DEBUG /INCREMENTAL /OPT:NOREF /OPT:NOICF /PDBSOURCEPATH:build")
+    add_linker_flags("/DEBUG /INCREMENTAL:NO /OPT:REF /OPT:NOICF /PDBSOURCEPATH:build")
 else()
     add_compiler_ccxxflags("/GS- /Ob2 /Ot /Ox /Oy")
     add_linker_flags("/INCREMENTAL:NO /OPT:REF /OPT:ICF")
