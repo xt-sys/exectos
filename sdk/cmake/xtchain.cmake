@@ -52,7 +52,7 @@ add_compiler_ccxxflags("-fno-builtin")
 
 # Set symbols and libraries output directory
 set(CMAKE_PDB_OUTPUT_DIRECTORY "${EXECTOS_BINARY_DIR}/output/symbols")
-set(LIBRARY_OUTPUT_PATH "${EXECTOS_BINARY_DIR}/output/libraries")
+set(LIBRARY_OUTPUT_PATH "${EXECTOS_BINARY_DIR}/output/sdk/lib")
 
 # Set linker flags
 add_linker_flags("${HOTPATCH_LINKER_FLAG} /LARGEADDRESSAWARE /IGNORE:4039 /IGNORE:4104 /MANIFEST:NO /NODEFAULTLIB /SAFESEH:NO")
