@@ -50,8 +50,9 @@ add_compiler_ccxxflags("-Wno-gnu-folding-constant")
 # Disable compiler builtins
 add_compiler_ccxxflags("-fno-builtin")
 
-# Set debugging symbols output directory
+# Set symbols and libraries output directory
 set(CMAKE_PDB_OUTPUT_DIRECTORY "${EXECTOS_BINARY_DIR}/output/symbols")
+set(LIBRARY_OUTPUT_PATH "${EXECTOS_BINARY_DIR}/output/libraries")
 
 # Set linker flags
 add_linker_flags("${HOTPATCH_LINKER_FLAG} /LARGEADDRESSAWARE /IGNORE:4039 /IGNORE:4104 /MANIFEST:NO /NODEFAULTLIB /SAFESEH:NO")
