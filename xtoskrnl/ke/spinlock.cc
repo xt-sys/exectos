@@ -28,7 +28,7 @@ VOID
 SpinLock::AcquireQueuedSpinLock(IN KSPIN_LOCK_QUEUE_LEVEL LockLevel)
 {
     /* Acquire the queued spinlock */
-    AcquireSpinLock(KeGetCurrentProcessorControlBlock()->LockQueue[LockLevel].Lock);
+    AcquireSpinLock(KE::Processor::GetCurrentProcessorControlBlock()->LockQueue[LockLevel].Lock);
 }
 
 /**
@@ -46,18 +46,18 @@ VOID
 SpinLock::AcquireSpinLock(IN OUT PKSPIN_LOCK SpinLock)
 {
     /* Try to acquire the lock */
-    while(RtlAtomicBitTestAndSet((PLONG)SpinLock, 0))
+    while(RTL::Atomic::BitTestAndSet((PLONG)SpinLock, 0))
     {
         /* Wait until locked is cleared */
         while(*(VOLATILE PKSPIN_LOCK)SpinLock & 1)
         {
                 /* Yield processor and keep waiting */
-                ArYieldProcessor();
+                AR::CpuFunc::YieldProcessor();
         }
     }
 
     /* Add an explicit memory barrier */
-    ArReadWriteBarrier();
+    AR::CpuFunc::ReadWriteBarrier();
 }
 
 /**
@@ -93,7 +93,7 @@ VOID
 SpinLock::ReleaseQueuedSpinLock(IN KSPIN_LOCK_QUEUE_LEVEL LockLevel)
 {
     /* Clear the lock */
-    ReleaseSpinLock(KeGetCurrentProcessorControlBlock()->LockQueue[LockLevel].Lock);
+    ReleaseSpinLock(KE::Processor::GetCurrentProcessorControlBlock()->LockQueue[LockLevel].Lock);
 }
 
 /**
@@ -111,10 +111,10 @@ VOID
 SpinLock::ReleaseSpinLock(IN OUT PKSPIN_LOCK SpinLock)
 {
     /* Clear the lock */
-    RtlAtomicAnd32((PLONG)SpinLock, 0);
+    RTL::Atomic::And32((PLONG)SpinLock, 0);
 
     /* Add an explicit memory barrier */
-    ArReadWriteBarrier();
+    AR::CpuFunc::ReadWriteBarrier();
 }
 
 } /* namespace */

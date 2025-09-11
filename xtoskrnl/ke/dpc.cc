@@ -114,7 +114,7 @@ XTAPI
 VOID
 Dpc::SignalCallDone(IN PVOID SystemArgument)
 {
-    RtlAtomicDecrement32((PLONG)SystemArgument);
+    RTL::Atomic::Decrement32((PLONG)SystemArgument);
 }
 
 /**
