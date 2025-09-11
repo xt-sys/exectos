@@ -1,8 +1,8 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/rtl/globals.c
- * DESCRIPTION:     Kernel runtime library global variables
+ * FILE:            xtoskrnl/rtl/data.cc
+ * DESCRIPTION:     Runtime Library global and static data
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
@@ -10,4 +10,4 @@
 
 
 /* This is required for floating numbers to keep LLVM happy */
-int _fltused = 0xFEEDBULL;
+XTCLINK INT _fltused = 0xFEEDBULL;

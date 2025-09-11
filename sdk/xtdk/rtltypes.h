@@ -56,17 +56,17 @@ typedef XTSTATUS (*PWRITE_WIDE_CHARACTER)(IN WCHAR Character);
 /* Variable types enumeration list */
 typedef enum _RTL_VARIABLE_TYPE
 {
-    Unknown,
-    AnsiString,
-    Boolean,
-    Char,
-    Float,
-    Guid,
-    Integer,
-    String,
-    UnicodeString,
-    WideChar,
-    WideString
+    TypeUnknown,
+    TypeAnsiString,
+    TypeBoolean,
+    TypeChar,
+    TypeFloat,
+    TypeGuid,
+    TypeInteger,
+    TypeString,
+    TypeUnicodeString,
+    TypeWideChar,
+    TypeWideString
 } RTL_VARIABLE_TYPE, *PRTL_VARIABLE_TYPE;
 
 /* Bit Map structure definition */

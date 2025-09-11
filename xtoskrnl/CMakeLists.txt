@@ -33,9 +33,11 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/ex/rundown.cc
     ${XTOSKRNL_SOURCE_DIR}/hl/acpi.c
     ${XTOSKRNL_SOURCE_DIR}/hl/cport.c
+    ${XTOSKRNL_SOURCE_DIR}/hl/exports.cc
     ${XTOSKRNL_SOURCE_DIR}/hl/fbdev.c
     ${XTOSKRNL_SOURCE_DIR}/hl/globals.c
     ${XTOSKRNL_SOURCE_DIR}/hl/init.c
+    ${XTOSKRNL_SOURCE_DIR}/hl/ioreg.cc
     ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/cpu.c
     ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/pic.c
     ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/ioport.c
@@ -73,19 +75,19 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/pages.c
     ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/pmap.c
     ${XTOSKRNL_SOURCE_DIR}/po/idle.c
-    ${XTOSKRNL_SOURCE_DIR}/rtl/atomic.c
-    ${XTOSKRNL_SOURCE_DIR}/rtl/bitmap.c
-    ${XTOSKRNL_SOURCE_DIR}/rtl/byteswap.c
-    ${XTOSKRNL_SOURCE_DIR}/rtl/globals.c
-    ${XTOSKRNL_SOURCE_DIR}/rtl/guid.c
-    ${XTOSKRNL_SOURCE_DIR}/rtl/ioreg.c
-    ${XTOSKRNL_SOURCE_DIR}/rtl/math.c
-    ${XTOSKRNL_SOURCE_DIR}/rtl/memory.c
-    ${XTOSKRNL_SOURCE_DIR}/rtl/plist.c
-    ${XTOSKRNL_SOURCE_DIR}/rtl/string.c
-    ${XTOSKRNL_SOURCE_DIR}/rtl/widestr.c
-    ${XTOSKRNL_SOURCE_DIR}/rtl/${ARCH}/dispatch.c
-    ${XTOSKRNL_SOURCE_DIR}/rtl/${ARCH}/exsup.c)
+    ${XTOSKRNL_SOURCE_DIR}/rtl/${ARCH}/dispatch.cc
+    ${XTOSKRNL_SOURCE_DIR}/rtl/${ARCH}/exsup.cc
+    ${XTOSKRNL_SOURCE_DIR}/rtl/atomic.cc
+    ${XTOSKRNL_SOURCE_DIR}/rtl/bitmap.cc
+    ${XTOSKRNL_SOURCE_DIR}/rtl/data.cc
+    ${XTOSKRNL_SOURCE_DIR}/rtl/endian.cc
+    ${XTOSKRNL_SOURCE_DIR}/rtl/exports.cc
+    ${XTOSKRNL_SOURCE_DIR}/rtl/guid.cc
+    ${XTOSKRNL_SOURCE_DIR}/rtl/llist.cc
+    ${XTOSKRNL_SOURCE_DIR}/rtl/math.cc
+    ${XTOSKRNL_SOURCE_DIR}/rtl/memory.cc
+    ${XTOSKRNL_SOURCE_DIR}/rtl/string.cc
+    ${XTOSKRNL_SOURCE_DIR}/rtl/widestr.cc)
 
 # Set module definition SPEC file
 set_specfile(xtoskrnl.spec xtoskrnl.exe)

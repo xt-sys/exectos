@@ -1,12 +1,12 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/rtl/widestr.c
+ * FILE:            xtoskrnl/rtl/widestr.cc
  * DESCRIPTION:     Wide string support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
 
 /**
@@ -27,9 +27,9 @@
  */
 XTAPI
 SIZE_T
-RtlCompareWideString(IN PCWSTR String1,
-                     IN PCWSTR String2,
-                     IN SIZE_T Length)
+RTL::WideString::CompareWideString(IN PCWSTR String1,
+                                   IN PCWSTR String2,
+                                   IN SIZE_T Length)
 {
     SIZE_T Index;
 
@@ -79,9 +79,9 @@ RtlCompareWideString(IN PCWSTR String1,
  */
 XTAPI
 SIZE_T
-RtlCompareWideStringInsensitive(IN PCWSTR String1,
-                                IN PCWSTR String2,
-                                IN SIZE_T Length)
+RTL::WideString::CompareWideStringInsensitive(IN PCWSTR String1,
+                                              IN PCWSTR String2,
+                                              IN SIZE_T Length)
 {
     WCHAR Character1;
     WCHAR Character2;
@@ -146,9 +146,9 @@ RtlCompareWideStringInsensitive(IN PCWSTR String1,
  */
 XTAPI
 PWCHAR
-RtlConcatenateWideString(OUT PWCHAR Destination,
-                         IN PWCHAR Source,
-                         IN SIZE_T Count)
+RTL::WideString::ConcatenateWideString(OUT PWCHAR Destination,
+                                       IN PWCHAR Source,
+                                       IN SIZE_T Count)
 {
     PWCHAR DestString = Destination;
 
@@ -203,12 +203,11 @@ RtlConcatenateWideString(OUT PWCHAR Destination,
  *
  * @since XT 1.0
  */
-
 XTAPI
 VOID
-RtlCopyWideString(IN PWCHAR Destination,
-                  IN PCWSTR Source,
-                  IN ULONG Length)
+RTL::WideString::CopyWideString(IN PWCHAR Destination,
+                                IN PCWSTR Source,
+                                IN ULONG Length)
 {
     ULONG Index;
 
@@ -245,8 +244,8 @@ RtlCopyWideString(IN PWCHAR Destination,
  */
 XTAPI
 PCWSTR
-RtlFindWideString(IN PCWSTR Source,
-                  IN PCWSTR Search)
+RTL::WideString::FindWideString(IN PCWSTR Source,
+                                IN PCWSTR Search)
 {
     PCWSTR CurrentSource;
     PCWSTR CurrentSearch;
@@ -255,7 +254,7 @@ RtlFindWideString(IN PCWSTR Source,
     if(!Source || !Search)
     {
         /* Invalid input parameters, return NULL */
-        return NULL;
+        return nullptr;
     }
 
     /* Check if search string is empty */
@@ -289,7 +288,7 @@ RtlFindWideString(IN PCWSTR Source,
     }
 
     /* No match found, return NULL */
-    return NULL;
+    return nullptr;
 }
 
 /**
@@ -307,8 +306,8 @@ RtlFindWideString(IN PCWSTR Source,
  */
 XTAPI
 PCWSTR
-RtlFindWideStringInsensitive(IN PCWSTR Source,
-                             IN PCWSTR Search)
+RTL::WideString::FindWideStringInsensitive(IN PCWSTR Source,
+                                           IN PCWSTR Search)
 {
     PCWSTR CurrentSource;
     PCWSTR CurrentSearch;
@@ -317,7 +316,7 @@ RtlFindWideStringInsensitive(IN PCWSTR Source,
     if(!Source || !Search)
     {
         /* Invalid input parameters, return NULL */
-        return NULL;
+        return nullptr;
     }
 
     /* Check if search string is empty */
@@ -336,7 +335,7 @@ RtlFindWideStringInsensitive(IN PCWSTR Source,
 
         /* Check if the substring matches starting at the current position */
         while(*CurrentSource != L'\0' && *CurrentSearch != L'\0' &&
-              RtlToLowerWideCharacter(*CurrentSource) == RtlToLowerWideCharacter(*CurrentSearch))
+              ToLowerWideCharacter(*CurrentSource) == ToLowerWideCharacter(*CurrentSearch))
         {
             /* Go to the next character */
             CurrentSource++;
@@ -352,359 +351,7 @@ RtlFindWideStringInsensitive(IN PCWSTR Source,
     }
 
     /* No match found, return NULL */
-    return NULL;
-}
-
-/**
- * Formats a wide string according to the given printf-alike format string.
- *
- * @param Context
- *        Supplies a pointer to the print context structure.
- *
- * @param Format
- *        Supplies a pointer to the printf-alike format string.
- *
- * @param ArgumentList
- *        Supplies a list of arguments to the format string.
- *
- * @return This routine returns a status code.
- *
- * @since XT 1.0
- */
-XTAPI
-XTSTATUS
-RtlFormatWideString(IN PRTL_PRINT_CONTEXT Context,
-                    IN PCWSTR Format,
-                    IN VA_LIST ArgumentList)
-{
-    VA_LIST LocalArgumentList;
-    XTSTATUS Status;
-    ULONG Index;
-
-    /* Make sure, that we have valid context and write routine */
-    if(Context == NULL || Context->WriteWideCharacter == NULL)
-    {
-        /* Invalid context or write routine not set */
-        return FALSE;
-    }
-
-    /* Check format string pointer */
-    if(Format == NULL)
-    {
-        /* Write null string */
-        Format = L"(null)";
-    }
-
-    /* Make a copy of the argument list */
-    VA_COPY(LocalArgumentList, ArgumentList);
-
-    /* Iterate through format string */
-    Index = 0;
-    while(Format[Index] != L'\0')
-    {
-        /* Look for format specifier */
-        if(Format[Index] == L'%')
-        {
-            /* Handle format along with arguments */
-            Status = RtlpFormatWideStringArgumentSpecifier(Context, Format, &LocalArgumentList, &Index);
-        }
-        else
-        {
-            /* Write wide character and increase string index */
-            Status = RtlpWriteWideCharacter(Context, Format[Index]);
-            Index++;
-        }
-
-        /* Make sure character written successfully */
-        if(Status != STATUS_SUCCESS)
-        {
-            /* Return status code */
-            return Status;
-        }
-    }
-
-    /* Clean up the argument list */
-    VA_END(LocalArgumentList);
-
-    /* Return success */
-    return STATUS_SUCCESS;
-}
-
-/**
- * Reverses a characters order in a wide string. It modifies the original, input variable.
- *
- * @param String
- *        Supplies a pointer to the wide string to reverse.
- *
- * @param Length
- *        Supplies the length of the wide string to reverse.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTAPI
-VOID
-RtlReverseWideString(IN OUT PWCHAR String,
-                     IN ULONG Length)
-{
-    WCHAR TempChar;
-    ULONG Index;
-
-    /* Iterate through the string */
-    for(Index = 0; Index < (Length / 2); Index++)
-    {
-        /* Swap characters */
-        TempChar = String[Index];
-        String[Index] = String[Length - Index - 1];
-        String[Length - Index - 1] = TempChar;
-    }
-}
-
-/**
- * Finds the next token in a null-terminated wide string.
- *
- * @param String
- *        Pointer to the null-terminated wide string to tokenize.
- *
- * @param Delimiter
- *        Pointer to the null-terminated wide string identifying delimiters.
- *
- * @param SavePtr
- *        Pointer to an object used to store routine internal state.
- *
- * @return Pointer to the beginning of the next token or NULL if there are no more tokens.
- *
- * @since: XT 1.0
- */
-XTAPI
-PWCHAR
-RtlTokenizeWideString(IN PWCHAR String,
-                      IN PCWSTR Delimiter,
-                      IN OUT PWCHAR *SavePtr)
-{
-    PWCHAR Span, Token;
-    WCHAR Char, SpanChar;
-
-    /* Check if there is anything to tokenize */
-    if(String == NULL && (String = *SavePtr) == NULL)
-    {
-        /* Empty string given */
-        return NULL;
-    }
-
-    /* Check non-delimiter characters */
-    Char = *String++;
-    if(Char == L'\0')
-    {
-        *SavePtr = NULL;
-        return NULL;
-    }
-    Token = String - 1;
-
-    /* Scan token for delimiters */
-    for(;;)
-    {
-        Char = *String++;
-        Span = (PWCHAR)Delimiter;
-        do
-        {
-            /* Check if delimiter found */
-            if((SpanChar = *Span++) == Char)
-            {
-                /* Check if end of string reached */
-                if(Char == L'\0')
-                {
-                    /* End of string reached, no more tokens */
-                    String = NULL;
-                }
-                else
-                {
-                    /* Terminate token */
-                    String[-1] = L'\0';
-                }
-
-                /* Store pointer to the next token */
-                *SavePtr = String;
-
-                /* Return token */
-                return Token;
-            }
-        }
-        while(SpanChar != L'\0');
-    }
-}
-
-/**
- * Converts a wide character to lowercase.
- *
- * @param Character
- *        Wide character to be converted.
- *
- * @return Converted wide character or original character if it was not uppercase.
- *
- * @since XT 1.0
- */
-XTAPI
-WCHAR
-RtlToLowerWideCharacter(IN WCHAR Character)
-{
-    /* Check if wide character is uppercase */
-    if(Character >= L'A' && Character <= L'Z')
-    {
-        /* Convert wide character to lowercase */
-        return (WCHAR)(Character + (L'a' - L'A'));
-    }
-
-    /* Return original wide character */
-    return Character;
-}
-
-/**
- * Converts a wide character to uppercase.
- *
- * @param Character
- *        Wide character to be converted.
- *
- * @return Converted wide character or original character if it was not lowercase.
- *
- * @since XT 1.0
- */
-XTAPI
-WCHAR
-RtlToUpperWideCharacter(IN WCHAR Character)
-{
-    /* Check if wide character is lowercase */
-    if(Character >= L'a' && Character <= L'z')
-    {
-        /* Convert wide character to uppercase */
-        return (WCHAR)(Character - (L'a' - L'A'));
-    }
-
-    /* Return original wide character */
-    return Character;
-}
-
-/**
- * Removes certain characters from a beginning of the wide string.
- *
- * @param String
- *        Pointer to the null-terminated wide string to be trimmed.
- *
- * @return This routine returns a pointer to the left-trimmed wide string.
- *
- * @since XT 1.0
- */
-XTAPI
-PWCHAR
-RtlTrimLeftWideString(IN PWCHAR String)
-{
-    PWCHAR Start;
-
-    /* Initialize pointer */
-    Start = String;
-
-    /* Skip all leading whitespaces */
-    while(*Start == L' ' || *Start == L'\n' || *Start == L'\t' || *Start == L'\r' || *Start == L'\v' || *Start == L'\f')
-    {
-        /* Advance to the next character */
-        Start++;
-    }
-
-    /* Return left-trimmed string */
-    return Start;
-}
-
-/**
- * Removes certain characters from the end of the wide string.
- *
- * @param String
- *        Pointer to the null-terminated wide string to be trimmed.
- *
- * @return This routine returns a pointer to the right-trimmed wide string.
- *
- * @since XT 1.0
- */
-XTAPI
-PWCHAR
-RtlTrimRightWideString(IN PWCHAR String)
-{
-    PWCHAR End;
-
-    /* Find end of the string */
-    End = String + RtlWideStringLength(String, 0);
-
-    /* Skip all trailing whitespaces */
-    while((End != String) && (*End == L' ' || *End == L'\n' || *End == L'\t' || *End == L'\r' || *End == L'\v' || *End == L'\f'))
-    {
-        /* Move to the previous character */
-        End--;
-    }
-
-    /* Terminate the string */
-    *End = 0;
-
-    /* Return right-trimmed string */
-    return String;
-}
-
-/**
- * Removes certain characters from the beginning and the end of the wide string.
- *
- * @param String
- *        Pointer to the null-terminated wide string to be trimmed.
- *
- * @return This routine returns a pointer to the trimmed wide string.
- *
- * @since XT 1.0
- */
-XTAPI
-PWCHAR
-RtlTrimWideString(IN PWCHAR String)
-{
-    return RtlTrimLeftWideString(RtlTrimRightWideString(String));
-}
-
-/**
- * Calculates the length of a given wide string.
- *
- * @param String
- *        Pointer to the null-terminated wide string to be examined.
- *
- * @param MaxLength
- *        Maximum number of wide characters to examine. If no limit set, it examines whole string.
- *
- * @return The length of the null-terminated wide string.
- *
- * @since: XT 1.0
- */
-XTAPI
-SIZE_T
-RtlWideStringLength(IN PCWSTR String,
-                    IN SIZE_T MaxLength)
-{
-    SIZE_T Length;
-
-    /* Check if NULL pointer passed */
-    if(String == NULL)
-    {
-        return 0;
-    }
-
-    /* Iterate through the wide string */
-    for(Length = 0; ; Length++)
-    {
-
-        /* Check if NULL found or max length limit reached */
-        if((Length != 0 && Length == MaxLength) || !String[Length])
-        {
-            /* Finish examination */
-            break;
-        }
-    }
-
-    /* Return wide string length */
-    return Length;
+    return nullptr;
 }
 
 /**
@@ -728,10 +375,10 @@ RtlWideStringLength(IN PCWSTR String,
  */
 XTAPI
 XTSTATUS
-RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
-                                     IN PCWSTR Format,
-                                     IN PVA_LIST ArgumentList,
-                                     IN OUT PULONG Index)
+RTL::WideString::FormatArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
+                                         IN PCWSTR Format,
+                                         IN PVA_LIST ArgumentList,
+                                         IN OUT PULONG Index)
 {
     RTL_PRINT_FORMAT_PROPERTIES FormatProperties;
     PUNICODE_STRING UnicodeStrArg;
@@ -742,7 +389,7 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
     LARGE_DOUBLE FloatArg;
     PCWSTR FormatIndex;
     ULONG ArgPosition;
-    PWCHAR WideStrArg;
+    PCWSTR WideStrArg;
     ULONGLONG IntArg;
     XTSTATUS Status;
     PGUID GuidArg;
@@ -754,7 +401,7 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
     ArgPosition = 0;
 
     /* Initialize format properties */
-    RtlZeroMemory(&FormatProperties, sizeof(RTL_PRINT_FORMAT_PROPERTIES));
+    RTL::Memory::ZeroMemory(&FormatProperties, sizeof(RTL_PRINT_FORMAT_PROPERTIES));
     FormatProperties.IntegerSize = sizeof(INT);
     FormatProperties.Precision = -1;
 
@@ -766,7 +413,7 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
     if((*FormatIndex >= L'1') && (*FormatIndex <= L'9'))
     {
         /* POSIX extension found, read its value */
-        SpecifierValue = RtlpGetWideStringSpecifierValue((PWSTR*)&FormatIndex);
+        SpecifierValue = GetSpecifierValue((PWSTR*)&FormatIndex);
 
         /* Make sure parameter field ends with '$' character */
         if(*FormatIndex == L'$')
@@ -852,7 +499,7 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
     else if((*FormatIndex >= L'1') && (*FormatIndex <= L'9'))
     {
         /* Read a numeric width value */
-        FormatProperties.FieldWidth = RtlpGetWideStringSpecifierValue((PWSTR*)&FormatIndex);
+        FormatProperties.FieldWidth = GetSpecifierValue((PWSTR*)&FormatIndex);
     }
 
     /* Check if field width is set to negative value */
@@ -879,7 +526,7 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
         else if((*FormatIndex >= L'0') && (*FormatIndex <= L'9'))
         {
             /* Read a numeric precision value */
-            FormatProperties.Precision = RtlpGetWideStringSpecifierValue((PWSTR*)&FormatIndex);
+            FormatProperties.Precision = GetSpecifierValue((PWSTR*)&FormatIndex);
         }
         else
         {
@@ -1000,156 +647,157 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
     {
         case L'a':
             /* Double argument as hexadecimal number (lowercase) */
-            FormatProperties.VariableType = Float;
+            FormatProperties.VariableType = TypeFloat;
             FormatProperties.Flags |= PFL_SCI_FORMAT;
             FormatProperties.Radix = 16;
             break;
         case L'A':
             /* Double argument as hexadecimal number (uppercase) */
-            FormatProperties.VariableType = Float;
+            FormatProperties.VariableType = TypeFloat;
             FormatProperties.Flags |= PFL_SCI_FORMAT | PFL_UPPERCASE;
             FormatProperties.Radix = 16;
             break;
         case L'b':
             /* XTOS extension: Boolean argument (lowercase) */
-            FormatProperties.VariableType = Boolean;
+            FormatProperties.VariableType = TypeBoolean;
             break;
         case L'B':
             /* XTOS extension: Boolean argument (uppercase) */
-            FormatProperties.VariableType = Boolean;
+            FormatProperties.VariableType = TypeBoolean;
             FormatProperties.Flags |= PFL_UPPERCASE;
             break;
         case L'c':
             /* Character argument */
-            FormatProperties.VariableType = Char;
+            FormatProperties.VariableType = TypeChar;
             break;
         case L'C':
             /* Wide character argument */
-            FormatProperties.VariableType = WideChar;
+            FormatProperties.VariableType = TypeWideChar;
             break;
         case L'd':
         case L'i':
             /* Signed integer argument as decimal number */
-            FormatProperties.VariableType = Integer;
+            FormatProperties.VariableType = TypeInteger;
             FormatProperties.Flags &= ~PFL_UNSIGNED;
             FormatProperties.Radix = 10;
             break;
         case L'e':
             /* Double argument in scientific notation (lowercase) */
-            FormatProperties.VariableType = Float;
+            FormatProperties.VariableType = TypeFloat;
             FormatProperties.Flags |= PFL_SCI_FORMAT;
             break;
         case L'E':
             /* Double argument in scientific notation (uppercase) */
-            FormatProperties.VariableType = Float;
+            FormatProperties.VariableType = TypeFloat;
             FormatProperties.Flags |= PFL_SCI_FORMAT | PFL_UPPERCASE;
             break;
         case L'f':
             /* Double argument as floating point number (lowercase) */
-            FormatProperties.VariableType = Float;
+            FormatProperties.VariableType = TypeFloat;
             FormatProperties.Flags |= PFL_FLOAT_FORMAT;
             break;
         case L'F':
             /* Double argument as floating point number (uppercase) */
-            FormatProperties.VariableType = Float;
+            FormatProperties.VariableType = TypeFloat;
             FormatProperties.Flags |= PFL_FLOAT_FORMAT | PFL_UPPERCASE;
             break;
         case L'g':
             /* Double argument as either floating point number or in scientific notation (lowercase) */
-            FormatProperties.VariableType = Float;
+            FormatProperties.VariableType = TypeFloat;
             FormatProperties.Flags |= PFL_DIGIT_PRECISION;
             break;
         case L'G':
             /* Double argument as either floating point number or in scientific notation (uppercase) */
-            FormatProperties.VariableType = Float;
+            FormatProperties.VariableType = TypeFloat;
             FormatProperties.Flags |= PFL_DIGIT_PRECISION | PFL_UPPERCASE;
             break;
         case L'n':
             /* Write number of characters written so far into an integer pointer parameter */
-            FormatProperties.VariableType = Integer;
+            FormatProperties.VariableType = TypeInteger;
             FormatProperties.IntegerSize = sizeof(PVOID);
             break;
         case L'o':
             /* Unsigned integer argument as octal number */
-            FormatProperties.VariableType = Integer;
+            FormatProperties.VariableType = TypeInteger;
             FormatProperties.Radix = 8;
             break;
         case L'p':
             /* Pointer argument as hexadecimal number (lowercase) */
-            FormatProperties.VariableType = Integer;
+            FormatProperties.VariableType = TypeInteger;
             FormatProperties.IntegerSize = sizeof(UINT_PTR);
             FormatProperties.Flags |= PFL_PRINT_RADIX;
             FormatProperties.Radix = 16;
             break;
         case L'P':
             /* XTOS extension: Pointer argument as hexadecimal number (uppercase) */
-            FormatProperties.VariableType = Integer;
+            FormatProperties.VariableType = TypeInteger;
             FormatProperties.IntegerSize = sizeof(UINT_PTR);
             FormatProperties.Flags |= PFL_PRINT_RADIX | PFL_UPPERCASE;
             FormatProperties.Radix = 16;
             break;
         case L's':
             /* String argument */
-            FormatProperties.VariableType = String;
+            FormatProperties.VariableType = TypeString;
             break;
         case L'S':
             /* Wide string argument */
-            FormatProperties.VariableType = WideString;
+            FormatProperties.VariableType = TypeWideString;
             break;
         case L'u':
             /* Unsigned integer argument as decimal number */
-            FormatProperties.VariableType = Integer;
+            FormatProperties.VariableType = TypeInteger;
             FormatProperties.Radix = 10;
             break;
         case L'v':
             /* XTOS extension: UUID/GUID argument (lowercase) */
-            FormatProperties.VariableType = Guid;
+            FormatProperties.VariableType = TypeGuid;
             break;
         case L'V':
             /* XTOS extension: UUID/GUID argument (uppercase) */
-            FormatProperties.VariableType = Guid;
+            FormatProperties.VariableType = TypeGuid;
             FormatProperties.Flags |= PFL_UPPERCASE;
             break;
         case L'x':
             /* Unsigned integer argument as hexadecimal number (lowercase) */
-            FormatProperties.VariableType = Integer;
+            FormatProperties.VariableType = TypeInteger;
             FormatProperties.Radix = 16;
             break;
         case L'X':
             /* Unsigned integer argument as hexadecimal number (uppercase) */
-            FormatProperties.VariableType = Integer;
+            FormatProperties.VariableType = TypeInteger;
             FormatProperties.Flags |= PFL_UPPERCASE;
             FormatProperties.Radix = 16;
             break;
         case L'Z':
             /* MSVC extension: ANSI/Unicode string argument */
-            FormatProperties.VariableType = (FormatProperties.Flags & PFL_WIDE_CHARACTER) ? UnicodeString : AnsiString;
+            FormatProperties.VariableType = (FormatProperties.Flags & PFL_WIDE_CHARACTER) ? TypeUnicodeString
+                                                                                          : TypeAnsiString;
             break;
         case L'%':
             /* Print '%' character */
-            FormatProperties.VariableType = Unknown;
+            FormatProperties.VariableType = TypeUnknown;
             WideCharArg = L'%';
             break;
         default:
             /* Unknown format specifier, print '?' character */
-            FormatProperties.VariableType = Unknown;
+            FormatProperties.VariableType = TypeUnknown;
             WideCharArg = L'?';
             break;
     }
 
     /* Finally, write the formatted argument */
-    if(FormatProperties.VariableType == Unknown)
+    if(FormatProperties.VariableType == TypeUnknown)
     {
         /* Write defined wide character */
-        Status = RtlpWriteWideStringValue(Context, &FormatProperties, &WideCharArg, 1);
+        Status = WriteValue(Context, &FormatProperties, &WideCharArg, 1);
     }
-    if(FormatProperties.VariableType == Boolean)
+    if(FormatProperties.VariableType == TypeBoolean)
     {
         /* Boolean type */
         if(ArgPosition != 0)
         {
             /* Get argument value from specified argument position */
-            IntArg = RtlpGetWideStringArgument(&ArgumentsCopy, ArgPosition, FormatProperties.IntegerSize);
+            IntArg = GetArgument(&ArgumentsCopy, ArgPosition, FormatProperties.IntegerSize);
         }
         else
         {
@@ -1170,15 +818,15 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
         }
 
         /* Write formatted boolean string */
-        Status = RtlpWriteWideStringValue(Context, &FormatProperties, WideStrArg, RtlWideStringLength(WideStrArg, 0));
+        Status = WriteValue(Context, &FormatProperties, WideStrArg, WideStringLength(WideStrArg, 0));
     }
-    else if(FormatProperties.VariableType == Guid)
+    else if(FormatProperties.VariableType == TypeGuid)
     {
         /* GUID type */
         if(ArgPosition != 0)
         {
             /* Get argument value from specified argument position */
-            IntArg = RtlpGetWideStringArgument(&ArgumentsCopy, ArgPosition, sizeof(PGUID));
+            IntArg = GetArgument(&ArgumentsCopy, ArgPosition, sizeof(PGUID));
             GuidArg = (PGUID)(UINT_PTR)IntArg;
         }
         else
@@ -1202,19 +850,19 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
                 WideStrArg = L"%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x";
             }
             /* Write formatted GUID string */
-            Status = RtlpWriteWideStringCustomValue(Context, WideStrArg, GuidArg->Data1, GuidArg->Data2, GuidArg->Data3,
-                                                    GuidArg->Data4[0], GuidArg->Data4[1], GuidArg->Data4[2],
-                                                    GuidArg->Data4[3], GuidArg->Data4[4], GuidArg->Data4[5],
-                                                    GuidArg->Data4[6], GuidArg->Data4[7]);
+            Status = WriteCustomValue(Context, WideStrArg, GuidArg->Data1, GuidArg->Data2, GuidArg->Data3,
+                                      GuidArg->Data4[0], GuidArg->Data4[1], GuidArg->Data4[2],
+                                      GuidArg->Data4[3], GuidArg->Data4[4], GuidArg->Data4[5],
+                                      GuidArg->Data4[6], GuidArg->Data4[7]);
         }
     }
-    else if(FormatProperties.VariableType == Char)
+    else if(FormatProperties.VariableType == TypeChar)
     {
         /* Character type */
         if(ArgPosition != 0)
         {
             /* Get argument value from specified argument position */
-            CharArg = (UCHAR)RtlpGetWideStringArgument(&ArgumentsCopy, ArgPosition, sizeof(UCHAR));
+            CharArg = (UCHAR)GetArgument(&ArgumentsCopy, ArgPosition, sizeof(UCHAR));
         }
         else
         {
@@ -1223,15 +871,15 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
         }
 
         /* Write formatted character */
-        Status = RtlpWriteWideStringStringValue(Context, &FormatProperties, &CharArg, 1);
+        Status = WriteStringValue(Context, &FormatProperties, &CharArg, 1);
     }
-    else if(FormatProperties.VariableType == WideChar)
+    else if(FormatProperties.VariableType == TypeWideChar)
     {
         /* Wide character type */
         if(ArgPosition != 0)
         {
             /* Get argument value from specified argument position */
-            WideCharArg = (WCHAR)RtlpGetWideStringArgument(&ArgumentsCopy, ArgPosition, sizeof(WCHAR));
+            WideCharArg = (WCHAR)GetArgument(&ArgumentsCopy, ArgPosition, sizeof(WCHAR));
         }
         else
         {
@@ -1240,15 +888,15 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
         }
 
         /* Write formatted wide character */
-        Status = RtlpWriteWideStringValue(Context, &FormatProperties, &WideCharArg, 1);
+        Status = WriteValue(Context, &FormatProperties, &WideCharArg, 1);
     }
-    else if(FormatProperties.VariableType == Float)
+    else if(FormatProperties.VariableType == TypeFloat)
     {
         /* Float/Double type */
         if(ArgPosition != 0)
         {
             /* Get argument value from specified argument position */
-            FloatArg.QuadPart = RtlpGetWideStringArgument(&ArgumentsCopy, ArgPosition, sizeof(ULONGLONG));
+            FloatArg.QuadPart = GetArgument(&ArgumentsCopy, ArgPosition, sizeof(ULONGLONG));
         }
         else
         {
@@ -1264,15 +912,15 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
         }
 
         /* Write formatted double value */
-        Status = RtlpWriteWideStringDoubleValue(Context, &FormatProperties, FloatArg.DoublePart);
+        Status = WriteDoubleValue(Context, &FormatProperties, FloatArg.DoublePart);
     }
-    else if(FormatProperties.VariableType == Integer)
+    else if(FormatProperties.VariableType == TypeInteger)
     {
         /* Integer type */
         if(ArgPosition != 0)
         {
             /* Get argument value from specified argument position */
-            IntArg = RtlpGetWideStringArgument(&ArgumentsCopy, ArgPosition, FormatProperties.IntegerSize);
+            IntArg = GetArgument(&ArgumentsCopy, ArgPosition, FormatProperties.IntegerSize);
 
             /* Convert to required integer size */
             switch(FormatProperties.IntegerSize)
@@ -1328,16 +976,16 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
         else
         {
             /* Write formatted integer value */
-            Status = RtlpWriteWideStringIntegerValue(Context, &FormatProperties, IntArg);
+            Status = WriteIntegerValue(Context, &FormatProperties, IntArg);
         }
     }
-    else if(FormatProperties.VariableType == String)
+    else if(FormatProperties.VariableType == TypeString)
     {
         /* String type */
         if(ArgPosition != 0)
         {
             /* Get argument value from specified argument position */
-            IntArg = RtlpGetWideStringArgument(&ArgumentsCopy, ArgPosition, sizeof(PCHAR));
+            IntArg = GetArgument(&ArgumentsCopy, ArgPosition, sizeof(PCHAR));
             StrArg = (PCHAR)(UINT_PTR)IntArg;
         }
         else
@@ -1347,16 +995,16 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
         }
 
         /* Write formatted string value */
-        Status = RtlpWriteWideStringStringValue(Context, &FormatProperties, StrArg, RtlStringLength(StrArg, 0));
+        Status = WriteStringValue(Context, &FormatProperties, StrArg, RTL::String::StringLength(StrArg, 0));
     }
-    else if(FormatProperties.VariableType == WideString)
+    else if(FormatProperties.VariableType == TypeWideString)
     {
         /* Wide string type */
         if(ArgPosition != 0)
         {
             /* Get argument value from specified argument position */
-            IntArg = RtlpGetWideStringArgument(&ArgumentsCopy, ArgPosition, sizeof(PWCHAR));
-            WideStrArg = (PWCHAR)(UINT_PTR)IntArg;
+            IntArg = GetArgument(&ArgumentsCopy, ArgPosition, sizeof(PWCHAR));
+            WideStrArg = (PCWSTR)(UINT_PTR)IntArg;
         }
         else
         {
@@ -1365,15 +1013,15 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
         }
 
         /* Write formatted wide string value */
-        Status = RtlpWriteWideStringValue(Context, &FormatProperties, WideStrArg, RtlWideStringLength(WideStrArg, 0));
+        Status = WriteValue(Context, &FormatProperties, WideStrArg, RtlWideStringLength(WideStrArg, 0));
     }
-    else if(FormatProperties.VariableType == AnsiString )
+    else if(FormatProperties.VariableType == TypeAnsiString )
     {
         /* ANSI string type */
         if(ArgPosition != 0)
         {
             /* Get argument value from specified argument position */
-            IntArg = RtlpGetWideStringArgument(&ArgumentsCopy, ArgPosition, sizeof(PANSI_STRING));
+            IntArg = GetArgument(&ArgumentsCopy, ArgPosition, sizeof(PANSI_STRING));
             AnsiStrArg = (PANSI_STRING)(UINT_PTR)IntArg;
         }
         else
@@ -1386,16 +1034,16 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
         if(AnsiStrArg != NULL)
         {
             /* Write formatted ANSI string value */
-            Status = RtlpWriteWideStringStringValue(Context, &FormatProperties, AnsiStrArg->Buffer, AnsiStrArg->Length);
+            Status = WriteStringValue(Context, &FormatProperties, AnsiStrArg->Buffer, AnsiStrArg->Length);
         }
     }
-    else if(FormatProperties.VariableType == UnicodeString)
+    else if(FormatProperties.VariableType == TypeUnicodeString)
     {
         /* Unicode string type */
         if(ArgPosition != 0)
         {
             /* Get argument value from specified argument position */
-            IntArg = RtlpGetWideStringArgument(&ArgumentsCopy, ArgPosition, sizeof(PUNICODE_STRING));
+            IntArg = GetArgument(&ArgumentsCopy, ArgPosition, sizeof(PUNICODE_STRING));
             UnicodeStrArg = (PUNICODE_STRING)(UINT_PTR)IntArg;
         }
         else
@@ -1408,7 +1056,7 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
         if(UnicodeStrArg != NULL)
         {
             /* Write formatted UNICODE string value */
-            Status = RtlpWriteWideStringValue(Context, &FormatProperties, UnicodeStrArg->Buffer, UnicodeStrArg->Length);
+            Status = WriteValue(Context, &FormatProperties, UnicodeStrArg->Buffer, UnicodeStrArg->Length);
         }
     }
 
@@ -1420,6 +1068,81 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
 
     /* Return status code */
     return Status;
+}
+
+/**
+ * Formats a wide string according to the given printf-alike format string.
+ *
+ * @param Context
+ *        Supplies a pointer to the print context structure.
+ *
+ * @param Format
+ *        Supplies a pointer to the printf-alike format string.
+ *
+ * @param ArgumentList
+ *        Supplies a list of arguments to the format string.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+RTL::WideString::FormatWideString(IN PRTL_PRINT_CONTEXT Context,
+                                  IN PCWSTR Format,
+                                  IN VA_LIST ArgumentList)
+{
+    VA_LIST LocalArgumentList;
+    XTSTATUS Status;
+    ULONG Index;
+
+    /* Make sure, that we have valid context and write routine */
+    if(Context == NULL || Context->WriteWideCharacter == NULL)
+    {
+        /* Invalid context or write routine not set */
+        return FALSE;
+    }
+
+    /* Check format string pointer */
+    if(Format == NULL)
+    {
+        /* Write null string */
+        Format = L"(null)";
+    }
+
+    /* Make a copy of the argument list */
+    VA_COPY(LocalArgumentList, ArgumentList);
+
+    /* Iterate through format string */
+    Index = 0;
+    while(Format[Index] != L'\0')
+    {
+        /* Look for format specifier */
+        if(Format[Index] == L'%')
+        {
+            /* Handle format along with arguments */
+            Status = FormatArgumentSpecifier(Context, Format, &LocalArgumentList, &Index);
+        }
+        else
+        {
+            /* Write wide character and increase string index */
+            Status = WriteWideCharacter(Context, Format[Index]);
+            Index++;
+        }
+
+        /* Make sure character written successfully */
+        if(Status != STATUS_SUCCESS)
+        {
+            /* Return status code */
+            return Status;
+        }
+    }
+
+    /* Clean up the argument list */
+    VA_END(LocalArgumentList);
+
+    /* Return success */
+    return STATUS_SUCCESS;
 }
 
 /**
@@ -1436,9 +1159,9 @@ RtlpFormatWideStringArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
  */
 XTAPI
 ULONGLONG
-RtlpGetWideStringArgument(IN PVA_LIST ArgumentList,
-                          IN ULONG ArgumentNumber,
-                          IN LONG ArgumentSize)
+RTL::WideString::GetArgument(IN PVA_LIST ArgumentList,
+                             IN ULONG ArgumentNumber,
+                             IN LONG ArgumentSize)
 {
     VA_LIST ArgumentsCopy;
     ULONGLONG Value;
@@ -1494,7 +1217,7 @@ RtlpGetWideStringArgument(IN PVA_LIST ArgumentList,
  */
 XTAPI
 ULONGLONG
-RtlpGetWideStringSpecifierValue(IN PWCHAR *Format)
+RTL::WideString::GetSpecifierValue(IN PWCHAR *Format)
 {
     ULONG Count;
     PWCHAR Fmt;
@@ -1524,6 +1247,284 @@ RtlpGetWideStringSpecifierValue(IN PWCHAR *Format)
 }
 
 /**
+ * Reverses a characters order in a wide string. It modifies the original, input variable.
+ *
+ * @param String
+ *        Supplies a pointer to the wide string to reverse.
+ *
+ * @param Length
+ *        Supplies the length of the wide string to reverse.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+RTL::WideString::ReverseWideString(IN OUT PWCHAR String,
+                                   IN ULONG Length)
+{
+    WCHAR TempChar;
+    ULONG Index;
+
+    /* Iterate through the string */
+    for(Index = 0; Index < (Length / 2); Index++)
+    {
+        /* Swap characters */
+        TempChar = String[Index];
+        String[Index] = String[Length - Index - 1];
+        String[Length - Index - 1] = TempChar;
+    }
+}
+
+/**
+ * Finds the next token in a null-terminated wide string.
+ *
+ * @param String
+ *        Pointer to the null-terminated wide string to tokenize.
+ *
+ * @param Delimiter
+ *        Pointer to the null-terminated wide string identifying delimiters.
+ *
+ * @param SavePtr
+ *        Pointer to an object used to store routine internal state.
+ *
+ * @return Pointer to the beginning of the next token or NULL if there are no more tokens.
+ *
+ * @since: XT 1.0
+ */
+XTAPI
+PWCHAR
+RTL::WideString::TokenizeWideString(IN PWCHAR String,
+                                    IN PCWSTR Delimiter,
+                                    IN OUT PWCHAR *SavePtr)
+{
+    PWCHAR Span, Token;
+    WCHAR Char, SpanChar;
+
+    /* Check if there is anything to tokenize */
+    if(String == NULL && (String = *SavePtr) == NULL)
+    {
+        /* Empty string given */
+        return nullptr;
+    }
+
+    /* Check non-delimiter characters */
+    Char = *String++;
+    if(Char == L'\0')
+    {
+        *SavePtr = nullptr;
+        return nullptr;
+    }
+    Token = String - 1;
+
+    /* Scan token for delimiters */
+    for(;;)
+    {
+        Char = *String++;
+        Span = (PWCHAR)Delimiter;
+        do
+        {
+            /* Check if delimiter found */
+            if((SpanChar = *Span++) == Char)
+            {
+                /* Check if end of string reached */
+                if(Char == L'\0')
+                {
+                    /* End of string reached, no more tokens */
+                    String = nullptr;
+                }
+                else
+                {
+                    /* Terminate token */
+                    String[-1] = L'\0';
+                }
+
+                /* Store pointer to the next token */
+                *SavePtr = String;
+
+                /* Return token */
+                return Token;
+            }
+        }
+        while(SpanChar != L'\0');
+    }
+}
+
+/**
+ * Converts a wide character to lowercase.
+ *
+ * @param Character
+ *        Wide character to be converted.
+ *
+ * @return Converted wide character or original character if it was not uppercase.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+WCHAR
+RTL::WideString::ToLowerWideCharacter(IN WCHAR Character)
+{
+    /* Check if wide character is uppercase */
+    if(Character >= L'A' && Character <= L'Z')
+    {
+        /* Convert wide character to lowercase */
+        return (WCHAR)(Character + (L'a' - L'A'));
+    }
+
+    /* Return original wide character */
+    return Character;
+}
+
+/**
+ * Converts a wide character to uppercase.
+ *
+ * @param Character
+ *        Wide character to be converted.
+ *
+ * @return Converted wide character or original character if it was not lowercase.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+WCHAR
+RTL::WideString::ToUpperWideCharacter(IN WCHAR Character)
+{
+    /* Check if wide character is lowercase */
+    if(Character >= L'a' && Character <= L'z')
+    {
+        /* Convert wide character to uppercase */
+        return (WCHAR)(Character - (L'a' - L'A'));
+    }
+
+    /* Return original wide character */
+    return Character;
+}
+
+/**
+ * Removes certain characters from a beginning of the wide string.
+ *
+ * @param String
+ *        Pointer to the null-terminated wide string to be trimmed.
+ *
+ * @return This routine returns a pointer to the left-trimmed wide string.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PWCHAR
+RTL::WideString::TrimLeftWideString(IN PWCHAR String)
+{
+    PWCHAR Start;
+
+    /* Initialize pointer */
+    Start = String;
+
+    /* Skip all leading whitespaces */
+    while(*Start == L' ' || *Start == L'\n' || *Start == L'\t' || *Start == L'\r' || *Start == L'\v' || *Start == L'\f')
+    {
+        /* Advance to the next character */
+        Start++;
+    }
+
+    /* Return left-trimmed string */
+    return Start;
+}
+
+/**
+ * Removes certain characters from the end of the wide string.
+ *
+ * @param String
+ *        Pointer to the null-terminated wide string to be trimmed.
+ *
+ * @return This routine returns a pointer to the right-trimmed wide string.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PWCHAR
+RTL::WideString::TrimRightWideString(IN PWCHAR String)
+{
+    PWCHAR End;
+
+    /* Find end of the string */
+    End = String + RtlWideStringLength(String, 0);
+
+    /* Skip all trailing whitespaces */
+    while((End != String) && (*End == L' ' || *End == L'\n' || *End == L'\t' ||
+                              *End == L'\r' || *End == L'\v' || *End == L'\f'))
+    {
+        /* Move to the previous character */
+        End--;
+    }
+
+    /* Terminate the string */
+    *End = 0;
+
+    /* Return right-trimmed string */
+    return String;
+}
+
+/**
+ * Removes certain characters from the beginning and the end of the wide string.
+ *
+ * @param String
+ *        Pointer to the null-terminated wide string to be trimmed.
+ *
+ * @return This routine returns a pointer to the trimmed wide string.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PWCHAR
+RTL::WideString::TrimWideString(IN PWCHAR String)
+{
+    return RtlTrimLeftWideString(RtlTrimRightWideString(String));
+}
+
+/**
+ * Calculates the length of a given wide string.
+ *
+ * @param String
+ *        Pointer to the null-terminated wide string to be examined.
+ *
+ * @param MaxLength
+ *        Maximum number of wide characters to examine. If no limit set, it examines whole string.
+ *
+ * @return The length of the null-terminated wide string.
+ *
+ * @since: XT 1.0
+ */
+XTAPI
+SIZE_T
+RTL::WideString::WideStringLength(IN PCWSTR String,
+                                  IN SIZE_T MaxLength)
+{
+    SIZE_T Length;
+
+    /* Check if NULL pointer passed */
+    if(String == NULL)
+    {
+        return 0;
+    }
+
+    /* Iterate through the wide string */
+    for(Length = 0; ; Length++)
+    {
+
+        /* Check if NULL found or max length limit reached */
+        if((Length != 0 && Length == MaxLength) || !String[Length])
+        {
+            /* Finish examination */
+            break;
+        }
+    }
+
+    /* Return wide string length */
+    return Length;
+}
+
+/**
  * Writes a wide character to the destination provided by the print context.
  *
  * @param Context
@@ -1538,8 +1539,8 @@ RtlpGetWideStringSpecifierValue(IN PWCHAR *Format)
  */
 XTAPI
 XTSTATUS
-RtlpWriteWideCharacter(IN PRTL_PRINT_CONTEXT Context,
-                       IN WCHAR Character)
+RTL::WideString::WriteWideCharacter(IN PRTL_PRINT_CONTEXT Context,
+                                    IN WCHAR Character)
 {
     XTSTATUS Status;
 
@@ -1569,9 +1570,9 @@ RtlpWriteWideCharacter(IN PRTL_PRINT_CONTEXT Context,
  */
 XTCDECL
 XTSTATUS
-RtlpWriteWideStringCustomValue(IN PRTL_PRINT_CONTEXT Context,
-                               IN PCWSTR Format,
-                               IN ...)
+RTL::WideString::WriteCustomValue(IN PRTL_PRINT_CONTEXT Context,
+                                  IN PCWSTR Format,
+                                  IN ...)
 {
     VA_LIST Arguments;
     XTSTATUS Status;
@@ -1580,7 +1581,7 @@ RtlpWriteWideStringCustomValue(IN PRTL_PRINT_CONTEXT Context,
     VA_START(Arguments, Format);
 
     /* Format and print the string to the desired output */
-    Status = RtlFormatWideString(Context, Format, Arguments);
+    Status = FormatWideString(Context, Format, Arguments);
 
     /* Clean up the va_list */
     VA_END(Arguments);
@@ -1591,9 +1592,9 @@ RtlpWriteWideStringCustomValue(IN PRTL_PRINT_CONTEXT Context,
 
 XTAPI
 XTSTATUS
-RtlpWriteWideStringDoubleValue(IN PRTL_PRINT_CONTEXT Context,
-                               IN PRTL_PRINT_FORMAT_PROPERTIES FormatProperties,
-                               IN DOUBLE Value)
+RTL::WideString::WriteDoubleValue(IN PRTL_PRINT_CONTEXT Context,
+                                  IN PRTL_PRINT_FORMAT_PROPERTIES FormatProperties,
+                                  IN DOUBLE Value)
 {
     LONG CurrentExponent, DigitCount, Exponent, Precision, PrecisionIndex, SignificantDigits;
     WCHAR Character, Digit, ExponentCharacter, SignCharacter;
@@ -1601,7 +1602,7 @@ RtlpWriteWideStringDoubleValue(IN PRTL_PRINT_CONTEXT Context,
     WCHAR Buffer[MAX_DOUBLE_STRING_SIZE];
     BOOLEAN NegativeValue, WriteExponent;
     DOUBLE RoundingAmount, TenPower;
-    PWCHAR NonNumberString;
+    PCWSTR NonNumberString;
     LARGE_DOUBLE Parts;
     XTSTATUS Status;
 
@@ -1627,10 +1628,10 @@ RtlpWriteWideStringDoubleValue(IN PRTL_PRINT_CONTEXT Context,
     }
 
     /* Determine whether the value is infinite or nan */
-    if(RtlInfiniteDouble(Value))
+    if(RTL::Math::InfiniteDouble(Value))
     {
         /* Check if the value is nan */
-        if(RtlNanDouble(Value))
+        if(RTL::Math::NanDouble(Value))
         {
             /* Set non-number string depending on the selection of upper or lowercase */
             if(FormatProperties->Flags & PFL_UPPERCASE)
@@ -1683,15 +1684,15 @@ RtlpWriteWideStringDoubleValue(IN PRTL_PRINT_CONTEXT Context,
         }
 
         /* Copy string to buffer and write it to wide string context */
-        RtlCopyWideString(Buffer + Index, NonNumberString, sizeof(Buffer) - Index);
-        return RtlpWriteWideStringValue(Context, FormatProperties, Buffer, RtlWideStringLength(Buffer, 0));
+        CopyWideString(Buffer + Index, NonNumberString, sizeof(Buffer) - Index);
+        return WriteValue(Context, FormatProperties, Buffer, WideStringLength(Buffer, 0));
     }
 
     /* Check whether we need to handle hexadecimal format */
     if(FormatProperties->Radix == 16)
     {
         /* Handle it as hex value */
-        return RtlpWriteWideStringHexDoubleValue(Context, FormatProperties, Value);
+        return WriteHexDoubleValue(Context, FormatProperties, Value);
     }
 
     /* Check if the value is negative */
@@ -1703,11 +1704,11 @@ RtlpWriteWideStringDoubleValue(IN PRTL_PRINT_CONTEXT Context,
     }
 
     /* Calculate the exponent */
-    Exponent = RtlGetBaseExponent(Value, &TenPower);
+    Exponent = RTL::Math::GetBaseExponent(Value, &TenPower);
     RoundingAmount = 0.5;
 
     /* Determine whether or not to write the exponent */
-    WriteExponent = (FormatProperties->Flags & PFL_SCI_FORMAT);
+    WriteExponent = (BOOLEAN)(FormatProperties->Flags & PFL_SCI_FORMAT);
     if((WriteExponent == FALSE) && !(FormatProperties->Flags & PFL_FLOAT_FORMAT))
     {
         if((Exponent < DOUBLE_SCIENTIFIC_PRECISION) || (Exponent >= Precision))
@@ -1960,7 +1961,7 @@ RtlpWriteWideStringDoubleValue(IN PRTL_PRINT_CONTEXT Context,
         if(SignCharacter != 0)
         {
             /* Write the sign character */
-            Status = RtlpWriteWideCharacter(Context, SignCharacter);
+            Status = WriteWideCharacter(Context, SignCharacter);
             if(Status != STATUS_SUCCESS)
             {
                 /* Failed to write the character, return status code */
@@ -1991,7 +1992,7 @@ RtlpWriteWideStringDoubleValue(IN PRTL_PRINT_CONTEXT Context,
         for(FieldIndex = 0; FieldIndex < FieldCount; FieldIndex++)
         {
             /* Write the leading character */
-            Status = RtlpWriteWideCharacter(Context, Character);
+            Status = WriteWideCharacter(Context, Character);
             if(Status != STATUS_SUCCESS)
             {
                 /* Failed to write the character, return status code */
@@ -2007,7 +2008,7 @@ RtlpWriteWideStringDoubleValue(IN PRTL_PRINT_CONTEXT Context,
     if(SignCharacter != 0)
     {
         /* Write the sign character */
-        Status = RtlpWriteWideCharacter(Context, SignCharacter);
+        Status = WriteWideCharacter(Context, SignCharacter);
         if(Status != STATUS_SUCCESS)
         {
             /* Failed to write the character, return status code */
@@ -2033,7 +2034,7 @@ RtlpWriteWideStringDoubleValue(IN PRTL_PRINT_CONTEXT Context,
         }
 
         /* Write the digit */
-        Status = RtlpWriteWideCharacter(Context, Digit);
+        Status = WriteWideCharacter(Context, Digit);
         if(Status != STATUS_SUCCESS)
         {
             /* Failed to write the character, return status code */
@@ -2051,7 +2052,7 @@ RtlpWriteWideStringDoubleValue(IN PRTL_PRINT_CONTEXT Context,
         if((Precision != 0) || (FormatProperties->Flags & PFL_PRINT_RADIX))
         {
             /* Write the radix character */
-            Status = RtlpWriteWideCharacter(Context, L'.');
+            Status = WriteWideCharacter(Context, L'.');
             if(Status != STATUS_SUCCESS)
             {
                 /* Failed to write the character, return status code */
@@ -2076,7 +2077,7 @@ RtlpWriteWideStringDoubleValue(IN PRTL_PRINT_CONTEXT Context,
             }
 
             /* Write the digit */
-            Status = RtlpWriteWideCharacter(Context, Digit);
+            Status = WriteWideCharacter(Context, Digit);
             if(Status != STATUS_SUCCESS)
             {
                 /* Failed to write the character, return status code */
@@ -2097,7 +2098,7 @@ RtlpWriteWideStringDoubleValue(IN PRTL_PRINT_CONTEXT Context,
         }
 
         /* Write the exponent string */
-        Status = RtlpWriteWideStringCustomValue(Context, L"%C%+0.2d", ExponentCharacter, Exponent);
+        Status = WriteCustomValue(Context, L"%C%+0.2d", ExponentCharacter, Exponent);
         if(Status != STATUS_SUCCESS)
         {
             /* Failed to write the characters, return status code */
@@ -2127,7 +2128,7 @@ RtlpWriteWideStringDoubleValue(IN PRTL_PRINT_CONTEXT Context,
                 }
 
                 /* Write the digit */
-                Status = RtlpWriteWideCharacter(Context, Digit);
+                Status = WriteWideCharacter(Context, Digit);
                 if(Status != STATUS_SUCCESS)
                 {
                     /* Failed to write the character, return status code */
@@ -2148,7 +2149,7 @@ RtlpWriteWideStringDoubleValue(IN PRTL_PRINT_CONTEXT Context,
         else
         {
             /* Exponent is negative, write '0' */
-            Status = RtlpWriteWideCharacter(Context, L'0');
+            Status = WriteWideCharacter(Context, L'0');
             if(Status != STATUS_SUCCESS)
             {
                 /* Failed to write the character, return status code */
@@ -2163,7 +2164,7 @@ RtlpWriteWideStringDoubleValue(IN PRTL_PRINT_CONTEXT Context,
         if((Precision != 0) || (FormatProperties->Flags & PFL_PRINT_RADIX))
         {
             /* Write the radix character */
-            Status = RtlpWriteWideCharacter(Context, L'.');
+            Status = WriteWideCharacter(Context, L'.');
             if(Status != STATUS_SUCCESS)
             {
                 /* Failed to write the character, return status code */
@@ -2193,7 +2194,7 @@ RtlpWriteWideStringDoubleValue(IN PRTL_PRINT_CONTEXT Context,
             }
 
             /* Write the digit */
-            Status = RtlpWriteWideCharacter(Context, Digit);
+            Status = WriteWideCharacter(Context, Digit);
             if(Status != STATUS_SUCCESS)
             {
                 /* Failed to write the character, return status code */
@@ -2209,7 +2210,7 @@ RtlpWriteWideStringDoubleValue(IN PRTL_PRINT_CONTEXT Context,
     for(FieldIndex = 0; FieldIndex < FieldCount; FieldIndex++)
     {
         /* Fill the remaining space with spaces */
-        Status = RtlpWriteWideCharacter(Context, L' ');
+        Status = WriteWideCharacter(Context, L' ');
         if(Status != STATUS_SUCCESS)
         {
             /* Failed to write the character, return status code */
@@ -2239,9 +2240,9 @@ RtlpWriteWideStringDoubleValue(IN PRTL_PRINT_CONTEXT Context,
  */
 XTAPI
 XTSTATUS
-RtlpWriteWideStringHexDoubleValue(IN PRTL_PRINT_CONTEXT Context,
-                                  IN PRTL_PRINT_FORMAT_PROPERTIES FormatProperties,
-                                  IN DOUBLE Double)
+RTL::WideString::WriteHexDoubleValue(IN PRTL_PRINT_CONTEXT Context,
+                                     IN PRTL_PRINT_FORMAT_PROPERTIES FormatProperties,
+                                     IN DOUBLE Double)
 {
     LONG AbsoluteExponent, Exponent, FieldCount, Index, NumberLength;
     WCHAR Character, Digit, ExponentCharacter, IntegerValue;
@@ -2462,7 +2463,7 @@ RtlpWriteWideStringHexDoubleValue(IN PRTL_PRINT_CONTEXT Context,
             while(PrefixSize--)
             {
                 /* Write the prefix character */
-                Status = RtlpWriteWideCharacter(Context, Prefix[PrefixIndex]);
+                Status = WriteWideCharacter(Context, Prefix[PrefixIndex]);
                 if(Status != STATUS_SUCCESS)
                 {
                     /* Failed to write character, return error code */
@@ -2483,7 +2484,7 @@ RtlpWriteWideStringHexDoubleValue(IN PRTL_PRINT_CONTEXT Context,
         while(FieldCount)
         {
             /* Write the field character */
-            Status = RtlpWriteWideCharacter(Context, Character);
+            Status = WriteWideCharacter(Context, Character);
             if(Status != STATUS_SUCCESS)
             {
                 /* Failed to write character, return error code */
@@ -2499,7 +2500,7 @@ RtlpWriteWideStringHexDoubleValue(IN PRTL_PRINT_CONTEXT Context,
     for(PrefixIndex = 0; PrefixIndex < PrefixSize; PrefixIndex++)
     {
         /* Write the prefix character */
-        Status = RtlpWriteWideCharacter(Context, Prefix[PrefixIndex]);
+        Status = WriteWideCharacter(Context, Prefix[PrefixIndex]);
         if(Status != STATUS_SUCCESS)
         {
             /* Failed to write character, return error code */
@@ -2508,7 +2509,7 @@ RtlpWriteWideStringHexDoubleValue(IN PRTL_PRINT_CONTEXT Context,
     }
 
     /* Write the integer value */
-    Status = RtlpWriteWideCharacter(Context, IntegerValue);
+    Status = WriteWideCharacter(Context, IntegerValue);
     if(Status != STATUS_SUCCESS)
     {
         /* Failed to write character, return error code */
@@ -2519,7 +2520,7 @@ RtlpWriteWideStringHexDoubleValue(IN PRTL_PRINT_CONTEXT Context,
     if((FormatProperties->Flags & PFL_PRINT_RADIX) || (Precision != 0))
     {
         /* Write the radix character */
-        Status = RtlpWriteWideCharacter(Context, L'.');
+        Status = WriteWideCharacter(Context, L'.');
         if(Status != STATUS_SUCCESS)
         {
             /* Failed to write character, return error code */
@@ -2543,7 +2544,7 @@ RtlpWriteWideStringHexDoubleValue(IN PRTL_PRINT_CONTEXT Context,
         }
 
         /* Write the precision character */
-        Status = RtlpWriteWideCharacter(Context, Digit);
+        Status = WriteWideCharacter(Context, Digit);
         if(Status != STATUS_SUCCESS)
         {
             /* Failed to write character, return error code */
@@ -2552,7 +2553,7 @@ RtlpWriteWideStringHexDoubleValue(IN PRTL_PRINT_CONTEXT Context,
     }
 
     /* Write the exponent characters */
-    Status = RtlpWriteWideStringCustomValue(Context, L"%C%+d", ExponentCharacter, Exponent);
+    Status = WriteCustomValue(Context, L"%C%+d", ExponentCharacter, Exponent);
     if(Status != STATUS_SUCCESS)
     {
         /* Failed to write character, return error code */
@@ -2563,7 +2564,7 @@ RtlpWriteWideStringHexDoubleValue(IN PRTL_PRINT_CONTEXT Context,
     while(FieldCount)
     {
         /* Write the field character */
-        Status = RtlpWriteWideCharacter(Context, L' ');
+        Status = WriteWideCharacter(Context, L' ');
         if(Status != STATUS_SUCCESS)
         {
             /* Failed to write character, return error code */
@@ -2596,9 +2597,9 @@ RtlpWriteWideStringHexDoubleValue(IN PRTL_PRINT_CONTEXT Context,
  */
 XTAPI
 XTSTATUS
-RtlpWriteWideStringIntegerValue(IN PRTL_PRINT_CONTEXT Context,
-                                IN PRTL_PRINT_FORMAT_PROPERTIES FormatProperties,
-                                IN ULONGLONG Integer)
+RTL::WideString::WriteIntegerValue(IN PRTL_PRINT_CONTEXT Context,
+                                   IN PRTL_PRINT_FORMAT_PROPERTIES FormatProperties,
+                                   IN ULONGLONG Integer)
 {
     LONG BufferIndex, FieldLength, IntegerLength, PrecisionLength, PrefixIndex, PrefixLength;
     WCHAR Buffer[MAX_INTEGER_STRING_SIZE];
@@ -2649,13 +2650,13 @@ RtlpWriteWideStringIntegerValue(IN PRTL_PRINT_CONTEXT Context,
         }
 
         /* Initialize the buffer */
-        RtlZeroMemory(Buffer, sizeof(Buffer));
+        RTL::Memory::ZeroMemory(Buffer, sizeof(Buffer));
 
         /* Convert the integer into a reversed wide string */
         do
         {
             /* Get the next digit */
-            NextInteger = RtlDivideUnsigned64(Integer, FormatProperties->Radix, &Remainder);
+            NextInteger = RTL::Math::DivideUnsigned64(Integer, FormatProperties->Radix, &Remainder);
 
             /* Convert the digit into a character */
             Character = (WCHAR)Remainder;
@@ -2689,7 +2690,7 @@ RtlpWriteWideStringIntegerValue(IN PRTL_PRINT_CONTEXT Context,
         while(Integer > 0);
 
         /* Reverse the string representation of the integer */
-        RtlReverseWideString(Buffer, IntegerLength);
+        ReverseWideString(Buffer, IntegerLength);
     }
 
     /* Handle the sign decoration */
@@ -2763,7 +2764,7 @@ RtlpWriteWideStringIntegerValue(IN PRTL_PRINT_CONTEXT Context,
             Character = L'0';
             for(PrefixIndex = 0; PrefixIndex < PrefixLength; PrefixIndex++)
             {
-                Status = RtlpWriteWideCharacter(Context, Prefix[PrefixIndex]);
+                Status = WriteWideCharacter(Context, Prefix[PrefixIndex]);
                 if(Status != STATUS_SUCCESS)
                 {
                     /* Failed to write character, return status code */
@@ -2778,7 +2779,7 @@ RtlpWriteWideStringIntegerValue(IN PRTL_PRINT_CONTEXT Context,
         /* Write additional field width characters */
         while(FieldLength > 0)
         {
-            Status = RtlpWriteWideCharacter(Context, Character);
+            Status = WriteWideCharacter(Context, Character);
             if(Status != STATUS_SUCCESS)
             {
                 /* Failed to write character, return status code */
@@ -2793,7 +2794,7 @@ RtlpWriteWideStringIntegerValue(IN PRTL_PRINT_CONTEXT Context,
     /* Write the prefix characters */
     for(PrefixIndex = 0; PrefixIndex < PrefixLength; PrefixIndex++)
     {
-        Status = RtlpWriteWideCharacter(Context, Prefix[PrefixIndex]);
+        Status = WriteWideCharacter(Context, Prefix[PrefixIndex]);
         if(Status != STATUS_SUCCESS)
         {
             /* Failed to write character, return status code */
@@ -2804,7 +2805,7 @@ RtlpWriteWideStringIntegerValue(IN PRTL_PRINT_CONTEXT Context,
     /* Fill the precision characters with '0' */
     while(PrecisionLength > 0)
     {
-        Status = RtlpWriteWideCharacter(Context, L'0');
+        Status = WriteWideCharacter(Context, L'0');
         if(Status != STATUS_SUCCESS)
         {
             /* Failed to write character, return status code */
@@ -2818,7 +2819,7 @@ RtlpWriteWideStringIntegerValue(IN PRTL_PRINT_CONTEXT Context,
     /* Write the actual integer value */
     for(BufferIndex = 0; BufferIndex < IntegerLength; BufferIndex++)
     {
-        Status = RtlpWriteWideCharacter(Context, Buffer[BufferIndex]);
+        Status = WriteWideCharacter(Context, Buffer[BufferIndex]);
         if(Status != STATUS_SUCCESS)
         {
             /* Failed to write character, return status code */
@@ -2829,7 +2830,7 @@ RtlpWriteWideStringIntegerValue(IN PRTL_PRINT_CONTEXT Context,
     /* Write additional field width with ' ' characters */
     while(FieldLength > 0)
     {
-        Status = RtlpWriteWideCharacter(Context, L' ');
+        Status = WriteWideCharacter(Context, L' ');
         if(Status != STATUS_SUCCESS)
         {
             /* Failed to write character, return status code */
@@ -2865,10 +2866,10 @@ RtlpWriteWideStringIntegerValue(IN PRTL_PRINT_CONTEXT Context,
  */
 XTAPI
 XTSTATUS
-RtlpWriteWideStringStringValue(PRTL_PRINT_CONTEXT Context,
-                               PRTL_PRINT_FORMAT_PROPERTIES FormatProperties,
-                               PCHAR String,
-                               SIZE_T StringLength)
+RTL::WideString::WriteStringValue(PRTL_PRINT_CONTEXT Context,
+                                  PRTL_PRINT_FORMAT_PROPERTIES FormatProperties,
+                                  PCSTR String,
+                                  SIZE_T StringLength)
 {
     WCHAR WideCharacter[2];
     ULONG PaddingLength;
@@ -2903,7 +2904,7 @@ RtlpWriteWideStringStringValue(PRTL_PRINT_CONTEXT Context,
         while(PaddingLength > 0)
         {
             /* Write space */
-            Status = RtlpWriteWideCharacter(Context, L' ');
+            Status = WriteWideCharacter(Context, L' ');
             if(Status != STATUS_SUCCESS)
             {
                 /* Failed to write character, return status code */
@@ -2923,7 +2924,7 @@ RtlpWriteWideStringStringValue(PRTL_PRINT_CONTEXT Context,
         WideCharacter[1] = 0;
 
         /* Write wide character */
-        Status = RtlpWriteWideCharacter(Context, *WideCharacter);
+        Status = WriteWideCharacter(Context, *WideCharacter);
         if(Status != STATUS_SUCCESS)
         {
             /* Failed to write character, return status code */
@@ -2939,7 +2940,7 @@ RtlpWriteWideStringStringValue(PRTL_PRINT_CONTEXT Context,
     while(PaddingLength > 0)
     {
         /* Write space */
-        Status = RtlpWriteWideCharacter(Context, L' ');
+        Status = WriteWideCharacter(Context, L' ');
         if(Status != STATUS_SUCCESS)
         {
             /* Failed to write character, return status code */
@@ -2975,10 +2976,10 @@ RtlpWriteWideStringStringValue(PRTL_PRINT_CONTEXT Context,
  */
 XTAPI
 XTSTATUS
-RtlpWriteWideStringValue(PRTL_PRINT_CONTEXT Context,
-                         PRTL_PRINT_FORMAT_PROPERTIES FormatProperties,
-                         PWCHAR String,
-                         SIZE_T StringLength)
+RTL::WideString::WriteValue(PRTL_PRINT_CONTEXT Context,
+                            PRTL_PRINT_FORMAT_PROPERTIES FormatProperties,
+                            PCWSTR String,
+                            SIZE_T StringLength)
 {
     ULONG PaddingLength;
     XTSTATUS Status;
@@ -3013,7 +3014,7 @@ RtlpWriteWideStringValue(PRTL_PRINT_CONTEXT Context,
         while(PaddingLength > 0)
         {
             /* Write space */
-            Status = RtlpWriteWideCharacter(Context, L' ');
+            Status = WriteWideCharacter(Context, L' ');
             if(Status != STATUS_SUCCESS)
             {
                 /* Failed to write character, return status code */
@@ -3029,7 +3030,7 @@ RtlpWriteWideStringValue(PRTL_PRINT_CONTEXT Context,
     while(StringLength != 0)
     {
         /* Write wide character */
-        Status = RtlpWriteWideCharacter(Context, *String);
+        Status = WriteWideCharacter(Context, *String);
         if(Status != STATUS_SUCCESS)
         {
             /* Failed to write character, return status code */
@@ -3045,7 +3046,7 @@ RtlpWriteWideStringValue(PRTL_PRINT_CONTEXT Context,
     while(PaddingLength > 0)
     {
         /* Write space */
-        Status = RtlpWriteWideCharacter(Context, L' ');
+        Status = WriteWideCharacter(Context, L' ');
         if(Status != STATUS_SUCCESS)
         {
             /* Failed to write character, return status code */
@@ -3058,4 +3059,18 @@ RtlpWriteWideStringValue(PRTL_PRINT_CONTEXT Context,
 
     /* Return success */
     return STATUS_SUCCESS;
+}
+
+
+
+
+/* TEMPORARY FOR COMPATIBILITY WITH C CODE */
+XTCLINK
+XTAPI
+XTSTATUS
+RtlFormatWideString(IN PRTL_PRINT_CONTEXT Context,
+                                  IN PCWSTR Format,
+                                  IN VA_LIST ArgumentList)
+{
+    return RTL::WideString::FormatWideString(Context, Format, ArgumentList);
 }

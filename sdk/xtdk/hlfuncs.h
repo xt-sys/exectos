@@ -28,4 +28,37 @@ HlInitializeComPort(IN OUT PCPPORT Port,
                     IN PUCHAR PortAddress,
                     IN ULONG BaudRate);
 
+XTCLINK
+XTAPI
+UCHAR
+HlReadRegister8(IN PVOID Register);
+
+XTCLINK
+XTAPI
+USHORT
+HlReadRegister16(IN PVOID Register);
+
+XTCLINK
+XTAPI
+ULONG
+HlReadRegister32(IN PVOID Register);
+
+XTCLINK
+XTAPI
+VOID
+HlWriteRegister8(IN PVOID Register,
+                 IN UCHAR Value);
+
+XTCLINK
+XTAPI
+VOID
+HlWriteRegister16(IN PVOID Register,
+                  IN USHORT Value);
+
+XTCLINK
+XTAPI
+VOID
+HlWriteRegister32(IN PVOID Register,
+                  IN ULONG Value);
+
 #endif /* __XTDK_HLFUNCS_H */

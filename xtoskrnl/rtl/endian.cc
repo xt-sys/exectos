@@ -1,12 +1,12 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/rtl/byteswap.c
+ * FILE:            xtoskrnl/rtl/endian.cc
  * DESCRIPTION:     Endian conversion routines
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
 
 /**
@@ -21,7 +21,7 @@
  */
 XTFASTCALL
 USHORT
-RtlByteSwap16(IN USHORT Source)
+RTL::Endianness::SwapByte16(IN USHORT Source)
 {
     return (USHORT)(((Source >> 8) & 0x00FF) |
                     ((Source << 8) & 0xFF00));
@@ -39,7 +39,7 @@ RtlByteSwap16(IN USHORT Source)
  */
 XTFASTCALL
 ULONG
-RtlByteSwap32(IN ULONG Source)
+RTL::Endianness::SwapByte32(IN ULONG Source)
 {
     return (ULONG)(((Source >> 24) & 0x000000FF) |
                    ((Source >> 8)  & 0x0000FF00) |
@@ -59,7 +59,7 @@ RtlByteSwap32(IN ULONG Source)
  */
 XTFASTCALL
 ULONGLONG
-RtlByteSwap64(IN ULONGLONG Source)
+RTL::Endianness::SwapByte64(IN ULONGLONG Source)
 {
     return (ULONGLONG)(((Source >> 56) & 0x00000000000000FF) |
                        ((Source >> 40) & 0x000000000000FF00) |

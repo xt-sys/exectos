@@ -1,12 +1,12 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/rtl/amd64/dispatch.c
- * DESCRIPTION:     Dispatching support for AMD64 architecture
+ * FILE:            xtoskrnl/rtl/i686/dispatch.cc
+ * DESCRIPTION:     Dispatching support for i686 architecture
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
 
 /**
@@ -24,10 +24,10 @@
  */
 XTAPI
 VOID
-RtlGetStackLimits(OUT PULONG_PTR StackBase,
-                  OUT PULONG_PTR StackLimit)
+RTL::Dispatcher::GetStackLimits(OUT PULONG_PTR StackBase,
+                                OUT PULONG_PTR StackLimit)
 {
     PKTHREAD Thread = KeGetCurrentThread();
-    *StackBase = (ULONG_PTR)Thread->StackBase;
+    *StackBase = (ULONG_PTR)Thread->StackBase - sizeof(FX_SAVE_AREA);
     *StackLimit = (ULONG_PTR)Thread->StackLimit;
 }

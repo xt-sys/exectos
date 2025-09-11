@@ -1,12 +1,12 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/rtl/string.c
+ * FILE:            xtoskrnl/rtl/string.cc
  * DESCRIPTION:     String support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
 
 /**
@@ -27,9 +27,9 @@
  */
 XTAPI
 SIZE_T
-RtlCompareString(IN PCSTR String1,
-                 IN PCSTR String2,
-                 IN SIZE_T Length)
+RTL::String::CompareString(IN PCSTR String1,
+                           IN PCSTR String2,
+                           IN SIZE_T Length)
 {
     SIZE_T Index;
 
@@ -79,9 +79,9 @@ RtlCompareString(IN PCSTR String1,
  */
 XTAPI
 SIZE_T
-RtlCompareStringInsensitive(IN PCSTR String1,
-                            IN PCSTR String2,
-                            IN SIZE_T Length)
+RTL::String::CompareStringInsensitive(IN PCSTR String1,
+                                      IN PCSTR String2,
+                                      IN SIZE_T Length)
 {
     CHAR Character1;
     CHAR Character2;
@@ -146,9 +146,9 @@ RtlCompareStringInsensitive(IN PCSTR String1,
  */
 XTAPI
 PCHAR
-RtlConcatenateString(OUT PCHAR Destination,
-                     IN PCHAR Source,
-                     IN SIZE_T Count)
+RTL::String::ConcatenateString(OUT PCHAR Destination,
+                               IN PCHAR Source,
+                               IN SIZE_T Count)
 {
     PCHAR DestString = Destination;
 
@@ -205,9 +205,9 @@ RtlConcatenateString(OUT PCHAR Destination,
  */
 XTAPI
 VOID
-RtlCopyString(IN PCHAR Destination,
-              IN PCSTR Source,
-              IN ULONG Length)
+RTL::String::CopyString(IN PCHAR Destination,
+                        IN PCSTR Source,
+                        IN ULONG Length)
 {
     ULONG Index;
 
@@ -244,8 +244,8 @@ RtlCopyString(IN PCHAR Destination,
  */
 XTAPI
 PCSTR
-RtlFindString(IN PCSTR Source,
-              IN PCSTR Search)
+RTL::String::FindString(IN PCSTR Source,
+                        IN PCSTR Search)
 {
     PCSTR CurrentSource;
     PCSTR CurrentSearch;
@@ -254,7 +254,7 @@ RtlFindString(IN PCSTR Source,
     if(!Source || !Search)
     {
         /* Invalid input parameters, return NULL */
-        return NULL;
+        return nullptr;
     }
 
     /* Check if search string is empty */
@@ -288,7 +288,7 @@ RtlFindString(IN PCSTR Source,
     }
 
     /* No match found, return NULL */
-    return NULL;
+    return nullptr;
 }
 
 /**
@@ -306,8 +306,8 @@ RtlFindString(IN PCSTR Source,
  */
 XTAPI
 PCSTR
-RtlFindStringInsensitive(IN PCSTR Source,
-                         IN PCSTR Search)
+RTL::String::FindStringInsensitive(IN PCSTR Source,
+                                   IN PCSTR Search)
 {
     PCSTR CurrentSource;
     PCSTR CurrentSearch;
@@ -316,7 +316,7 @@ RtlFindStringInsensitive(IN PCSTR Source,
     if(!Source || !Search)
     {
         /* Invalid input parameters, return NULL */
-        return NULL;
+        return nullptr;
     }
 
     /* Check if search string is empty */
@@ -335,7 +335,7 @@ RtlFindStringInsensitive(IN PCSTR Source,
 
         /* Check if the substring matches starting at the current position */
         while(*CurrentSource != '\0' && *CurrentSearch != '\0' &&
-              RtlToLowerCharacter(*CurrentSource) == RtlToLowerCharacter(*CurrentSearch))
+              ToLowerCharacter(*CurrentSource) == ToLowerCharacter(*CurrentSearch))
         {
             /* Go to the next character */
             CurrentSource++;
@@ -351,7 +351,7 @@ RtlFindStringInsensitive(IN PCSTR Source,
     }
 
     /* No match found, return NULL */
-    return NULL;
+    return nullptr;
 }
 
 /**
@@ -369,8 +369,8 @@ RtlFindStringInsensitive(IN PCSTR Source,
  */
 XTAPI
 VOID
-RtlReverseString(IN OUT PCHAR String,
-                 IN ULONG Length)
+RTL::String::ReverseString(IN OUT PCHAR String,
+                           IN ULONG Length)
 {
     UCHAR TempChar;
     ULONG Index;
@@ -400,8 +400,8 @@ RtlReverseString(IN OUT PCHAR String,
  */
 XTAPI
 SIZE_T
-RtlStringLength(IN PCSTR String,
-                IN SIZE_T MaxLength)
+RTL::String::StringLength(IN PCSTR String,
+                          IN SIZE_T MaxLength)
 {
     SIZE_T Length;
 
@@ -445,9 +445,9 @@ RtlStringLength(IN PCSTR String,
  */
 XTAPI
 SIZE_T
-RtlStringToWideString(OUT PWCHAR Destination,
-                      IN PCSTR *Source,
-                      IN SIZE_T Length)
+RTL::String::StringToWideString(OUT PWCHAR Destination,
+                                IN PCSTR *Source,
+                                IN SIZE_T Length)
 {
     PCSTR LocalSource = *Source;
     SIZE_T Count = Length;
@@ -466,7 +466,7 @@ RtlStringToWideString(OUT PWCHAR Destination,
         if((*Destination = *LocalSource) == 0)
         {
             /* End of string reached */
-            LocalSource = NULL;
+            LocalSource = nullptr;
             break;
         }
 
@@ -505,9 +505,9 @@ RtlStringToWideString(OUT PWCHAR Destination,
  */
 XTAPI
 PCHAR
-RtlTokenizeString(IN PCHAR String,
-                  IN PCSTR Delimiter,
-                  IN OUT PCHAR *SavePtr)
+RTL::String::TokenizeString(IN PCHAR String,
+                            IN PCSTR Delimiter,
+                            IN OUT PCHAR *SavePtr)
 {
     PCHAR Span, Token;
     CHAR Char, SpanChar;
@@ -516,15 +516,15 @@ RtlTokenizeString(IN PCHAR String,
     if(String == NULL && (String = *SavePtr) == NULL)
     {
         /* Empty string given */
-        return NULL;
+        return nullptr;
     }
 
     /* Check non-delimiter characters */
     Char = *String++;
     if(Char == '\0')
     {
-        *SavePtr = NULL;
-        return NULL;
+        *SavePtr = nullptr;
+        return nullptr;
     }
     Token = String - 1;
 
@@ -542,7 +542,7 @@ RtlTokenizeString(IN PCHAR String,
                 if(Char == '\0')
                 {
                     /* End of string reached, no more tokens */
-                    String = NULL;
+                    String = nullptr;
                 }
                 else
                 {
@@ -573,7 +573,7 @@ RtlTokenizeString(IN PCHAR String,
  */
 XTAPI
 CHAR
-RtlToLowerCharacter(IN CHAR Character)
+RTL::String::ToLowerCharacter(IN CHAR Character)
 {
     /* Check if character is uppercase */
     if(Character >= 'A' && Character <= 'Z')
@@ -598,7 +598,7 @@ RtlToLowerCharacter(IN CHAR Character)
  */
 XTAPI
 CHAR
-RtlToUpperCharacter(IN CHAR Character)
+RTL::String::ToUpperCharacter(IN CHAR Character)
 {
     /* Check if character is lowercase */
     if(Character >= 'a' && Character <= 'z')
@@ -623,7 +623,7 @@ RtlToUpperCharacter(IN CHAR Character)
  */
 XTAPI
 PCHAR
-RtlTrimLeftString(IN PCHAR String)
+RTL::String::TrimLeftString(IN PCHAR String)
 {
     PCHAR Start;
 
@@ -653,12 +653,12 @@ RtlTrimLeftString(IN PCHAR String)
  */
 XTAPI
 PCHAR
-RtlTrimRightString(IN PCHAR String)
+RTL::String::TrimRightString(IN PCHAR String)
 {
     PCHAR End;
 
     /* Find end of the string */
-    End = String + RtlStringLength(String, 0);
+    End = String + StringLength(String, 0);
 
     /* Skip all trailing whitespaces */
     while((End != String) && (*End == ' ' || *End == '\n' || *End == '\t' || *End == '\r' || *End == '\v' || *End == '\f'))
@@ -686,7 +686,7 @@ RtlTrimRightString(IN PCHAR String)
  */
 XTAPI
 PCHAR
-RtlTrimString(IN PCHAR String)
+RTL::String::TrimString(IN PCHAR String)
 {
-    return RtlTrimLeftString(RtlTrimRightString(String));
+    return TrimLeftString(TrimRightString(String));
 }

@@ -1,12 +1,12 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/rtl/memory.c
+ * FILE:            xtoskrnl/rtl/memory.cc
  * DESCRIPTION:     Memory related routines
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
 
 /**
@@ -27,9 +27,9 @@
  */
 XTAPI
 SIZE_T
-RtlCompareMemory(IN PCVOID LeftBuffer,
-                 IN PCVOID RightBuffer,
-                 IN SIZE_T Length)
+RTL::Memory::CompareMemory(IN PCVOID LeftBuffer,
+                           IN PCVOID RightBuffer,
+                           IN SIZE_T Length)
 {
     SIZE_T Bytes = 0;
 
@@ -73,9 +73,9 @@ RtlCompareMemory(IN PCVOID LeftBuffer,
  */
 XTAPI
 VOID
-RtlCopyMemory(OUT PVOID Destination,
-              IN PCVOID Source,
-              IN SIZE_T Length)
+RTL::Memory::CopyMemory(OUT PVOID Destination,
+                        IN PCVOID Source,
+                        IN SIZE_T Length)
 {
     PCHAR DestinationBytes = (PCHAR)Destination;
     PCCHAR SourceBytes = (PCHAR)Source;
@@ -106,9 +106,9 @@ RtlCopyMemory(OUT PVOID Destination,
  */
 XTAPI
 VOID
-RtlMoveMemory(OUT PVOID Destination,
-              IN PCVOID Source,
-              IN SIZE_T Length)
+RTL::Memory::MoveMemory(OUT PVOID Destination,
+                        IN PCVOID Source,
+                        IN SIZE_T Length)
 {
     PCHAR DestinationBytes = (PCHAR)Destination;
     PCHAR SourceBytes = (PCHAR)Source;
@@ -154,11 +154,11 @@ RtlMoveMemory(OUT PVOID Destination,
  */
 XTAPI
 BOOLEAN
-RtlSameMemory(IN PCVOID LeftBuffer,
-              IN PCVOID RightBuffer,
-              IN SIZE_T Length)
+RTL::Memory::SameMemory(IN PCVOID LeftBuffer,
+                        IN PCVOID RightBuffer,
+                        IN SIZE_T Length)
 {
-    return (RtlCompareMemory(LeftBuffer, RightBuffer, Length) == Length) ? TRUE : FALSE;
+    return (CompareMemory(LeftBuffer, RightBuffer, Length) == Length) ? TRUE : FALSE;
 }
 
 /**
@@ -179,9 +179,9 @@ RtlSameMemory(IN PCVOID LeftBuffer,
  */
 XTAPI
 VOID
-RtlSetMemory(OUT PVOID Destination,
-             IN UCHAR Byte,
-             IN SIZE_T Length)
+RTL::Memory::SetMemory(OUT PVOID Destination,
+                       IN UCHAR Byte,
+                       IN SIZE_T Length)
 {
     PCHAR DestinationBytes = (PCHAR)Destination;
 
@@ -207,9 +207,9 @@ RtlSetMemory(OUT PVOID Destination,
  */
 XTAPI
 VOID
-RtlZeroMemory(OUT PVOID Destination,
-              IN SIZE_T Length)
+RTL::Memory::ZeroMemory(OUT PVOID Destination,
+                        IN SIZE_T Length)
 {
     /* Fill the buffer with zeroes */
-    RtlSetMemory(Destination, 0, Length);
+    SetMemory(Destination, 0, Length);
 }

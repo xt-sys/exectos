@@ -2,7 +2,7 @@
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
  * FILE:            xtoskrnl/includes/ex.hh
- * DESCRIPTION:     
+ * DESCRIPTION:     Kernel Executive
  * DEVELOPERS:      Aiken Harris <harraiken91@gmail.com>
  */
 

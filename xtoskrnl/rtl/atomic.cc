@@ -1,12 +1,12 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/rtl/atomic.c
+ * FILE:            xtoskrnl/rtl/atomic.cc
  * DESCRIPTION:     Atomic operations support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
 
 /**
@@ -24,8 +24,8 @@
  */
 XTFASTCALL
 CHAR
-RtlAtomicAnd8(IN VOLATILE PCHAR Address,
-              IN CHAR Mask)
+RTL::Atomic::And8(IN PCHAR Address,
+                  IN CHAR Mask)
 {
     return __sync_fetch_and_and(Address, Mask);
 }
@@ -45,8 +45,8 @@ RtlAtomicAnd8(IN VOLATILE PCHAR Address,
  */
 XTFASTCALL
 SHORT
-RtlAtomicAnd16(IN VOLATILE PSHORT Address,
-               IN SHORT Mask)
+RTL::Atomic::And16(IN PSHORT Address,
+                   IN SHORT Mask)
 {
     return __sync_fetch_and_and(Address, Mask);
 }
@@ -66,8 +66,8 @@ RtlAtomicAnd16(IN VOLATILE PSHORT Address,
  */
 XTFASTCALL
 LONG
-RtlAtomicAnd32(IN VOLATILE PLONG Address,
-               IN LONG Mask)
+RTL::Atomic::And32(IN PLONG Address,
+                   IN LONG Mask)
 {
     return __sync_fetch_and_and(Address, Mask);
 }
@@ -87,8 +87,8 @@ RtlAtomicAnd32(IN VOLATILE PLONG Address,
  */
 XTFASTCALL
 LONG_PTR
-RtlAtomicAnd64(IN VOLATILE PLONG_PTR Address,
-               IN LONG_PTR Mask)
+RTL::Atomic::And64(IN PLONG_PTR Address,
+                   IN LONG_PTR Mask)
 {
     return __sync_fetch_and_and(Address, Mask);
 }
@@ -108,8 +108,8 @@ RtlAtomicAnd64(IN VOLATILE PLONG_PTR Address,
  */
 XTFASTCALL
 UCHAR
-RtlAtomicBitTestAndSet(IN VOLATILE PLONG Base,
-                       IN LONG Offset)
+RTL::Atomic::BitTestAndSet(IN PLONG Base,
+                           IN LONG Offset)
 {
     return (__atomic_fetch_or(Base, 1l << Offset, __ATOMIC_SEQ_CST) >> Offset) & 1;
 }
@@ -129,8 +129,8 @@ RtlAtomicBitTestAndSet(IN VOLATILE PLONG Base,
  */
 XTFASTCALL
 UCHAR
-RtlAtomicBitTestAndSet64(IN VOLATILE PLONGLONG Base,
-                         IN LONGLONG Offset)
+RTL::Atomic::BitTestAndSet64(IN PLONGLONG Base,
+                             IN LONGLONG Offset)
 {
     return (__atomic_fetch_or(Base, 1ll << Offset, __ATOMIC_SEQ_CST) >> Offset) & 1;
 }
@@ -153,9 +153,9 @@ RtlAtomicBitTestAndSet64(IN VOLATILE PLONGLONG Base,
  */
 XTFASTCALL
 CHAR
-RtlAtomicCompareExchange8(IN VOLATILE PCHAR Address,
-                          IN CHAR Comperand,
-                          IN CHAR Exchange)
+RTL::Atomic::CompareExchange8(IN PCHAR Address,
+                              IN CHAR Comperand,
+                              IN CHAR Exchange)
 {
     return __sync_val_compare_and_swap(Address, Comperand, Exchange);
 }
@@ -178,9 +178,9 @@ RtlAtomicCompareExchange8(IN VOLATILE PCHAR Address,
  */
 XTFASTCALL
 SHORT
-RtlAtomicCompareExchange16(IN VOLATILE PSHORT Address,
-                           IN SHORT Comperand,
-                           IN SHORT Exchange)
+RTL::Atomic::CompareExchange16(IN PSHORT Address,
+                               IN SHORT Comperand,
+                               IN SHORT Exchange)
 {
     return __sync_val_compare_and_swap(Address, Comperand, Exchange);
 }
@@ -203,9 +203,9 @@ RtlAtomicCompareExchange16(IN VOLATILE PSHORT Address,
  */
 XTFASTCALL
 LONG
-RtlAtomicCompareExchange32(IN VOLATILE PLONG Address,
-                           IN LONG Comperand,
-                           IN LONG Exchange)
+RTL::Atomic::CompareExchange32(IN PLONG Address,
+                               IN LONG Comperand,
+                               IN LONG Exchange)
 {
     return __sync_val_compare_and_swap(Address, Comperand, Exchange);
 }
@@ -228,9 +228,9 @@ RtlAtomicCompareExchange32(IN VOLATILE PLONG Address,
  */
 XTFASTCALL
 LONG_PTR
-RtlAtomicCompareExchange64(IN VOLATILE PLONG_PTR Address,
-                           IN LONG_PTR Comperand,
-                           IN LONG_PTR Exchange)
+RTL::Atomic::CompareExchange64(IN PLONG_PTR Address,
+                               IN LONG_PTR Comperand,
+                               IN LONG_PTR Exchange)
 {
     return __sync_val_compare_and_swap(Address, Comperand, Exchange);
 }
@@ -253,9 +253,9 @@ RtlAtomicCompareExchange64(IN VOLATILE PLONG_PTR Address,
  */
 XTFASTCALL
 PVOID
-RtlAtomicCompareExchangePointer(IN VOLATILE PVOID *Address,
-                                IN PVOID Comperand,
-                                IN PVOID Exchange)
+RTL::Atomic::CompareExchangePointer(IN PVOID *Address,
+                                    IN PVOID Comperand,
+                                    IN PVOID Exchange)
 {
     return (PVOID)__sync_val_compare_and_swap(Address, Comperand, Exchange);
 }
@@ -272,7 +272,7 @@ RtlAtomicCompareExchangePointer(IN VOLATILE PVOID *Address,
  */
 XTFASTCALL
 CHAR
-RtlAtomicDecrement8(IN VOLATILE PCHAR Address)
+RTL::Atomic::Decrement8(IN PCHAR Address)
 {
     return __sync_sub_and_fetch(Address, 1);
 }
@@ -289,7 +289,7 @@ RtlAtomicDecrement8(IN VOLATILE PCHAR Address)
  */
 XTFASTCALL
 SHORT
-RtlAtomicDecrement16(IN VOLATILE PSHORT Address)
+RTL::Atomic::Decrement16(IN PSHORT Address)
 {
     return __sync_sub_and_fetch(Address, 1);
 }
@@ -306,7 +306,7 @@ RtlAtomicDecrement16(IN VOLATILE PSHORT Address)
  */
 XTFASTCALL
 LONG
-RtlAtomicDecrement32(IN VOLATILE PLONG Address)
+RTL::Atomic::Decrement32(IN PLONG Address)
 {
     return __sync_sub_and_fetch(Address, 1);
 }
@@ -323,7 +323,7 @@ RtlAtomicDecrement32(IN VOLATILE PLONG Address)
  */
 XTFASTCALL
 LONG_PTR
-RtlAtomicDecrement64(IN VOLATILE PLONG_PTR Address)
+RTL::Atomic::Decrement64(IN PLONG_PTR Address)
 {
     return __sync_sub_and_fetch(Address, 1);
 }
@@ -343,8 +343,8 @@ RtlAtomicDecrement64(IN VOLATILE PLONG_PTR Address)
  */
 XTFASTCALL
 CHAR
-RtlAtomicExchange8(IN VOLATILE PCHAR Address,
-                   IN CHAR Exchange)
+RTL::Atomic::Exchange8(IN PCHAR Address,
+                       IN CHAR Exchange)
 {
     return __sync_lock_test_and_set(Address, Exchange);
 }
@@ -364,8 +364,8 @@ RtlAtomicExchange8(IN VOLATILE PCHAR Address,
  */
 XTFASTCALL
 SHORT
-RtlAtomicExchange16(IN VOLATILE PSHORT Address,
-                    IN SHORT Exchange)
+RTL::Atomic::Exchange16(IN PSHORT Address,
+                        IN SHORT Exchange)
 {
     return __sync_lock_test_and_set(Address, Exchange);
 }
@@ -385,8 +385,8 @@ RtlAtomicExchange16(IN VOLATILE PSHORT Address,
  */
 XTFASTCALL
 LONG
-RtlAtomicExchange32(IN VOLATILE PLONG Address,
-                    IN LONG Exchange)
+RTL::Atomic::Exchange32(IN PLONG Address,
+                        IN LONG Exchange)
 {
     return __sync_lock_test_and_set(Address, Exchange);
 }
@@ -406,8 +406,8 @@ RtlAtomicExchange32(IN VOLATILE PLONG Address,
  */
 XTFASTCALL
 LONG_PTR
-RtlAtomicExchange64(IN VOLATILE PLONG_PTR Address,
-                    IN LONG_PTR Exchange)
+RTL::Atomic::Exchange64(IN PLONG_PTR Address,
+                        IN LONG_PTR Exchange)
 {
     return __sync_lock_test_and_set(Address, Exchange);
 }
@@ -427,8 +427,8 @@ RtlAtomicExchange64(IN VOLATILE PLONG_PTR Address,
  */
 XTFASTCALL
 CHAR
-RtlAtomicExchangeAdd8(IN VOLATILE PCHAR Address,
-                      IN CHAR Value)
+RTL::Atomic::ExchangeAdd8(IN PCHAR Address,
+                          IN CHAR Value)
 {
     return __sync_fetch_and_add(Address, Value);
 }
@@ -448,8 +448,8 @@ RtlAtomicExchangeAdd8(IN VOLATILE PCHAR Address,
  */
 XTFASTCALL
 SHORT
-RtlAtomicExchangeAdd16(IN VOLATILE PSHORT Address,
-                       IN SHORT Value)
+RTL::Atomic::ExchangeAdd16(IN PSHORT Address,
+                           IN SHORT Value)
 {
     return __sync_fetch_and_add(Address, Value);
 }
@@ -469,8 +469,8 @@ RtlAtomicExchangeAdd16(IN VOLATILE PSHORT Address,
  */
 XTFASTCALL
 LONG
-RtlAtomicExchangeAdd32(IN VOLATILE PLONG Address,
-                       IN LONG Value)
+RTL::Atomic::ExchangeAdd32(IN PLONG Address,
+                           IN LONG Value)
 {
     return __sync_fetch_and_add(Address, Value);
 }
@@ -490,8 +490,8 @@ RtlAtomicExchangeAdd32(IN VOLATILE PLONG Address,
  */
 XTFASTCALL
 LONG_PTR
-RtlAtomicExchangeAdd64(IN VOLATILE PLONG_PTR Address,
-                       IN LONG_PTR Value)
+RTL::Atomic::ExchangeAdd64(IN PLONG_PTR Address,
+                           IN LONG_PTR Value)
 {
     return __sync_fetch_and_add(Address, Value);
 }
@@ -511,8 +511,8 @@ RtlAtomicExchangeAdd64(IN VOLATILE PLONG_PTR Address,
  */
 XTFASTCALL
 PVOID
-RtlAtomicExchangePointer(IN VOLATILE PVOID *Address,
-                         IN PVOID Exchange)
+RTL::Atomic::ExchangePointer(IN PVOID *Address,
+                             IN PVOID Exchange)
 {
     __sync_synchronize();
     return (PVOID)__sync_lock_test_and_set(Address, Exchange);
@@ -530,9 +530,9 @@ RtlAtomicExchangePointer(IN VOLATILE PVOID *Address,
  */
 XTFASTCALL
 PSINGLE_LIST_ENTRY
-RtlAtomicFlushSingleList(IN PSINGLE_LIST_HEADER Header)
+RTL::Atomic::FlushSingleList(IN PSINGLE_LIST_HEADER Header)
 {
-    return (PSINGLE_LIST_ENTRY)RtlAtomicExchange64((PLONG_PTR)&Header->Alignment, (LONGLONG)NULL);
+    return (PSINGLE_LIST_ENTRY)Exchange64((PLONG_PTR)&Header->Alignment, (LONGLONG)NULL);
 }
 
 /**
@@ -547,7 +547,7 @@ RtlAtomicFlushSingleList(IN PSINGLE_LIST_HEADER Header)
  */
 XTFASTCALL
 CHAR
-RtlAtomicIncrement8(IN VOLATILE PCHAR Address)
+RTL::Atomic::Increment8(IN PCHAR Address)
 {
     return __sync_add_and_fetch(Address, 1);
 }
@@ -564,7 +564,7 @@ RtlAtomicIncrement8(IN VOLATILE PCHAR Address)
  */
 XTFASTCALL
 SHORT
-RtlAtomicIncrement16(IN VOLATILE PSHORT Address)
+RTL::Atomic::Increment16(IN PSHORT Address)
 {
     return __sync_add_and_fetch(Address, 1);
 }
@@ -581,7 +581,7 @@ RtlAtomicIncrement16(IN VOLATILE PSHORT Address)
  */
 XTFASTCALL
 LONG
-RtlAtomicIncrement32(IN VOLATILE PLONG Address)
+RTL::Atomic::Increment32(IN PLONG Address)
 {
     return __sync_add_and_fetch(Address, 1);
 }
@@ -598,7 +598,7 @@ RtlAtomicIncrement32(IN VOLATILE PLONG Address)
  */
 XTFASTCALL
 LONG_PTR
-RtlAtomicIncrement64(IN VOLATILE PLONG_PTR Address)
+RTL::Atomic::Increment64(IN PLONG_PTR Address)
 {
     return __sync_add_and_fetch(Address, 1);
 }
@@ -618,8 +618,8 @@ RtlAtomicIncrement64(IN VOLATILE PLONG_PTR Address)
  */
 XTFASTCALL
 CHAR
-RtlAtomicOr8(IN VOLATILE PCHAR Address,
-             IN CHAR Mask)
+RTL::Atomic::Or8(IN PCHAR Address,
+                 IN CHAR Mask)
 {
     return __sync_fetch_and_or(Address, Mask);
 }
@@ -639,8 +639,8 @@ RtlAtomicOr8(IN VOLATILE PCHAR Address,
  */
 XTFASTCALL
 SHORT
-RtlAtomicOr16(IN VOLATILE PSHORT Address,
-              IN SHORT Mask)
+RTL::Atomic::Or16(IN PSHORT Address,
+                  IN SHORT Mask)
 {
     return __sync_fetch_and_or(Address, Mask);
 }
@@ -660,8 +660,8 @@ RtlAtomicOr16(IN VOLATILE PSHORT Address,
  */
 XTFASTCALL
 LONG
-RtlAtomicOr32(IN VOLATILE PLONG Address,
-              IN LONG Mask)
+RTL::Atomic::Or32(IN PLONG Address,
+                  IN LONG Mask)
 {
     return __sync_fetch_and_or(Address, Mask);
 }
@@ -681,8 +681,8 @@ RtlAtomicOr32(IN VOLATILE PLONG Address,
  */
 XTFASTCALL
 LONG_PTR
-RtlAtomicOr64(IN VOLATILE PLONG_PTR Address,
-              IN LONG_PTR Mask)
+RTL::Atomic::Or64(IN PLONG_PTR Address,
+                  IN LONG_PTR Mask)
 {
     return __sync_fetch_and_or(Address, Mask);
 }
@@ -699,12 +699,12 @@ RtlAtomicOr64(IN VOLATILE PLONG_PTR Address,
  */
 XTFASTCALL
 PSINGLE_LIST_ENTRY
-RtlAtomicPopEntrySingleList(IN PSINGLE_LIST_HEADER Header)
+RTL::Atomic::PopEntrySingleList(IN PSINGLE_LIST_HEADER Header)
 {
     PSINGLE_LIST_ENTRY ListHead, FirstEntry, NextEntry;
 
     /* Save header and first entry */
-    ListHead = (PVOID)Header;
+    ListHead = (PSINGLE_LIST_ENTRY)Header;
     FirstEntry = ListHead->Next;
     do
     {
@@ -712,16 +712,16 @@ RtlAtomicPopEntrySingleList(IN PSINGLE_LIST_HEADER Header)
         if(!FirstEntry)
         {
             /* Empty list */
-            return NULL;
+            return nullptr;
         }
 
         /* Update link */
         NextEntry = FirstEntry;
 
         /* Compare and exchange */
-        FirstEntry = (PVOID)RtlAtomicCompareExchange64((PLONG_PTR)ListHead,
-                                                       (LONG_PTR)FirstEntry->Next,
-                                                       (LONG_PTR)FirstEntry);
+        FirstEntry = (PSINGLE_LIST_ENTRY)CompareExchange64((PLONG_PTR)ListHead,
+                                                           (LONG_PTR)FirstEntry->Next,
+                                                           (LONG_PTR)FirstEntry);
     } while(FirstEntry != NextEntry);
 
     /* Return removed element */
@@ -743,14 +743,14 @@ RtlAtomicPopEntrySingleList(IN PSINGLE_LIST_HEADER Header)
  */
 XTFASTCALL
 PSINGLE_LIST_ENTRY
-RtlAtomicPushEntrySingleList(IN PSINGLE_LIST_HEADER Header,
-                             IN PSINGLE_LIST_ENTRY Entry)
+RTL::Atomic::PushEntrySingleList(IN PSINGLE_LIST_HEADER Header,
+                                 IN PSINGLE_LIST_ENTRY Entry)
 {
     PSINGLE_LIST_ENTRY ListHead, ListEntry, FirstEntry, NextEntry;
 
     /* Save header and new entry */
-    ListHead = (PVOID)Header;
-    ListEntry = (PVOID)Entry;
+    ListHead = (PSINGLE_LIST_ENTRY)Header;
+    ListEntry = Entry;
 
     /* Save next link in new first element */
     FirstEntry = ListHead->Next;
@@ -761,9 +761,9 @@ RtlAtomicPushEntrySingleList(IN PSINGLE_LIST_HEADER Header,
         NextEntry = FirstEntry;
 
         /* Compare and exchange */
-        FirstEntry = (PVOID)RtlAtomicCompareExchange64((PLONG_PTR)ListHead,
-                                                       (LONG_PTR)ListEntry,
-                                                       (LONG_PTR)FirstEntry);
+        FirstEntry = (PSINGLE_LIST_ENTRY)CompareExchange64((PLONG_PTR)ListHead,
+                                                           (LONG_PTR)ListEntry,
+                                                           (LONG_PTR)FirstEntry);
     } while(FirstEntry != NextEntry);
 
     /* Return original first element */
@@ -785,8 +785,8 @@ RtlAtomicPushEntrySingleList(IN PSINGLE_LIST_HEADER Header,
  */
 XTFASTCALL
 CHAR
-RtlAtomicXor8(IN VOLATILE PCHAR Address,
-              IN CHAR Mask)
+RTL::Atomic::Xor8(IN PCHAR Address,
+                  IN CHAR Mask)
 {
     return __sync_fetch_and_xor(Address, Mask);
 }
@@ -806,8 +806,8 @@ RtlAtomicXor8(IN VOLATILE PCHAR Address,
  */
 XTFASTCALL
 SHORT
-RtlAtomicXor16(IN VOLATILE PSHORT Address,
-               IN SHORT Mask)
+RTL::Atomic::Xor16(IN PSHORT Address,
+                   IN SHORT Mask)
 {
     return __sync_fetch_and_xor(Address, Mask);
 }
@@ -827,8 +827,8 @@ RtlAtomicXor16(IN VOLATILE PSHORT Address,
  */
 XTFASTCALL
 LONG
-RtlAtomicXor32(IN VOLATILE PLONG Address,
-               IN LONG Mask)
+RTL::Atomic::Xor32(IN PLONG Address,
+                   IN LONG Mask)
 {
     return __sync_fetch_and_xor(Address, Mask);
 }
@@ -848,8 +848,8 @@ RtlAtomicXor32(IN VOLATILE PLONG Address,
  */
 XTFASTCALL
 LONG_PTR
-RtlAtomicXor64(IN VOLATILE PLONG_PTR Address,
-               IN LONG_PTR Mask)
+RTL::Atomic::Xor64(IN PLONG_PTR Address,
+                   IN LONG_PTR Mask)
 {
     return __sync_fetch_and_xor(Address, Mask);
 }

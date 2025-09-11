@@ -2,7 +2,7 @@
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
  * FILE:            xtoskrnl/includes/ar.hh
- * DESCRIPTION:     
+ * DESCRIPTION:     Architecture Library
  * DEVELOPERS:      Aiken Harris <harraiken91@gmail.com>
  */
 

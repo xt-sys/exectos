@@ -28,4 +28,6 @@ extern "C" {
 
 #include <ar.hh>
 #include <ex.hh>
+#include <hl.hh>
 #include <ke.hh>
+#include <rtl.hh>

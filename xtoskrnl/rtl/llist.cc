@@ -1,12 +1,12 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/rtl/plist.c
+ * FILE:            xtoskrnl/rtl/llist.cc
  * DESCRIPTION:     Linked list manipulation routines
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
 
 /**
@@ -21,7 +21,7 @@
  */
 XTCDECL
 VOID
-RtlInitializeListHead(IN PLIST_ENTRY ListHead)
+RTL::LinkedList::InitializeListHead(IN PLIST_ENTRY ListHead)
 {
     ListHead->Blink = ListHead;
     ListHead->Flink = ListHead;
@@ -39,7 +39,7 @@ RtlInitializeListHead(IN PLIST_ENTRY ListHead)
  */
 XTCDECL
 VOID
-RtlInitializeListHead32(IN PLIST_ENTRY32 ListHead)
+RTL::LinkedList::InitializeListHead32(IN PLIST_ENTRY32 ListHead)
 {
     ListHead->Blink = PtrToUlong(ListHead);
     ListHead->Flink = PtrToUlong(ListHead);
@@ -60,8 +60,8 @@ RtlInitializeListHead32(IN PLIST_ENTRY32 ListHead)
  */
 XTCDECL
 VOID
-RtlInsertHeadList(IN OUT PLIST_ENTRY ListHead,
-                  IN PLIST_ENTRY Entry)
+RTL::LinkedList::InsertHeadList(IN OUT PLIST_ENTRY ListHead,
+                                IN PLIST_ENTRY Entry)
 {
     Entry->Flink = ListHead->Flink;
     Entry->Blink = ListHead;
@@ -84,8 +84,8 @@ RtlInsertHeadList(IN OUT PLIST_ENTRY ListHead,
  */
 XTCDECL
 VOID
-RtlInsertTailList(IN OUT PLIST_ENTRY ListHead,
-                  IN PLIST_ENTRY Entry)
+RTL::LinkedList::InsertTailList(IN OUT PLIST_ENTRY ListHead,
+                                IN PLIST_ENTRY Entry)
 {
     Entry->Flink = ListHead;
     Entry->Blink = ListHead->Blink;
@@ -105,9 +105,9 @@ RtlInsertTailList(IN OUT PLIST_ENTRY ListHead,
  */
 XTCDECL
 BOOLEAN
-RtlListEmpty(IN PLIST_ENTRY ListHead)
+RTL::LinkedList::ListEmpty(IN PLIST_ENTRY ListHead)
 {
-    return (((ListHead->Flink == NULL) && (ListHead->Blink == NULL)) || (ListHead->Flink == ListHead));
+    return (BOOLEAN)(((ListHead->Flink == NULL) && (ListHead->Blink == NULL)) || (ListHead->Flink == ListHead));
 }
 
 /**
@@ -122,7 +122,7 @@ RtlListEmpty(IN PLIST_ENTRY ListHead)
  */
 XTCDECL
 BOOLEAN
-RtlListLoop(IN PLIST_ENTRY ListHead)
+RTL::LinkedList::ListLoop(IN PLIST_ENTRY ListHead)
 {
     PLIST_ENTRY SlowEntry, FastEntry;
 
@@ -168,7 +168,7 @@ RtlListLoop(IN PLIST_ENTRY ListHead)
  */
 XTCDECL
 VOID
-RtlRemoveEntryList(IN PLIST_ENTRY Entry)
+RTL::LinkedList::RemoveEntryList(IN PLIST_ENTRY Entry)
 {
     Entry->Flink->Blink = Entry->Blink;
     Entry->Blink->Flink = Entry->Flink;

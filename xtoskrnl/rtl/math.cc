@@ -1,12 +1,12 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/rtl/math.c
+ * FILE:            xtoskrnl/rtl/math.cc
  * DESCRIPTION:     Kernel math support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
 
 /**
@@ -21,7 +21,7 @@
  */
 XTAPI
 LARGE_INTEGER
-RtlConvertToLargeInteger32(IN LONG Value)
+RTL::Math::ConvertToLargeInteger32(IN LONG Value)
 {
     LARGE_INTEGER LargeInt;
 
@@ -42,7 +42,7 @@ RtlConvertToLargeInteger32(IN LONG Value)
  */
 XTAPI
 LARGE_INTEGER
-RtlConvertToLargeIntegerUnsigned32(IN ULONG Value)
+RTL::Math::ConvertToLargeIntegerUnsigned32(IN ULONG Value)
 {
     LARGE_INTEGER LargeInt;
 
@@ -63,7 +63,7 @@ RtlConvertToLargeIntegerUnsigned32(IN ULONG Value)
  */
 XTAPI
 INT
-RtlCountLeadingZeroes32(IN ULONG Value)
+RTL::Math::CountLeadingZeroes32(IN ULONG Value)
 {
     /* Return a number of leading zero bits */
     return __builtin_clzl(Value);
@@ -81,7 +81,7 @@ RtlCountLeadingZeroes32(IN ULONG Value)
  */
 XTAPI
 INT
-RtlCountLeadingZeroes64(IN ULONGLONG Value)
+RTL::Math::CountLeadingZeroes64(IN ULONGLONG Value)
 {
     /* Return a number of leading zero bits */
     return __builtin_clzll(Value);
@@ -99,7 +99,7 @@ RtlCountLeadingZeroes64(IN ULONGLONG Value)
  */
 XTAPI
 INT
-RtlCountTrailingZeroes32(IN ULONG Value)
+RTL::Math::CountTrailingZeroes32(IN ULONG Value)
 {
     /* Return a number of trailing zero bits */
     return __builtin_ctzl(Value);
@@ -117,7 +117,7 @@ RtlCountTrailingZeroes32(IN ULONG Value)
  */
 XTAPI
 INT
-RtlCountTrailingZeroes64(IN ULONGLONG Value)
+RTL::Math::CountTrailingZeroes64(IN ULONGLONG Value)
 {
     /* Return a number of trailing zero bits */
     return __builtin_ctzll(Value);
@@ -141,9 +141,9 @@ RtlCountTrailingZeroes64(IN ULONGLONG Value)
  */
 XTAPI
 LONGLONG
-RtlDivide32(IN LONG Dividend,
-            IN LONG Divisor,
-            OUT PLONG Remainder)
+RTL::Math::Divide32(IN LONG Dividend,
+                    IN LONG Divisor,
+                    OUT PLONG Remainder)
 {
     LONG Quotient;
 
@@ -179,9 +179,9 @@ RtlDivide32(IN LONG Dividend,
  */
 XTAPI
 LONGLONG
-RtlDivide64(IN LONGLONG Dividend,
-            IN LONGLONG Divisor,
-            OUT PLONGLONG Remainder)
+RTL::Math::Divide64(IN LONGLONG Dividend,
+                    IN LONGLONG Divisor,
+                    OUT PLONGLONG Remainder)
 {
     LONGLONG DividendSign, DivisorSign, Quotient, UDividend, UDivisor;
 
@@ -193,7 +193,7 @@ RtlDivide64(IN LONGLONG Dividend,
 
     /* Calculate the quotient */
     DividendSign ^= DivisorSign;
-    Quotient = (RtlDivideUnsigned64(UDividend, UDivisor, NULL) ^ DividendSign) - DividendSign;
+    Quotient = (DivideUnsigned64(UDividend, UDivisor, nullptr) ^ DividendSign) - DividendSign;
 
     /* Make sure a pointer to remainder provided */
     if(Remainder)
@@ -224,9 +224,9 @@ RtlDivide64(IN LONGLONG Dividend,
  */
 XTAPI
 ULONGLONG
-RtlDivideUnsigned32(IN ULONG Dividend,
-                    IN ULONG Divisor,
-                    OUT PULONG Remainder)
+RTL::Math::DivideUnsigned32(IN ULONG Dividend,
+                            IN ULONG Divisor,
+                            OUT PULONG Remainder)
 {
     /* Make sure a pointer to remainder provided */
     if(Remainder)
@@ -257,9 +257,9 @@ RtlDivideUnsigned32(IN ULONG Dividend,
  */
 XTAPI
 ULONGLONG
-RtlDivideUnsigned64(IN ULONGLONG Dividend,
-                    IN ULONGLONG Divisor,
-                    OUT PULONGLONG Remainder)
+RTL::Math::DivideUnsigned64(IN ULONGLONG Dividend,
+                            IN ULONGLONG Divisor,
+                            OUT PULONGLONG Remainder)
 {
     ULARGE_INTEGER DividendParts, DivisorParts, QuotientParts, RemainderParts;
     LONGLONG Difference;
@@ -312,7 +312,7 @@ RtlDivideUnsigned64(IN ULONGLONG Dividend,
         if(DivisorParts.u.HighPart != 0)
         {
             /* Divisor is 64-bit value, calculate the shift count */
-            Shift = RtlCountLeadingZeroes32(DivisorParts.u.HighPart) - RtlCountLeadingZeroes32(DividendParts.u.HighPart);
+            Shift = CountLeadingZeroes32(DivisorParts.u.HighPart) - CountLeadingZeroes32(DividendParts.u.HighPart);
 
             /* Check if shift count exceeds 32-bits */
             if(Shift > ((sizeof(ULONG) * BITS_PER_BYTE) - 1))
@@ -349,8 +349,8 @@ RtlDivideUnsigned64(IN ULONGLONG Dividend,
         {
             /* Divisor is 32-bit value, calculate the shift count */
             Shift = (sizeof(ULONG) * BITS_PER_BYTE) + 1 +
-                    RtlCountLeadingZeroes32(DivisorParts.u.LowPart) -
-                    RtlCountLeadingZeroes32(DividendParts.u.HighPart);
+                    CountLeadingZeroes32(DivisorParts.u.LowPart) -
+                    CountLeadingZeroes32(DividendParts.u.HighPart);
 
             /* Check if shift is 32-bit */
             if(Shift == (sizeof(ULONG) * BITS_PER_BYTE))
@@ -401,7 +401,7 @@ RtlDivideUnsigned64(IN ULONGLONG Dividend,
         }
 
         /* Calculate the shift count */
-        Shift = RtlCountLeadingZeroes32(DivisorParts.u.HighPart) - RtlCountLeadingZeroes32(DividendParts.u.HighPart);
+        Shift = CountLeadingZeroes32(DivisorParts.u.HighPart) - CountLeadingZeroes32(DividendParts.u.HighPart);
 
         /* Check if shift exceeds 32-bits */
         if(Shift > ((sizeof(ULONG) * BITS_PER_BYTE) - 2))
@@ -485,9 +485,9 @@ RtlDivideUnsigned64(IN ULONGLONG Dividend,
  */
 XTAPI
 LARGE_INTEGER
-RtlDivideLargeInteger(IN LARGE_INTEGER Dividend,
-                      IN ULONG Divisor,
-                      OUT PULONG Remainder)
+RTL::Math::DivideLargeInteger(IN LARGE_INTEGER Dividend,
+                              IN ULONG Divisor,
+                              OUT PULONG Remainder)
 {
     LONGLONG DividendSign, UDividend;
     LARGE_INTEGER LargeInt;
@@ -497,7 +497,7 @@ RtlDivideLargeInteger(IN LARGE_INTEGER Dividend,
     UDividend = (Dividend.QuadPart ^ DividendSign) - DividendSign;
 
     /* Calculate the quotient */
-    LargeInt.QuadPart = (RtlDivideUnsigned64(UDividend, Divisor, NULL) ^ DividendSign) - DividendSign;
+    LargeInt.QuadPart = (DivideUnsigned64(UDividend, Divisor, nullptr) ^ DividendSign) - DividendSign;
 
     /* Make sure a pointer to remainder provided */
     if(Remainder)
@@ -525,8 +525,8 @@ RtlDivideLargeInteger(IN LARGE_INTEGER Dividend,
  */
 XTAPI
 LONG
-RtlGetBaseExponent(IN DOUBLE Value,
-                   OUT PDOUBLE PowerOfTen)
+RTL::Math::GetBaseExponent(IN DOUBLE Value,
+                           OUT PDOUBLE PowerOfTen)
 {
     LONG BaseExponent, CurrentExponent, Exponent;
     ULONG ExponentShift, ExponentMask;
@@ -612,7 +612,7 @@ RtlGetBaseExponent(IN DOUBLE Value,
  */
 XTCDECL
 BOOLEAN
-RtlInfiniteDouble(IN DOUBLE Value)
+RTL::Math::InfiniteDouble(IN DOUBLE Value)
 {
     /* DOUBLE argument in IEEE 754 standard format */
     union
@@ -631,7 +631,7 @@ RtlInfiniteDouble(IN DOUBLE Value)
     Var.Double = &Value;
 
     /* Return TRUE if it is infinite, or FALSE otherwise */
-    return ((Var.DoubleS->Exponent & 0x7FF) == 0x7FF);
+    return (BOOLEAN)((Var.DoubleS->Exponent & 0x7FF) == 0x7FF);
 }
 
 /**
@@ -649,8 +649,8 @@ RtlInfiniteDouble(IN DOUBLE Value)
  */
 XTAPI
 LARGE_INTEGER
-RtlMultiplyLargeInteger(IN LARGE_INTEGER Multiplicand,
-                        IN LONG Multiplier)
+RTL::Math::MultiplyLargeInteger(IN LARGE_INTEGER Multiplicand,
+                                IN LONG Multiplier)
 {
     LARGE_INTEGER LargeInt;
 
@@ -671,7 +671,7 @@ RtlMultiplyLargeInteger(IN LARGE_INTEGER Multiplicand,
  */
 XTCDECL
 BOOLEAN
-RtlNanDouble(IN DOUBLE Value)
+RTL::Math::NanDouble(IN DOUBLE Value)
 {
     /* DOUBLE argument in IEEE 754 standard format */
     union
@@ -690,5 +690,5 @@ RtlNanDouble(IN DOUBLE Value)
     Var.Double = &Value;
 
     /* Return TRUE if it is NaN, or FALSE otherwise */
-    return (Var.DoubleS->Exponent == 0x7FF && (Var.DoubleS->MantissaHigh != 0 || Var.DoubleS->MantissaLow != 0));
+    return (BOOLEAN)(Var.DoubleS->Exponent == 0x7FF && (Var.DoubleS->MantissaHigh != 0 || Var.DoubleS->MantissaLow != 0));
 }

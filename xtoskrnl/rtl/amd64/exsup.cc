@@ -1,15 +1,16 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/rtl/i686/exsup.c
- * DESCRIPTION:     Exception handling for i686 architecture
+ * FILE:            xtoskrnl/rtl/amd64/exsup.cc
+ * DESCRIPTION:     Exception handling for AMD64 architecture
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
 
-XTCDECL
+XTCLINK
+XTAPI
 EXCEPTION_DISPOSITION
 __C_specific_handler(IN PEXCEPTION_RECORD ExceptionRecord,
                      IN PVOID EstablisherFrame,
@@ -22,6 +23,7 @@ __C_specific_handler(IN PEXCEPTION_RECORD ExceptionRecord,
     return ExceptionContinueExecution;
 }
 
+XTCLINK
 XTCDECL
 INT
 _except_handler3(PEXCEPTION_RECORD ExceptionRecord,
