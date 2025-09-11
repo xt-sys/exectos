@@ -15,123 +15,123 @@
 /* Runtime Library routines forward references */
 XTFASTCALL
 CHAR
-RtlAtomicAnd8(IN VOLATILE PCHAR Address,
+RtlAtomicAnd8(IN PCHAR Address,
               IN CHAR Mask);
 
 XTFASTCALL
 SHORT
-RtlAtomicAnd16(IN VOLATILE PSHORT Address,
+RtlAtomicAnd16(IN PSHORT Address,
                IN SHORT Mask);
 
 XTFASTCALL
 LONG
-RtlAtomicAnd32(IN VOLATILE PLONG Address,
+RtlAtomicAnd32(IN PLONG Address,
                IN LONG Mask);
 
 XTFASTCALL
 LONG_PTR
-RtlAtomicAnd64(IN VOLATILE PLONG_PTR Address,
+RtlAtomicAnd64(IN PLONG_PTR Address,
                IN LONG_PTR Mask);
 
 XTFASTCALL
 UCHAR
-RtlAtomicBitTestAndSet(IN VOLATILE PLONG Base,
+RtlAtomicBitTestAndSet(IN PLONG Base,
                        IN LONG Offset);
 
 XTFASTCALL
 UCHAR
-RtlAtomicBitTestAndSet64(IN VOLATILE PLONGLONG Base,
+RtlAtomicBitTestAndSet64(IN PLONGLONG Base,
                          IN LONGLONG Offset);
 
 XTFASTCALL
 CHAR
-RtlAtomicCompareExchange8(IN VOLATILE PCHAR Address,
+RtlAtomicCompareExchange8(IN PCHAR Address,
                           IN CHAR Comperand,
                           IN CHAR Exchange);
 
 XTFASTCALL
 SHORT
-RtlAtomicCompareExchange16(IN VOLATILE PSHORT Address,
+RtlAtomicCompareExchange16(IN PSHORT Address,
                            IN SHORT Comperand,
                            IN SHORT Exchange);
 
 XTFASTCALL
 LONG
-RtlAtomicCompareExchange32(IN VOLATILE PLONG Address,
+RtlAtomicCompareExchange32(IN PLONG Address,
                            IN LONG Comperand,
                            IN LONG Exchange);
 
 XTFASTCALL
 LONG_PTR
-RtlAtomicCompareExchange64(IN VOLATILE PLONG_PTR Address,
+RtlAtomicCompareExchange64(IN PLONG_PTR Address,
                            IN LONG_PTR Comperand,
                            IN LONG_PTR Exchange);
 
 XTFASTCALL
 PVOID
-RtlAtomicCompareExchangePointer(IN VOLATILE PVOID *Address,
+RtlAtomicCompareExchangePointer(IN PVOID *Address,
                                 IN PVOID Comperand,
                                 IN PVOID Exchange);
 
 XTFASTCALL
 CHAR
-RtlAtomicDecrement8(IN VOLATILE PCHAR Address);
+RtlAtomicDecrement8(IN PCHAR Address);
 
 XTFASTCALL
 SHORT
-RtlAtomicDecrement16(IN VOLATILE PSHORT Address);
+RtlAtomicDecrement16(IN PSHORT Address);
 
 XTFASTCALL
 LONG
-RtlAtomicDecrement32(IN VOLATILE PLONG Address);
+RtlAtomicDecrement32(IN PLONG Address);
 
 XTFASTCALL
 LONG_PTR
-RtlAtomicDecrement64(IN VOLATILE PLONG_PTR Address);
+RtlAtomicDecrement64(IN PLONG_PTR Address);
 
 XTFASTCALL
 CHAR
-RtlAtomicExchange8(IN VOLATILE PCHAR Address,
+RtlAtomicExchange8(IN PCHAR Address,
                    IN CHAR Exchange);
 
 XTFASTCALL
 SHORT
-RtlAtomicExchange16(IN VOLATILE PSHORT Address,
+RtlAtomicExchange16(IN PSHORT Address,
                     IN SHORT Exchange);
 
 XTFASTCALL
 LONG
-RtlAtomicExchange32(IN VOLATILE PLONG Address,
+RtlAtomicExchange32(IN PLONG Address,
                     IN LONG Exchange);
 
 XTFASTCALL
 LONG_PTR
-RtlAtomicExchange64(IN VOLATILE PLONG_PTR Address,
+RtlAtomicExchange64(IN PLONG_PTR Address,
                     IN LONG_PTR Exchange);
 
 XTFASTCALL
 CHAR
-RtlAtomicExchangeAdd8(IN VOLATILE PCHAR Address,
+RtlAtomicExchangeAdd8(IN PCHAR Address,
                       IN CHAR Value);
 
 XTFASTCALL
 SHORT
-RtlAtomicExchangeAdd16(IN VOLATILE PSHORT Address,
+RtlAtomicExchangeAdd16(IN PSHORT Address,
                        IN SHORT Value);
 
 XTFASTCALL
 LONG
-RtlAtomicExchangeAdd32(IN VOLATILE PLONG Address,
+RtlAtomicExchangeAdd32(IN PLONG Address,
                        IN LONG Value);
 
 XTFASTCALL
 LONG_PTR
-RtlAtomicExchangeAdd64(IN VOLATILE PLONG_PTR Address,
+RtlAtomicExchangeAdd64(IN PLONG_PTR Address,
                        IN LONG_PTR Value);
 
 XTFASTCALL
 PVOID
-RtlAtomicExchangePointer(IN VOLATILE PVOID *Address,
+RtlAtomicExchangePointer(IN PVOID *Address,
                          IN PVOID Exchange);
 
 XTFASTCALL
@@ -140,38 +140,38 @@ RtlAtomicFlushSingleList(IN PSINGLE_LIST_HEADER Header);
 
 XTFASTCALL
 CHAR
-RtlAtomicIncrement8(IN VOLATILE PCHAR Address);
+RtlAtomicIncrement8(IN PCHAR Address);
 
 XTFASTCALL
 SHORT
-RtlAtomicIncrement16(IN VOLATILE PSHORT Address);
+RtlAtomicIncrement16(IN PSHORT Address);
 
 XTFASTCALL
 LONG
-RtlAtomicIncrement32(IN VOLATILE PLONG Address);
+RtlAtomicIncrement32(IN PLONG Address);
 
 XTFASTCALL
 LONG_PTR
-RtlAtomicIncrement64(IN VOLATILE PLONG_PTR Address);
+RtlAtomicIncrement64(IN PLONG_PTR Address);
 
 XTFASTCALL
 CHAR
-RtlAtomicOr8(IN VOLATILE PCHAR Address,
+RtlAtomicOr8(IN PCHAR Address,
              IN CHAR Mask);
 
 XTFASTCALL
 SHORT
-RtlAtomicOr16(IN VOLATILE PSHORT Address,
+RtlAtomicOr16(IN PSHORT Address,
               IN SHORT Mask);
 
 XTFASTCALL
 LONG
-RtlAtomicOr32(IN VOLATILE PLONG Address,
+RtlAtomicOr32(IN PLONG Address,
               IN LONG Mask);
 
 XTFASTCALL
 LONG_PTR
-RtlAtomicOr64(IN VOLATILE PLONG_PTR Address,
+RtlAtomicOr64(IN PLONG_PTR Address,
               IN LONG_PTR Mask);
 
 XTFASTCALL
@@ -185,22 +185,22 @@ RtlAtomicPushEntrySingleList(IN PSINGLE_LIST_HEADER Header,
 
 XTFASTCALL
 CHAR
-RtlAtomicXor8(IN VOLATILE PCHAR Address,
+RtlAtomicXor8(IN PCHAR Address,
               IN CHAR Mask);
 
 XTFASTCALL
 SHORT
-RtlAtomicXor16(IN VOLATILE PSHORT Address,
+RtlAtomicXor16(IN PSHORT Address,
                IN SHORT Mask);
 
 XTFASTCALL
 LONG
-RtlAtomicXor32(IN VOLATILE PLONG Address,
+RtlAtomicXor32(IN PLONG Address,
                IN LONG Mask);
 
 XTFASTCALL
 LONG_PTR
-RtlAtomicXor64(IN VOLATILE PLONG_PTR Address,
+RtlAtomicXor64(IN PLONG_PTR Address,
                IN LONG_PTR Mask);
 
 XTFASTCALL
