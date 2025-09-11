@@ -9,10 +9,6 @@
 #include <xtos.hh>
 
 
-/* Kernel Executive */
-namespace EX
-{
-
 /**
  * Acquires the rundown protection for given descriptor.
  *
@@ -25,7 +21,7 @@ namespace EX
  */
 XTFASTCALL
 BOOLEAN
-Rundown::AcquireProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
+EX::Rundown::AcquireProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
 {
     ULONG_PTR CurrentValue, NewValue;
 
@@ -46,8 +42,8 @@ Rundown::AcquireProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
         NewValue = CurrentValue + 2;
 
         /* Exchange the value */
-        NewValue = (ULONG_PTR)RtlAtomicCompareExchangePointer(&Descriptor->Ptr, (PVOID)NewValue,
-                                                                   (PVOID)CurrentValue);
+        NewValue = (ULONG_PTR)RTL::Atomic::CompareExchangePointer(&Descriptor->Ptr, (PVOID)NewValue,
+                                                                  (PVOID)CurrentValue);
 
         /* Make sure protection acquired */
         if(NewValue == CurrentValue)
@@ -73,9 +69,9 @@ Rundown::AcquireProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
  */
 XTFASTCALL
 VOID
-Rundown::CompleteProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
+EX::Rundown::CompleteProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
 {
-    RtlAtomicExchangePointer(&Descriptor->Ptr, (PVOID)EX_RUNDOWN_ACTIVE);
+    RTL::Atomic::ExchangePointer(&Descriptor->Ptr, (PVOID)EX_RUNDOWN_ACTIVE);
 }
 
 /**
@@ -90,7 +86,7 @@ Rundown::CompleteProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
  */
 XTFASTCALL
 VOID
-Rundown::InitializeProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
+EX::Rundown::InitializeProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
 {
     /* Reset descriptor counter */
     Descriptor->Count = 0;
@@ -108,9 +104,9 @@ Rundown::InitializeProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
  */
 XTFASTCALL
 VOID
-Rundown::ReInitializeProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
+EX::Rundown::ReInitializeProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
 {
-    RtlAtomicExchangePointer(&Descriptor->Ptr, NULL);
+    RTL::Atomic::ExchangePointer(&Descriptor->Ptr, NULL);
 }
 
 /**
@@ -125,7 +121,7 @@ Rundown::ReInitializeProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
  */
 XTFASTCALL
 VOID
-Rundown::ReleaseProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
+EX::Rundown::ReleaseProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
 {
     ULONG_PTR CurrentValue, NewValue;
     PEX_RUNDOWN_WAIT_BLOCK WaitBlock;
@@ -138,7 +134,7 @@ Rundown::ReleaseProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
         {
             WaitBlock = (PEX_RUNDOWN_WAIT_BLOCK)(CurrentValue & ~0x1);
 
-            if(!RtlAtomicDecrement64((PLONG_PTR)&WaitBlock->Count))
+            if(!RTL::Atomic::Decrement64((PLONG_PTR)&WaitBlock->Count))
             {
                 KE::Event::SetEvent(&WaitBlock->WakeEvent, 0, FALSE);
             }
@@ -151,8 +147,8 @@ Rundown::ReleaseProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
             NewValue = CurrentValue - 2;
 
             /* Exchange the value */
-            NewValue = (ULONG_PTR)RtlAtomicCompareExchangePointer(&Descriptor->Ptr, (PVOID)NewValue,
-                                                                       (PVOID)CurrentValue);
+            NewValue = (ULONG_PTR)RTL::Atomic::CompareExchangePointer(&Descriptor->Ptr, (PVOID)NewValue,
+                                                                      (PVOID)CurrentValue);
 
             if(NewValue == CurrentValue)
             {
@@ -176,9 +172,7 @@ Rundown::ReleaseProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
  */
 XTFASTCALL
 VOID
-Rundown::WaitForProtectionRelease(IN PEX_RUNDOWN_REFERENCE Descriptor)
+EX::Rundown::WaitForProtectionRelease(IN PEX_RUNDOWN_REFERENCE Descriptor)
 {
     UNIMPLEMENTED;
 }
-
-} /* namespace */
