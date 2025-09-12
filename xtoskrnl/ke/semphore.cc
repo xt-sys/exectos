@@ -9,9 +9,6 @@
 #include <xtos.hh>
 
 
-namespace KE
-{
-
 /**
  * Initializes a kernel semaphore object.
  *
@@ -30,9 +27,9 @@ namespace KE
  */
 XTAPI
 VOID
-Semaphore::InitializeSemaphore(IN PKSEMAPHORE Semaphore,
-                               IN LONG Count,
-                               IN LONG Limit)
+KE::Semaphore::InitializeSemaphore(IN PKSEMAPHORE Semaphore,
+                                   IN LONG Count,
+                                   IN LONG Limit)
 {
     /* Initialize semaphore header and limit */
     Semaphore->Header.Type = SemaphoreObject;
@@ -55,7 +52,7 @@ Semaphore::InitializeSemaphore(IN PKSEMAPHORE Semaphore,
  */
 XTAPI
 LONG
-Semaphore::ReadState(IN PKSEMAPHORE Semaphore)
+KE::Semaphore::ReadState(IN PKSEMAPHORE Semaphore)
 {
     /* Return semaphore's signal state */
     return Semaphore->Header.SignalState;
@@ -82,13 +79,11 @@ Semaphore::ReadState(IN PKSEMAPHORE Semaphore)
  */
 XTAPI
 LONG
-Semaphore::ReleaseSemaphore(IN PKSEMAPHORE Semaphore,
-                            IN KPRIORITY Increment,
-                            IN LONG Adjustment,
-                            IN BOOLEAN Wait)
+KE::Semaphore::ReleaseSemaphore(IN PKSEMAPHORE Semaphore,
+                                IN KPRIORITY Increment,
+                                IN LONG Adjustment,
+                                IN BOOLEAN Wait)
 {
     UNIMPLEMENTED;
     return 0;
 }
-
-} /* namespace */

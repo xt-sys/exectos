@@ -9,13 +9,9 @@
 #include <xtos.hh>
 
 
-/* Kernel Library */
-namespace KE
-{
-
 XTAPI
 PETHREAD
-KThread::GetInitialThread(VOID)
+KE::KThread::GetInitialThread(VOID)
 {
     return &InitialThread;
 }
@@ -32,7 +28,7 @@ KThread::GetInitialThread(VOID)
  */
 XTFASTCALL
 VOID
-KThread::ExitDispatcher(IN KRUNLEVEL OldRunLevel)
+KE::KThread::ExitDispatcher(IN KRUNLEVEL OldRunLevel)
 {
     UNIMPLEMENTED;
 
@@ -73,15 +69,15 @@ KThread::ExitDispatcher(IN KRUNLEVEL OldRunLevel)
  */
 XTAPI
 XTSTATUS
-KThread::InitializeThread(IN PKPROCESS Process,
-                          IN OUT PKTHREAD Thread,
-                          IN PKSYSTEM_ROUTINE SystemRoutine,
-                          IN PKSTART_ROUTINE StartRoutine,
-                          IN PVOID StartContext,
-                          IN PCONTEXT Context,
-                          IN PVOID EnvironmentBlock,
-                          IN PVOID Stack,
-                          IN BOOLEAN RunThread)
+KE::KThread::InitializeThread(IN PKPROCESS Process,
+                              IN OUT PKTHREAD Thread,
+                              IN PKSYSTEM_ROUTINE SystemRoutine,
+                              IN PKSTART_ROUTINE StartRoutine,
+                              IN PVOID StartContext,
+                              IN PCONTEXT Context,
+                              IN PVOID EnvironmentBlock,
+                              IN PVOID Stack,
+                              IN BOOLEAN RunThread)
 {
     PKWAIT_BLOCK TimerWaitBlock;
     BOOLEAN Allocation;
@@ -217,7 +213,7 @@ KThread::InitializeThread(IN PKPROCESS Process,
  */
 XTAPI
 VOID
-KThread::StartThread(IN PKTHREAD Thread)
+KE::KThread::StartThread(IN PKTHREAD Thread)
 {
     UNIMPLEMENTED;
 }
@@ -246,11 +242,11 @@ KThread::StartThread(IN PKTHREAD Thread)
  */
 XTAPI
 VOID
-KThread::SuspendNop(IN PKAPC Apc,
-                    IN OUT PKNORMAL_ROUTINE *NormalRoutine,
-                    IN OUT PVOID *NormalContext,
-                    IN OUT PVOID *SystemArgument1,
-                    IN OUT PVOID *SystemArgument2)
+KE::KThread::SuspendNop(IN PKAPC Apc,
+                        IN OUT PKNORMAL_ROUTINE *NormalRoutine,
+                        IN OUT PVOID *NormalContext,
+                        IN OUT PVOID *SystemArgument1,
+                        IN OUT PVOID *SystemArgument2)
 {
     /* No action here */
 }
@@ -267,7 +263,7 @@ KThread::SuspendNop(IN PKAPC Apc,
  */
 XTAPI
 VOID
-KThread::SuspendRundown(IN PKAPC Apc)
+KE::KThread::SuspendRundown(IN PKAPC Apc)
 {
     /* No action here */
 }
@@ -290,14 +286,14 @@ KThread::SuspendRundown(IN PKAPC Apc)
  */
 XTAPI
 VOID
-KThread::SuspendThread(IN PVOID NormalContext,
-              IN PVOID SystemArgument1,
-              IN PVOID SystemArgument2)
+KE::KThread::SuspendThread(IN PVOID NormalContext,
+                           IN PVOID SystemArgument1,
+                           IN PVOID SystemArgument2)
 {
     UNIMPLEMENTED;
 }
 
-} /* namespace */
+
 
 
 

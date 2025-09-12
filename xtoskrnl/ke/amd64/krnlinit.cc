@@ -9,10 +9,6 @@
 #include <xtos.hh>
 
 
-/* Kernel Library */
-namespace KE
-{
-
 /**
  * This routine initializes XT kernel.
  *
@@ -22,7 +18,7 @@ namespace KE
  */
 XTAPI
 VOID
-KernelInit::InitializeKernel(VOID)
+KE::KernelInit::InitializeKernel(VOID)
 {
     XTSTATUS Status;
 
@@ -45,7 +41,7 @@ KernelInit::InitializeKernel(VOID)
  */
 XTAPI
 VOID
-KernelInit::InitializeMachine(VOID)
+KE::KernelInit::InitializeMachine(VOID)
 {
     /* Re-enable IDE interrupts */
     HlIoPortOutByte(0x376, 0);
@@ -70,7 +66,7 @@ KernelInit::InitializeMachine(VOID)
  */
 XTAPI
 VOID
-KernelInit::StartKernel(VOID)
+KE::KernelInit::StartKernel(VOID)
 {
     PKPROCESSOR_CONTROL_BLOCK Prcb;
     ULONG_PTR PageDirectory[2];
@@ -125,7 +121,7 @@ KernelInit::StartKernel(VOID)
  */
 XTAPI
 VOID
-KernelInit::SwitchBootStack(VOID)
+KE::KernelInit::SwitchBootStack(VOID)
 {
     ULONG_PTR Stack;
     PVOID StartKernel;
@@ -148,5 +144,3 @@ KernelInit::SwitchBootStack(VOID)
                        "r" (StartKernel)
                      : "rdx", "rbp", "rsp", "memory");
 }
-
-} /* namespace */

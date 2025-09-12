@@ -9,10 +9,6 @@
 #include <xtos.hh>
 
 
-/* Kernel Library */
-namespace KE
-{
-
 /**
  * Gets the current running level of the current processor.
  *
@@ -22,7 +18,7 @@ namespace KE
  */
 XTFASTCALL
 KRUNLEVEL
-RunLevel::GetCurrentRunLevel(VOID)
+KE::RunLevel::GetCurrentRunLevel(VOID)
 {
     return HlGetRunLevel();
 }
@@ -39,7 +35,7 @@ RunLevel::GetCurrentRunLevel(VOID)
  */
 XTFASTCALL
 VOID
-RunLevel::LowerRunLevel(IN KRUNLEVEL RunLevel)
+KE::RunLevel::LowerRunLevel(IN KRUNLEVEL RunLevel)
 {
     KRUNLEVEL OldRunLevel;
 
@@ -66,7 +62,7 @@ RunLevel::LowerRunLevel(IN KRUNLEVEL RunLevel)
  */
 XTFASTCALL
 KRUNLEVEL
-RunLevel::RaiseRunLevel(IN KRUNLEVEL RunLevel)
+KE::RunLevel::RaiseRunLevel(IN KRUNLEVEL RunLevel)
 {
     KRUNLEVEL OldRunLevel;
 
@@ -84,7 +80,6 @@ RunLevel::RaiseRunLevel(IN KRUNLEVEL RunLevel)
     return OldRunLevel;
 }
 
-} /* namespace */
 
 
 /* TEMPORARY FOR COMPATIBILITY WITH C CODE */

@@ -9,13 +9,9 @@
 #include <xtos.hh>
 
 
-/* Kernel Library */
-namespace KE
-{
-
 XTAPI
 PVOID
-BootInformation::GetDebugPrint(VOID)
+KE::BootInformation::GetDebugPrint(VOID)
 {
     return InitializationBlock->LoaderInformation.DbgPrint;
 }
@@ -29,7 +25,7 @@ BootInformation::GetDebugPrint(VOID)
  */
 XTAPI
 SYSTEM_FIRMWARE_TYPE
-BootInformation::GetFirmwareType(VOID)
+KE::BootInformation::GetFirmwareType(VOID)
 {
     return InitializationBlock->FirmwareInformation.FirmwareType;
 }
@@ -49,8 +45,8 @@ BootInformation::GetFirmwareType(VOID)
  */
 XTAPI
 XTSTATUS
-BootInformation::GetKernelParameter(IN PCWSTR ParameterName,
-                                    OUT PCWSTR *Parameter)
+KE::BootInformation::GetKernelParameter(IN PCWSTR ParameterName,
+                                        OUT PCWSTR *Parameter)
 {
     PCWSTR Match, SearchStart;
     SIZE_T ParameterNameLength;
@@ -63,7 +59,7 @@ BootInformation::GetKernelParameter(IN PCWSTR ParameterName,
     }
 
     /* Get the length of the parameter name we are looking for */
-    ParameterNameLength = RtlWideStringLength(ParameterName, 0);
+    ParameterNameLength = RTL::WideString::WideStringLength(ParameterName, 0);
     if(ParameterNameLength == 0)
     {
         /* Do not allow empty parameter names */
@@ -77,7 +73,7 @@ BootInformation::GetKernelParameter(IN PCWSTR ParameterName,
     SearchStart = InitializationBlock->KernelParameters;
 
     /* Search for the parameter name */
-    while((Match = RtlFindWideStringInsensitive(SearchStart, ParameterName)))
+    while((Match = RTL::WideString::FindWideStringInsensitive(SearchStart, ParameterName)))
     {
         /* Check if the match is at the start of the string or preceded by a space */
         if(Match == InitializationBlock->KernelParameters || *(Match - 1) == L' ')
@@ -102,32 +98,37 @@ BootInformation::GetKernelParameter(IN PCWSTR ParameterName,
 }
 
 /**
+ * Retrieves a pointer to the list of system resources.
  *
+ * @return This routine returns a pointer to the list of system resources.
  *
- *
- *
+ * @since XT 1.0
  */
 XTAPI
 PLIST_ENTRY
-BootInformation::GetSystemResources(VOID)
+KE::BootInformation::GetSystemResources(VOID)
 {
     return &InitializationBlock->SystemResourcesListHead;
 }
 
 /**
+ * Initializes the bootloader-provided system information.
  *
+ * @param Block
+ *        Supplies a pointer to the kernel initialization block.
  *
+ * @return This routine does not return any value.
  *
- *
+ * @since XT 1.0
  */
 XTAPI
 VOID
-BootInformation::SetInitializationBlock(IN PKERNEL_INITIALIZATION_BLOCK Block)
+KE::BootInformation::InitializeInitializationBlock(IN PKERNEL_INITIALIZATION_BLOCK Block)
 {
     InitializationBlock = Block;
 }
 
-} /* namespace */
+
 
 
 /* TEMPORARY FOR COMPATIBILITY WITH C CODE */
@@ -140,6 +141,7 @@ KeGetKernelParameter(IN PCWSTR ParameterName,
     return KE::BootInformation::GetKernelParameter(ParameterName, Parameter);
 }
 
+/* TEMPORARY FOR COMPATIBILITY WITH C CODE */
 XTCLINK
 XTAPI
 PKERNEL_INITIALIZATION_BLOCK

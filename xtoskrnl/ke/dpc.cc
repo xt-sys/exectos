@@ -9,10 +9,6 @@
 #include <xtos.hh>
 
 
-/* Kernel Library */
-namespace KE
-{
-
 /**
  * Initializes Deferred Procedure Call (DPC) object.
  *
@@ -31,9 +27,9 @@ namespace KE
  */
 XTAPI
 VOID
-Dpc::InitializeDpc(IN PKDPC Dpc,
-                   IN PKDEFERRED_ROUTINE DpcRoutine,
-                   IN PVOID DpcContext)
+KE::Dpc::InitializeDpc(IN PKDPC Dpc,
+                       IN PKDEFERRED_ROUTINE DpcRoutine,
+                       IN PVOID DpcContext)
 {
     /* Initialize DPC */
     Dpc->Type = DpcObject;
@@ -64,9 +60,9 @@ Dpc::InitializeDpc(IN PKDPC Dpc,
  */
 XTAPI
 VOID
-Dpc::InitializeThreadedDpc(IN PKDPC Dpc,
-                           IN PKDEFERRED_ROUTINE DpcRoutine,
-                           IN PVOID DpcContext)
+KE::Dpc::InitializeThreadedDpc(IN PKDPC Dpc,
+                               IN PKDEFERRED_ROUTINE DpcRoutine,
+                               IN PVOID DpcContext)
 {
     /* Initialize threaded DPC */
     Dpc->Type = ThreadedDpcObject;
@@ -94,8 +90,8 @@ Dpc::InitializeThreadedDpc(IN PKDPC Dpc,
  */
 XTAPI
 VOID
-Dpc::SetTargetProcessor(IN PKDPC Dpc,
-                        IN CCHAR Number)
+KE::Dpc::SetTargetProcessor(IN PKDPC Dpc,
+                            IN CCHAR Number)
 {
     Dpc->Number = MAXIMUM_PROCESSORS + Number;
 }
@@ -112,7 +108,7 @@ Dpc::SetTargetProcessor(IN PKDPC Dpc,
  */
 XTAPI
 VOID
-Dpc::SignalCallDone(IN PVOID SystemArgument)
+KE::Dpc::SignalCallDone(IN PVOID SystemArgument)
 {
     RTL::Atomic::Decrement32((PLONG)SystemArgument);
 }
@@ -129,7 +125,7 @@ Dpc::SignalCallDone(IN PVOID SystemArgument)
  */
 XTAPI
 BOOLEAN
-Dpc::SignalCallSynchronize(IN PVOID SystemArgument)
+KE::Dpc::SignalCallSynchronize(IN PVOID SystemArgument)
 {
     UNIMPLEMENTED;
 
@@ -149,9 +145,7 @@ Dpc::SignalCallSynchronize(IN PVOID SystemArgument)
  */
 XTFASTCALL
 VOID
-Dpc::RetireList(IN PKPROCESSOR_CONTROL_BLOCK Prcb)
+KE::Dpc::RetireList(IN PKPROCESSOR_CONTROL_BLOCK Prcb)
 {
     UNIMPLEMENTED;
 }
-
-} /* namespace */

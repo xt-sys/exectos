@@ -9,9 +9,6 @@
 #include <xtos.hh>
 
 
-namespace KE
-{
-
 /**
  * Cancels the timer.
  *
@@ -24,7 +21,7 @@ namespace KE
  */
 XTAPI
 BOOLEAN
-Timer::CancelTimer(IN PKTIMER Timer)
+KE::Timer::CancelTimer(IN PKTIMER Timer)
 {
     BOOLEAN Result;
     KRUNLEVEL RunLevel;
@@ -64,7 +61,7 @@ Timer::CancelTimer(IN PKTIMER Timer)
  */
 XTAPI
 VOID
-Timer::ClearTimer(IN PKTIMER Timer)
+KE::Timer::ClearTimer(IN PKTIMER Timer)
 {
     /* Clear signal state */
     Timer->Header.SignalState = 0;
@@ -82,7 +79,7 @@ Timer::ClearTimer(IN PKTIMER Timer)
  */
 XTAPI
 BOOLEAN
-Timer::GetState(IN PKTIMER Timer)
+KE::Timer::GetState(IN PKTIMER Timer)
 {
     /* Return timer state */
     return (BOOLEAN)Timer->Header.SignalState;
@@ -103,8 +100,8 @@ Timer::GetState(IN PKTIMER Timer)
  */
 XTAPI
 VOID
-Timer::InitializeTimer(OUT PKTIMER Timer,
-                       IN KTIMER_TYPE Type)
+KE::Timer::InitializeTimer(OUT PKTIMER Timer,
+                           IN KTIMER_TYPE Type)
 {
     /* Initialize the header */
     Timer->Header.Type = TimerNotificationObject + (UCHAR)Type;
@@ -132,7 +129,7 @@ Timer::InitializeTimer(OUT PKTIMER Timer,
  */
 XTAPI
 ULONGLONG
-Timer::QueryTimer(IN PKTIMER Timer)
+KE::Timer::QueryTimer(IN PKTIMER Timer)
 {
     KRUNLEVEL RunLevel;
     ULONGLONG DueTime;
@@ -180,10 +177,10 @@ Timer::QueryTimer(IN PKTIMER Timer)
  */
 XTAPI
 VOID
-Timer::SetTimer(IN PKTIMER Timer,
-                IN LARGE_INTEGER DueTime,
-                IN LONG Period,
-                IN PKDPC Dpc)
+KE::Timer::SetTimer(IN PKTIMER Timer,
+                    IN LARGE_INTEGER DueTime,
+                    IN LONG Period,
+                    IN PKDPC Dpc)
 {
     UNIMPLEMENTED;
 }
@@ -200,11 +197,9 @@ Timer::SetTimer(IN PKTIMER Timer,
  */
 XTAPI
 VOID
-Timer::RemoveTimer(IN OUT PKTIMER Timer)
+KE::Timer::RemoveTimer(IN OUT PKTIMER Timer)
 {
     /* Remove the timer from the list */
     Timer->Header.Inserted = FALSE;
     RtlRemoveEntryList(&Timer->TimerListEntry);
 }
-
-} /* namespace */

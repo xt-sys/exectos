@@ -9,10 +9,6 @@
 #include <xtos.hh>
 
 
-/* Kernel Library */
-namespace KE
-{
-
 /**
  * Looks for an unacquired system resource of the specified type and acquires it.
  *
@@ -28,8 +24,8 @@ namespace KE
  */
 XTAPI
 XTSTATUS
-SystemResources::AcquireResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
-                                 OUT PSYSTEM_RESOURCE_HEADER *ResourceHeader)
+KE::SystemResources::AcquireResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
+                                     OUT PSYSTEM_RESOURCE_HEADER *ResourceHeader)
 {
     /* Get system resource and acquire an ownership */
     return GetSystemResource(ResourceType, TRUE, ResourceHeader);
@@ -53,9 +49,9 @@ SystemResources::AcquireResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
  */
 XTAPI
 XTSTATUS
-SystemResources::GetSystemResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
-                                   IN BOOLEAN ResourceLock,
-                                   OUT PSYSTEM_RESOURCE_HEADER *ResourceHeader)
+KE::SystemResources::GetSystemResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
+                                       IN BOOLEAN ResourceLock,
+                                       OUT PSYSTEM_RESOURCE_HEADER *ResourceHeader)
 {
     PSYSTEM_RESOURCE_HEADER Resource;
     PLIST_ENTRY ListEntry;
@@ -141,8 +137,8 @@ SystemResources::GetSystemResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
  */
 XTAPI
 XTSTATUS
-SystemResources::GetResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
-                             OUT PSYSTEM_RESOURCE_HEADER *ResourceHeader)
+KE::SystemResources::GetResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
+                                 OUT PSYSTEM_RESOURCE_HEADER *ResourceHeader)
 {
     /* Get system resource without acquiring an ownership */
     return GetSystemResource(ResourceType, FALSE, ResourceHeader);
@@ -157,7 +153,7 @@ SystemResources::GetResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
  */
 XTAPI
 VOID
-SystemResources::InitializeResources(VOID)
+KE::SystemResources::InitializeResources(VOID)
 {
     PSYSTEM_RESOURCE_HEADER ResourceHeader;
     PLIST_ENTRY ListEntry, NextListEntry;
@@ -221,7 +217,7 @@ SystemResources::InitializeResources(VOID)
  */
 XTAPI
 VOID
-SystemResources::ReleaseResource(IN PSYSTEM_RESOURCE_HEADER ResourceHeader)
+KE::SystemResources::ReleaseResource(IN PSYSTEM_RESOURCE_HEADER ResourceHeader)
 {
     /* Disable interrupts and acquire a spinlock */
     AR::CpuFunc::ClearInterruptFlag();
@@ -234,5 +230,3 @@ SystemResources::ReleaseResource(IN PSYSTEM_RESOURCE_HEADER ResourceHeader)
     SpinLock::ReleaseSpinLock(&ResourcesLock);
     AR::CpuFunc::SetInterruptFlag();
 }
-
-} /* namespace */

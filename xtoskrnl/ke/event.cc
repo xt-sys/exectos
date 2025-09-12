@@ -9,10 +9,6 @@
 #include <xtos.hh>
 
 
-/* Kernel Library */
-namespace KE
-{
-
 /**
  * Clears the signal state of the event.
  *
@@ -25,7 +21,7 @@ namespace KE
  */
 XTAPI
 VOID
-Event::ClearEvent(IN PKEVENT Event)
+KE::Event::ClearEvent(IN PKEVENT Event)
 {
     /* Clear event's signal state */
     Event->Header.SignalState = FALSE;
@@ -49,9 +45,9 @@ Event::ClearEvent(IN PKEVENT Event)
  */
 XTAPI
 VOID
-Event::InitializeEvent(OUT PKEVENT Event,
-                       IN KEVENT_TYPE EventType,
-                       IN BOOLEAN InitialState)
+KE::Event::InitializeEvent(OUT PKEVENT Event,
+                           IN KEVENT_TYPE EventType,
+                           IN BOOLEAN InitialState)
 {
     /* Initialize event dispatcher header */
     Event->Header.Type = EventType;
@@ -79,13 +75,11 @@ Event::InitializeEvent(OUT PKEVENT Event,
  */
 XTAPI
 LONG
-Event::SetEvent(IN PKEVENT Event,
-                IN KPRIORITY Increment,
-                IN BOOLEAN Wait)
+KE::Event::SetEvent(IN PKEVENT Event,
+                    IN KPRIORITY Increment,
+                    IN BOOLEAN Wait)
 {
     UNIMPLEMENTED;
 
     return 0;
 }
-
-} /* namespace */

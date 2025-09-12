@@ -9,10 +9,6 @@
 #include <xtos.hh>
 
 
-/* Kernel Library */
-namespace KE
-{
-
 /**
  * Initializes CPU architecture dependent context of a thread.
  *
@@ -37,11 +33,11 @@ namespace KE
  */
 XTAPI
 VOID
-KThread::InitializeThreadContext(IN PKTHREAD Thread,
-                           IN PKSYSTEM_ROUTINE SystemRoutine,
-                           IN PKSTART_ROUTINE StartRoutine,
-                           IN PVOID StartContext,
-                           IN PCONTEXT ContextRecord)
+KE::KThread::InitializeThreadContext(IN PKTHREAD Thread,
+                                     IN PKSYSTEM_ROUTINE SystemRoutine,
+                                     IN PKSTART_ROUTINE StartRoutine,
+                                     IN PVOID StartContext,
+                                     IN PCONTEXT ContextRecord)
 {
     PKTHREAD_INIT_FRAME ThreadFrame;
 
@@ -49,7 +45,7 @@ KThread::InitializeThreadContext(IN PKTHREAD Thread,
     ThreadFrame = ((PKTHREAD_INIT_FRAME)Thread->InitialStack) - 1;
 
     /* Fill floating point save area with zeroes */
-    RtlZeroMemory(&ThreadFrame->NpxFrame, sizeof(FLOATING_SAVE_AREA));
+    RTL::Memory::ZeroMemory(&ThreadFrame->NpxFrame, sizeof(FLOATING_SAVE_AREA));
 
     /* Check if context provided for this thread */
     if(ContextRecord)
@@ -58,8 +54,8 @@ KThread::InitializeThreadContext(IN PKTHREAD Thread,
         UNIMPLEMENTED;
 
         /* Fill exception and trap frames with zeroes */
-        RtlZeroMemory(&ThreadFrame->ExceptionFrame, sizeof(KEXCEPTION_FRAME));
-        RtlZeroMemory(&ThreadFrame->TrapFrame, sizeof(KTRAP_FRAME));
+        RTL::Memory::ZeroMemory(&ThreadFrame->ExceptionFrame, sizeof(KEXCEPTION_FRAME));
+        RTL::Memory::ZeroMemory(&ThreadFrame->TrapFrame, sizeof(KTRAP_FRAME));
 
         /* Disable debug registers and enable context registers */
         ContextRecord->ContextFlags &= ~CONTEXT_DEBUG_REGISTERS | CONTEXT_CONTROL;
@@ -120,5 +116,3 @@ KThread::InitializeThreadContext(IN PKTHREAD Thread,
     /* Set thread stack */
     Thread->KernelStack = &ThreadFrame->SwitchFrame;
 }
-
-} /* namespace */

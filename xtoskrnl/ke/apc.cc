@@ -9,10 +9,6 @@
 #include <xtos.hh>
 
 
-/* Kernel Library */
-namespace KE
-{
-
 /**
  * Initializes an APC object.
  *
@@ -46,14 +42,14 @@ namespace KE
  */
 XTAPI
 VOID
-Apc::InitializeApc(IN PKAPC Apc,
-                   IN PKTHREAD Thread,
-                   IN KAPC_ENVIRONMENT Environment,
-                   IN PKKERNEL_ROUTINE KernelRoutine,
-                   IN PKRUNDOWN_ROUTINE RundownRoutine,
-                   IN PKNORMAL_ROUTINE NormalRoutine,
-                   IN KPROCESSOR_MODE ApcMode,
-                   IN PVOID Context)
+KE::Apc::InitializeApc(IN PKAPC Apc,
+                       IN PKTHREAD Thread,
+                       IN KAPC_ENVIRONMENT Environment,
+                       IN PKKERNEL_ROUTINE KernelRoutine,
+                       IN PKRUNDOWN_ROUTINE RundownRoutine,
+                       IN PKNORMAL_ROUTINE NormalRoutine,
+                       IN KPROCESSOR_MODE ApcMode,
+                       IN PVOID Context)
 {
     /* Set APC type and thread */
     Apc->Type = ApcObject;
@@ -93,5 +89,3 @@ Apc::InitializeApc(IN PKAPC Apc,
     /* Mark APC as not inserted yet */
     Apc->Inserted = FALSE;
 }
-
-} /* namespace */

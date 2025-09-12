@@ -9,10 +9,6 @@
 #include <xtos.hh>
 
 
-/* Kernel Library */
-namespace KE
-{
-
 /**
  * Halts the system.
  *
@@ -22,7 +18,7 @@ namespace KE
  */
 XTAPI
 VOID
-Crash::HaltSystem(VOID)
+KE::Crash::HaltSystem(VOID)
 {
     /* Enter infinite loop */
     for(;;)
@@ -45,7 +41,7 @@ Crash::HaltSystem(VOID)
  */
 XTAPI
 VOID
-Crash::Panic(IN ULONG Code)
+KE::Crash::Panic(IN ULONG Code)
 {
     PanicEx(Code, 0, 0, 0, 0);
 }
@@ -74,7 +70,7 @@ Crash::Panic(IN ULONG Code)
  */
 XTAPI
 VOID
-Crash::PanicEx(IN ULONG Code,
+KE::Crash::PanicEx(IN ULONG Code,
                IN ULONG_PTR Parameter1,
                IN ULONG_PTR Parameter2,
                IN ULONG_PTR Parameter3,
@@ -84,7 +80,6 @@ Crash::PanicEx(IN ULONG Code,
     HaltSystem();
 }
 
-} /* namespace */
 
 
 /* TEMPORARY FOR COMPATIBILITY WITH C CODE */

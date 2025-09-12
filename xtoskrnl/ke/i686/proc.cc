@@ -9,10 +9,6 @@
 #include <xtos.hh>
 
 
-/* Kernel Library */
-namespace KE
-{
-
 /**
  * Gets the processor block for the currently executing processor.
  *
@@ -22,7 +18,7 @@ namespace KE
  */
 XTAPI
 PKPROCESSOR_BLOCK
-Processor::GetCurrentProcessorBlock(VOID)
+KE::Processor::GetCurrentProcessorBlock(VOID)
 {
     /* Get processor block from FS register */
     return (PKPROCESSOR_BLOCK)AR::CpuFunc::ReadFSDualWord(FIELD_OFFSET(KPROCESSOR_BLOCK, Self));
@@ -37,7 +33,7 @@ Processor::GetCurrentProcessorBlock(VOID)
  */
 XTAPI
 PKPROCESSOR_CONTROL_BLOCK
-Processor::GetCurrentProcessorControlBlock(VOID)
+KE::Processor::GetCurrentProcessorControlBlock(VOID)
 {
     return (PKPROCESSOR_CONTROL_BLOCK)AR::CpuFunc::ReadFSDualWord(FIELD_OFFSET(KPROCESSOR_BLOCK, CurrentPrcb));
 }
@@ -51,7 +47,7 @@ Processor::GetCurrentProcessorControlBlock(VOID)
  */
 XTAPI
 ULONG
-Processor::GetCurrentProcessorNumber(VOID)
+KE::Processor::GetCurrentProcessorNumber(VOID)
 {
     return (ULONG)AR::CpuFunc::ReadFSDualWord(FIELD_OFFSET(KPROCESSOR_BLOCK, CpuNumber));
 }
@@ -65,7 +61,7 @@ Processor::GetCurrentProcessorNumber(VOID)
  */
 XTAPI
 PKTHREAD
-Processor::GetCurrentThread(VOID)
+KE::Processor::GetCurrentThread(VOID)
 {
     return (PKTHREAD)AR::CpuFunc::ReadFSDualWord(FIELD_OFFSET(KPROCESSOR_BLOCK, Prcb.CurrentThread));
 }
@@ -82,7 +78,7 @@ Processor::GetCurrentThread(VOID)
  */
 XTAPI
 VOID
-Processor::SaveProcessorState(OUT PKPROCESSOR_STATE CpuState)
+KE::Processor::SaveProcessorState(OUT PKPROCESSOR_STATE CpuState)
 {
     /* Save CR registers */
     CpuState->SpecialRegisters.Cr0 = AR::CpuFunc::ReadControlRegister(0);
@@ -105,7 +101,6 @@ Processor::SaveProcessorState(OUT PKPROCESSOR_STATE CpuState)
     AR::CpuFunc::StoreTaskRegister(&CpuState->SpecialRegisters.Tr);
 }
 
-} /* namespace */
 
 
 

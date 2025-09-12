@@ -9,10 +9,6 @@
 #include <xtos.hh>
 
 
-/* Kernel Library */
-namespace KE
-{
-
 /**
  * Initializes CPU architecture dependent context of a thread.
  *
@@ -37,11 +33,11 @@ namespace KE
  */
 XTAPI
 VOID
-KThread::InitializeThreadContext(IN PKTHREAD Thread,
-                                 IN PKSYSTEM_ROUTINE SystemRoutine,
-                                 IN PKSTART_ROUTINE StartRoutine,
-                                 IN PVOID StartContext,
-                                 IN PCONTEXT ContextRecord)
+KE::KThread::InitializeThreadContext(IN PKTHREAD Thread,
+                                     IN PKSYSTEM_ROUTINE SystemRoutine,
+                                     IN PKSTART_ROUTINE StartRoutine,
+                                     IN PVOID StartContext,
+                                     IN PCONTEXT ContextRecord)
 {
     PKTHREAD_INIT_FRAME ThreadFrame;
     PFX_SAVE_FORMAT FxSaveFormat;
@@ -50,7 +46,7 @@ KThread::InitializeThreadContext(IN PKTHREAD Thread,
     ThreadFrame = (PKTHREAD_INIT_FRAME)((ULONG_PTR)Thread->InitialStack - sizeof(KTHREAD_INIT_FRAME));
 
     /* Fill floating point save area with zeroes */
-    RtlZeroMemory(&ThreadFrame->NpxFrame, sizeof(FX_SAVE_AREA));
+    RTL::Memory::ZeroMemory(&ThreadFrame->NpxFrame, sizeof(FX_SAVE_AREA));
 
     /* Check if context provided for this thread */
     if(ContextRecord)
@@ -59,7 +55,7 @@ KThread::InitializeThreadContext(IN PKTHREAD Thread,
         UNIMPLEMENTED;
 
         /* Fill trap frame with zeroes */
-        RtlZeroMemory(&ThreadFrame->TrapFrame, sizeof(KTRAP_FRAME));
+        RTL::Memory::ZeroMemory(&ThreadFrame->TrapFrame, sizeof(KTRAP_FRAME));
 
         /* Disable debug registers and enable context registers */
         ContextRecord->ContextFlags &= ~CONTEXT_DEBUG_REGISTERS | CONTEXT_CONTROL;
@@ -118,5 +114,3 @@ KThread::InitializeThreadContext(IN PKTHREAD Thread,
     /* Set thread stack */
     Thread->KernelStack = &ThreadFrame->SwitchFrame;
 }
-
-} /* namespace */

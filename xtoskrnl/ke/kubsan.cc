@@ -9,10 +9,6 @@
 #include <xtos.hh>
 
 
-/* Kernel Library */
-namespace KE
-{
-
 /**
  * Checks whether handled UBSAN error should be reported.
  *
@@ -25,7 +21,7 @@ namespace KE
  */
 XTCDECL
 BOOLEAN
-KUbsan::CheckReport(PKUBSAN_SOURCE_LOCATION Location)
+KE::KUbsan::CheckReport(PKUBSAN_SOURCE_LOCATION Location)
 {
     /* Make sure, this error should be reported */
     return (BOOLEAN)!ActiveFrame;
@@ -46,8 +42,8 @@ KUbsan::CheckReport(PKUBSAN_SOURCE_LOCATION Location)
  */
 XTCDECL
 VOID
-KUbsan::EnterFrame(PKUBSAN_SOURCE_LOCATION Location,
-                  PCCHAR Reason)
+KE::KUbsan::EnterFrame(PKUBSAN_SOURCE_LOCATION Location,
+                       PCCHAR Reason)
 {
     /* Enter UBSAN frame */
     ActiveFrame = TRUE;
@@ -72,8 +68,8 @@ KUbsan::EnterFrame(PKUBSAN_SOURCE_LOCATION Location,
  */
 XTCDECL
 LONGLONG
-KUbsan::GetSignedValue(PKUBSAN_TYPE_DESCRIPTOR Type,
-                      PVOID Value)
+KE::KUbsan::GetSignedValue(PKUBSAN_TYPE_DESCRIPTOR Type,
+                           PVOID Value)
 {
     ULONG BitWidth, ExtraBits;
     ULONG_PTR LongValue;
@@ -106,7 +102,7 @@ KUbsan::GetSignedValue(PKUBSAN_TYPE_DESCRIPTOR Type,
  */
 XTCDECL
 PCCHAR
-KUbsan::GetTypeKind(UCHAR TypeCheckKind)
+KE::KUbsan::GetTypeKind(UCHAR TypeCheckKind)
 {
     /* Get type kind name */
     switch(TypeCheckKind)
@@ -151,8 +147,8 @@ KUbsan::GetTypeKind(UCHAR TypeCheckKind)
  */
 XTCDECL
 ULONGLONG
-KUbsan::GetUnsignedValue(PKUBSAN_TYPE_DESCRIPTOR Type,
-                        PVOID Value)
+KE::KUbsan::GetUnsignedValue(PKUBSAN_TYPE_DESCRIPTOR Type,
+                             PVOID Value)
 {
     ULONG BitWidth;
 
@@ -188,9 +184,9 @@ KUbsan::GetUnsignedValue(PKUBSAN_TYPE_DESCRIPTOR Type,
  */
 XTCDECL
 VOID
-KUbsan::HandleDivisionOverflow(PKUBSAN_OVERFLOW_DATA Data,
-                              PVOID Lhs,
-                              PVOID Rhs)
+KE::KUbsan::HandleDivisionOverflow(PKUBSAN_OVERFLOW_DATA Data,
+                                   PVOID Lhs,
+                                   PVOID Rhs)
 {
     /* Check if this error was already reported */
     if(!CheckReport(&Data->Location))
@@ -236,9 +232,9 @@ KUbsan::HandleDivisionOverflow(PKUBSAN_OVERFLOW_DATA Data,
  */
 XTCDECL
 VOID
-KUbsan::HandleFloatCastOverflow(PKUBSAN_FLOAT_CAST_OVERFLOW_DATA Data,
-                               ULONG_PTR Lhs,
-                               ULONG_PTR Rhs)
+KE::KUbsan::HandleFloatCastOverflow(PKUBSAN_FLOAT_CAST_OVERFLOW_DATA Data,
+                                    ULONG_PTR Lhs,
+                                    ULONG_PTR Rhs)
 {
     /* Check if this error was already reported */
     if(!CheckReport(&Data->Location))
@@ -272,8 +268,8 @@ KUbsan::HandleFloatCastOverflow(PKUBSAN_FLOAT_CAST_OVERFLOW_DATA Data,
  */
 XTCDECL
 VOID
-KUbsan::HandleFunctionTypeMismatch(PKUBSAN_FUNCTION_TYPE_MISMATCH_DATA Data,
-                                  ULONG_PTR Pointer)
+KE::KUbsan::HandleFunctionTypeMismatch(PKUBSAN_FUNCTION_TYPE_MISMATCH_DATA Data,
+                                       ULONG_PTR Pointer)
 {
     /* Check if this error was already reported */
     if(!CheckReport(&Data->Location))
@@ -311,9 +307,9 @@ KUbsan::HandleFunctionTypeMismatch(PKUBSAN_FUNCTION_TYPE_MISMATCH_DATA Data,
  */
 XTCDECL
 VOID
-KUbsan::HandleIntegerOverflow(PKUBSAN_OVERFLOW_DATA Data,
-                             ULONG_PTR Lhs,
-                             ULONG_PTR Rhs)
+KE::KUbsan::HandleIntegerOverflow(PKUBSAN_OVERFLOW_DATA Data,
+                                  ULONG_PTR Lhs,
+                                  ULONG_PTR Rhs)
 {
     /* Check if this error was already reported */
     if(!CheckReport(&Data->Location))
@@ -344,7 +340,7 @@ KUbsan::HandleIntegerOverflow(PKUBSAN_OVERFLOW_DATA Data,
  */
 XTCDECL
 VOID
-KUbsan::HandleInvalidBuiltin(PKUBSAN_INVALID_BUILTIN_DATA Data)
+KE::KUbsan::HandleInvalidBuiltin(PKUBSAN_INVALID_BUILTIN_DATA Data)
 {
     /* Check if this error was already reported */
     if(!CheckReport(&Data->Location))
@@ -387,8 +383,8 @@ KUbsan::HandleInvalidBuiltin(PKUBSAN_INVALID_BUILTIN_DATA Data)
  */
 XTCDECL
 VOID
-KUbsan::HandleMisalignedAccess(PKUBSAN_TYPE_MISMATCH_DATA Data,
-                              ULONG_PTR Pointer)
+KE::KUbsan::HandleMisalignedAccess(PKUBSAN_TYPE_MISMATCH_DATA Data,
+                                   ULONG_PTR Pointer)
 {
     /* Check if this error was already reported */
     if(!CheckReport(&Data->Location))
@@ -423,8 +419,8 @@ KUbsan::HandleMisalignedAccess(PKUBSAN_TYPE_MISMATCH_DATA Data,
  */
 XTCDECL
 VOID
-KUbsan::HandleNegateOverflow(PKUBSAN_OVERFLOW_DATA Data,
-                            ULONG_PTR OldValue)
+KE::KUbsan::HandleNegateOverflow(PKUBSAN_OVERFLOW_DATA Data,
+                                 ULONG_PTR OldValue)
 {
     /* Check if this error was already reported */
     if(!CheckReport(&Data->Location))
@@ -459,7 +455,7 @@ KUbsan::HandleNegateOverflow(PKUBSAN_OVERFLOW_DATA Data,
  */
 XTCDECL
 VOID
-KUbsan::HandleNullPointerDereference(PKUBSAN_TYPE_MISMATCH_DATA Data)
+KE::KUbsan::HandleNullPointerDereference(PKUBSAN_TYPE_MISMATCH_DATA Data)
 {
     /* Check if this error was already reported */
     if(!CheckReport(&Data->Location))
@@ -493,8 +489,8 @@ KUbsan::HandleNullPointerDereference(PKUBSAN_TYPE_MISMATCH_DATA Data)
  */
 XTCDECL
 VOID
-KUbsan::HandleObjectSizeMismatch(PKUBSAN_TYPE_MISMATCH_DATA Data,
-                                 ULONG_PTR Pointer)
+KE::KUbsan::HandleObjectSizeMismatch(PKUBSAN_TYPE_MISMATCH_DATA Data,
+                                     ULONG_PTR Pointer)
 {
     /* Check if this error was already reported */
     if(!CheckReport(&Data->Location))
@@ -529,8 +525,8 @@ KUbsan::HandleObjectSizeMismatch(PKUBSAN_TYPE_MISMATCH_DATA Data,
  */
 XTCDECL
 VOID
-KUbsan::HandleOutOfBounds(PKUBSAN_OUT_OF_BOUNDS_DATA Data,
-                         ULONG_PTR Index)
+KE::KUbsan::HandleOutOfBounds(PKUBSAN_OUT_OF_BOUNDS_DATA Data,
+                              ULONG_PTR Index)
 {
     /* Check if this error was already reported */
     if(!CheckReport(&Data->Location))
@@ -567,9 +563,9 @@ KUbsan::HandleOutOfBounds(PKUBSAN_OUT_OF_BOUNDS_DATA Data,
  */
 XTCDECL
 VOID
-KUbsan::HandlePointerOverflow(PKUBSAN_OVERFLOW_DATA Data,
-                             ULONG_PTR Lhs,
-                             ULONG_PTR Rhs)
+KE::KUbsan::HandlePointerOverflow(PKUBSAN_OVERFLOW_DATA Data,
+                                  ULONG_PTR Lhs,
+                                  ULONG_PTR Rhs)
 {
     /* Check if this error was already reported */
     if(!CheckReport(&Data->Location))
@@ -608,9 +604,9 @@ KUbsan::HandlePointerOverflow(PKUBSAN_OVERFLOW_DATA Data,
  */
 XTCDECL
 VOID
-KUbsan::HandleShiftOutOfBounds(PKUBSAN_SHIFT_OUT_OF_BOUNDS_DATA Data,
-                              ULONG_PTR Lhs,
-                              ULONG_PTR Rhs)
+KE::KUbsan::HandleShiftOutOfBounds(PKUBSAN_SHIFT_OUT_OF_BOUNDS_DATA Data,
+                                   ULONG_PTR Lhs,
+                                   ULONG_PTR Rhs)
 {
     ULONG LhsBitWidth;
 
@@ -671,8 +667,8 @@ KUbsan::HandleShiftOutOfBounds(PKUBSAN_SHIFT_OUT_OF_BOUNDS_DATA Data,
  */
 XTCDECL
 VOID
-KUbsan::HandleTypeMismatch(PKUBSAN_TYPE_MISMATCH_DATA Data,
-                          ULONG_PTR Pointer)
+KE::KUbsan::HandleTypeMismatch(PKUBSAN_TYPE_MISMATCH_DATA Data,
+                               ULONG_PTR Pointer)
 {
     /* Check the type of mismatch */
     if(!Pointer)
@@ -701,13 +697,12 @@ KUbsan::HandleTypeMismatch(PKUBSAN_TYPE_MISMATCH_DATA Data,
  */
 XTCDECL
 VOID
-KUbsan::LeaveFrame()
+KE::KUbsan::LeaveFrame()
 {
     /* Leave UBSAN frame */
     ActiveFrame = FALSE;
 }
 
-} /* namespace */
 
 
 

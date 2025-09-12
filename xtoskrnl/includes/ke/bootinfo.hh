@@ -26,8 +26,9 @@ namespace KE
             STATIC XTAPI XTSTATUS GetKernelParameter(IN PCWSTR ParameterName,
                                                      OUT PCWSTR *Parameter);
             STATIC XTAPI PLIST_ENTRY GetSystemResources(VOID);
-            STATIC XTAPI VOID SetInitializationBlock(IN PKERNEL_INITIALIZATION_BLOCK Block);
+            STATIC XTAPI VOID InitializeInitializationBlock(IN PKERNEL_INITIALIZATION_BLOCK Block);
 
+            /* TEMPORARY FOR COMPATIBILITY WITH C CODE */
             STATIC XTAPI PKERNEL_INITIALIZATION_BLOCK GetInitializationBlock(VOID)
             {
                 return InitializationBlock;

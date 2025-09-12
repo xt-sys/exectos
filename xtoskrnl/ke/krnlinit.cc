@@ -36,7 +36,7 @@ KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
     }
 
     /* Save the kernel initialization block */
-    BootInformation::SetInitializationBlock(Parameters);
+    BootInformation::InitializeInitializationBlock(Parameters);
 
     /* Check if debugging enabled and if boot loader provided routine for debug printing */
     if(DEBUG && BootInformation::GetDebugPrint())

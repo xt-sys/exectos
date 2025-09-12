@@ -9,13 +9,9 @@
 #include <xtos.hh>
 
 
-/* Kernel Library */
-namespace KE
-{
-
 XTAPI
 PEPROCESS
-KProcess::GetInitialProcess(VOID)
+KE::KProcess::GetInitialProcess(VOID)
 {
     return &InitialProcess;
 }
@@ -44,7 +40,7 @@ KProcess::GetInitialProcess(VOID)
  */
 XTAPI
 VOID
-KProcess::InitializeProcess(IN OUT PKPROCESS Process,
+KE::KProcess::InitializeProcess(IN OUT PKPROCESS Process,
                            IN KPRIORITY Priority,
                            IN KAFFINITY Affinity,
                            IN PULONG_PTR DirectoryTable,
@@ -79,7 +75,6 @@ KProcess::InitializeProcess(IN OUT PKPROCESS Process,
     Process->State = ProcessInMemory;
 }
 
-} /* namespace */
 
 
 

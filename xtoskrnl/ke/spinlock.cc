@@ -9,10 +9,6 @@
 #include <xtos.hh>
 
 
-/* Kernel Library */
-namespace KE
-{
-
 /**
  * Acquires a specified queued spinlock.
  *
@@ -25,7 +21,7 @@ namespace KE
  */
 XTFASTCALL
 VOID
-SpinLock::AcquireQueuedSpinLock(IN KSPIN_LOCK_QUEUE_LEVEL LockLevel)
+KE::SpinLock::AcquireQueuedSpinLock(IN KSPIN_LOCK_QUEUE_LEVEL LockLevel)
 {
     /* Acquire the queued spinlock */
     AcquireSpinLock(KE::Processor::GetCurrentProcessorControlBlock()->LockQueue[LockLevel].Lock);
@@ -43,7 +39,7 @@ SpinLock::AcquireQueuedSpinLock(IN KSPIN_LOCK_QUEUE_LEVEL LockLevel)
  */
 XTFASTCALL
 VOID
-SpinLock::AcquireSpinLock(IN OUT PKSPIN_LOCK SpinLock)
+KE::SpinLock::AcquireSpinLock(IN OUT PKSPIN_LOCK SpinLock)
 {
     /* Try to acquire the lock */
     while(RTL::Atomic::BitTestAndSet((PLONG)SpinLock, 0))
@@ -72,7 +68,7 @@ SpinLock::AcquireSpinLock(IN OUT PKSPIN_LOCK SpinLock)
  */
 XTAPI
 VOID
-SpinLock::InitializeSpinLock(IN PKSPIN_LOCK SpinLock)
+KE::SpinLock::InitializeSpinLock(IN PKSPIN_LOCK SpinLock)
 {
     /* Zero initialize spinlock */
     *SpinLock = 0;
@@ -90,7 +86,7 @@ SpinLock::InitializeSpinLock(IN PKSPIN_LOCK SpinLock)
  */
 XTFASTCALL
 VOID
-SpinLock::ReleaseQueuedSpinLock(IN KSPIN_LOCK_QUEUE_LEVEL LockLevel)
+KE::SpinLock::ReleaseQueuedSpinLock(IN KSPIN_LOCK_QUEUE_LEVEL LockLevel)
 {
     /* Clear the lock */
     ReleaseSpinLock(KE::Processor::GetCurrentProcessorControlBlock()->LockQueue[LockLevel].Lock);
@@ -108,7 +104,7 @@ SpinLock::ReleaseQueuedSpinLock(IN KSPIN_LOCK_QUEUE_LEVEL LockLevel)
  */
 XTFASTCALL
 VOID
-SpinLock::ReleaseSpinLock(IN OUT PKSPIN_LOCK SpinLock)
+KE::SpinLock::ReleaseSpinLock(IN OUT PKSPIN_LOCK SpinLock)
 {
     /* Clear the lock */
     RTL::Atomic::And32((PLONG)SpinLock, 0);
@@ -116,5 +112,3 @@ SpinLock::ReleaseSpinLock(IN OUT PKSPIN_LOCK SpinLock)
     /* Add an explicit memory barrier */
     AR::CpuFunc::ReadWriteBarrier();
 }
-
-} /* namespace */

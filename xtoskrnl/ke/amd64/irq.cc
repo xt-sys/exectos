@@ -9,10 +9,6 @@
 #include <xtos.hh>
 
 
-/* Kernel Library */
-namespace KE
-{
-
 /**
  * Sets new interrupt handler for the existing IDT entry.
  *
@@ -28,13 +24,13 @@ namespace KE
  */
 XTAPI
 VOID
-Irq::SetInterruptHandler(IN ULONG Vector,
-                         IN PVOID Handler)
+KE::Irq::SetInterruptHandler(IN ULONG Vector,
+                             IN PVOID Handler)
 {
     PKPROCESSOR_BLOCK ProcessorBlock;
 
     /* Get current processor block */
-    ProcessorBlock = KeGetCurrentProcessorBlock();
+    ProcessorBlock = KE::Processor::GetCurrentProcessorBlock();
 
     /* Update interrupt handler */
     ProcessorBlock->IdtBase[(UCHAR) Vector].OffsetLow = ((ULONG_PTR)Handler & 0xFFFF);
@@ -42,7 +38,6 @@ Irq::SetInterruptHandler(IN ULONG Vector,
     ProcessorBlock->IdtBase[(UCHAR) Vector].OffsetHigh = (ULONG_PTR)Handler >> 32;
 }
 
-} /* namespace */
 
 
 /* TEMPORARY FOR COMPATIBILITY WITH C CODE */
