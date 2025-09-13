@@ -21,7 +21,7 @@ namespace KE
             STATIC PKERNEL_INITIALIZATION_BLOCK InitializationBlock;
 
         public:
-            STATIC XTAPI PVOID GetDebugPrint(VOID);
+            STATIC XTAPI PKD_PRINT_ROUTINE GetDebugPrint(VOID);
             STATIC XTAPI SYSTEM_FIRMWARE_TYPE GetFirmwareType(VOID);
             STATIC XTAPI XTSTATUS GetKernelParameter(IN PCWSTR ParameterName,
                                                      OUT PCWSTR *Parameter);

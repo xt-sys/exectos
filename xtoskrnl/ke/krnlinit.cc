@@ -42,7 +42,7 @@ KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
     if(DEBUG && BootInformation::GetDebugPrint())
     {
         /* Use loader's provided DbgPrint() routine for early printing to serial console */
-        KdSetPrintRoutine(BootInformation::GetDebugPrint());
+        KD::DebugIo::SetPrintRoutine(BootInformation::GetDebugPrint());
         DebugPrint(L"Initializing ExectOS v%d.%d for %s\n", XTOS_VERSION_MAJOR, XTOS_VERSION_MINOR, _ARCH_NAME);
     }
 
@@ -56,7 +56,7 @@ KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
     if(DEBUG)
     {
         /* Initialize debug I/O */
-        KdInitializeDebugIoProviders();
+        KD::DebugIo::InitializeDebugIoProviders();
     }
 
     /* Announce kernel startup */

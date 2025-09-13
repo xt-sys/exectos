@@ -28,9 +28,8 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/hl/fbdev.cc
     ${XTOSKRNL_SOURCE_DIR}/hl/init.cc
     ${XTOSKRNL_SOURCE_DIR}/hl/ioreg.cc
-    ${XTOSKRNL_SOURCE_DIR}/kd/dbginit.c
-    ${XTOSKRNL_SOURCE_DIR}/kd/dbgio.c
-    ${XTOSKRNL_SOURCE_DIR}/kd/globals.c
+    ${XTOSKRNL_SOURCE_DIR}/kd/data.cc
+    ${XTOSKRNL_SOURCE_DIR}/kd/dbgio.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/irq.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/krnlinit.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/kthread.cc

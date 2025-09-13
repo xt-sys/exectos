@@ -10,10 +10,10 @@
 
 
 XTAPI
-PVOID
+PKD_PRINT_ROUTINE
 KE::BootInformation::GetDebugPrint(VOID)
 {
-    return InitializationBlock->LoaderInformation.DbgPrint;
+    return (PKD_PRINT_ROUTINE)InitializationBlock->LoaderInformation.DbgPrint;
 }
 
 /**
