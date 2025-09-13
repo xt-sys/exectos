@@ -24,27 +24,55 @@
  */
 XTCDECL
 VOID
-KD::DebugIo::DbgPrint(PCWSTR Format, ...)
+KD::DebugIo::DbgPrint(PCWSTR Format,
+                      ...)
 {
     VA_LIST Arguments;
-    PLIST_ENTRY DispatchTableEntry;
-    PKD_DISPATCH_TABLE DispatchTable;
 
     /* Initialise the va_list */
     VA_START(Arguments, Format);
 
-    DispatchTableEntry = Providers.Flink;
-    while(DispatchTableEntry != &Providers)
-    {
-        DispatchTable = CONTAIN_RECORD(DispatchTableEntry, KD_DISPATCH_TABLE, ListEntry);
-
-        RTL::WideString::FormatWideString(&DispatchTable->PrintContext, (PWCHAR)Format, Arguments);
-
-        DispatchTableEntry = DispatchTableEntry->Flink;
-    }
+    /* Call the actual debug print routine */
+    DbgPrintEx(Format, Arguments);
 
     /* Clean up the va_list */
     VA_END(Arguments);
+}
+
+/**
+ * Prints a formatted string using the configured debug output providers (va_list variant).
+ *
+ * @param Format
+ *        Supplies the format string.
+ *
+ * @param ...
+ *        Supplies the variable argument list.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+KD::DebugIo::DbgPrintEx(PCWSTR Format,
+                        VA_LIST Arguments)
+{
+    PLIST_ENTRY DispatchTableEntry;
+    PKD_DISPATCH_TABLE DispatchTable;
+
+    /* Iterate over all registered debug providers */
+    DispatchTableEntry = Providers.Flink;
+    while(DispatchTableEntry != &Providers)
+    {
+        /* Get dispatch table */
+        DispatchTable = CONTAIN_RECORD(DispatchTableEntry, KD_DISPATCH_TABLE, ListEntry);
+
+        /* Print formatted string using the provider's print context */
+        RTL::WideString::FormatWideString(&DispatchTable->PrintContext, (PWCHAR)Format, Arguments);
+
+        /* Move to the next provider */
+        DispatchTableEntry = DispatchTableEntry->Flink;
+    }
 }
 
 /**

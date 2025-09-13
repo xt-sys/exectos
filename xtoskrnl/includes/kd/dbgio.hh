@@ -2,7 +2,7 @@
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
  * FILE:            xtoskrnl/includes/kd/dbgio.hh
- * DESCRIPTION:     
+ * DESCRIPTION:     Kernel Debugger I/O support
  * DEVELOPERS:      Aiken Harris <harraiken91@gmail.com>
  */
 
@@ -17,6 +17,9 @@ namespace KD
 {
     class DebugIo
     {
+        public:
+            STATIC PKD_PRINT_ROUTINE KdPrint;
+
         private:
             STATIC KD_DEBUG_MODE DebugMode;
             STATIC PKD_INIT_ROUTINE IoProvidersInitRoutines[KDBG_PROVIDERS_COUNT];
@@ -25,7 +28,10 @@ namespace KD
             STATIC ULONG SerialPortList[COMPORT_COUNT];
 
         public:
-            STATIC XTCDECL VOID DbgPrint(PCWSTR Format, ...);
+            STATIC XTCDECL VOID DbgPrint(PCWSTR Format,
+                                         ...);
+            STATIC XTCDECL VOID DbgPrintEx(PCWSTR Format,
+                                           VA_LIST Arguments);
             STATIC XTAPI XTSTATUS InitializeDebugIoProviders(VOID);
             STATIC XTAPI VOID SetPrintRoutine(PKD_PRINT_ROUTINE DebugPrintRoutine);
 

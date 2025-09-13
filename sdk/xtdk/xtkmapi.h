@@ -48,6 +48,7 @@
 /* XT routines */
 #include <exfuncs.h>
 #include <hlfuncs.h>
+#include <kdfuncs.h>
 #include <kefuncs.h>
 #include <rtlfuncs.h>
 

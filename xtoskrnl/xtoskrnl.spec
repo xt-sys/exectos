@@ -1,4 +1,5 @@
 # XTOS kernel exports
+@ cdecl DbgPrint(wstr)
 @ fastcall ExAcquireRundownProtection(ptr)
 @ fastcall ExCompleteRundownProtection(ptr)
 @ fastcall ExInitializeRundownProtection(ptr)

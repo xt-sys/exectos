@@ -20,7 +20,7 @@
 /* XTOS platform debugging macros */
 #ifdef DBG
     #define DEBUG                       1
-    #define DebugPrint(Format, ...)     if(KdPrint) KdPrint(Format, __VA_ARGS__);
+    #define DebugPrint(Format, ...)     DbgPrint(Format, __VA_ARGS__);
 #else
     #define DEBUG                       0
     #define DebugPrint(Format, ...)     ((VOID)NULL)

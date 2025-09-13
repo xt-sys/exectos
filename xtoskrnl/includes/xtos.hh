@@ -27,6 +27,7 @@ extern "C" {
 
 
 #include <ar.hh>
+#include <dbg.hh>
 #include <ex.hh>
 #include <hl.hh>
 #include <kd.hh>

@@ -9,9 +9,6 @@
 #include <xtos.hh>
 
 
-/* Pointer to DbgPrint() routine */
-PKD_PRINT_ROUTINE KdPrint = nullptr;
-
 /* Kernel Debugger mode */
 KD_DEBUG_MODE KD::DebugIo::DebugMode;
 
@@ -20,6 +17,9 @@ PKD_INIT_ROUTINE KD::DebugIo::IoProvidersInitRoutines[KDBG_PROVIDERS_COUNT] = {
     InitializeFrameBufferProvider,
     InitializeSerialPortProvider
 };
+
+/* Pointer to DbgPrint() routine */
+PKD_PRINT_ROUTINE KD::DebugIo::KdPrint = nullptr;
 
 /* List of active I/O providers */
 LIST_ENTRY KD::DebugIo::Providers;
