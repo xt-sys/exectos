@@ -1,13 +1,13 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/includes/dbg.hh
+ * FILE:            xtoskrnl/includes/kd/dbg.hh
  * DESCRIPTION:     Kernel debugging support
  * DEVELOPERS:      Aiken Harris <harraiken91@gmail.com>
  */
 
-#ifndef __XTOSKRNL_DBG_HH
-#define __XTOSKRNL_DBG_HH
+#ifndef __XTOSKRNL_KD_DBG_HH
+#define __XTOSKRNL_KD_DBG_HH
 
 #include <xtos.hh>
 
@@ -20,4 +20,4 @@
     #define DebugPrint(Format, ...)     ((VOID)NULL)
 #endif
 
-#endif /* __XTOSKRNL_DBG_HH */
+#endif /* __XTOSKRNL_KD_DBG_HH */

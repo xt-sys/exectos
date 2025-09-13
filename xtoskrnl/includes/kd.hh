@@ -11,6 +11,7 @@
 
 #include <xtos.hh>
 
+#include <kd/dbg.hh>
 #include <kd/dbgio.hh>
 
 #endif /* __XTOSKRNL_KD_HH */
