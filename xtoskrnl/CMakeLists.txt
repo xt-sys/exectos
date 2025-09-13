@@ -17,17 +17,17 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/traps.cc
     ${XTOSKRNL_SOURCE_DIR}/ex/exports.cc
     ${XTOSKRNL_SOURCE_DIR}/ex/rundown.cc
-    ${XTOSKRNL_SOURCE_DIR}/hl/acpi.c
-    ${XTOSKRNL_SOURCE_DIR}/hl/cport.c
+    ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/cpu.cc
+    ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/pic.cc
+    ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/ioport.cc
+    ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/runlevel.cc
+    ${XTOSKRNL_SOURCE_DIR}/hl/acpi.cc
+    ${XTOSKRNL_SOURCE_DIR}/hl/cport.cc
+    ${XTOSKRNL_SOURCE_DIR}/hl/data.cc
     ${XTOSKRNL_SOURCE_DIR}/hl/exports.cc
-    ${XTOSKRNL_SOURCE_DIR}/hl/fbdev.c
-    ${XTOSKRNL_SOURCE_DIR}/hl/globals.c
-    ${XTOSKRNL_SOURCE_DIR}/hl/init.c
+    ${XTOSKRNL_SOURCE_DIR}/hl/fbdev.cc
+    ${XTOSKRNL_SOURCE_DIR}/hl/init.cc
     ${XTOSKRNL_SOURCE_DIR}/hl/ioreg.cc
-    ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/cpu.c
-    ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/pic.c
-    ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/ioport.c
-    ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/runlevel.c
     ${XTOSKRNL_SOURCE_DIR}/kd/dbginit.c
     ${XTOSKRNL_SOURCE_DIR}/kd/dbgio.c
     ${XTOSKRNL_SOURCE_DIR}/kd/globals.c

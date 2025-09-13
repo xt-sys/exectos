@@ -29,8 +29,8 @@ BpDisableToneBeep()
     UCHAR Status;
 
     /* Stop the PC speaker */
-    Status = HlIoPortInByte(0x61);
-    HlIoPortOutByte(0x61, Status & 0xFC);
+    Status = HlReadPort8(0x61);
+    HlWritePort8(0x61, Status & 0xFC);
 }
 
 /**
@@ -62,14 +62,14 @@ BpEnableToneBeep(IN UINT Pitch)
 
     /* Set the desired frequency of the PIT clock */
     Counter = 0x1234DD / Pitch;
-    HlIoPortOutByte(0x43, 0xB6);
-    HlIoPortOutByte(0x43, 0xB6);
-    HlIoPortOutByte(0x42, (UCHAR) Counter & 0xFF);
-    HlIoPortOutByte(0x42, (UCHAR) (Counter >> 8) & 0xFF);
+    HlWritePort8(0x43, 0xB6);
+    HlWritePort8(0x43, 0xB6);
+    HlWritePort8(0x42, (UCHAR) Counter & 0xFF);
+    HlWritePort8(0x42, (UCHAR) (Counter >> 8) & 0xFF);
 
     /* Start the PC speaker */
-    Status = HlIoPortInByte(0x61);
-    HlIoPortOutByte(0x61, Status | 0x03);
+    Status = HlReadPort8(0x61);
+    HlWritePort8(0x61, Status | 0x03);
 }
 
 /**

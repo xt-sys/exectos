@@ -78,7 +78,7 @@ BlpDebugPutChar(IN WCHAR Character)
     /* Write character to the serial console */
     Buffer[0] = Character;
     Buffer[1] = 0;
-    return HlComPortPutByte(&BlpStatus.SerialPort, Buffer[0]);
+    return HlWriteComPort(&BlpStatus.SerialPort, Buffer[0]);
 }
 
 /**

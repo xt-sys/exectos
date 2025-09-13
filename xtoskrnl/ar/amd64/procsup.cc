@@ -159,7 +159,7 @@ AR::ProcSup::InitializeProcessor(IN PVOID ProcessorStructures)
     CpuFunc::LoadTaskRegister((UINT)KGDT_SYS_TSS);
 
     /* Enter passive IRQ level */
-    HlSetRunLevel(PASSIVE_LEVEL);
+    HL::RunLevel::SetRunLevel(PASSIVE_LEVEL);
 
     /* Initialize segment registers */
     InitializeSegments();

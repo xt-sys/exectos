@@ -1,12 +1,12 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/hl/i686/runlevel.c
+ * FILE:            xtoskrnl/hl/i686/runlevel.cc
  * DESCRIPTION:     Run Level management support for i686 architecture
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
 
 /**
@@ -18,9 +18,9 @@
  */
 XTFASTCALL
 KRUNLEVEL
-HlGetRunLevel(VOID)
+HL::RunLevel::GetRunLevel(VOID)
 {
-    return HlpTransformApicTprToRunLevel(HlReadApicRegister(APIC_TPR));
+    return TransformApicTprToRunLevel(HL::Pic::ReadApicRegister(APIC_TPR));
 }
 
 /**
@@ -35,9 +35,9 @@ HlGetRunLevel(VOID)
  */
 XTFASTCALL
 VOID
-HlSetRunLevel(IN KRUNLEVEL RunLevel)
+HL::RunLevel::SetRunLevel(IN KRUNLEVEL RunLevel)
 {
-    HlWriteApicRegister(APIC_TPR, HlpTransformRunLevelToApicTpr(RunLevel));
+    HL::Pic::WriteApicRegister(APIC_TPR, TransformRunLevelToApicTpr(RunLevel));
 }
 
 /**
@@ -52,7 +52,7 @@ HlSetRunLevel(IN KRUNLEVEL RunLevel)
  */
 XTFASTCALL
 KRUNLEVEL
-HlpTransformApicTprToRunLevel(IN UCHAR Tpr)
+HL::RunLevel::TransformApicTprToRunLevel(IN UCHAR Tpr)
 {
     STATIC KRUNLEVEL TransformationTable[16] =
     {
@@ -90,7 +90,7 @@ HlpTransformApicTprToRunLevel(IN UCHAR Tpr)
  */
 XTFASTCALL
 UCHAR
-HlpTransformRunLevelToApicTpr(IN KRUNLEVEL RunLevel)
+HL::RunLevel::TransformRunLevelToApicTpr(IN KRUNLEVEL RunLevel)
 {
     STATIC UCHAR TransformationTable[32] =
     {

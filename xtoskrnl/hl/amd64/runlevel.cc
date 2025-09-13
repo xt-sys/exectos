@@ -1,12 +1,12 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/hl/amd64/runlevel.c
+ * FILE:            xtoskrnl/hl/amd64/runlevel.cc
  * DESCRIPTION:     Run Level management support for AMD64 architecture
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
 
 /**
@@ -18,7 +18,7 @@
  */
 XTFASTCALL
 KRUNLEVEL
-HlGetRunLevel(VOID)
+HL::RunLevel::GetRunLevel(VOID)
 {
     return (KRUNLEVEL)ArReadControlRegister(8);
 }
@@ -35,7 +35,7 @@ HlGetRunLevel(VOID)
  */
 XTFASTCALL
 VOID
-HlSetRunLevel(IN KRUNLEVEL RunLevel)
+HL::RunLevel::SetRunLevel(IN KRUNLEVEL RunLevel)
 {
     ArWriteControlRegister(8, RunLevel);
 }
@@ -52,7 +52,7 @@ HlSetRunLevel(IN KRUNLEVEL RunLevel)
  */
 XTFASTCALL
 KRUNLEVEL
-HlpTransformApicTprToRunLevel(IN UCHAR Tpr)
+HL::RunLevel::TransformApicTprToRunLevel(IN UCHAR Tpr)
 {
     return (KRUNLEVEL)(Tpr >> 4);
 }
@@ -69,7 +69,7 @@ HlpTransformApicTprToRunLevel(IN UCHAR Tpr)
  */
 XTFASTCALL
 UCHAR
-HlpTransformRunLevelToApicTpr(IN KRUNLEVEL RunLevel)
+HL::RunLevel::TransformRunLevelToApicTpr(IN KRUNLEVEL RunLevel)
 {
     return (RunLevel << 4);
 }

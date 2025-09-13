@@ -10,6 +10,60 @@
 
 
 /**
+ * Reads the 8-bit data from the specified I/O port.
+ *
+ * @param Port
+ *        Specifies the address to read from, in the range of 0-0xFFFF.
+ *
+ * @return The value read from the port.
+ *
+ * @since XT 1.0
+ */
+XTCLINK
+XTCDECL
+UCHAR
+HlReadPort8(IN USHORT Port)
+{
+    return HL::IoPort::ReadPort8(Port);
+}
+
+/**
+ * Reads the 16-bit data from the specified I/O port.
+ *
+ * @param Port
+ *        Specifies the address to read from, in the range of 0-0xFFFF.
+ *
+ * @return The value read from the port.
+ *
+ * @since XT 1.0
+ */
+XTCLINK
+XTCDECL
+USHORT
+HlReadPort16(IN USHORT Port)
+{
+    return HL::IoPort::ReadPort16(Port);
+}
+
+/**
+ * Reads the 32-bit data from the specified I/O port.
+ *
+ * @param Port
+ *        Specifies the address to read from, in the range of 0-0xFFFF.
+ *
+ * @return The value read from the port.
+ *
+ * @since XT 1.0
+ */
+XTCLINK
+XTCDECL
+ULONG
+HlReadPort32(IN USHORT Port)
+{
+    return HL::IoPort::ReadPort32(Port);
+}
+
+/**
  * Reads an 8-bit data from a specified register address.
  *
  * @param Register
@@ -61,6 +115,72 @@ ULONG
 HlReadRegister32(IN PVOID Register)
 {
     return HL::IoRegister::ReadRegister32(Register);
+}
+
+/**
+ * Writes the 8-bit data to the specified I/O port.
+ *
+ * @param Port
+ *        Specifies the address to write to, in the range of 0-0xFFFF.
+ *
+ * @param Value
+ *        Supplies the value to write.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCLINK
+XTCDECL
+VOID
+HlWritePort8(IN USHORT Port,
+             IN UCHAR Value)
+{
+    HL::IoPort::WritePort8(Port, Value);
+}
+
+/**
+ * Writes the 16-bit data to the specified I/O port.
+ *
+ * @param Port
+ *        Specifies the address to write to, in the range of 0-0xFFFF.
+ *
+ * @param Value
+ *        Supplies the value to write.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCLINK
+XTCDECL
+VOID
+HlWritePort16(IN USHORT Port,
+              IN USHORT Value)
+{
+    HL::IoPort::WritePort16(Port, Value);
+}
+
+/**
+ * Writes the 32-bit data to the specified I/O port.
+ *
+ * @param Port
+ *        Specifies the address to write to, in the range of 0-0xFFFF.
+ *
+ * @param Value
+ *        Supplies the value to write.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCLINK
+XTCDECL
+VOID
+HlWritePort32(IN USHORT Port,
+              IN ULONG Value)
+{
+    HL::IoPort::WritePort32(Port, Value);
 }
 
 /**

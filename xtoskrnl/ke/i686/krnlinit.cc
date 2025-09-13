@@ -23,7 +23,7 @@ KE::KernelInit::InitializeKernel(VOID)
     XTSTATUS Status;
 
     /* Initialize hardware layer subsystem */
-    Status = HlInitializeSystem();
+    Status = HL::Init::InitializeSystem();
     if(Status != STATUS_SUCCESS)
     {
         /* Hardware layer initialization failed, kernel panic */
@@ -44,14 +44,14 @@ VOID
 KE::KernelInit::InitializeMachine(VOID)
 {
     /* Re-enable IDE interrupts */
-    HlIoPortOutByte(0x376, 0);
-    HlIoPortOutByte(0x3F6, 0);
+    HL::IoPort::WritePort8(0x376, 0);
+    HL::IoPort::WritePort8(0x3F6, 0);
 
     /* Initialize frame buffer */
-    HlInitializeFrameBuffer();
+    HL::FrameBuffer::InitializeFrameBuffer();
 
     /* Initialize processor */
-    HlInitializeProcessor();
+    HL::Cpu::InitializeProcessor();
 
     /* Initialize page map support */
     MmInitializePageMapSupport();

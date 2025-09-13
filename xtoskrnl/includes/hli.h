@@ -26,8 +26,8 @@ HlComPortGetByte(IN PCPPORT Port,
 
 XTCDECL
 XTSTATUS
-HlComPortPutByte(IN PCPPORT Port,
-                 IN UCHAR Byte);
+HlWriteComPort8(IN PCPPORT Port,
+                IN UCHAR Byte);
 
 XTCDECL
 UCHAR

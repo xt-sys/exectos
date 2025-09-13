@@ -1,12 +1,12 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/hl/init.c
+ * FILE:            xtoskrnl/hl/init.cc
  * DESCRIPTION:     Hardware layer initialization code
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
 
 /**
@@ -18,19 +18,19 @@
  */
 XTAPI
 XTSTATUS
-HlInitializeSystem(VOID)
+HL::Init::InitializeSystem(VOID)
 {
     XTSTATUS Status;
 
     /* Initialize ACPI */
-    Status = HlpInitializeAcpi();
+    Status = Acpi::InitializeAcpi();
     if(Status != STATUS_SUCCESS)
     {
         return Status;
     }
 
     /* Get system information from ACPI */
-    Status = HlpInitializeAcpiSystemInformation();
+    Status = Acpi::InitializeAcpiSystemInformation();
     if(Status != STATUS_SUCCESS)
     {
         return Status;

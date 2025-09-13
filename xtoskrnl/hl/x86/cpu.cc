@@ -1,12 +1,12 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/hl/x86/cpu.c
+ * FILE:            xtoskrnl/hl/x86/cpu.cc
  * DESCRIPTION:     HAL x86 (i686/AMD64) processor support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
 
 /**
@@ -21,13 +21,13 @@
  */
 XTAPI
 VOID
-HlInitializeProcessor(VOID)
+HL::Cpu::InitializeProcessor(VOID)
 {
     PKPROCESSOR_BLOCK ProcessorBlock;
     KAFFINITY Affinity;
 
     /* Get current processor block */
-    ProcessorBlock = KeGetCurrentProcessorBlock();
+    ProcessorBlock = KE::Processor::GetCurrentProcessorBlock();
 
     /* Set initial stall factor, CPU number and mask interrupts */
     ProcessorBlock->StallScaleFactor = INITIAL_STALL_FACTOR;
@@ -37,11 +37,11 @@ HlInitializeProcessor(VOID)
     Affinity = (KAFFINITY) 1 << ProcessorBlock->CpuNumber;
 
     /* Apply affinity to a set of processors */
-    HlpActiveProcessors |= Affinity;
+    ActiveProcessors |= Affinity;
 
     /* Initialize APIC for this processor */
-    HlpInitializePic();
+    Pic::InitializePic();
 
     /* Set the APIC running level */
-    HlSetRunLevel(KeGetCurrentProcessorBlock()->RunLevel);
+    HL::RunLevel::SetRunLevel(KeGetCurrentProcessorBlock()->RunLevel);
 }

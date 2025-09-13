@@ -2,7 +2,7 @@
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
  * FILE:            xtoskrnl/ke/data.cc
- * DESCRIPTION:     
+ * DESCRIPTION:     Kernel Library global and static data
  * DEVELOPERS:      Aiken Harris <harraiken91@gmail.com>
  */
 

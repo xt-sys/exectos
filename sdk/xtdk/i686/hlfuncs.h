@@ -15,38 +15,38 @@
 #include <i686/xtstruct.h>
 
 
-/* HAL library routines forward references */
+/* Hardware layer routines forward references */
 XTCLINK
 XTCDECL
 UCHAR
-HlIoPortInByte(IN USHORT Port);
-
-XTCLINK
-XTCDECL
-ULONG
-HlIoPortInLong(IN USHORT Port);
+HlReadPort8(IN USHORT Port);
 
 XTCLINK
 XTCDECL
 USHORT
-HlIoPortInShort(IN USHORT Port);
+HlReadPort16(IN USHORT Port);
+
+XTCLINK
+XTCDECL
+ULONG
+HlReadPort32(IN USHORT Port);
 
 XTCLINK
 XTCDECL
 VOID
-HlIoPortOutByte(IN USHORT Port,
-                IN UCHAR Data);
+HlWritePort8(IN USHORT Port,
+             IN UCHAR Data);
 
 XTCLINK
 XTCDECL
 VOID
-HlIoPortOutLong(IN USHORT Port,
-                IN ULONG Value);
+HlWritePort16(IN USHORT Port,
+              IN USHORT Value);
 
 XTCLINK
 XTCDECL
 VOID
-HlIoPortOutShort(IN USHORT Port,
-                 IN USHORT Value);
+HlWritePort32(IN USHORT Port,
+              IN ULONG Value);
 
 #endif /* __XTDK_I686_HLFUNCS_H */

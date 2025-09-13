@@ -1,12 +1,12 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/hl/cport.c
+ * FILE:            xtoskrnl/hl/cport.cc
  * DESCRIPTION:     Serial (COM) port support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
 
 /**
@@ -30,10 +30,10 @@
  */
 XTCDECL
 XTSTATUS
-HlComPortGetByte(IN PCPPORT Port,
-                 OUT PUCHAR Byte,
-                 IN BOOLEAN Wait,
-                 IN BOOLEAN Poll)
+HL::ComPort::ReadComPort(IN PCPPORT Port,
+                         OUT PUCHAR Byte,
+                         IN BOOLEAN Wait,
+                         IN BOOLEAN Poll)
 {
     UCHAR Lsr;
     ULONG Retry;
@@ -49,7 +49,7 @@ HlComPortGetByte(IN PCPPORT Port,
     while(Retry--)
     {
         /* Get LSR for data ready */
-        Lsr = HlComPortReadLsr(Port, COMPORT_LSR_DR);
+        Lsr = ReadComPortLsr(Port, COMPORT_LSR_DR);
         if((Lsr & COMPORT_LSR_DR) == COMPORT_LSR_DR)
         {
             /* Check for errors */
@@ -68,13 +68,13 @@ HlComPortGetByte(IN PCPPORT Port,
             }
 
             /* Read the byte from serial port */
-            *Byte = HlIoPortInByte(PtrToUshort(Port->Address + (ULONG)COMPORT_REG_RBR));
+            *Byte = HL::IoPort::ReadPort8(PtrToUshort(Port->Address + (ULONG)COMPORT_REG_RBR));
 
             /* Check if in modem control mode */
             if(Port->Flags & COMPORT_FLAG_MC)
             {
                 /* Handle Carrier Detected (CD) */
-                if((HlIoPortInByte(PtrToShort(Port->Address + (ULONG)COMPORT_REG_MSR)) & COMPORT_MSR_DCD) == 0)
+                if((HL::IoPort::ReadPort8(PtrToShort(Port->Address + (ULONG)COMPORT_REG_MSR)) & COMPORT_MSR_DCD) == 0)
                 {
                     /* Skip byte if no CD present */
                     continue;
@@ -85,65 +85,8 @@ HlComPortGetByte(IN PCPPORT Port,
     }
 
     /* Reset LSR and return that no data found */
-    HlComPortReadLsr(Port, 0);
+    ReadComPortLsr(Port, 0);
     return STATUS_NOT_FOUND;
-}
-
-/**
- * This routine writes a byte to the serial port.
- *
- * @param Port
- *        Address of port object describing a port settings.
- *
- * @param Byte
- *        Data to be written.
- *
- * @return This routine returns a status code.
- *
- * @since XT 1.0
- */
-XTCDECL
-XTSTATUS 
-HlComPortPutByte(IN PCPPORT Port,
-                 IN UCHAR Byte)
-{
-    UCHAR Lsr, Msr;
-
-    /* Make sure the port has been initialized */
-    if(Port->Address == 0)
-    {
-        return STATUS_DEVICE_NOT_READY;
-    }
-
-    /* Check if port is in modem control */
-    while(Port->Flags & COMPORT_FLAG_MC)
-    {
-        /* Get the Modem Status Register (MSR) */
-        Msr = HlIoPortInByte(PtrToUshort(Port->Address + (ULONG)COMPORT_REG_MSR)) & COMPORT_MSR_DSRCTSCD;
-        if(Msr != COMPORT_MSR_DSRCTSCD)
-        {
-            /* Take character, if CD is not set */
-            Lsr = HlComPortReadLsr(Port, 0);
-            if((Msr & COMPORT_MSR_DCD) == 0 && (Lsr & COMPORT_LSR_DR) == COMPORT_LSR_DR)
-            {
-                /* Eat the character */
-                HlIoPortInByte(PtrToUshort(Port->Address + (ULONG)COMPORT_REG_RBR));
-            }
-        }
-        else
-        {
-            /* CD, CTS and DSR are set, we can continue */
-            break;
-        }
-    }
-
-    /* Wait for busy port */
-    while((HlComPortReadLsr(Port, COMPORT_LSR_THRE) & COMPORT_LSR_THRE) == 0);
-
-    /* Send byte to the port */
-    HlIoPortOutByte(PtrToUshort(Port->Address + (ULONG)COMPORT_REG_THR), Byte);
-
-    return STATUS_SUCCESS;
 }
 
 /**
@@ -161,19 +104,19 @@ HlComPortPutByte(IN PCPPORT Port,
  */
 XTCDECL
 UCHAR
-HlComPortReadLsr(IN PCPPORT Port,
-                 IN UCHAR Byte)
+HL::ComPort::ReadComPortLsr(IN PCPPORT Port,
+                            IN UCHAR Byte)
 {
     UCHAR Lsr, Msr;
 
     /* Read the Line Status Register (LSR) */
-    Lsr = HlIoPortInByte(PtrToUshort(Port->Address + (ULONG)COMPORT_REG_LSR));
+    Lsr = HL::IoPort::ReadPort8(PtrToUshort(Port->Address + (ULONG)COMPORT_REG_LSR));
 
     /* Check if expected byte is present */
     if((Lsr & Byte) == 0)
     {
         /* Check Modem Status Register (MSR) for ring indicator */
-        Msr = HlIoPortInByte(PtrToUshort(Port->Address + (ULONG)COMPORT_REG_MSR));
+        Msr = HL::IoPort::ReadPort8(PtrToUshort(Port->Address + (ULONG)COMPORT_REG_MSR));
         Port->Ring |= (Msr & COMPORT_MSR_RI) ? 1 : 2;
         if(Port->Ring == 3)
         {
@@ -207,9 +150,9 @@ HlComPortReadLsr(IN PCPPORT Port,
  */
 XTCDECL
 XTSTATUS
-HlInitializeComPort(IN OUT PCPPORT Port,
-                    IN PUCHAR PortAddress,
-                    IN ULONG BaudRate)
+HL::ComPort::InitializeComPort(IN OUT PCPPORT Port,
+                               IN PUCHAR PortAddress,
+                               IN ULONG BaudRate)
 {
     USHORT Flags;
     UCHAR Byte;
@@ -237,8 +180,8 @@ HlInitializeComPort(IN OUT PCPPORT Port,
     do
     {
         /* Check whether the 16450/16550 scratch register exists */
-        HlIoPortOutByte(PtrToUshort(PortAddress + (ULONG)COMPORT_REG_SR), Byte);
-        if(HlIoPortInByte(PtrToUshort(PortAddress + (ULONG)COMPORT_REG_SR)) != Byte)
+        HL::IoPort::WritePort8(PtrToUshort(PortAddress + (ULONG)COMPORT_REG_SR), Byte);
+        if(HL::IoPort::ReadPort8(PtrToUshort(PortAddress + (ULONG)COMPORT_REG_SR)) != Byte)
         {
             return STATUS_NOT_FOUND;
         }
@@ -246,37 +189,37 @@ HlInitializeComPort(IN OUT PCPPORT Port,
     while(++Byte != 0);
 
     /* Disable interrupts */
-    HlIoPortOutByte(PtrToUshort(PortAddress + (ULONG)COMPORT_REG_LCR), COMPORT_LSR_DIS);
-    HlIoPortOutByte(PtrToUshort(PortAddress + (ULONG)COMPORT_REG_IER), COMPORT_LSR_DIS);
+    HL::IoPort::WritePort8(PtrToUshort(PortAddress + (ULONG)COMPORT_REG_LCR), COMPORT_LSR_DIS);
+    HL::IoPort::WritePort8(PtrToUshort(PortAddress + (ULONG)COMPORT_REG_IER), COMPORT_LSR_DIS);
 
     /* Enable Divisor Latch Access Bit (DLAB) */
-    HlIoPortOutByte(PtrToUshort(PortAddress + (ULONG)COMPORT_REG_LCR), COMPORT_LCR_DLAB);
+    HL::IoPort::WritePort8(PtrToUshort(PortAddress + (ULONG)COMPORT_REG_LCR), COMPORT_LCR_DLAB);
 
     /* Set baud rate */
     Mode = COMPORT_CLOCK_RATE / BaudRate;
-    HlIoPortOutByte(PtrToUshort(PortAddress + (ULONG)COMPORT_DIV_DLL), (UCHAR)(Mode & 0xFF));
-    HlIoPortOutByte(PtrToUshort(PortAddress + (ULONG)COMPORT_DIV_DLM), (UCHAR)((Mode >> 8) & 0xFF));
+    HL::IoPort::WritePort8(PtrToUshort(PortAddress + (ULONG)COMPORT_DIV_DLL), (UCHAR)(Mode & 0xFF));
+    HL::IoPort::WritePort8(PtrToUshort(PortAddress + (ULONG)COMPORT_DIV_DLM), (UCHAR)((Mode >> 8) & 0xFF));
 
     /* Set 8 data bits, 1 stop bits, no parity (8n1) */
-    HlIoPortOutByte(PtrToUshort(PortAddress + (ULONG)COMPORT_REG_LCR),
-                       COMPORT_LCR_8DATA | COMPORT_LCR_1STOP | COMPORT_LCR_PARN);
+    HL::IoPort::WritePort8(PtrToUshort(PortAddress + (ULONG)COMPORT_REG_LCR),
+                              COMPORT_LCR_8DATA | COMPORT_LCR_1STOP | COMPORT_LCR_PARN);
 
     /* Enable DTR, RTS and OUT2 */
-    HlIoPortOutByte(PtrToUshort(PortAddress + (ULONG)COMPORT_REG_MCR),
-                       COMPORT_MCR_DTR | COMPORT_MCR_RTS | COMPORT_MCR_OUT2);
+    HL::IoPort::WritePort8(PtrToUshort(PortAddress + (ULONG)COMPORT_REG_MCR),
+                              COMPORT_MCR_DTR | COMPORT_MCR_RTS | COMPORT_MCR_OUT2);
 
     /* Enable FIFO */
-    HlIoPortOutByte(PtrToUshort(PortAddress + (ULONG)COMPORT_REG_FCR),
-                       COMPORT_FCR_ENABLE | COMPORT_FCR_RCVR_RESET | COMPORT_FCR_TXMT_RESET);
+    HL::IoPort::WritePort8(PtrToUshort(PortAddress + (ULONG)COMPORT_REG_FCR),
+                              COMPORT_FCR_ENABLE | COMPORT_FCR_RCVR_RESET | COMPORT_FCR_TXMT_RESET);
 
     /* Mark port as fully initialized */
     Flags |= COMPORT_FLAG_INIT;
 
     /* Make sure port works in Normal Operation Mode (NOM) */
-    HlIoPortOutByte(PtrToUshort(PortAddress + (ULONG)COMPORT_REG_MCR), COMPORT_MCR_NOM);
+    HL::IoPort::WritePort8(PtrToUshort(PortAddress + (ULONG)COMPORT_REG_MCR), COMPORT_MCR_NOM);
 
     /* Read junk data out of the Receive Buffer Register (RBR) */
-    HlIoPortInByte(PtrToUshort(PortAddress + (ULONG)COMPORT_REG_RBR));
+    HL::IoPort::ReadPort8(PtrToUshort(PortAddress + (ULONG)COMPORT_REG_RBR));
 
     /* Store port details */
     Port->Address = PortAddress;
@@ -286,4 +229,82 @@ HlInitializeComPort(IN OUT PCPPORT Port,
 
     /* Return success */
     return STATUS_SUCCESS;
+}
+
+/**
+ * This routine writes a byte to the serial port.
+ *
+ * @param Port
+ *        Address of port object describing a port settings.
+ *
+ * @param Byte
+ *        Data to be written.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+XTSTATUS
+HL::ComPort::WriteComPort(IN PCPPORT Port,
+                          IN UCHAR Byte)
+{
+    UCHAR Lsr, Msr;
+
+    /* Make sure the port has been initialized */
+    if(Port->Address == 0)
+    {
+        return STATUS_DEVICE_NOT_READY;
+    }
+
+    /* Check if port is in modem control */
+    while(Port->Flags & COMPORT_FLAG_MC)
+    {
+        /* Get the Modem Status Register (MSR) */
+        Msr = HL::IoPort::ReadPort8(PtrToUshort(Port->Address + (ULONG)COMPORT_REG_MSR)) & COMPORT_MSR_DSRCTSCD;
+        if(Msr != COMPORT_MSR_DSRCTSCD)
+        {
+            /* Take character, if CD is not set */
+            Lsr = ReadComPortLsr(Port, 0);
+            if((Msr & COMPORT_MSR_DCD) == 0 && (Lsr & COMPORT_LSR_DR) == COMPORT_LSR_DR)
+            {
+                /* Eat the character */
+                HL::IoPort::ReadPort8(PtrToUshort(Port->Address + (ULONG)COMPORT_REG_RBR));
+            }
+        }
+        else
+        {
+            /* CD, CTS and DSR are set, we can continue */
+            break;
+        }
+    }
+
+    /* Wait for busy port */
+    while((ReadComPortLsr(Port, COMPORT_LSR_THRE) & COMPORT_LSR_THRE) == 0);
+
+    /* Send byte to the port */
+    HL::IoPort::WritePort8(PtrToUshort(Port->Address + (ULONG)COMPORT_REG_THR), Byte);
+
+    return STATUS_SUCCESS;
+}
+
+
+
+/* TEMPORARY FOR XTLDR */
+XTCDECL
+XTSTATUS
+HlWriteComPort(IN PCPPORT Port,
+               IN UCHAR Byte)
+{
+    return HL::ComPort::WriteComPort(Port, Byte);
+}
+
+/* TEMPORARY FOR XTLDR */
+XTCDECL
+XTSTATUS
+HlInitializeComPort(IN OUT PCPPORT Port,
+                    IN PUCHAR PortAddress,
+                    IN ULONG BaudRate)
+{
+    return HL::ComPort::InitializeComPort(Port, PortAddress, BaudRate);
 }

@@ -20,7 +20,7 @@ XTFASTCALL
 KRUNLEVEL
 KE::RunLevel::GetCurrentRunLevel(VOID)
 {
-    return HlGetRunLevel();
+    return HL::RunLevel::GetRunLevel();
 }
 
 /**
@@ -40,13 +40,13 @@ KE::RunLevel::LowerRunLevel(IN KRUNLEVEL RunLevel)
     KRUNLEVEL OldRunLevel;
 
     /* Read current run level */
-    OldRunLevel = HlGetRunLevel();
+    OldRunLevel = HL::RunLevel::GetRunLevel();
 
     /* Validate run level lowerage */
     if(OldRunLevel > RunLevel)
     {
         /* Set new, lower run level */
-        HlSetRunLevel(RunLevel);
+        HL::RunLevel::SetRunLevel(RunLevel);
     }
 }
 
@@ -67,13 +67,13 @@ KE::RunLevel::RaiseRunLevel(IN KRUNLEVEL RunLevel)
     KRUNLEVEL OldRunLevel;
 
     /* Read current run level */
-    OldRunLevel = HlGetRunLevel();
+    OldRunLevel = HL::RunLevel::GetRunLevel();
 
     /* Validate run level raise */
     if(OldRunLevel < RunLevel)
     {
         /* Set new, higher run level */
-        HlSetRunLevel(RunLevel);
+        HL::RunLevel::SetRunLevel(RunLevel);
     }
 
     /* Return old run level */

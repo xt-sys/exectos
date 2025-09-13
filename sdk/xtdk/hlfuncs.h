@@ -18,8 +18,8 @@
 XTCLINK
 XTCDECL
 XTSTATUS
-HlComPortPutByte(IN PCPPORT Port,
-                 IN UCHAR Byte);
+HlWriteComPort(IN PCPPORT Port,
+               IN UCHAR Byte);
 
 XTCLINK
 XTCDECL
@@ -28,6 +28,7 @@ HlInitializeComPort(IN OUT PCPPORT Port,
                     IN PUCHAR PortAddress,
                     IN ULONG BaudRate);
 
+/* Hardware layer routines forward references */
 XTCLINK
 XTAPI
 UCHAR

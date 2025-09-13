@@ -171,5 +171,5 @@ KdpSerialWriteCharacter(WCHAR Character)
     /* Write character to the serial console */
     Buffer[0] = Character;
     Buffer[1] = 0;
-    return HlComPortPutByte(&KdpSerialPort, Buffer[0]);
+    return HlWriteComPort(&KdpSerialPort, Buffer[0]);
 }

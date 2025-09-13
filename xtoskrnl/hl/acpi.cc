@@ -1,13 +1,34 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/hl/x86/acpi.c
+ * FILE:            xtoskrnl/hl/x86/acpi.cc
  * DESCRIPTION:     Advanced Configuration and Power Interface (ACPI) support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
+
+/**
+ * Stores given ACPI table in the kernel local cache.
+ *
+ * @param AcpiTable
+ *        Supplies a pointer to ACPI table that will be stored in the cache.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+HL::Acpi::CacheAcpiTable(IN PACPI_DESCRIPTION_HEADER AcpiTable)
+{
+    PACPI_CACHE_LIST AcpiCache;
+
+    /* Create new ACPI table cache entry */
+    AcpiCache = CONTAIN_RECORD(AcpiTable, ACPI_CACHE_LIST, Header);
+    RTL::LinkedList::InsertTailList(&CacheList, &AcpiCache->ListEntry);
+}
 
 /**
  * Gets a pointer to the ACPI system description pointer (RSDP).
@@ -21,10 +42,10 @@
  */
 XTAPI
 XTSTATUS
-HlGetAcpiSystemDescriptionPointer(OUT PACPI_RSDP *Rsdp)
+HL::Acpi::GetAcpiSystemDescriptionPointer(OUT PACPI_RSDP *Rsdp)
 {
     /* Get RSDP and return success */
-    *Rsdp = HlpAcpiRsdp;
+    *Rsdp = RsdpStructure;
     return STATUS_SUCCESS;
 }
 
@@ -43,21 +64,21 @@ HlGetAcpiSystemDescriptionPointer(OUT PACPI_RSDP *Rsdp)
  */
 XTAPI
 XTSTATUS
-HlGetAcpiTable(IN ULONG Signature,
-               OUT PACPI_DESCRIPTION_HEADER *AcpiTable)
+HL::Acpi::GetAcpiTable(IN ULONG Signature,
+                       OUT PACPI_DESCRIPTION_HEADER *AcpiTable)
 {
     PACPI_DESCRIPTION_HEADER Table;
     XTSTATUS Status;
 
     /* Assume ACPI table not found */
-    *AcpiTable = NULL;
+    *AcpiTable = nullptr;
 
     /* Attempt to get ACPI table from the cache */
-    Status = HlpQueryAcpiCache(Signature, &Table);
+    Status = QueryAcpiCache(Signature, &Table);
     if(Status != STATUS_SUCCESS)
     {
         /* Table not found in the cache, query ACPI tables */
-        Status = HlpQueryAcpiTables(Signature, &Table);
+        Status = QueryAcpiTables(Signature, &Table);
         if(Status != STATUS_SUCCESS)
         {
             /* ACPI table not found, return error */
@@ -71,27 +92,6 @@ HlGetAcpiTable(IN ULONG Signature,
 }
 
 /**
- * Stores given ACPI table in the kernel local cache.
- *
- * @param AcpiTable
- *        Supplies a pointer to ACPI table that will be stored in the cache.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTAPI
-VOID
-HlpCacheAcpiTable(IN PACPI_DESCRIPTION_HEADER AcpiTable)
-{
-    PACPI_CACHE_LIST AcpiCache;
-
-    /* Create new ACPI table cache entry */
-    AcpiCache = CONTAIN_RECORD(AcpiTable, ACPI_CACHE_LIST, Header);
-    RtlInsertTailList(&HlpAcpiCacheList, &AcpiCache->ListEntry);
-}
-
-/**
  * Performs an initialization of the ACPI subsystem.
  *
  * @return This routine returns a status code.
@@ -100,13 +100,13 @@ HlpCacheAcpiTable(IN PACPI_DESCRIPTION_HEADER AcpiTable)
  */
 XTAPI
 XTSTATUS
-HlpInitializeAcpi(VOID)
+HL::Acpi::InitializeAcpi(VOID)
 {
     PACPI_FADT Fadt;
     XTSTATUS Status;
 
     /* Initialize ACPI cache */
-    Status = HlpInitializeAcpiCache();
+    Status = InitializeAcpiCache();
     if(Status != STATUS_SUCCESS)
     {
         /* ACPI cache initialization failed, return error */
@@ -114,7 +114,7 @@ HlpInitializeAcpi(VOID)
     }
 
     /* Get Fixed ACPI Description Table (FADT) */
-    Status = HlGetAcpiTable(ACPI_FADT_SIGNATURE, (PACPI_DESCRIPTION_HEADER*)&Fadt);
+    Status = GetAcpiTable(ACPI_FADT_SIGNATURE, (PACPI_DESCRIPTION_HEADER*)&Fadt);
     if(Status != STATUS_SUCCESS || !Fadt)
     {
         /* Failed to get FADT, return error */
@@ -122,7 +122,7 @@ HlpInitializeAcpi(VOID)
     }
 
     /* Initialize ACPI timer */
-    HlpInitializeAcpiTimer();
+    InitializeAcpiTimer();
 
     /* Return success */
     return STATUS_SUCCESS;
@@ -137,16 +137,16 @@ HlpInitializeAcpi(VOID)
  */
 XTAPI
 XTSTATUS
-HlpInitializeAcpiCache(VOID)
+HL::Acpi::InitializeAcpiCache(VOID)
 {
     PACPI_DESCRIPTION_HEADER Rsdt;
     XTSTATUS Status;
 
     /* Initialize ACPI cache list */
-    RtlInitializeListHead(&HlpAcpiCacheList);
+    RTL::LinkedList::InitializeListHead(&CacheList);
 
     /* Get XSDT/RSDT */
-    Status = HlpInitializeAcpiSystemDescriptionTable(&Rsdt);
+    Status = InitializeAcpiSystemDescriptionTable(&Rsdt);
     if(Status != STATUS_SUCCESS)
     {
         /* Failed to get XSDT/RSDT, return error */
@@ -154,7 +154,7 @@ HlpInitializeAcpiCache(VOID)
     }
 
     /* Cache XSDT/RSDT table */
-    HlpCacheAcpiTable(Rsdt);
+    CacheAcpiTable(Rsdt);
 
     /* Return success */
     return STATUS_SUCCESS;
@@ -172,7 +172,7 @@ HlpInitializeAcpiCache(VOID)
  */
 XTAPI
 XTSTATUS
-HlpInitializeAcpiSystemDescriptionTable(OUT PACPI_DESCRIPTION_HEADER *AcpiTable)
+HL::Acpi::InitializeAcpiSystemDescriptionTable(OUT PACPI_DESCRIPTION_HEADER *AcpiTable)
 {
     PHYSICAL_ADDRESS RsdpAddress, RsdtAddress;
     PSYSTEM_RESOURCE_HEADER ResourceHeader;
@@ -182,7 +182,7 @@ HlpInitializeAcpiSystemDescriptionTable(OUT PACPI_DESCRIPTION_HEADER *AcpiTable)
     XTSTATUS Status;
 
     /* Assume ACPI table not found */
-    *AcpiTable = NULL;
+    *AcpiTable = nullptr;
 
     /* Get ACPI system resource */
     Status = KeGetSystemResource(SystemResourceAcpi, &ResourceHeader);
@@ -197,26 +197,26 @@ HlpInitializeAcpiSystemDescriptionTable(OUT PACPI_DESCRIPTION_HEADER *AcpiTable)
     RsdpAddress.QuadPart = (LONGLONG)AcpiResource->Header.PhysicalAddress;
 
     /* Map RSDP and mark it as CD/WT to avoid delays in write-back cache */
-    Status = MmMapHardwareMemory(RsdpAddress, 1, TRUE, (PVOID *)&HlpAcpiRsdp);
-    MmMarkHardwareMemoryWriteThrough(HlpAcpiRsdp, 1);
+    Status = MmMapHardwareMemory(RsdpAddress, 1, TRUE, (PVOID *)&RsdpStructure);
+    MmMarkHardwareMemoryWriteThrough(RsdpStructure, 1);
 
     /* Validate RSDP signature */
-    if(Status != STATUS_SUCCESS || HlpAcpiRsdp->Signature != ACPI_RSDP_SIGNATURE)
+    if(Status != STATUS_SUCCESS || RsdpStructure->Signature != ACPI_RSDP_SIGNATURE)
     {
         /* Not mapped correctly or invalid RSDP signature, return error */
         return STATUS_INVALID_PARAMETER;
     }
 
     /* Check RSDP revision to determine RSDT/XSDT address */
-    if(HlpAcpiRsdp->Revision >= 2)
+    if(RsdpStructure->Revision >= 2)
     {
         /* Get XSDT address */
-        RsdtAddress.QuadPart = (LONGLONG)HlpAcpiRsdp->XsdtAddress;
+        RsdtAddress.QuadPart = (LONGLONG)RsdpStructure->XsdtAddress;
     }
     else
     {
         /* Get RSDT address */
-        RsdtAddress.QuadPart = (LONGLONG)HlpAcpiRsdp->RsdtAddress;
+        RsdtAddress.QuadPart = (LONGLONG)RsdpStructure->RsdtAddress;
     }
 
     /* Map RSDT/XSDT as CD/WT */
@@ -263,7 +263,7 @@ HlpInitializeAcpiSystemDescriptionTable(OUT PACPI_DESCRIPTION_HEADER *AcpiTable)
  */
 XTAPI
 XTSTATUS
-HlpInitializeAcpiSystemInformation(VOID)
+HL::Acpi::InitializeAcpiSystemInformation(VOID)
 {
     PACPI_MADT_LOCAL_X2APIC LocalX2Apic;
     PACPI_MADT_LOCAL_APIC LocalApic;
@@ -273,7 +273,7 @@ HlpInitializeAcpiSystemInformation(VOID)
     USHORT CpuCount;
 
     /* Allocate memory for ACPI system information structure */
-    Status = HlpInitializeAcpiSystemStructure();
+    Status = InitializeAcpiSystemStructure();
     if(Status != STATUS_SUCCESS)
     {
         /* Failed to allocate memory, return error */
@@ -281,7 +281,7 @@ HlpInitializeAcpiSystemInformation(VOID)
     }
 
     /* Get Multiple APIC Description Table (MADT) */
-    Status = HlGetAcpiTable(ACPI_MADT_SIGNATURE, (PACPI_DESCRIPTION_HEADER*)&Madt);
+    Status = GetAcpiTable(ACPI_MADT_SIGNATURE, (PACPI_DESCRIPTION_HEADER*)&Madt);
     if(Status != STATUS_SUCCESS)
     {
         /* Failed to get MADT, return error */
@@ -306,9 +306,9 @@ HlpInitializeAcpiSystemInformation(VOID)
             if(LocalApic->Flags & ACPI_MADT_PLAOC_ENABLED)
             {
                 /* Store CPU number, APIC ID and CPU ID */
-                HlpSystemInfo.CpuInfo[CpuCount].AcpiId = LocalApic->AcpiId;
-                HlpSystemInfo.CpuInfo[CpuCount].ApicId = LocalApic->ApicId;
-                HlpSystemInfo.CpuInfo[CpuCount].CpuNumber = CpuCount;
+                SystemInfo.CpuInfo[CpuCount].AcpiId = LocalApic->AcpiId;
+                SystemInfo.CpuInfo[CpuCount].ApicId = LocalApic->ApicId;
+                SystemInfo.CpuInfo[CpuCount].CpuNumber = CpuCount;
 
                 /* Increment number of CPUs */
                 CpuCount++;
@@ -327,9 +327,9 @@ HlpInitializeAcpiSystemInformation(VOID)
             if(LocalX2Apic->Flags & ACPI_MADT_PLAOC_ENABLED)
             {
                 /* Store CPU number, APIC ID and CPU ID */
-                HlpSystemInfo.CpuInfo[CpuCount].AcpiId = LocalX2Apic->AcpiId;
-                HlpSystemInfo.CpuInfo[CpuCount].ApicId = LocalX2Apic->ApicId;
-                HlpSystemInfo.CpuInfo[CpuCount].CpuNumber = CpuCount;
+                SystemInfo.CpuInfo[CpuCount].AcpiId = LocalX2Apic->AcpiId;
+                SystemInfo.CpuInfo[CpuCount].ApicId = LocalX2Apic->ApicId;
+                SystemInfo.CpuInfo[CpuCount].CpuNumber = CpuCount;
 
                 /* Increment number of CPUs */
                 CpuCount++;
@@ -346,7 +346,7 @@ HlpInitializeAcpiSystemInformation(VOID)
     }
 
     /* Store number of CPUs */
-    HlpSystemInfo.CpuCount = CpuCount;
+    SystemInfo.CpuCount = CpuCount;
 
     /* Return success */
     return STATUS_SUCCESS;
@@ -361,7 +361,7 @@ HlpInitializeAcpiSystemInformation(VOID)
  */
 XTAPI
 XTSTATUS
-HlpInitializeAcpiSystemStructure(VOID)
+HL::Acpi::InitializeAcpiSystemStructure(VOID)
 {
     PHYSICAL_ADDRESS PhysicalAddress;
     PFN_NUMBER PageCount;
@@ -371,7 +371,7 @@ HlpInitializeAcpiSystemStructure(VOID)
     ULONG CpuCount;
 
     /* Get Multiple APIC Description Table (MADT) */
-    Status = HlGetAcpiTable(ACPI_MADT_SIGNATURE, (PACPI_DESCRIPTION_HEADER*)&Madt);
+    Status = GetAcpiTable(ACPI_MADT_SIGNATURE, (PACPI_DESCRIPTION_HEADER*)&Madt);
     if(Status != STATUS_SUCCESS)
     {
         /* Failed to get MADT, return error */
@@ -420,7 +420,7 @@ HlpInitializeAcpiSystemStructure(VOID)
     }
 
     /* Zero the ACPI system information structure */
-    RtlZeroMemory(&HlpSystemInfo, sizeof(ACPI_SYSTEM_INFO));
+    RTL::Memory::ZeroMemory(&SystemInfo, sizeof(ACPI_SYSTEM_INFO));
 
     /* Calculate number of pages needed to store CPU information */
     PageCount = SIZE_TO_PAGES(CpuCount * sizeof(PROCESSOR_IDENTITY));
@@ -434,7 +434,7 @@ HlpInitializeAcpiSystemStructure(VOID)
     }
 
     /* Map physical address to the virtual memory area */
-    Status = MmMapHardwareMemory(PhysicalAddress, PageCount, TRUE, (PVOID *)&HlpSystemInfo.CpuInfo);
+    Status = MmMapHardwareMemory(PhysicalAddress, PageCount, TRUE, (PVOID *)&SystemInfo.CpuInfo);
     if(Status != STATUS_SUCCESS)
     {
         /* Failed to map memory, return error */
@@ -442,7 +442,7 @@ HlpInitializeAcpiSystemStructure(VOID)
     }
 
     /* Zero the CPU information structure */
-    RtlZeroMemory(HlpSystemInfo.CpuInfo, PAGES_TO_SIZE(PageCount));
+    RTL::Memory::ZeroMemory(SystemInfo.CpuInfo, PAGES_TO_SIZE(PageCount));
 
     /* Return success */
     return STATUS_SUCCESS;
@@ -457,13 +457,13 @@ HlpInitializeAcpiSystemStructure(VOID)
  */
 XTAPI
 XTSTATUS
-HlpInitializeAcpiTimer(VOID)
+HL::Acpi::InitializeAcpiTimer(VOID)
 {
     PACPI_FADT Fadt;
     XTSTATUS Status;
 
     /* Get Fixed ACPI Description Table (FADT) */
-    Status = HlGetAcpiTable(ACPI_FADT_SIGNATURE, (PACPI_DESCRIPTION_HEADER*)&Fadt);
+    Status = GetAcpiTable(ACPI_FADT_SIGNATURE, (PACPI_DESCRIPTION_HEADER*)&Fadt);
     if(Status != STATUS_SUCCESS || !Fadt)
     {
         /* Failed to get FADT, return error */
@@ -471,18 +471,18 @@ HlpInitializeAcpiTimer(VOID)
     }
 
     /* Set ACPI timer port address */
-    HlpAcpiTimerInfo.TimerPort = Fadt->PmTmrBlkIoPort;
+    TimerInfo.TimerPort = Fadt->PmTmrBlkIoPort;
 
     /* Determine whether 32-bit or 24-bit timer is used */
     if(Fadt->Flags & ACPI_FADT_32BIT_TIMER)
     {
         /* 32-bit timer */
-        HlpAcpiTimerInfo.MsbMask = ACPI_FADT_TIMER_32BIT;
+        TimerInfo.MsbMask = ACPI_FADT_TIMER_32BIT;
     }
     else
     {
         /* 24-bit timer */
-        HlpAcpiTimerInfo.MsbMask = ACPI_FADT_TIMER_24BIT;
+        TimerInfo.MsbMask = ACPI_FADT_TIMER_24BIT;
     }
 
     /* Return success */
@@ -504,19 +504,19 @@ HlpInitializeAcpiTimer(VOID)
  */
 XTAPI
 XTSTATUS
-HlpQueryAcpiCache(IN ULONG Signature,
-                  OUT PACPI_DESCRIPTION_HEADER *AcpiTable)
+HL::Acpi::QueryAcpiCache(IN ULONG Signature,
+                         OUT PACPI_DESCRIPTION_HEADER *AcpiTable)
 {
     PACPI_DESCRIPTION_HEADER TableHeader;
     PACPI_CACHE_LIST AcpiCache;
     PLIST_ENTRY ListEntry;
 
     /* Initialize variables */
-    TableHeader = NULL;
+    TableHeader = nullptr;
 
     /* Iterate through ACPI tables cache list */
-    ListEntry = HlpAcpiCacheList.Flink;
-    while(ListEntry != &HlpAcpiCacheList)
+    ListEntry = CacheList.Flink;
+    while(ListEntry != &CacheList)
     {
         /* Get cached ACPI table header */
         AcpiCache = CONTAIN_RECORD(ListEntry, ACPI_CACHE_LIST, ListEntry);
@@ -561,8 +561,8 @@ HlpQueryAcpiCache(IN ULONG Signature,
  */
 XTAPI
 XTSTATUS
-HlpQueryAcpiTables(IN ULONG Signature,
-                   OUT PACPI_DESCRIPTION_HEADER *AcpiTable)
+HL::Acpi::QueryAcpiTables(IN ULONG Signature,
+                          OUT PACPI_DESCRIPTION_HEADER *AcpiTable)
 {
     ULONG TableCount, TableIndex, TablePages;
     PACPI_DESCRIPTION_HEADER TableHeader;
@@ -580,13 +580,13 @@ HlpQueryAcpiTables(IN ULONG Signature,
     }
 
     /* Ensure that table header is not set before attempting to find ACPI table */
-    TableHeader = NULL;
+    TableHeader = nullptr;
 
     /* Check if DSDT or FACS table requested */
     if(Signature == ACPI_DSDT_SIGNATURE || Signature == ACPI_FACS_SIGNATURE)
     {
         /* Get FADT as it contains a pointer to DSDT and FACS */
-        Status = HlGetAcpiTable(ACPI_FADT_SIGNATURE, (PACPI_DESCRIPTION_HEADER*)&Fadt);
+        Status = GetAcpiTable(ACPI_FADT_SIGNATURE, (PACPI_DESCRIPTION_HEADER*)&Fadt);
         if(Status != STATUS_SUCCESS)
         {
             /* Failed to get FADT, return error */
@@ -619,11 +619,11 @@ HlpQueryAcpiTables(IN ULONG Signature,
     else
     {
         /* Query cache for XSDP table */
-        Status = HlpQueryAcpiCache(ACPI_XSDT_SIGNATURE, (PACPI_DESCRIPTION_HEADER*)&Xsdt);
+        Status = QueryAcpiCache(ACPI_XSDT_SIGNATURE, (PACPI_DESCRIPTION_HEADER*)&Xsdt);
         if(Status != STATUS_SUCCESS)
         {
             /* XSDP not found, query cache for RSDP table */
-            Status = HlpQueryAcpiCache(ACPI_RSDT_SIGNATURE, (PACPI_DESCRIPTION_HEADER*)&Rsdt);
+            Status = QueryAcpiCache(ACPI_RSDT_SIGNATURE, (PACPI_DESCRIPTION_HEADER*)&Rsdt);
         }
 
         /* Check if XSDT or RSDT table found */
@@ -703,7 +703,7 @@ HlpQueryAcpiTables(IN ULONG Signature,
     if(TableHeader->Signature != ACPI_FADT_SIGNATURE || TableHeader->Revision > 2)
     {
         /* Validate table checksum */
-        if(!HlpValidateAcpiTable(TableHeader, TableHeader->Length))
+        if(!ValidateAcpiTable(TableHeader, TableHeader->Length))
         {
             /* Checksum mismatch, unmap table and return error */
             MmUnmapHardwareMemory(TableHeader, 2, TRUE);
@@ -729,7 +729,7 @@ HlpQueryAcpiTables(IN ULONG Signature,
 
     /* Mark table as write through and store it in local cache */
     MmMarkHardwareMemoryWriteThrough(TableHeader, TablePages);
-    HlpCacheAcpiTable(TableHeader);
+    CacheAcpiTable(TableHeader);
 
     /* Store ACPI table and return success */
     *AcpiTable = TableHeader;
@@ -751,15 +751,15 @@ HlpQueryAcpiTables(IN ULONG Signature,
  */
 XTAPI
 BOOLEAN
-HlpValidateAcpiTable(IN PVOID Buffer,
-                     IN UINT_PTR Size)
+HL::Acpi::ValidateAcpiTable(IN PVOID Buffer,
+                            IN UINT_PTR Size)
 {
     PUCHAR Pointer;
     UCHAR Sum;
 
     /* Initialize variables */
     Sum = 0;
-    Pointer = Buffer;
+    Pointer = (PUCHAR)Buffer;
 
     /* Calculate checksum of given table */
     while(Size != 0)
