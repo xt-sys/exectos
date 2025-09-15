@@ -51,15 +51,14 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/ke/spinlock.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/sysres.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/timer.cc
-    ${XTOSKRNL_SOURCE_DIR}/mm/globals.c
-    ${XTOSKRNL_SOURCE_DIR}/mm/hlpool.c
-    ${XTOSKRNL_SOURCE_DIR}/mm/init.c
-    ${XTOSKRNL_SOURCE_DIR}/mm/kpools.c
-    ${XTOSKRNL_SOURCE_DIR}/mm/pages.c
-    ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/globals.c
-    ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/init.c
-    ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/pages.c
-    ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/pmap.c
+    ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/init.cc
+    ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/pagemap.cc
+    ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/paging.cc
+    ${XTOSKRNL_SOURCE_DIR}/mm/data.cc
+    ${XTOSKRNL_SOURCE_DIR}/mm/hlpool.cc
+    ${XTOSKRNL_SOURCE_DIR}/mm/init.cc
+    ${XTOSKRNL_SOURCE_DIR}/mm/kpool.cc
+    ${XTOSKRNL_SOURCE_DIR}/mm/paging.cc
     ${XTOSKRNL_SOURCE_DIR}/po/idle.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/${ARCH}/dispatch.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/${ARCH}/exsup.cc

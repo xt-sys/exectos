@@ -1,12 +1,12 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/mm/hlpool.c
+ * FILE:            xtoskrnl/mm/hlpool.cc
  * DESCRIPTION:     Hardware layer pool memory management
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
 
 /**
@@ -27,9 +27,9 @@
  */
 XTAPI
 XTSTATUS
-MmAllocateHardwareMemory(IN PFN_NUMBER PageCount,
-                         IN BOOLEAN Aligned,
-                         OUT PPHYSICAL_ADDRESS Buffer)
+MM::HardwarePool::AllocateHardwareMemory(IN PFN_NUMBER PageCount,
+                                         IN BOOLEAN Aligned,
+                                         OUT PPHYSICAL_ADDRESS Buffer)
 {
     PLOADER_MEMORY_DESCRIPTOR Descriptor, ExtraDescriptor, HardwareDescriptor;
     PFN_NUMBER Alignment, MaxPage;
@@ -43,7 +43,7 @@ MmAllocateHardwareMemory(IN PFN_NUMBER PageCount,
     MaxPage = MM_MAXIMUM_PHYSICAL_ADDRESS >> MM_PAGE_SHIFT;
 
     /* Make sure there are at least 2 descriptors available */
-    if((MmpUsedHardwareAllocationDescriptors + 2) > MM_HARDWARE_ALLOCATION_DESCRIPTORS)
+    if((UsedHardwareAllocationDescriptors + 2) > MM_HARDWARE_ALLOCATION_DESCRIPTORS)
     {
         /* Not enough descriptors, return error */
         return STATUS_INSUFFICIENT_RESOURCES;
@@ -84,13 +84,13 @@ MmAllocateHardwareMemory(IN PFN_NUMBER PageCount,
     }
 
     /* Allocate new descriptor */
-    HardwareDescriptor = &MmpHardwareAllocationDescriptors[MmpUsedHardwareAllocationDescriptors];
+    HardwareDescriptor = &HardwareAllocationDescriptors[UsedHardwareAllocationDescriptors];
     HardwareDescriptor->BasePage = Descriptor->BasePage + Alignment;
     HardwareDescriptor->MemoryType = LoaderHardwareCachedMemory;
     HardwareDescriptor->PageCount = PageCount;
 
     /* Update hardware allocation descriptors count */
-    MmpUsedHardwareAllocationDescriptors++;
+    UsedHardwareAllocationDescriptors++;
 
     /* Check if alignment was done */
     if(Alignment)
@@ -99,23 +99,23 @@ MmAllocateHardwareMemory(IN PFN_NUMBER PageCount,
         if(Descriptor->PageCount > (PageCount + Alignment))
         {
             /* Initialize extra descriptor */
-            ExtraDescriptor = &MmpHardwareAllocationDescriptors[MmpUsedHardwareAllocationDescriptors];
+            ExtraDescriptor = &HardwareAllocationDescriptors[UsedHardwareAllocationDescriptors];
             ExtraDescriptor->BasePage = Descriptor->BasePage + Alignment + (ULONG)PageCount;
             ExtraDescriptor->MemoryType = LoaderFree;
             ExtraDescriptor->PageCount = Descriptor->PageCount - (Alignment + (ULONG)PageCount);
 
             /* Update hardware allocation descriptors count */
-            MmpUsedHardwareAllocationDescriptors++;
+            UsedHardwareAllocationDescriptors++;
 
             /* Insert extra descriptor in the list */
-            RtlInsertHeadList(&Descriptor->ListEntry, &ExtraDescriptor->ListEntry);
+            RTL::LinkedList::InsertHeadList(&Descriptor->ListEntry, &ExtraDescriptor->ListEntry);
         }
 
         /* Trim source descriptor to the alignment */
         Descriptor->PageCount = Alignment;
 
         /* Insert new descriptor in the list */
-        RtlInsertHeadList(&Descriptor->ListEntry, &HardwareDescriptor->ListEntry);
+        RTL::LinkedList::InsertHeadList(&Descriptor->ListEntry, &HardwareDescriptor->ListEntry);
     }
     else
     {
@@ -124,13 +124,13 @@ MmAllocateHardwareMemory(IN PFN_NUMBER PageCount,
         Descriptor->PageCount -= (ULONG)PageCount;
 
         /* Insert new descriptor in the list */
-        RtlInsertTailList(&Descriptor->ListEntry, &HardwareDescriptor->ListEntry);
+        RTL::LinkedList::InsertTailList(&Descriptor->ListEntry, &HardwareDescriptor->ListEntry);
 
         /* Check if source descriptor is fully consumed */
         if(Descriptor->PageCount == 0)
         {
             /* Remove descriptor from the list */
-            RtlRemoveEntryList(&Descriptor->ListEntry);
+            RTL::LinkedList::RemoveEntryList(&Descriptor->ListEntry);
         }
     }
 
@@ -160,17 +160,17 @@ MmAllocateHardwareMemory(IN PFN_NUMBER PageCount,
  */
 XTAPI
 XTSTATUS
-MmMapHardwareMemory(IN PHYSICAL_ADDRESS PhysicalAddress,
-                    IN PFN_NUMBER PageCount,
-                    IN BOOLEAN FlushTlb,
-                    OUT PVOID *VirtualAddress)
+MM::HardwarePool::MapHardwareMemory(IN PHYSICAL_ADDRESS PhysicalAddress,
+                                    IN PFN_NUMBER PageCount,
+                                    IN BOOLEAN FlushTlb,
+                                    OUT PVOID *VirtualAddress)
 {
     PVOID BaseAddress, ReturnAddress;
     PFN_NUMBER MappedPages;
     PHARDWARE_PTE PtePointer;
 
     /* Initialize variables */
-    BaseAddress = MmpHardwareHeapStart;
+    BaseAddress = HardwareHeapStart;
     MappedPages = 0;
     ReturnAddress = BaseAddress;
     *VirtualAddress = NULL;
@@ -186,11 +186,11 @@ MmMapHardwareMemory(IN PHYSICAL_ADDRESS PhysicalAddress,
         }
 
         /* Get PTE pointer and advance to next page */
-        PtePointer = (PHARDWARE_PTE)MmpGetPteAddress(ReturnAddress);
-        ReturnAddress = (PVOID)(ULONG_PTR)ReturnAddress + MM_PAGE_SIZE;
+        PtePointer = (PHARDWARE_PTE)MM::Paging::GetPteAddress(ReturnAddress);
+        ReturnAddress = (PVOID)((ULONG_PTR)ReturnAddress + MM_PAGE_SIZE);
 
         /* Check if PTE is valid */
-        if(MmpPageMapRoutines->PteValid(PtePointer))
+        if(MM::Paging::PteValid(PtePointer))
         {
             /* PTE is not available, go to the next one */
             BaseAddress = ReturnAddress;
@@ -203,23 +203,23 @@ MmMapHardwareMemory(IN PHYSICAL_ADDRESS PhysicalAddress,
     }
 
     /* Take the actual base address with an offset */
-    ReturnAddress = (PVOID)(ULONG_PTR)(BaseAddress + PAGE_OFFSET(PhysicalAddress.LowPart));
+    ReturnAddress = (PVOID)((ULONG_PTR)BaseAddress + PAGE_OFFSET(PhysicalAddress.LowPart));
 
     /* Check if base address starts at the beginning of the heap */
-    if(BaseAddress == MmpHardwareHeapStart)
+    if(BaseAddress == HardwareHeapStart)
     {
         /* Move heap beyond base address */
-        MmpHardwareHeapStart = (PVOID)((ULONG_PTR)BaseAddress + ((ULONG_PTR)PageCount << MM_PAGE_SHIFT));
+        HardwareHeapStart = (PVOID)((ULONG_PTR)BaseAddress + ((ULONG_PTR)PageCount << MM_PAGE_SHIFT));
     }
 
     /* Iterate through mapped pages */
     while(MappedPages--)
     {
         /* Get PTE pointer */
-        PtePointer = (PHARDWARE_PTE)MmpGetPteAddress(BaseAddress);
+        PtePointer = (PHARDWARE_PTE)MM::Paging::GetPteAddress(BaseAddress);
 
         /* Fill the PTE */
-        MmpPageMapRoutines->SetPte(PtePointer, (PFN_NUMBER)(PhysicalAddress.QuadPart >> MM_PAGE_SHIFT), TRUE);
+        MM::Paging::SetPte(PtePointer, (PFN_NUMBER)(PhysicalAddress.QuadPart >> MM_PAGE_SHIFT), TRUE);
 
         /* Advance to the next address */
         PhysicalAddress.QuadPart += MM_PAGE_SIZE;
@@ -230,7 +230,7 @@ MmMapHardwareMemory(IN PHYSICAL_ADDRESS PhysicalAddress,
     if(FlushTlb)
     {
         /* Flush the TLB */
-        MmFlushTlb();
+        MM::Paging::FlushTlb();
     }
 
     /* Return virtual address */
@@ -253,20 +253,20 @@ MmMapHardwareMemory(IN PHYSICAL_ADDRESS PhysicalAddress,
  */
 XTAPI
 VOID
-MmMarkHardwareMemoryWriteThrough(IN PVOID VirtualAddress,
-                                 IN PFN_NUMBER PageCount)
+MM::HardwarePool::MarkHardwareMemoryWriteThrough(IN PVOID VirtualAddress,
+                                                 IN PFN_NUMBER PageCount)
 {
     PHARDWARE_PTE PtePointer;
     PFN_NUMBER Page;
 
     /* Get PTE address from virtual address */
-    PtePointer = (PHARDWARE_PTE)MmpGetPteAddress(VirtualAddress);
+    PtePointer = (PHARDWARE_PTE)MM::Paging::GetPteAddress(VirtualAddress);
 
     /* Iterate through mapped pages */
     for(Page = 0; Page < PageCount; Page++)
     {
         /* Mark pages as CD/WT */
-        MmpPageMapRoutines->SetPteCaching(PtePointer, TRUE, TRUE);
+        MM::Paging::SetPteCaching(PtePointer, TRUE, TRUE);
         PtePointer++;
     }
 }
@@ -289,23 +289,23 @@ MmMarkHardwareMemoryWriteThrough(IN PVOID VirtualAddress,
  */
 XTAPI
 VOID
-MmRemapHardwareMemory(IN PVOID VirtualAddress,
-                      IN PHYSICAL_ADDRESS PhysicalAddress,
-                      IN BOOLEAN FlushTlb)
+MM::HardwarePool::RemapHardwareMemory(IN PVOID VirtualAddress,
+                                      IN PHYSICAL_ADDRESS PhysicalAddress,
+                                      IN BOOLEAN FlushTlb)
 {
     PHARDWARE_PTE PtePointer;
 
     /* Get PTE address from virtual address */
-    PtePointer = (PHARDWARE_PTE)MmpGetPteAddress(VirtualAddress);
+    PtePointer = (PHARDWARE_PTE)MM::Paging::GetPteAddress(VirtualAddress);
 
     /* Remap the PTE */
-    MmpPageMapRoutines->SetPte(PtePointer, (PFN_NUMBER)(PhysicalAddress.QuadPart >> MM_PAGE_SHIFT), TRUE);
+    MM::Paging::SetPte(PtePointer, (PFN_NUMBER)(PhysicalAddress.QuadPart >> MM_PAGE_SHIFT), TRUE);
 
     /* Check if TLB needs to be flushed */
     if(FlushTlb)
     {
         /* Flush the TLB */
-        MmFlushTlb();
+        MM::Paging::FlushTlb();
     }
 }
 
@@ -327,9 +327,9 @@ MmRemapHardwareMemory(IN PVOID VirtualAddress,
  */
 XTAPI
 XTSTATUS
-MmUnmapHardwareMemory(IN PVOID VirtualAddress,
-                      IN PFN_NUMBER PageCount,
-                      IN BOOLEAN FlushTlb)
+MM::HardwarePool::UnmapHardwareMemory(IN PVOID VirtualAddress,
+                                      IN PFN_NUMBER PageCount,
+                                      IN BOOLEAN FlushTlb)
 {
     PHARDWARE_PTE PtePointer;
     PFN_NUMBER Page;
@@ -345,13 +345,13 @@ MmUnmapHardwareMemory(IN PVOID VirtualAddress,
     VirtualAddress = (PVOID)((ULONG_PTR)VirtualAddress & ~(MM_PAGE_SIZE - 1));
 
     /* Get PTE address from virtual address */
-    PtePointer = (PHARDWARE_PTE)MmpGetPteAddress(VirtualAddress);
+    PtePointer = (PHARDWARE_PTE)MM::Paging::GetPteAddress(VirtualAddress);
 
     /* Iterate through mapped pages */
     for(Page = 0; Page < PageCount; Page++)
     {
         /* Unmap the PTE and get the next one */
-        MmpPageMapRoutines->ClearPte(PtePointer);
+        MM::Paging::ClearPte(PtePointer);
         PtePointer++;
     }
 
@@ -359,14 +359,14 @@ MmUnmapHardwareMemory(IN PVOID VirtualAddress,
     if(FlushTlb)
     {
         /* Flush the TLB */
-        MmFlushTlb();
+        MM::Paging::FlushTlb();
     }
 
     /* Check if heap can be reused */
-    if(MmpHardwareHeapStart > VirtualAddress)
+    if(HardwareHeapStart > VirtualAddress)
     {
         /* Free VA space */
-        MmpHardwareHeapStart = VirtualAddress;
+        HardwareHeapStart = VirtualAddress;
     }
 
     /* Return success */

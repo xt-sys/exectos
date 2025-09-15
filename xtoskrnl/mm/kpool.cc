@@ -1,12 +1,12 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/mm/kpools.c
+ * FILE:            xtoskrnl/mm/kpool.cc
  * DESCRIPTION:     Kernel pool memory management
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
 
 /**
@@ -27,9 +27,9 @@
  */
 XTAPI
 XTSTATUS
-MmAllocateKernelStack(IN PVOID *Stack,
-                      IN BOOLEAN LargeStack,
-                      IN UCHAR SystemNode)
+MM::KernelPool::AllocateKernelStack(IN PVOID *Stack,
+                                    IN BOOLEAN LargeStack,
+                                    IN UCHAR SystemNode)
 {
     UNIMPLEMENTED;
     return STATUS_NOT_IMPLEMENTED;
@@ -50,8 +50,8 @@ MmAllocateKernelStack(IN PVOID *Stack,
  */
 XTAPI
 XTSTATUS
-MmAllocateProcessorStructures(IN ULONG CpuNumber,
-                              OUT PVOID *StructuresData)
+MM::KernelPool::AllocateProcessorStructures(IN ULONG CpuNumber,
+                                            OUT PVOID *StructuresData)
 {
     PKPROCESSOR_BLOCK ProcessorBlock;
     PVOID ProcessorStructures;
@@ -61,10 +61,10 @@ MmAllocateProcessorStructures(IN ULONG CpuNumber,
     UNIMPLEMENTED;
 
     /* Assign memory for processor structures from preallocated buffer */
-    ProcessorStructures = &MmProcessorStructuresData[CpuNumber - 1];
+    ProcessorStructures = &ProcessorStructuresData[CpuNumber - 1];
 
     /* Make sure all structures are zeroed */
-    RtlZeroMemory(ProcessorStructures, KPROCESSOR_STRUCTURES_SIZE);
+    RTL::Memory::ZeroMemory(ProcessorStructures, KPROCESSOR_STRUCTURES_SIZE);
 
     /* Align address to page size boundary and find a space for processor block */
     Address = ROUND_UP((UINT_PTR)ProcessorStructures, MM_PAGE_SIZE);
@@ -95,8 +95,8 @@ MmAllocateProcessorStructures(IN ULONG CpuNumber,
  */
 XTAPI
 VOID
-MmFreeKernelStack(IN PVOID Stack,
-                  IN BOOLEAN LargeStack)
+MM::KernelPool::FreeKernelStack(IN PVOID Stack,
+                                IN BOOLEAN LargeStack)
 {
     UNIMPLEMENTED;
 }
@@ -113,7 +113,7 @@ MmFreeKernelStack(IN PVOID Stack,
  */
 XTAPI
 VOID
-MmFreeProcessorStructures(IN PVOID StructuresData)
+MM::KernelPool::FreeProcessorStructures(IN PVOID StructuresData)
 {
     UNIMPLEMENTED;
 }

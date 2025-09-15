@@ -1,12 +1,12 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/mm/i686/pmap.c
+ * FILE:            xtoskrnl/mm/i686/pagemap.cc
  * DESCRIPTION:     Low-level support for i686 page map manipulation
  * DEVELOPERS:      Aiken Harris <harraiken91@gmail.com>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
 
 /**
@@ -21,24 +21,9 @@
  */
 XTAPI
 VOID
-MmpClearPte(PHARDWARE_PTE PtePointer)
+MM::PageMap::ClearPte(PHARDWARE_PTE PtePointer)
 {
     PtePointer->Long = 0;
-}
-
-/**
- * Checks if eXtended Physical Addressing (XPA) is enabled.
- *
- * @return This routine returns TRUE if PAE is enabled, or FALSE otherwise.
- *
- * @since XT 1.0
- */
-XTAPI
-BOOLEAN
-MmpGetExtendedPhysicalAddressingStatus(VOID)
-{
-    /* Check if PAE is enabled */
-    return ((ArReadControlRegister(4) & CR4_PAE) != 0) ? TRUE : FALSE;
 }
 
 /**
@@ -53,13 +38,13 @@ MmpGetExtendedPhysicalAddressingStatus(VOID)
  */
 XTAPI
 PMMPDE
-MmpGetPdeAddress(PVOID Address)
+MM::PageMap::GetPdeAddress(PVOID Address)
 {
     ULONG Offset;
 
-    /* Calculate offset and return PTE address */
-    Offset = ((((ULONG)(Address)) >> MmpPageMapInfo.PdiShift) << MmpPageMapInfo.PteShift);
-    return (PMMPTE)(MmpPageMapInfo.PdeBase + Offset);
+    /* Calculate offset and return PDE address */
+    Offset = ((((ULONG_PTR)(Address)) >> PageMapInfo.PdiShift) << PageMapInfo.PteShift);
+    return (PMMPDE)(PageMapInfo.PdeBase + Offset);
 }
 
 /**
@@ -74,10 +59,10 @@ MmpGetPdeAddress(PVOID Address)
  */
 XTAPI
 PMMPPE
-MmpGetPpeAddress(PVOID Address)
+MM::PageMap::GetPpeAddress(PVOID Address)
 {
     /* Return zero */
-    return 0;
+    return (PMMPPE)0;
 }
 
 /**
@@ -92,13 +77,36 @@ MmpGetPpeAddress(PVOID Address)
  */
 XTAPI
 PMMPTE
-MmpGetPteAddress(PVOID Address)
+MM::PageMap::GetPteAddress(PVOID Address)
 {
     ULONG Offset;
 
     /* Calculate offset and return PTE address */
-    Offset = ((((ULONG)(Address)) >> MM_PTI_SHIFT) << MmpPageMapInfo.PteShift);
+    Offset = ((((ULONG_PTR)(Address)) >> MM_PTI_SHIFT) << PageMapInfo.PteShift);
     return (PMMPTE)(MM_PTE_BASE + Offset);
+}
+
+/**
+ * Initializes page map information for basic paging (PML2).
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::PageMapBasic::InitializePageMapInfo(VOID)
+{
+    /* Set PML2 page map information */
+    PageMapInfo.Xpa = FALSE;
+
+    /* Set PML2 base addresses */
+    PageMapInfo.PteBase = MM_PTE_BASE;
+    PageMapInfo.PdeBase = MM_PDE_LEGACY_BASE;
+
+    /* Set PML2 shift values */
+    PageMapInfo.PdiShift = MM_PDI_LEGACY_SHIFT;
+    PageMapInfo.PteShift = MM_PTE_LEGACY_SHIFT;
 }
 
 /**
@@ -113,7 +121,7 @@ MmpGetPteAddress(PVOID Address)
  */
 XTAPI
 BOOLEAN
-MmpPml2PteValid(PHARDWARE_PTE PtePointer)
+MM::PageMapBasic::PteValid(PHARDWARE_PTE PtePointer)
 {
     return (BOOLEAN)PtePointer->Pml2.Valid;
 }
@@ -136,9 +144,9 @@ MmpPml2PteValid(PHARDWARE_PTE PtePointer)
  */
 XTAPI
 VOID
-MmpSetPml2Pte(PHARDWARE_PTE PtePointer,
-              PFN_NUMBER PageFrameNumber,
-              BOOLEAN Writable)
+MM::PageMapBasic::SetPte(PHARDWARE_PTE PtePointer,
+                         PFN_NUMBER PageFrameNumber,
+                         BOOLEAN Writable)
 {
     PtePointer->Pml2.PageFrameNumber = PageFrameNumber;
     PtePointer->Pml2.Valid = 1;
@@ -163,12 +171,35 @@ MmpSetPml2Pte(PHARDWARE_PTE PtePointer,
  */
 XTAPI
 VOID
-MmpSetPml2PteCaching(PHARDWARE_PTE PtePointer,
-                     BOOLEAN CacheDisable,
-                     BOOLEAN WriteThrough)
+MM::PageMapBasic::SetPteCaching(PHARDWARE_PTE PtePointer,
+                                BOOLEAN CacheDisable,
+                                BOOLEAN WriteThrough)
 {
     PtePointer->Pml2.CacheDisable = CacheDisable;
     PtePointer->Pml2.WriteThrough = WriteThrough;
+}
+
+/**
+ * Initializes page map information for basic paging (PML3).
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::PageMapXpa::InitializePageMapInfo(VOID)
+{
+    /* Set PML2 page map information */
+    PageMapInfo.Xpa = TRUE;
+
+    /* Set PML2 base addresses */
+    PageMapInfo.PteBase = MM_PTE_BASE;
+    PageMapInfo.PdeBase = MM_PDE_BASE;
+
+    /* Set PML2 shift values */
+    PageMapInfo.PdiShift = MM_PDI_SHIFT;
+    PageMapInfo.PteShift = MM_PTE_SHIFT;
 }
 
 /**
@@ -183,9 +214,9 @@ MmpSetPml2PteCaching(PHARDWARE_PTE PtePointer,
  */
 XTAPI
 BOOLEAN
-MmpPml3PteValid(PHARDWARE_PTE PtePointer)
+MM::PageMapXpa::PteValid(PHARDWARE_PTE PtePointer)
 {
-    return PtePointer->Pml3.Valid;
+    return (BOOLEAN)PtePointer->Pml3.Valid;
 }
 
 /**
@@ -206,9 +237,9 @@ MmpPml3PteValid(PHARDWARE_PTE PtePointer)
  */
 XTAPI
 VOID
-MmpSetPml3Pte(PHARDWARE_PTE PtePointer,
-              PFN_NUMBER PageFrameNumber,
-              BOOLEAN Writable)
+MM::PageMapXpa::SetPte(PHARDWARE_PTE PtePointer,
+                       PFN_NUMBER PageFrameNumber,
+                       BOOLEAN Writable)
 {
     PtePointer->Pml3.PageFrameNumber = PageFrameNumber;
     PtePointer->Pml3.Valid = 1;
@@ -233,9 +264,9 @@ MmpSetPml3Pte(PHARDWARE_PTE PtePointer,
  */
 XTAPI
 VOID
-MmpSetPml3PteCaching(PHARDWARE_PTE PtePointer,
-                     BOOLEAN CacheDisable,
-                     BOOLEAN WriteThrough)
+MM::PageMapXpa::SetPteCaching(PHARDWARE_PTE PtePointer,
+                              BOOLEAN CacheDisable,
+                              BOOLEAN WriteThrough)
 {
     PtePointer->Pml3.CacheDisable = CacheDisable;
     PtePointer->Pml3.WriteThrough = WriteThrough;

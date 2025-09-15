@@ -1,12 +1,12 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/mm/init.c
+ * FILE:            xtoskrnl/mm/init.cc
  * DESCRIPTION:     Memory Manager initialization routines
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtos.h>
+#include <xtos.hh>
 
 
 /**
@@ -18,13 +18,13 @@
  */
 XTAPI
 VOID
-MmInitializeMemoryManager(VOID)
+MM::Init::InitializeMemoryManager(VOID)
 {
     /* Scan memory descriptors provided by the boot loader */
-    MmpScanMemoryDescriptors();
+    ScanMemoryDescriptors();
 
     /* Check if there are enough physical pages */
-    if(MmNumberOfPhysicalPages < MM_MINIMUM_PHYSICAL_PAGES)
+    if(NumberOfPhysicalPages < MM_MINIMUM_PHYSICAL_PAGES)
     {
         /* Insufficient physical pages, kernel panic */
         DebugPrint(L"Insufficient physical pages! Install additional memory\n");
@@ -32,7 +32,7 @@ MmInitializeMemoryManager(VOID)
     }
 
     /* Proceed with architecture specific initialization */
-    MmpInitializeArchitecture();
+    InitializeArchitecture();
 }
 
 /**
@@ -44,7 +44,7 @@ MmInitializeMemoryManager(VOID)
  */
 XTAPI
 VOID
-MmpScanMemoryDescriptors(VOID)
+MM::Init::ScanMemoryDescriptors(VOID)
 {
     PLOADER_MEMORY_DESCRIPTOR MemoryDescriptor;
     PLIST_ENTRY MemoryMappings;
@@ -61,7 +61,7 @@ MmpScanMemoryDescriptors(VOID)
         MemoryDescriptor = CONTAIN_RECORD(MemoryMappings, LOADER_MEMORY_DESCRIPTOR, ListEntry);
 
         /* Check if memory type is invisible or cached */
-        if(MmpVerifyMemoryTypeInvisible(MemoryDescriptor->MemoryType) ||
+        if(VerifyMemoryTypeInvisible(MemoryDescriptor->MemoryType) ||
            (MemoryDescriptor->MemoryType == LoaderHardwareCachedMemory))
         {
             /* Skip this mapping */
@@ -73,32 +73,32 @@ MmpScanMemoryDescriptors(VOID)
         if(MemoryDescriptor->MemoryType != LoaderBad)
         {
             /* Increment number of physical pages */
-            MmNumberOfPhysicalPages += MemoryDescriptor->PageCount;
+            NumberOfPhysicalPages += MemoryDescriptor->PageCount;
         }
 
         /* Find lowest physical page */
-        if(MemoryDescriptor->BasePage < MmLowestPhysicalPage)
+        if(MemoryDescriptor->BasePage < LowestPhysicalPage)
         {
             /* Update lowest physical page */
-            MmLowestPhysicalPage = MemoryDescriptor->BasePage;
+            LowestPhysicalPage = MemoryDescriptor->BasePage;
         }
 
         /* Find highest physical page */
-        if(MemoryDescriptor->BasePage + MemoryDescriptor->PageCount > MmHighestPhysicalPage)
+        if(MemoryDescriptor->BasePage + MemoryDescriptor->PageCount > HighestPhysicalPage)
         {
             /* Update highest physical page */
-            MmHighestPhysicalPage = (MemoryDescriptor->BasePage + MemoryDescriptor->PageCount) - 1;
+            HighestPhysicalPage = (MemoryDescriptor->BasePage + MemoryDescriptor->PageCount) - 1;
         }
 
         /* Check if memory type should be considered as free */
-        if(MmpVerifyMemoryTypeFree(MemoryDescriptor->MemoryType))
+        if(VerifyMemoryTypeFree(MemoryDescriptor->MemoryType))
         {
             /* Check if this descriptor contains more free pages */
             if(MemoryDescriptor->PageCount >= FreePages)
             {
                 /* Update free descriptor */
                 FreePages = MemoryDescriptor->PageCount;
-                MmFreeDescriptor = MemoryDescriptor;
+                FreeDescriptor = MemoryDescriptor;
             }
         }
 
@@ -107,7 +107,7 @@ MmpScanMemoryDescriptors(VOID)
     }
 
     /* Store original free descriptor */
-    RtlCopyMemory(&MmOldFreeDescriptor, MmFreeDescriptor, sizeof(LOADER_MEMORY_DESCRIPTOR));
+    RTL::Memory::CopyMemory(&OldFreeDescriptor, FreeDescriptor, sizeof(LOADER_MEMORY_DESCRIPTOR));
 }
 
 /** Checks whether the specified memory type should be considered as free.
@@ -121,10 +121,10 @@ MmpScanMemoryDescriptors(VOID)
  */
 XTAPI
 BOOLEAN
-MmpVerifyMemoryTypeFree(LOADER_MEMORY_TYPE MemoryType)
+MM::Init::VerifyMemoryTypeFree(LOADER_MEMORY_TYPE MemoryType)
 {
-    return (MemoryType == LoaderFree) || (MemoryType == LoaderFirmwareTemporary) ||
-           (MemoryType == LoaderLoadedProgram) || (MemoryType == LoaderOsloaderStack);
+    return (BOOLEAN)((MemoryType == LoaderFree) || (MemoryType == LoaderFirmwareTemporary) ||
+                     (MemoryType == LoaderLoadedProgram) || (MemoryType == LoaderOsloaderStack));
 }
 
 /**
@@ -139,9 +139,9 @@ MmpVerifyMemoryTypeFree(LOADER_MEMORY_TYPE MemoryType)
  */
 XTAPI
 BOOLEAN
-MmpVerifyMemoryTypeInvisible(LOADER_MEMORY_TYPE MemoryType)
+MM::Init::VerifyMemoryTypeInvisible(LOADER_MEMORY_TYPE MemoryType)
 {
-    return (MemoryType == LoaderFirmwarePermanent) ||
-           (MemoryType == LoaderSpecialMemory) ||
-           (MemoryType == LoaderBBTMemory);
+    return (BOOLEAN)((MemoryType == LoaderFirmwarePermanent) ||
+                     (MemoryType == LoaderSpecialMemory) ||
+                     (MemoryType == LoaderBBTMemory));
 }
