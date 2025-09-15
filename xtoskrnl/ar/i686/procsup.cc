@@ -376,11 +376,11 @@ AR::ProcSup::InitializeProcessorStructures(IN PVOID ProcessorStructures,
 
     /* Assign a space for GDT and advance */
     *Gdt = (PKGDTENTRY)(PVOID)Address;
-    Address += sizeof(ArInitialGdt);
+    Address += sizeof(InitialGdt);
 
     /* Assign a space for Processor Block and advance */
     *ProcessorBlock = (PKPROCESSOR_BLOCK)(PVOID)Address;
-    Address += sizeof(ArInitialProcessorBlock);
+    Address += sizeof(InitialProcessorBlock);
 
     /* Assign a space for TSS */
     *Tss = (PKTSS)(PVOID)Address;
