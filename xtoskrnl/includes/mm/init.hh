@@ -17,6 +17,13 @@ namespace MM
 {
     class Init
     {
+        private:
+            STATIC PLOADER_MEMORY_DESCRIPTOR FreeDescriptor;
+            STATIC ULONG_PTR HighestPhysicalPage;
+            STATIC ULONG_PTR LowestPhysicalPage;
+            STATIC ULONG NumberOfPhysicalPages;
+            STATIC LOADER_MEMORY_DESCRIPTOR OldFreeDescriptor;
+
         public:
             STATIC XTAPI VOID InitializeMemoryManager(VOID);
             STATIC XTAPI VOID InitializePageMapSupport(VOID);

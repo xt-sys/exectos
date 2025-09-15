@@ -17,6 +17,11 @@ namespace MM
 {
     class HardwarePool
     {
+        private:
+            STATIC LOADER_MEMORY_DESCRIPTOR HardwareAllocationDescriptors[MM_HARDWARE_ALLOCATION_DESCRIPTORS];
+            STATIC PVOID HardwareHeapStart;
+            STATIC ULONG UsedHardwareAllocationDescriptors;
+
         public:
             STATIC XTAPI XTSTATUS AllocateHardwareMemory(IN PFN_NUMBER PageCount,
                                                          IN BOOLEAN Aligned,

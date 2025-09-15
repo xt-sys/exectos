@@ -17,6 +17,9 @@ namespace MM
 {
     class KernelPool
     {
+        private:
+            STATIC UCHAR ProcessorStructuresData[MAXIMUM_PROCESSORS][KPROCESSOR_STRUCTURES_SIZE];
+
         public:
             STATIC XTAPI XTSTATUS AllocateKernelStack(IN PVOID *Stack,
                                                      IN BOOLEAN LargeStack,
