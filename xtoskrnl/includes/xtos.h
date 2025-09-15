@@ -13,17 +13,7 @@
 #include <xtver.h>
 
 /* Kernel specific headers */
-#include "globals.h"
-#include "hli.h"
-#include "kdi.h"
 #include "kei.h"
-#include "mmi.h"
-#include "poi.h"
-#include "rtli.h"
 
-#include ARCH_HEADER(globals.h)
-#include ARCH_HEADER(ari.h)
-#include ARCH_HEADER(hli.h)
+
 #include ARCH_HEADER(kei.h)
-#include ARCH_HEADER(mmi.h)
-#include ARCH_HEADER(rtli.h)

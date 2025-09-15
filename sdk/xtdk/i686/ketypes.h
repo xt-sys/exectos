@@ -144,8 +144,8 @@
 #define KERNEL_STACK_GUARD_PAGES          1
 
 /* Processor structures size */
-#define KPROCESSOR_STRUCTURES_SIZE        ((2 * KERNEL_STACK_SIZE) + sizeof(ArInitialGdt) + sizeof(ArInitialTss) + \
-                                          sizeof(ArInitialProcessorBlock) + MM_PAGE_SIZE)
+#define KPROCESSOR_STRUCTURES_SIZE        ((2 * KERNEL_STACK_SIZE) + (GDT_ENTRIES * sizeof(KGDTENTRY)) + sizeof(KTSS) + \
+                                          sizeof(KPROCESSOR_BLOCK) + MM_PAGE_SIZE)
 
 /* Kernel frames */
 #define KTRAP_FRAME_ALIGN                 0x08

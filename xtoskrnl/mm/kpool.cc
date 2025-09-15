@@ -68,7 +68,7 @@ MM::KernelPool::AllocateProcessorStructures(IN ULONG CpuNumber,
 
     /* Align address to page size boundary and find a space for processor block */
     Address = ROUND_UP((UINT_PTR)ProcessorStructures, MM_PAGE_SIZE);
-    ProcessorBlock = (PKPROCESSOR_BLOCK)((PUCHAR)Address + (2 * KERNEL_STACK_SIZE) + sizeof(ArInitialGdt));
+    ProcessorBlock = (PKPROCESSOR_BLOCK)((PUCHAR)Address + (2 * KERNEL_STACK_SIZE) + (GDT_ENTRIES * sizeof(KGDTENTRY)));
 
     /* Store processor number in the processor block */
     ProcessorBlock->CpuNumber = CpuNumber;
