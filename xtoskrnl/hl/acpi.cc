@@ -197,8 +197,8 @@ HL::Acpi::InitializeAcpiSystemDescriptionTable(OUT PACPI_DESCRIPTION_HEADER *Acp
     RsdpAddress.QuadPart = (LONGLONG)AcpiResource->Header.PhysicalAddress;
 
     /* Map RSDP and mark it as CD/WT to avoid delays in write-back cache */
-    Status = MmMapHardwareMemory(RsdpAddress, 1, TRUE, (PVOID *)&RsdpStructure);
-    MmMarkHardwareMemoryWriteThrough(RsdpStructure, 1);
+    Status = MM::HardwarePool::MapHardwareMemory(RsdpAddress, 1, TRUE, (PVOID *)&RsdpStructure);
+    MM::HardwarePool::MarkHardwareMemoryWriteThrough(RsdpStructure, 1);
 
     /* Validate RSDP signature */
     if(Status != STATUS_SUCCESS || RsdpStructure->Signature != ACPI_RSDP_SIGNATURE)
@@ -220,8 +220,8 @@ HL::Acpi::InitializeAcpiSystemDescriptionTable(OUT PACPI_DESCRIPTION_HEADER *Acp
     }
 
     /* Map RSDT/XSDT as CD/WT */
-    Status = MmMapHardwareMemory(RsdtAddress, 2, TRUE, (PVOID *)&Rsdt);
-    MmMarkHardwareMemoryWriteThrough(Rsdt, 2);
+    Status = MM::HardwarePool::MapHardwareMemory(RsdtAddress, 2, TRUE, (PVOID *)&Rsdt);
+    MM::HardwarePool::MarkHardwareMemoryWriteThrough(Rsdt, 2);
 
     /* Validate RSDT/XSDT signature */
     if((Status != STATUS_SUCCESS) ||
@@ -237,9 +237,9 @@ HL::Acpi::InitializeAcpiSystemDescriptionTable(OUT PACPI_DESCRIPTION_HEADER *Acp
     if(RsdtPages != 2)
     {
         /* RSDT/XSDT needs less or more than 2 pages, remap it */
-        MmUnmapHardwareMemory(Rsdt, 2, TRUE);
-        Status = MmMapHardwareMemory(RsdtAddress, RsdtPages, TRUE, (PVOID *)&Rsdt);
-        MmMarkHardwareMemoryWriteThrough(Rsdt, RsdtPages);
+        MM::HardwarePool::UnmapHardwareMemory(Rsdt, 2, TRUE);
+        Status = MM::HardwarePool::MapHardwareMemory(RsdtAddress, RsdtPages, TRUE, (PVOID *)&Rsdt);
+        MM::HardwarePool::MarkHardwareMemoryWriteThrough(Rsdt, RsdtPages);
 
         /* Make sure remapping was successful */
         if(Status != STATUS_SUCCESS)
@@ -426,7 +426,7 @@ HL::Acpi::InitializeAcpiSystemStructure(VOID)
     PageCount = SIZE_TO_PAGES(CpuCount * sizeof(PROCESSOR_IDENTITY));
 
     /* Allocate memory for CPU information */
-    Status = MmAllocateHardwareMemory(PageCount, TRUE, &PhysicalAddress);
+    Status = MM::HardwarePool::AllocateHardwareMemory(PageCount, TRUE, &PhysicalAddress);
     if(Status != STATUS_SUCCESS)
     {
         /* Failed to allocate memory, return error */
@@ -434,7 +434,7 @@ HL::Acpi::InitializeAcpiSystemStructure(VOID)
     }
 
     /* Map physical address to the virtual memory area */
-    Status = MmMapHardwareMemory(PhysicalAddress, PageCount, TRUE, (PVOID *)&SystemInfo.CpuInfo);
+    Status = MM::HardwarePool::MapHardwareMemory(PhysicalAddress, PageCount, TRUE, (PVOID *)&SystemInfo.CpuInfo);
     if(Status != STATUS_SUCCESS)
     {
         /* Failed to map memory, return error */
@@ -609,7 +609,7 @@ HL::Acpi::QueryAcpiTables(IN ULONG Signature,
         TableAddress.HighPart = 0;
 
         /* Map table using hardware memory pool */
-        Status = MmMapHardwareMemory(TableAddress, 2, TRUE, (PVOID*)&TableHeader);
+        Status = MM::HardwarePool::MapHardwareMemory(TableAddress, 2, TRUE, (PVOID*)&TableHeader);
         if(Status != STATUS_SUCCESS)
         {
             /* Failed to map table, return error */
@@ -665,11 +665,11 @@ HL::Acpi::QueryAcpiTables(IN ULONG Signature,
             if(TableHeader != NULL)
             {
                 /* Unmap previous table */
-                MmUnmapHardwareMemory(TableHeader, 2, TRUE);
+                MM::HardwarePool::UnmapHardwareMemory(TableHeader, 2, TRUE);
             }
 
             /* Map table using hardware memory pool */
-            Status = MmMapHardwareMemory(TableAddress, 2, TRUE, (PVOID*)&TableHeader);
+            Status = MM::HardwarePool::MapHardwareMemory(TableAddress, 2, TRUE, (PVOID*)&TableHeader);
             if(Status != STATUS_SUCCESS)
             {
                 /* Failed to map table, return error */
@@ -692,7 +692,7 @@ HL::Acpi::QueryAcpiTables(IN ULONG Signature,
         if(TableHeader != NULL)
         {
             /* Unmap non-matching ACPI table */
-            MmUnmapHardwareMemory(TableHeader, 2, TRUE);
+            MM::HardwarePool::UnmapHardwareMemory(TableHeader, 2, TRUE);
         }
 
         /* Return error */
@@ -706,7 +706,7 @@ HL::Acpi::QueryAcpiTables(IN ULONG Signature,
         if(!ValidateAcpiTable(TableHeader, TableHeader->Length))
         {
             /* Checksum mismatch, unmap table and return error */
-            MmUnmapHardwareMemory(TableHeader, 2, TRUE);
+            MM::HardwarePool::UnmapHardwareMemory(TableHeader, 2, TRUE);
             return STATUS_CRC_ERROR;
         }
     }
@@ -716,8 +716,8 @@ HL::Acpi::QueryAcpiTables(IN ULONG Signature,
     if(TablePages != 2)
     {
         /* ACPI table needs less or more than 2 pages, remap it */
-        MmUnmapHardwareMemory(TableHeader, 2, FALSE);
-        Status = MmMapHardwareMemory(TableAddress, TablePages, TRUE, (PVOID*)&TableHeader);
+        MM::HardwarePool::UnmapHardwareMemory(TableHeader, 2, FALSE);
+        Status = MM::HardwarePool::MapHardwareMemory(TableAddress, TablePages, TRUE, (PVOID*)&TableHeader);
 
         /* Make sure remapping was successful */
         if(Status != STATUS_SUCCESS)
@@ -728,7 +728,7 @@ HL::Acpi::QueryAcpiTables(IN ULONG Signature,
     }
 
     /* Mark table as write through and store it in local cache */
-    MmMarkHardwareMemoryWriteThrough(TableHeader, TablePages);
+    MM::HardwarePool::MarkHardwareMemoryWriteThrough(TableHeader, TablePages);
     CacheAcpiTable(TableHeader);
 
     /* Store ACPI table and return success */

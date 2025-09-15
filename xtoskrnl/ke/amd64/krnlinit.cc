@@ -54,7 +54,7 @@ KE::KernelInit::InitializeMachine(VOID)
     HL::Cpu::InitializeProcessor();
 
     /* Initialize page map support */
-    MmInitializePageMapSupport();
+    MM::Paging::InitializePageMapSupport();
 }
 
 /**

@@ -152,7 +152,7 @@ KE::KThread::InitializeThread(IN PKPROCESS Process,
     if(!Stack)
     {
         /* Allocate new stack */
-        Status = MmAllocateKernelStack(&Stack, FALSE, 0);
+        Status = MM::KernelPool::AllocateKernelStack(&Stack, FALSE, 0);
         if(Status != STATUS_SUCCESS || !Stack)
         {
             /* Stack allocation failed */
@@ -178,7 +178,7 @@ KE::KThread::InitializeThread(IN PKPROCESS Process,
         if(Allocation)
         {
             /* Deallocate stack */
-            MmFreeKernelStack(Stack, FALSE);
+            MM::KernelPool::FreeKernelStack(Stack, FALSE);
             Thread->InitialStack = NULL;
             Thread->StackBase = NULL;
         }
