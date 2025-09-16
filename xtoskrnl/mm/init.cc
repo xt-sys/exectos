@@ -28,7 +28,7 @@ MM::Init::InitializeMemoryManager(VOID)
     {
         /* Insufficient physical pages, kernel panic */
         DebugPrint(L"Insufficient physical pages! Install additional memory\n");
-        KePanic(0);
+        KE::Crash::Panic(0);
     }
 
     /* Proceed with architecture specific initialization */
@@ -46,16 +46,19 @@ XTAPI
 VOID
 MM::Init::ScanMemoryDescriptors(VOID)
 {
+    PLIST_ENTRY LoaderMemoryDescriptors, MemoryMappings;
     PLOADER_MEMORY_DESCRIPTOR MemoryDescriptor;
-    PLIST_ENTRY MemoryMappings;
     PFN_NUMBER FreePages;
 
     /* Initially, set number of free pages to 0 */
     FreePages = 0;
 
+    /* Get a list of memory descriptors provided by the boot loader */
+    LoaderMemoryDescriptors = KE::BootInformation::GetMemoryDescriptors();
+
     /* Iterate through memory mappings provided by the boot loader */
-    MemoryMappings = KeGetInitializationBlock()->MemoryDescriptorListHead.Flink;
-    while(MemoryMappings != &KeGetInitializationBlock()->MemoryDescriptorListHead)
+    MemoryMappings = LoaderMemoryDescriptors->Flink;
+    while(MemoryMappings != LoaderMemoryDescriptors)
     {
         /* Get memory descriptor */
         MemoryDescriptor = CONTAIN_RECORD(MemoryMappings, LOADER_MEMORY_DESCRIPTOR, ListEntry);

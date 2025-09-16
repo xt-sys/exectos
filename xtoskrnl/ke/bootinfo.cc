@@ -97,6 +97,13 @@ KE::BootInformation::GetKernelParameter(IN PCWSTR ParameterName,
     return STATUS_NOT_FOUND;
 }
 
+XTAPI
+PLIST_ENTRY
+KE::BootInformation::GetMemoryDescriptors(VOID)
+{
+    return &InitializationBlock->MemoryDescriptorListHead;
+}
+
 /**
  * Retrieves a pointer to the list of system resources.
  *
@@ -125,7 +132,12 @@ XTAPI
 VOID
 KE::BootInformation::InitializeInitializationBlock(IN PKERNEL_INITIALIZATION_BLOCK Block)
 {
-    InitializationBlock = Block;
+    /* Check if the initialization block is already initialized */
+    if(!InitializationBlock)
+    {
+        /* Save the kernel initialization block */
+        InitializationBlock = Block;
+    }
 }
 
 

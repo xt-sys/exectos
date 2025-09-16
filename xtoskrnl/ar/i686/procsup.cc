@@ -43,7 +43,7 @@ AR::ProcSup::IdentifyProcessor(VOID)
     UNIMPLEMENTED;
 
     /* Get current processor control block */
-    Prcb = KeGetCurrentProcessorControlBlock();
+    Prcb = KE::Processor::GetCurrentProcessorControlBlock();
 
     /* Get CPU vendor by issueing CPUID instruction */
     RtlZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));

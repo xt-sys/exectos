@@ -34,7 +34,7 @@ MM::HardwarePool::AllocateHardwareMemory(IN PFN_NUMBER PageCount,
     PLOADER_MEMORY_DESCRIPTOR Descriptor, ExtraDescriptor, HardwareDescriptor;
     PFN_NUMBER Alignment, MaxPage;
     ULONGLONG PhysicalAddress;
-    PLIST_ENTRY ListEntry;
+    PLIST_ENTRY ListEntry, LoaderMemoryDescriptors;
 
     /* Assume failure */
     (*Buffer).QuadPart = 0;
@@ -49,9 +49,12 @@ MM::HardwarePool::AllocateHardwareMemory(IN PFN_NUMBER PageCount,
         return STATUS_INSUFFICIENT_RESOURCES;
     }
 
+    /* Get a list of memory descriptors provided by the boot loader */
+    LoaderMemoryDescriptors = KE::BootInformation::GetMemoryDescriptors();
+
     /* Scan memory descriptors provided by the boot loader */
-    ListEntry = KeGetInitializationBlock()->MemoryDescriptorListHead.Flink;
-    while(ListEntry != &KeGetInitializationBlock()->MemoryDescriptorListHead)
+    ListEntry = LoaderMemoryDescriptors->Flink;
+    while(ListEntry != LoaderMemoryDescriptors)
     {
         Descriptor = CONTAIN_RECORD(ListEntry, LOADER_MEMORY_DESCRIPTOR, ListEntry);
 
@@ -77,7 +80,7 @@ MM::HardwarePool::AllocateHardwareMemory(IN PFN_NUMBER PageCount,
     }
 
     /* Make sure we found a descriptor */
-    if(ListEntry == &KeGetInitializationBlock()->MemoryDescriptorListHead)
+    if(ListEntry == LoaderMemoryDescriptors)
     {
         /* Descriptor not found, return error */
         return STATUS_INSUFFICIENT_RESOURCES;

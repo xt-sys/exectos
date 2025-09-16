@@ -43,5 +43,5 @@ HL::Cpu::InitializeProcessor(VOID)
     Pic::InitializePic();
 
     /* Set the APIC running level */
-    HL::RunLevel::SetRunLevel(KeGetCurrentProcessorBlock()->RunLevel);
+    HL::RunLevel::SetRunLevel(KE::Processor::GetCurrentProcessorBlock()->RunLevel);
 }

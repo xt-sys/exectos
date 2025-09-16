@@ -10,22 +10,13 @@
 /* Preprocessor macro for including arch-specific headers */
 #define XTOS_ARCH_HEADER(subsystem, header) STRINGIFY(subsystem/_ARCH/header)
 
-
-
-/* Temporary includes for C code compatibility */
-extern "C" {
-/* XT Development Kit */
+/* XT Kernel Mode Development Kit */
 #include <xtkmapi.h>
 
 /* XT OS version */
 #include <xtver.h>
 
 /* Kernel specific headers */
-#include <xtos.h>
-}
-
-
-
 #include <ar.hh>
 #include <ex.hh>
 #include <hl.hh>
