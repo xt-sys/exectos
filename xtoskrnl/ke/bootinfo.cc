@@ -9,6 +9,13 @@
 #include <xtos.hh>
 
 
+/**
+ * Retrieves a pointer to the DebugPrint routine provided by the bootloader.
+ *
+ * @return This routine returns a pointer to the DebugPrint routine.
+ *
+ * @since XT 1.0
+ */
 XTAPI
 PKD_PRINT_ROUTINE
 KE::BootInformation::GetDebugPrint(VOID)
@@ -145,26 +152,4 @@ KE::BootInformation::InitializeInitializationBlock(IN PKERNEL_INITIALIZATION_BLO
         /* Save the kernel initialization block */
         InitializationBlock = Block;
     }
-}
-
-
-
-
-/* TEMPORARY FOR COMPATIBILITY WITH C CODE */
-XTCLINK
-XTAPI
-XTSTATUS
-KeGetKernelParameter(IN PCWSTR ParameterName,
-                   OUT PCWSTR *Parameter)
-{
-    return KE::BootInformation::GetKernelParameter(ParameterName, Parameter);
-}
-
-/* TEMPORARY FOR COMPATIBILITY WITH C CODE */
-XTCLINK
-XTAPI
-PKERNEL_INITIALIZATION_BLOCK
-KeGetInitializationBlock(VOID)
-{
-    return KE::BootInformation::GetInitializationBlock();
 }

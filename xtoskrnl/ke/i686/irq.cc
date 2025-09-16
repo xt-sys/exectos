@@ -36,16 +36,3 @@ KE::Irq::SetInterruptHandler(IN ULONG Vector,
     ProcessorBlock->IdtBase[(UCHAR) Vector].Offset = (USHORT)((ULONG)Handler & 0xFFFF);
     ProcessorBlock->IdtBase[(UCHAR) Vector].ExtendedOffset = (USHORT)((ULONG)Handler >> 16);
 }
-
-
-
-
-/* TEMPORARY FOR COMPATIBILITY WITH C CODE */
-XTCLINK
-XTAPI
-VOID
-KeSetInterruptHandler(IN ULONG Vector,
-                      IN PVOID Handler)
-{
-    KE::Irq::SetInterruptHandler(Vector, Handler);
-}

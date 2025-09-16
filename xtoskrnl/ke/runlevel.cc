@@ -79,32 +79,3 @@ KE::RunLevel::RaiseRunLevel(IN KRUNLEVEL RunLevel)
     /* Return old run level */
     return OldRunLevel;
 }
-
-
-
-/* TEMPORARY FOR COMPATIBILITY WITH C CODE */
-XTCLINK
-XTFASTCALL
-KRUNLEVEL
-KeGetCurrentRunLevel(VOID)
-{
-    return KE::RunLevel::GetCurrentRunLevel();
-}
-
-/* TEMPORARY FOR COMPATIBILITY WITH C CODE */
-XTCLINK
-XTFASTCALL
-VOID
-KeLowerRunLevel(KRUNLEVEL RunLevel)
-{
-    KE::RunLevel::LowerRunLevel(RunLevel);
-}
-
-/* TEMPORARY FOR COMPATIBILITY WITH C CODE */
-XTCLINK
-XTFASTCALL
-KRUNLEVEL
-KeRaiseRunLevel(KRUNLEVEL RunLevel)
-{
-    return KE::RunLevel::RaiseRunLevel(RunLevel);
-}

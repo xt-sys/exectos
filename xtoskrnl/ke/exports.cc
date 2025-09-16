@@ -86,6 +86,21 @@ KeCancelTimer(IN PKTIMER Timer)
 }
 
 /**
+ * Gets the current running level of the current processor.
+ *
+ * @return This routine returns the current running level.
+ *
+ * @since XT 1.0
+ */
+XTCLINK
+XTFASTCALL
+KRUNLEVEL
+KeGetCurrentRunLevel(VOID)
+{
+    return KE::RunLevel::GetCurrentRunLevel();
+}
+
+/**
  * Looks for an unacquired system resource of the specified type and returns it without acquiring an ownership.
  *
  * @param ResourceType
@@ -289,6 +304,42 @@ VOID
 KeInitializeSpinLock(IN PKSPIN_LOCK SpinLock)
 {
     KE::SpinLock::InitializeSpinLock(SpinLock);
+}
+
+/**
+ * Lowers the running level of the current processor.
+ *
+ * @param RunLevel
+ *        Supplies the new running level to lower to.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCLINK
+XTFASTCALL
+VOID
+KeLowerRunLevel(KRUNLEVEL RunLevel)
+{
+    KE::RunLevel::LowerRunLevel(RunLevel);
+}
+
+/**
+ * Raises the running level of the current processor.
+ *
+ * @param RunLevel
+ *        Supplies the new running level to raise to.
+ *
+ * @return This routine returns the old running level.
+ *
+ * @since XT 1.0
+ */
+XTCLINK
+XTFASTCALL
+KRUNLEVEL
+KeRaiseRunLevel(KRUNLEVEL RunLevel)
+{
+    return KE::RunLevel::RaiseRunLevel(RunLevel);
 }
 
 /**

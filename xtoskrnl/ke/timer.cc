@@ -30,7 +30,7 @@ KE::Timer::CancelTimer(IN PKTIMER Timer)
     Result = FALSE;
 
     /* Raise run level and acquire dispatcher lock */
-    RunLevel = KeRaiseRunLevel(SYNC_LEVEL);
+    RunLevel = KE::RunLevel::RaiseRunLevel(SYNC_LEVEL);
     SpinLock::AcquireQueuedSpinLock(DispatcherLock);
 
     /* Check timer status */
@@ -113,8 +113,8 @@ KE::Timer::InitializeTimer(OUT PKTIMER Timer,
     Timer->Period = 0;
 
     /* Initialize linked lists */
-    RtlInitializeListHead(&Timer->Header.WaitListHead);
-    RtlInitializeListHead(&Timer->TimerListEntry);
+    RTL::LinkedList::InitializeListHead(&Timer->Header.WaitListHead);
+    RTL::LinkedList::InitializeListHead(&Timer->TimerListEntry);
 }
 
 /**
@@ -138,7 +138,7 @@ KE::Timer::QueryTimer(IN PKTIMER Timer)
     DueTime = 0;
 
     /* Raise run level and acquire dispatcher lock */
-    RunLevel = KeRaiseRunLevel(SYNC_LEVEL);
+    RunLevel = KE::RunLevel::RaiseRunLevel(SYNC_LEVEL);
     SpinLock::AcquireQueuedSpinLock(DispatcherLock);
 
     /* Check timer status */
@@ -201,5 +201,5 @@ KE::Timer::RemoveTimer(IN OUT PKTIMER Timer)
 {
     /* Remove the timer from the list */
     Timer->Header.Inserted = FALSE;
-    RtlRemoveEntryList(&Timer->TimerListEntry);
+    RTL::LinkedList::RemoveEntryList(&Timer->TimerListEntry);
 }

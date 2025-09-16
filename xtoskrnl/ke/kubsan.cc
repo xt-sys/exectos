@@ -703,10 +703,6 @@ KE::KUbsan::LeaveFrame()
     ActiveFrame = FALSE;
 }
 
-
-
-
-
 /**
  * Handles the addition overflow error. This is internal routine implementing ABI defined by CLANG UBSAN.
  *
@@ -783,6 +779,7 @@ __ubsan_handle_divrem_overflow(IN PKUBSAN_OVERFLOW_DATA Data,
  *
  * @see https://github.com/llvm/llvm-project/blob/release/18.x/clang/lib/CodeGen/CodeGenFunction.h#L113
  */
+XTCLINK
 XTCDECL
 VOID
 __ubsan_handle_float_cast_overflow(IN PKUBSAN_FLOAT_CAST_OVERFLOW_DATA Data,
@@ -808,6 +805,7 @@ __ubsan_handle_float_cast_overflow(IN PKUBSAN_FLOAT_CAST_OVERFLOW_DATA Data,
  *
  * @see https://github.com/llvm/llvm-project/blob/release/18.x/clang/lib/CodeGen/CodeGenFunction.h#L113
  */
+XTCLINK
 XTCDECL
 VOID
 __ubsan_handle_function_type_mismatch(IN PKUBSAN_FUNCTION_TYPE_MISMATCH_DATA Data,
@@ -829,6 +827,7 @@ __ubsan_handle_function_type_mismatch(IN PKUBSAN_FUNCTION_TYPE_MISMATCH_DATA Dat
  *
  * @see https://github.com/llvm/llvm-project/blob/release/18.x/clang/lib/CodeGen/CodeGenFunction.h#L113
  */
+XTCLINK
 XTCDECL
 VOID
 __ubsan_handle_invalid_builtin(IN PKUBSAN_INVALID_BUILTIN_DATA Data)
@@ -855,6 +854,7 @@ __ubsan_handle_invalid_builtin(IN PKUBSAN_INVALID_BUILTIN_DATA Data)
  *
  * @see https://github.com/llvm/llvm-project/blob/release/18.x/clang/lib/CodeGen/CodeGenFunction.h#L113
  */
+XTCLINK
 XTCDECL
 VOID
 __ubsan_handle_mul_overflow(IN PKUBSAN_OVERFLOW_DATA Data,
@@ -880,6 +880,7 @@ __ubsan_handle_mul_overflow(IN PKUBSAN_OVERFLOW_DATA Data,
  *
  * @see https://github.com/llvm/llvm-project/blob/release/18.x/clang/lib/CodeGen/CodeGenFunction.h#L113
  */
+XTCLINK
 XTCDECL
 VOID
 __ubsan_handle_negate_overflow(IN PKUBSAN_OVERFLOW_DATA Data,
@@ -904,6 +905,7 @@ __ubsan_handle_negate_overflow(IN PKUBSAN_OVERFLOW_DATA Data,
  *
  * @see https://github.com/llvm/llvm-project/blob/release/18.x/clang/lib/CodeGen/CodeGenFunction.h#L113
  */
+XTCLINK
 XTCDECL
 VOID
 __ubsan_handle_out_of_bounds(IN PKUBSAN_OUT_OF_BOUNDS_DATA Data,
@@ -931,6 +933,7 @@ __ubsan_handle_out_of_bounds(IN PKUBSAN_OUT_OF_BOUNDS_DATA Data,
  *
  * @see https://github.com/llvm/llvm-project/blob/release/18.x/clang/lib/CodeGen/CodeGenFunction.h#L113
  */
+XTCLINK
 XTCDECL
 VOID
 __ubsan_handle_pointer_overflow(IN PKUBSAN_OVERFLOW_DATA Data,
@@ -959,6 +962,7 @@ __ubsan_handle_pointer_overflow(IN PKUBSAN_OVERFLOW_DATA Data,
  *
  * @see https://github.com/llvm/llvm-project/blob/release/18.x/clang/lib/CodeGen/CodeGenFunction.h#L113
  */
+XTCLINK
 XTCDECL
 VOID
 __ubsan_handle_shift_out_of_bounds(IN PKUBSAN_SHIFT_OUT_OF_BOUNDS_DATA Data,
@@ -987,6 +991,7 @@ __ubsan_handle_shift_out_of_bounds(IN PKUBSAN_SHIFT_OUT_OF_BOUNDS_DATA Data,
  *
  * @see https://github.com/llvm/llvm-project/blob/release/18.x/clang/lib/CodeGen/CodeGenFunction.h#L113
  */
+XTCLINK
 XTCDECL
 VOID
 __ubsan_handle_sub_overflow(IN PKUBSAN_OVERFLOW_DATA Data,
@@ -1012,6 +1017,7 @@ __ubsan_handle_sub_overflow(IN PKUBSAN_OVERFLOW_DATA Data,
  *
  * @see https://github.com/llvm/llvm-project/blob/release/18.x/clang/lib/CodeGen/CodeGenFunction.h#L113
  */
+XTCLINK
 XTCDECL
 VOID
 __ubsan_handle_type_mismatch(IN PKUBSAN_TYPE_MISMATCH_DATA Data,
@@ -1036,6 +1042,7 @@ __ubsan_handle_type_mismatch(IN PKUBSAN_TYPE_MISMATCH_DATA Data,
  *
  * @see https://github.com/llvm/llvm-project/blob/release/18.x/clang/lib/CodeGen/CodeGenFunction.h#L113
  */
+XTCLINK
 XTCDECL
 VOID
 __ubsan_handle_type_mismatch_v1(IN PKUBSAN_TYPE_MISMATCH_DATA_V1 Data,

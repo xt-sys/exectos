@@ -37,7 +37,7 @@ KE::Semaphore::InitializeSemaphore(IN PKSEMAPHORE Semaphore,
     Semaphore->Limit = Limit;
 
     /* Initialize semaphore wait list */
-    RtlInitializeListHead(&Semaphore->Header.WaitListHead);
+    RTL::LinkedList::InitializeListHead(&Semaphore->Header.WaitListHead);
 }
 
 /**

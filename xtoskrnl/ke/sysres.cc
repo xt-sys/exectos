@@ -161,10 +161,10 @@ KE::SystemResources::InitializeResources(VOID)
 
     /* Initialize system resources spin lock and resource list */
     SpinLock::InitializeSpinLock(&ResourcesLock);
-    RtlInitializeListHead(&ResourcesListHead);
+    RTL::LinkedList::InitializeListHead(&ResourcesListHead);
 
     /* Make sure there are some system resources available */
-    if(!RtlListEmpty(BootInformation::GetSystemResources()))
+    if(!RTL::LinkedList::ListEmpty(BootInformation::GetSystemResources()))
     {
         /* Iterate through system resources list */
         ListEntry = BootInformation::GetSystemResources()->Flink;
@@ -195,8 +195,8 @@ KE::SystemResources::InitializeResources(VOID)
             if(ResourceSize != 0 && ResourceSize == ResourceHeader->ResourceSize)
             {
                 /* Move valid resource to the internal kernel list of system resources */
-                RtlRemoveEntryList(&ResourceHeader->ListEntry);
-                RtlInsertTailList(&ResourcesListHead, &ResourceHeader->ListEntry);
+                RTL::LinkedList::RemoveEntryList(&ResourceHeader->ListEntry);
+                RTL::LinkedList::InsertTailList(&ResourcesListHead, &ResourceHeader->ListEntry);
             }
 
             /* Go to the next list entry */

@@ -292,24 +292,3 @@ KE::KThread::SuspendThread(IN PVOID NormalContext,
 {
     UNIMPLEMENTED;
 }
-
-
-
-
-
-/* TEMPORARY FOR COMPATIBILITY WITH C CODE */
-XTCLINK
-XTAPI
-XTSTATUS
-KeInitializeThread(IN PKPROCESS Process,
-                          IN OUT PKTHREAD Thread,
-                          IN PKSYSTEM_ROUTINE SystemRoutine,
-                          IN PKSTART_ROUTINE StartRoutine,
-                          IN PVOID StartContext,
-                          IN PCONTEXT Context,
-                          IN PVOID EnvironmentBlock,
-                          IN PVOID Stack,
-                          IN BOOLEAN RunThread)
-{
-    return KE::KThread::InitializeThread(Process, Thread, SystemRoutine, StartRoutine, StartContext, Context, EnvironmentBlock, Stack, RunThread);
-}

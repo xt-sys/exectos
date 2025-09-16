@@ -79,23 +79,3 @@ KE::Crash::PanicEx(IN ULONG Code,
     KD::DebugIo::KdPrint(L"Fatal System Error: 0x%08lx\nKernel Panic!\n\n", Code);
     HaltSystem();
 }
-
-
-
-/* TEMPORARY FOR COMPATIBILITY WITH C CODE */
-XTCLINK
-XTAPI
-VOID
-KeHaltSystem(VOID)
-{
-    KE::Crash::HaltSystem();
-}
-
-/* TEMPORARY FOR COMPATIBILITY WITH C CODE */
-XTCLINK
-XTAPI
-VOID
-KePanic(ULONG Code)
-{
-    KE::Crash::Panic(Code);
-}

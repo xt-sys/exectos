@@ -74,18 +74,3 @@ KE::KProcess::InitializeProcess(IN OUT PKPROCESS Process,
     /* Set initial process state */
     Process->State = ProcessInMemory;
 }
-
-
-
-
-/* TEMPORARY FOR COMPATIBILITY WITH C CODE */
-XTAPI
-VOID
-KeInitializeProcess(IN OUT PKPROCESS Process,
-                    IN KPRIORITY Priority,
-                    IN KAFFINITY Affinity,
-                    IN PULONG_PTR DirectoryTable,
-                    IN BOOLEAN Alignment)
-{
-    KE::KProcess::InitializeProcess(Process, Priority, Affinity, DirectoryTable, Alignment);
-}
