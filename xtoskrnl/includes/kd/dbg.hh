@@ -17,7 +17,7 @@
 #ifdef DBG
     #define DebugPrint(Format, ...)     if(KD::DebugIo::KdPrint) KD::DebugIo::KdPrint(Format, __VA_ARGS__);
 #else
-    #define DebugPrint(Format, ...)     ((VOID)NULL)
+    #define DebugPrint(Format, ...)     ((VOID)NULLPTR)
 #endif
 
 #endif /* __XTOSKRNL_KD_DBG_HH */
