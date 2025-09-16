@@ -107,7 +107,7 @@ XTCDECL
 BOOLEAN
 RTL::LinkedList::ListEmpty(IN PLIST_ENTRY ListHead)
 {
-    return (BOOLEAN)(((ListHead->Flink == NULL) && (ListHead->Blink == NULL)) || (ListHead->Flink == ListHead));
+    return (BOOLEAN)(((ListHead->Flink == NULLPTR) && (ListHead->Blink == NULLPTR)) || (ListHead->Flink == ListHead));
 }
 
 /**
@@ -127,7 +127,7 @@ RTL::LinkedList::ListLoop(IN PLIST_ENTRY ListHead)
     PLIST_ENTRY SlowEntry, FastEntry;
 
     /* Check if list exists */
-    if(ListHead == NULL)
+    if(ListHead == NULLPTR)
     {
         /* No loop in non-existen list */
         return FALSE;
@@ -138,7 +138,7 @@ RTL::LinkedList::ListLoop(IN PLIST_ENTRY ListHead)
     SlowEntry = ListHead;
 
     /* Iterate through the linked list to find a loop */
-    while(SlowEntry != NULL && FastEntry != NULL && FastEntry->Flink != NULL)
+    while(SlowEntry != NULLPTR && FastEntry != NULLPTR && FastEntry->Flink != NULLPTR)
     {
         /* Move slow and fast pointers by one and two positions accordingly */
         SlowEntry = SlowEntry->Flink;

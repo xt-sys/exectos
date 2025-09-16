@@ -11,10 +11,18 @@
 
 
 #ifdef __cplusplus
-    #define XTCLINK extern "C"
+    /* C++ definitions */
+    #define XTCLINK         extern "C"
+    #define NULLPTR         nullptr
+
+    /* C++ types */
     typedef wchar_t wchar;
 #else
+    /* C definitions */
     #define XTCLINK
+    #define NULLPTR         ((void *)0)
+
+    /* C types */
     typedef unsigned short wchar;
 #endif
 

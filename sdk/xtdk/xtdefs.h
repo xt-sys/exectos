@@ -29,10 +29,6 @@
 #define UNION                                  union
 #define VOLATILE                               volatile
 
-/* NULL values */
-#define NULL                                   ((PVOID) 0)
-#define NULL64                                 ((VOID * PVOID) 0)
-
 /* Type limits */
 #define MINCHAR                                0x80
 #define MAXCHAR                                0x7F

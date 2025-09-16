@@ -400,7 +400,7 @@ PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
     }
 
     /* Store file size and memory type, nullify data and free up memory */
-    ImageData->Data = NULL;
+    ImageData->Data = NULLPTR;
     ImageData->FileSize = FileInfo->FileSize;
     ImageData->MemoryType = MemoryType;
     XtLdrProtocol->Memory.FreePool(FileInfo);

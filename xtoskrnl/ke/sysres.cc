@@ -104,8 +104,8 @@ KE::SystemResources::GetSystemResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
     /* Check if resource was found */
     if(ListEntry == &ResourcesListHead)
     {
-        /* Resource not found, return NULL */
-        Resource = nullptr;
+        /* Resource not found, return NULLPTR */
+        Resource = NULLPTR;
         Status = STATUS_NOT_FOUND;
     }
 

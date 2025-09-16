@@ -132,10 +132,10 @@ RTL::String::CompareStringInsensitive(IN PCSTR String1,
  * Appends a copy of the source string to the end of the destination string.
  *
  * @param Destination
- *        Supplies a pointer to the null-terminated string to append to.
+ *        Supplies a pointer to the NULL-terminated string to append to.
  *
  * @param Source
- *        Supplies a pointer to the null-terminated string to copy from.
+ *        Supplies a pointer to the NULL-terminated string to copy from.
  *
  * @param Count
  *        Sets a maximum number of characters to copy. If no limit set, appends whole string.
@@ -164,7 +164,7 @@ RTL::String::ConcatenateString(OUT PCHAR Destination,
         /* Copy character-by-character */
         do
         {
-            /* Check if NULL terminated character found */
+            /* Check if NULL-terminated character found */
             if((*Destination = *Source++) == '\0')
             {
                 /* Break on '\0' character */
@@ -174,7 +174,7 @@ RTL::String::ConcatenateString(OUT PCHAR Destination,
         }
         while(--Count != 0);
 
-        /* Add NULL termination character to the end of destination string */
+        /* Add NULL-termination character to the end of destination string */
         *Destination = '\0';
     }
     else
@@ -217,7 +217,7 @@ RTL::String::CopyString(IN PCHAR Destination,
         /* Copy source character */
         Destination[Index] = Source[Index];
 
-        /* Check if NULL terminated character found */
+        /* Check if NULL-terminated character found */
         if(Source[Index] == '\0')
         {
             /* End of source string reached */
@@ -253,8 +253,8 @@ RTL::String::FindString(IN PCSTR Source,
     /* Validate input parameters */
     if(!Source || !Search)
     {
-        /* Invalid input parameters, return NULL */
-        return nullptr;
+        /* Invalid input parameters, return NULLPTR */
+        return NULLPTR;
     }
 
     /* Check if search string is empty */
@@ -287,8 +287,8 @@ RTL::String::FindString(IN PCSTR Source,
         }
     }
 
-    /* No match found, return NULL */
-    return nullptr;
+    /* No match found, return NULLPTR */
+    return NULLPTR;
 }
 
 /**
@@ -315,8 +315,8 @@ RTL::String::FindStringInsensitive(IN PCSTR Source,
     /* Validate input parameters */
     if(!Source || !Search)
     {
-        /* Invalid input parameters, return NULL */
-        return nullptr;
+        /* Invalid input parameters, return NULLPTR */
+        return NULLPTR;
     }
 
     /* Check if search string is empty */
@@ -350,8 +350,8 @@ RTL::String::FindStringInsensitive(IN PCSTR Source,
         }
     }
 
-    /* No match found, return NULL */
-    return nullptr;
+    /* No match found, return NULLPTR */
+    return NULLPTR;
 }
 
 /**
@@ -389,12 +389,12 @@ RTL::String::ReverseString(IN OUT PCHAR String,
  * Calculates the length of a given string.
  *
  * @param String
- *        Pointer to the null-terminated string to be examined.
+ *        Pointer to the NULL-terminated string to be examined.
  *
  * @param MaxLength
  *        Maximum number of characters to examine. If no limit set, it examines whole string.
  *
- * @return The length of the null-terminated string.
+ * @return The length of the NULL-terminated string.
  *
  * @since: XT 1.0
  */
@@ -406,7 +406,7 @@ RTL::String::StringLength(IN PCSTR String,
     SIZE_T Length;
 
     /* Check if NULL pointer passed */
-    if(String == NULL)
+    if(String == NULLPTR)
     {
         return 0;
     }
@@ -453,7 +453,7 @@ RTL::String::StringToWideString(OUT PWCHAR Destination,
     SIZE_T Count = Length;
 
     /* Check if NULL pointer passed */
-    if(Destination == NULL)
+    if(Destination == NULLPTR)
     {
         /* No wide characters written */
         return 0;
@@ -466,7 +466,7 @@ RTL::String::StringToWideString(OUT PWCHAR Destination,
         if((*Destination = *LocalSource) == 0)
         {
             /* End of string reached */
-            LocalSource = nullptr;
+            LocalSource = NULLPTR;
             break;
         }
 
@@ -488,13 +488,13 @@ RTL::String::StringToWideString(OUT PWCHAR Destination,
 }
 
 /**
- * Finds the next token in a null-terminated string.
+ * Finds the next token in a NULL-terminated string.
  *
  * @param String
- *        Pointer to the null-terminated string to tokenize.
+ *        Pointer to the NULL-terminated string to tokenize.
  *
  * @param Delimiter
- *        Pointer to the null-terminated string identifying delimiters.
+ *        Pointer to the NULL-terminated string identifying delimiters.
  *
  * @param SavePtr
  *        Pointer to an object used to store routine internal state.
@@ -513,18 +513,18 @@ RTL::String::TokenizeString(IN PCHAR String,
     CHAR Char, SpanChar;
 
     /* Check if there is anything to tokenize */
-    if(String == NULL && (String = *SavePtr) == NULL)
+    if(String == NULLPTR && (String = *SavePtr) == NULLPTR)
     {
         /* Empty string given */
-        return nullptr;
+        return NULLPTR;
     }
 
     /* Check non-delimiter characters */
     Char = *String++;
     if(Char == '\0')
     {
-        *SavePtr = nullptr;
-        return nullptr;
+        *SavePtr = NULLPTR;
+        return NULLPTR;
     }
     Token = String - 1;
 
@@ -542,7 +542,7 @@ RTL::String::TokenizeString(IN PCHAR String,
                 if(Char == '\0')
                 {
                     /* End of string reached, no more tokens */
-                    String = nullptr;
+                    String = NULLPTR;
                 }
                 else
                 {
@@ -615,7 +615,7 @@ RTL::String::ToUpperCharacter(IN CHAR Character)
  * Removes certain characters from a beginning of the string.
  *
  * @param String
- *        Pointer to the null-terminated string to be trimmed.
+ *        Pointer to the NULL-terminated string to be trimmed.
  *
  * @return This routine returns a pointer to the left-trimmed string.
  *
@@ -645,7 +645,7 @@ RTL::String::TrimLeftString(IN PCHAR String)
  * Removes certain characters from the end of the string.
  *
  * @param String
- *        Pointer to the null-terminated string to be trimmed.
+ *        Pointer to the NULL-terminated string to be trimmed.
  *
  * @return This routine returns a pointer to the right-trimmed string.
  *
@@ -678,7 +678,7 @@ RTL::String::TrimRightString(IN PCHAR String)
  * Removes certain characters from the beginning and the end of the string.
  *
  * @param String
- *        Pointer to the null-terminated string to be trimmed.
+ *        Pointer to the NULL-terminated string to be trimmed.
  *
  * @return This routine returns a pointer to the trimmed string.
  *

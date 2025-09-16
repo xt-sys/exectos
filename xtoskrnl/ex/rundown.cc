@@ -106,7 +106,7 @@ XTFASTCALL
 VOID
 EX::Rundown::ReInitializeProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
 {
-    RTL::Atomic::ExchangePointer(&Descriptor->Ptr, NULL);
+    RTL::Atomic::ExchangePointer(&Descriptor->Ptr, NULLPTR);
 }
 
 /**

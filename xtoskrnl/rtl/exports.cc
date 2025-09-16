@@ -256,10 +256,10 @@ RtlCompareWideStringInsensitive(IN PCWSTR String1,
  * Appends a copy of the source string to the end of the destination string.
  *
  * @param Destination
- *        Supplies a pointer to the null-terminated string to append to.
+ *        Supplies a pointer to the NULL-terminated string to append to.
  *
  * @param Source
- *        Supplies a pointer to the null-terminated string to copy from.
+ *        Supplies a pointer to the NULL-terminated string to copy from.
  *
  * @param Count
  *        Sets a maximum number of characters to copy. If no limit set, appends whole string.
@@ -282,10 +282,10 @@ RtlConcatenateString(OUT PCHAR Destination,
  * Appends a copy of the source wide string to the end of the destination wide string.
  *
  * @param Destination
- *        Supplies a pointer to the null-terminated wide string to append to.
+ *        Supplies a pointer to the NULL-terminated wide string to append to.
  *
  * @param Source
- *        Supplies a pointer to the null-terminated wide string to copy from.
+ *        Supplies a pointer to the NULL-terminated wide string to copy from.
  *
  * @param Count
  *        Sets a maximum number of wide characters to copy. If no limit set, appends whole wide string.
@@ -967,12 +967,12 @@ RtlSetMemory(OUT PVOID Destination,
  * Calculates the length of a given string.
  *
  * @param String
- *        Pointer to the null-terminated string to be examined.
+ *        Pointer to the NULL-terminated string to be examined.
  *
  * @param MaxLength
  *        Maximum number of characters to examine. If no limit set, it examines whole string.
  *
- * @return The length of the null-terminated string.
+ * @return The length of the NULL-terminated string.
  *
  * @since: XT 1.0
  */
@@ -1034,13 +1034,13 @@ RtlTestBit(IN PRTL_BITMAP BitMap,
 }
 
 /**
- * Finds the next token in a null-terminated string.
+ * Finds the next token in a NULL-terminated string.
  *
  * @param String
- *        Pointer to the null-terminated string to tokenize.
+ *        Pointer to the NULL-terminated string to tokenize.
  *
  * @param Delimiter
- *        Pointer to the null-terminated string identifying delimiters.
+ *        Pointer to the NULL-terminated string identifying delimiters.
  *
  * @param SavePtr
  *        Pointer to an object used to store routine internal state.
@@ -1060,18 +1060,18 @@ RtlTokenizeString(IN PCHAR String,
 }
 
 /**
- * Finds the next token in a null-terminated wide string.
+ * Finds the next token in a NULL-terminated wide string.
  *
  * @param String
- *        Pointer to the null-terminated wide string to tokenize.
+ *        Pointer to the NULL-terminated wide string to tokenize.
  *
  * @param Delimiter
- *        Pointer to the null-terminated wide string identifying delimiters.
+ *        Pointer to the NULL-terminated wide string identifying delimiters.
  *
  * @param SavePtr
  *        Pointer to an object used to store routine internal state.
  *
- * @return Pointer to the beginning of the next token or NULL if there are no more tokens.
+ * @return Pointer to the beginning of the next token or NULLPTR if there are no more tokens.
  *
  * @since: XT 1.0
  */
@@ -1161,7 +1161,7 @@ RtlToUpperWideCharacter(IN WCHAR Character)
  * Removes certain characters from a beginning of the string.
  *
  * @param String
- *        Pointer to the null-terminated string to be trimmed.
+ *        Pointer to the NULL-terminated string to be trimmed.
  *
  * @return This routine returns a pointer to the left-trimmed string.
  *
@@ -1179,7 +1179,7 @@ RtlTrimLeftString(IN PCHAR String)
  * Removes certain characters from a beginning of the wide string.
  *
  * @param String
- *        Pointer to the null-terminated wide string to be trimmed.
+ *        Pointer to the NULL-terminated wide string to be trimmed.
  *
  * @return This routine returns a pointer to the left-trimmed wide string.
  *
@@ -1197,7 +1197,7 @@ RtlTrimLeftWideString(IN PWCHAR String)
  * Removes certain characters from the end of the string.
  *
  * @param String
- *        Pointer to the null-terminated string to be trimmed.
+ *        Pointer to the NULL-terminated string to be trimmed.
  *
  * @return This routine returns a pointer to the right-trimmed string.
  *
@@ -1215,7 +1215,7 @@ RtlTrimRightString(IN PCHAR String)
  * Removes certain characters from the end of the wide string.
  *
  * @param String
- *        Pointer to the null-terminated wide string to be trimmed.
+ *        Pointer to the NULL-terminated wide string to be trimmed.
  *
  * @return This routine returns a pointer to the right-trimmed wide string.
  *
@@ -1233,7 +1233,7 @@ RtlTrimRightWideString(IN PWCHAR String)
  * Removes certain characters from the beginning and the end of the string.
  *
  * @param String
- *        Pointer to the null-terminated string to be trimmed.
+ *        Pointer to the NULL-terminated string to be trimmed.
  *
  * @return This routine returns a pointer to the trimmed string.
  *
@@ -1251,7 +1251,7 @@ RtlTrimString(IN PCHAR String)
  * Removes certain characters from the beginning and the end of the wide string.
  *
  * @param String
- *        Pointer to the null-terminated wide string to be trimmed.
+ *        Pointer to the NULL-terminated wide string to be trimmed.
  *
  * @return This routine returns a pointer to the trimmed wide string.
  *
@@ -1269,12 +1269,12 @@ RtlTrimWideString(IN PWCHAR String)
  * Calculates the length of a given wide string.
  *
  * @param String
- *        Pointer to the null-terminated wide string to be examined.
+ *        Pointer to the NULL-terminated wide string to be examined.
  *
  * @param MaxLength
  *        Maximum number of wide characters to examine. If no limit set, it examines whole string.
  *
- * @return The length of the null-terminated wide string.
+ * @return The length of the NULL-terminated wide string.
  *
  * @since: XT 1.0
  */

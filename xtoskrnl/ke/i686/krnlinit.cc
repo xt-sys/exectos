@@ -99,7 +99,8 @@ KE::KernelInit::StartKernel(VOID)
     CurrentProcess->Quantum = MAXCHAR;
 
     /* Initialize Idle thread */
-    KThread::InitializeThread(CurrentProcess, CurrentThread, nullptr, nullptr, nullptr, nullptr, nullptr, AR::ProcSup::GetBootStack(), TRUE);
+    KThread::InitializeThread(CurrentProcess, CurrentThread, NULLPTR, NULLPTR, NULLPTR,
+                              NULLPTR, NULLPTR, AR::ProcSup::GetBootStack(), TRUE);
     CurrentThread->NextProcessor = Prcb->CpuNumber;
     CurrentThread->Priority = THREAD_HIGH_PRIORITY;
     CurrentThread->State = Running;

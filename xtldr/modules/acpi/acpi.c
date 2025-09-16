@@ -61,7 +61,7 @@ AcGetAcpiDescriptionPointer(OUT PVOID *AcpiTable)
  *        Supplies a pointer to the table to start searching from.
  *
  * @param AcpiTable
- *        Supplies a pointer to memory area where ACPI table address will be stored, or NULL if not found.
+ *        Supplies a pointer to memory area where ACPI table address will be stored, or NULLPTR if not found.
  *
  * @return This routine returns a status code.
  *
@@ -81,8 +81,8 @@ AcGetAcpiTable(IN CONST UINT Signature,
     PACPI_RSDT Rsdt;
     BOOLEAN Xsdp;
 
-    /* Return NULL address by default if requested table not found */
-    *AcpiTable = NULL;
+    /* Return NULLPTR by default if requested table not found */
+    *AcpiTable = NULLPTR;
 
     /* Get Root System Description Table Pointer */
     Status = AcGetAcpiDescriptionPointer((PVOID)&Rsdp);
@@ -127,13 +127,13 @@ AcGetAcpiTable(IN CONST UINT Signature,
         }
 
         /* Check if previous table provided */
-        if(PreviousTable != NULL)
+        if(PreviousTable != NULLPTR)
         {
             /* Check if this is a table previously found */
             if(TableHeader == (PVOID)PreviousTable)
             {
                 /* Unset previous table */
-                PreviousTable = NULL;
+                PreviousTable = NULLPTR;
             }
 
             /* Skip to next ACPI table */
@@ -231,7 +231,7 @@ AcGetRsdpTable(OUT PVOID *AcpiTable)
     if(Status != STATUS_EFI_SUCCESS || !AcpValidateAcpiTable(RsdpTable, 20))
     {
         /* RSDP not found or checksum mismatch */
-        *AcpiTable = NULL;
+        *AcpiTable = NULLPTR;
         return STATUS_EFI_NOT_FOUND;
     }
 
@@ -263,7 +263,7 @@ AcGetSMBiosTable(OUT PVOID *SmBiosTable)
     if(Status != STATUS_EFI_SUCCESS || !AcpValidateAcpiTable(SmBios, SmBios->Length))
     {
         /* SMBIOS not found or checksum mismatch */
-        *SmBiosTable = NULL;
+        *SmBiosTable = NULLPTR;
         return STATUS_EFI_NOT_FOUND;
     }
 
@@ -295,7 +295,7 @@ AcGetSMBios3Table(OUT PVOID *SmBiosTable)
     if(Status != STATUS_EFI_SUCCESS || !AcpValidateAcpiTable(SmBios, SmBios->Length))
     {
         /* SMBIOS3 not found or checksum mismatch */
-        *SmBiosTable = NULL;
+        *SmBiosTable = NULLPTR;
         return STATUS_EFI_NOT_FOUND;
     }
 
@@ -327,7 +327,7 @@ AcGetXsdpTable(OUT PVOID *AcpiTable)
     if(Status != STATUS_EFI_SUCCESS || !AcpValidateAcpiTable(XsdpTable, 36))
     {
         /* XSDP not found or checksum mismatch */
-        *AcpiTable = NULL;
+        *AcpiTable = NULLPTR;
         return STATUS_EFI_NOT_FOUND;
     }
 

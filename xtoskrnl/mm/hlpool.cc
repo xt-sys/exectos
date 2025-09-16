@@ -176,13 +176,13 @@ MM::HardwarePool::MapHardwareMemory(IN PHYSICAL_ADDRESS PhysicalAddress,
     BaseAddress = HardwareHeapStart;
     MappedPages = 0;
     ReturnAddress = BaseAddress;
-    *VirtualAddress = NULL;
+    *VirtualAddress = NULLPTR;
 
     /* Iterate through all pages */
     while(MappedPages < PageCount)
     {
         /* Check if address overflows */
-        if(BaseAddress == NULL)
+        if(BaseAddress == NULLPTR)
         {
             /* Not enough free pages, return error */
             return STATUS_INSUFFICIENT_RESOURCES;

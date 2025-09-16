@@ -146,7 +146,7 @@ BlInitializeBootMenuList(IN ULONG MaxNameLength,
     while(MenuEntrySectionList != BlpMenuList)
     {
         /* NULLify menu entry name */
-        MenuEntryName = NULL;
+        MenuEntryName = NULLPTR;
 
         /* Get menu section */
         MenuEntrySection = CONTAIN_RECORD(MenuEntrySectionList, XTBL_CONFIG_SECTION, Flink);
@@ -253,7 +253,7 @@ BlInvokeBootProtocol(IN PWCHAR ShortName,
 
     /* Initialize boot parameters and a list of modules */
     RtlZeroMemory(&BootParameters, sizeof(XTBL_BOOT_PARAMETERS));
-    ModulesList = NULL;
+    ModulesList = NULLPTR;
 
     /* Iterate through all options provided by boot menu entry and propagate boot parameters */
     OptionsListEntry = OptionsList->Flink;
@@ -440,7 +440,7 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
     }
 
     /* Disable watchdog timer */
-    Status = EfiSystemTable->BootServices->SetWatchdogTimer(0, 0x10000, 0, NULL);
+    Status = EfiSystemTable->BootServices->SetWatchdogTimer(0, 0x10000, 0, NULLPTR);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to disable the timer, print message */
@@ -479,7 +479,7 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
     while(TRUE)
     {
         /* Check if custom boot menu registered */
-        if(BlpStatus.BootMenu != NULL)
+        if(BlpStatus.BootMenu != NULLPTR)
         {
             /* Display alternative boot menu */
             BlpStatus.BootMenu();

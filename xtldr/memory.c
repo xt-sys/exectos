@@ -130,12 +130,12 @@ BlGetMemoryMap(OUT PEFI_MEMORY_MAP MemoryMap)
 {
     EFI_STATUS Status;
 
-    if(MemoryMap == NULL)
+    if(MemoryMap == NULLPTR)
     {
         return STATUS_EFI_INVALID_PARAMETER;
     }
 
-    MemoryMap->Map = NULL;
+    MemoryMap->Map = NULLPTR;
     MemoryMap->MapSize = 0;
 
     /* Get memory map */
@@ -167,7 +167,7 @@ BlGetMemoryMap(OUT PEFI_MEMORY_MAP MemoryMap)
     while(Status == STATUS_EFI_BUFFER_TOO_SMALL);
 
     /* Make sure memory map is set */
-    if(MemoryMap->Map == NULL)
+    if(MemoryMap->Map == NULLPTR)
     {
         /* Something went wrong */
         return STATUS_EFI_NO_MAPPING;
@@ -290,7 +290,7 @@ BlMapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
     VirtualAddress = *MemoryMapAddress;
 
     /* Check if custom memory type routine is specified */
-    if(GetMemoryTypeRoutine == NULL)
+    if(GetMemoryTypeRoutine == NULLPTR)
     {
         /* Use default memory type routine */
         GetMemoryTypeRoutine = BlpGetLoaderMemoryType;
@@ -367,7 +367,7 @@ BlMapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
             else
             {
                 /* Map all other memory as loader free */
-                Status = BlMapVirtualMemory(PageMap, NULL, (PVOID)Descriptor->PhysicalStart,
+                Status = BlMapVirtualMemory(PageMap, NULLPTR, (PVOID)Descriptor->PhysicalStart,
                                             Descriptor->NumberOfPages, LoaderFree);
             }
 
@@ -384,7 +384,7 @@ BlMapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
     }
 
     /* Always map first page */
-    Status = BlMapVirtualMemory(PageMap, NULL, (PVOID)0, 1, LoaderFirmwarePermanent);
+    Status = BlMapVirtualMemory(PageMap, NULLPTR, (PVOID)0, 1, LoaderFirmwarePermanent);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Mapping failed */
@@ -392,7 +392,7 @@ BlMapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
     }
 
     /* Map BIOS ROM and VRAM */
-    Status = BlMapVirtualMemory(PageMap, NULL, (PVOID)0xA0000, 0x60, LoaderFirmwarePermanent);
+    Status = BlMapVirtualMemory(PageMap, NULLPTR, (PVOID)0xA0000, 0x60, LoaderFirmwarePermanent);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Mapping failed */
@@ -500,7 +500,7 @@ BlMapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
 
                 /* Set mapping fields and insert it on the top */
                 Mapping3->PhysicalAddress = (PUCHAR)PhysicalAddressEnd + 1;
-                Mapping3->VirtualAddress = NULL;
+                Mapping3->VirtualAddress = NULLPTR;
                 Mapping3->NumberOfPages = NumberOfMappedPages;
                 Mapping3->MemoryType = Mapping2->MemoryType;
                 RtlInsertHeadList(&Mapping2->ListEntry, &Mapping3->ListEntry);
@@ -536,7 +536,7 @@ BlMapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
 
                 /* Set mapping fields and insert it on the top */
                 Mapping3->PhysicalAddress = Mapping1->PhysicalAddress;
-                Mapping3->VirtualAddress = NULL;
+                Mapping3->VirtualAddress = NULLPTR;
                 Mapping3->NumberOfPages = NumberOfMappedPages;
                 Mapping3->MemoryType = Mapping2->MemoryType;
                 RtlInsertHeadList(&Mapping2->ListEntry, &Mapping3->ListEntry);

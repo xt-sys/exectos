@@ -19,7 +19,7 @@ PKD_INIT_ROUTINE KD::DebugIo::IoProvidersInitRoutines[KDBG_PROVIDERS_COUNT] = {
 };
 
 /* Pointer to DbgPrint() routine */
-PKD_PRINT_ROUTINE KD::DebugIo::KdPrint = nullptr;
+PKD_PRINT_ROUTINE KD::DebugIo::KdPrint = NULLPTR;
 
 /* List of active I/O providers */
 LIST_ENTRY KD::DebugIo::Providers;

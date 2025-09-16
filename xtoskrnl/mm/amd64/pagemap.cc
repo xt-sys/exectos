@@ -36,7 +36,7 @@ MM::PageMap::ClearPte(PHARDWARE_PTE PtePointer)
  * @param Address
  *        Specifies the virtual address for which to retrieve the corresponding P5E.
  *
- * @return This routine returns the address of the P5E, or NULL if LA57 is not enabled.
+ * @return This routine returns the address of the P5E, or NULLPTR if LA57 is not enabled.
  *
  * @since XT 1.0
  */

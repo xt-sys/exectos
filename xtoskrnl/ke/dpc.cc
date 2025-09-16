@@ -39,7 +39,7 @@ KE::Dpc::InitializeDpc(IN PKDPC Dpc,
     /* Initialize DPC routine and context data */
     Dpc->DeferredContext = DpcContext;
     Dpc->DeferredRoutine = DpcRoutine;
-    Dpc->DpcData = NULL;
+    Dpc->DpcData = NULLPTR;
 }
 
 /**
@@ -72,7 +72,7 @@ KE::Dpc::InitializeThreadedDpc(IN PKDPC Dpc,
     /* Initialize DPC routine and context data */
     Dpc->DeferredContext = DpcContext;
     Dpc->DeferredRoutine = DpcRoutine;
-    Dpc->DpcData = NULL;
+    Dpc->DpcData = NULLPTR;
 }
 
 /**

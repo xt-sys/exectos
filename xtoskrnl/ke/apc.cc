@@ -83,7 +83,7 @@ KE::Apc::InitializeApc(IN PKAPC Apc,
     {
         /* Set context and mode for special APC */
         Apc->ApcMode = KernelMode;
-        Apc->NormalContext = NULL;
+        Apc->NormalContext = NULLPTR;
     }
 
     /* Mark APC as not inserted yet */

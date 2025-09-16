@@ -132,10 +132,10 @@ RTL::WideString::CompareWideStringInsensitive(IN PCWSTR String1,
  * Appends a copy of the source wide string to the end of the destination wide string.
  *
  * @param Destination
- *        Supplies a pointer to the null-terminated wide string to append to.
+ *        Supplies a pointer to the NULL-terminated wide string to append to.
  *
  * @param Source
- *        Supplies a pointer to the null-terminated wide string to copy from.
+ *        Supplies a pointer to the NULL-terminated wide string to copy from.
  *
  * @param Count
  *        Sets a maximum number of wide characters to copy. If no limit set, appends whole wide string.
@@ -253,8 +253,8 @@ RTL::WideString::FindWideString(IN PCWSTR Source,
     /* Validate input parameters */
     if(!Source || !Search)
     {
-        /* Invalid input parameters, return NULL */
-        return nullptr;
+        /* Invalid input parameters, return NULLPTR */
+        return NULLPTR;
     }
 
     /* Check if search string is empty */
@@ -287,8 +287,8 @@ RTL::WideString::FindWideString(IN PCWSTR Source,
         }
     }
 
-    /* No match found, return NULL */
-    return nullptr;
+    /* No match found, return NULLPTR */
+    return NULLPTR;
 }
 
 /**
@@ -315,8 +315,8 @@ RTL::WideString::FindWideStringInsensitive(IN PCWSTR Source,
     /* Validate input parameters */
     if(!Source || !Search)
     {
-        /* Invalid input parameters, return NULL */
-        return nullptr;
+        /* Invalid input parameters, return NULLPTR */
+        return NULLPTR;
     }
 
     /* Check if search string is empty */
@@ -350,8 +350,8 @@ RTL::WideString::FindWideStringInsensitive(IN PCWSTR Source,
         }
     }
 
-    /* No match found, return NULL */
-    return nullptr;
+    /* No match found, return NULLPTR */
+    return NULLPTR;
 }
 
 /**
@@ -835,8 +835,8 @@ RTL::WideString::FormatArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
             GuidArg = VA_ARG(*ArgumentList, PGUID);
         }
 
-        /* Make sure a pointer to GUID is not NULL */
-        if(GuidArg != NULL)
+        /* Make sure a pointer to GUID is not NULL pointer */
+        if(GuidArg != NULLPTR)
         {
             /* Check if using uppercase format */
             if(FormatProperties.Flags & PFL_UPPERCASE)
@@ -967,7 +967,7 @@ RTL::WideString::FormatArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
         if(Specifier == L'n')
         {
             /* Make sure, that integer pointer parameter is not NULL */
-            if(IntArg != (UINT_PTR)NULL)
+            if(IntArg != (UINT_PTR)NULLPTR)
             {
                 /* Store number of characters written in integer pointer parameter */
                 *((PINT)(UINT_PTR)IntArg) = Context->CharactersWritten;
@@ -1031,7 +1031,7 @@ RTL::WideString::FormatArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
         }
 
         /* Make sure a pointer to ANSI_STRING is not NULL */
-        if(AnsiStrArg != NULL)
+        if(AnsiStrArg != NULLPTR)
         {
             /* Write formatted ANSI string value */
             Status = WriteStringValue(Context, &FormatProperties, AnsiStrArg->Buffer, AnsiStrArg->Length);
@@ -1053,7 +1053,7 @@ RTL::WideString::FormatArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,
         }
 
         /* Make sure a pointer to UNICODE_STRING is not NULL */
-        if(UnicodeStrArg != NULL)
+        if(UnicodeStrArg != NULLPTR)
         {
             /* Write formatted UNICODE string value */
             Status = WriteValue(Context, &FormatProperties, UnicodeStrArg->Buffer, UnicodeStrArg->Length);
@@ -1097,14 +1097,14 @@ RTL::WideString::FormatWideString(IN PRTL_PRINT_CONTEXT Context,
     ULONG Index;
 
     /* Make sure, that we have valid context and write routine */
-    if(Context == NULL || Context->WriteWideCharacter == NULL)
+    if(Context == NULLPTR || Context->WriteWideCharacter == NULLPTR)
     {
         /* Invalid context or write routine not set */
         return FALSE;
     }
 
     /* Check format string pointer */
-    if(Format == NULL)
+    if(Format == NULLPTR)
     {
         /* Write null string */
         Format = L"(null)";
@@ -1278,18 +1278,18 @@ RTL::WideString::ReverseWideString(IN OUT PWCHAR String,
 }
 
 /**
- * Finds the next token in a null-terminated wide string.
+ * Finds the next token in a NULL-terminated wide string.
  *
  * @param String
- *        Pointer to the null-terminated wide string to tokenize.
+ *        Pointer to the NULL-terminated wide string to tokenize.
  *
  * @param Delimiter
- *        Pointer to the null-terminated wide string identifying delimiters.
+ *        Pointer to the NULL-terminated wide string identifying delimiters.
  *
  * @param SavePtr
  *        Pointer to an object used to store routine internal state.
  *
- * @return Pointer to the beginning of the next token or NULL if there are no more tokens.
+ * @return Pointer to the beginning of the next token or NULLPTR if there are no more tokens.
  *
  * @since: XT 1.0
  */
@@ -1303,18 +1303,18 @@ RTL::WideString::TokenizeWideString(IN PWCHAR String,
     WCHAR Char, SpanChar;
 
     /* Check if there is anything to tokenize */
-    if(String == NULL && (String = *SavePtr) == NULL)
+    if(String == NULLPTR && (String = *SavePtr) == NULLPTR)
     {
         /* Empty string given */
-        return nullptr;
+        return NULLPTR;
     }
 
     /* Check non-delimiter characters */
     Char = *String++;
     if(Char == L'\0')
     {
-        *SavePtr = nullptr;
-        return nullptr;
+        *SavePtr = NULLPTR;
+        return NULLPTR;
     }
     Token = String - 1;
 
@@ -1332,7 +1332,7 @@ RTL::WideString::TokenizeWideString(IN PWCHAR String,
                 if(Char == L'\0')
                 {
                     /* End of string reached, no more tokens */
-                    String = nullptr;
+                    String = NULLPTR;
                 }
                 else
                 {
@@ -1405,7 +1405,7 @@ RTL::WideString::ToUpperWideCharacter(IN WCHAR Character)
  * Removes certain characters from a beginning of the wide string.
  *
  * @param String
- *        Pointer to the null-terminated wide string to be trimmed.
+ *        Pointer to the NULL-terminated wide string to be trimmed.
  *
  * @return This routine returns a pointer to the left-trimmed wide string.
  *
@@ -1435,7 +1435,7 @@ RTL::WideString::TrimLeftWideString(IN PWCHAR String)
  * Removes certain characters from the end of the wide string.
  *
  * @param String
- *        Pointer to the null-terminated wide string to be trimmed.
+ *        Pointer to the NULL-terminated wide string to be trimmed.
  *
  * @return This routine returns a pointer to the right-trimmed wide string.
  *
@@ -1469,7 +1469,7 @@ RTL::WideString::TrimRightWideString(IN PWCHAR String)
  * Removes certain characters from the beginning and the end of the wide string.
  *
  * @param String
- *        Pointer to the null-terminated wide string to be trimmed.
+ *        Pointer to the NULL-terminated wide string to be trimmed.
  *
  * @return This routine returns a pointer to the trimmed wide string.
  *
@@ -1486,12 +1486,12 @@ RTL::WideString::TrimWideString(IN PWCHAR String)
  * Calculates the length of a given wide string.
  *
  * @param String
- *        Pointer to the null-terminated wide string to be examined.
+ *        Pointer to the NULL-terminated wide string to be examined.
  *
  * @param MaxLength
  *        Maximum number of wide characters to examine. If no limit set, it examines whole string.
  *
- * @return The length of the null-terminated wide string.
+ * @return The length of the NULL-terminated wide string.
  *
  * @since: XT 1.0
  */
@@ -1503,7 +1503,7 @@ RTL::WideString::WideStringLength(IN PCWSTR String,
     SIZE_T Length;
 
     /* Check if NULL pointer passed */
-    if(String == NULL)
+    if(String == NULLPTR)
     {
         return 0;
     }
@@ -2876,7 +2876,7 @@ RTL::WideString::WriteStringValue(PRTL_PRINT_CONTEXT Context,
     XTSTATUS Status;
 
     /* Check for NULL string */
-    if(String == NULL)
+    if(String == NULLPTR)
     {
         /* Print '(null)' instead */
         String = "(null)";
@@ -2985,7 +2985,7 @@ RTL::WideString::WriteValue(PRTL_PRINT_CONTEXT Context,
     XTSTATUS Status;
 
     /* Check for NULL string */
-    if(String == NULL)
+    if(String == NULLPTR)
     {
         /* Print '(null)' instead */
         String = L"(null)";

@@ -193,7 +193,7 @@ RTL::Math::Divide64(IN LONGLONG Dividend,
 
     /* Calculate the quotient */
     DividendSign ^= DivisorSign;
-    Quotient = (DivideUnsigned64(UDividend, UDivisor, nullptr) ^ DividendSign) - DividendSign;
+    Quotient = (DivideUnsigned64(UDividend, UDivisor, NULLPTR) ^ DividendSign) - DividendSign;
 
     /* Make sure a pointer to remainder provided */
     if(Remainder)
@@ -284,7 +284,7 @@ RTL::Math::DivideUnsigned64(IN ULONGLONG Dividend,
         if(DivisorParts.u.HighPart == 0)
         {
             /* 32-bit divide operation, check if remainder provided */
-            if(Remainder != NULL)
+            if(Remainder != NULLPTR)
             {
                 /* Calculate remainder */
                 *Remainder = DividendParts.u.LowPart % DivisorParts.u.LowPart;
@@ -295,7 +295,7 @@ RTL::Math::DivideUnsigned64(IN ULONGLONG Dividend,
         }
 
         /* 32-bit value divided by a 64-bit value, check if remainder provided */
-        if(Remainder != NULL)
+        if(Remainder != NULLPTR)
         {
             /* Calculate remainder */
             *Remainder = DividendParts.u.LowPart;
@@ -318,7 +318,7 @@ RTL::Math::DivideUnsigned64(IN ULONGLONG Dividend,
             if(Shift > ((sizeof(ULONG) * BITS_PER_BYTE) - 1))
             {
                 /* Check if remainder provided */
-                if(Remainder != NULL)
+                if(Remainder != NULLPTR)
                 {
                     /* Calculate remainder */
                     *Remainder = DividendParts.QuadPart;
@@ -388,7 +388,7 @@ RTL::Math::DivideUnsigned64(IN ULONGLONG Dividend,
         if(DividendParts.u.LowPart == 0)
         {
             /* Check if remainder provided */
-            if(Remainder != NULL)
+            if(Remainder != NULLPTR)
             {
                 /* Calculate the remainder */
                 RemainderParts.u.HighPart = DividendParts.u.HighPart % DivisorParts.u.HighPart;
@@ -407,7 +407,7 @@ RTL::Math::DivideUnsigned64(IN ULONGLONG Dividend,
         if(Shift > ((sizeof(ULONG) * BITS_PER_BYTE) - 2))
         {
             /* Check if remainder provided */
-            if(Remainder != NULL)
+            if(Remainder != NULLPTR)
             {
                 /* Calculate the remainder */
                 *Remainder = DividendParts.QuadPart;
@@ -457,7 +457,7 @@ RTL::Math::DivideUnsigned64(IN ULONGLONG Dividend,
     QuotientParts.QuadPart = (QuotientParts.QuadPart << 1) | Carry;
 
     /* Check if remainder provided */
-    if(Remainder != NULL)
+    if(Remainder != NULLPTR)
     {
         /* Calculate the remainder */
         *Remainder = RemainderParts.QuadPart;
@@ -497,7 +497,7 @@ RTL::Math::DivideLargeInteger(IN LARGE_INTEGER Dividend,
     UDividend = (Dividend.QuadPart ^ DividendSign) - DividendSign;
 
     /* Calculate the quotient */
-    LargeInt.QuadPart = (DivideUnsigned64(UDividend, Divisor, nullptr) ^ DividendSign) - DividendSign;
+    LargeInt.QuadPart = (DivideUnsigned64(UDividend, Divisor, NULLPTR) ^ DividendSign) - DividendSign;
 
     /* Make sure a pointer to remainder provided */
     if(Remainder)

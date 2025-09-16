@@ -38,7 +38,7 @@ BlGetBootOptionValue(IN PLIST_ENTRY Options,
     EFI_STATUS Status;
 
     /* Assume the option will not be found */
-    *OptionValue = NULL;
+    *OptionValue = NULLPTR;
 
     /* Get the length of the option name we are looking for */
     KeyLength = RtlWideStringLength(OptionName, 0);
@@ -62,7 +62,7 @@ BlGetBootOptionValue(IN PLIST_ENTRY Options,
             {
                 /* Memory allocation failure, print debug message and return status code */
                 BlDebugPrint(L"ERROR: Memory allocation failure (Status Code: 0x%zX)\n", Status);
-                *OptionValue = NULL;
+                *OptionValue = NULLPTR;
                 return Status;
             }
 
@@ -121,7 +121,7 @@ BlGetConfigBooleanValue(IN CONST PWCHAR ConfigName)
  * @param ConfigName
  *        Specifies the configuration key to return its value.
  *
- * @return This routine returns a pointer to the configuration value, or NULL if key was not found.
+ * @return This routine returns a pointer to the configuration value, or NULLPTR if key was not found.
  *
  * @since XT 1.0
  */
@@ -137,7 +137,7 @@ BlGetConfigValue(IN CONST PWCHAR ConfigName,
     PWCHAR Value;
 
     /* Assume the option will not be found */
-    *ConfigValue = NULL;
+    *ConfigValue = NULLPTR;
 
     /* Get config entry name length */
     KeyLength = RtlWideStringLength(ConfigName, 0);
@@ -159,7 +159,7 @@ BlGetConfigValue(IN CONST PWCHAR ConfigName,
             Status = BlAllocateMemoryPool((ValueLength + 1) * sizeof(WCHAR), (PVOID *)&Value);
             if(Status != STATUS_EFI_SUCCESS)
             {
-                /* Memory allocation failure, return NULL */
+                /* Memory allocation failure, return NULLPTR */
                 BlDebugPrint(L"ERROR: Memory allocation failure (Status Code: 0x%zX)\n", Status);
                 return Status;
             }
@@ -175,7 +175,7 @@ BlGetConfigValue(IN CONST PWCHAR ConfigName,
         ConfigListEntry = ConfigListEntry->Flink;
     }
 
-    /* Config entry not found, return NULL */
+    /* Config entry not found, return NULLPTR */
     return STATUS_EFI_NOT_FOUND;
 }
 
@@ -504,7 +504,7 @@ BlpParseCommandLine(VOID)
             Argument = RtlTokenizeWideString(LoadedImage->LoadOptions, L" ", &LastArg);
 
             /* Iterate over all arguments passed to boot loader */
-            while(Argument != NULL)
+            while(Argument != NULLPTR)
             {
                 /* Store key name */
                 Key = Argument;
@@ -573,7 +573,7 @@ BlpParseCommandLine(VOID)
                 RtlInsertTailList(&Config, &Option->Flink);
 
                 /* Take next argument */
-                Argument = RtlTokenizeWideString(NULL, L" ", &LastArg);
+                Argument = RtlTokenizeWideString(NULLPTR, L" ", &LastArg);
             }
 
             /* Update global configuration */
@@ -611,11 +611,11 @@ BlpParseConfigFile(IN CONST PCHAR RawConfig,
 
     /* Initialize pointers */
     InputData = RawConfig;
-    Section = NULL;
-    Option = NULL;
-    SectionName = NULL;
-    Key = NULL;
-    Value = NULL;
+    Section = NULLPTR;
+    Option = NULLPTR;
+    SectionName = NULLPTR;
+    Key = NULLPTR;
+    Value = NULLPTR;
 
     /* Analyze configuration data until end of file is reached */
     while(*InputData != '\0')
@@ -812,7 +812,7 @@ BlpReadConfigFile(IN CONST PWCHAR ConfigDirectory,
     SIZE_T FileSize;
 
     /* Open EFI volume */
-    Status = BlOpenVolume(NULL, &DiskHandle, &FsHandle);
+    Status = BlOpenVolume(NULLPTR, &DiskHandle, &FsHandle);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to open a volume */
@@ -872,7 +872,7 @@ BlpUpdateConfiguration(IN PLIST_ENTRY NewConfig)
 
         /* Make sure config entry does not exist yet */
         BlGetConfigValue(ConfigEntry->Name, &ConfigValue);
-        if(ConfigValue == NULL)
+        if(ConfigValue == NULLPTR)
         {
             /* Remove new config entry from input list and put it into global config list */
             RtlRemoveEntryList(&ConfigEntry->Flink);

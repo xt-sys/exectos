@@ -98,7 +98,7 @@ BpPlayTune(IN PWCHAR Arguments)
     Argument = RtlTokenizeWideString(Arguments, L" ", &LastArgument);
 
     /* Iterate over all arguments */
-    while(Argument != NULL)
+    while(Argument != NULLPTR)
     {
         /* Check if tempo, pitch and duration are set */
         if(Tempo < 0)
@@ -137,7 +137,7 @@ BpPlayTune(IN PWCHAR Arguments)
         }
 
         /* Get next argument */
-        Argument = RtlTokenizeWideString(NULL, L" ", &LastArgument);
+        Argument = RtlTokenizeWideString(NULLPTR, L" ", &LastArgument);
     }
 
     /* Stop emitting beep tone */

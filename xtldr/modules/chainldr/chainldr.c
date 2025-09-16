@@ -39,7 +39,7 @@ ChBootSystem(IN PXTBL_BOOT_PARAMETERS Parameters)
     PVOID LoaderData;
 
     /* Check if image file is provided */
-    if(Parameters->KernelFile == NULL)
+    if(Parameters->KernelFile == NULLPTR)
     {
         /* No image filename provided, return error code */
         XtLdrProtocol->Debug.Print(L"ERROR: No EFI image filename provided\n");

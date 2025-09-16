@@ -71,7 +71,7 @@ HL::Acpi::GetAcpiTable(IN ULONG Signature,
     XTSTATUS Status;
 
     /* Assume ACPI table not found */
-    *AcpiTable = nullptr;
+    *AcpiTable = NULLPTR;
 
     /* Attempt to get ACPI table from the cache */
     Status = QueryAcpiCache(Signature, &Table);
@@ -182,7 +182,7 @@ HL::Acpi::InitializeAcpiSystemDescriptionTable(OUT PACPI_DESCRIPTION_HEADER *Acp
     XTSTATUS Status;
 
     /* Assume ACPI table not found */
-    *AcpiTable = nullptr;
+    *AcpiTable = NULLPTR;
 
     /* Get ACPI system resource */
     Status = KeGetSystemResource(SystemResourceAcpi, &ResourceHeader);
@@ -512,7 +512,7 @@ HL::Acpi::QueryAcpiCache(IN ULONG Signature,
     PLIST_ENTRY ListEntry;
 
     /* Initialize variables */
-    TableHeader = nullptr;
+    TableHeader = NULLPTR;
 
     /* Iterate through ACPI tables cache list */
     ListEntry = CacheList.Flink;
@@ -534,7 +534,7 @@ HL::Acpi::QueryAcpiCache(IN ULONG Signature,
     }
 
     /* Check if the requested ACPI table was found in the cache */
-    if(TableHeader == NULL)
+    if(TableHeader == NULLPTR)
     {
         /* ACPI table not found in cache, return error */
         return STATUS_NOT_FOUND;
@@ -580,7 +580,7 @@ HL::Acpi::QueryAcpiTables(IN ULONG Signature,
     }
 
     /* Ensure that table header is not set before attempting to find ACPI table */
-    TableHeader = nullptr;
+    TableHeader = NULLPTR;
 
     /* Check if DSDT or FACS table requested */
     if(Signature == ACPI_DSDT_SIGNATURE || Signature == ACPI_FACS_SIGNATURE)
@@ -634,7 +634,7 @@ HL::Acpi::QueryAcpiTables(IN ULONG Signature,
         }
 
         /* Get table count depending on root table type */
-        if(Xsdt != NULL)
+        if(Xsdt != NULLPTR)
         {
             /* Get table count from XSDT */
             TableCount = (Xsdt->Header.Length - sizeof(ACPI_DESCRIPTION_HEADER)) / 8;
@@ -649,7 +649,7 @@ HL::Acpi::QueryAcpiTables(IN ULONG Signature,
         for(TableIndex = 0; TableIndex < TableCount; TableIndex++)
         {
             /* Check if XSDP or RSDT is used */
-            if(Xsdt != NULL)
+            if(Xsdt != NULLPTR)
             {
                 /* Get table header physical address from XSDT */
                 TableAddress.QuadPart = Xsdt->Tables[TableIndex];
@@ -662,7 +662,7 @@ HL::Acpi::QueryAcpiTables(IN ULONG Signature,
             }
 
             /* Check whether some table is already mapped */
-            if(TableHeader != NULL)
+            if(TableHeader != NULLPTR)
             {
                 /* Unmap previous table */
                 MM::HardwarePool::UnmapHardwareMemory(TableHeader, 2, TRUE);
@@ -689,7 +689,7 @@ HL::Acpi::QueryAcpiTables(IN ULONG Signature,
     if(TableHeader->Signature != Signature)
     {
         /* ACPI table not found, check if cleanup is needed */
-        if(TableHeader != NULL)
+        if(TableHeader != NULLPTR)
         {
             /* Unmap non-matching ACPI table */
             MM::HardwarePool::UnmapHardwareMemory(TableHeader, 2, TRUE);

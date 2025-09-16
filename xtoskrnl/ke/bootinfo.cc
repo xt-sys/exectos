@@ -44,7 +44,7 @@ KE::BootInformation::GetFirmwareType(VOID)
  *        Supplies a pointer to a null-terminated wide string specifying the name of the parameter to search for.
  *
  * @param Parameter
- *        Supplies a pointer to a variable that receives a pointer to the matching parameter, or NULL if not found.
+ *        Supplies a pointer to a variable that receives a pointer to the matching parameter, or NULLPTR if not found.
  *
  * @return This routine returns a status code.
  *
@@ -74,7 +74,7 @@ KE::BootInformation::GetKernelParameter(IN PCWSTR ParameterName,
     }
 
     /* Assume the requested parameter is not present in the kernel parameters */
-    *Parameter = nullptr;
+    *Parameter = NULLPTR;
 
     /* Start searching from the beginning of the list */
     SearchStart = InitializationBlock->KernelParameters;

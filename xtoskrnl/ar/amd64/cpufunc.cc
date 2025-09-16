@@ -709,7 +709,7 @@ AR::CpuFunc::StoreSegment(IN USHORT Segment,
                              : "=r" (*(PUINT)Destination));
             break;
         default:
-            Destination = NULL;
+            Destination = NULLPTR;
             break;
     }
 }

@@ -111,7 +111,7 @@ BlpInitializeDebugConsole()
         DebugPort = RtlTokenizeWideString(DebugConfiguration, L";", &LastPort);
 
         /* Iterate over all debug ports */
-        while(DebugPort != NULL)
+        while(DebugPort != NULLPTR)
         {
             /* Check what port is set for debugging */
             if(RtlCompareWideStringInsensitive(DebugPort, L"COM", 3) == 0)
@@ -183,7 +183,7 @@ BlpInitializeDebugConsole()
             }
 
             /* Take next debug port */
-            DebugPort = RtlTokenizeWideString(NULL, L";", &LastPort);
+            DebugPort = RtlTokenizeWideString(NULLPTR, L";", &LastPort);
         }
 
         /* Check if serial debug port is enabled */

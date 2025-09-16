@@ -31,7 +31,7 @@ BlGetBooleanParameter(IN CONST PWCHAR Parameters,
     SIZE_T NeedleLength, TokenLength;
 
     /* Validate input data and ensure the option is not an empty string */
-    if(Parameters == NULL || Needle == NULL || *Needle == L'\0')
+    if(Parameters == NULLPTR || Needle == NULLPTR || *Needle == L'\0')
     {
         /* One of the parameters was invalid */
         return FALSE;

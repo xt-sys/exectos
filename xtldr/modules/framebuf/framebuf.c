@@ -185,7 +185,7 @@ FbInitializeDisplay()
             }
 
             /* Query current graphics mode */
-            QueryMode = FbpDisplayInfo.Driver.Gop->Mode == NULL ? 0 : FbpDisplayInfo.Driver.Gop->Mode->Mode;
+            QueryMode = FbpDisplayInfo.Driver.Gop->Mode == NULLPTR ? 0 : FbpDisplayInfo.Driver.Gop->Mode->Mode;
             Status = FbpDisplayInfo.Driver.Gop->QueryMode(FbpDisplayInfo.Driver.Gop, QueryMode, &InfoSize, &GopModeInfo);
             if(Status == STATUS_EFI_NOT_STARTED)
             {
@@ -357,7 +357,7 @@ FbSetScreenResolution(IN UINT Width,
                 {
                     /* Get mode information */
                     Status = FbpDisplayInfo.Driver.Gop->QueryMode(FbpDisplayInfo.Driver.Gop, Mode, &Size, &ModeInfo);
-                    if(Status == STATUS_EFI_SUCCESS && Size >= sizeof(*ModeInfo) && ModeInfo != NULL)
+                    if(Status == STATUS_EFI_SUCCESS && Size >= sizeof(*ModeInfo) && ModeInfo != NULLPTR)
                     {
                         /* Check if match found */
                         if(ModeInfo->HorizontalResolution == Width && ModeInfo->VerticalResolution == Height)
@@ -441,7 +441,7 @@ FbpFindFramebufferAddress(OUT PEFI_PHYSICAL_ADDRESS Address)
 
     /* Initialize variables */
     FramebufAddressLength = 0;
-    Handles = NULL;
+    Handles = NULLPTR;
 
     /* Locate EFI_PCI_IO_PROTOCOL handles */
     Status = XtLdrProtocol->Protocol.LocateHandles(&Handles, &HandlesCount, &PciIoGuid);
@@ -488,7 +488,7 @@ FbpFindFramebufferAddress(OUT PEFI_PHYSICAL_ADDRESS Address)
         for(UINT Bars = 0; Bars < 6; Bars++)
         {
             /* Get BAR attributes */
-            Status = IoProtocol->GetBarAttributes(IoProtocol, Bars, NULL, (VOID **)&BarInfo);
+            Status = IoProtocol->GetBarAttributes(IoProtocol, Bars, NULLPTR, (VOID **)&BarInfo);
             if(Status != STATUS_EFI_SUCCESS)
             {
                 /* Failed to get BAR attributes, continue with next BAR */

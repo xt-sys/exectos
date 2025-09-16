@@ -22,7 +22,7 @@ VOID
 BlDisplayBootMenu()
 {
     XTBL_DIALOG_HANDLE Handle;
-    PXTBL_BOOTMENU_ITEM MenuEntries = NULL;
+    PXTBL_BOOTMENU_ITEM MenuEntries = NULLPTR;
     ULONG Index;
     ULONG HighligtedEntryId, OldHighligtedEntryId, NumberOfEntries, TopVisibleEntry, VisibleEntries;
     BOOLEAN RedrawBootMenu, RedrawEntries;
@@ -61,7 +61,7 @@ BlDisplayBootMenu()
     TimeOut = -1;
 
     /* Check if timeout is specified */
-    if(TimeOutString != NULL)
+    if(TimeOutString != NULLPTR)
     {
         /* Convert timeout string to number */
         TimeOut = 0;
@@ -122,7 +122,7 @@ BlDisplayBootMenu()
         }
 
         /* Create a timer event for controlling the timeout of the boot menu */
-        Status = EfiSystemTable->BootServices->CreateEvent(EFI_EVENT_TIMER, EFI_TPL_CALLBACK, NULL, NULL, &TimerEvent);
+        Status = EfiSystemTable->BootServices->CreateEvent(EFI_EVENT_TIMER, EFI_TPL_CALLBACK, NULLPTR, NULLPTR, &TimerEvent);
         if(Status == STATUS_EFI_SUCCESS)
         {
             /* Setup new EFI timer */
@@ -444,7 +444,7 @@ BlDisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry)
                                      (TopVisibleEntry + Index) == HighligtedOptionId);
 
                 /* Free allocated value string if needed */
-                if(Value != NULL)
+                if(Value != NULLPTR)
                 {
                     BlFreeMemoryPool(Value);
                 }
@@ -465,8 +465,8 @@ BlDisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry)
             OptionName = EditableOptions[HighligtedOptionId];
             BlGetBootOptionValue(MenuEntry->Options, OptionName, &OriginalValue);
 
-            /* If the original value is NULL, use an empty string for editing */
-            if(OriginalValue == NULL)
+            /* If the original value is NULLPTR, use an empty string for editing */
+            if(OriginalValue == NULLPTR)
             {
                 ValueToEdit = L"";
             }
@@ -488,7 +488,7 @@ BlDisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry)
             }
 
             /* Free the original value if it was allocated */
-            if(OriginalValue != NULL)
+            if(OriginalValue != NULLPTR)
             {
                 BlFreeMemoryPool(OriginalValue);
             }
@@ -519,7 +519,7 @@ BlDisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry)
                 BlpDrawEditMenuEntry(&Handle, EditableOptions[OldHighligtedOptionId], Value, OldHighligtedOptionId - TopVisibleEntry, FALSE);
 
                 /* Free allocated value string if needed */
-                if(Value != NULL)
+                if(Value != NULLPTR)
                 {
                     BlFreeMemoryPool(Value);
                 }
@@ -529,7 +529,7 @@ BlDisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry)
                 BlpDrawEditMenuEntry(&Handle, EditableOptions[HighligtedOptionId], Value, HighligtedOptionId - TopVisibleEntry, TRUE);
 
                 /* Free allocated value string if needed */
-                if(Value != NULL)
+                if(Value != NULLPTR)
                 {
                     BlFreeMemoryPool(Value);
                 }
@@ -558,7 +558,7 @@ BlDisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry)
                 BlpDrawEditMenuEntry(&Handle, EditableOptions[OldHighligtedOptionId], Value, OldHighligtedOptionId - TopVisibleEntry, FALSE);
 
                 /* Free allocated value string if needed */
-                if(Value != NULL)
+                if(Value != NULLPTR)
                 {
                     BlFreeMemoryPool(Value);
                 }
@@ -568,7 +568,7 @@ BlDisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry)
                 BlpDrawEditMenuEntry(&Handle, EditableOptions[HighligtedOptionId], Value, HighligtedOptionId - TopVisibleEntry, TRUE);
 
                 /* Free allocated value string if needed */
-                if(Value != NULL)
+                if(Value != NULLPTR)
                 {
                     BlFreeMemoryPool(Value);
                 }
@@ -864,7 +864,7 @@ BlDisplayInputDialog(IN PWCHAR Caption,
                     RtlMoveMemory(InputFieldBuffer + TextPosition, InputFieldBuffer + TextPosition + 1,
                                   (InputFieldLength - TextPosition) * sizeof(WCHAR));
 
-                    /* Decrement length and null terminate string */
+                    /* Decrement length and NULL terminate string */
                     InputFieldLength--;
                     InputFieldBuffer[InputFieldLength] = L'\0';
                 }
@@ -882,7 +882,7 @@ BlDisplayInputDialog(IN PWCHAR Caption,
                     RtlMoveMemory(InputFieldBuffer + TextPosition - 1, InputFieldBuffer + TextPosition,
                                   (InputFieldLength - TextPosition + 1) * sizeof(WCHAR));
 
-                    /* Decrement length, position and null terminate string */
+                    /* Decrement length, position and NULL terminate string */
                     TextPosition--;
                     InputFieldLength--;
                     InputFieldBuffer[InputFieldLength] = L'\0';
@@ -908,7 +908,7 @@ BlDisplayInputDialog(IN PWCHAR Caption,
                                   (InputFieldLength - TextPosition) * sizeof(WCHAR));
                     InputFieldBuffer[TextPosition] = Key.UnicodeChar;
 
-                    /* Increment length, position and null terminate string */
+                    /* Increment length, position and NULL terminate string */
                     TextPosition++;
                     InputFieldLength++;
                     InputFieldBuffer[InputFieldLength] = L'\0';
@@ -1008,7 +1008,7 @@ BlUpdateProgressBar(IN PXTBL_DIALOG_HANDLE Handle,
                     IN UCHAR Percentage)
 {
     /* Check if message needs an update */
-    if(Message != NULL)
+    if(Message != NULLPTR)
     {
         /* Update a message on the dialog box */
         BlpDrawDialogMessage(Handle, Message);
@@ -1185,7 +1185,7 @@ BlpDrawBootMenu(OUT PXTBL_DIALOG_HANDLE Handle)
     }
 
     /* Draw empty dialog box for boot menu */
-    BlpDrawDialogBox(Handle, NULL, NULL);
+    BlpDrawDialogBox(Handle, NULLPTR, NULLPTR);
 
     /* Print help message below the boot menu */
     BlSetCursorPosition(0, Handle->PosY + Handle->Height);
@@ -1305,7 +1305,7 @@ BlpDrawDialogBox(IN OUT PXTBL_DIALOG_HANDLE Handle,
             BoxLine[0] = EFI_TEXT_BOX_DOWN_RIGHT;
 
             /* Check if there is a caption for this dialog */
-            if(Caption != NULL)
+            if(Caption != NULLPTR)
             {
                 /* Get caption length */
                 CaptionLength = RtlWideStringLength(Caption, 0);
@@ -1366,7 +1366,7 @@ BlpDrawDialogBox(IN OUT PXTBL_DIALOG_HANDLE Handle,
             BoxLine[Handle->Width - 1] = EFI_TEXT_BOX_VERTICAL;
         }
 
-        /* Add null terminator to the end of the line */
+        /* Add NULL terminator to the end of the line */
         BoxLine[Handle->Width] = 0;
 
         /* Write the line to the console */
@@ -1374,7 +1374,7 @@ BlpDrawDialogBox(IN OUT PXTBL_DIALOG_HANDLE Handle,
     }
 
     /* Make sure there is a caption to print */
-    if(Caption != NULL)
+    if(Caption != NULLPTR)
     {
     /* Write dialog box caption */
         BlSetCursorPosition(Handle->PosX + 3, Handle->PosY);
@@ -1382,7 +1382,7 @@ BlpDrawDialogBox(IN OUT PXTBL_DIALOG_HANDLE Handle,
     }
 
     /* Make sure there is a message to print */
-    if(Message != NULL)
+    if(Message != NULLPTR)
     {
         /* Write a message on the dialog box */
         BlpDrawDialogMessage(Handle, Message);
@@ -1514,7 +1514,7 @@ BlpDrawDialogInputField(IN PXTBL_DIALOG_HANDLE Handle,
         InputField[Index] = InputFieldText[Index];
     }
 
-    /* Add null terminator to the end of the line */
+    /* Add NULL terminator to the end of the line */
     InputField[Handle->Width] = 0;
 
     /* Write input field text */
@@ -1592,7 +1592,7 @@ BlpDrawDialogMessage(IN PXTBL_DIALOG_HANDLE Handle,
         }
 
         /* Get next line */
-        MsgLine = RtlTokenizeWideString(NULL, L"\n", &LastMsgLine);
+        MsgLine = RtlTokenizeWideString(NULLPTR, L"\n", &LastMsgLine);
         Line++;
     }
 }
@@ -1699,7 +1699,7 @@ BlpDrawEditMenu(OUT PXTBL_DIALOG_HANDLE Handle)
     }
 
     /* Draw empty dialog box for boot menu */
-    BlpDrawDialogBox(Handle, L"Edit Options", NULL);
+    BlpDrawDialogBox(Handle, L"Edit Options", NULLPTR);
 
     /* Print help message below the edit menu */
     BlSetCursorPosition(0, Handle->PosY + Handle->Height);
@@ -1748,7 +1748,7 @@ BlpDrawEditMenuEntry(IN PXTBL_DIALOG_HANDLE Handle,
     Allocation = FALSE;
 
     /* Set display value depending on input */
-    DisplayValue = (OptionValue != NULL) ? OptionValue : L"";
+    DisplayValue = (OptionValue != NULLPTR) ? OptionValue : L"";
 
     /* Determine lengths */
     OptionNameLength = RtlWideStringLength(OptionName, 0);

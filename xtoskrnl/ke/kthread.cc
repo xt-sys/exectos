@@ -131,7 +131,7 @@ KE::KThread::InitializeThread(IN PKPROCESS Process,
 
     /* Initialize kernel-mode suspend APC */
     Apc::InitializeApc(&Thread->SuspendApc, Thread, OriginalApcEnvironment, SuspendNop,
-                       SuspendRundown, SuspendThread, KernelMode, NULL);
+                       SuspendRundown, SuspendThread, KernelMode, NULLPTR);
 
     /* Initialize suspend semaphore */
     Semaphore::InitializeSemaphore(&Thread->SuspendSemaphore, 0, 2);
@@ -179,8 +179,8 @@ KE::KThread::InitializeThread(IN PKPROCESS Process,
         {
             /* Deallocate stack */
             MM::KernelPool::FreeKernelStack(Stack, FALSE);
-            Thread->InitialStack = NULL;
-            Thread->StackBase = NULL;
+            Thread->InitialStack = NULLPTR;
+            Thread->StackBase = NULLPTR;
         }
 
         /* Thread initialization failed */

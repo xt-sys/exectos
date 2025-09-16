@@ -524,7 +524,7 @@ RTL::Atomic::ExchangePointer(IN PVOID *Address,
  * @param Header
  *        Supplies a pointer to the header of linked list.
  *
- * @return This routine returns a pointer to the original list, or NULL if the list was already empty.
+ * @return This routine returns a pointer to the original list, or NULLPTR if the list was already empty.
  *
  * @since XT 1.0
  */
@@ -532,7 +532,7 @@ XTFASTCALL
 PSINGLE_LIST_ENTRY
 RTL::Atomic::FlushSingleList(IN PSINGLE_LIST_HEADER Header)
 {
-    return (PSINGLE_LIST_ENTRY)Exchange64((PLONG_PTR)&Header->Alignment, (LONGLONG)NULL);
+    return (PSINGLE_LIST_ENTRY)Exchange64((PLONG_PTR)&Header->Alignment, (LONGLONG)NULLPTR);
 }
 
 /**
@@ -693,7 +693,7 @@ RTL::Atomic::Or64(IN PLONG_PTR Address,
  * @param Header
  *        Supplies a pointer to the header of a single linked list.
  *
- * @return This routine returns a pointer to the removed element, or NULL if the list was empty.
+ * @return This routine returns a pointer to the removed element, or NULLPTR if the list was empty.
  *
  * @since XT 1.0
  */
@@ -712,7 +712,7 @@ RTL::Atomic::PopEntrySingleList(IN PSINGLE_LIST_HEADER Header)
         if(!FirstEntry)
         {
             /* Empty list */
-            return nullptr;
+            return NULLPTR;
         }
 
         /* Update link */
@@ -737,7 +737,7 @@ RTL::Atomic::PopEntrySingleList(IN PSINGLE_LIST_HEADER Header)
  * @param Entry
  *        Supplies a pointer to entry, that will be inserted into linked list.
  *
- * @return This routine returns a pointer to original heading, or NULL if the list was originally empty.
+ * @return This routine returns a pointer to original heading, or NULLPTR if the list was originally empty.
  *
  * @since XT 1.0
  */

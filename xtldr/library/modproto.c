@@ -32,13 +32,13 @@ BlGetXtLdrProtocol(IN PEFI_SYSTEM_TABLE SystemTable,
                    OUT PXTBL_LOADER_PROTOCOL *ProtocolHandler)
 {
     EFI_GUID ProtocolGuid = XT_BOOT_LOADER_PROTOCOL_GUID;
-    PEFI_HANDLE Handles = NULL;
+    PEFI_HANDLE Handles = NULLPTR;
     EFI_STATUS Status;
     UINT_PTR Count;
     UINT Index;
 
     /* Try to locate the handles */
-    Status = SystemTable->BootServices->LocateHandleBuffer(ByProtocol, &ProtocolGuid, NULL, &Count, &Handles);
+    Status = SystemTable->BootServices->LocateHandleBuffer(ByProtocol, &ProtocolGuid, NULLPTR, &Count, &Handles);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Unable to get handles */
@@ -53,7 +53,7 @@ BlGetXtLdrProtocol(IN PEFI_SYSTEM_TABLE SystemTable,
         {
             /* Try to open protocol */
             Status = SystemTable->BootServices->OpenProtocol(Handles[Index], &ProtocolGuid,
-                                                             (PVOID*)ProtocolHandler, ImageHandle, NULL,
+                                                             (PVOID*)ProtocolHandler, ImageHandle, NULLPTR,
                                                              EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
 
             /* Check if successfully opened the loader protocol */
@@ -69,7 +69,7 @@ BlGetXtLdrProtocol(IN PEFI_SYSTEM_TABLE SystemTable,
     SystemTable->BootServices->FreePool(Handles);
 
     /* Make sure the loaded protocol has been found */
-    if(*ProtocolHandler == NULL)
+    if(*ProtocolHandler == NULLPTR)
     {
         /* Protocol not found */
         return STATUS_EFI_NOT_FOUND;

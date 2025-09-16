@@ -27,10 +27,10 @@ BlCloseVolume(IN PEFI_HANDLE VolumeHandle)
     EFI_GUID LIPGuid = EFI_LOADED_IMAGE_PROTOCOL_GUID;
 
     /* Make sure a handle specified */
-    if(VolumeHandle != NULL)
+    if(VolumeHandle != NULLPTR)
     {
         /* Close a handle */
-        return EfiSystemTable->BootServices->CloseProtocol(VolumeHandle, &LIPGuid, EfiImageHandle, NULL);
+        return EfiSystemTable->BootServices->CloseProtocol(VolumeHandle, &LIPGuid, EfiImageHandle, NULLPTR);
     }
 
     /* Return success */
@@ -50,10 +50,10 @@ BlEnumerateBlockDevices()
 {
     EFI_GUID LoadedImageProtocolGuid = EFI_LOADED_IMAGE_PROTOCOL_GUID;
     EFI_GUID BlockIoGuid = EFI_BLOCK_IO_PROTOCOL_GUID;
-    EFI_HANDLE BootDeviceHandle = NULL, DeviceHandle = NULL;
+    EFI_HANDLE BootDeviceHandle = NULLPTR, DeviceHandle = NULLPTR;
     EFI_LOADED_IMAGE_PROTOCOL* LoadedImage;
-    PEFI_DEVICE_PATH_PROTOCOL DevicePath = NULL, LastNode = NULL;
-    PEFI_BLOCK_DEVICE_DATA ParentNode = NULL;
+    PEFI_DEVICE_PATH_PROTOCOL DevicePath = NULLPTR, LastNode = NULLPTR;
+    PEFI_BLOCK_DEVICE_DATA ParentNode = NULLPTR;
     PEFI_BLOCK_DEVICE_DATA BlockDeviceData;
     PEFI_BLOCK_DEVICE BlockDevice;
     LIST_ENTRY BlockDevices;
@@ -97,7 +97,7 @@ BlEnumerateBlockDevices()
     {
         /* Get data for the next discovered device. */
         BlockDeviceData = CONTAIN_RECORD(ListEntry, EFI_BLOCK_DEVICE_DATA, ListEntry);
-        PartitionGuid = NULL;
+        PartitionGuid = NULLPTR;
 
         /* Find last node */
         Status = BlpFindLastBlockDeviceNode(BlockDeviceData->DevicePath, &LastNode);
@@ -172,11 +172,11 @@ BlEnumerateBlockDevices()
             PartitionGuid = (PEFI_GUID)HDPath->Signature;
 
             /* Check if this is the EFI System Partition (ESP) */
-            if(BootDeviceHandle != NULL)
+            if(BootDeviceHandle != NULLPTR)
             {
                 /* Allocate memory for device path */
                 DevicePath = BlpDuplicateDevicePath(BlockDeviceData->DevicePath);
-                if(DevicePath != NULL)
+                if(DevicePath != NULLPTR)
                 {
                     /* Check if this is the boot device */
                     Status = EfiSystemTable->BootServices->LocateDevicePath(&BlockIoGuid, &DevicePath,
@@ -262,7 +262,7 @@ BlFindVolumeDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL FsHandle,
 {
     EFI_STATUS Status;
     SIZE_T FsPathLength, DevicePathLength = 0;
-    PEFI_FILEPATH_DEVICE_PATH FilePath = NULL;
+    PEFI_FILEPATH_DEVICE_PATH FilePath = NULLPTR;
     PEFI_DEVICE_PATH_PROTOCOL EndDevicePath;
     PEFI_DEVICE_PATH_PROTOCOL DevicePathHandle;
 
@@ -405,7 +405,7 @@ BlGetVolumeDevicePath(IN PWCHAR SystemPath,
     EFI_STATUS Status;
 
     /* Make sure this is not set */
-    *DevicePath = NULL;
+    *DevicePath = NULLPTR;
 
     /* Find volume path and its length */
     Volume = SystemPath;
@@ -489,7 +489,7 @@ BlGetVolumeDevicePath(IN PWCHAR SystemPath,
     }
 
     /* Check if volume was found */
-    if(*DevicePath == NULL)
+    if(*DevicePath == NULLPTR)
     {
         /* Volume not found */
         BlDebugPrint(L"ERROR: Volume (DriveType: %u, DriveNumber: %lu, PartNumber: %lu) not found\n",
@@ -530,7 +530,7 @@ BlOpenVolume(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
     EFI_STATUS Status;
 
     /* Check if device path has been passed or not */
-    if(DevicePath != NULL)
+    if(DevicePath != NULLPTR)
     {
         /* Locate the device path */
         Status = EfiSystemTable->BootServices->LocateDevicePath(&SFSGuid, &DevicePath, DiskHandle);
@@ -544,7 +544,7 @@ BlOpenVolume(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
     {
         /* Open the image protocol if no device path specified */
         Status = EfiSystemTable->BootServices->OpenProtocol(EfiImageHandle, &LIPGuid, (PVOID *)&ImageProtocol,
-                                                            EfiImageHandle, NULL, EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
+                                                            EfiImageHandle, NULLPTR, EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Failed to open image protocol */
@@ -557,7 +557,7 @@ BlOpenVolume(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
 
     /* Open the filesystem protocol */
     Status = EfiSystemTable->BootServices->OpenProtocol(*DiskHandle, &SFSGuid, (PVOID *)&FileSystemProtocol,
-                                                        EfiImageHandle, NULL, EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
+                                                        EfiImageHandle, NULLPTR, EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
 
     /* Check if filesystem protocol opened successfully */
     if(Status != STATUS_EFI_SUCCESS)
@@ -718,7 +718,7 @@ BlpDiscoverEfiBlockDevices(OUT PLIST_ENTRY BlockDevices)
     PEFI_DEVICE_PATH_PROTOCOL DevicePath;
     PEFI_BLOCK_DEVICE_DATA BlockDevice;
     UINT_PTR HandlesCount, Index;
-    PEFI_HANDLE Handles = NULL;
+    PEFI_HANDLE Handles = NULLPTR;
     PEFI_BLOCK_IO_PROTOCOL Io;
     EFI_STATUS Status;
 
@@ -738,9 +738,9 @@ BlpDiscoverEfiBlockDevices(OUT PLIST_ENTRY BlockDevices)
         BlDebugPrint(L"Opening %lu block device from %lu discovered\n", Index + 1, HandlesCount);
 
         /* Open I/O protocol for given handle */
-        Io = NULL;
+        Io = NULLPTR;
         Status = BlOpenProtocolHandle(Handles[Index], (PVOID *)&Io, &IoGuid);
-        if(Status != STATUS_EFI_SUCCESS || Io == NULL)
+        if(Status != STATUS_EFI_SUCCESS || Io == NULLPTR)
         {
             /* Failed to open I/O protocol, skip it */
             BlDebugPrint(L"WARNING: Failed to open EFI Block I/O protocol (Status Code: 0x%zX)\n", Status);
@@ -756,13 +756,13 @@ BlpDiscoverEfiBlockDevices(OUT PLIST_ENTRY BlockDevices)
         }
 
         /* Check if DevicePath protocol is supported by this handle */
-        DevicePath = NULL;
+        DevicePath = NULLPTR;
         Status = EfiSystemTable->BootServices->HandleProtocol(Handles[Index], &DevicePathGuid, (PVOID *)&DevicePath);
-        if(Status != STATUS_EFI_SUCCESS || DevicePath == NULL)
+        if(Status != STATUS_EFI_SUCCESS || DevicePath == NULLPTR)
         {
             /* Device failed to handle DP protocol */
             BlDebugPrint(L"WARNING: Unable to open DevicePath protocol (Status Code: 0x%zX)\n", Status);
-            EfiSystemTable->BootServices->CloseProtocol(Handles[Index], &IoGuid, EfiImageHandle, NULL);
+            EfiSystemTable->BootServices->CloseProtocol(Handles[Index], &IoGuid, EfiImageHandle, NULLPTR);
             continue;
         }
 
@@ -772,8 +772,8 @@ BlpDiscoverEfiBlockDevices(OUT PLIST_ENTRY BlockDevices)
         {
             /* Memory allocation failure */
             BlDebugPrint(L"ERROR: Failed to allocate memory pool for block device (Status Code: 0x%zX)\n", Status);
-            EfiSystemTable->BootServices->CloseProtocol(Handles[Index], &DevicePathGuid, EfiImageHandle, NULL);
-            EfiSystemTable->BootServices->CloseProtocol(Handles[Index], &IoGuid, EfiImageHandle, NULL);
+            EfiSystemTable->BootServices->CloseProtocol(Handles[Index], &DevicePathGuid, EfiImageHandle, NULLPTR);
+            EfiSystemTable->BootServices->CloseProtocol(Handles[Index], &IoGuid, EfiImageHandle, NULLPTR);
             return Status;
         }
 
@@ -983,11 +983,11 @@ BlpDuplicateDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath)
     EFI_STATUS Status;
     UINT Length = 0;
 
-    /* Check if the input device path is NULL */
+    /* Check if the input device path is NULL pointer */
     if(!DevicePath)
     {
         /* Nothing to duplicate */
-        return NULL;
+        return NULLPTR;
     }
 
     /* Start iterating from the beginning of the device path */
@@ -1008,7 +1008,7 @@ BlpDuplicateDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath)
     if(Length == 0)
     {
         /* Nothing to duplicate */
-        return NULL;
+        return NULLPTR;
     }
 
     /* Allocate memory for the new device path */
@@ -1017,7 +1017,7 @@ BlpDuplicateDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath)
     {
         /* Failed to allocate memory */
         BlDebugPrint(L"ERROR: Failed to allocate memory pool for device path duplicate (Status Code: 0x%zX)\n", Status);
-        return NULL;
+        return NULLPTR;
     }
 
     /* Copy the device path */
@@ -1051,7 +1051,7 @@ BlpFindLastBlockDeviceNode(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
     if(DevicePath->Type == EFI_END_DEVICE_PATH)
     {
         /* End reached, nothing to do */
-        LastNode = NULL;
+        LastNode = NULLPTR;
         return STATUS_EFI_INVALID_PARAMETER;
     }
 

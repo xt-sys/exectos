@@ -144,7 +144,7 @@ BlGetConfigurationTable(IN PEFI_GUID TableGuid,
     }
 
     /* Table not found */
-    *Table = NULL;
+    *Table = NULLPTR;
     return STATUS_EFI_NOT_FOUND;
 }
 
@@ -184,7 +184,7 @@ BlGetEfiVariable(IN PEFI_GUID Vendor,
     }
 
     /* Attempt to get variable value */
-    Status = EfiSystemTable->RuntimeServices->GetVariable(VariableName, Vendor, NULL, &Size, Buffer);
+    Status = EfiSystemTable->RuntimeServices->GetVariable(VariableName, Vendor, NULLPTR, &Size, Buffer);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to get variable, probably not found such one */
@@ -239,12 +239,12 @@ BlGetSecureBootStatus()
 
     Size = sizeof(VarValue);
     if(EfiSystemTable->RuntimeServices->GetVariable(L"SecureBoot", &VarGuid,
-       NULL, &Size, &VarValue) == STATUS_EFI_SUCCESS)
+       NULLPTR, &Size, &VarValue) == STATUS_EFI_SUCCESS)
     {
         SecureBootStatus = (INT_PTR)VarValue;
 
         if((EfiSystemTable->RuntimeServices->GetVariable(L"SetupMode", &VarGuid,
-           NULL, &Size, &VarValue) == STATUS_EFI_SUCCESS) && VarValue != 0)
+           NULLPTR, &Size, &VarValue) == STATUS_EFI_SUCCESS) && VarValue != 0)
         {
             SecureBootStatus = -1;
         }
@@ -274,11 +274,11 @@ BlInitializeEntropy(PULONGLONG RNGBuffer)
     ULONGLONG Seed;
 
     /* Initialize variables */
-    Rng = NULL;
+    Rng = NULLPTR;
     Seed = 0;
 
     /* Locate RNG protocol */
-    Status = EfiSystemTable->BootServices->LocateProtocol(&RngGuid, NULL, (PVOID *)&Rng);
+    Status = EfiSystemTable->BootServices->LocateProtocol(&RngGuid, NULLPTR, (PVOID *)&Rng);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to locate RNG protocol, return status code */
@@ -286,7 +286,7 @@ BlInitializeEntropy(PULONGLONG RNGBuffer)
     }
 
     /* Get RNG value using the default algorithm */
-    Status = Rng->GetRNG(Rng, NULL, 8, (PUCHAR)&Seed);
+    Status = Rng->GetRNG(Rng, NULLPTR, 8, (PUCHAR)&Seed);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to get RNG value, return status code */
@@ -340,7 +340,7 @@ EFI_STATUS
 BlRebootSystem()
 {
     /* Reboot machine */
-    return EfiSystemTable->RuntimeServices->ResetSystem(EfiResetCold, STATUS_EFI_SUCCESS, 0, NULL);
+    return EfiSystemTable->RuntimeServices->ResetSystem(EfiResetCold, STATUS_EFI_SUCCESS, 0, NULLPTR);
 }
 
 /**
@@ -388,7 +388,7 @@ EFI_STATUS
 BlShutdownSystem()
 {
     /* Shutdown machine */
-    return EfiSystemTable->RuntimeServices->ResetSystem(EfiResetShutdown, STATUS_EFI_SUCCESS, 0, NULL);
+    return EfiSystemTable->RuntimeServices->ResetSystem(EfiResetShutdown, STATUS_EFI_SUCCESS, 0, NULLPTR);
 }
 
 /**
@@ -422,7 +422,7 @@ XTCDECL
 EFI_STATUS
 BlStartEfiImage(IN EFI_HANDLE ImageHandle)
 {
-    return EfiSystemTable->BootServices->StartImage(ImageHandle, NULL, NULL);
+    return EfiSystemTable->BootServices->StartImage(ImageHandle, NULLPTR, NULLPTR);
 }
 
 /**

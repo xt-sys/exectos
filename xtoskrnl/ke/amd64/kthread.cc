@@ -99,7 +99,7 @@ KE::KThread::InitializeThreadContext(IN PKTHREAD Thread,
         Thread->NpxState = NPX_STATE_UNUSED;
 
         /* Set thread start address */
-        ThreadFrame->StartFrame.Return = (ULONG64)NULL;
+        ThreadFrame->StartFrame.Return = (ULONG64)NULLPTR;
     }
 
     /* Initialize thread startup information */

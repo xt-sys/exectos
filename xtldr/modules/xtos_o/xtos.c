@@ -260,7 +260,7 @@ XtBootSystem(IN PXTBL_BOOT_PARAMETERS Parameters)
     }
 
     /* Check device path */
-    if(Parameters->DevicePath == NULL)
+    if(Parameters->DevicePath == NULLPTR)
     {
         /* No device path set */
         XtLdrProtocol->Debug.Print(L"ERROR: No device path provided, unable to boot system\n");
@@ -268,7 +268,7 @@ XtBootSystem(IN PXTBL_BOOT_PARAMETERS Parameters)
     }
 
     /* Check if system path is set */
-    if(Parameters->SystemPath != NULL)
+    if(Parameters->SystemPath != NULLPTR)
     {
         /* Make sure system path begins with backslash, the only separator supported by EFI */
         if(Parameters->SystemPath[0] == '/')
@@ -300,7 +300,7 @@ XtBootSystem(IN PXTBL_BOOT_PARAMETERS Parameters)
     }
 
     /* Check if kernel file is set */
-    if(Parameters->KernelFile == NULL)
+    if(Parameters->KernelFile == NULLPTR)
     {
         /* No kernel filename set, fallback to default */
         XtLdrProtocol->Debug.Print(L"WARNING: No kernel file specified, falling back to defaults\n");
@@ -308,7 +308,7 @@ XtBootSystem(IN PXTBL_BOOT_PARAMETERS Parameters)
     }
 
     /* Check if provided any kernel boot arguments */
-    if(Parameters->Parameters == NULL)
+    if(Parameters->Parameters == NULLPTR)
     {
         /* No argument supplied */
         Parameters->Parameters = L"";
@@ -382,7 +382,7 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
     EFI_GUID FrameBufGuid = XT_FRAMEBUFFER_PROTOCOL_GUID;
     PKERNEL_INITIALIZATION_BLOCK KernelParameters;
     PXTBL_FRAMEBUFFER_PROTOCOL FrameBufProtocol;
-    PPECOFF_IMAGE_CONTEXT ImageContext = NULL;
+    PPECOFF_IMAGE_CONTEXT ImageContext = NULLPTR;
     PEFI_LOADED_IMAGE_PROTOCOL ImageProtocol;
     PVOID VirtualAddress, VirtualMemoryArea;
     PXT_ENTRY_POINT KernelEntryPoint;
@@ -412,7 +412,7 @@ XtpBootSequence(IN PEFI_FILE_HANDLE BootDir,
     /* Initialize virtual memory mappings */
     XtLdrProtocol->Memory.InitializePageMap(&PageMap, XtpDeterminePagingLevel(Parameters->Parameters), Size4K);
 
-    Status = XtLdrProtocol->Memory.MapEfiMemory(&PageMap, &VirtualMemoryArea, NULL);
+    Status = XtLdrProtocol->Memory.MapEfiMemory(&PageMap, &VirtualMemoryArea, NULLPTR);
     if(Status != STATUS_EFI_SUCCESS)
     {
         return Status;
@@ -582,7 +582,7 @@ XtpInitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
         /* Set FirmwareInformation block properties */
         LoaderBlock->FirmwareInformation.FirmwareType = SystemFirmwareEfi;
         LoaderBlock->FirmwareInformation.EfiFirmware.EfiVersion = 0; //EfiSystemTable->Hdr.Revision;
-        LoaderBlock->FirmwareInformation.EfiFirmware.EfiRuntimeServices = NULL;
+        LoaderBlock->FirmwareInformation.EfiFirmware.EfiRuntimeServices = NULLPTR;
     // }
     // else
     // {

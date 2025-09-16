@@ -47,7 +47,7 @@ KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
     }
 
     /* Initialize boot CPU */
-    AR::ProcSup::InitializeProcessor(NULL);
+    AR::ProcSup::InitializeProcessor(NULLPTR);
 
     /* Initialize system resources */
     SystemResources::InitializeResources();

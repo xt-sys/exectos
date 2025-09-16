@@ -24,7 +24,7 @@ BlpActivateSerialIOController()
     PEFI_PCI_ROOT_BRIDGE_IO_PROTOCOL PciDev;
     USHORT Bus, Device, Function, Command;
     UINT_PTR Index, PciHandleSize;
-    PEFI_HANDLE PciHandle = NULL;
+    PEFI_HANDLE PciHandle = NULLPTR;
     PCI_COMMON_HEADER PciHeader;
     EFI_STATUS Status;
     ULONGLONG Address;
@@ -39,7 +39,7 @@ BlpActivateSerialIOController()
     }
 
     /* Get all instances of PciRootBridgeIo */
-    Status = EfiSystemTable->BootServices->LocateHandle(ByProtocol, &PciGuid, NULL, &PciHandleSize, PciHandle);
+    Status = EfiSystemTable->BootServices->LocateHandle(ByProtocol, &PciGuid, NULLPTR, &PciHandleSize, PciHandle);
     if(Status == STATUS_EFI_BUFFER_TOO_SMALL)
     {
         /* Reallocate more memory as requested by UEFI */
@@ -52,7 +52,7 @@ BlpActivateSerialIOController()
         }
 
         /* Second attempt to get instances of PciRootBridgeIo */
-        Status = EfiSystemTable->BootServices->LocateHandle(ByProtocol, &PciGuid, NULL, &PciHandleSize, PciHandle);
+        Status = EfiSystemTable->BootServices->LocateHandle(ByProtocol, &PciGuid, NULLPTR, &PciHandleSize, PciHandle);
     }
 
     /* Make sure successfully obtained PciRootBridgeIo instances */

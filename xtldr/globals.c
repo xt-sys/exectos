@@ -25,7 +25,7 @@ LIST_ENTRY BlpConfigSections;
 PWCHAR BlpEditableConfigOptions[] = {
     L"BootModules", L"SystemType", L"SystemPath",
     L"KernelFile",  L"InitrdFile", L"HalFile",
-    L"Parameters", NULL
+    L"Parameters", NULLPTR
 };
 
 /* XT Boot Loader protocol */
@@ -35,7 +35,7 @@ XTBL_LOADER_PROTOCOL BlpLdrProtocol;
 LIST_ENTRY BlpLoadedModules;
 
 /* XT Boot Loader menu list */
-PLIST_ENTRY BlpMenuList = NULL;
+PLIST_ENTRY BlpMenuList = NULLPTR;
 
 /* XT Boot Loader status data */
 XTBL_STATUS BlpStatus = {0};

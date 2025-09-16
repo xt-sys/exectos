@@ -304,7 +304,7 @@ AR::ProcSup::InitializeProcessorBlock(OUT PKPROCESSOR_BLOCK ProcessorBlock,
     ProcessorBlock->Prcb.CurrentThread = &(KE::KThread::GetInitialThread())->ThreadControlBlock;
     ProcessorBlock->Prcb.CurrentThread->ApcState.Process = &(KE::KProcess::GetInitialProcess())->ProcessControlBlock;
     ProcessorBlock->Prcb.IdleThread = &(KE::KThread::GetInitialThread())->ThreadControlBlock;
-    ProcessorBlock->Prcb.NextThread = nullptr;
+    ProcessorBlock->Prcb.NextThread = NULLPTR;
 
     /* Set initial runlevel */
     ProcessorBlock->RunLevel = PASSIVE_LEVEL;

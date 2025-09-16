@@ -27,7 +27,7 @@ EFI_STATUS
 BlCloseProtocol(IN PEFI_HANDLE Handle,
                 IN PEFI_GUID ProtocolGuid)
 {
-    return EfiSystemTable->BootServices->CloseProtocol(Handle, ProtocolGuid, EfiImageHandle, NULL);
+    return EfiSystemTable->BootServices->CloseProtocol(Handle, ProtocolGuid, EfiImageHandle, NULLPTR);
 }
 
 /**
@@ -97,7 +97,7 @@ BlGetModulesList()
  *        Specifies a unique protocol GUID.
  *
  * @param Interface
- *        Supplies a pointer to the protocol interface, or NULL if there is no structure associated.
+ *        Supplies a pointer to the protocol interface, or NULLPTR if there is no structure associated.
  *
  * @return This routine returns a status code.
  *
@@ -108,7 +108,7 @@ EFI_STATUS
 BlInstallProtocol(IN PVOID Interface,
                   IN PEFI_GUID Guid)
 {
-    EFI_HANDLE Handle = NULL;
+    EFI_HANDLE Handle = NULLPTR;
 
     /* Install protocol interface */
     return EfiSystemTable->BootServices->InstallProtocolInterface(&Handle, Guid, EFI_NATIVE_INTERFACE, Interface);
@@ -171,7 +171,7 @@ BlLoadModule(IN PWCHAR ModuleName)
     RtlConcatenateWideString(ModuleFileName, L".EFI", 0);
 
     /* Open EFI volume */
-    Status = BlOpenVolume(NULL, &DiskHandle, &FsHandle);
+    Status = BlOpenVolume(NULLPTR, &DiskHandle, &FsHandle);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to open a volume */
@@ -264,7 +264,7 @@ BlLoadModule(IN PWCHAR ModuleName)
         ModuleDependency = CONTAIN_RECORD(DepsListEntry, XTBL_MODULE_DEPS, Flink);
 
         /* Make sure dependency list contains a valid module name */
-        if(ModuleDependency->ModuleName == NULL || ModuleDependency->ModuleName[0] == L'\0')
+        if(ModuleDependency->ModuleName == NULLPTR || ModuleDependency->ModuleName[0] == L'\0')
         {
             /* Invalid module name found, just skip this step */
             break;
@@ -320,7 +320,7 @@ BlLoadModule(IN PWCHAR ModuleName)
 
     /* Access module interface for further module type check */
     Status = EfiSystemTable->BootServices->OpenProtocol(ModuleHandle, &LIPGuid, (PVOID *)&LoadedImage,
-                                                        EfiImageHandle, NULL, EFI_OPEN_PROTOCOL_GET_PROTOCOL);
+                                                        EfiImageHandle, NULLPTR, EFI_OPEN_PROTOCOL_GET_PROTOCOL);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to open LoadedImage protocol */
@@ -335,7 +335,7 @@ BlLoadModule(IN PWCHAR ModuleName)
         BlDebugPrint(L"ERROR: Loaded module is not a boot system driver\n");
 
         /* Close protocol and skip module */
-        EfiSystemTable->BootServices->CloseProtocol(LoadedImage, &LIPGuid, LoadedImage, NULL);
+        EfiSystemTable->BootServices->CloseProtocol(LoadedImage, &LIPGuid, LoadedImage, NULLPTR);
     }
 
     /* Save additional module information, not found in '.modinfo' section */
@@ -346,7 +346,7 @@ BlLoadModule(IN PWCHAR ModuleName)
     ModuleInfo->UnloadModule = LoadedImage->Unload;
 
     /* Close loaded image protocol */
-    EfiSystemTable->BootServices->CloseProtocol(LoadedImage, &LIPGuid, LoadedImage, NULL);
+    EfiSystemTable->BootServices->CloseProtocol(LoadedImage, &LIPGuid, LoadedImage, NULLPTR);
 
     /* Start EFI image */
     Status = BlStartEfiImage(ModuleHandle);
@@ -384,13 +384,13 @@ BlLoadModules(IN PWCHAR ModulesList)
     /* Set default return value */
     ReturnStatus = STATUS_EFI_SUCCESS;
 
-    if(ModulesList != NULL)
+    if(ModulesList != NULLPTR)
     {
         /* Tokenize provided list of modules */
         Module = RtlTokenizeWideString(ModulesList, L" ", &LastModule);
 
         /* Iterate over all arguments passed to boot loader */
-        while(Module != NULL)
+        while(Module != NULLPTR)
         {
             Status = BlLoadModule(Module);
             if(Status != STATUS_EFI_SUCCESS)
@@ -401,7 +401,7 @@ BlLoadModules(IN PWCHAR ModulesList)
             }
 
             /* Take next module from the list */
-            Module = RtlTokenizeWideString(NULL, L" ", &LastModule);
+            Module = RtlTokenizeWideString(NULLPTR, L" ", &LastModule);
         }
     }
 
@@ -431,7 +431,7 @@ BlLocateProtocolHandles(OUT PEFI_HANDLE *Handles,
                         OUT PUINT_PTR Count,
                         IN PEFI_GUID ProtocolGuid)
 {
-    return EfiSystemTable->BootServices->LocateHandleBuffer(ByProtocol, ProtocolGuid, NULL, Count, Handles);
+    return EfiSystemTable->BootServices->LocateHandleBuffer(ByProtocol, ProtocolGuid, NULLPTR, Count, Handles);
 }
 
 /**
@@ -456,7 +456,7 @@ BlOpenProtocol(OUT PEFI_HANDLE Handle,
                OUT PVOID *ProtocolHandler,
                IN PEFI_GUID ProtocolGuid)
 {
-    PEFI_HANDLE Handles = NULL;
+    PEFI_HANDLE Handles = NULLPTR;
     EFI_STATUS Status;
     UINT_PTR Count;
     UINT Index;
@@ -492,7 +492,7 @@ BlOpenProtocol(OUT PEFI_HANDLE Handle,
     EfiSystemTable->BootServices->FreePool(Handles);
 
     /* Make sure the loaded protocol has been found */
-    if(*ProtocolHandler == NULL)
+    if(*ProtocolHandler == NULLPTR)
     {
         /* Protocol not found */
         return STATUS_EFI_NOT_FOUND;
@@ -525,7 +525,7 @@ BlOpenProtocolHandle(IN EFI_HANDLE Handle,
                      IN PEFI_GUID ProtocolGuid)
 {
     return EfiSystemTable->BootServices->OpenProtocol(Handle, ProtocolGuid, ProtocolHandler, EfiImageHandle,
-                                                      NULL, EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
+                                                      NULLPTR, EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
 }
 
 /**
@@ -689,7 +689,7 @@ BlpGetModuleInformation(IN PWCHAR SectionData,
         {
             /* Tokenize value to get module's single dependency */
             Dependency = RtlTokenizeWideString(Strings[Index], L" ", &LastStr);
-            while(Dependency != NULL)
+            while(Dependency != NULLPTR)
             {
                 /* Allocate memory for module dependency */
                 Status = BlAllocateMemoryPool(sizeof(XTBL_MODULE_DEPS), (PVOID*)&ModuleDependencies);
@@ -704,7 +704,7 @@ BlpGetModuleInformation(IN PWCHAR SectionData,
                 RtlInsertTailList(&ModuleInfo->Dependencies, &ModuleDependencies->Flink);
 
                 /* Get next dependency from single value if available */
-                Dependency = RtlTokenizeWideString(NULL, L" ", &LastStr);
+                Dependency = RtlTokenizeWideString(NULLPTR, L" ", &LastStr);
             }
         }
         else if(RtlCompareWideString(Key, L"version", 7) == 0)
@@ -756,7 +756,7 @@ BlpGetModuleInfoStrings(IN PWCHAR SectionData,
     if(!InfoStrings || !SectionSize)
     {
         /* Invalid input parameters */
-        *ModInfo = NULL;
+        *ModInfo = NULLPTR;
         *InfoCount = 0;
         return STATUS_EFI_INVALID_PARAMETER;
     }
@@ -775,7 +775,7 @@ BlpGetModuleInfoStrings(IN PWCHAR SectionData,
     if(DataSize < 1)
     {
         /* No strings found */
-        *ModInfo = NULL;
+        *ModInfo = NULLPTR;
         *InfoCount = 0;
         return STATUS_EFI_END_OF_FILE;
     }
@@ -793,7 +793,7 @@ BlpGetModuleInfoStrings(IN PWCHAR SectionData,
         {
             Index++;
         }
-        /* Skip all null terminators */
+        /* Skip all NULL terminators */
         while(Index < DataSize && InfoStrings[Index] == L'\0')
         {
             Index++;
@@ -814,11 +814,11 @@ BlpGetModuleInfoStrings(IN PWCHAR SectionData,
     /* Copy the raw string data */
     RtlCopyMemory(String, InfoStrings, DataSize * sizeof(WCHAR));
 
-    /* Ensure the entire buffer is null-terminated for safety */
+    /* Ensure the entire buffer is NULL-terminated for safety */
     String[DataSize] = L'\0';
 
-    /* Set the last element of the pointer array to NULL */
-    Array[Count] = NULL;
+    /* Set the last element of the pointer array to NULLPTR */
+    Array[Count] = NULLPTR;
 
     /* Populate the array with pointers to the strings within the buffer */
     Index = 0;
@@ -834,7 +834,7 @@ BlpGetModuleInfoStrings(IN PWCHAR SectionData,
             Index++;
         }
 
-        /* Skip all null terminators to find the beginning of the next string */
+        /* Skip all NULL terminators to find the beginning of the next string */
         while(Index < DataSize && String[Index] == L'\0')
         {
             Index++;
