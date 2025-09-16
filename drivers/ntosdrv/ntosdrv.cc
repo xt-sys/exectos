@@ -1,7 +1,7 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            drivers/ntosdrv/ntosdrv.c
+ * FILE:            drivers/ntosdrv/ntosdrv.cc
  * DESCRIPTION:     NTOS compatibility driver
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
@@ -16,6 +16,7 @@
  *
  * @since XT 1.0
  */
+XTCLINK
 XTAPI
 XTSTATUS
 XtDriverEntry(VOID)

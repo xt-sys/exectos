@@ -1,7 +1,7 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            drivers/ntosdrv/rtl.c
+ * FILE:            drivers/ntosdrv/rtl.cc
  * DESCRIPTION:     NTOS compatibility driver runtime library
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
@@ -25,6 +25,7 @@
  *
  * @since NT 3.5
  */
+XTCLINK
 XTAPI
 VOID
 RtlFillMemory(OUT PVOID Destination,
