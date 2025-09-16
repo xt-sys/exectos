@@ -27,7 +27,7 @@ VOID
 RTL::Dispatcher::GetStackLimits(OUT PULONG_PTR StackBase,
                                 OUT PULONG_PTR StackLimit)
 {
-    PKTHREAD Thread = KeGetCurrentThread();
+    PKTHREAD Thread = KE::Processor::GetCurrentThread();
     *StackBase = (ULONG_PTR)Thread->StackBase - sizeof(FX_SAVE_AREA);
     *StackLimit = (ULONG_PTR)Thread->StackLimit;
 }
