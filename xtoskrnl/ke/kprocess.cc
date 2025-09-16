@@ -41,10 +41,10 @@ KE::KProcess::GetInitialProcess(VOID)
 XTAPI
 VOID
 KE::KProcess::InitializeProcess(IN OUT PKPROCESS Process,
-                           IN KPRIORITY Priority,
-                           IN KAFFINITY Affinity,
-                           IN PULONG_PTR DirectoryTable,
-                           IN BOOLEAN Alignment)
+                                IN KPRIORITY Priority,
+                                IN KAFFINITY Affinity,
+                                IN PULONG_PTR DirectoryTable,
+                                IN BOOLEAN Alignment)
 {
     /* Initialize process dispatcher header */
     Process->Header.Type = ProcessObject;

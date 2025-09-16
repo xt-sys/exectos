@@ -192,8 +192,8 @@ XTCLINK
 XTAPI
 VOID
 KeInitializeDpc(IN PKDPC Dpc,
-                   IN PKDEFERRED_ROUTINE DpcRoutine,
-                   IN PVOID DpcContext)
+                IN PKDEFERRED_ROUTINE DpcRoutine,
+                IN PVOID DpcContext)
 {
     KE::Dpc::InitializeDpc(Dpc, DpcRoutine, DpcContext);
 
@@ -267,8 +267,8 @@ XTCLINK
 XTAPI
 VOID
 KeInitializeSemaphore(IN PKSEMAPHORE Semaphore,
-                               IN LONG Count,
-                               IN LONG Limit)
+                      IN LONG Count,
+                      IN LONG Limit)
 {
     KE::Semaphore::InitializeSemaphore(Semaphore, Count, Limit);
 }
@@ -350,9 +350,9 @@ XTCLINK
 XTAPI
 LONG
 KeReleaseSemaphore(IN PKSEMAPHORE Semaphore,
-                            IN KPRIORITY Increment,
-                            IN LONG Adjustment,
-                            IN BOOLEAN Wait)
+                   IN KPRIORITY Increment,
+                   IN LONG Adjustment,
+                   IN BOOLEAN Wait)
 {
     return KE::Semaphore::ReleaseSemaphore(Semaphore, Increment, Adjustment, Wait);
 }

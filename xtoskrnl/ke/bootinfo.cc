@@ -97,6 +97,13 @@ KE::BootInformation::GetKernelParameter(IN PCWSTR ParameterName,
     return STATUS_NOT_FOUND;
 }
 
+/**
+ * Retrieves a pointer to the list of memory descriptors.
+ *
+ * @return This routine returns a pointer to the list of memory descriptors.
+ *
+ * @since XT 1.0
+ */
 XTAPI
 PLIST_ENTRY
 KE::BootInformation::GetMemoryDescriptors(VOID)
