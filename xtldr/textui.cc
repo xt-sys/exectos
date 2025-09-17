@@ -392,7 +392,7 @@ BlDisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry)
     XTBL_DIALOG_HANDLE Handle;
     BOOLEAN RedrawEditMenu, RedrawEntries;
     EFI_INPUT_KEY Key;
-    UINT_PTR EventIndex;    
+    UINT_PTR EventIndex;
     PWCHAR NewValue, OriginalValue, Value, ValueToEdit;
     PCWSTR OptionName, *EditableOptions;
     EFI_STATUS Status;
