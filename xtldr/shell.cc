@@ -1,7 +1,7 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtldr/shell.c
+ * FILE:            xtldr/shell.cc
  * DESCRIPTION:     XT Boot Loader shell
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */

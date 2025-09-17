@@ -1,7 +1,7 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtldr/hardware.c
+ * FILE:            xtldr/hardware.cc
  * DESCRIPTION:     EFI hardware support for XT Boot Loader
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
@@ -85,7 +85,7 @@ BlpActivateSerialIOController()
                     /* Read configuration space */
                     Address = ((ULONGLONG)((((UINT_PTR) Bus) << 24) + (((UINT_PTR) Device) << 16) +
                                            (((UINT_PTR) Function) << 8) + ((UINT_PTR) 0)));
-                    PciDev->Pci.Read(PciDev, 2, Address, sizeof (PciHeader) / sizeof (UINT), &PciHeader);
+                    PciDev->Pci.Read(PciDev, EfiPciIoWidthUint32, Address, sizeof (PciHeader) / sizeof (UINT), &PciHeader);
 
                     /* Check if device exists */
                     if(PciHeader.VendorId == PCI_INVALID_VENDORID)
@@ -100,7 +100,7 @@ BlpActivateSerialIOController()
                         /* Enable I/O space access */
                         Address |= 0x4;
                         Command = PCI_ENABLE_IO_SPACE;
-                        Status = PciDev->Pci.Write(PciDev, 1, Address, 1, &Command);
+                        Status = PciDev->Pci.Write(PciDev, EfiPciIoWidthUint16, Address, 1, &Command);
                     }
                 }
             }

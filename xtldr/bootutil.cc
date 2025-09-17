@@ -1,7 +1,7 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtldr/bootutil.c
+ * FILE:            xtldr/bootutil.cc
  * DESCRIPTION:     Helper functions used by the boot protocol during system startup
  * DEVELOPERS:      Aiken Harris <harraiken91@gmail.com>
  */
@@ -24,10 +24,10 @@
  */
 XTCDECL
 BOOLEAN
-BlGetBooleanParameter(IN CONST PWCHAR Parameters,
-                      IN CONST PWCHAR Needle)
+BlGetBooleanParameter(IN PCWSTR Parameters,
+                      IN PCWSTR Needle)
 {
-    PWCHAR CurrentPosition, TokenEnd, TokenStart;
+    PCWSTR CurrentPosition, TokenEnd, TokenStart;
     SIZE_T NeedleLength, TokenLength;
 
     /* Validate input data and ensure the option is not an empty string */

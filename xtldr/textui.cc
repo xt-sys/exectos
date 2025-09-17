@@ -1,7 +1,7 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtldr/textui.c
+ * FILE:            xtldr/textui.cc
  * DESCRIPTION:     Text console User Interface (TUI) support for XT Boot Loader
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  *                  Aiken Harris <harraiken91@gmail.com>
@@ -105,7 +105,7 @@ BlDisplayBootMenu()
                 {
                     /* Draw menu entry */
                     BlpDrawBootMenuEntry(&Handle, MenuEntries[TopVisibleEntry + Index].EntryName,
-                                         Index, (TopVisibleEntry + Index) == HighligtedEntryId);
+                                         Index, (BOOLEAN)((TopVisibleEntry + Index) == HighligtedEntryId));
                 }
 
                 /* Clear redraw entries flag */
@@ -214,9 +214,9 @@ BlDisplayBootMenu()
 
                         /* Redraw new highlighted entry and the old one */
                         BlpDrawBootMenuEntry(&Handle, MenuEntries[OldHighligtedEntryId].EntryName,
-                                             OldHighligtedEntryId - TopVisibleEntry, FALSE);
+                                             OldHighligtedEntryId - TopVisibleEntry, (BOOLEAN)FALSE);
                         BlpDrawBootMenuEntry(&Handle, MenuEntries[HighligtedEntryId].EntryName,
-                                             HighligtedEntryId - TopVisibleEntry, TRUE);
+                                             HighligtedEntryId - TopVisibleEntry, (BOOLEAN)TRUE);
                     }
                 }
                 else if(Key.ScanCode == 0x02)
@@ -239,9 +239,9 @@ BlDisplayBootMenu()
 
                         /* Redraw new highlighted entry and the old one */
                         BlpDrawBootMenuEntry(&Handle, MenuEntries[OldHighligtedEntryId].EntryName,
-                                             OldHighligtedEntryId - TopVisibleEntry, FALSE);
+                                             OldHighligtedEntryId - TopVisibleEntry, (BOOLEAN)FALSE);
                         BlpDrawBootMenuEntry(&Handle, MenuEntries[HighligtedEntryId].EntryName,
-                                             HighligtedEntryId - TopVisibleEntry, TRUE);
+                                             HighligtedEntryId - TopVisibleEntry, (BOOLEAN)TRUE);
                     }
                 }
                 else if(Key.ScanCode == 0x09)
@@ -392,9 +392,9 @@ BlDisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry)
     XTBL_DIALOG_HANDLE Handle;
     BOOLEAN RedrawEditMenu, RedrawEntries;
     EFI_INPUT_KEY Key;
-    UINT_PTR EventIndex;
-    PWCHAR NewValue, OptionName, OriginalValue, Value, ValueToEdit;
-    CONST PWCHAR *EditableOptions;
+    UINT_PTR EventIndex;    
+    PWCHAR NewValue, OriginalValue, Value, ValueToEdit;
+    PCWSTR OptionName, *EditableOptions;
     EFI_STATUS Status;
 
     /* Draw edit menu */
@@ -441,7 +441,7 @@ BlDisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry)
                 /* Draw menu entry */
                 BlGetBootOptionValue(MenuEntry->Options, EditableOptions[TopVisibleEntry + Index], &Value);
                 BlpDrawEditMenuEntry(&Handle, EditableOptions[TopVisibleEntry + Index], Value, Index,
-                                     (TopVisibleEntry + Index) == HighligtedOptionId);
+                                     (BOOLEAN)((TopVisibleEntry + Index) == HighligtedOptionId));
 
                 /* Free allocated value string if needed */
                 if(Value != NULLPTR)
@@ -468,7 +468,7 @@ BlDisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry)
             /* If the original value is NULLPTR, use an empty string for editing */
             if(OriginalValue == NULLPTR)
             {
-                ValueToEdit = L"";
+                ValueToEdit = (PWCHAR)L"";
             }
             else
             {
@@ -516,7 +516,7 @@ BlDisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry)
 
                 /* Redraw old highlighted entry */
                 BlGetBootOptionValue(MenuEntry->Options, EditableOptions[OldHighligtedOptionId], &Value);
-                BlpDrawEditMenuEntry(&Handle, EditableOptions[OldHighligtedOptionId], Value, OldHighligtedOptionId - TopVisibleEntry, FALSE);
+                BlpDrawEditMenuEntry(&Handle, EditableOptions[OldHighligtedOptionId], Value, OldHighligtedOptionId - TopVisibleEntry, (BOOLEAN)FALSE);
 
                 /* Free allocated value string if needed */
                 if(Value != NULLPTR)
@@ -526,7 +526,7 @@ BlDisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry)
 
                 /* Redraw new highlighted entry */
                 BlGetBootOptionValue(MenuEntry->Options, EditableOptions[HighligtedOptionId], &Value);
-                BlpDrawEditMenuEntry(&Handle, EditableOptions[HighligtedOptionId], Value, HighligtedOptionId - TopVisibleEntry, TRUE);
+                BlpDrawEditMenuEntry(&Handle, EditableOptions[HighligtedOptionId], Value, HighligtedOptionId - TopVisibleEntry, (BOOLEAN)TRUE);
 
                 /* Free allocated value string if needed */
                 if(Value != NULLPTR)
@@ -555,7 +555,7 @@ BlDisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry)
 
                 /* Redraw old highlighted entry */
                 BlGetBootOptionValue(MenuEntry->Options, EditableOptions[OldHighligtedOptionId], &Value);
-                BlpDrawEditMenuEntry(&Handle, EditableOptions[OldHighligtedOptionId], Value, OldHighligtedOptionId - TopVisibleEntry, FALSE);
+                BlpDrawEditMenuEntry(&Handle, EditableOptions[OldHighligtedOptionId], Value, OldHighligtedOptionId - TopVisibleEntry, (BOOLEAN)FALSE);
 
                 /* Free allocated value string if needed */
                 if(Value != NULLPTR)
@@ -565,7 +565,7 @@ BlDisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry)
 
                 /* Redraw new highlighted entry */
                 BlGetBootOptionValue(MenuEntry->Options, EditableOptions[HighligtedOptionId], &Value);
-                BlpDrawEditMenuEntry(&Handle, EditableOptions[HighligtedOptionId], Value, HighligtedOptionId - TopVisibleEntry, TRUE);
+                BlpDrawEditMenuEntry(&Handle, EditableOptions[HighligtedOptionId], Value, HighligtedOptionId - TopVisibleEntry, (BOOLEAN)TRUE);
 
                 /* Free allocated value string if needed */
                 if(Value != NULLPTR)
@@ -640,8 +640,8 @@ BlDisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry)
  */
 XTCDECL
 VOID
-BlDisplayErrorDialog(IN PWCHAR Caption,
-                     IN PWCHAR Message)
+BlDisplayErrorDialog(IN PCWSTR Caption,
+                     IN PCWSTR Message)
 {
     XTBL_DIALOG_HANDLE Handle;
     EFI_INPUT_KEY Key;
@@ -693,8 +693,8 @@ BlDisplayErrorDialog(IN PWCHAR Caption,
  */
 XTCDECL
 VOID
-BlDisplayInfoDialog(IN PWCHAR Caption,
-                    IN PWCHAR Message)
+BlDisplayInfoDialog(IN PCWSTR Caption,
+                    IN PCWSTR Message)
 {
     XTBL_DIALOG_HANDLE Handle;
     EFI_INPUT_KEY Key;
@@ -749,8 +749,8 @@ BlDisplayInfoDialog(IN PWCHAR Caption,
  */
 XTCDECL
 VOID
-BlDisplayInputDialog(IN PWCHAR Caption,
-                     IN PWCHAR Message,
+BlDisplayInputDialog(IN PCWSTR Caption,
+                     IN PCWSTR Message,
                      IN OUT PWCHAR *InputFieldText)
 {
     SIZE_T InputFieldLength, TextCursorPosition, TextIndex, TextPosition;
@@ -962,8 +962,8 @@ BlDisplayInputDialog(IN PWCHAR Caption,
  */
 XTCDECL
 XTBL_DIALOG_HANDLE
-BlDisplayProgressDialog(IN PWCHAR Caption,
-                        IN PWCHAR Message,
+BlDisplayProgressDialog(IN PCWSTR Caption,
+                        IN PCWSTR Message,
                         IN UCHAR Percentage)
 {
     XTBL_DIALOG_HANDLE Handle;
@@ -1004,7 +1004,7 @@ BlDisplayProgressDialog(IN PWCHAR Caption,
 XTCDECL
 VOID
 BlUpdateProgressBar(IN PXTBL_DIALOG_HANDLE Handle,
-                    IN PWCHAR Message,
+                    IN PCWSTR Message,
                     IN UCHAR Percentage)
 {
     /* Check if message needs an update */
@@ -1034,7 +1034,7 @@ BlUpdateProgressBar(IN PXTBL_DIALOG_HANDLE Handle,
 XTCDECL
 VOID
 BlpDetermineDialogBoxSize(IN OUT PXTBL_DIALOG_HANDLE Handle,
-                          IN PWCHAR Message)
+                          IN PCWSTR Message)
 {
     UINT_PTR Width, Height, LineLength;
     SIZE_T Index, MessageLength;
@@ -1268,8 +1268,8 @@ BlpDrawBootMenuEntry(IN PXTBL_DIALOG_HANDLE Handle,
 XTCDECL
 VOID
 BlpDrawDialogBox(IN OUT PXTBL_DIALOG_HANDLE Handle,
-                 IN PWCHAR Caption,
-                 IN PWCHAR Message)
+                 IN PCWSTR Caption,
+                 IN PCWSTR Message)
 {
     WCHAR BoxLine[XTBL_TUI_MAX_DIALOG_WIDTH];
     SIZE_T CaptionLength;
@@ -1545,7 +1545,7 @@ BlpDrawDialogInputField(IN PXTBL_DIALOG_HANDLE Handle,
 XTCDECL
 VOID
 BlpDrawDialogMessage(IN PXTBL_DIALOG_HANDLE Handle,
-                     IN PWCHAR Message)
+                     IN PCWSTR Message)
 {
     PWCHAR Msg, MsgLine, LastMsgLine;
     SIZE_T Index, Length, LineLength;
@@ -1733,13 +1733,13 @@ BlpDrawEditMenu(OUT PXTBL_DIALOG_HANDLE Handle)
 XTCDECL
 EFI_STATUS
 BlpDrawEditMenuEntry(IN PXTBL_DIALOG_HANDLE Handle,
-                     IN PWCHAR OptionName,
-                     IN PWCHAR OptionValue,
+                     IN PCWSTR OptionName,
+                     IN PCWSTR OptionValue,
                      IN UINT Position,
                      IN BOOLEAN Highlighted)
 {
     BOOLEAN Allocation;
-    PWCHAR DisplayValue, ShortValue;
+    PCWSTR DisplayValue, ShortValue;
     UINT Index;
     ULONG OptionNameLength, OptionValueLength, OptionWidth;
     EFI_STATUS Status;
@@ -1759,7 +1759,7 @@ BlpDrawEditMenuEntry(IN PXTBL_DIALOG_HANDLE Handle,
     if(OptionValueLength > OptionWidth)
     {
         /* Allocate buffer for new, shortened value */
-        Status = BlAllocateMemoryPool((OptionWidth + 1) * sizeof(WCHAR), (PVOID *)&ShortValue);
+        Status = BlAllocateMemoryPool((OptionWidth + 1) * sizeof(WCHAR), (PVOID *)&ShortValue); // This allocates PWCHAR
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory allocation failure, print debug message and return */
@@ -1768,9 +1768,9 @@ BlpDrawEditMenuEntry(IN PXTBL_DIALOG_HANDLE Handle,
         }
 
         /* Copy a desired value length into the allocated buffer and append "..." */
-        RtlCopyMemory(ShortValue, DisplayValue, (OptionWidth - 3) * sizeof(WCHAR));
-        RtlCopyMemory(ShortValue + OptionWidth - 3, L"...", 3 * sizeof(WCHAR));
-        ShortValue[OptionWidth] = L'\0';
+        RtlCopyMemory((PWCHAR)ShortValue, DisplayValue, (OptionWidth - 3) * sizeof(WCHAR));
+        RtlCopyMemory((PWCHAR)ShortValue + OptionWidth - 3, L"...", 3 * sizeof(WCHAR));
+        ((PWCHAR)ShortValue)[OptionWidth] = L'\0';
 
         /* Mark that allocation was made and set new display value */
         Allocation = TRUE;
@@ -1806,7 +1806,7 @@ BlpDrawEditMenuEntry(IN PXTBL_DIALOG_HANDLE Handle,
     if(Allocation)
     {
         /* Free allocated memory */
-        BlFreeMemoryPool(DisplayValue);
+        BlFreeMemoryPool((PVOID)DisplayValue);
     }
 
     /* Return success */

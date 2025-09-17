@@ -11,24 +11,24 @@ include_directories(
 
 # Specify list of library source code files
 list(APPEND LIBXTLDR_SOURCE
-    ${XTLDR_SOURCE_DIR}/library/modproto.c)
+    ${XTLDR_SOURCE_DIR}/library/modproto.cc)
 
 # Specify list of source code files
 list(APPEND XTLDR_SOURCE
-    ${XTLDR_SOURCE_DIR}/arch/${ARCH}/memory.c
-    ${XTLDR_SOURCE_DIR}/bootutil.c
-    ${XTLDR_SOURCE_DIR}/config.c
-    ${XTLDR_SOURCE_DIR}/console.c
-    ${XTLDR_SOURCE_DIR}/debug.c
-    ${XTLDR_SOURCE_DIR}/efiutils.c
-    ${XTLDR_SOURCE_DIR}/globals.c
-    ${XTLDR_SOURCE_DIR}/hardware.c
-    ${XTLDR_SOURCE_DIR}/memory.c
-    ${XTLDR_SOURCE_DIR}/protocol.c
-    ${XTLDR_SOURCE_DIR}/shell.c
-    ${XTLDR_SOURCE_DIR}/textui.c
-    ${XTLDR_SOURCE_DIR}/volume.c
-    ${XTLDR_SOURCE_DIR}/xtldr.c)
+    ${XTLDR_SOURCE_DIR}/arch/${ARCH}/memory.cc
+    ${XTLDR_SOURCE_DIR}/bootutil.cc
+    ${XTLDR_SOURCE_DIR}/config.cc
+    ${XTLDR_SOURCE_DIR}/console.cc
+    ${XTLDR_SOURCE_DIR}/debug.cc
+    ${XTLDR_SOURCE_DIR}/efiutils.cc
+    ${XTLDR_SOURCE_DIR}/globals.cc
+    ${XTLDR_SOURCE_DIR}/hardware.cc
+    ${XTLDR_SOURCE_DIR}/memory.cc
+    ${XTLDR_SOURCE_DIR}/protocol.cc
+    ${XTLDR_SOURCE_DIR}/shell.cc
+    ${XTLDR_SOURCE_DIR}/textui.cc
+    ${XTLDR_SOURCE_DIR}/volume.cc
+    ${XTLDR_SOURCE_DIR}/xtldr.cc)
 
 # Link static XTLDR library
 add_library(libxtldr ${LIBXTLDR_SOURCE})

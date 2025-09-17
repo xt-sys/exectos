@@ -1,7 +1,7 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtldr/protocol.c
+ * FILE:            xtldr/protocol.cc
  * DESCRIPTION:     XT Boot Loader protocol support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
@@ -45,7 +45,7 @@ BlCloseProtocol(IN PEFI_HANDLE Handle,
  */
 XTCDECL
 EFI_STATUS
-BlFindBootProtocol(IN PWCHAR SystemType,
+BlFindBootProtocol(IN PCWSTR SystemType,
                    OUT PEFI_GUID BootProtocolGuid)
 {
     PXTBL_KNOWN_BOOT_PROTOCOL ProtocolEntry;
@@ -167,8 +167,8 @@ BlLoadModule(IN PWCHAR ModuleName)
     BlDebugPrint(L"Loading module '%S' ...\n", ModuleName);
 
     /* Set module path */
-    RtlCopyMemory(ModuleFileName, ModuleName, sizeof(ModuleFileName) / sizeof(WCHAR));
-    RtlConcatenateWideString(ModuleFileName, L".EFI", 0);
+    RtlCopyMemory(ModuleFileName, ModuleName, (RtlWideStringLength(ModuleName, 0) + 1) * sizeof(WCHAR));
+    RtlConcatenateWideString(ModuleFileName, (PWCHAR)L".EFI", 0);
 
     /* Open EFI volume */
     Status = BlOpenVolume(NULLPTR, &DiskHandle, &FsHandle);
@@ -179,11 +179,11 @@ BlLoadModule(IN PWCHAR ModuleName)
     }
 
     /* Open XTLDR modules common directory */
-    Status = FsHandle->Open(FsHandle, &DirHandle, XTBL_MODULES_DIRECTORY_PATH, EFI_FILE_MODE_READ, 0);
+    Status = FsHandle->Open(FsHandle, &DirHandle, (PWCHAR)XTBL_MODULES_DIRECTORY_PATH, EFI_FILE_MODE_READ, 0);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Modules directory not found, attempt to open XTLDR architecture specific modules directory */
-        Status = FsHandle->Open(FsHandle, &DirHandle, XTBL_ARCH_MODULES_DIRECTORY_PATH, EFI_FILE_MODE_READ, 0);
+        Status = FsHandle->Open(FsHandle, &DirHandle, (PWCHAR)XTBL_ARCH_MODULES_DIRECTORY_PATH, EFI_FILE_MODE_READ, 0);
     }
 
     /* Close FS handle */
@@ -193,14 +193,14 @@ BlLoadModule(IN PWCHAR ModuleName)
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to open directory */
-        BlCloseVolume(DiskHandle);
+        BlCloseVolume(&DiskHandle);
         return Status;
     }
 
     /* Read module file from disk and close directory and EFI volume */
     Status = BlReadFile(DirHandle, ModuleFileName, &ModuleData, &ModuleSize);
     DirHandle->Close(DirHandle);
-    BlCloseVolume(DiskHandle);
+    BlCloseVolume(&DiskHandle);
 
     /* Make sure module file was read successfully */
     if(Status != STATUS_EFI_SUCCESS)
@@ -222,7 +222,7 @@ BlLoadModule(IN PWCHAR ModuleName)
 
     /* Setup PE/COFF EFI image headers */
     DosHeader = (PPECOFF_IMAGE_DOS_HEADER)ModuleData;
-    PeHeader = (PPECOFF_IMAGE_PE_HEADER)(ModuleData + DosHeader->PeHeaderOffset);
+    PeHeader = (PPECOFF_IMAGE_PE_HEADER)((PUCHAR)ModuleData + DosHeader->PeHeaderOffset);
 
     /* Check PE/COFF image type*/
     if(PeHeader->OptionalHeader32.Magic == PECOFF_IMAGE_PE_OPTIONAL_HDR64_MAGIC)
@@ -244,7 +244,7 @@ BlLoadModule(IN PWCHAR ModuleName)
         if(RtlCompareString((PCHAR)SectionHeader[SectionIndex].Name, ".modinfo", 8) == 0)
         {
             /* Module information section found */
-            SectionData = ModuleData + SectionHeader[SectionIndex].PointerToRawData;
+            SectionData = (PWCHAR)((PUCHAR)ModuleData + SectionHeader[SectionIndex].PointerToRawData);
 
             /* Get module information */
             Status = BlpGetModuleInformation(SectionData, SectionHeader[SectionIndex].SizeOfRawData, ModuleInfo);
@@ -543,7 +543,7 @@ VOID
 BlRegisterBootMenu(IN PVOID BootMenuRoutine)
 {
     /* Set boot menu routine */
-    BlpStatus.BootMenu = BootMenuRoutine;
+    BlpStatus.BootMenu = (PBL_XT_BOOT_MENU)BootMenuRoutine;
 }
 
 /**
@@ -561,7 +561,7 @@ BlRegisterBootMenu(IN PVOID BootMenuRoutine)
  */
 XTCDECL
 EFI_STATUS
-BlRegisterBootProtocol(IN PWCHAR SystemType,
+BlRegisterBootProtocol(IN PCWSTR SystemType,
                        IN PEFI_GUID BootProtocolGuid)
 {
     PXTBL_KNOWN_BOOT_PROTOCOL ProtocolEntry;
@@ -594,7 +594,7 @@ BlRegisterBootProtocol(IN PWCHAR SystemType,
     }
 
     /* Set protocol properties and add it to the list */
-    ProtocolEntry->SystemType = SystemType;
+    ProtocolEntry->SystemType = (PWCHAR)SystemType;
     ProtocolEntry->Guid = *BootProtocolGuid;
     RtlInsertTailList(&BlpBootProtocols, &ProtocolEntry->Flink);
 

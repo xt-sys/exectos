@@ -1,7 +1,7 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtldr/memory.c
+ * FILE:            xtldr/memory.cc
  * DESCRIPTION:     XT Boot Loader memory management
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
@@ -209,11 +209,11 @@ BlGetVirtualAddress(IN PXTBL_PAGE_MAPPING PageMap,
         if(Mapping->VirtualAddress)
         {
             /* Check if provided physical address is in range of this mapping */
-            if((PhysicalAddress >= Mapping->PhysicalAddress) &&
-               (PhysicalAddress < Mapping->PhysicalAddress + (Mapping->NumberOfPages * EFI_PAGE_SIZE)))
+            if(((UINT_PTR)PhysicalAddress >= (UINT_PTR)Mapping->PhysicalAddress) &&
+               ((UINT_PTR)PhysicalAddress < ((UINT_PTR)Mapping->PhysicalAddress + (Mapping->NumberOfPages * EFI_PAGE_SIZE))))
             {
                 /* Calculate virtual address based on the mapping and return it */
-                return PhysicalAddress - Mapping->PhysicalAddress + Mapping->VirtualAddress;
+                return (PVOID)(((UINT_PTR)PhysicalAddress - (UINT_PTR)Mapping->PhysicalAddress) + (UINT_PTR)Mapping->VirtualAddress);
             }
         }
 
@@ -287,7 +287,7 @@ BlMapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
     SIZE_T Index;
 
     /* Set virtual address as specified in argument */
-    VirtualAddress = *MemoryMapAddress;
+    VirtualAddress = (PUCHAR)*MemoryMapAddress;
 
     /* Check if custom memory type routine is specified */
     if(GetMemoryTypeRoutine == NULLPTR)
@@ -346,7 +346,7 @@ BlMapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
             }
 
             /* Convert EFI memory type into XTLDR memory type */
-            MemoryType = GetMemoryTypeRoutine(Descriptor->Type);
+            MemoryType = GetMemoryTypeRoutine((EFI_MEMORY_TYPE)Descriptor->Type);
 
             /* Do memory mappings depending on memory type */
             if(MemoryType == LoaderFirmwareTemporary)
@@ -663,12 +663,12 @@ BlPhysicalListToVirtual(IN PXTBL_PAGE_MAPPING PageMap,
         if(ListEntry->Blink == ListHead)
         {
             /* Find virtual address of list head */
-            ListEntry->Blink = BlGetVirtualAddress(PageMap, ListEntry->Blink);
+            ListEntry->Blink = (PLIST_ENTRY)BlGetVirtualAddress(PageMap, ListEntry->Blink);
         }
         else
         {
             /* Convert list entry */
-            ListEntry->Blink = BlPhysicalAddressToVirtual(ListEntry->Blink, (PVOID)PhysicalBase, VirtualBase);
+            ListEntry->Blink = (PLIST_ENTRY)BlPhysicalAddressToVirtual(ListEntry->Blink, (PVOID)PhysicalBase, VirtualBase);
         }
         if(ListEntry->Flink == ListHead)
         {
@@ -678,7 +678,7 @@ BlPhysicalListToVirtual(IN PXTBL_PAGE_MAPPING PageMap,
         else
         {
             /* Convert list entry */
-            ListEntry->Flink = BlPhysicalAddressToVirtual(ListEntry->Flink, (PVOID)PhysicalBase, VirtualBase);
+            ListEntry->Flink = (PLIST_ENTRY)BlPhysicalAddressToVirtual(ListEntry->Flink, (PVOID)PhysicalBase, VirtualBase);
         }
 
         /* Get to the next element*/
@@ -686,8 +686,8 @@ BlPhysicalListToVirtual(IN PXTBL_PAGE_MAPPING PageMap,
     }
 
     /* Convert list head */
-    ListHead->Blink = BlPhysicalAddressToVirtual(ListHead->Blink, (PVOID)PhysicalBase, VirtualBase);
-    ListHead->Flink = BlPhysicalAddressToVirtual(ListHead->Flink, (PVOID)PhysicalBase, VirtualBase);
+    ListHead->Blink = (PLIST_ENTRY)BlPhysicalAddressToVirtual(ListHead->Blink, (PVOID)PhysicalBase, VirtualBase);
+    ListHead->Flink = (PLIST_ENTRY)BlPhysicalAddressToVirtual(ListHead->Flink, (PVOID)PhysicalBase, VirtualBase);
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
@@ -704,7 +704,7 @@ BlPhysicalListToVirtual(IN PXTBL_PAGE_MAPPING PageMap,
  * @since XT 1.0
  */
 XTCDECL
-LONG
+LOADER_MEMORY_TYPE
 BlpGetLoaderMemoryType(IN EFI_MEMORY_TYPE EfiMemoryType)
 {
     LOADER_MEMORY_TYPE MemoryType;

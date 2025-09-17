@@ -1,7 +1,7 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtldr/efiutils.c
+ * FILE:            xtldr/efiutils.cc
  * DESCRIPTION:     EFI related routines for XT Boot Loader
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
@@ -21,7 +21,7 @@ EFI_STATUS
 BlEnterFirmwareSetup()
 {
     EFI_GUID Guid = EFI_GLOBAL_VARIABLE_GUID;
-    PULONGLONG SetupSupport;
+    PULONGLONG SetupSupport = NULLPTR;
     ULONGLONG Indications;
     EFI_STATUS Status;
 
@@ -31,12 +31,18 @@ BlEnterFirmwareSetup()
     {
         /* Reboot into firmware setup is not supported */
         BlDebugPrint(L"WARNING: Reboot into firmware setup interface not supported\n");
+        if(SetupSupport)
+        {
+            BlFreeMemoryPool((PVOID)SetupSupport);
+        }
         return STATUS_EFI_UNSUPPORTED;
     }
 
+    BlFreeMemoryPool((PVOID)SetupSupport);
+
     /* Get the value of OsIndications variable */
     Indications = 0;
-    Status = BlGetEfiVariable(&Guid, L"OsIndications", (PVOID)&Indications);
+    Status = BlGetEfiVariable(&Guid, L"OsIndications", (PVOID*)&Indications);
 
     /* Enable FW setup on next boot */
     Indications |= EFI_OS_INDICATIONS_BOOT_TO_FW_UI;
@@ -167,12 +173,12 @@ BlGetConfigurationTable(IN PEFI_GUID TableGuid,
 XTCDECL
 EFI_STATUS
 BlGetEfiVariable(IN PEFI_GUID Vendor,
-                 IN PWCHAR VariableName,
+                 IN PCWSTR VariableName,
                  OUT PVOID *VariableValue)
 {
     EFI_STATUS Status;
     PVOID Buffer;
-    UINT_PTR Size;
+    UINT_PTR Size = 0;
 
     /* Allocate a buffer for storing a variable's value */
     Size = EFI_MAXIMUM_VARIABLE_SIZE * sizeof(PWCHAR);
@@ -184,7 +190,7 @@ BlGetEfiVariable(IN PEFI_GUID Vendor,
     }
 
     /* Attempt to get variable value */
-    Status = EfiSystemTable->RuntimeServices->GetVariable(VariableName, Vendor, NULLPTR, &Size, Buffer);
+    Status = EfiSystemTable->RuntimeServices->GetVariable((PWCHAR)VariableName, Vendor, NULLPTR, &Size, Buffer);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to get variable, probably not found such one */
@@ -234,16 +240,16 @@ BlGetSecureBootStatus()
 {
     EFI_GUID VarGuid = EFI_GLOBAL_VARIABLE_GUID;
     INT_PTR SecureBootStatus = 0;
-    UCHAR VarValue = 0;
+    INT_PTR VarValue = 0;
     UINT_PTR Size;
 
-    Size = sizeof(VarValue);
-    if(EfiSystemTable->RuntimeServices->GetVariable(L"SecureBoot", &VarGuid,
+    Size = sizeof(INT_PTR);
+    if(EfiSystemTable->RuntimeServices->GetVariable((PWCHAR)L"SecureBoot", &VarGuid,
        NULLPTR, &Size, &VarValue) == STATUS_EFI_SUCCESS)
     {
-        SecureBootStatus = (INT_PTR)VarValue;
-
-        if((EfiSystemTable->RuntimeServices->GetVariable(L"SetupMode", &VarGuid,
+        SecureBootStatus = VarValue;
+        Size = sizeof(INT_PTR);
+        if((EfiSystemTable->RuntimeServices->GetVariable((PWCHAR)L"SetupMode", &VarGuid,
            NULLPTR, &Size, &VarValue) == STATUS_EFI_SUCCESS) && VarValue != 0)
         {
             SecureBootStatus = -1;
@@ -365,7 +371,7 @@ BlRebootSystem()
 XTCDECL
 EFI_STATUS
 BlSetEfiVariable(IN PEFI_GUID Vendor,
-                 IN PWCHAR VariableName,
+                 IN PCWSTR VariableName,
                  IN PVOID VariableValue,
                  IN UINT_PTR Size)
 {
@@ -373,7 +379,7 @@ BlSetEfiVariable(IN PEFI_GUID Vendor,
 
     /* Set EFI variable */
     Attributes = EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS;
-    return EfiSystemTable->RuntimeServices->SetVariable(VariableName, Vendor, Attributes, Size, VariableValue);
+    return EfiSystemTable->RuntimeServices->SetVariable((PWCHAR)VariableName, Vendor, Attributes, Size, VariableValue);
 }
 
 /**

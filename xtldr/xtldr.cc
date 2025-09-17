@@ -1,7 +1,7 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtldr/xtldr.c
+ * FILE:            xtldr/xtldr.cc
  * DESCRIPTION:     XTOS UEFI Boot Loader
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
@@ -55,15 +55,17 @@ BlInitializeBootLoader()
         {
             /* Protocol opened successfully, print useful debug information */
             BlConsolePrint(L"\n---------- BOOTLOADER DEBUG ----------\n"
-                           L"Pointer Size      : %d\n"
-                           L"Image Base Address: %P\n"
-                           L"Image Base Size   : 0x%lX\n"
-                           L"Image Revision    : 0x%lX\n"
+                           L"Pointer Size       : %d\n"
+                           L"Image Base Address : %P\n"
+                           L"Image Base Size    : 0x%lX\n"
+                           L"Image Revision     : 0x%lX\n"
+                           L"Secure Boot Status : %zd\n"
                            L"--------------------------------------\n",
                            sizeof(PVOID),
                            LoadedImage->ImageBase,
                            LoadedImage->ImageSize,
-                           LoadedImage->Revision);
+                           LoadedImage->Revision,
+                           BlpStatus.SecureBoot);
             BlSleepExecution(3000);
         }
 

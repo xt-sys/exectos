@@ -1,7 +1,7 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtldr/arch/amd64/memory.c
+ * FILE:            xtldr/arch/amd64/memory.cc
  * DESCRIPTION:     XT Boot Loader AMD64 specific memory management
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  *                  Aiken Harris <harraiken91@gmail.com>

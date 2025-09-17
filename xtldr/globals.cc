@@ -1,7 +1,7 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtldr/globals.c
+ * FILE:            xtldr/globals.cc
  * DESCRIPTION:     XT Boot Loader global variables
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
@@ -22,7 +22,7 @@ LIST_ENTRY BlpConfig;
 LIST_ENTRY BlpConfigSections;
 
 /* List of user-editable boot options */
-PWCHAR BlpEditableConfigOptions[] = {
+PCWSTR BlpEditableConfigOptions[] = {
     L"BootModules", L"SystemType", L"SystemPath",
     L"KernelFile",  L"InitrdFile", L"HalFile",
     L"Parameters", NULLPTR

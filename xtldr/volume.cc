@@ -1,7 +1,7 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtldr/volume.c
+ * FILE:            xtldr/volume.cc
  * DESCRIPTION:     XTLDR volume support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  *                  Aiken Harris <harraiken91@gmail.com>
@@ -563,7 +563,7 @@ BlOpenVolume(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to open the filesystem protocol, close volume */
-        BlCloseVolume(*DiskHandle);
+        BlCloseVolume(DiskHandle);
         return Status;
     }
 
@@ -572,7 +572,7 @@ BlOpenVolume(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to open the filesystem, close volume */
-        BlCloseVolume(*DiskHandle);
+        BlCloseVolume(DiskHandle);
         return Status;
     }
 
@@ -602,7 +602,7 @@ BlOpenVolume(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
 XTCDECL
 EFI_STATUS
 BlReadFile(IN PEFI_FILE_HANDLE DirHandle,
-           IN CONST PWCHAR FileName,
+           IN PCWSTR FileName,
            OUT PVOID *FileData,
            OUT PSIZE_T FileSize)
 {
@@ -614,7 +614,7 @@ BlReadFile(IN PEFI_FILE_HANDLE DirHandle,
     UINT_PTR ReadSize;
     SIZE_T Pages;
 
-    Status = DirHandle->Open(DirHandle, &FileHandle, FileName, EFI_FILE_MODE_READ,
+    Status = DirHandle->Open(DirHandle, &FileHandle, (PWCHAR)FileName, EFI_FILE_MODE_READ,
                              EFI_FILE_READ_ONLY | EFI_FILE_HIDDEN | EFI_FILE_SYSTEM);
     if(Status != STATUS_EFI_SUCCESS)
     {

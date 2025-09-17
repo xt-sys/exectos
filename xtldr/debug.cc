@@ -1,7 +1,7 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtldr/debug.c
+ * FILE:            xtldr/debug.cc
  * DESCRIPTION:     XT Boot Loader debugging support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
@@ -257,7 +257,7 @@ BlpInitializeSerialPort(IN ULONG PortNumber,
     }
 
     /* Initialize COM port */
-    Status = HlInitializeComPort(&BlpStatus.SerialPort, UlongToPtr(PortAddress), BaudRate);
+    Status = HlInitializeComPort(&BlpStatus.SerialPort, (PUCHAR)UlongToPtr(PortAddress), BaudRate);
 
     /* Port not found under supplied address */
     if(Status == STATUS_NOT_FOUND && PortAddress)
@@ -268,7 +268,7 @@ BlpInitializeSerialPort(IN ULONG PortNumber,
         {
             /* Try to reinitialize COM port */
             BlConsolePrint(L"Enabled I/O space access for all PCI(E) serial controllers found\n");
-            Status = HlInitializeComPort(&BlpStatus.SerialPort, UlongToPtr(PortAddress), BaudRate);
+            Status = HlInitializeComPort(&BlpStatus.SerialPort, (PUCHAR)UlongToPtr(PortAddress), BaudRate);
         }
     }
 

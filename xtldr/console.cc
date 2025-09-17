@@ -1,7 +1,7 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtldr/console.c
+ * FILE:            xtldr/console.cc
  * DESCRIPTION:     EFI console support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */

@@ -1,7 +1,7 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtldr/library/modproto.c
+ * FILE:            xtldr/library/modproto.cc
  * DESCRIPTION:     XT Boot Loader protocol support for XTLDR modules
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
@@ -25,6 +25,7 @@
  *
  * @since XT 1.0
  */
+XTCLINK
 XTCDECL
 EFI_STATUS
 BlGetXtLdrProtocol(IN PEFI_SYSTEM_TABLE SystemTable,

@@ -77,24 +77,24 @@ BlDisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry);
 
 XTCDECL
 VOID
-BlDisplayErrorDialog(IN PWCHAR Caption,
-                     IN PWCHAR Message);
+BlDisplayErrorDialog(IN PCWSTR Caption,
+                     IN PCWSTR Message);
 
 XTCDECL
 VOID
-BlDisplayInfoDialog(IN PWCHAR Caption,
-                    IN PWCHAR Message);
+BlDisplayInfoDialog(IN PCWSTR Caption,
+                    IN PCWSTR Message);
 
 XTCDECL
 VOID
-BlDisplayInputDialog(IN PWCHAR Caption,
-                     IN PWCHAR Message,
+BlDisplayInputDialog(IN PCWSTR Caption,
+                     IN PCWSTR Message,
                      IN OUT PWCHAR *InputFieldText);
 
 XTCDECL
 XTBL_DIALOG_HANDLE
-BlDisplayProgressDialog(IN PWCHAR Caption,
-                        IN PWCHAR Message,
+BlDisplayProgressDialog(IN PCWSTR Caption,
+                        IN PCWSTR Message,
                         IN UCHAR Percentage);
 
 XTCDECL
@@ -115,7 +115,7 @@ BlExitBootServices();
 
 XTCDECL
 EFI_STATUS
-BlFindBootProtocol(IN PWCHAR SystemType,
+BlFindBootProtocol(IN PCWSTR SystemType,
                    OUT PEFI_GUID BootProtocolGuid);
 
 XTCDECL
@@ -135,22 +135,22 @@ BlFreeMemoryPool(IN PVOID Memory);
 
 XTCDECL
 BOOLEAN
-BlGetBooleanParameter(IN CONST PWCHAR Parameters,
-                      IN CONST PWCHAR Needle);
+BlGetBooleanParameter(IN PCWSTR Parameters,
+                      IN PCWSTR Needle);
 
 XTCDECL
 EFI_STATUS
 BlGetBootOptionValue(IN PLIST_ENTRY Options,
-                     IN CONST PWCHAR OptionName,
+                     IN PCWSTR OptionName,
                      OUT PWCHAR *OptionValue);
 
 XTCDECL
 BOOLEAN
-BlGetConfigBooleanValue(IN CONST PWCHAR ConfigName);
+BlGetConfigBooleanValue(IN PCWSTR ConfigName);
 
 XTCDECL
 EFI_STATUS
-BlGetConfigValue(IN CONST PWCHAR ConfigName,
+BlGetConfigValue(IN PCWSTR ConfigName,
                  OUT PWCHAR *ConfigValue);
 
 XTCDECL
@@ -160,7 +160,7 @@ BlGetConfigurationTable(IN PEFI_GUID TableGuid,
 
 XTCDECL
 VOID
-BlGetEditableOptions(OUT CONST PWCHAR **OptionsArray,
+BlGetEditableOptions(OUT PCWSTR **OptionsArray,
                      OUT PULONG OptionsCount);
 
 XTCDECL
@@ -171,7 +171,7 @@ BlGetEfiPath(IN PWCHAR SystemPath,
 XTCDECL
 EFI_STATUS
 BlGetEfiVariable(IN PEFI_GUID Vendor,
-                 IN PWCHAR VariableName,
+                 IN PCWSTR VariableName,
                  OUT PVOID *VariableValue);
 
 XTCDECL
@@ -323,7 +323,7 @@ BlQueryConsoleMode(OUT PUINT_PTR ResX,
 XTCDECL
 EFI_STATUS
 BlReadFile(IN PEFI_FILE_HANDLE DirHandle,
-           IN CONST PWCHAR FileName,
+           IN PCWSTR FileName,
            OUT PVOID *FileData,
            OUT PSIZE_T FileSize);
 
@@ -341,7 +341,7 @@ BlRegisterBootMenu(PVOID BootMenuRoutine);
 
 XTCDECL
 EFI_STATUS
-BlRegisterBootProtocol(IN PWCHAR SystemType,
+BlRegisterBootProtocol(IN PCWSTR SystemType,
                        IN PEFI_GUID BootProtocolGuid);
 
 XTCDECL
@@ -351,13 +351,13 @@ BlResetConsoleInputBuffer();
 XTCDECL
 EFI_STATUS
 BlSetBootOptionValue(IN PLIST_ENTRY Options,
-                     IN CONST PWCHAR OptionName,
-                     IN CONST PWCHAR OptionValue);
+                     IN PCWSTR OptionName,
+                     IN PCWSTR OptionValue);
 
 XTCDECL
 EFI_STATUS
-BlSetConfigValue(IN CONST PWCHAR ConfigName,
-                 IN CONST PWCHAR ConfigValue);
+BlSetConfigValue(IN PCWSTR ConfigName,
+                 IN PCWSTR ConfigValue);
 
 XTCDECL
 VOID
@@ -375,7 +375,7 @@ BlSetCursorPosition(IN ULONGLONG PosX,
 XTCDECL
 EFI_STATUS
 BlSetEfiVariable(IN PEFI_GUID Vendor,
-                 IN PWCHAR VariableName,
+                 IN PCWSTR VariableName,
                  IN PVOID VariableValue,
                  IN UINT_PTR Size);
 
@@ -403,7 +403,7 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
 XTCDECL
 VOID
 BlUpdateProgressBar(IN PXTBL_DIALOG_HANDLE Handle,
-                    IN PWCHAR Message,
+                    IN PCWSTR Message,
                     IN UCHAR Percentage);
 
 XTCDECL
@@ -427,7 +427,7 @@ BlpDebugPutChar(IN WCHAR Character);
 XTCDECL
 VOID
 BlpDetermineDialogBoxSize(IN OUT PXTBL_DIALOG_HANDLE Handle,
-                          IN PWCHAR Message);
+                          IN PCWSTR Message);
 
 XTCDECL
 EFI_STATUS
@@ -456,8 +456,8 @@ BlpDrawBootMenuEntry(IN PXTBL_DIALOG_HANDLE Handle,
 XTCDECL
 VOID
 BlpDrawDialogBox(IN OUT PXTBL_DIALOG_HANDLE Handle,
-                 IN PWCHAR Caption,
-                 IN PWCHAR Message);
+                 IN PCWSTR Caption,
+                 IN PCWSTR Message);
 
 XTCDECL
 VOID
@@ -471,7 +471,7 @@ BlpDrawDialogInputField(IN PXTBL_DIALOG_HANDLE Handle,
 XTCDECL
 VOID
 BlpDrawDialogMessage(IN PXTBL_DIALOG_HANDLE Handle,
-                     IN PWCHAR Message);
+                     IN PCWSTR Message);
 
 XTCDECL
 VOID
@@ -485,8 +485,8 @@ BlpDrawEditMenu(OUT PXTBL_DIALOG_HANDLE Handle);
 XTCDECL
 EFI_STATUS
 BlpDrawEditMenuEntry(IN PXTBL_DIALOG_HANDLE Handle,
-                     IN PWCHAR OptionName,
-                     IN PWCHAR OptionValue,
+                     IN PCWSTR OptionName,
+                     IN PCWSTR OptionValue,
                      IN UINT Position,
                      IN BOOLEAN Highlighted);
 
@@ -506,7 +506,7 @@ BlpFindParentBlockDevice(IN PLIST_ENTRY BlockDevices,
                          OUT PEFI_BLOCK_DEVICE_DATA *ParentNode);
 
 XTCDECL
-LONG
+LOADER_MEMORY_TYPE
 BlpGetLoaderMemoryType(IN EFI_MEMORY_TYPE EfiMemoryType);
 
 XTCDECL
@@ -562,8 +562,8 @@ BlpPrintShellPrompt();
 
 XTCDECL
 EFI_STATUS
-BlpReadConfigFile(IN CONST PWCHAR ConfigDirectory,
-                  IN CONST PWCHAR ConfigFile,
+BlpReadConfigFile(IN PCWSTR ConfigDirectory,
+                  IN PCWSTR ConfigFile,
                   OUT PCHAR *ConfigData);
 
 XTCDECL

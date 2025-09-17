@@ -1,7 +1,7 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtldr/arch/i686/memory.c
+ * FILE:            xtldr/arch/i686/memory.cc
  * DESCRIPTION:     XT Boot Loader i686 specific memory management
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  *                  Aiken Harris <harraiken91@gmail.com>

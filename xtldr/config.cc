@@ -1,7 +1,7 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtldr/config.c
+ * FILE:            xtldr/config.cc
  * DESCRIPTION:     XT Boot Loader Configuration
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  *                  Aiken Harris <harraiken91@gmail.com>
@@ -29,7 +29,7 @@
 XTCDECL
 EFI_STATUS
 BlGetBootOptionValue(IN PLIST_ENTRY Options,
-                     IN CONST PWCHAR OptionName,
+                     IN PCWSTR OptionName,
                      OUT PWCHAR *OptionValue)
 {
     PXTBL_CONFIG_ENTRY ConfigEntry;
@@ -94,7 +94,7 @@ BlGetBootOptionValue(IN PLIST_ENTRY Options,
  */
 XTCDECL
 BOOLEAN
-BlGetConfigBooleanValue(IN CONST PWCHAR ConfigName)
+BlGetConfigBooleanValue(IN PCWSTR ConfigName)
 {
     PWCHAR Value;
 
@@ -127,7 +127,7 @@ BlGetConfigBooleanValue(IN CONST PWCHAR ConfigName)
  */
 XTCDECL
 EFI_STATUS
-BlGetConfigValue(IN CONST PWCHAR ConfigName,
+BlGetConfigValue(IN PCWSTR ConfigName,
                  OUT PWCHAR *ConfigValue)
 {
     PXTBL_CONFIG_ENTRY ConfigEntry;
@@ -194,7 +194,7 @@ BlGetConfigValue(IN CONST PWCHAR ConfigName,
  */
 XTCDECL
 VOID
-BlGetEditableOptions(OUT CONST PWCHAR **OptionsArray,
+BlGetEditableOptions(OUT PCWSTR **OptionsArray,
                      OUT PULONG OptionsCount)
 {
     ULONG Count = 0;
@@ -231,8 +231,8 @@ BlGetEditableOptions(OUT CONST PWCHAR **OptionsArray,
 XTCDECL
 EFI_STATUS
 BlSetBootOptionValue(IN PLIST_ENTRY Options,
-                     IN CONST PWCHAR OptionName,
-                     IN CONST PWCHAR OptionValue)
+                     IN PCWSTR OptionName,
+                     IN PCWSTR OptionValue)
 {
     PXTBL_CONFIG_ENTRY ConfigEntry;
     PLIST_ENTRY ConfigList;
@@ -344,8 +344,8 @@ BlSetBootOptionValue(IN PLIST_ENTRY Options,
  */
 XTCDECL
 EFI_STATUS
-BlSetConfigValue(IN CONST PWCHAR ConfigName,
-                 IN CONST PWCHAR ConfigValue)
+BlSetConfigValue(IN PCWSTR ConfigName,
+                 IN PCWSTR ConfigValue)
 {
     PXTBL_CONFIG_ENTRY ConfigEntry;
     PLIST_ENTRY ConfigListEntry;
@@ -501,7 +501,7 @@ BlpParseCommandLine(VOID)
         if(LoadedImage && LoadedImage->LoadOptions)
         {
             /* Tokenize provided options */
-            Argument = RtlTokenizeWideString(LoadedImage->LoadOptions, L" ", &LastArg);
+            Argument = RtlTokenizeWideString((PWCHAR)LoadedImage->LoadOptions, L" ", &LastArg);
 
             /* Iterate over all arguments passed to boot loader */
             while(Argument != NULLPTR)
@@ -802,8 +802,8 @@ BlpParseConfigFile(IN CONST PCHAR RawConfig,
  */
 XTCDECL
 EFI_STATUS
-BlpReadConfigFile(IN CONST PWCHAR ConfigDirectory,
-                  IN CONST PWCHAR ConfigFile,
+BlpReadConfigFile(IN PCWSTR ConfigDirectory,
+                  IN PCWSTR ConfigFile,
                   OUT PCHAR *ConfigData)
 {
     PEFI_FILE_HANDLE DirHandle, FsHandle;
@@ -820,14 +820,14 @@ BlpReadConfigFile(IN CONST PWCHAR ConfigDirectory,
     }
 
     /* Open specified directory, containing the configuration file and close the FS immediately */
-    Status = FsHandle->Open(FsHandle, &DirHandle, ConfigDirectory, EFI_FILE_MODE_READ, 0);
+    Status = FsHandle->Open(FsHandle, &DirHandle, (PWCHAR)ConfigDirectory, EFI_FILE_MODE_READ, 0);
     FsHandle->Close(FsHandle);
 
     /* Check if directory opened successfully */
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to open directory */
-        BlCloseVolume(DiskHandle);
+        BlCloseVolume(&DiskHandle);
         return Status;
     }
 
@@ -836,7 +836,7 @@ BlpReadConfigFile(IN CONST PWCHAR ConfigDirectory,
     DirHandle->Close(DirHandle);
 
     /* Close EFI volume */
-    BlCloseVolume(DiskHandle);
+    BlCloseVolume(&DiskHandle);
 
     /* Return read status */
     return Status;
