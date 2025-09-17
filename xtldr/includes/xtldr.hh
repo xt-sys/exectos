@@ -1,18 +1,18 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtldr/includes/xtldr.h
+ * FILE:            xtldr/includes/xtldr.hh
  * DESCRIPTION:     Top level header for XTLDR
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#ifndef __XTLDR_XTLDR_H
-#define __XTLDR_XTLDR_H
+#ifndef __XTLDR_XTLDR_HH
+#define __XTLDR_XTLDR_HH
 
 #include <xtblapi.h>
 #include <xtver.h>
 
-#include <globals.h>
+#include <globals.hh>
 
 
 /* XTLDR routines forward references */
@@ -579,4 +579,4 @@ XTCDECL
 VOID
 BlpUpdateConfiguration(IN PLIST_ENTRY NewConfig);
 
-#endif /* __XTLDR_XTLDR_H */
+#endif /* __XTLDR_XTLDR_HH */

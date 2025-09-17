@@ -1,19 +1,20 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtldr/modules/acpi/acpi.c
+ * FILE:            xtldr/modules/acpi/acpi.cc
  * DESCRIPTION:     XTLDR ACPI Support Module
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <acpi.h>
+#include <acpi.hh>
 
 
-/* Dummy module information */
+/* ACPI module information */
 MODULE_AUTHOR(L"Rafal Kupiec <belliash@codingworkshop.eu.org>");
 MODULE_DESCRIPTION(L"ACPI support");
 MODULE_LICENSE(L"GPLv3");
 MODULE_VERSION(L"0.1");
+
 
 /**
  * Attempts to get XSDP. If it is not found or checksum mismatch, it will try to get RSDP instead.
@@ -27,12 +28,12 @@ MODULE_VERSION(L"0.1");
  */
 XTCDECL
 EFI_STATUS
-AcGetAcpiDescriptionPointer(OUT PVOID *AcpiTable)
+Acpi::GetAcpiDescriptionPointer(OUT PVOID *AcpiTable)
 {
     PVOID Rsdp;
 
     /* Try to get XSDP (ACPI 2.0) from system configuration tables */
-    if(AcGetXsdpTable(&Rsdp) == STATUS_EFI_SUCCESS)
+    if(GetXsdpTable(&Rsdp) == STATUS_EFI_SUCCESS)
     {
         /* XSDP found, return success */
         *AcpiTable = Rsdp;
@@ -40,7 +41,7 @@ AcGetAcpiDescriptionPointer(OUT PVOID *AcpiTable)
     }
 
     /* Try to get RSDP (ACPI 1.0) from system configuration tables */
-    if(AcGetRsdpTable(&Rsdp) == STATUS_EFI_SUCCESS)
+    if(GetRsdpTable(&Rsdp) == STATUS_EFI_SUCCESS)
     {
         /* RSDP found, return success */
         *AcpiTable = Rsdp;
@@ -69,9 +70,9 @@ AcGetAcpiDescriptionPointer(OUT PVOID *AcpiTable)
  */
 XTCDECL
 EFI_STATUS
-AcGetAcpiTable(IN CONST UINT Signature,
-               IN PVOID PreviousTable,
-               OUT PVOID *AcpiTable)
+Acpi::GetAcpiTable(IN CONST UINT Signature,
+                   IN PVOID PreviousTable,
+                   OUT PVOID *AcpiTable)
 {
     PACPI_DESCRIPTION_HEADER TableHeader;
     SIZE_T RsdtIndex, TableIndex;
@@ -85,7 +86,7 @@ AcGetAcpiTable(IN CONST UINT Signature,
     *AcpiTable = NULLPTR;
 
     /* Get Root System Description Table Pointer */
-    Status = AcGetAcpiDescriptionPointer((PVOID)&Rsdp);
+    Status = GetAcpiDescriptionPointer((PVOID*)&Rsdp);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* ACPI tables not found, return error */
@@ -159,7 +160,7 @@ AcGetAcpiTable(IN CONST UINT Signature,
     if(TableHeader->Signature != ACPI_FADT_SIGNATURE || TableHeader->Revision > 2)
     {
         /* Validate table checksum */
-        if(!AcpValidateAcpiTable(TableHeader, TableHeader->Length))
+        if(!ValidateAcpiTable(TableHeader, TableHeader->Length))
         {
             /* Checksum mismatch, return error */
             return STATUS_EFI_CRC_ERROR;
@@ -183,7 +184,7 @@ AcGetAcpiTable(IN CONST UINT Signature,
  */
 XTCDECL
 EFI_STATUS
-AcGetApicBase(OUT PVOID *ApicBase)
+Acpi::GetApicBase(OUT PVOID *ApicBase)
 {
     CPUID_REGISTERS CpuRegisters;
 
@@ -220,7 +221,7 @@ AcGetApicBase(OUT PVOID *ApicBase)
  */
 XTCDECL
 EFI_STATUS
-AcGetRsdpTable(OUT PVOID *AcpiTable)
+Acpi::GetRsdpTable(OUT PVOID *AcpiTable)
 {
     EFI_GUID AcpiGuid = EFI_CONFIG_TABLE_ACPI_TABLE_GUID;
     EFI_STATUS Status;
@@ -228,7 +229,7 @@ AcGetRsdpTable(OUT PVOID *AcpiTable)
 
     /* Get RSDP (ACPI 1.0) table from system configuration tables */
     Status = XtLdrProtocol->Util.GetConfigurationTable(&AcpiGuid, &RsdpTable);
-    if(Status != STATUS_EFI_SUCCESS || !AcpValidateAcpiTable(RsdpTable, 20))
+    if(Status != STATUS_EFI_SUCCESS || !ValidateAcpiTable(RsdpTable, 20))
     {
         /* RSDP not found or checksum mismatch */
         *AcpiTable = NULLPTR;
@@ -252,15 +253,15 @@ AcGetRsdpTable(OUT PVOID *AcpiTable)
  */
 XTCDECL
 EFI_STATUS
-AcGetSMBiosTable(OUT PVOID *SmBiosTable)
+Acpi::GetSMBiosTable(OUT PVOID *SmBiosTable)
 {
     EFI_GUID SmBiosGuid = EFI_CONFIG_TABLE_SMBIOS_TABLE_GUID;
     PSMBIOS_TABLE_HEADER SmBios;
     EFI_STATUS Status;
 
     /* Get SMBIOS table from system configuration tables */
-    Status = XtLdrProtocol->Util.GetConfigurationTable(&SmBiosGuid, (PVOID)&SmBios);
-    if(Status != STATUS_EFI_SUCCESS || !AcpValidateAcpiTable(SmBios, SmBios->Length))
+    Status = XtLdrProtocol->Util.GetConfigurationTable(&SmBiosGuid, (PVOID*)&SmBios);
+    if(Status != STATUS_EFI_SUCCESS || !ValidateAcpiTable(SmBios, SmBios->Length))
     {
         /* SMBIOS not found or checksum mismatch */
         *SmBiosTable = NULLPTR;
@@ -284,15 +285,15 @@ AcGetSMBiosTable(OUT PVOID *SmBiosTable)
  */
 XTCDECL
 EFI_STATUS
-AcGetSMBios3Table(OUT PVOID *SmBiosTable)
+Acpi::GetSMBios3Table(OUT PVOID *SmBiosTable)
 {
     EFI_GUID SmBios3Guid = EFI_CONFIG_TABLE_SMBIOS3_TABLE_GUID;
     PSMBIOS3_TABLE_HEADER SmBios;
     EFI_STATUS Status;
 
     /* Get SMBIOS3 table from system configuration tables */
-    Status = XtLdrProtocol->Util.GetConfigurationTable(&SmBios3Guid, (PVOID)&SmBios);
-    if(Status != STATUS_EFI_SUCCESS || !AcpValidateAcpiTable(SmBios, SmBios->Length))
+    Status = XtLdrProtocol->Util.GetConfigurationTable(&SmBios3Guid, (PVOID*)&SmBios);
+    if(Status != STATUS_EFI_SUCCESS || !ValidateAcpiTable(SmBios, SmBios->Length))
     {
         /* SMBIOS3 not found or checksum mismatch */
         *SmBiosTable = NULLPTR;
@@ -316,7 +317,7 @@ AcGetSMBios3Table(OUT PVOID *SmBiosTable)
  */
 XTCDECL
 EFI_STATUS
-AcGetXsdpTable(OUT PVOID *AcpiTable)
+Acpi::GetXsdpTable(OUT PVOID *AcpiTable)
 {
     EFI_GUID AcpiGuid = EFI_CONFIG_TABLE_ACPI20_TABLE_GUID;
     EFI_STATUS Status;
@@ -324,7 +325,7 @@ AcGetXsdpTable(OUT PVOID *AcpiTable)
 
     /* Get XSDP (ACPI 2.0) from system configuration tables */
     Status = XtLdrProtocol->Util.GetConfigurationTable(&AcpiGuid, &XsdpTable);
-    if(Status != STATUS_EFI_SUCCESS || !AcpValidateAcpiTable(XsdpTable, 36))
+    if(Status != STATUS_EFI_SUCCESS || !ValidateAcpiTable(XsdpTable, 36))
     {
         /* XSDP not found or checksum mismatch */
         *AcpiTable = NULLPTR;
@@ -334,6 +335,48 @@ AcGetXsdpTable(OUT PVOID *AcpiTable)
     /* XSDP found, return success */
     *AcpiTable = XsdpTable;
     return STATUS_EFI_SUCCESS;
+}
+
+/**
+ * Initializes ACPI module by opening XTLDR protocol and installing ACPI protocol.
+ *
+ * @param ImageHandle
+ *        Firmware-allocated handle that identifies the image.
+ *
+ * @param SystemTable
+ *        Provides the EFI system table.
+ *
+ * @return This routine returns status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+Acpi::InitializeModule(IN EFI_HANDLE ImageHandle,
+                       IN PEFI_SYSTEM_TABLE SystemTable)
+{
+    EFI_GUID Guid = XT_ACPI_PROTOCOL_GUID;
+    EFI_STATUS Status;
+
+    /* Open the XTLDR protocol */
+    Status = BlGetXtLdrProtocol(SystemTable, ImageHandle, &XtLdrProtocol);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to open the protocol, return error */
+        return STATUS_EFI_PROTOCOL_ERROR;
+    }
+
+    /* Set routines available via ACPI protocol */
+    AcpiProtocol.GetAcpiDescriptionPointer = GetAcpiDescriptionPointer;
+    AcpiProtocol.GetAcpiTable = GetAcpiTable;
+    AcpiProtocol.GetApicBase = GetApicBase;
+    AcpiProtocol.GetRsdpTable = GetRsdpTable;
+    AcpiProtocol.GetSMBiosTable = GetSMBiosTable;
+    AcpiProtocol.GetSMBios3Table = GetSMBios3Table;
+    AcpiProtocol.GetXsdpTable = GetXsdpTable;
+
+    /* Install ACPI protocol */
+    return XtLdrProtocol->Protocol.Install(&AcpiProtocol, &Guid);
 }
 
 /**
@@ -351,15 +394,15 @@ AcGetXsdpTable(OUT PVOID *AcpiTable)
  */
 XTCDECL
 BOOLEAN
-AcpValidateAcpiTable(IN PVOID Buffer,
-                     IN UINT_PTR Size)
+Acpi::ValidateAcpiTable(IN PVOID Buffer,
+                        IN UINT_PTR Size)
 {
     PUCHAR Pointer;
     UCHAR Sum;
 
     /* Initialize variables */
     Sum = 0;
-    Pointer = Buffer;
+    Pointer = (PUCHAR)Buffer;
 
     /* Calculate checksum of given table */
     while(Size != 0)
@@ -391,26 +434,6 @@ EFI_STATUS
 XtLdrModuleMain(IN EFI_HANDLE ImageHandle,
                 IN PEFI_SYSTEM_TABLE SystemTable)
 {
-    EFI_GUID Guid = XT_ACPI_PROTOCOL_GUID;
-    EFI_STATUS Status;
-
-    /* Open the XTLDR protocol */
-    Status = BlGetXtLdrProtocol(SystemTable, ImageHandle, &XtLdrProtocol);
-    if(Status != STATUS_EFI_SUCCESS)
-    {
-        /* Failed to open the protocol, return error */
-        return STATUS_EFI_PROTOCOL_ERROR;
-    }
-
-    /* Set routines available via ACPI protocol */
-    AcpAcpiProtocol.GetAcpiDescriptionPointer = AcGetAcpiDescriptionPointer;
-    AcpAcpiProtocol.GetAcpiTable = AcGetAcpiTable;
-    AcpAcpiProtocol.GetApicBase = AcGetApicBase;
-    AcpAcpiProtocol.GetRsdpTable = AcGetRsdpTable;
-    AcpAcpiProtocol.GetSMBiosTable = AcGetSMBiosTable;
-    AcpAcpiProtocol.GetSMBios3Table = AcGetSMBios3Table;
-    AcpAcpiProtocol.GetXsdpTable = AcGetXsdpTable;
-
-    /* Install ACPI protocol */
-    return XtLdrProtocol->Protocol.Install(&AcpAcpiProtocol, &Guid);
+    /* Initialize ACPI module */
+    return Acpi::InitializeModule(ImageHandle, SystemTable);
 }

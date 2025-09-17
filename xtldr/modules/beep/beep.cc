@@ -1,12 +1,12 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtldr/modules/beep/beep.c
+ * FILE:            xtldr/modules/beep/beep.cc
  * DESCRIPTION:     XTLDR Beep Module
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <beep.h>
+#include <beep.hh>
 
 
 /* Beep module information */
@@ -14,6 +14,7 @@ MODULE_AUTHOR(L"Rafal Kupiec <belliash@codingworkshop.eu.org>");
 MODULE_DESCRIPTION(L"Plays a GRUB compatible tune via PC speaker");
 MODULE_LICENSE(L"GPLv3");
 MODULE_VERSION(L"0.1");
+
 
 /**
  * Disables the PC speaker.
@@ -24,7 +25,7 @@ MODULE_VERSION(L"0.1");
  */
 XTCDECL
 VOID
-BpDisableToneBeep()
+Beep::DisableToneBeep()
 {
     UCHAR Status;
 
@@ -45,7 +46,7 @@ BpDisableToneBeep()
  */
 XTCDECL
 VOID
-BpEnableToneBeep(IN UINT Pitch)
+Beep::EnableToneBeep(IN UINT Pitch)
 {
     UINT Counter;
     UCHAR Status;
@@ -73,6 +74,43 @@ BpEnableToneBeep(IN UINT Pitch)
 }
 
 /**
+ * Initializes BEEP module by opening XTLDR protocol and playing the tune.
+ *
+ * @param ImageHandle
+ *        Firmware-allocated handle that identifies the image.
+ *
+ * @param SystemTable
+ *        Provides the EFI system table.
+ *
+ * @return This routine returns status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+Beep::InitializeModule(IN EFI_HANDLE ImageHandle,
+                       IN PEFI_SYSTEM_TABLE SystemTable)
+{
+    EFI_STATUS Status;
+    PWCHAR Tune;
+
+    /* Open the XTLDR protocol */
+    Status = BlGetXtLdrProtocol(SystemTable, ImageHandle, &XtLdrProtocol);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to open the protocol, return error */
+        return STATUS_EFI_PROTOCOL_ERROR;
+    }
+
+    /* Play the tune set in the configuration */
+    XtLdrProtocol->Config.GetValue(L"TUNE", &Tune);
+    PlayTune(Tune);
+
+    /* Return success */
+    return STATUS_EFI_SUCCESS;
+}
+
+/**
  * This routine plays a tune.
  *
  * @param Arguments
@@ -84,7 +122,7 @@ BpEnableToneBeep(IN UINT Pitch)
  */
 XTCDECL
 VOID
-BpPlayTune(IN PWCHAR Arguments)
+Beep::PlayTune(IN PWCHAR Arguments)
 {
     LONG Pitch, Duration, Tempo;
     PWCHAR Argument, LastArgument;
@@ -104,28 +142,28 @@ BpPlayTune(IN PWCHAR Arguments)
         if(Tempo < 0)
         {
             /* Set the tempo */
-            Tempo = BpWideStringToNumber(Argument);
+            Tempo = WideStringToNumber(Argument);
         }
         else if(Pitch < 0)
         {
             /* Set the pitch */
-            Pitch = BpWideStringToNumber(Argument);
+            Pitch = WideStringToNumber(Argument);
         }
         else
         {
             /* Set the duration */
-            Duration = BpWideStringToNumber(Argument);
+            Duration = WideStringToNumber(Argument);
 
             /* Check pitch value */
             if(Pitch > 0)
             {
                 /* Emit the beep tone */
-                BpEnableToneBeep(Pitch);
+                EnableToneBeep(Pitch);
             }
             else
             {
                 /* Stop emitting beep tone */
-                BpDisableToneBeep();
+                DisableToneBeep();
             }
 
             /* Wait for duration time */
@@ -141,7 +179,7 @@ BpPlayTune(IN PWCHAR Arguments)
     }
 
     /* Stop emitting beep tone */
-    BpDisableToneBeep();
+    DisableToneBeep();
 }
 
 /**
@@ -156,7 +194,7 @@ BpPlayTune(IN PWCHAR Arguments)
  */
 XTCDECL
 UINT
-BpWideStringToNumber(IN PWCHAR String)
+Beep::WideStringToNumber(IN PWCHAR String)
 {
     ULONG Number = 0;
 
@@ -195,21 +233,6 @@ EFI_STATUS
 XtLdrModuleMain(IN EFI_HANDLE ImageHandle,
                 IN PEFI_SYSTEM_TABLE SystemTable)
 {
-    EFI_STATUS Status;
-    PWCHAR Tune;
-
-    /* Open the XTLDR protocol */
-    Status = BlGetXtLdrProtocol(SystemTable, ImageHandle, &XtLdrProtocol);
-    if(Status != STATUS_EFI_SUCCESS)
-    {
-        /* Failed to open the protocol, return error */
-        return STATUS_EFI_PROTOCOL_ERROR;
-    }
-
-    /* Play the tune set in the configuration */
-    XtLdrProtocol->Config.GetValue(L"TUNE", &Tune);
-    BpPlayTune(Tune);
-
-    /* Return success */
-    return STATUS_EFI_SUCCESS;
+    /* Initialize BEEP module */
+    return Beep::InitializeModule(ImageHandle, SystemTable);
 }

@@ -1,12 +1,12 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtldr/modules/chainldr/chainldr.c
+ * FILE:            xtldr/modules/chainldr/chainldr.cc
  * DESCRIPTION:     XTLDR Chain Loader
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <chainldr.h>
+#include <chainldr.hh>
 
 
 /* ChainLoader module information */
@@ -14,6 +14,7 @@ MODULE_AUTHOR(L"Rafal Kupiec <belliash@codingworkshop.eu.org>");
 MODULE_DESCRIPTION(L"XTLDR Chain Loader");
 MODULE_LICENSE(L"GPLv3");
 MODULE_VERSION(L"0.1");
+
 
 /**
  * Chainloads another boot loader.
@@ -27,7 +28,7 @@ MODULE_VERSION(L"0.1");
  */
 XTCDECL
 EFI_STATUS
-ChBootSystem(IN PXTBL_BOOT_PARAMETERS Parameters)
+ChainLoader::BootSystem(IN PXTBL_BOOT_PARAMETERS Parameters)
 {
     EFI_GUID LIPGuid = EFI_LOADED_IMAGE_PROTOCOL_GUID;
     EFI_MEMMAP_DEVICE_PATH MemoryDevicePath[2];
@@ -66,14 +67,14 @@ ChBootSystem(IN PXTBL_BOOT_PARAMETERS Parameters)
         XtLdrProtocol->Debug.Print(L"ERROR: Unable to open system boot directory (Status Code: 0x%zX)\n", Status);
 
         /* Close volume and return error code */
-        XtLdrProtocol->Disk.CloseVolume(DiskHandle);
+        XtLdrProtocol->Disk.CloseVolume(&DiskHandle);
         return Status;
     }
 
     /* Read EFI image file from disk and close both directory and EFI volume */
     Status = XtLdrProtocol->Disk.ReadFile(BootDir, Parameters->KernelFile, &LoaderData, &LoaderSize);
     BootDir->Close(BootDir);
-    XtLdrProtocol->Disk.CloseVolume(DiskHandle);
+    XtLdrProtocol->Disk.CloseVolume(&DiskHandle);
 
     /* Setup device path for EFI image */
     MemoryDevicePath[0].Header.Length[0] = sizeof(EFI_MEMMAP_DEVICE_PATH);
@@ -124,6 +125,45 @@ ChBootSystem(IN PXTBL_BOOT_PARAMETERS Parameters)
 }
 
 /**
+ * Initializes CHAINLDR module by opening XTLDR protocol and installing CHAINLOADER protocol.
+ *
+ * @param ImageHandle
+ *        Firmware-allocated handle that identifies the image.
+ *
+ * @param SystemTable
+ *        Provides the EFI system table.
+ *
+ * @return This routine returns status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+ChainLoader::InitializeModule(IN EFI_HANDLE ImageHandle,
+                              IN PEFI_SYSTEM_TABLE SystemTable)
+{
+    EFI_GUID Guid = XT_CHAIN_BOOT_PROTOCOL_GUID;
+    EFI_STATUS Status;
+
+    /* Open the XTLDR protocol */
+    Status = BlGetXtLdrProtocol(SystemTable, ImageHandle, &XtLdrProtocol);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to open the protocol, return error */
+        return STATUS_EFI_PROTOCOL_ERROR;
+    }
+
+    /* Set routines available via ChainLoader boot protocol */
+    BootProtocol.BootSystem = BootSystem;
+
+    /* Register XTOS boot protocol */
+    XtLdrProtocol->Boot.RegisterProtocol(L"CHAINLOADER", &Guid);
+
+    /* Install XTOS protocol */
+    return XtLdrProtocol->Protocol.Install(&BootProtocol, &Guid);
+}
+
+/**
  * This routine is the entry point of the XT EFI boot loader module.
  *
  * @param ImageHandle
@@ -141,23 +181,6 @@ EFI_STATUS
 XtLdrModuleMain(IN EFI_HANDLE ImageHandle,
                 IN PEFI_SYSTEM_TABLE SystemTable)
 {
-    EFI_GUID Guid = XT_CHAIN_BOOT_PROTOCOL_GUID;
-    EFI_STATUS Status;
-
-    /* Open the XTLDR protocol */
-    Status = BlGetXtLdrProtocol(SystemTable, ImageHandle, &XtLdrProtocol);
-    if(Status != STATUS_EFI_SUCCESS)
-    {
-        /* Failed to open the protocol, return error */
-        return STATUS_EFI_PROTOCOL_ERROR;
-    }
-
-    /* Set routines available via ChainLoader boot protocol */
-    ChpBootProtocol.BootSystem = ChBootSystem;
-
-    /* Register XTOS boot protocol */
-    XtLdrProtocol->Boot.RegisterProtocol(L"CHAINLOADER", &Guid);
-
-    /* Install XTOS protocol */
-    return XtLdrProtocol->Protocol.Install(&ChpBootProtocol, &Guid);
+    /* Initialize CHAINLDR module */
+    return ChainLoader::InitializeModule(ImageHandle, SystemTable);
 }

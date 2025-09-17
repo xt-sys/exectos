@@ -8,8 +8,8 @@ include_directories(
 
 # Specify list of source code files
 list(APPEND XTLDR_FRAMEBUF_SOURCE
-    ${XTLDR_FRAMEBUF_SOURCE_DIR}/framebuf.c
-    ${XTLDR_FRAMEBUF_SOURCE_DIR}/globals.c)
+    ${XTLDR_FRAMEBUF_SOURCE_DIR}/framebuf.cc
+    ${XTLDR_FRAMEBUF_SOURCE_DIR}/data.cc)
 
 # Link bootloader executable
 add_executable(framebuf ${XTLDR_FRAMEBUF_SOURCE})

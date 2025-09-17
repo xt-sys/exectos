@@ -8,8 +8,8 @@ include_directories(
 
 # Specify list of source code files
 list(APPEND XTLDR_PECOFF_SOURCE
-    ${XTLDR_PECOFF_SOURCE_DIR}/globals.c
-    ${XTLDR_PECOFF_SOURCE_DIR}/pecoff.c)
+    ${XTLDR_PECOFF_SOURCE_DIR}/data.cc
+    ${XTLDR_PECOFF_SOURCE_DIR}/pecoff.cc)
 
 # Link module executable
 add_executable(pecoff ${XTLDR_PECOFF_SOURCE})

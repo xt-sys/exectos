@@ -8,8 +8,8 @@ include_directories(
 
 # Specify list of source code files
 list(APPEND XTLDR_ACPI_SOURCE
-    ${XTLDR_ACPI_SOURCE_DIR}/acpi.c
-    ${XTLDR_ACPI_SOURCE_DIR}/globals.c)
+    ${XTLDR_ACPI_SOURCE_DIR}/acpi.cc
+    ${XTLDR_ACPI_SOURCE_DIR}/data.cc)
 
 # Link module executable
 add_executable(acpi ${XTLDR_ACPI_SOURCE})

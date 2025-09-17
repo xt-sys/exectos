@@ -1,12 +1,12 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtldr/modules/pecoff/pecoff.c
+ * FILE:            xtldr/modules/pecoff/pecoff.cc
  * DESCRIPTION:     Basic PE/COFF executable file format support module
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <pecoff.h>
+#include <pecoff.hh>
 
 
 /* PE/COFF_O module information */
@@ -14,6 +14,7 @@ MODULE_AUTHOR(L"Rafal Kupiec <belliash@codingworkshop.eu.org>");
 MODULE_DESCRIPTION(L"Basic PE/COFF executable file format support");
 MODULE_LICENSE(L"GPLv3");
 MODULE_VERSION(L"0.1");
+
 
 /**
  * Returns the address of the entry point.
@@ -30,10 +31,13 @@ MODULE_VERSION(L"0.1");
  */
 XTCDECL
 EFI_STATUS
-PeGetEntryPoint(IN PVOID ImagePointer,
-                OUT PVOID *EntryPoint)
+PeCoff::GetEntryPoint(IN PVOID ImagePointer,
+                      OUT PVOID *EntryPoint)
 {
-    PPECOFF_IMAGE_CONTEXT Image = ImagePointer;
+    PPECOFF_IMAGE_CONTEXT Image;
+
+    /* Get PE/COFF image pointer*/
+    Image = (PPECOFF_IMAGE_CONTEXT)ImagePointer;
 
     /* Validate input data */
     if(!Image || !Image->PeHeader)
@@ -46,12 +50,12 @@ PeGetEntryPoint(IN PVOID ImagePointer,
     if(Image->PeHeader->OptionalHeader32.Magic == PECOFF_IMAGE_PE_OPTIONAL_HDR64_MAGIC)
     {
         /* Get entry point from 64-bit optional header */
-        *EntryPoint = (PUINT8)Image->VirtualAddress + Image->PeHeader->OptionalHeader64.AddressOfEntryPoint;
+        *EntryPoint = (PUCHAR)Image->VirtualAddress + Image->PeHeader->OptionalHeader64.AddressOfEntryPoint;
     }
     else
     {
         /* Get entry point from 32-bit optional header */
-        *EntryPoint = (PUINT8)Image->VirtualAddress + Image->PeHeader->OptionalHeader32.AddressOfEntryPoint;
+        *EntryPoint = (PUCHAR)Image->VirtualAddress + Image->PeHeader->OptionalHeader32.AddressOfEntryPoint;
     }
 
     /* Return success */
@@ -73,13 +77,13 @@ PeGetEntryPoint(IN PVOID ImagePointer,
  */
 XTCDECL
 EFI_STATUS
-PeGetFileSize(IN PVOID ImagePointer,
-              OUT PULONGLONG FileSize)
+PeCoff::GetFileSize(IN PVOID ImagePointer,
+                    OUT PULONGLONG FileSize)
 {
     PPECOFF_IMAGE_CONTEXT Image;
 
     /* Get PE/COFF image pointer*/
-    Image = ImagePointer;
+    Image = (PPECOFF_IMAGE_CONTEXT)ImagePointer;
 
     /* Validate input data */
     if(!Image || !Image->ImageSize)
@@ -108,13 +112,13 @@ PeGetFileSize(IN PVOID ImagePointer,
  */
 XTCDECL
 EFI_STATUS
-PeGetImageSize(IN PVOID ImagePointer,
-               OUT PUINT ImageSize)
+PeCoff::GetImageSize(IN PVOID ImagePointer,
+                     OUT PUINT ImageSize)
 {
     PPECOFF_IMAGE_CONTEXT Image;
 
     /* Get PE/COFF image pointer*/
-    Image = ImagePointer;
+    Image = (PPECOFF_IMAGE_CONTEXT)ImagePointer;
 
     /* Validate input data */
     if(!Image || !Image->ImageSize)
@@ -143,10 +147,13 @@ PeGetImageSize(IN PVOID ImagePointer,
  */
 XTCDECL
 EFI_STATUS
-PeGetMachineType(IN PVOID ImagePointer,
-                 OUT PUSHORT MachineType)
+PeCoff::GetMachineType(IN PVOID ImagePointer,
+                       OUT PUSHORT MachineType)
 {
-    PPECOFF_IMAGE_CONTEXT Image = ImagePointer;
+    PPECOFF_IMAGE_CONTEXT Image;
+
+    /* Get PE/COFF image pointer*/
+    Image = (PPECOFF_IMAGE_CONTEXT)ImagePointer;
 
     /* Validate input data */
     if(!Image || !Image->PeHeader)
@@ -178,9 +185,9 @@ PeGetMachineType(IN PVOID ImagePointer,
  */
 XTCDECL
 EFI_STATUS
-PeGetSection(IN PVOID ImagePointer,
-             IN PCHAR SectionName,
-             OUT PULONG *RawData)
+PeCoff::GetSection(IN PVOID ImagePointer,
+                   IN PCHAR SectionName,
+                   OUT PULONG *RawData)
 {
     PPECOFF_IMAGE_SECTION_HEADER SectionHeader;
     PPECOFF_IMAGE_CONTEXT Image;
@@ -188,7 +195,7 @@ PeGetSection(IN PVOID ImagePointer,
     USHORT SectionIndex;
 
     /* Get PE/COFF image pointer*/
-    Image = ImagePointer;
+    Image = (PPECOFF_IMAGE_CONTEXT)ImagePointer;
 
     /* Validate input data */
     if(!Image || !Image->PeHeader)
@@ -221,7 +228,7 @@ PeGetSection(IN PVOID ImagePointer,
         if(RtlCompareString((PCHAR)SectionHeader[SectionIndex].Name, SectionName, SectionNameLength) == 0)
         {
             /* Store section address and return */
-            *RawData = Image->Data + SectionHeader[SectionIndex].PointerToRawData;
+            *RawData = (PULONG)((PUCHAR)Image->Data + SectionHeader[SectionIndex].PointerToRawData);
             return STATUS_EFI_SUCCESS;
         }
     }
@@ -245,10 +252,13 @@ PeGetSection(IN PVOID ImagePointer,
  */
 XTCDECL
 EFI_STATUS
-PeGetSubSystem(IN PVOID ImagePointer,
-               OUT PUSHORT SubSystem)
+PeCoff::GetSubSystem(IN PVOID ImagePointer,
+                     OUT PUSHORT SubSystem)
 {
-    PPECOFF_IMAGE_CONTEXT Image = ImagePointer;
+    PPECOFF_IMAGE_CONTEXT Image;
+
+    /* Get PE/COFF image pointer*/
+    Image = (PPECOFF_IMAGE_CONTEXT)ImagePointer;
 
     /* Validate input data */
     if(!Image || !Image->PeHeader)
@@ -288,10 +298,13 @@ PeGetSubSystem(IN PVOID ImagePointer,
  */
 XTCDECL
 EFI_STATUS
-PeGetVersion(IN PVOID ImagePointer,
-             OUT PUSHORT Version)
+PeCoff::GetVersion(IN PVOID ImagePointer,
+                   OUT PUSHORT Version)
 {
-    PPECOFF_IMAGE_CONTEXT Image = ImagePointer;
+    PPECOFF_IMAGE_CONTEXT Image;
+
+    /* Get PE/COFF image pointer*/
+    Image = (PPECOFF_IMAGE_CONTEXT)ImagePointer;
 
     /* Validate input data */
     if(!Image || !Image->PeHeader)
@@ -317,6 +330,52 @@ PeGetVersion(IN PVOID ImagePointer,
 }
 
 /**
+ * Initializes PECOFF module by opening XTLDR protocol and installing PECOFF protocol.
+ *
+ * @param ImageHandle
+ *        Firmware-allocated handle that identifies the image.
+ *
+ * @param SystemTable
+ *        Provides the EFI system table.
+ *
+ * @return This routine returns status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+PeCoff::InitializeModule(IN EFI_HANDLE ImageHandle,
+                         IN PEFI_SYSTEM_TABLE SystemTable)
+{
+    EFI_GUID Guid = XT_PECOFF_IMAGE_PROTOCOL_GUID;
+    EFI_STATUS Status;
+
+    /* Open the XTLDR protocol */
+    Status = BlGetXtLdrProtocol(SystemTable, ImageHandle, &XtLdrProtocol);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to open loader protocol */
+        return STATUS_EFI_PROTOCOL_ERROR;
+    }
+
+    /* Set routines available via PE/COFF image protocol */
+    PeProtocol.GetEntryPoint = GetEntryPoint;
+    PeProtocol.GetFileSize = GetFileSize;
+    PeProtocol.GetImageSize = GetImageSize;
+    PeProtocol.GetMachineType = GetMachineType;
+    PeProtocol.GetSection = GetSection;
+    PeProtocol.GetSubSystem = GetSubSystem;
+    PeProtocol.GetVersion = GetVersion;
+    PeProtocol.LoadImage = LoadImage;
+    PeProtocol.RelocateImage = RelocateImage;
+    PeProtocol.UnloadImage = UnloadImage;
+    PeProtocol.VerifyImage = VerifyImage;
+
+    /* Register PE/COFF protocol */
+    return XtLdrProtocol->Protocol.Install(&PeProtocol, &Guid);
+}
+
+/**
  * Loads a PE/COFF image file.
  *
  * @param FileHandle
@@ -337,10 +396,10 @@ PeGetVersion(IN PVOID ImagePointer,
  */
 XTCDECL
 EFI_STATUS
-PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
-            IN LOADER_MEMORY_TYPE MemoryType,
-            IN PVOID VirtualAddress,
-            OUT PVOID *ImagePointer)
+PeCoff::LoadImage(IN PEFI_FILE_HANDLE FileHandle,
+                  IN LOADER_MEMORY_TYPE MemoryType,
+                  IN PVOID VirtualAddress,
+                  OUT PVOID *ImagePointer)
 {
     EFI_GUID FileInfoGuid = EFI_FILE_INFO_PROTOCOL_GUID;
     PPECOFF_IMAGE_SECTION_HEADER SectionHeader;
@@ -433,10 +492,10 @@ PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
 
     /* Extract DOS and PE headers */
     ImageData->DosHeader = (PPECOFF_IMAGE_DOS_HEADER)Data;
-    ImageData->PeHeader = (PPECOFF_IMAGE_PE_HEADER)((PUINT8)Data + ImageData->DosHeader->PeHeaderOffset);
+    ImageData->PeHeader = (PPECOFF_IMAGE_PE_HEADER)((PUCHAR)Data + ImageData->DosHeader->PeHeaderOffset);
 
     /* Validate headers */
-    Status = PeVerifyImage(ImageData);
+    Status = PeCoff::VerifyImage(ImageData);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Header validation failed, probably broken or invalid PE/COFF image */
@@ -482,7 +541,7 @@ PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
     }
 
     /* Store image data and virtual address */
-    ImageData->Data = (PUINT8)(UINT_PTR)Address;
+    ImageData->Data = (PUCHAR)(UINT_PTR)Address;
     ImageData->PhysicalAddress = (PVOID)(UINT_PTR)Address;
     if(VirtualAddress)
     {
@@ -534,7 +593,7 @@ PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
         if(SectionSize > 0 && SectionHeader[Index].PointerToRawData != 0)
         {
             /* Copy section */
-            XtLdrProtocol->Memory.CopyMemory((PUINT8)ImageData->Data + SectionHeader[Index].VirtualAddress,
+            XtLdrProtocol->Memory.CopyMemory((PUCHAR)ImageData->Data + SectionHeader[Index].VirtualAddress,
                                              Data + SectionHeader[Index].PointerToRawData, SectionSize);
         }
 
@@ -542,7 +601,7 @@ PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
         if(SectionSize < SectionHeader[Index].Misc.VirtualSize)
         {
             /* Fill remaining space with zeroes */
-            XtLdrProtocol->Memory.ZeroMemory((PUINT8)ImageData->Data + SectionHeader[Index].VirtualAddress + SectionSize,
+            XtLdrProtocol->Memory.ZeroMemory((PUCHAR)ImageData->Data + SectionHeader[Index].VirtualAddress + SectionSize,
                                              SectionHeader[Index].Misc.VirtualSize - SectionSize);
         }
     }
@@ -551,7 +610,7 @@ PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
     XtLdrProtocol->Memory.FreePages((EFI_PHYSICAL_ADDRESS)(UINT_PTR)Data, Pages);
 
     /* Perform relocation fixups */
-    Status = PepRelocateLoadedImage(ImageData);
+    Status = PeCoff::RelocateLoadedImage(ImageData);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to relocate image */
@@ -581,13 +640,15 @@ PeLoadImage(IN PEFI_FILE_HANDLE FileHandle,
  */
 XTCDECL
 EFI_STATUS
-PeRelocateImage(IN PVOID ImagePointer,
-                IN EFI_VIRTUAL_ADDRESS Address)
+PeCoff::RelocateImage(IN PVOID ImagePointer,
+                      IN EFI_VIRTUAL_ADDRESS Address)
 {
-    PPECOFF_IMAGE_CONTEXT Image = ImagePointer;
-
-    UINT64 ImageBase, OldVirtualAddress;
+    PPECOFF_IMAGE_CONTEXT Image;
+    ULONGLONG ImageBase, OldVirtualAddress;
     EFI_STATUS Status;
+
+    /* Get PE/COFF image pointer*/
+    Image = (PPECOFF_IMAGE_CONTEXT)ImagePointer;
 
     /* Store original virtual address */
     OldVirtualAddress = (UINT_PTR)Image->VirtualAddress;
@@ -606,7 +667,7 @@ PeRelocateImage(IN PVOID ImagePointer,
 
     /* Overwrite virtual address and relocate image once again */
     Image->VirtualAddress = (PVOID)(Address - OldVirtualAddress + ImageBase);
-    Status = PepRelocateLoadedImage(Image);
+    Status = PeCoff::RelocateLoadedImage(Image);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Relocation failed */
@@ -615,98 +676,6 @@ PeRelocateImage(IN PVOID ImagePointer,
 
     /* Store new image virtual address */
     Image->VirtualAddress = (PVOID)Address;
-
-    /* Return success */
-    return STATUS_EFI_SUCCESS;
-}
-
-/**
- * Unloads a PE/COFF image file and frees allocated memory.
- *
- * @param ImagePointer
- *        Supplies a pointer to the PE/COFF context structure representing the loaded image.
- *
- * @return This routine returns a status code.
- *
- * @since XT 1.0
- */
-XTCDECL
-EFI_STATUS
-PeUnloadImage(IN PVOID ImagePointer)
-{
-    PPECOFF_IMAGE_CONTEXT Image;
-    EFI_STATUS Status;
-
-    /* Get PE/COFF image pointer*/
-    Image = ImagePointer;
-
-    /* Validate input data */
-    if(!Image || !Image->Data)
-    {
-        /* Invalid parameter passed */
-        return STATUS_EFI_INVALID_PARAMETER;
-    }
-
-    /* Free memory allocated for the image */
-    Status = XtLdrProtocol->Memory.FreePages(Image->ImagePages, (EFI_PHYSICAL_ADDRESS)(UINT_PTR)Image->Data);
-    Status |= XtLdrProtocol->Memory.FreePool(Image);
-
-    /* Return status */
-    return Status;
-}
-
-/**
- * Validates a PE/COFF image headers.
- *
- * @param ImagePointer
- *        Supplies a pointer to the PE/COFF context structure representing the loaded image.
- *
- * @return This routine returns a status code.
- *
- * @since XT 1.0
- */
-XTCDECL
-EFI_STATUS
-PeVerifyImage(IN PVOID ImagePointer)
-{
-    PPECOFF_IMAGE_CONTEXT Image = ImagePointer;
-
-    /* Validate input data */
-    if(!Image || !Image->PeHeader)
-    {
-        /* Invalid parameter passed */
-        return STATUS_EFI_INVALID_PARAMETER;
-    }
-
-    /* Validate file size */
-    if(Image->FileSize < sizeof(PECOFF_IMAGE_DOS_HEADER))
-    {
-        /* PE/COFF image shorter than DOS header, return error*/
-        return STATUS_EFI_END_OF_FILE;
-    }
-
-    /* Validate DOS header */
-    if(Image->DosHeader->Magic != PECOFF_IMAGE_DOS_SIGNATURE)
-    {
-        /* Invalid DOS signature, return error */
-        return STATUS_EFI_INCOMPATIBLE_VERSION;
-    }
-
-    /* Validate PE header */
-    if(Image->PeHeader->Signature != PECOFF_IMAGE_NT_SIGNATURE &&
-       Image->PeHeader->Signature != PECOFF_IMAGE_XT_SIGNATURE)
-    {
-        /* Invalid PE signature, return error */
-        return STATUS_EFI_INCOMPATIBLE_VERSION;
-    }
-
-    /* Validate optional header */
-    if(Image->PeHeader->OptionalHeader32.Magic != PECOFF_IMAGE_PE_OPTIONAL_HDR32_MAGIC &&
-       Image->PeHeader->OptionalHeader64.Magic != PECOFF_IMAGE_PE_OPTIONAL_HDR64_MAGIC)
-    {
-        /* Invalid optional header signature, return error */
-        return STATUS_EFI_INCOMPATIBLE_VERSION;
-    }
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
@@ -724,15 +693,15 @@ PeVerifyImage(IN PVOID ImagePointer)
  */
 XTCDECL
 EFI_STATUS
-PepRelocateLoadedImage(IN PPECOFF_IMAGE_CONTEXT Image)
+PeCoff::RelocateLoadedImage(IN PPECOFF_IMAGE_CONTEXT Image)
 {
     PPECOFF_IMAGE_BASE_RELOCATION RelocationDir, RelocationEnd;
     PPECOFF_IMAGE_DATA_DIRECTORY DataDirectory;
     USHORT Offset, Type, Count;
     PUSHORT TypeOffset;
-    UINT64 ImageBase;
-    PUINT32 Address;
-    PUINT64 LongPtr;
+    ULONGLONG ImageBase;
+    PUINT Address;
+    PULONGLONG LongPtr;
     PUINT ShortPtr;
 
     /* Make sure image is not stripped */
@@ -793,7 +762,7 @@ PepRelocateLoadedImage(IN PPECOFF_IMAGE_CONTEXT Image)
             Type = *TypeOffset >> 12;
 
             /* Check if end of the loaded address reached */
-            if((PVOID)(PUSHORT)(Address + Offset) >= Image->Data + Image->ImageSize)
+            if((PVOID)(PUSHORT)(Address + Offset) >= (PUCHAR)Image->Data + Image->ImageSize)
             {
                 /* Do not relocate after the end of loaded image */
                 break;
@@ -816,7 +785,7 @@ PepRelocateLoadedImage(IN PPECOFF_IMAGE_CONTEXT Image)
                         break;
                     case PECOFF_IMAGE_REL_BASED_HIGHLOW:
                         /* 32-bit relocation of hight and low half of address */
-                        ShortPtr = (PUINT32)((PUCHAR)Address + Offset);
+                        ShortPtr = (PUINT)((PUCHAR)Address + Offset);
                         *ShortPtr = *ShortPtr - ImageBase + (UINT_PTR)Image->VirtualAddress;
                         break;
                     default:
@@ -833,6 +802,101 @@ PepRelocateLoadedImage(IN PPECOFF_IMAGE_CONTEXT Image)
     }
 
     /* Return SUCCESS */
+    return STATUS_EFI_SUCCESS;
+}
+
+/**
+ * Unloads a PE/COFF image file and frees allocated memory.
+ *
+ * @param ImagePointer
+ *        Supplies a pointer to the PE/COFF context structure representing the loaded image.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+PeCoff::UnloadImage(IN PVOID ImagePointer)
+{
+    PPECOFF_IMAGE_CONTEXT Image;
+    EFI_STATUS Status;
+
+    /* Get PE/COFF image pointer*/
+    Image = (PPECOFF_IMAGE_CONTEXT)ImagePointer;
+
+    /* Validate input data */
+    if(!Image || !Image->Data)
+    {
+        /* Invalid parameter passed */
+        return STATUS_EFI_INVALID_PARAMETER;
+    }
+
+    /* Free memory allocated for the image */
+    Status = XtLdrProtocol->Memory.FreePages(Image->ImagePages, (EFI_PHYSICAL_ADDRESS)(UINT_PTR)Image->Data);
+    Status |= XtLdrProtocol->Memory.FreePool(Image);
+
+    /* Return status */
+    return Status;
+}
+
+/**
+ * Validates a PE/COFF image headers.
+ *
+ * @param ImagePointer
+ *        Supplies a pointer to the PE/COFF context structure representing the loaded image.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+PeCoff::VerifyImage(IN PVOID ImagePointer)
+{
+    PPECOFF_IMAGE_CONTEXT Image;
+
+    /* Get PE/COFF image pointer*/
+    Image = (PPECOFF_IMAGE_CONTEXT)ImagePointer;
+
+    /* Validate input data */
+    if(!Image || !Image->PeHeader)
+    {
+        /* Invalid parameter passed */
+        return STATUS_EFI_INVALID_PARAMETER;
+    }
+
+    /* Validate file size */
+    if(Image->FileSize < sizeof(PECOFF_IMAGE_DOS_HEADER))
+    {
+        /* PE/COFF image shorter than DOS header, return error*/
+        return STATUS_EFI_END_OF_FILE;
+    }
+
+    /* Validate DOS header */
+    if(Image->DosHeader->Magic != PECOFF_IMAGE_DOS_SIGNATURE)
+    {
+        /* Invalid DOS signature, return error */
+        return STATUS_EFI_INCOMPATIBLE_VERSION;
+    }
+
+    /* Validate PE header */
+    if(Image->PeHeader->Signature != PECOFF_IMAGE_NT_SIGNATURE &&
+       Image->PeHeader->Signature != PECOFF_IMAGE_XT_SIGNATURE)
+    {
+        /* Invalid PE signature, return error */
+        return STATUS_EFI_INCOMPATIBLE_VERSION;
+    }
+
+    /* Validate optional header */
+    if(Image->PeHeader->OptionalHeader32.Magic != PECOFF_IMAGE_PE_OPTIONAL_HDR32_MAGIC &&
+       Image->PeHeader->OptionalHeader64.Magic != PECOFF_IMAGE_PE_OPTIONAL_HDR64_MAGIC)
+    {
+        /* Invalid optional header signature, return error */
+        return STATUS_EFI_INCOMPATIBLE_VERSION;
+    }
+
+    /* Return success */
     return STATUS_EFI_SUCCESS;
 }
 
@@ -854,30 +918,6 @@ EFI_STATUS
 XtLdrModuleMain(IN EFI_HANDLE ImageHandle,
                 IN PEFI_SYSTEM_TABLE SystemTable)
 {
-    EFI_GUID Guid = XT_PECOFF_IMAGE_PROTOCOL_GUID;
-    EFI_STATUS Status;
-
-    /* Open the XTLDR protocol */
-    Status = BlGetXtLdrProtocol(SystemTable, ImageHandle, &XtLdrProtocol);
-    if(Status != STATUS_EFI_SUCCESS)
-    {
-        /* Failed to open loader protocol */
-        return STATUS_EFI_PROTOCOL_ERROR;
-    }
-
-    /* Set routines available via PE/COFF image protocol */
-    PeCoffProtocol.GetEntryPoint = PeGetEntryPoint;
-    PeCoffProtocol.GetFileSize = PeGetFileSize;
-    PeCoffProtocol.GetImageSize = PeGetImageSize;
-    PeCoffProtocol.GetMachineType = PeGetMachineType;
-    PeCoffProtocol.GetSection = PeGetSection;
-    PeCoffProtocol.GetSubSystem = PeGetSubSystem;
-    PeCoffProtocol.GetVersion = PeGetVersion;
-    PeCoffProtocol.LoadImage = PeLoadImage;
-    PeCoffProtocol.RelocateImage = PeRelocateImage;
-    PeCoffProtocol.UnloadImage = PeUnloadImage;
-    PeCoffProtocol.VerifyImage = PeVerifyImage;
-
-    /* Register PE/COFF protocol */
-    return XtLdrProtocol->Protocol.Install(&PeCoffProtocol, &Guid);
+    /* Initialize PECOFF module */
+    return PeCoff::InitializeModule(ImageHandle, SystemTable);
 }

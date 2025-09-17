@@ -6,7 +6,7 @@
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <xtldr.h>
+#include <xtldr.hh>
 
 
 /* XT Boot Loader registered boot protocol list */

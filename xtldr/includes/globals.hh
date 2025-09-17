@@ -1,13 +1,13 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtldr/includes/globals.h
+ * FILE:            xtldr/includes/globals.hh
  * DESCRIPTION:     XTLDR global variables
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#ifndef __XTLDR_GLOBALS_H
-#define __XTLDR_GLOBALS_H
+#ifndef __XTLDR_GLOBALS_HH
+#define __XTLDR_GLOBALS_HH
 
 #include <xtblapi.h>
 
@@ -48,4 +48,4 @@ EXTERN EFI_HANDLE EfiImageHandle;
 /* EFI System Table */
 EXTERN PEFI_SYSTEM_TABLE EfiSystemTable;
 
-#endif /* __XTLDR_GLOBALS_H */
+#endif /* __XTLDR_GLOBALS_HH */
