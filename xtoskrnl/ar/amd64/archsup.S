@@ -6,7 +6,7 @@
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
-#include <amd64/asmsup.h>
+#include <ar/amd64/asmsup.h>
 
 .altmacro
 .text

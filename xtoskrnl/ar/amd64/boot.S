@@ -6,7 +6,7 @@
  * DEVELOPERS:      Aiken Harris <harraiken91@gmail.com>
  */
 
-#include <amd64/asmsup.h>
+#include <ar/amd64/asmsup.h>
 
 .altmacro
 .text
