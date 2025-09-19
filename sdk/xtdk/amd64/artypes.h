@@ -419,4 +419,11 @@ typedef struct _CPUID_SIGNATURE
     ULONG Unused2:4;
 } CPU_SIGNATURE, *PCPU_SIGNATURE;
 
+/* Trampoline types */
+typedef enum _TRAMPOLINE_TYPE
+{
+    TrampolineApStartup,
+    TrampolineEnableXpa
+} TRAMPOLINE_TYPE, *PTRAMPOLINE_TYPE;
+
 #endif /* __XTDK_AMD64_ARTYPES_H */

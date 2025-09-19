@@ -11,6 +11,7 @@
 
 #include <xtos.hh>
 
+#include XTOS_ARCH_HEADER(ar, assembly.hh)
 #include XTOS_ARCH_HEADER(ar, cpufunc.hh)
 #include XTOS_ARCH_HEADER(ar, procsup.hh)
 #include XTOS_ARCH_HEADER(ar, traps.hh)

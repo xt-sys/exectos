@@ -131,3 +131,17 @@ XpaTemporaryGdtDesc: .quad 0x0000000000000000, 0x00CF9A000000FFFF, 0x00AF9A00000
 
 .global ArEnableExtendedPhysicalAddressingEnd
 ArEnableExtendedPhysicalAddressingEnd:
+
+
+/**
+ * Starts an application processor (AP). This is just a stub.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+.global ArStartApplicationProcessor
+ArStartApplicationProcessor:
+
+.global ArStartApplicationProcessorEnd
+ArStartApplicationProcessorEnd:

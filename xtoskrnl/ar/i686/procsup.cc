@@ -23,6 +23,26 @@ AR::ProcSup::GetBootStack(VOID)
     return (PVOID)BootStack;
 }
 
+XTAPI
+VOID
+AR::ProcSup::GetTrampolineInformation(IN TRAMPOLINE_TYPE TrampolineType,
+                                      OUT PVOID *TrampolineCode,
+                                      OUT PULONG_PTR TrampolineSize)
+{
+    switch(TrampolineType)
+    {
+        case TrampolineApStartup:
+            *TrampolineCode = (PVOID)ArStartApplicationProcessor;
+            *TrampolineSize = (ULONG_PTR)ArStartApplicationProcessorEnd -
+                              (ULONG_PTR)ArStartApplicationProcessor;
+            break;
+        default:
+            *TrampolineCode = NULLPTR;
+            *TrampolineSize = 0;
+            break;
+    }
+}
+
 /**
  * Identifies processor type (vendor, model, stepping) as well as looks for available CPU features and stores them
  * in Processor Control Block (PRCB).

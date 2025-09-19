@@ -12,3 +12,15 @@
 .text
 
 
+/**
+ * Starts an application processor (AP). This is just a stub.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+.global ArStartApplicationProcessor
+ArStartApplicationProcessor:
+
+.global ArStartApplicationProcessorEnd
+ArStartApplicationProcessorEnd:
