@@ -34,7 +34,7 @@ HL::Pic::CheckX2ApicSupport(VOID)
     CpuRegisters.Edx = 0;
 
     /* Get CPUID */
-    ArCpuId(&CpuRegisters);
+    AR::CpuFunc::CpuId(&CpuRegisters);
 
     /* Check x2APIC status from the CPUID results */
     if(!(CpuRegisters.Ecx & CPUID_FEATURES_ECX_X2APIC))

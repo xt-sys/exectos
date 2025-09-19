@@ -20,7 +20,7 @@ XTFASTCALL
 KRUNLEVEL
 HL::RunLevel::GetRunLevel(VOID)
 {
-    return (KRUNLEVEL)ArReadControlRegister(8);
+    return (KRUNLEVEL)AR::CpuFunc::ReadControlRegister(8);
 }
 
 /**
@@ -37,7 +37,7 @@ XTFASTCALL
 VOID
 HL::RunLevel::SetRunLevel(IN KRUNLEVEL RunLevel)
 {
-    ArWriteControlRegister(8, RunLevel);
+    AR::CpuFunc::WriteControlRegister(8, RunLevel);
 }
 
 /**
