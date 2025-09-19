@@ -19,8 +19,8 @@
  *
  * @since XT 1.0
  */
-.global ArStartApplicationProcessor
-ArStartApplicationProcessor:
+.global _ArStartApplicationProcessor
+_ArStartApplicationProcessor:
 
-.global ArStartApplicationProcessorEnd
-ArStartApplicationProcessorEnd:
+.global _ArStartApplicationProcessorEnd
+_ArStartApplicationProcessorEnd:

@@ -2,7 +2,7 @@
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
  * FILE:            xtoskrnl/includes/ar/i686/assembly.hh
- * DESCRIPTION:     Architecture-specific assembler routines forward references
+ * DESCRIPTION:     Architecture-specific assembler prototypes
  * DEVELOPERS:      Aiken Harris <harraiken91@gmail.com>
  */
 
