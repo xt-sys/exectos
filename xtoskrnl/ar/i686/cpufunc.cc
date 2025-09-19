@@ -79,7 +79,7 @@ VOID
 AR::CpuFunc::FlushTlb(VOID)
 {
     /* Flush the TLB by resetting the CR3 */
-    ArWriteControlRegister(3, ArReadControlRegister(3));
+    WriteControlRegister(3, ReadControlRegister(3));
 }
 
 /**
