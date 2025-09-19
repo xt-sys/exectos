@@ -14,20 +14,6 @@
 #include <xttypes.h>
 
 
-/* Routines used by XTLDR */
-XTCLINK
-XTCDECL
-XTSTATUS
-HlWriteComPort(IN PCPPORT Port,
-               IN UCHAR Byte);
-
-XTCLINK
-XTCDECL
-XTSTATUS
-HlInitializeComPort(IN OUT PCPPORT Port,
-                    IN PUCHAR PortAddress,
-                    IN ULONG BaudRate);
-
 /* Hardware layer routines forward references */
 XTCLINK
 XTAPI

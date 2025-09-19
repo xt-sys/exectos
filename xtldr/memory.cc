@@ -248,7 +248,7 @@ BlInitializePageMap(OUT PXTBL_PAGE_MAPPING PageMap,
                     IN PAGE_SIZE PageSize)
 {
     /* Initialize memory mappings */
-    RtlInitializeListHead(&PageMap->MemoryMap);
+    RTL::LinkedList::InitializeListHead(&PageMap->MemoryMap);
     PageMap->MapSize = 0;
 
     /* Set page map size/level and memory map address */
@@ -298,7 +298,7 @@ BlMapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
 
     /* Allocate and zero-fill buffer for EFI memory map */
     BlAllocateMemoryPool(sizeof(EFI_MEMORY_MAP), (PVOID*)&MemoryMap);
-    RtlZeroMemory(MemoryMap, sizeof(EFI_MEMORY_MAP));
+    RTL::Memory::ZeroMemory(MemoryMap, sizeof(EFI_MEMORY_MAP));
 
     /* Get EFI memory map */
     Status = BlGetMemoryMap(MemoryMap);
@@ -503,7 +503,7 @@ BlMapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
                 Mapping3->VirtualAddress = NULLPTR;
                 Mapping3->NumberOfPages = NumberOfMappedPages;
                 Mapping3->MemoryType = Mapping2->MemoryType;
-                RtlInsertHeadList(&Mapping2->ListEntry, &Mapping3->ListEntry);
+                RTL::LinkedList::InsertHeadList(&Mapping2->ListEntry, &Mapping3->ListEntry);
             }
 
             /* Calculate number of pages and the end of the physical address */
@@ -539,7 +539,7 @@ BlMapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
                 Mapping3->VirtualAddress = NULLPTR;
                 Mapping3->NumberOfPages = NumberOfMappedPages;
                 Mapping3->MemoryType = Mapping2->MemoryType;
-                RtlInsertHeadList(&Mapping2->ListEntry, &Mapping3->ListEntry);
+                RTL::LinkedList::InsertHeadList(&Mapping2->ListEntry, &Mapping3->ListEntry);
             }
 
             /* Calculate number of pages and the end of the physical address */
@@ -563,7 +563,7 @@ BlMapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
             MappingListEntry = ListEntry->Flink;
 
             /* Remove mapping from the list and free up it's memory */
-            RtlRemoveEntryList(&Mapping2->ListEntry);
+            RTL::LinkedList::RemoveEntryList(&Mapping2->ListEntry);
             Status = BlFreeMemoryPool(Mapping2);
             ListEntry = MappingListEntry;
 
@@ -575,7 +575,7 @@ BlMapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
         if(Mapping2->PhysicalAddress > Mapping1->PhysicalAddress)
         {
             /* Insert new mapping in front */
-            RtlInsertHeadList(Mapping2->ListEntry.Blink, &Mapping1->ListEntry);
+            RTL::LinkedList::InsertHeadList(Mapping2->ListEntry.Blink, &Mapping1->ListEntry);
             return STATUS_EFI_SUCCESS;
         }
 
@@ -584,7 +584,7 @@ BlMapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
     }
 
     /* Insert new mapping to the list and increase page map size */
-    RtlInsertTailList(&PageMap->MemoryMap, &Mapping1->ListEntry);
+    RTL::LinkedList::InsertTailList(&PageMap->MemoryMap, &Mapping1->ListEntry);
     PageMap->MapSize++;
 
     /* Return success */

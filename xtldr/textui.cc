@@ -781,7 +781,7 @@ BlDisplayInputDialog(IN PCWSTR Caption,
     Key.UnicodeChar = 0;
 
     /* Determine input field length */
-    InputFieldLength = RtlWideStringLength(*InputFieldText, 0);
+    InputFieldLength = RTL::WideString::WideStringLength(*InputFieldText, 0);
 
     /* Allocate a buffer for storing the input field text */
     Status = BlAllocateMemoryPool(2048 * sizeof(WCHAR), (PVOID *)&InputFieldBuffer);
@@ -794,7 +794,7 @@ BlDisplayInputDialog(IN PCWSTR Caption,
     }
 
     /* Copy input text into edit buffer */
-    RtlCopyMemory(InputFieldBuffer, *InputFieldText, InputFieldLength * sizeof(WCHAR));
+    RTL::Memory::CopyMemory(InputFieldBuffer, *InputFieldText, InputFieldLength * sizeof(WCHAR));
     InputFieldBuffer[InputFieldLength] = L'\0';
 
     /* Start at first character */
@@ -861,7 +861,7 @@ BlDisplayInputDialog(IN PCWSTR Caption,
                 if(InputFieldLength > 0 && TextPosition < InputFieldLength)
                 {
                     /* Delete character */
-                    RtlMoveMemory(InputFieldBuffer + TextPosition, InputFieldBuffer + TextPosition + 1,
+                    RTL::Memory::MoveMemory(InputFieldBuffer + TextPosition, InputFieldBuffer + TextPosition + 1,
                                   (InputFieldLength - TextPosition) * sizeof(WCHAR));
 
                     /* Decrement length and NULL terminate string */
@@ -879,7 +879,7 @@ BlDisplayInputDialog(IN PCWSTR Caption,
                 if(InputFieldLength > 0 && TextPosition > 0 && TextPosition <= InputFieldLength)
                 {
                     /* Move memory to overwrite the character to the left of the cursor */
-                    RtlMoveMemory(InputFieldBuffer + TextPosition - 1, InputFieldBuffer + TextPosition,
+                    RTL::Memory::MoveMemory(InputFieldBuffer + TextPosition - 1, InputFieldBuffer + TextPosition,
                                   (InputFieldLength - TextPosition + 1) * sizeof(WCHAR));
 
                     /* Decrement length, position and NULL terminate string */
@@ -904,7 +904,7 @@ BlDisplayInputDialog(IN PCWSTR Caption,
                 if(InputFieldLength < 2047)
                 {
                     /* Insert character at current position */
-                    RtlMoveMemory(InputFieldBuffer + TextPosition + 1, InputFieldBuffer + TextPosition,
+                    RTL::Memory::MoveMemory(InputFieldBuffer + TextPosition + 1, InputFieldBuffer + TextPosition,
                                   (InputFieldLength - TextPosition) * sizeof(WCHAR));
                     InputFieldBuffer[TextPosition] = Key.UnicodeChar;
 
@@ -1080,7 +1080,7 @@ BlpDetermineDialogBoxSize(IN OUT PXTBL_DIALOG_HANDLE Handle,
     }
 
     /* Get message length and count dialog window dimensions */
-    MessageLength = RtlWideStringLength(Message, 0);
+    MessageLength = RTL::WideString::WideStringLength(Message, 0);
     for(Index = 0; Index < MessageLength; Index++)
     {
         /* Check if this is multiline message */
@@ -1308,7 +1308,7 @@ BlpDrawDialogBox(IN OUT PXTBL_DIALOG_HANDLE Handle,
             if(Caption != NULLPTR)
             {
                 /* Get caption length */
-                CaptionLength = RtlWideStringLength(Caption, 0);
+                CaptionLength = RTL::WideString::WideStringLength(Caption, 0);
 
                 /* Start caption area with vertical line */
                 BoxLine[1] = EFI_TEXT_BOX_VERTICAL_LEFT;
@@ -1500,7 +1500,7 @@ BlpDrawDialogInputField(IN PXTBL_DIALOG_HANDLE Handle,
     BlConsoleWrite(InputField);
 
     /* Check input field text length */
-    Length = RtlWideStringLength(InputFieldText, 0);
+    Length = RTL::WideString::WideStringLength(InputFieldText, 0);
     if(Length > (Handle->Width - 9))
     {
         /* Text longer than input field width, display only part of it */
@@ -1553,7 +1553,7 @@ BlpDrawDialogMessage(IN PXTBL_DIALOG_HANDLE Handle,
     ULONG Line;
 
     /* Allocate memory for dialog box message */
-    Length = RtlWideStringLength(Message, 0);
+    Length = RTL::WideString::WideStringLength(Message, 0);
     Status = BlAllocateMemoryPool(Length * sizeof(WCHAR), (PVOID *)&Msg);
     if(Status != STATUS_EFI_SUCCESS)
     {
@@ -1563,18 +1563,18 @@ BlpDrawDialogMessage(IN PXTBL_DIALOG_HANDLE Handle,
     }
 
     /* Make a copy of dialog box message */
-    RtlCopyMemory(Msg, Message, Length * sizeof(WCHAR));
+    RTL::Memory::CopyMemory(Msg, Message, Length * sizeof(WCHAR));
     Msg[Length] = 0;
 
     /* Tokenize dialog box message */
-    MsgLine = RtlTokenizeWideString(Msg, L"\n", &LastMsgLine);
+    MsgLine = RTL::WideString::TokenizeWideString(Msg, L"\n", &LastMsgLine);
 
     /* Iterate through message lines */
     Line = 0;
     while(MsgLine)
     {
         /* Determine line length */
-        LineLength = RtlWideStringLength(MsgLine, 0);
+        LineLength = RTL::WideString::WideStringLength(MsgLine, 0);
 
         /* Write line in the dialog box */
         BlSetCursorPosition(Handle->PosX + 2, Handle->PosY + 2 + Line);
@@ -1592,7 +1592,7 @@ BlpDrawDialogMessage(IN PXTBL_DIALOG_HANDLE Handle,
         }
 
         /* Get next line */
-        MsgLine = RtlTokenizeWideString(NULLPTR, L"\n", &LastMsgLine);
+        MsgLine = RTL::WideString::TokenizeWideString(NULLPTR, L"\n", &LastMsgLine);
         Line++;
     }
 }
@@ -1751,8 +1751,8 @@ BlpDrawEditMenuEntry(IN PXTBL_DIALOG_HANDLE Handle,
     DisplayValue = (OptionValue != NULLPTR) ? OptionValue : L"";
 
     /* Determine lengths */
-    OptionNameLength = RtlWideStringLength(OptionName, 0);
-    OptionValueLength = RtlWideStringLength(DisplayValue, 0);
+    OptionNameLength = RTL::WideString::WideStringLength(OptionName, 0);
+    OptionValueLength = RTL::WideString::WideStringLength(DisplayValue, 0);
     OptionWidth = Handle->Width - 4 - (OptionNameLength + 2);
 
     /* Check if value needs to be truncated */
@@ -1768,8 +1768,8 @@ BlpDrawEditMenuEntry(IN PXTBL_DIALOG_HANDLE Handle,
         }
 
         /* Copy a desired value length into the allocated buffer and append "..." */
-        RtlCopyMemory((PWCHAR)ShortValue, DisplayValue, (OptionWidth - 3) * sizeof(WCHAR));
-        RtlCopyMemory((PWCHAR)ShortValue + OptionWidth - 3, L"...", 3 * sizeof(WCHAR));
+        RTL::Memory::CopyMemory((PWCHAR)ShortValue, DisplayValue, (OptionWidth - 3) * sizeof(WCHAR));
+        RTL::Memory::CopyMemory((PWCHAR)ShortValue + OptionWidth - 3, L"...", 3 * sizeof(WCHAR));
         ((PWCHAR)ShortValue)[OptionWidth] = L'\0';
 
         /* Mark that allocation was made and set new display value */

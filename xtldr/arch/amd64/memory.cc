@@ -44,7 +44,7 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
 
     /* Assign and zero-fill memory used by page mappings */
     PageMap->PtePointer = (PVOID)(UINT_PTR)Address;
-    RtlZeroMemory(PageMap->PtePointer, EFI_PAGE_SIZE);
+    RTL::Memory::ZeroMemory(PageMap->PtePointer, EFI_PAGE_SIZE);
 
     /* Add page mapping itself to memory mapping */
     Status = BlpSelfMapPml(PageMap, SelfMapAddress);
@@ -228,7 +228,7 @@ BlMapPage(IN PXTBL_PAGE_MAPPING PageMap,
 
         /* Set paging entry settings */
         PmlTable = (PHARDWARE_PTE)Pml1;
-        RtlZeroMemory(&PmlTable[Pml1Entry], sizeof(HARDWARE_PTE));
+        RTL::Memory::ZeroMemory(&PmlTable[Pml1Entry], sizeof(HARDWARE_PTE));
         PmlTable[Pml1Entry].PageFrameNumber = PageFrameNumber;
         PmlTable[Pml1Entry].Valid = 1;
         PmlTable[Pml1Entry].Writable = 1;
@@ -304,7 +304,7 @@ BlpGetNextPageTable(IN PXTBL_PAGE_MAPPING PageMap,
         }
 
         /* Fill allocated memory with zeros */
-        RtlZeroMemory((PVOID)(ULONGLONG)Address, EFI_PAGE_SIZE);
+        RTL::Memory::ZeroMemory((PVOID)(ULONGLONG)Address, EFI_PAGE_SIZE);
 
         /* Set paging entry settings */
         PmlTable[Entry].PageFrameNumber = Address / EFI_PAGE_SIZE;
@@ -357,7 +357,7 @@ BlpSelfMapPml(IN PXTBL_PAGE_MAPPING PageMap,
     }
 
     /* Add self-mapping */
-    RtlZeroMemory(&PmlBase[PmlIndex], sizeof(HARDWARE_PTE));
+    RTL::Memory::ZeroMemory(&PmlBase[PmlIndex], sizeof(HARDWARE_PTE));
     PmlBase[PmlIndex].PageFrameNumber = (UINT_PTR)PageMap->PtePointer / EFI_PAGE_SIZE;
     PmlBase[PmlIndex].Valid = 1;
     PmlBase[PmlIndex].Writable = 1;

@@ -122,7 +122,7 @@ Xtos::BootSystem(IN PXTBL_BOOT_PARAMETERS Parameters)
     }
 
     /* System path has to point to the boot directory */
-    RtlConcatenateWideString(Parameters->SystemPath, (PWCHAR)L"\\Boot", 0);
+    XtLdrProtocol->WideString.Concatenate(Parameters->SystemPath, (PWCHAR)L"\\Boot", 0);
 
     /* Open XTOS system boot directory */
     Status = FsHandle->Open(FsHandle, &BootDir, Parameters->SystemPath, EFI_FILE_MODE_READ, 0);
@@ -226,7 +226,7 @@ Xtos::GetMemoryDescriptorList(IN PXTBL_PAGE_MAPPING PageMap,
         MemoryDescriptor->BasePage = (UINT_PTR)MemoryMapping->PhysicalAddress / EFI_PAGE_SIZE;
         MemoryDescriptor->PageCount = MemoryMapping->NumberOfPages;
 
-        RtlInsertTailList(MemoryDescriptorList, &MemoryDescriptor->ListEntry);
+        XtLdrProtocol->LinkedList.InsertTail(MemoryDescriptorList, &MemoryDescriptor->ListEntry);
 
         Address = Address + sizeof(LOADER_MEMORY_DESCRIPTOR);
         ListEntry = ListEntry->Flink;
@@ -281,7 +281,7 @@ Xtos::GetSystemResourcesList(IN PXTBL_PAGE_MAPPING PageMap,
 
     AcpiResource = (PSYSTEM_RESOURCE_ACPI)Address;
 
-    RtlZeroMemory(AcpiResource, sizeof(SYSTEM_RESOURCE_ACPI));
+    XtLdrProtocol->Memory.ZeroMemory(AcpiResource, sizeof(SYSTEM_RESOURCE_ACPI));
 
     /* Load FrameBuffer protocol */
     Status = XtLdrProtocol->Protocol.Open(&ProtocolHandle, (PVOID*)&AcpiProtocol, &AcpiGuid);
@@ -300,7 +300,7 @@ Xtos::GetSystemResourcesList(IN PXTBL_PAGE_MAPPING PageMap,
     /* No need to map ACPI */
     AcpiResource->Header.VirtualAddress = 0;
 
-    RtlInsertTailList(SystemResourcesList, &AcpiResource->Header.ListEntry);
+    XtLdrProtocol->LinkedList.InsertTail(SystemResourcesList, &AcpiResource->Header.ListEntry);
 
     /* Close FrameBuffer protocol */
     XtLdrProtocol->Protocol.Close(&ProtocolHandle, &FrameBufGuid);
@@ -309,7 +309,7 @@ Xtos::GetSystemResourcesList(IN PXTBL_PAGE_MAPPING PageMap,
 
     FrameBufferResource = (PSYSTEM_RESOURCE_FRAMEBUFFER)Address;
 
-    RtlZeroMemory(FrameBufferResource, sizeof(SYSTEM_RESOURCE_FRAMEBUFFER));
+    XtLdrProtocol->Memory.ZeroMemory(FrameBufferResource, sizeof(SYSTEM_RESOURCE_FRAMEBUFFER));
 
     /* Load FrameBuffer protocol */
     Status = XtLdrProtocol->Protocol.Open(&ProtocolHandle, (PVOID*)&FrameBufProtocol, &FrameBufGuid);
@@ -345,7 +345,7 @@ Xtos::GetSystemResourcesList(IN PXTBL_PAGE_MAPPING PageMap,
 
     *VirtualAddress = (PUINT8)*VirtualAddress + (FrameBufferPages * EFI_PAGE_SIZE);
 
-    RtlInsertTailList(SystemResourcesList, &FrameBufferResource->Header.ListEntry);
+    XtLdrProtocol->LinkedList.InsertTail(SystemResourcesList, &FrameBufferResource->Header.ListEntry);
 
     XtLdrProtocol->Memory.PhysicalListToVirtual(PageMap, SystemResourcesList, PhysicalBase, VirtualBase);
 
@@ -420,7 +420,7 @@ Xtos::InitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
     UINT ParametersSize;
 
     /* Calculate size of parameters */
-    ParametersSize = (RtlWideStringLength(Parameters->Parameters, 0) + 1) * sizeof(WCHAR);
+    ParametersSize = (XtLdrProtocol->WideString.Length(Parameters->Parameters, 0) + 1) * sizeof(WCHAR);
 
     /* Calculate number of pages needed for initialization block */
     BlockPages = EFI_SIZE_TO_PAGES(sizeof(KERNEL_INITIALIZATION_BLOCK) + ParametersSize);
@@ -435,7 +435,7 @@ Xtos::InitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
 
     /* Initialize and zero-fill kernel initialization block */
     LoaderBlock = (PKERNEL_INITIALIZATION_BLOCK)(UINT_PTR)Address;
-    RtlZeroMemory(LoaderBlock, sizeof(KERNEL_INITIALIZATION_BLOCK) + ParametersSize);
+    XtLdrProtocol->Memory.ZeroMemory(LoaderBlock, sizeof(KERNEL_INITIALIZATION_BLOCK) + ParametersSize);
 
     /* Set basic loader block properties */
     LoaderBlock->BlockSize = sizeof(KERNEL_INITIALIZATION_BLOCK);
@@ -462,7 +462,7 @@ Xtos::InitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
 
     /* Copy parameters to kernel initialization block */
     LoaderBlock->KernelParameters = (PWCHAR)((UINT_PTR)*VirtualAddress + sizeof(KERNEL_INITIALIZATION_BLOCK));
-    RtlCopyMemory((PVOID)((UINT_PTR)LoaderBlock + sizeof(KERNEL_INITIALIZATION_BLOCK)),
+    XtLdrProtocol->Memory.CopyMemory((PVOID)((UINT_PTR)LoaderBlock + sizeof(KERNEL_INITIALIZATION_BLOCK)),
                   Parameters->Parameters,
                   ParametersSize);
 
@@ -473,11 +473,11 @@ Xtos::InitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
     /* Calculate next valid virtual address */
     *VirtualAddress = (PUINT8)*VirtualAddress + (BlockPages * EFI_PAGE_SIZE);
 
-    RtlInitializeListHead(&LoaderBlock->SystemResourcesListHead);
+    XtLdrProtocol->LinkedList.InitializeHead(&LoaderBlock->SystemResourcesListHead);
     GetSystemResourcesList(PageMap, VirtualAddress, &LoaderBlock->SystemResourcesListHead);
 
     /* Initialize memory descriptor list */
-    RtlInitializeListHead(&LoaderBlock->MemoryDescriptorListHead);
+    XtLdrProtocol->LinkedList.InitializeHead(&LoaderBlock->MemoryDescriptorListHead);
     GetMemoryDescriptorList(PageMap, VirtualAddress, &LoaderBlock->MemoryDescriptorListHead);
 
     /* Return success */

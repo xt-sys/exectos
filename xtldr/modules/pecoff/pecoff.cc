@@ -219,13 +219,13 @@ PeCoff::GetSection(IN PVOID ImagePointer,
     }
 
     /* Get section name length */
-    SectionNameLength = RtlStringLength(SectionName, 0);
+    SectionNameLength = XtLdrProtocol->String.Length(SectionName, 0);
 
     /* Iterate through all image sections */
     for(SectionIndex = 0; SectionIndex < Image->PeHeader->FileHeader.NumberOfSections; SectionIndex++)
     {
         /* Check section name */
-        if(RtlCompareString((PCHAR)SectionHeader[SectionIndex].Name, SectionName, SectionNameLength) == 0)
+        if(XtLdrProtocol->String.Compare((PCHAR)SectionHeader[SectionIndex].Name, SectionName, SectionNameLength) == 0)
         {
             /* Store section address and return */
             *RawData = (PULONG)((PUCHAR)Image->Data + SectionHeader[SectionIndex].PointerToRawData);

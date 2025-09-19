@@ -88,7 +88,7 @@ BlExitBootServices()
     }
 
     /* Zero fill the buffer and initialize counter */
-    RtlZeroMemory(MemoryMap, sizeof(EFI_MEMORY_MAP));
+    RTL::Memory::ZeroMemory(MemoryMap, sizeof(EFI_MEMORY_MAP));
     Counter = 0xFF;
 
     /* Attempt to exit boot services */
@@ -141,7 +141,7 @@ BlGetConfigurationTable(IN PEFI_GUID TableGuid,
     for(Index = 0; Index < EfiSystemTable->NumberOfTableEntries; Index++)
     {
         /* Check if this table matches requested table */
-        if(RtlCompareGuids((PGUID)&(EfiSystemTable->ConfigurationTable[Index].VendorGuid), (PGUID)TableGuid))
+        if(RTL::Guid::CompareGuids((PGUID)&(EfiSystemTable->ConfigurationTable[Index].VendorGuid), (PGUID)TableGuid))
         {
             /* Found requested table, return success */
             *Table = EfiSystemTable->ConfigurationTable[Index].VendorTable;

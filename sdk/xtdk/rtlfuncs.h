@@ -174,13 +174,6 @@ RtlFindWideStringInsensitive(IN PCWSTR Source,
 
 XTCLINK
 XTAPI
-XTSTATUS
-RtlFormatWideString(IN PRTL_PRINT_CONTEXT Context,
-                    IN PCWSTR Format,
-                    IN VA_LIST ArgumentList);
-
-XTCLINK
-XTAPI
 VOID
 RtlInitializeBitMap(IN PRTL_BITMAP BitMap,
                     IN PULONG_PTR Buffer,

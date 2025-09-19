@@ -27,21 +27,21 @@ Xtos::DeterminePagingLevel(IN CONST PWCHAR Parameters)
     CPUID_REGISTERS CpuRegisters;
 
     /* Prepare CPUID registers to query for STD7 features */
-    RtlZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
+    XtLdrProtocol->Memory.ZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
     CpuRegisters.Leaf = CPUID_GET_VENDOR_STRING;
 
     /* Query CPUID */
-    ArCpuId(&CpuRegisters);
+    XtLdrProtocol->Cpu.CpuId(&CpuRegisters);
 
     /* Verify if the CPU supports the STD7 feature leaf (0x00000007) */
     if(CpuRegisters.Eax >= CPUID_GET_STANDARD7_FEATURES)
     {
         /* Prepare CPUID registers to query for LA57 support */
-        RtlZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
+        XtLdrProtocol->Memory.ZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
         CpuRegisters.Leaf = CPUID_GET_STANDARD7_FEATURES;
 
         /* Query CPUID */
-        ArCpuId(&CpuRegisters);
+        XtLdrProtocol->Cpu.CpuId(&CpuRegisters);
 
         /* Check if eXtended Physical Addressing (XPA) is enabled and if LA57 is supported by the CPU */
         if((CpuRegisters.Ecx & CPUID_FEATURES_ECX_LA57) &&
@@ -113,7 +113,7 @@ Xtos::EnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
 
         /* Set the trampoline entry point and copy its code into the allocated buffer */
         TrampolineEntry = (PXT_TRAMPOLINE_ENTRY)(UINT_PTR)TrampolineAddress;
-        RtlCopyMemory((PVOID)TrampolineEntry, (PVOID)ArEnableExtendedPhysicalAddressing, TrampolineSize);
+        XtLdrProtocol->Memory.CopyMemory((PVOID)TrampolineEntry, (PVOID)ArEnableExtendedPhysicalAddressing, TrampolineSize);
     }
 
     /* Exit EFI Boot Services */
@@ -141,8 +141,8 @@ Xtos::EnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
         XtLdrProtocol->Debug.Print(L"Disabling Linear Address 57-bit (LA57)\n");
 
         /* Write PML4 to CR3 and enable paging */
-        ArWriteControlRegister(3, (UINT_PTR)PageMap->PtePointer);
-        ArWriteControlRegister(0, ArReadControlRegister(0) | CR0_PG);
+        XtLdrProtocol->Cpu.WriteControlRegister(3, (UINT_PTR)PageMap->PtePointer);
+        XtLdrProtocol->Cpu.WriteControlRegister(0, XtLdrProtocol->Cpu.ReadControlRegister(0) | CR0_PG);
     }
 
     /* Return success */
@@ -184,7 +184,7 @@ Xtos::MapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
             }
 
             /* Zero fill memory used by P5E */
-            RtlZeroMemory((PVOID)Address, EFI_PAGE_SIZE);
+            XtLdrProtocol->Memory.ZeroMemory((PVOID)Address, EFI_PAGE_SIZE);
 
             /* Make P5E valid */
             P5eBase[(MM_HARDWARE_VA_START >> MM_P5I_SHIFT) & 0x1FF].Valid = 1;
@@ -218,7 +218,7 @@ Xtos::MapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
         }
 
         /* Zero fill memory used by PXE */
-        RtlZeroMemory((PVOID)Address, EFI_PAGE_SIZE);
+        XtLdrProtocol->Memory.ZeroMemory((PVOID)Address, EFI_PAGE_SIZE);
 
         /* Make PXE valid */
         PxeBase[(MM_HARDWARE_VA_START >> MM_PXI_SHIFT) & 0x1FF].Valid = 1;
@@ -246,7 +246,7 @@ Xtos::MapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
         }
 
         /* Zero fill memory used by PPE */
-        RtlZeroMemory((PVOID)Address, EFI_PAGE_SIZE);
+        XtLdrProtocol->Memory.ZeroMemory((PVOID)Address, EFI_PAGE_SIZE);
 
         /* Make PPE valid */
         PpeBase[(MM_HARDWARE_VA_START >> MM_PPI_SHIFT) & 0x1FF].Valid = 1;
@@ -277,7 +277,7 @@ Xtos::MapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
             }
 
             /* Zero fill memory used by PDE */
-            RtlZeroMemory((PVOID)Address, EFI_PAGE_SIZE);
+            XtLdrProtocol->Memory.ZeroMemory((PVOID)Address, EFI_PAGE_SIZE);
 
             /* Make PDE valid */
             PdeBase[((MM_HARDWARE_VA_START >> MM_PDI_SHIFT) & 0x1FF) + Index].Valid = 1;

@@ -189,11 +189,11 @@ Acpi::GetApicBase(OUT PVOID *ApicBase)
     CPUID_REGISTERS CpuRegisters;
 
     /* Prepare CPUID registers to query for APIC support */
-    RtlZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
+    XtLdrProtocol->Memory.ZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
     CpuRegisters.Leaf = CPUID_GET_STANDARD1_FEATURES;
 
     /* Query CPUID */
-    ArCpuId(&CpuRegisters);
+    XtLdrProtocol->Cpu.CpuId(&CpuRegisters);
 
     /* Check if APIC present */
     if((CpuRegisters.Edx & CPUID_FEATURES_EDX_APIC) == 0)
@@ -203,7 +203,7 @@ Acpi::GetApicBase(OUT PVOID *ApicBase)
     }
 
     /* Get APIC base address */
-    *ApicBase = (PVOID)((UINT_PTR)ArReadModelSpecificRegister(0x1B) & 0xFFFFF000);
+    *ApicBase = (PVOID)((UINT_PTR)XtLdrProtocol->Cpu.ReadModelSpecificRegister(0x1B) & 0xFFFFF000);
 
     /* Return success */
     return STATUS_EFI_SUCCESS;

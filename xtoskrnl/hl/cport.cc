@@ -287,24 +287,3 @@ HL::ComPort::WriteComPort(IN PCPPORT Port,
 
     return STATUS_SUCCESS;
 }
-
-
-
-/* TEMPORARY FOR XTLDR */
-XTCDECL
-XTSTATUS
-HlWriteComPort(IN PCPPORT Port,
-               IN UCHAR Byte)
-{
-    return HL::ComPort::WriteComPort(Port, Byte);
-}
-
-/* TEMPORARY FOR XTLDR */
-XTCDECL
-XTSTATUS
-HlInitializeComPort(IN OUT PCPPORT Port,
-                    IN PUCHAR PortAddress,
-                    IN ULONG BaudRate)
-{
-    return HL::ComPort::InitializeComPort(Port, PortAddress, BaudRate);
-}

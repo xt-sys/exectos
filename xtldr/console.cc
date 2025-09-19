@@ -109,16 +109,16 @@ BlConsolePrint(IN PCWSTR Format,
     VA_START(Arguments, Format);
 
     /* Format and print the string to the stdout */
-    RtlFormatWideString(&ConsolePrintContext, (PWCHAR)Format, Arguments);
+    RTL::WideString::FormatWideString(&ConsolePrintContext, (PWCHAR)Format, Arguments);
 
     /* Print to serial console only if not running under OVMF */
-    if(RtlCompareWideString(EfiSystemTable->FirmwareVendor, L"EDK II", 6) != 0)
+    if(RTL::WideString::CompareWideString(EfiSystemTable->FirmwareVendor, L"EDK II", 6) != 0)
     {
         /* Check if debugging enabled and if EFI serial port is fully initialized */
         if(DEBUG && (BlpStatus.SerialPort.Flags & COMPORT_FLAG_INIT))
         {
             /* Format and print the string to the serial console */
-            RtlFormatWideString(&SerialPrintContext, (PWCHAR)Format, Arguments);
+            RTL::WideString::FormatWideString(&SerialPrintContext, (PWCHAR)Format, Arguments);
         }
     }
 

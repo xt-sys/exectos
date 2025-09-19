@@ -38,7 +38,7 @@ BlGetBooleanParameter(IN PCWSTR Parameters,
     }
 
     CurrentPosition = Parameters;
-    NeedleLength = RtlWideStringLength(Needle, 0);
+    NeedleLength = RTL::WideString::WideStringLength(Needle, 0);
 
     /* Iterate through the entire parameters string */
     while(*CurrentPosition != L'\0')
@@ -71,7 +71,7 @@ BlGetBooleanParameter(IN PCWSTR Parameters,
         if(TokenLength == NeedleLength)
         {
             /* Length matches, compare the strings */
-            if(RtlCompareWideStringInsensitive(TokenStart, Needle, NeedleLength) == 0)
+            if(RTL::WideString::CompareWideStringInsensitive(TokenStart, Needle, NeedleLength) == 0)
             {
                 /* A match was found */
                 return TRUE;

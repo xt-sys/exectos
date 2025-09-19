@@ -44,14 +44,14 @@ BlDebugPrint(IN PCWSTR Format,
         if((BlpStatus.DebugPort & XTBL_DEBUGPORT_SERIAL) && (BlpStatus.SerialPort.Flags & COMPORT_FLAG_INIT))
         {
             /* Format and print the string to the serial console */
-            RtlFormatWideString(&SerialPrintContext, (PWCHAR)Format, Arguments);
+            RTL::WideString::FormatWideString(&SerialPrintContext, (PWCHAR)Format, Arguments);
         }
 
         /* Check if screen debug port is enabled and Boot Services are still available */
         if((BlpStatus.DebugPort & XTBL_DEBUGPORT_SCREEN) && (BlpStatus.BootServices == TRUE))
         {
             /* Format and print the string to the screen */
-            RtlFormatWideString(&ConsolePrintContext, (PWCHAR)Format, Arguments);
+            RTL::WideString::FormatWideString(&ConsolePrintContext, (PWCHAR)Format, Arguments);
         }
 
         /* Clean up the va_list */
@@ -78,7 +78,7 @@ BlpDebugPutChar(IN WCHAR Character)
     /* Write character to the serial console */
     Buffer[0] = Character;
     Buffer[1] = 0;
-    return HlWriteComPort(&BlpStatus.SerialPort, Buffer[0]);
+    return HL::ComPort::WriteComPort(&BlpStatus.SerialPort, Buffer[0]);
 }
 
 /**
@@ -108,13 +108,13 @@ BlpInitializeDebugConsole()
     if(DebugConfiguration && BlpStatus.DebugPort == 0)
     {
         /* Find all debug ports */
-        DebugPort = RtlTokenizeWideString(DebugConfiguration, L";", &LastPort);
+        DebugPort = RTL::WideString::TokenizeWideString(DebugConfiguration, L";", &LastPort);
 
         /* Iterate over all debug ports */
         while(DebugPort != NULLPTR)
         {
             /* Check what port is set for debugging */
-            if(RtlCompareWideStringInsensitive(DebugPort, L"COM", 3) == 0)
+            if(RTL::WideString::CompareWideStringInsensitive(DebugPort, L"COM", 3) == 0)
             {
                 /* Read COM port number */
                 DebugPort += 3;
@@ -127,7 +127,7 @@ BlpInitializeDebugConsole()
                 }
 
                 /* Check if custom COM port address supplied */
-                if(PortNumber == 0 && RtlCompareWideStringInsensitive(DebugPort, L":0x", 3) == 0)
+                if(PortNumber == 0 && RTL::WideString::CompareWideStringInsensitive(DebugPort, L":0x", 3) == 0)
                 {
                     /* COM port address provided */
                     DebugPort += 3;
@@ -170,7 +170,7 @@ BlpInitializeDebugConsole()
                 /* Enable debug port */
                 BlpStatus.DebugPort |= XTBL_DEBUGPORT_SERIAL;
             }
-            else if(RtlCompareWideStringInsensitive(DebugPort, L"SCREEN", 5) == 0)
+            else if(RTL::WideString::CompareWideStringInsensitive(DebugPort, L"SCREEN", 5) == 0)
             {
                 /* Enable debug port */
                 BlpStatus.DebugPort |= XTBL_DEBUGPORT_SCREEN;
@@ -183,7 +183,7 @@ BlpInitializeDebugConsole()
             }
 
             /* Take next debug port */
-            DebugPort = RtlTokenizeWideString(NULLPTR, L";", &LastPort);
+            DebugPort = RTL::WideString::TokenizeWideString(NULLPTR, L";", &LastPort);
         }
 
         /* Check if serial debug port is enabled */
@@ -257,7 +257,7 @@ BlpInitializeSerialPort(IN ULONG PortNumber,
     }
 
     /* Initialize COM port */
-    Status = HlInitializeComPort(&BlpStatus.SerialPort, (PUCHAR)UlongToPtr(PortAddress), BaudRate);
+    Status = HL::ComPort::InitializeComPort(&BlpStatus.SerialPort, (PUCHAR)UlongToPtr(PortAddress), BaudRate);
 
     /* Port not found under supplied address */
     if(Status == STATUS_NOT_FOUND && PortAddress)
@@ -268,7 +268,7 @@ BlpInitializeSerialPort(IN ULONG PortNumber,
         {
             /* Try to reinitialize COM port */
             BlConsolePrint(L"Enabled I/O space access for all PCI(E) serial controllers found\n");
-            Status = HlInitializeComPort(&BlpStatus.SerialPort, (PUCHAR)UlongToPtr(PortAddress), BaudRate);
+            Status = HL::ComPort::InitializeComPort(&BlpStatus.SerialPort, (PUCHAR)UlongToPtr(PortAddress), BaudRate);
         }
     }
 

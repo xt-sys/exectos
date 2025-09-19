@@ -41,7 +41,7 @@ BlGetBootOptionValue(IN PLIST_ENTRY Options,
     *OptionValue = NULLPTR;
 
     /* Get the length of the option name we are looking for */
-    KeyLength = RtlWideStringLength(OptionName, 0);
+    KeyLength = RTL::WideString::WideStringLength(OptionName, 0);
 
     /* Start iterating from the first entry in the options list */
     ConfigList = Options->Flink;
@@ -51,10 +51,10 @@ BlGetBootOptionValue(IN PLIST_ENTRY Options,
         ConfigEntry = CONTAIN_RECORD(ConfigList, XTBL_CONFIG_ENTRY, Flink);
 
         /* Compare the current entry's name with the requested option name */
-        if(RtlCompareWideStringInsensitive(ConfigEntry->Name, OptionName, KeyLength) == 0)
+        if(RTL::WideString::CompareWideStringInsensitive(ConfigEntry->Name, OptionName, KeyLength) == 0)
         {
             /* Found the option, now prepare to copy its value */
-            ValueLength = RtlWideStringLength(ConfigEntry->Value, 0);
+            ValueLength = RTL::WideString::WideStringLength(ConfigEntry->Value, 0);
 
             /* Allocate memory for the output value string */
             Status = BlAllocateMemoryPool((ValueLength + 1) * sizeof(WCHAR), (PVOID *)OptionValue);
@@ -67,7 +67,7 @@ BlGetBootOptionValue(IN PLIST_ENTRY Options,
             }
 
             /* Copy the value and NULL-terminate the new string */
-            RtlCopyMemory(*OptionValue, ConfigEntry->Value, ValueLength * sizeof(WCHAR));
+            RTL::Memory::CopyMemory(*OptionValue, ConfigEntry->Value, ValueLength * sizeof(WCHAR));
             (*OptionValue)[ValueLength] = L'\0';
 
             /* Successfully retrieved the option value, return success */
@@ -102,10 +102,10 @@ BlGetConfigBooleanValue(IN PCWSTR ConfigName)
     BlGetConfigValue(ConfigName, &Value);
 
     /* Check if option is enabled */
-    if(RtlCompareWideStringInsensitive(Value, L"ENABLED", 0) == 0 ||
-       RtlCompareWideStringInsensitive(Value, L"ON", 0) == 0 ||
-       RtlCompareWideStringInsensitive(Value, L"TRUE", 0) == 0 ||
-       RtlCompareWideStringInsensitive(Value, L"YES", 0) == 0)
+    if(RTL::WideString::CompareWideStringInsensitive(Value, L"ENABLED", 0) == 0 ||
+       RTL::WideString::CompareWideStringInsensitive(Value, L"ON", 0) == 0 ||
+       RTL::WideString::CompareWideStringInsensitive(Value, L"TRUE", 0) == 0 ||
+       RTL::WideString::CompareWideStringInsensitive(Value, L"YES", 0) == 0)
     {
         /* This option is enabled */
         return TRUE;
@@ -140,7 +140,7 @@ BlGetConfigValue(IN PCWSTR ConfigName,
     *ConfigValue = NULLPTR;
 
     /* Get config entry name length */
-    KeyLength = RtlWideStringLength(ConfigName, 0);
+    KeyLength = RTL::WideString::WideStringLength(ConfigName, 0);
 
     /* Iterate through config entries */
     ConfigListEntry = BlpConfig.Flink;
@@ -150,10 +150,10 @@ BlGetConfigValue(IN PCWSTR ConfigName,
         ConfigEntry = CONTAIN_RECORD(ConfigListEntry, XTBL_CONFIG_ENTRY, Flink);
 
         /* Check if requested configuration found */
-        if(RtlCompareWideStringInsensitive(ConfigEntry->Name, ConfigName, KeyLength) == 0)
+        if(RTL::WideString::CompareWideStringInsensitive(ConfigEntry->Name, ConfigName, KeyLength) == 0)
         {
             /* Get value length */
-            ValueLength = RtlWideStringLength(ConfigEntry->Value, 0);
+            ValueLength = RTL::WideString::WideStringLength(ConfigEntry->Value, 0);
 
             /* Allocate memory for value */
             Status = BlAllocateMemoryPool((ValueLength + 1) * sizeof(WCHAR), (PVOID *)&Value);
@@ -165,7 +165,7 @@ BlGetConfigValue(IN PCWSTR ConfigName,
             }
 
             /* Copy value and return it */
-            RtlCopyMemory(Value, ConfigEntry->Value, ValueLength * sizeof(WCHAR));
+            RTL::Memory::CopyMemory(Value, ConfigEntry->Value, ValueLength * sizeof(WCHAR));
             Value[ValueLength] = L'\0';
             *ConfigValue = Value;
             return STATUS_EFI_SUCCESS;
@@ -240,7 +240,7 @@ BlSetBootOptionValue(IN PLIST_ENTRY Options,
     EFI_STATUS Status;
 
     /* Get the length of the option name we are looking for */
-    Length = RtlWideStringLength(OptionName, 0);
+    Length = RTL::WideString::WideStringLength(OptionName, 0);
 
     /* Start iterating from the first entry in the options list */
     ConfigList = Options->Flink;
@@ -250,10 +250,10 @@ BlSetBootOptionValue(IN PLIST_ENTRY Options,
         ConfigEntry = CONTAIN_RECORD(ConfigList, XTBL_CONFIG_ENTRY, Flink);
 
         /* Compare the current entry's name with the requested option name */
-        if(RtlCompareWideStringInsensitive(ConfigEntry->Name, OptionName, Length) == 0)
+        if(RTL::WideString::CompareWideStringInsensitive(ConfigEntry->Name, OptionName, Length) == 0)
         {
             /* Found the option, get its length */
-            Length = RtlWideStringLength(OptionValue, 0);
+            Length = RTL::WideString::WideStringLength(OptionValue, 0);
 
             /* Reallocate memory for the new value */
             Status = BlFreeMemoryPool(ConfigEntry->Value);
@@ -273,7 +273,7 @@ BlSetBootOptionValue(IN PLIST_ENTRY Options,
             }
 
             /* Copy the value and NULL-terminate the new string */
-            RtlCopyMemory(ConfigEntry->Value, OptionValue, Length * sizeof(WCHAR));
+            RTL::Memory::CopyMemory(ConfigEntry->Value, OptionValue, Length * sizeof(WCHAR));
             ConfigEntry->Value[Length] = L'\0';
             return STATUS_EFI_SUCCESS;
         }
@@ -292,7 +292,7 @@ BlSetBootOptionValue(IN PLIST_ENTRY Options,
     }
 
     /* Allocate memory for the option name */
-    Length = RtlWideStringLength(OptionName, 0);
+    Length = RTL::WideString::WideStringLength(OptionName, 0);
     Status = BlAllocateMemoryPool((Length + 1) * sizeof(WCHAR), (PVOID *)&ConfigEntry->Name);
     if(Status != STATUS_EFI_SUCCESS)
     {
@@ -303,11 +303,11 @@ BlSetBootOptionValue(IN PLIST_ENTRY Options,
     }
 
     /* Copy the option name and NULL-terminate the new string */
-    RtlCopyMemory(ConfigEntry->Name, OptionName, Length * sizeof(WCHAR));
+    RTL::Memory::CopyMemory(ConfigEntry->Name, OptionName, Length * sizeof(WCHAR));
     ConfigEntry->Name[Length] = L'\0';
 
     /* Allocate memory for the option value */
-    Length = RtlWideStringLength(OptionValue, 0);
+    Length = RTL::WideString::WideStringLength(OptionValue, 0);
     Status = BlAllocateMemoryPool((Length + 1) * sizeof(WCHAR), (PVOID *)&ConfigEntry->Value);
     if(Status != STATUS_EFI_SUCCESS)
     {
@@ -319,11 +319,11 @@ BlSetBootOptionValue(IN PLIST_ENTRY Options,
     }
 
     /* Copy the value and NULL-terminate the new string */
-    RtlCopyMemory(ConfigEntry->Value, OptionValue, Length * sizeof(WCHAR));
+    RTL::Memory::CopyMemory(ConfigEntry->Value, OptionValue, Length * sizeof(WCHAR));
     ConfigEntry->Value[Length] = L'\0';
 
     /* Insert the new config entry at the end of the options list */
-    RtlInsertTailList(Options, &ConfigEntry->Flink);
+    RTL::LinkedList::InsertTailList(Options, &ConfigEntry->Flink);
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
@@ -353,7 +353,7 @@ BlSetConfigValue(IN PCWSTR ConfigName,
     SIZE_T Length;
 
     /* Get config entry name length */
-    Length = RtlWideStringLength(ConfigName, 0);
+    Length = RTL::WideString::WideStringLength(ConfigName, 0);
 
     /* Iterate through config entries */
     ConfigListEntry = BlpConfig.Flink;
@@ -363,10 +363,10 @@ BlSetConfigValue(IN PCWSTR ConfigName,
         ConfigEntry = CONTAIN_RECORD(ConfigListEntry, XTBL_CONFIG_ENTRY, Flink);
 
         /* Check if requested configuration found */
-        if(RtlCompareWideStringInsensitive(ConfigEntry->Name, ConfigName, Length) == 0)
+        if(RTL::WideString::CompareWideStringInsensitive(ConfigEntry->Name, ConfigName, Length) == 0)
         {
             /* Check new config value length */
-            Length = RtlWideStringLength(ConfigValue, 0);
+            Length = RTL::WideString::WideStringLength(ConfigValue, 0);
 
             /* Reallocate memory for new config value */
             Status = BlFreeMemoryPool(ConfigEntry->Value);
@@ -384,7 +384,7 @@ BlSetConfigValue(IN PCWSTR ConfigName,
             }
 
             /* Update config value */
-            RtlCopyMemory(ConfigEntry->Value, ConfigValue, Length * sizeof(WCHAR));
+            RTL::Memory::CopyMemory(ConfigEntry->Value, ConfigValue, Length * sizeof(WCHAR));
             ConfigEntry->Value[Length] = L'\0';
 
             /* Return success */
@@ -415,7 +415,7 @@ BlpLoadConfiguration()
     PCHAR ConfigData;
 
     /* Initialize configuration pointer */
-    RtlInitializeListHead(&BlpConfigSections);
+    RTL::LinkedList::InitializeListHead(&BlpConfigSections);
 
     /* Read data from configuration file */
     Status = BlpReadConfigFile(XTBL_LOADER_DIRECTORY_PATH, L"XTLDR.INI", &ConfigData);
@@ -450,13 +450,13 @@ BlpLoadConfiguration()
         PXTBL_CONFIG_SECTION Section = CONTAIN_RECORD(SectionListEntry, XTBL_CONFIG_SECTION, Flink);
 
         /* Look for global XTLDR configuration section */
-        if(RtlCompareWideStringInsensitive(Section->SectionName, L"XTLDR", 5) == 0)
+        if(RTL::WideString::CompareWideStringInsensitive(Section->SectionName, L"XTLDR", 5) == 0)
         {
             /* Update global configuration */
             BlpUpdateConfiguration(&Section->Options);
 
             /* Remove XTLDR section from the list */
-            RtlRemoveEntryList(SectionListEntry);
+            RTL::LinkedList::RemoveEntryList(SectionListEntry);
             break;
         }
 
@@ -491,7 +491,7 @@ BlpParseCommandLine(VOID)
     LIST_ENTRY Config;
 
     /* Initialize configuration list */
-    RtlInitializeListHead(&Config);
+    RTL::LinkedList::InitializeListHead(&Config);
 
     /* Handle loaded image protocol */
     Status = EfiSystemTable->BootServices->HandleProtocol(EfiImageHandle, &LIPGuid, (PVOID *)&LoadedImage);
@@ -501,7 +501,7 @@ BlpParseCommandLine(VOID)
         if(LoadedImage && LoadedImage->LoadOptions)
         {
             /* Tokenize provided options */
-            Argument = RtlTokenizeWideString((PWCHAR)LoadedImage->LoadOptions, L" ", &LastArg);
+            Argument = RTL::WideString::TokenizeWideString((PWCHAR)LoadedImage->LoadOptions, L" ", &LastArg);
 
             /* Iterate over all arguments passed to boot loader */
             while(Argument != NULLPTR)
@@ -535,8 +535,8 @@ BlpParseCommandLine(VOID)
                 Argument++;
 
                 /* Get length of the key and its value */
-                KeyLength = RtlWideStringLength(Key, 0);
-                ValueLength = RtlWideStringLength(Value, 0);
+                KeyLength = RTL::WideString::WideStringLength(Key, 0);
+                ValueLength = RTL::WideString::WideStringLength(Value, 0);
 
                 /* Check if argument is valid */
                 if(KeyLength == 0 || ValueLength == 0)
@@ -564,16 +564,16 @@ BlpParseCommandLine(VOID)
                 }
 
                 /* Set entry name and value */
-                RtlCopyMemory(Option->Name, Key, (KeyLength * sizeof(WCHAR)));
-                RtlCopyMemory(Option->Value, Value, (ValueLength * sizeof(WCHAR)));
+                RTL::Memory::CopyMemory(Option->Name, Key, (KeyLength * sizeof(WCHAR)));
+                RTL::Memory::CopyMemory(Option->Value, Value, (ValueLength * sizeof(WCHAR)));
                 Option->Name[KeyLength] = L'\0';
                 Option->Value[ValueLength] = L'\0';
 
                 /* Add entry to the list */
-                RtlInsertTailList(&Config, &Option->Flink);
+                RTL::LinkedList::InsertTailList(&Config, &Option->Flink);
 
                 /* Take next argument */
-                Argument = RtlTokenizeWideString(NULLPTR, L" ", &LastArg);
+                Argument = RTL::WideString::TokenizeWideString(NULLPTR, L" ", &LastArg);
             }
 
             /* Update global configuration */
@@ -661,10 +661,10 @@ BlpParseConfigFile(IN CONST PCHAR RawConfig,
             InputData++;
 
             /* Remove leading and trailing spaces from section name */
-            SectionName = RtlTrimString(SectionName);
+            SectionName = RTL::String::TrimString(SectionName);
 
             /* Find length of the section name */
-            SectionLength = RtlStringLength(SectionName, 0);
+            SectionLength = RTL::String::StringLength(SectionName, 0);
 
             /* Allocate memory for new section */
             Status = BlAllocateMemoryPool(sizeof(XTBL_CONFIG_SECTION), (PVOID*)&Section);
@@ -680,12 +680,12 @@ BlpParseConfigFile(IN CONST PCHAR RawConfig,
             }
 
             /* Initialize new section and convert its name to wide string */
-            RtlInitializeListHead(&Section->Options);
-            RtlStringToWideString(Section->SectionName, (PCSTR*)&SectionName, SectionLength);
+            RTL::LinkedList::InitializeListHead(&Section->Options);
+            RTL::String::StringToWideString(Section->SectionName, (PCSTR*)&SectionName, SectionLength);
 
             /* Ensure string is NULL-terminated and add new section to the configuration list */
             Section->SectionName[SectionLength] = L'\0';
-            RtlInsertTailList(Configuration, &Section->Flink);
+            RTL::LinkedList::InsertTailList(Configuration, &Section->Flink);
         }
         else
         {
@@ -732,12 +732,12 @@ BlpParseConfigFile(IN CONST PCHAR RawConfig,
             InputData++;
 
             /* Remove leading and trailing spaces from key and value */
-            Key = RtlTrimString(Key);
-            Value = RtlTrimString(Value);
+            Key = RTL::String::TrimString(Key);
+            Value = RTL::String::TrimString(Value);
 
             /* Find length of the key and its value */
-            KeyLength = RtlStringLength(Key, 0);
-            ValueLength = RtlStringLength(Value, 0);
+            KeyLength = RTL::String::StringLength(Key, 0);
+            ValueLength = RTL::String::StringLength(Value, 0);
 
             /* Allocate memory for new option */
             Status = BlAllocateMemoryPool(sizeof(XTBL_CONFIG_ENTRY), (PVOID*)&Option);
@@ -770,13 +770,13 @@ BlpParseConfigFile(IN CONST PCHAR RawConfig,
             }
 
             /* Convert key and value to wide strings */
-            RtlStringToWideString(Option->Name, (PCSTR*)&Key, RtlStringLength(Key, 0) + 1);
-            RtlStringToWideString(Option->Value, (PCSTR*)&Value, RtlStringLength(Value, 0) + 1);
+            RTL::String::StringToWideString(Option->Name, (PCSTR*)&Key, RTL::String::StringLength(Key, 0) + 1);
+            RTL::String::StringToWideString(Option->Value, (PCSTR*)&Value, RTL::String::StringLength(Value, 0) + 1);
 
             /* Ensure strings are NULL-terminated and add new option to the list */
             Option->Name[KeyLength] = L'\0';
             Option->Value[ValueLength] = L'\0';
-            RtlInsertTailList(&Section->Options, &Option->Flink);
+            RTL::LinkedList::InsertTailList(&Section->Options, &Option->Flink);
         }
     }
 
@@ -875,8 +875,8 @@ BlpUpdateConfiguration(IN PLIST_ENTRY NewConfig)
         if(ConfigValue == NULLPTR)
         {
             /* Remove new config entry from input list and put it into global config list */
-            RtlRemoveEntryList(&ConfigEntry->Flink);
-            RtlInsertTailList(&BlpConfig, &ConfigEntry->Flink);
+            RTL::LinkedList::RemoveEntryList(&ConfigEntry->Flink);
+            RTL::LinkedList::InsertTailList(&BlpConfig, &ConfigEntry->Flink);
         }
 
         /* Move to the next new config entry */

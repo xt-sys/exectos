@@ -113,7 +113,7 @@ ChainLoader::BootSystem(IN PXTBL_BOOT_PARAMETERS Parameters)
     if(Parameters->Parameters)
     {
         /* Pass arguments to chainloaded image */
-        LoadedImage->LoadOptionsSize = RtlWideStringLength(Parameters->Parameters, 0) * sizeof(WCHAR);
+        LoadedImage->LoadOptionsSize = XtLdrProtocol->WideString.Length(Parameters->Parameters, 0) * sizeof(WCHAR);
         LoadedImage->LoadOptions = Parameters->Parameters;
     }
 

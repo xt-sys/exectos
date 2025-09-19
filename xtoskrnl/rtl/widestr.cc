@@ -3060,17 +3060,3 @@ RTL::WideString::WriteValue(PRTL_PRINT_CONTEXT Context,
     /* Return success */
     return STATUS_SUCCESS;
 }
-
-
-
-
-/* XTLDR API */
-XTCLINK
-XTAPI
-XTSTATUS
-RtlFormatWideString(IN PRTL_PRINT_CONTEXT Context,
-                                  IN PCWSTR Format,
-                                  IN VA_LIST ArgumentList)
-{
-    return RTL::WideString::FormatWideString(Context, Format, ArgumentList);
-}

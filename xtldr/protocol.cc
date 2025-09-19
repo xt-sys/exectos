@@ -58,7 +58,7 @@ BlFindBootProtocol(IN PCWSTR SystemType,
         ProtocolEntry = CONTAIN_RECORD(ProtocolListEntry, XTBL_KNOWN_BOOT_PROTOCOL, Flink);
 
         /* Check if this boot protocol supports specified system */
-        if(RtlCompareWideStringInsensitive(ProtocolEntry->SystemType, SystemType, 0) == 0)
+        if(RTL::WideString::CompareWideStringInsensitive(ProtocolEntry->SystemType, SystemType, 0) == 0)
         {
             /* Boot protocol matched, return success */
             *BootProtocolGuid = ProtocolEntry->Guid;
@@ -152,7 +152,7 @@ BlLoadModule(IN PWCHAR ModuleName)
         /* Get module information */
         ModuleInfo = CONTAIN_RECORD(ModuleListEntry, XTBL_MODULE_INFO, Flink);
 
-        if(RtlCompareWideStringInsensitive(ModuleInfo->ModuleName, ModuleName, 0) == 0)
+        if(RTL::WideString::CompareWideStringInsensitive(ModuleInfo->ModuleName, ModuleName, 0) == 0)
         {
             /* Module already loaded */
             BlDebugPrint(L"WARNING: Module '%S' already loaded!\n", ModuleName);
@@ -167,8 +167,8 @@ BlLoadModule(IN PWCHAR ModuleName)
     BlDebugPrint(L"Loading module '%S' ...\n", ModuleName);
 
     /* Set module path */
-    RtlCopyMemory(ModuleFileName, ModuleName, (RtlWideStringLength(ModuleName, 0) + 1) * sizeof(WCHAR));
-    RtlConcatenateWideString(ModuleFileName, (PWCHAR)L".EFI", 0);
+    RTL::Memory::CopyMemory(ModuleFileName, ModuleName, (RTL::WideString::WideStringLength(ModuleName, 0) + 1) * sizeof(WCHAR));
+    RTL::WideString::ConcatenateWideString(ModuleFileName, (PWCHAR)L".EFI", 0);
 
     /* Open EFI volume */
     Status = BlOpenVolume(NULLPTR, &DiskHandle, &FsHandle);
@@ -218,7 +218,7 @@ BlLoadModule(IN PWCHAR ModuleName)
     }
 
     /* Zero module information block */
-    RtlZeroMemory(ModuleInfo, sizeof(XTBL_MODULE_INFO));
+    RTL::Memory::ZeroMemory(ModuleInfo, sizeof(XTBL_MODULE_INFO));
 
     /* Setup PE/COFF EFI image headers */
     DosHeader = (PPECOFF_IMAGE_DOS_HEADER)ModuleData;
@@ -241,7 +241,7 @@ BlLoadModule(IN PWCHAR ModuleName)
     /* Look for .modinfo section */
     for(SectionIndex = 0; SectionIndex < PeHeader->FileHeader.NumberOfSections; SectionIndex++)
     {
-        if(RtlCompareString((PCHAR)SectionHeader[SectionIndex].Name, ".modinfo", 8) == 0)
+        if(RTL::String::CompareString((PCHAR)SectionHeader[SectionIndex].Name, ".modinfo", 8) == 0)
         {
             /* Module information section found */
             SectionData = (PWCHAR)((PUCHAR)ModuleData + SectionHeader[SectionIndex].PointerToRawData);
@@ -358,7 +358,7 @@ BlLoadModule(IN PWCHAR ModuleName)
     }
 
     /* Add module to the list of loaded modules */
-    RtlInsertTailList(&BlpLoadedModules, &ModuleInfo->Flink);
+    RTL::LinkedList::InsertTailList(&BlpLoadedModules, &ModuleInfo->Flink);
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
@@ -387,7 +387,7 @@ BlLoadModules(IN PWCHAR ModulesList)
     if(ModulesList != NULLPTR)
     {
         /* Tokenize provided list of modules */
-        Module = RtlTokenizeWideString(ModulesList, L" ", &LastModule);
+        Module = RTL::WideString::TokenizeWideString(ModulesList, L" ", &LastModule);
 
         /* Iterate over all arguments passed to boot loader */
         while(Module != NULLPTR)
@@ -401,7 +401,7 @@ BlLoadModules(IN PWCHAR ModulesList)
             }
 
             /* Take next module from the list */
-            Module = RtlTokenizeWideString(NULLPTR, L" ", &LastModule);
+            Module = RTL::WideString::TokenizeWideString(NULLPTR, L" ", &LastModule);
         }
     }
 
@@ -575,7 +575,7 @@ BlRegisterBootProtocol(IN PCWSTR SystemType,
         ProtocolEntry = CONTAIN_RECORD(ProtocolListEntry, XTBL_KNOWN_BOOT_PROTOCOL, Flink);
 
         /* Check if boot protocol already registered for specified system */
-        if(RtlCompareWideStringInsensitive(ProtocolEntry->SystemType, SystemType, 0) == 0)
+        if(RTL::WideString::CompareWideStringInsensitive(ProtocolEntry->SystemType, SystemType, 0) == 0)
         {
             /* Boot protocol already registered */
             return STATUS_EFI_ABORTED;
@@ -596,7 +596,7 @@ BlRegisterBootProtocol(IN PCWSTR SystemType,
     /* Set protocol properties and add it to the list */
     ProtocolEntry->SystemType = (PWCHAR)SystemType;
     ProtocolEntry->Guid = *BootProtocolGuid;
-    RtlInsertTailList(&BlpBootProtocols, &ProtocolEntry->Flink);
+    RTL::LinkedList::InsertTailList(&BlpBootProtocols, &ProtocolEntry->Flink);
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
@@ -632,8 +632,8 @@ BlpGetModuleInformation(IN PWCHAR SectionData,
     PWCHAR *Strings;
 
     /* Initialize authors and dependencies lists */
-    RtlInitializeListHead(&ModuleInfo->Authors);
-    RtlInitializeListHead(&ModuleInfo->Dependencies);
+    RTL::LinkedList::InitializeListHead(&ModuleInfo->Authors);
+    RTL::LinkedList::InitializeListHead(&ModuleInfo->Dependencies);
 
     /* Get information strings from '.modinfo' section */
     Status = BlpGetModuleInfoStrings(SectionData, SectionSize, &Strings, &Count);
@@ -661,7 +661,7 @@ BlpGetModuleInformation(IN PWCHAR SectionData,
         Strings[Index]++;
 
         /* Parse information string key */
-        if(RtlCompareWideString(Key, L"author", 6) == 0)
+        if(RTL::WideString::CompareWideString(Key, L"author", 6) == 0)
         {
             /* Allocate memory for module author */
             Status = BlAllocateMemoryPool(sizeof(XTBL_MODULE_AUTHORS), (PVOID*)&ModuleAuthors);
@@ -673,22 +673,22 @@ BlpGetModuleInformation(IN PWCHAR SectionData,
 
             /* Store module's author */
             ModuleAuthors->AuthorName = Strings[Index];
-            RtlInsertTailList(&ModuleInfo->Authors, &ModuleAuthors->Flink);
+            RTL::LinkedList::InsertTailList(&ModuleInfo->Authors, &ModuleAuthors->Flink);
         }
-        else if(RtlCompareWideString(Key, L"description", 11) == 0)
+        else if(RTL::WideString::CompareWideString(Key, L"description", 11) == 0)
         {
             /* Store module's description */
             ModuleInfo->ModuleDescription = Strings[Index];
         }
-        else if(RtlCompareWideString(Key, L"license", 7) == 0)
+        else if(RTL::WideString::CompareWideString(Key, L"license", 7) == 0)
         {
             /* Store module's license */
             ModuleInfo->License = Strings[Index];
         }
-        else if(RtlCompareWideString(Key, L"softdeps", 6) == 0)
+        else if(RTL::WideString::CompareWideString(Key, L"softdeps", 6) == 0)
         {
             /* Tokenize value to get module's single dependency */
-            Dependency = RtlTokenizeWideString(Strings[Index], L" ", &LastStr);
+            Dependency = RTL::WideString::TokenizeWideString(Strings[Index], L" ", &LastStr);
             while(Dependency != NULLPTR)
             {
                 /* Allocate memory for module dependency */
@@ -701,13 +701,13 @@ BlpGetModuleInformation(IN PWCHAR SectionData,
 
                 /* Store module's dependency */
                 ModuleDependencies->ModuleName = Dependency;
-                RtlInsertTailList(&ModuleInfo->Dependencies, &ModuleDependencies->Flink);
+                RTL::LinkedList::InsertTailList(&ModuleInfo->Dependencies, &ModuleDependencies->Flink);
 
                 /* Get next dependency from single value if available */
-                Dependency = RtlTokenizeWideString(NULLPTR, L" ", &LastStr);
+                Dependency = RTL::WideString::TokenizeWideString(NULLPTR, L" ", &LastStr);
             }
         }
-        else if(RtlCompareWideString(Key, L"version", 7) == 0)
+        else if(RTL::WideString::CompareWideString(Key, L"version", 7) == 0)
         {
             /* Store module's version */
             ModuleInfo->Version = Strings[Index];
@@ -812,7 +812,7 @@ BlpGetModuleInfoStrings(IN PWCHAR SectionData,
     String = (PWCHAR)(Array + Count + 1);
 
     /* Copy the raw string data */
-    RtlCopyMemory(String, InfoStrings, DataSize * sizeof(WCHAR));
+    RTL::Memory::CopyMemory(String, InfoStrings, DataSize * sizeof(WCHAR));
 
     /* Ensure the entire buffer is NULL-terminated for safety */
     String[DataSize] = L'\0';
@@ -885,14 +885,29 @@ BlpInstallXtLoaderProtocol()
     BlpLdrProtocol.Console.SetAttributes = BlSetConsoleAttributes;
     BlpLdrProtocol.Console.SetCursorPosition = BlSetCursorPosition;
     BlpLdrProtocol.Console.Write = BlConsoleWrite;
+    BlpLdrProtocol.Cpu.CpuId = AR::CpuFunc::CpuId;
+    BlpLdrProtocol.Cpu.ReadControlRegister = AR::CpuFunc::ReadControlRegister;
+    BlpLdrProtocol.Cpu.ReadModelSpecificRegister = AR::CpuFunc::ReadModelSpecificRegister;
+    BlpLdrProtocol.Cpu.WriteControlRegister = AR::CpuFunc::WriteControlRegister;
     BlpLdrProtocol.Debug.Print = BlDebugPrint;
     BlpLdrProtocol.Disk.CloseVolume = BlCloseVolume;
     BlpLdrProtocol.Disk.OpenVolume = BlOpenVolume;
     BlpLdrProtocol.Disk.ReadFile = BlReadFile;
+    BlpLdrProtocol.IoPort.Read8 = HL::IoPort::ReadPort8;
+    BlpLdrProtocol.IoPort.Read16 = HL::IoPort::ReadPort16;
+    BlpLdrProtocol.IoPort.Read32 = HL::IoPort::ReadPort32;
+    BlpLdrProtocol.IoPort.Write8 = HL::IoPort::WritePort8;
+    BlpLdrProtocol.IoPort.Write16 = HL::IoPort::WritePort16;
+    BlpLdrProtocol.IoPort.Write32 = HL::IoPort::WritePort32;
+    BlpLdrProtocol.LinkedList.InitializeHead = RTL::LinkedList::InitializeListHead;
+    BlpLdrProtocol.LinkedList.InsertHead = RTL::LinkedList::InsertHeadList;
+    BlpLdrProtocol.LinkedList.InsertTail = RTL::LinkedList::InsertTailList;
+    BlpLdrProtocol.LinkedList.RemoveEntry = RTL::LinkedList::RemoveEntryList;
     BlpLdrProtocol.Memory.AllocatePages = BlAllocateMemoryPages;
     BlpLdrProtocol.Memory.AllocatePool = BlAllocateMemoryPool;
     BlpLdrProtocol.Memory.BuildPageMap = BlBuildPageMap;
-    BlpLdrProtocol.Memory.CopyMemory = RtlCopyMemory;
+    BlpLdrProtocol.Memory.CompareMemory = RTL::Memory::CompareMemory;
+    BlpLdrProtocol.Memory.CopyMemory = RTL::Memory::CopyMemory;
     BlpLdrProtocol.Memory.FreePages = BlFreeMemoryPages;
     BlpLdrProtocol.Memory.FreePool = BlFreeMemoryPool;
     BlpLdrProtocol.Memory.GetMappingsCount = BlGetMappingsCount;
@@ -902,16 +917,21 @@ BlpInstallXtLoaderProtocol()
     BlpLdrProtocol.Memory.MapEfiMemory = BlMapEfiMemory;
     BlpLdrProtocol.Memory.MapPage = BlMapPage;
     BlpLdrProtocol.Memory.MapVirtualMemory = BlMapVirtualMemory;
+    BlpLdrProtocol.Memory.MoveMemory = RTL::Memory::MoveMemory;
     BlpLdrProtocol.Memory.PhysicalAddressToVirtual = BlPhysicalAddressToVirtual;
     BlpLdrProtocol.Memory.PhysicalListToVirtual = BlPhysicalListToVirtual;
-    BlpLdrProtocol.Memory.SetMemory = RtlSetMemory;
-    BlpLdrProtocol.Memory.ZeroMemory = RtlZeroMemory;
+    BlpLdrProtocol.Memory.SetMemory = RTL::Memory::SetMemory;
+    BlpLdrProtocol.Memory.ZeroMemory = RTL::Memory::ZeroMemory;
     BlpLdrProtocol.Protocol.Close = BlCloseProtocol;
     BlpLdrProtocol.Protocol.GetModulesList = BlGetModulesList;
     BlpLdrProtocol.Protocol.Install = BlInstallProtocol;
     BlpLdrProtocol.Protocol.LocateHandles = BlLocateProtocolHandles;
     BlpLdrProtocol.Protocol.Open = BlOpenProtocol;
     BlpLdrProtocol.Protocol.OpenHandle = BlOpenProtocolHandle;
+    BlpLdrProtocol.String.Compare = RTL::String::CompareString;
+    BlpLdrProtocol.String.Length = RTL::String::StringLength;
+    BlpLdrProtocol.String.ToWideString = RTL::String::StringToWideString;
+    BlpLdrProtocol.String.Trim = RTL::String::TrimString;
     BlpLdrProtocol.Tui.DisplayErrorDialog = BlDisplayErrorDialog;
     BlpLdrProtocol.Tui.DisplayInfoDialog = BlDisplayInfoDialog;
     BlpLdrProtocol.Tui.DisplayInputDialog = BlDisplayInputDialog;
@@ -931,6 +951,12 @@ BlpInstallXtLoaderProtocol()
     BlpLdrProtocol.Util.SleepExecution = BlSleepExecution;
     BlpLdrProtocol.Util.StartEfiImage = BlStartEfiImage;
     BlpLdrProtocol.Util.WaitForEfiEvent = BlWaitForEfiEvent;
+    BlpLdrProtocol.WideString.Compare = RTL::WideString::CompareWideString;
+    BlpLdrProtocol.WideString.CompareInsensitive = RTL::WideString::CompareWideStringInsensitive;
+    BlpLdrProtocol.WideString.Concatenate = RTL::WideString::ConcatenateWideString;
+    BlpLdrProtocol.WideString.Format = RTL::WideString::FormatWideString;
+    BlpLdrProtocol.WideString.Length = RTL::WideString::WideStringLength;
+    BlpLdrProtocol.WideString.Tokenize = RTL::WideString::TokenizeWideString;
 
     /* Register XTLDR loader protocol */
     BlDebugPrint(L"Registering XT loader protocol\n");

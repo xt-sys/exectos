@@ -45,7 +45,7 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
 
         /* Assign the allocated page to the page map and zero it out */
         PageMap->PtePointer = (PVOID)(UINT_PTR)Address;
-        RtlZeroMemory(PageMap->PtePointer, EFI_PAGE_SIZE);
+        RTL::Memory::ZeroMemory(PageMap->PtePointer, EFI_PAGE_SIZE);
 
         /* Allocate 4 pages for the Page Directories (PDs) */
         Status = BlAllocateMemoryPages(AllocateAnyPages, 4, &DirectoryAddress);
@@ -56,12 +56,12 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
         }
 
         /* Zero-fill the allocated memory for the Page Directories */
-        RtlZeroMemory((PVOID)DirectoryAddress, EFI_PAGE_SIZE * 4);
+        RTL::Memory::ZeroMemory((PVOID)DirectoryAddress, EFI_PAGE_SIZE * 4);
 
         /* Fill the PDPT with pointers to the Page Directories */
         for(Index = 0; Index < 4; Index++)
         {
-            RtlZeroMemory(&((PHARDWARE_MODERN_PTE)PageMap->PtePointer)[Index], sizeof(HARDWARE_MODERN_PTE));
+            RTL::Memory::ZeroMemory(&((PHARDWARE_MODERN_PTE)PageMap->PtePointer)[Index], sizeof(HARDWARE_MODERN_PTE));
             ((PHARDWARE_MODERN_PTE)PageMap->PtePointer)[Index].PageFrameNumber = DirectoryAddress / EFI_PAGE_SIZE;
             ((PHARDWARE_MODERN_PTE)PageMap->PtePointer)[Index].Valid = 1;
             DirectoryAddress += EFI_PAGE_SIZE;
@@ -79,7 +79,7 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
 
         /* Assign the allocated page to the page map and zero it out */
         PageMap->PtePointer = (PVOID)(UINT_PTR)Address;
-        RtlZeroMemory(PageMap->PtePointer, EFI_PAGE_SIZE);
+        RTL::Memory::ZeroMemory(PageMap->PtePointer, EFI_PAGE_SIZE);
     }
 
     /* Add page mapping itself to memory mapping */
@@ -241,7 +241,7 @@ BlMapPage(IN PXTBL_PAGE_MAPPING PageMap,
 
             /* Set the 64-bit PTE entry */
             PmlTable = (PHARDWARE_MODERN_PTE)Pml1;
-            RtlZeroMemory(&PmlTable[Pml1Entry], sizeof(HARDWARE_MODERN_PTE));
+            RTL::Memory::ZeroMemory(&PmlTable[Pml1Entry], sizeof(HARDWARE_MODERN_PTE));
             PmlTable[Pml1Entry].PageFrameNumber = PageFrameNumber;
             PmlTable[Pml1Entry].Valid = 1;
             PmlTable[Pml1Entry].Writable = 1;
@@ -265,7 +265,7 @@ BlMapPage(IN PXTBL_PAGE_MAPPING PageMap,
 
             /* Set the 32-bit PTE entry */
             LegacyPmlTable = (PHARDWARE_LEGACY_PTE)Pml1;
-            RtlZeroMemory(&LegacyPmlTable[Pml1Entry], sizeof(HARDWARE_LEGACY_PTE));
+            RTL::Memory::ZeroMemory(&LegacyPmlTable[Pml1Entry], sizeof(HARDWARE_LEGACY_PTE));
             LegacyPmlTable[Pml1Entry].PageFrameNumber = (UINT32)PageFrameNumber;
             LegacyPmlTable[Pml1Entry].Valid = 1;
             LegacyPmlTable[Pml1Entry].Writable = 1;
@@ -365,7 +365,7 @@ BlpGetNextPageTable(IN PXTBL_PAGE_MAPPING PageMap,
         }
 
         /* Fill allocated memory with zeros */
-        RtlZeroMemory((PVOID)(ULONGLONG)Address, EFI_PAGE_SIZE);
+        RTL::Memory::ZeroMemory((PVOID)(ULONGLONG)Address, EFI_PAGE_SIZE);
 
         /* Set paging entry settings based on level */
         if(PageMap->PageMapLevel >= 3)
@@ -431,7 +431,7 @@ BlpSelfMapPml(IN PXTBL_PAGE_MAPPING PageMap,
         /* Add self-mapping for PML3 (PAE enabled) */
         for(Index = 0; Index < 4; Index++)
         {
-            RtlZeroMemory(&Pml[PmlIndex + Index], sizeof(HARDWARE_MODERN_PTE));
+            RTL::Memory::ZeroMemory(&Pml[PmlIndex + Index], sizeof(HARDWARE_MODERN_PTE));
             Pml[PmlIndex + Index].PageFrameNumber = ((PHARDWARE_MODERN_PTE)PageMap->PtePointer)[Index].PageFrameNumber;
             Pml[PmlIndex + Index].Valid = 1;
             Pml[PmlIndex + Index].Writable = 1;
@@ -445,7 +445,7 @@ BlpSelfMapPml(IN PXTBL_PAGE_MAPPING PageMap,
         PmlIndex = (SelfMapAddress >> MM_PDI_LEGACY_SHIFT);
 
         /* Add self-mapping for PML2 (PAE disabled) */
-        RtlZeroMemory(&LegacyPml[PmlIndex], sizeof(HARDWARE_LEGACY_PTE));
+        RTL::Memory::ZeroMemory(&LegacyPml[PmlIndex], sizeof(HARDWARE_LEGACY_PTE));
         LegacyPml[PmlIndex].PageFrameNumber = (UINT_PTR)PageMap->PtePointer / EFI_PAGE_SIZE;
         LegacyPml[PmlIndex].Valid = 1;
         LegacyPml[PmlIndex].Writable = 1;

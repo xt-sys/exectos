@@ -30,8 +30,8 @@ Beep::DisableToneBeep()
     UCHAR Status;
 
     /* Stop the PC speaker */
-    Status = HlReadPort8(0x61);
-    HlWritePort8(0x61, Status & 0xFC);
+    Status = XtLdrProtocol->IoPort.Read8(0x61);
+    XtLdrProtocol->IoPort.Write8(0x61, Status & 0xFC);
 }
 
 /**
@@ -63,14 +63,14 @@ Beep::EnableToneBeep(IN UINT Pitch)
 
     /* Set the desired frequency of the PIT clock */
     Counter = 0x1234DD / Pitch;
-    HlWritePort8(0x43, 0xB6);
-    HlWritePort8(0x43, 0xB6);
-    HlWritePort8(0x42, (UCHAR) Counter & 0xFF);
-    HlWritePort8(0x42, (UCHAR) (Counter >> 8) & 0xFF);
+    XtLdrProtocol->IoPort.Write8(0x43, 0xB6);
+    XtLdrProtocol->IoPort.Write8(0x43, 0xB6);
+    XtLdrProtocol->IoPort.Write8(0x42, (UCHAR) Counter & 0xFF);
+    XtLdrProtocol->IoPort.Write8(0x42, (UCHAR) (Counter >> 8) & 0xFF);
 
     /* Start the PC speaker */
-    Status = HlReadPort8(0x61);
-    HlWritePort8(0x61, Status | 0x03);
+    Status = XtLdrProtocol->IoPort.Read8(0x61);
+    XtLdrProtocol->IoPort.Write8(0x61, Status | 0x03);
 }
 
 /**
@@ -133,7 +133,7 @@ Beep::PlayTune(IN PWCHAR Arguments)
     Tempo = -1;
 
     /* Tokenize provided list of arguments */
-    Argument = RtlTokenizeWideString(Arguments, L" ", &LastArgument);
+    Argument = XtLdrProtocol->WideString.Tokenize(Arguments, L" ", &LastArgument);
 
     /* Iterate over all arguments */
     while(Argument != NULLPTR)
@@ -175,7 +175,7 @@ Beep::PlayTune(IN PWCHAR Arguments)
         }
 
         /* Get next argument */
-        Argument = RtlTokenizeWideString(NULLPTR, L" ", &LastArgument);
+        Argument = XtLdrProtocol->WideString.Tokenize(NULLPTR, L" ", &LastArgument);
     }
 
     /* Stop emitting beep tone */

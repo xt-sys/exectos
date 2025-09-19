@@ -80,8 +80,8 @@ BlEnumerateBlockDevices()
     BootDeviceHandle = LoadedImage->DeviceHandle;
 
     /* Initialize list entries */
-    RtlInitializeListHead(&BlockDevices);
-    RtlInitializeListHead(&EfiBlockDevices);
+    RTL::LinkedList::InitializeListHead(&BlockDevices);
+    RTL::LinkedList::InitializeListHead(&EfiBlockDevices);
 
     /* Discover EFI block devices and store them in linked list */
     Status = BlpDiscoverEfiBlockDevices(&BlockDevices);
@@ -227,7 +227,7 @@ BlEnumerateBlockDevices()
             BlockDevice->PartitionGuid = PartitionGuid;
 
             /* Add block device to global list */
-            RtlInsertTailList(&EfiBlockDevices, &BlockDevice->ListEntry);
+            RTL::LinkedList::InsertTailList(&EfiBlockDevices, &BlockDevice->ListEntry);
         }
 
         /* Get next entry from linked list */
@@ -291,7 +291,7 @@ BlFindVolumeDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL FsHandle,
     }
 
     /* Check real path length */
-    FsPathLength = RtlWideStringLength(FileSystemPath, 0) * sizeof(WCHAR);
+    FsPathLength = RTL::WideString::WideStringLength(FileSystemPath, 0) * sizeof(WCHAR);
 
     /* Allocate memory pool for device path */
     Status = BlAllocateMemoryPool(FsPathLength + DevicePathLength + sizeof(EFI_DEVICE_PATH_PROTOCOL),
@@ -303,7 +303,7 @@ BlFindVolumeDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL FsHandle,
     }
 
     /* Set file path */
-    RtlCopyMemory(*DevicePath, FsHandle, DevicePathLength);
+    RTL::Memory::CopyMemory(*DevicePath, FsHandle, DevicePathLength);
     FilePath = (PEFI_FILEPATH_DEVICE_PATH)((PUCHAR)*DevicePath + DevicePathLength);
     FilePath->Header.Type = EFI_MEDIA_DEVICE_PATH;
     FilePath->Header.SubType = EFI_MEDIA_FILEPATH_DP;
@@ -311,7 +311,7 @@ BlFindVolumeDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL FsHandle,
     FilePath->Header.Length[1] = FilePath->Header.Length[0] >> 8;
 
     /* Set device path end node */
-    RtlCopyMemory(FilePath->PathName, FileSystemPath, FsPathLength + sizeof(WCHAR));
+    RTL::Memory::CopyMemory(FilePath->PathName, FileSystemPath, FsPathLength + sizeof(WCHAR));
     EndDevicePath = (PEFI_DEVICE_PATH_PROTOCOL)&FilePath->PathName[(FsPathLength / sizeof(WCHAR)) + 1];
     EndDevicePath->Type = EFI_END_DEVICE_PATH;
     EndDevicePath->SubType = EFI_END_ENTIRE_DP;
@@ -344,7 +344,7 @@ BlGetEfiPath(IN PWCHAR SystemPath,
     EFI_STATUS Status;
 
     /* Get system path length */
-    PathLength = RtlWideStringLength(SystemPath, 0);
+    PathLength = RTL::WideString::WideStringLength(SystemPath, 0);
 
     /* Allocate memory for storing EFI path */
     Status = BlAllocateMemoryPool(sizeof(WCHAR) * (PathLength + 1), (PVOID *)EfiPath);
@@ -356,7 +356,7 @@ BlGetEfiPath(IN PWCHAR SystemPath,
     }
 
     /* Make a copy of SystemPath string */
-    RtlCopyMemory(*EfiPath, SystemPath, sizeof(WCHAR) * (PathLength + 1));
+    RTL::Memory::CopyMemory(*EfiPath, SystemPath, sizeof(WCHAR) * (PathLength + 1));
 
     /* Replace directory separator if needed to comply with EFI standard */
     for(Index = 0; Index < PathLength; Index++)
@@ -678,7 +678,7 @@ BlReadFile(IN PEFI_FILE_HANDLE DirHandle,
     /* Calculate number of bytes to read and zero memory */
     ReadSize = Pages * EFI_PAGE_SIZE;
     *FileData = (PCHAR)(UINT_PTR)Address;
-    RtlZeroMemory(*FileData, ReadSize);
+    RTL::Memory::ZeroMemory(*FileData, ReadSize);
 
     /* Read data from the file */
     Status = FileHandle->Read(FileHandle, &ReadSize, *FileData);
@@ -780,7 +780,7 @@ BlpDiscoverEfiBlockDevices(OUT PLIST_ENTRY BlockDevices)
         /* Store new block device into a linked list */
         BlockDevice->BlockIo = Io;
         BlockDevice->DevicePath = DevicePath;
-        RtlInsertTailList(BlockDevices, &BlockDevice->ListEntry);
+        RTL::LinkedList::InsertTailList(BlockDevices, &BlockDevice->ListEntry);
     }
 
     /* Free handles buffer */
@@ -830,26 +830,26 @@ BlpDissectVolumeArcPath(IN PWCHAR SystemPath,
     *PartNumber = 0;
 
     /* Look for the ARC path */
-    if(RtlCompareWideStringInsensitive(SystemPath, L"ramdisk(0)", 0) == 0)
+    if(RTL::WideString::CompareWideStringInsensitive(SystemPath, L"ramdisk(0)", 0) == 0)
     {
         /* This is RAM disk */
         ArcLength = 10;
         *DriveType = XTBL_BOOT_DEVICE_RAMDISK;
     }
-    else if(RtlCompareWideStringInsensitive(SystemPath, L"multi(0)esp(0)", 0) == 0)
+    else if(RTL::WideString::CompareWideStringInsensitive(SystemPath, L"multi(0)esp(0)", 0) == 0)
     {
         /* This is ESP */
         ArcLength = 14;
         *DriveType = XTBL_BOOT_DEVICE_ESP;
     }
-    else if(RtlCompareWideStringInsensitive(SystemPath, L"multi(0)disk(0)", 0) == 0)
+    else if(RTL::WideString::CompareWideStringInsensitive(SystemPath, L"multi(0)disk(0)", 0) == 0)
     {
         /* This is a multi-disk port */
         ArcLength = 15;
         ArcPath = SystemPath + ArcLength;
 
         /* Check for disk type */
-        if(RtlCompareWideStringInsensitive(ArcPath, L"cdrom(", 0) == 0)
+        if(RTL::WideString::CompareWideStringInsensitive(ArcPath, L"cdrom(", 0) == 0)
         {
             /* This is an optical drive */
             ArcLength += 6;
@@ -870,7 +870,7 @@ BlpDissectVolumeArcPath(IN PWCHAR SystemPath,
             *DriveType = XTBL_BOOT_DEVICE_CDROM;
             ArcLength++;
         }
-        else if(RtlCompareWideStringInsensitive(ArcPath, L"fdisk(", 0) == 0)
+        else if(RTL::WideString::CompareWideStringInsensitive(ArcPath, L"fdisk(", 0) == 0)
         {
             /* This is a floppy drive */
             ArcLength += 6;
@@ -891,7 +891,7 @@ BlpDissectVolumeArcPath(IN PWCHAR SystemPath,
             *DriveType = XTBL_BOOT_DEVICE_FLOPPY;
             ArcLength++;
         }
-        else if(RtlCompareWideStringInsensitive(ArcPath, L"rdisk(", 0) == 0)
+        else if(RTL::WideString::CompareWideStringInsensitive(ArcPath, L"rdisk(", 0) == 0)
         {
             /* This is a hard disk */
             ArcLength += 6;
@@ -914,7 +914,7 @@ BlpDissectVolumeArcPath(IN PWCHAR SystemPath,
             ArcPath = SystemPath + ArcLength;
 
             /* Look for a partition */
-            if(RtlCompareWideStringInsensitive(ArcPath, L"partition(", 0) == 0)
+            if(RTL::WideString::CompareWideStringInsensitive(ArcPath, L"partition(", 0) == 0)
             {
                 /* Partition information found */
                 ArcLength += 10;
@@ -955,7 +955,7 @@ BlpDissectVolumeArcPath(IN PWCHAR SystemPath,
     if(ArcName)
     {
         BlAllocateMemoryPool(ArcLength * sizeof(WCHAR), (PVOID *)&LocalArcName);
-        RtlCopyMemory(LocalArcName, SystemPath, ArcLength * sizeof(WCHAR));
+        RTL::Memory::CopyMemory(LocalArcName, SystemPath, ArcLength * sizeof(WCHAR));
         LocalArcName[ArcLength] = '\0';
         *ArcName = LocalArcName;
     }
@@ -1021,7 +1021,7 @@ BlpDuplicateDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath)
     }
 
     /* Copy the device path */
-    RtlCopyMemory(DevicePathClone, DevicePath, Length);
+    RTL::Memory::CopyMemory(DevicePathClone, DevicePath, Length);
 
     /* Return the cloned object */
     return DevicePathClone;
@@ -1131,7 +1131,7 @@ BlpFindParentBlockDevice(IN PLIST_ENTRY BlockDevices,
 
             /* Check if nodes match */
             if((ChildLength != ParentLength) ||
-               (RtlCompareMemory(ChildDevicePath, ParentDevicePath, ParentLength) != ParentLength))
+               (RTL::Memory::CompareMemory(ChildDevicePath, ParentDevicePath, ParentLength) != ParentLength))
             {
                 /* Nodes do not match, this is not a valid parent */
                 break;

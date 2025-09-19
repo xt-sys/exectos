@@ -35,9 +35,9 @@ BlInitializeBootLoader()
     BlConsolePrint(L"XTLDR boot loader v%s\n", XTOS_VERSION);
 
     /* Initialize XTLDR configuration linked lists */
-    RtlInitializeListHead(&BlpBootProtocols);
-    RtlInitializeListHead(&BlpConfig);
-    RtlInitializeListHead(&BlpLoadedModules);
+    RTL::LinkedList::InitializeListHead(&BlpBootProtocols);
+    RTL::LinkedList::InitializeListHead(&BlpConfig);
+    RTL::LinkedList::InitializeListHead(&BlpLoadedModules);
 
     /* Store SecureBoot status */
     BlpStatus.SecureBoot = BlGetSecureBootStatus();
@@ -154,8 +154,8 @@ BlInitializeBootMenuList(IN ULONG MaxNameLength,
         MenuEntrySection = CONTAIN_RECORD(MenuEntrySectionList, XTBL_CONFIG_SECTION, Flink);
 
         /* Check if this is the default menu entry */
-        if((RtlWideStringLength(MenuEntrySection->SectionName, 0) == RtlWideStringLength(DefaultMenuEntry, 0)) &&
-           (RtlCompareWideStringInsensitive(MenuEntrySection->SectionName, DefaultMenuEntry, 0) == 0))
+        if((RTL::WideString::WideStringLength(MenuEntrySection->SectionName, 0) == RTL::WideString::WideStringLength(DefaultMenuEntry, 0)) &&
+           (RTL::WideString::CompareWideStringInsensitive(MenuEntrySection->SectionName, DefaultMenuEntry, 0) == 0))
         {
             /* Set default OS ID */
             DefaultOS = NumberOfEntries;
@@ -169,7 +169,7 @@ BlInitializeBootMenuList(IN ULONG MaxNameLength,
             MenuEntryOption = CONTAIN_RECORD(MenuEntryList, XTBL_CONFIG_ENTRY, Flink);
 
             /* Check if this is the menu entry display name */
-            if(RtlCompareWideStringInsensitive(MenuEntryOption->Name, L"SYSTEMNAME", 0) == 0)
+            if(RTL::WideString::CompareWideStringInsensitive(MenuEntryOption->Name, L"SYSTEMNAME", 0) == 0)
             {
                 /* Set menu entry display name */
                 MenuEntryName = MenuEntryOption->Value;
@@ -185,7 +185,7 @@ BlInitializeBootMenuList(IN ULONG MaxNameLength,
         OsList[NumberOfEntries].Options = &MenuEntrySection->Options;
 
         /* Check if the menu entry name fits the maximum length */
-        NameLength = RtlWideStringLength(MenuEntryName, 0);
+        NameLength = RTL::WideString::WideStringLength(MenuEntryName, 0);
         if(NameLength > MaxNameLength)
         {
             /* Menu entry name is too long, allocate memory for shorter name visible in the boot menu */
@@ -197,8 +197,8 @@ BlInitializeBootMenuList(IN ULONG MaxNameLength,
             }
 
             /* Copy shorter name and append "..." at the end */
-            RtlCopyMemory(VisibleName, MenuEntryName, (MaxNameLength - 3) * sizeof(WCHAR));
-            RtlCopyMemory(VisibleName + MaxNameLength - 3, L"...", 3 * sizeof(WCHAR));
+            RTL::Memory::CopyMemory(VisibleName, MenuEntryName, (MaxNameLength - 3) * sizeof(WCHAR));
+            RTL::Memory::CopyMemory(VisibleName + MaxNameLength - 3, L"...", 3 * sizeof(WCHAR));
             VisibleName[MaxNameLength] = L'\0';
 
             /* Set visible menu entry name */
@@ -254,7 +254,7 @@ BlInvokeBootProtocol(IN PWCHAR ShortName,
     EFI_STATUS Status;
 
     /* Initialize boot parameters and a list of modules */
-    RtlZeroMemory(&BootParameters, sizeof(XTBL_BOOT_PARAMETERS));
+    RTL::Memory::ZeroMemory(&BootParameters, sizeof(XTBL_BOOT_PARAMETERS));
     ModulesList = NULLPTR;
 
     /* Iterate through all options provided by boot menu entry and propagate boot parameters */
@@ -265,10 +265,10 @@ BlInvokeBootProtocol(IN PWCHAR ShortName,
         Option = CONTAIN_RECORD(OptionsListEntry, XTBL_CONFIG_ENTRY, Flink);
 
         /* Look for boot protocol and modules list */
-        if(RtlCompareWideStringInsensitive(Option->Name, L"BOOTMODULES", 0) == 0)
+        if(RTL::WideString::CompareWideStringInsensitive(Option->Name, L"BOOTMODULES", 0) == 0)
         {
             /* Check a length of modules list */
-            ModuleListLength = RtlWideStringLength(Option->Value, 0);
+            ModuleListLength = RTL::WideString::WideStringLength(Option->Value, 0);
 
             Status = BlAllocateMemoryPool(sizeof(WCHAR) * (ModuleListLength + 1), (PVOID *)&ModulesList);
             if(Status != STATUS_EFI_SUCCESS)
@@ -279,14 +279,14 @@ BlInvokeBootProtocol(IN PWCHAR ShortName,
             }
 
             /* Make a copy of modules list */
-            RtlCopyMemory(ModulesList, Option->Value, sizeof(WCHAR) * (ModuleListLength + 1));
+            RTL::Memory::CopyMemory(ModulesList, Option->Value, sizeof(WCHAR) * (ModuleListLength + 1));
         }
-        else if(RtlCompareWideStringInsensitive(Option->Name, L"SYSTEMTYPE", 0) == 0)
+        else if(RTL::WideString::CompareWideStringInsensitive(Option->Name, L"SYSTEMTYPE", 0) == 0)
         {
             /* Boot protocol found */
             BootParameters.SystemType = Option->Value;
         }
-        else if(RtlCompareWideStringInsensitive(Option->Name, L"SYSTEMPATH", 0) == 0)
+        else if(RTL::WideString::CompareWideStringInsensitive(Option->Name, L"SYSTEMPATH", 0) == 0)
         {
             /* System path found, get volume device path */
             Status = BlGetVolumeDevicePath(Option->Value, &BootParameters.DevicePath,
@@ -307,22 +307,22 @@ BlInvokeBootProtocol(IN PWCHAR ShortName,
                 return Status;
             }
         }
-        else if(RtlCompareWideStringInsensitive(Option->Name, L"KERNELFILE", 0) == 0)
+        else if(RTL::WideString::CompareWideStringInsensitive(Option->Name, L"KERNELFILE", 0) == 0)
         {
             /* Kernel file name found */
             BootParameters.KernelFile = Option->Value;
         }
-        else if(RtlCompareWideStringInsensitive(Option->Name, L"INITRDFILE", 0) == 0)
+        else if(RTL::WideString::CompareWideStringInsensitive(Option->Name, L"INITRDFILE", 0) == 0)
         {
             /* Initrd file name found */
             BootParameters.InitrdFile = Option->Value;
         }
-        else if(RtlCompareWideStringInsensitive(Option->Name, L"HALFILE", 0) == 0)
+        else if(RTL::WideString::CompareWideStringInsensitive(Option->Name, L"HALFILE", 0) == 0)
         {
             /* Hal file name found */
             BootParameters.HalFile = Option->Value;
         }
-        else if(RtlCompareWideStringInsensitive(Option->Name, L"PARAMETERS", 0) == 0)
+        else if(RTL::WideString::CompareWideStringInsensitive(Option->Name, L"PARAMETERS", 0) == 0)
         {
             /* Kernel parameters found */
             BootParameters.Parameters = Option->Value;
@@ -363,7 +363,7 @@ BlInvokeBootProtocol(IN PWCHAR ShortName,
     if(BlGetConfigBooleanValue(L"KEEPLASTBOOT"))
     {
         /* Save chosen operating system in NVRAM */
-        Status = BlSetEfiVariable(&VendorGuid, L"XtLdrLastBootOS", (PVOID)ShortName, RtlWideStringLength(ShortName, 0) * sizeof(WCHAR));
+        Status = BlSetEfiVariable(&VendorGuid, L"XtLdrLastBootOS", (PVOID)ShortName, RTL::WideString::WideStringLength(ShortName, 0) * sizeof(WCHAR));
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Failed to save chosen Operating System */

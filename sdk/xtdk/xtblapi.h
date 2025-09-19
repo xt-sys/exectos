@@ -38,14 +38,6 @@
 #include ARCH_HEADER(ketypes.h)
 #include ARCH_HEADER(mmtypes.h)
 
-/* XT Kernel runtime routines */
-#include <hlfuncs.h>
-#include <rtlfuncs.h>
-
-/* Architecture specific XT kernel routines */
-#include ARCH_HEADER(arfuncs.h)
-#include ARCH_HEADER(hlfuncs.h)
-
 /* Boot Manager specific structures */
 #include <bltarget.h>
 #include <bltypes.h>

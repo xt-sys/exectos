@@ -12,6 +12,7 @@
 #include <xtblapi.h>
 #include <xtver.h>
 
+#include <libxtos.hh>
 #include <globals.hh>
 
 
