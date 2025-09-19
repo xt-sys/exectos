@@ -48,7 +48,7 @@ AR::ProcSup::IdentifyProcessor(VOID)
     /* Get CPU vendor by issueing CPUID instruction */
     RtlZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
     CpuRegisters.Leaf = CPUID_GET_VENDOR_STRING;
-    ArCpuId(&CpuRegisters);
+    CpuFunc::CpuId(&CpuRegisters);
 
     /* Store CPU vendor in processor control block */
     Prcb->CpuId.Vendor = (CPU_VENDOR)CpuRegisters.Ebx;
@@ -60,7 +60,7 @@ AR::ProcSup::IdentifyProcessor(VOID)
     /* Get CPU standard features */
     RtlZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
     CpuRegisters.Leaf = CPUID_GET_STANDARD1_FEATURES;
-    ArCpuId(&CpuRegisters);
+    CpuFunc::CpuId(&CpuRegisters);
 
     /* Store CPU signature in processor control block */
     CpuSignature = *(PCPUID_SIGNATURE)&CpuRegisters.Eax;
@@ -686,7 +686,7 @@ AR::ProcSup::SetNonMaskableInterruptTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock
     Tss->IoMapBase = sizeof(KTSS);
     Tss->Flags = 0;
     Tss->LDT = KGDT_R0_LDT;
-    Tss->CR3 = ArReadControlRegister(3);
+    Tss->CR3 = CpuFunc::ReadControlRegister(3);
     Tss->Esp = (ULONG_PTR)KernelFaultStack;
     Tss->Esp0 = (ULONG_PTR)KernelFaultStack;
     Tss->Eip = PtrToUlong(ArTrap0x02);
