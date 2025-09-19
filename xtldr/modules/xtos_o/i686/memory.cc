@@ -26,11 +26,11 @@ Xtos::DeterminePagingLevel(IN CONST PWCHAR Parameters)
     CPUID_REGISTERS CpuRegisters;
 
     /* Prepare CPUID registers to query for PAE support */
-    RtlZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
+    XtLdrProtocol->Memory.ZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
     CpuRegisters.Leaf = CPUID_GET_STANDARD1_FEATURES;
 
     /* Query CPUID */
-    ArCpuId(&CpuRegisters);
+    XtLdrProtocol->Cpu.CpuId(&CpuRegisters);
 
     /* Check if eXtended Physical Addressing (XPA) is enabled and if PAE is supported by the CPU */
     if((CpuRegisters.Edx & CPUID_FEATURES_EDX_PAE) &&
@@ -89,27 +89,27 @@ Xtos::EnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
     }
 
     /* Disable paging */
-    ArWriteControlRegister(0, ArReadControlRegister(0) & ~CR0_PG);
+    XtLdrProtocol->Cpu.WriteControlRegister(0, XtLdrProtocol->Cpu.ReadControlRegister(0) & ~CR0_PG);
 
     /* Check the configured page map level to set the PAE state accordingly */
     if(PageMap->PageMapLevel == 3)
     {
         /* Enable Physical Address Extension (PAE) */
         XtLdrProtocol->Debug.Print(L"Enabling Physical Address Extension (PAE)\n");
-        ArWriteControlRegister(4, ArReadControlRegister(4) | CR4_PAE);
+        XtLdrProtocol->Cpu.WriteControlRegister(4, XtLdrProtocol->Cpu.ReadControlRegister(4) | CR4_PAE);
     }
     else
     {
         /* Disable Physical Address Extension (PAE) */
         XtLdrProtocol->Debug.Print(L"Disabling Physical Address Extension (PAE)\n");
-        ArWriteControlRegister(4, ArReadControlRegister(4) & ~CR4_PAE);
+        XtLdrProtocol->Cpu.WriteControlRegister(4, XtLdrProtocol->Cpu.ReadControlRegister(4) & ~CR4_PAE);
     }
 
     /* Write page mappings to CR3 */
-    ArWriteControlRegister(3, (UINT_PTR)PageMap->PtePointer);
+    XtLdrProtocol->Cpu.WriteControlRegister(3, (UINT_PTR)PageMap->PtePointer);
 
     /* Enable paging */
-    ArWriteControlRegister(0, ArReadControlRegister(0) | CR0_PG);
+    XtLdrProtocol->Cpu.WriteControlRegister(0, XtLdrProtocol->Cpu.ReadControlRegister(0) | CR0_PG);
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
@@ -143,7 +143,7 @@ Xtos::MapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
     }
 
     /* Zero fill allocated memory */
-    RtlZeroMemory((PVOID)Address, EFI_PAGE_SIZE);
+    XtLdrProtocol->Memory.ZeroMemory((PVOID)Address, EFI_PAGE_SIZE);
 
     /* Check if PAE is enabled (3-level paging) */
     if(PageMap->PageMapLevel == 3)
@@ -152,7 +152,7 @@ Xtos::MapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
         PdeBase = (PHARDWARE_MODERN_PTE)(((PHARDWARE_MODERN_PTE)PageMap->PtePointer)[MM_HARDWARE_VA_START >> MM_PPI_SHIFT].PageFrameNumber << MM_PAGE_SHIFT);
 
         /* Make PDE valid */
-        RtlZeroMemory(&PdeBase[(MM_HARDWARE_VA_START >> MM_PDI_SHIFT) & 0x1FF], sizeof(HARDWARE_MODERN_PTE));
+        XtLdrProtocol->Memory.ZeroMemory(&PdeBase[(MM_HARDWARE_VA_START >> MM_PDI_SHIFT) & 0x1FF], sizeof(HARDWARE_MODERN_PTE));
         PdeBase[(MM_HARDWARE_VA_START >> MM_PDI_SHIFT) & 0x1FF].PageFrameNumber = Address >> MM_PAGE_SHIFT;
         PdeBase[(MM_HARDWARE_VA_START >> MM_PDI_SHIFT) & 0x1FF].Valid = 1;
         PdeBase[(MM_HARDWARE_VA_START >> MM_PDI_SHIFT) & 0x1FF].Writable = 1;
@@ -170,7 +170,7 @@ Xtos::MapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
         }
 
         /* Make PDE valid  */
-        RtlZeroMemory(&LegacyPdeBase[MM_HARDWARE_VA_START >> MM_PDI_LEGACY_SHIFT], sizeof(HARDWARE_LEGACY_PTE));
+        XtLdrProtocol->Memory.ZeroMemory(&LegacyPdeBase[MM_HARDWARE_VA_START >> MM_PDI_LEGACY_SHIFT], sizeof(HARDWARE_LEGACY_PTE));
         LegacyPdeBase[MM_HARDWARE_VA_START >> MM_PDI_LEGACY_SHIFT].Valid = 1;
         LegacyPdeBase[MM_HARDWARE_VA_START >> MM_PDI_LEGACY_SHIFT].PageFrameNumber = Address >> MM_PAGE_SHIFT;
         LegacyPdeBase[MM_HARDWARE_VA_START >> MM_PDI_LEGACY_SHIFT].Writable = 1;
