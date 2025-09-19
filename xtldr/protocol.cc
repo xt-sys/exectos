@@ -869,6 +869,7 @@ BlpInstallXtLoaderProtocol()
     BlpLdrProtocol.Boot.RegisterMenu = BlRegisterBootMenu;
     BlpLdrProtocol.Boot.RegisterProtocol = BlRegisterBootProtocol;
     BlpLdrProtocol.BootUtil.GetBooleanParameter = BlGetBooleanParameter;
+    BlpLdrProtocol.BootUtil.GetTrampolineInformation = AR::ProcSup::GetTrampolineInformation;
     BlpLdrProtocol.Config.GetBooleanValue = BlGetConfigBooleanValue;
     BlpLdrProtocol.Config.GetBootOptionValue = BlGetBootOptionValue;
     BlpLdrProtocol.Config.GetEditableOptions = BlGetEditableOptions;

@@ -74,6 +74,7 @@ Xtos::EnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
     EFI_PHYSICAL_ADDRESS TrampolineAddress;
     PXT_TRAMPOLINE_ENTRY TrampolineEntry;
     ULONG_PTR TrampolineSize;
+    PVOID TrampolineCode;
 
     /* Build page map */
     Status = XtLdrProtocol->Memory.BuildPageMap(PageMap, (PageMap->PageMapLevel > 4) ? MM_P5E_LA57_BASE : MM_PXE_BASE);
@@ -96,11 +97,17 @@ Xtos::EnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
     /* Check the configured page map level to set the LA57 state accordingly */
     if(PageMap->PageMapLevel == 5)
     {
+        /* Get the trampoline code information */
+        XtLdrProtocol->BootUtil.GetTrampolineInformation(TrampolineEnableXpa, &TrampolineCode, &TrampolineSize);
+        if(TrampolineCode == NULLPTR || TrampolineSize == 0)
+        {
+            /* Failed to get trampoline information */
+            XtLdrProtocol->Debug.Print(L"Failed to get trampoline information\n");
+            return STATUS_EFI_INVALID_PARAMETER;
+        }
+
         /* Set the address of the trampoline code below 1MB */
         TrampolineAddress = MM_TRAMPOLINE_ADDRESS;
-
-        /* Calculate the size of the trampoline code */
-        TrampolineSize = (ULONG_PTR)ArEnableExtendedPhysicalAddressingEnd - (ULONG_PTR)ArEnableExtendedPhysicalAddressing;
 
         /* Allocate pages for the trampoline */
         Status = XtLdrProtocol->Memory.AllocatePages(AllocateAddress, EFI_SIZE_TO_PAGES(TrampolineSize), &TrampolineAddress);
@@ -113,7 +120,7 @@ Xtos::EnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
 
         /* Set the trampoline entry point and copy its code into the allocated buffer */
         TrampolineEntry = (PXT_TRAMPOLINE_ENTRY)(UINT_PTR)TrampolineAddress;
-        XtLdrProtocol->Memory.CopyMemory((PVOID)TrampolineEntry, (PVOID)ArEnableExtendedPhysicalAddressing, TrampolineSize);
+        XtLdrProtocol->Memory.CopyMemory((PVOID)TrampolineEntry, TrampolineCode, TrampolineSize);
     }
 
     /* Exit EFI Boot Services */

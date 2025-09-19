@@ -24,6 +24,14 @@ namespace AR
             STATIC XTCDECL VOID WriteControlRegister(IN USHORT ControlRegister,
                                                      IN UINT_PTR Value);
     };
+
+    class ProcSup
+    {
+        public:
+            STATIC XTAPI VOID GetTrampolineInformation(IN TRAMPOLINE_TYPE TrampolineType,
+                                                       OUT PVOID *TrampolineCode,
+                                                       OUT PULONG_PTR TrampolineSize);
+    };
 }
 
 /* Minimal forward references for HL classes used by XTLDR */

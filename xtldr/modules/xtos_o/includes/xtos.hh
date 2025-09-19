@@ -18,9 +18,6 @@ typedef VOID (XTAPI *PXT_ENTRY_POINT)(IN PKERNEL_INITIALIZATION_BLOCK BootParame
 /* XTOS trampoline entry point */
 typedef VOID (*PXT_TRAMPOLINE_ENTRY)(UINT64 PageMap);
 
-/* XTOS trampoline end address to calculate trampoline size */
-XTCLINK PVOID ArEnableExtendedPhysicalAddressingEnd[];
-
 
 /* XTOS module for XTLDR */
 class Xtos
