@@ -24,8 +24,8 @@
  */
 XTCDECL
 BOOLEAN
-BlGetBooleanParameter(IN PCWSTR Parameters,
-                      IN PCWSTR Needle)
+BootUtils::GetBooleanParameter(IN PCWSTR Parameters,
+                               IN PCWSTR Needle)
 {
     PCWSTR CurrentPosition, TokenEnd, TokenStart;
     SIZE_T NeedleLength, TokenLength;

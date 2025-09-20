@@ -45,7 +45,7 @@ Xtos::DeterminePagingLevel(IN CONST PWCHAR Parameters)
 
         /* Check if eXtended Physical Addressing (XPA) is enabled and if LA57 is supported by the CPU */
         if((CpuRegisters.Ecx & CPUID_FEATURES_ECX_LA57) &&
-           !(XtLdrProtocol->BootUtil.GetBooleanParameter(Parameters, L"NOXPA")))
+           !(XtLdrProtocol->BootUtils.GetBooleanParameter(Parameters, L"NOXPA")))
         {
             /* Enable LA57 (PML5) */
             return 5;
@@ -98,7 +98,7 @@ Xtos::EnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
     if(PageMap->PageMapLevel == 5)
     {
         /* Get the trampoline code information */
-        XtLdrProtocol->BootUtil.GetTrampolineInformation(TrampolineEnableXpa, &TrampolineCode, &TrampolineSize);
+        XtLdrProtocol->BootUtils.GetTrampolineInformation(TrampolineEnableXpa, &TrampolineCode, &TrampolineSize);
         if(TrampolineCode == NULLPTR || TrampolineSize == 0)
         {
             /* Failed to get trampoline information */
@@ -125,7 +125,7 @@ Xtos::EnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
 
     /* Exit EFI Boot Services */
     XtLdrProtocol->Debug.Print(L"Exiting EFI boot services\n");
-    Status = XtLdrProtocol->Util.ExitBootServices();
+    Status = XtLdrProtocol->Utils.ExitBootServices();
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to exit boot services */

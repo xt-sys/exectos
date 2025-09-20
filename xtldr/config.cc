@@ -11,6 +11,39 @@
 
 
 /**
+ * Returns a boolean value of the specified configuration key.
+ *
+ * @param ConfigName
+ *        Specifies the configuration key to return its boolean representation.
+ *
+ * @return This routine returns a boolean representation of the configuration value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+BOOLEAN
+Configuration::GetBooleanValue(IN PCWSTR ConfigName)
+{
+    PWCHAR Value;
+
+    /* Get config value */
+    GetValue(ConfigName, &Value);
+
+    /* Check if option is enabled */
+    if(RTL::WideString::CompareWideStringInsensitive(Value, L"ENABLED", 0) == 0 ||
+       RTL::WideString::CompareWideStringInsensitive(Value, L"ON", 0) == 0 ||
+       RTL::WideString::CompareWideStringInsensitive(Value, L"TRUE", 0) == 0 ||
+       RTL::WideString::CompareWideStringInsensitive(Value, L"YES", 0) == 0)
+    {
+        /* This option is enabled */
+        return TRUE;
+    }
+
+    /* Return FALSE by default */
+    return FALSE;
+}
+
+/**
  * @brief Retrieves the value of a specific OS boot option from a list.
  *
  * @param Options
@@ -28,9 +61,9 @@
  */
 XTCDECL
 EFI_STATUS
-BlGetBootOptionValue(IN PLIST_ENTRY Options,
-                     IN PCWSTR OptionName,
-                     OUT PWCHAR *OptionValue)
+Configuration::GetBootOptionValue(IN PLIST_ENTRY Options,
+                                  IN PCWSTR OptionName,
+                                  OUT PWCHAR *OptionValue)
 {
     PXTBL_CONFIG_ENTRY ConfigEntry;
     PLIST_ENTRY ConfigList;
@@ -57,11 +90,11 @@ BlGetBootOptionValue(IN PLIST_ENTRY Options,
             ValueLength = RTL::WideString::WideStringLength(ConfigEntry->Value, 0);
 
             /* Allocate memory for the output value string */
-            Status = BlAllocateMemoryPool((ValueLength + 1) * sizeof(WCHAR), (PVOID *)OptionValue);
+            Status = Memory::AllocatePool((ValueLength + 1) * sizeof(WCHAR), (PVOID *)OptionValue);
             if(Status != STATUS_EFI_SUCCESS)
             {
                 /* Memory allocation failure, print debug message and return status code */
-                BlDebugPrint(L"ERROR: Memory allocation failure (Status Code: 0x%zX)\n", Status);
+                Debug::Print(L"ERROR: Memory allocation failure (Status Code: 0x%zX)\n", Status);
                 *OptionValue = NULLPTR;
                 return Status;
             }
@@ -83,36 +116,36 @@ BlGetBootOptionValue(IN PLIST_ENTRY Options,
 }
 
 /**
- * Returns a boolean value of the specified configuration key.
+ * Retrieves the list of user-editable boot options.
  *
- * @param ConfigName
- *        Specifies the configuration key to return its boolean representation.
+ * @param OptionsArray
+ *        A pointer to a variable that will receive the pointer to the array of editable option names.
  *
- * @return This routine returns a boolean representation of the configuration value.
+ * @param OptionsCount
+ *        A pointer to a variable that will be updated with the number of elements in the OptionsArray.
+ *
+ * @return This routine does not return any value.
  *
  * @since XT 1.0
  */
 XTCDECL
-BOOLEAN
-BlGetConfigBooleanValue(IN PCWSTR ConfigName)
+VOID
+Configuration::GetEditableOptions(OUT PCWSTR **OptionsArray,
+                                  OUT PULONG OptionsCount)
 {
-    PWCHAR Value;
+    ULONG Count = 0;
 
-    /* Get config value */
-    BlGetConfigValue(ConfigName, &Value);
+    /* Return a pointer to the global array of editable options */
+    *OptionsArray = BlpEditableConfigOptions;
 
-    /* Check if option is enabled */
-    if(RTL::WideString::CompareWideStringInsensitive(Value, L"ENABLED", 0) == 0 ||
-       RTL::WideString::CompareWideStringInsensitive(Value, L"ON", 0) == 0 ||
-       RTL::WideString::CompareWideStringInsensitive(Value, L"TRUE", 0) == 0 ||
-       RTL::WideString::CompareWideStringInsensitive(Value, L"YES", 0) == 0)
+    /* Calculate the number of elements in the array */
+    while(BlpEditableConfigOptions[Count])
     {
-        /* This option is enabled */
-        return TRUE;
+        Count++;
     }
 
-    /* Return FALSE by default */
-    return FALSE;
+    /* Return the number of elements */
+    *OptionsCount = Count;
 }
 
 /**
@@ -127,8 +160,8 @@ BlGetConfigBooleanValue(IN PCWSTR ConfigName)
  */
 XTCDECL
 EFI_STATUS
-BlGetConfigValue(IN PCWSTR ConfigName,
-                 OUT PWCHAR *ConfigValue)
+Configuration::GetValue(IN PCWSTR ConfigName,
+                        OUT PWCHAR *ConfigValue)
 {
     PXTBL_CONFIG_ENTRY ConfigEntry;
     PLIST_ENTRY ConfigListEntry;
@@ -156,11 +189,11 @@ BlGetConfigValue(IN PCWSTR ConfigName,
             ValueLength = RTL::WideString::WideStringLength(ConfigEntry->Value, 0);
 
             /* Allocate memory for value */
-            Status = BlAllocateMemoryPool((ValueLength + 1) * sizeof(WCHAR), (PVOID *)&Value);
+            Status = Memory::AllocatePool((ValueLength + 1) * sizeof(WCHAR), (PVOID *)&Value);
             if(Status != STATUS_EFI_SUCCESS)
             {
                 /* Memory allocation failure, return NULLPTR */
-                BlDebugPrint(L"ERROR: Memory allocation failure (Status Code: 0x%zX)\n", Status);
+                Debug::Print(L"ERROR: Memory allocation failure (Status Code: 0x%zX)\n", Status);
                 return Status;
             }
 
@@ -180,226 +213,6 @@ BlGetConfigValue(IN PCWSTR ConfigName,
 }
 
 /**
- * Retrieves the list of user-editable boot options.
- *
- * @param OptionsArray
- *        A pointer to a variable that will receive the pointer to the array of editable option names.
- *
- * @param OptionsCount
- *        A pointer to a variable that will be updated with the number of elements in the OptionsArray.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTCDECL
-VOID
-BlGetEditableOptions(OUT PCWSTR **OptionsArray,
-                     OUT PULONG OptionsCount)
-{
-    ULONG Count = 0;
-
-    /* Return a pointer to the global array of editable options */
-    *OptionsArray = BlpEditableConfigOptions;
-
-    /* Calculate the number of elements in the array */
-    while(BlpEditableConfigOptions[Count])
-    {
-        Count++;
-    }
-
-    /* Return the number of elements */
-    *OptionsCount = Count;
-}
-
-/**
- * Sets the value of a specific OS boot option in a list, or adds it if it doesn't exist.
- *
- * @param Options
- *       A pointer to the head of a list of XTBL_CONFIG_ENTRY structures.
- *
- * @param OptionName
- *       A pointer to a wide string that contains the name of the boot option to set.
- *
- * @param OptionValue
- *       A pointer to a wide string that contains the new value for the boot option.
- *
- * @return This routine returns a status code.
- *
- * @since XT 1.0
- */
-XTCDECL
-EFI_STATUS
-BlSetBootOptionValue(IN PLIST_ENTRY Options,
-                     IN PCWSTR OptionName,
-                     IN PCWSTR OptionValue)
-{
-    PXTBL_CONFIG_ENTRY ConfigEntry;
-    PLIST_ENTRY ConfigList;
-    ULONG Length;
-    EFI_STATUS Status;
-
-    /* Get the length of the option name we are looking for */
-    Length = RTL::WideString::WideStringLength(OptionName, 0);
-
-    /* Start iterating from the first entry in the options list */
-    ConfigList = Options->Flink;
-    while(ConfigList != Options)
-    {
-        /* Get the container record for the current config entry */
-        ConfigEntry = CONTAIN_RECORD(ConfigList, XTBL_CONFIG_ENTRY, Flink);
-
-        /* Compare the current entry's name with the requested option name */
-        if(RTL::WideString::CompareWideStringInsensitive(ConfigEntry->Name, OptionName, Length) == 0)
-        {
-            /* Found the option, get its length */
-            Length = RTL::WideString::WideStringLength(OptionValue, 0);
-
-            /* Reallocate memory for the new value */
-            Status = BlFreeMemoryPool(ConfigEntry->Value);
-            if(Status != STATUS_EFI_SUCCESS)
-            {
-                /* Failed to free memory, return status code */
-                return Status;
-            }
-
-            /* Allocate new memory for the updated value */
-            Status = BlAllocateMemoryPool((Length + 1) * sizeof(WCHAR), (PVOID *)&ConfigEntry->Value);
-            if(Status != STATUS_EFI_SUCCESS)
-            {
-                /* Memory allocation failure, print debug message and return status code */
-                BlDebugPrint(L"ERROR: Memory allocation failure (Status Code: 0x%zX)\\n", Status);
-                return Status;
-            }
-
-            /* Copy the value and NULL-terminate the new string */
-            RTL::Memory::CopyMemory(ConfigEntry->Value, OptionValue, Length * sizeof(WCHAR));
-            ConfigEntry->Value[Length] = L'\0';
-            return STATUS_EFI_SUCCESS;
-        }
-
-        /* Move to the next entry in the list */
-        ConfigList = ConfigList->Flink;
-    }
-
-    /* Option not found, allocate memory for the new one */
-    Status = BlAllocateMemoryPool(sizeof(XTBL_CONFIG_ENTRY), (PVOID *)&ConfigEntry);
-    if(Status != STATUS_EFI_SUCCESS)
-    {
-        /* Memory allocation failure, print debug message and return status code */
-        BlDebugPrint(L"ERROR: Memory allocation failure (Status Code: 0x%zX)\\n", Status);
-        return Status;
-    }
-
-    /* Allocate memory for the option name */
-    Length = RTL::WideString::WideStringLength(OptionName, 0);
-    Status = BlAllocateMemoryPool((Length + 1) * sizeof(WCHAR), (PVOID *)&ConfigEntry->Name);
-    if(Status != STATUS_EFI_SUCCESS)
-    {
-        /* Memory allocation failure, print debug message and return status code */
-        BlDebugPrint(L"ERROR: Memory allocation failure (Status Code: 0x%zX)\\n", Status);
-        BlFreeMemoryPool(ConfigEntry);
-        return Status;
-    }
-
-    /* Copy the option name and NULL-terminate the new string */
-    RTL::Memory::CopyMemory(ConfigEntry->Name, OptionName, Length * sizeof(WCHAR));
-    ConfigEntry->Name[Length] = L'\0';
-
-    /* Allocate memory for the option value */
-    Length = RTL::WideString::WideStringLength(OptionValue, 0);
-    Status = BlAllocateMemoryPool((Length + 1) * sizeof(WCHAR), (PVOID *)&ConfigEntry->Value);
-    if(Status != STATUS_EFI_SUCCESS)
-    {
-        /* Memory allocation failure, print debug message and return status code */
-        BlDebugPrint(L"ERROR: Memory allocation failure (Status Code: 0x%zX)\\n", Status);
-        BlFreeMemoryPool(ConfigEntry->Name);
-        BlFreeMemoryPool(ConfigEntry);
-        return Status;
-    }
-
-    /* Copy the value and NULL-terminate the new string */
-    RTL::Memory::CopyMemory(ConfigEntry->Value, OptionValue, Length * sizeof(WCHAR));
-    ConfigEntry->Value[Length] = L'\0';
-
-    /* Insert the new config entry at the end of the options list */
-    RTL::LinkedList::InsertTailList(Options, &ConfigEntry->Flink);
-
-    /* Return success */
-    return STATUS_EFI_SUCCESS;
-}
-
-/**
- * Updates existing configuration value.
- *
- * @param ConfigName
- *        Specifies the configuration key to update.
- *
- * @param ConfigValue
- *        Specifies the new configuration value.
- *
- * @return This routine returns a status code.
- *
- * @since XT 1.0
- */
-XTCDECL
-EFI_STATUS
-BlSetConfigValue(IN PCWSTR ConfigName,
-                 IN PCWSTR ConfigValue)
-{
-    PXTBL_CONFIG_ENTRY ConfigEntry;
-    PLIST_ENTRY ConfigListEntry;
-    EFI_STATUS Status;
-    SIZE_T Length;
-
-    /* Get config entry name length */
-    Length = RTL::WideString::WideStringLength(ConfigName, 0);
-
-    /* Iterate through config entries */
-    ConfigListEntry = BlpConfig.Flink;
-    while(ConfigListEntry != &BlpConfig)
-    {
-        /* Get config entry */
-        ConfigEntry = CONTAIN_RECORD(ConfigListEntry, XTBL_CONFIG_ENTRY, Flink);
-
-        /* Check if requested configuration found */
-        if(RTL::WideString::CompareWideStringInsensitive(ConfigEntry->Name, ConfigName, Length) == 0)
-        {
-            /* Check new config value length */
-            Length = RTL::WideString::WideStringLength(ConfigValue, 0);
-
-            /* Reallocate memory for new config value */
-            Status = BlFreeMemoryPool(ConfigEntry->Value);
-            if(Status == STATUS_EFI_SUCCESS)
-            {
-                /* Successfully freed memory, allocate a new pool */
-                Status = BlAllocateMemoryPool((Length + 1) * sizeof(WCHAR), (PVOID *)&ConfigEntry->Value);
-            }
-
-            /* Check memory reallocation status */
-            if(Status != STATUS_EFI_SUCCESS)
-            {
-                /* Failed to reallocate memory */
-                return Status;
-            }
-
-            /* Update config value */
-            RTL::Memory::CopyMemory(ConfigEntry->Value, ConfigValue, Length * sizeof(WCHAR));
-            ConfigEntry->Value[Length] = L'\0';
-
-            /* Return success */
-            return STATUS_EFI_SUCCESS;
-        }
-
-        /* Move to the next config entry */
-        ConfigListEntry = ConfigListEntry->Flink;
-    }
-
-    /* Config entry not found */
-    return STATUS_EFI_NOT_FOUND;
-}
-
-/**
  * Loads and parses XTLDR configuration file.
  *
  * @return This routine returns a status code.
@@ -408,7 +221,7 @@ BlSetConfigValue(IN PCWSTR ConfigName,
  */
 XTCDECL
 EFI_STATUS
-BlpLoadConfiguration()
+Configuration::LoadConfiguration()
 {
     PLIST_ENTRY SectionListEntry;
     EFI_STATUS Status;
@@ -418,27 +231,27 @@ BlpLoadConfiguration()
     RTL::LinkedList::InitializeListHead(&BlpConfigSections);
 
     /* Read data from configuration file */
-    Status = BlpReadConfigFile(XTBL_LOADER_DIRECTORY_PATH, L"XTLDR.INI", &ConfigData);
+    Status = ReadConfigFile(XTBL_LOADER_DIRECTORY_PATH, L"XTLDR.INI", &ConfigData);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to read config file, try with architecture specific directory */
-        Status = BlpReadConfigFile(XTBL_ARCH_LOADER_DIRECTORY_PATH, L"XTLDR.INI", &ConfigData);
+        Status = ReadConfigFile(XTBL_ARCH_LOADER_DIRECTORY_PATH, L"XTLDR.INI", &ConfigData);
     }
 
     /* Check if configuration was read successfully */
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to load configuration */
-        BlDebugPrint(L"Failed to load FS0:/EFI/BOOT/XTLDR/XTLDR.INI configuration file (Status Code: 0x%zX)\n", Status);
+        Debug::Print(L"Failed to load FS0:/EFI/BOOT/XTLDR/XTLDR.INI configuration file (Status Code: 0x%zX)\n", Status);
         return Status;
     }
 
     /* Parse configuration data */
-    Status = BlpParseConfigFile(ConfigData, &BlpConfigSections);
+    Status = ParseConfigFile(ConfigData, &BlpConfigSections);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to parse configuration */
-        BlDebugPrint(L"Failed to parse FS0:/EFI/BOOT/XTLDR/XTLDR.INI configuration file (Status Code: 0x%zX)\n", Status);
+        Debug::Print(L"Failed to parse FS0:/EFI/BOOT/XTLDR/XTLDR.INI configuration file (Status Code: 0x%zX)\n", Status);
         return Status;
     }
 
@@ -453,7 +266,7 @@ BlpLoadConfiguration()
         if(RTL::WideString::CompareWideStringInsensitive(Section->SectionName, L"XTLDR", 5) == 0)
         {
             /* Update global configuration */
-            BlpUpdateConfiguration(&Section->Options);
+            UpdateConfiguration(&Section->Options);
 
             /* Remove XTLDR section from the list */
             RTL::LinkedList::RemoveEntryList(SectionListEntry);
@@ -480,7 +293,7 @@ BlpLoadConfiguration()
  */
 XTCDECL
 EFI_STATUS
-BlpParseCommandLine(VOID)
+Configuration::ParseCommandLine(VOID)
 {
     EFI_GUID LIPGuid = EFI_LOADED_IMAGE_PROTOCOL_GUID;
     PEFI_LOADED_IMAGE_PROTOCOL LoadedImage;
@@ -546,15 +359,15 @@ BlpParseCommandLine(VOID)
                 }
 
                 /* Allocate memory for new option */
-                Status = BlAllocateMemoryPool(sizeof(XTBL_CONFIG_ENTRY), (PVOID*)&Option);
+                Status = Memory::AllocatePool(sizeof(XTBL_CONFIG_ENTRY), (PVOID*)&Option);
                 if(Status == STATUS_EFI_SUCCESS)
                 {
                     /* Allocate more memory for option name */
-                    Status = BlAllocateMemoryPool(sizeof(WCHAR) * (KeyLength + 1), (PVOID*)&Option->Name);
+                    Status = Memory::AllocatePool(sizeof(WCHAR) * (KeyLength + 1), (PVOID*)&Option->Name);
                     if(Status == STATUS_EFI_SUCCESS)
                     {
                         /* Allocate even more memory for option value */
-                        Status = BlAllocateMemoryPool(sizeof(WCHAR) * (ValueLength + 1), (PVOID*)&Option->Value);
+                        Status = Memory::AllocatePool(sizeof(WCHAR) * (ValueLength + 1), (PVOID*)&Option->Value);
                     }
                 }
                 if(Status != STATUS_EFI_SUCCESS)
@@ -577,7 +390,7 @@ BlpParseCommandLine(VOID)
             }
 
             /* Update global configuration */
-            BlpUpdateConfiguration(&Config);
+            UpdateConfiguration(&Config);
         }
     }
 
@@ -600,8 +413,8 @@ BlpParseCommandLine(VOID)
  */
 XTCDECL
 EFI_STATUS
-BlpParseConfigFile(IN CONST PCHAR RawConfig,
-                   OUT PLIST_ENTRY Configuration)
+Configuration::ParseConfigFile(IN CONST PCHAR RawConfig,
+                               OUT PLIST_ENTRY Configuration)
 {
     SIZE_T SectionLength, KeyLength, ValueLength;
     PCHAR InputData, Key, SectionName, Value;
@@ -667,11 +480,11 @@ BlpParseConfigFile(IN CONST PCHAR RawConfig,
             SectionLength = RTL::String::StringLength(SectionName, 0);
 
             /* Allocate memory for new section */
-            Status = BlAllocateMemoryPool(sizeof(XTBL_CONFIG_SECTION), (PVOID*)&Section);
+            Status = Memory::AllocatePool(sizeof(XTBL_CONFIG_SECTION), (PVOID*)&Section);
             if(Status == STATUS_EFI_SUCCESS)
             {
                 /* Allocate more memory for section name */
-                Status = BlAllocateMemoryPool(sizeof(WCHAR) * (SectionLength + 1), (PVOID*)&Section->SectionName);
+                Status = Memory::AllocatePool(sizeof(WCHAR) * (SectionLength + 1), (PVOID*)&Section->SectionName);
             }
             if(Status != STATUS_EFI_SUCCESS)
             {
@@ -740,15 +553,15 @@ BlpParseConfigFile(IN CONST PCHAR RawConfig,
             ValueLength = RTL::String::StringLength(Value, 0);
 
             /* Allocate memory for new option */
-            Status = BlAllocateMemoryPool(sizeof(XTBL_CONFIG_ENTRY), (PVOID*)&Option);
+            Status = Memory::AllocatePool(sizeof(XTBL_CONFIG_ENTRY), (PVOID*)&Option);
             if(Status == STATUS_EFI_SUCCESS)
             {
                 /* Allocate more memory for option name */
-                Status = BlAllocateMemoryPool(sizeof(WCHAR) * (KeyLength + 1), (PVOID*)&Option->Name);
+                Status = Memory::AllocatePool(sizeof(WCHAR) * (KeyLength + 1), (PVOID*)&Option->Name);
                 if(Status == STATUS_EFI_SUCCESS)
                 {
                     /* Allocate even more memory for option value */
-                    Status = BlAllocateMemoryPool(sizeof(WCHAR) * (ValueLength + 1), (PVOID*)&Option->Value);
+                    Status = Memory::AllocatePool(sizeof(WCHAR) * (ValueLength + 1), (PVOID*)&Option->Value);
                 }
             }
             if(Status != STATUS_EFI_SUCCESS)
@@ -802,9 +615,9 @@ BlpParseConfigFile(IN CONST PCHAR RawConfig,
  */
 XTCDECL
 EFI_STATUS
-BlpReadConfigFile(IN PCWSTR ConfigDirectory,
-                  IN PCWSTR ConfigFile,
-                  OUT PCHAR *ConfigData)
+Configuration::ReadConfigFile(IN PCWSTR ConfigDirectory,
+                              IN PCWSTR ConfigFile,
+                              OUT PCHAR *ConfigData)
 {
     PEFI_FILE_HANDLE DirHandle, FsHandle;
     EFI_HANDLE DiskHandle;
@@ -812,7 +625,7 @@ BlpReadConfigFile(IN PCWSTR ConfigDirectory,
     SIZE_T FileSize;
 
     /* Open EFI volume */
-    Status = BlOpenVolume(NULLPTR, &DiskHandle, &FsHandle);
+    Status = Volume::OpenVolume(NULLPTR, &DiskHandle, &FsHandle);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to open a volume */
@@ -827,19 +640,207 @@ BlpReadConfigFile(IN PCWSTR ConfigDirectory,
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to open directory */
-        BlCloseVolume(&DiskHandle);
+        Volume::CloseVolume(&DiskHandle);
         return Status;
     }
 
     /* Read configuration file and close directory */
-    Status = BlReadFile(DirHandle, ConfigFile, (PVOID *)ConfigData, &FileSize);
+    Status = Volume::ReadFile(DirHandle, ConfigFile, (PVOID *)ConfigData, &FileSize);
     DirHandle->Close(DirHandle);
 
     /* Close EFI volume */
-    BlCloseVolume(&DiskHandle);
+    Volume::CloseVolume(&DiskHandle);
 
     /* Return read status */
     return Status;
+}
+
+
+/**
+ * Sets the value of a specific OS boot option in a list, or adds it if it doesn't exist.
+ *
+ * @param Options
+ *       A pointer to the head of a list of XTBL_CONFIG_ENTRY structures.
+ *
+ * @param OptionName
+ *       A pointer to a wide string that contains the name of the boot option to set.
+ *
+ * @param OptionValue
+ *       A pointer to a wide string that contains the new value for the boot option.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+Configuration::SetBootOptionValue(IN PLIST_ENTRY Options,
+                                  IN PCWSTR OptionName,
+                                  IN PCWSTR OptionValue)
+{
+    PXTBL_CONFIG_ENTRY ConfigEntry;
+    PLIST_ENTRY ConfigList;
+    ULONG Length;
+    EFI_STATUS Status;
+
+    /* Get the length of the option name we are looking for */
+    Length = RTL::WideString::WideStringLength(OptionName, 0);
+
+    /* Start iterating from the first entry in the options list */
+    ConfigList = Options->Flink;
+    while(ConfigList != Options)
+    {
+        /* Get the container record for the current config entry */
+        ConfigEntry = CONTAIN_RECORD(ConfigList, XTBL_CONFIG_ENTRY, Flink);
+
+        /* Compare the current entry's name with the requested option name */
+        if(RTL::WideString::CompareWideStringInsensitive(ConfigEntry->Name, OptionName, Length) == 0)
+        {
+            /* Found the option, get its length */
+            Length = RTL::WideString::WideStringLength(OptionValue, 0);
+
+            /* Reallocate memory for the new value */
+            Status = Memory::FreePool(ConfigEntry->Value);
+            if(Status != STATUS_EFI_SUCCESS)
+            {
+                /* Failed to free memory, return status code */
+                return Status;
+            }
+
+            /* Allocate new memory for the updated value */
+            Status = Memory::AllocatePool((Length + 1) * sizeof(WCHAR), (PVOID *)&ConfigEntry->Value);
+            if(Status != STATUS_EFI_SUCCESS)
+            {
+                /* Memory allocation failure, print debug message and return status code */
+                Debug::Print(L"ERROR: Memory allocation failure (Status Code: 0x%zX)\\n", Status);
+                return Status;
+            }
+
+            /* Copy the value and NULL-terminate the new string */
+            RTL::Memory::CopyMemory(ConfigEntry->Value, OptionValue, Length * sizeof(WCHAR));
+            ConfigEntry->Value[Length] = L'\0';
+            return STATUS_EFI_SUCCESS;
+        }
+
+        /* Move to the next entry in the list */
+        ConfigList = ConfigList->Flink;
+    }
+
+    /* Option not found, allocate memory for the new one */
+    Status = Memory::AllocatePool(sizeof(XTBL_CONFIG_ENTRY), (PVOID *)&ConfigEntry);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Memory allocation failure, print debug message and return status code */
+        Debug::Print(L"ERROR: Memory allocation failure (Status Code: 0x%zX)\\n", Status);
+        return Status;
+    }
+
+    /* Allocate memory for the option name */
+    Length = RTL::WideString::WideStringLength(OptionName, 0);
+    Status = Memory::AllocatePool((Length + 1) * sizeof(WCHAR), (PVOID *)&ConfigEntry->Name);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Memory allocation failure, print debug message and return status code */
+        Debug::Print(L"ERROR: Memory allocation failure (Status Code: 0x%zX)\\n", Status);
+        Memory::FreePool(ConfigEntry);
+        return Status;
+    }
+
+    /* Copy the option name and NULL-terminate the new string */
+    RTL::Memory::CopyMemory(ConfigEntry->Name, OptionName, Length * sizeof(WCHAR));
+    ConfigEntry->Name[Length] = L'\0';
+
+    /* Allocate memory for the option value */
+    Length = RTL::WideString::WideStringLength(OptionValue, 0);
+    Status = Memory::AllocatePool((Length + 1) * sizeof(WCHAR), (PVOID *)&ConfigEntry->Value);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Memory allocation failure, print debug message and return status code */
+        Debug::Print(L"ERROR: Memory allocation failure (Status Code: 0x%zX)\\n", Status);
+        Memory::FreePool(ConfigEntry->Name);
+        Memory::FreePool(ConfigEntry);
+        return Status;
+    }
+
+    /* Copy the value and NULL-terminate the new string */
+    RTL::Memory::CopyMemory(ConfigEntry->Value, OptionValue, Length * sizeof(WCHAR));
+    ConfigEntry->Value[Length] = L'\0';
+
+    /* Insert the new config entry at the end of the options list */
+    RTL::LinkedList::InsertTailList(Options, &ConfigEntry->Flink);
+
+    /* Return success */
+    return STATUS_EFI_SUCCESS;
+}
+
+/**
+ * Updates existing configuration value.
+ *
+ * @param ConfigName
+ *        Specifies the configuration key to update.
+ *
+ * @param ConfigValue
+ *        Specifies the new configuration value.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+Configuration::SetValue(IN PCWSTR ConfigName,
+                        IN PCWSTR ConfigValue)
+{
+    PXTBL_CONFIG_ENTRY ConfigEntry;
+    PLIST_ENTRY ConfigListEntry;
+    EFI_STATUS Status;
+    SIZE_T Length;
+
+    /* Get config entry name length */
+    Length = RTL::WideString::WideStringLength(ConfigName, 0);
+
+    /* Iterate through config entries */
+    ConfigListEntry = BlpConfig.Flink;
+    while(ConfigListEntry != &BlpConfig)
+    {
+        /* Get config entry */
+        ConfigEntry = CONTAIN_RECORD(ConfigListEntry, XTBL_CONFIG_ENTRY, Flink);
+
+        /* Check if requested configuration found */
+        if(RTL::WideString::CompareWideStringInsensitive(ConfigEntry->Name, ConfigName, Length) == 0)
+        {
+            /* Check new config value length */
+            Length = RTL::WideString::WideStringLength(ConfigValue, 0);
+
+            /* Reallocate memory for new config value */
+            Status = Memory::FreePool(ConfigEntry->Value);
+            if(Status == STATUS_EFI_SUCCESS)
+            {
+                /* Successfully freed memory, allocate a new pool */
+                Status = Memory::AllocatePool((Length + 1) * sizeof(WCHAR), (PVOID *)&ConfigEntry->Value);
+            }
+
+            /* Check memory reallocation status */
+            if(Status != STATUS_EFI_SUCCESS)
+            {
+                /* Failed to reallocate memory */
+                return Status;
+            }
+
+            /* Update config value */
+            RTL::Memory::CopyMemory(ConfigEntry->Value, ConfigValue, Length * sizeof(WCHAR));
+            ConfigEntry->Value[Length] = L'\0';
+
+            /* Return success */
+            return STATUS_EFI_SUCCESS;
+        }
+
+        /* Move to the next config entry */
+        ConfigListEntry = ConfigListEntry->Flink;
+    }
+
+    /* Config entry not found */
+    return STATUS_EFI_NOT_FOUND;
 }
 
 /**
@@ -854,7 +855,7 @@ BlpReadConfigFile(IN PCWSTR ConfigDirectory,
  */
 XTCDECL
 VOID
-BlpUpdateConfiguration(IN PLIST_ENTRY NewConfig)
+Configuration::UpdateConfiguration(IN PLIST_ENTRY NewConfig)
 {
     PXTBL_CONFIG_ENTRY ConfigEntry;
     PWCHAR ConfigValue;
@@ -871,7 +872,7 @@ BlpUpdateConfiguration(IN PLIST_ENTRY NewConfig)
         NextListEntry = ConfigListEntry->Flink;
 
         /* Make sure config entry does not exist yet */
-        BlGetConfigValue(ConfigEntry->Name, &ConfigValue);
+        GetValue(ConfigEntry->Name, &ConfigValue);
         if(ConfigValue == NULLPTR)
         {
             /* Remove new config entry from input list and put it into global config list */

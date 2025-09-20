@@ -22,8 +22,8 @@
  */
 XTCDECL
 EFI_STATUS
-BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
-               IN ULONG_PTR SelfMapAddress)
+Memory::BuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
+                     IN ULONG_PTR SelfMapAddress)
 {
     PLIST_ENTRY ListEntry, ModulesList, ModulesListEntry;
     EFI_PHYSICAL_ADDRESS Address, DirectoryAddress;
@@ -36,7 +36,7 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
     if(PageMap->PageMapLevel == 3)
     {
         /* Allocate a page for the 3-level page map structure (PAE enabled) */
-        Status = BlAllocateMemoryPages(AllocateAnyPages, 1, &Address);
+        Status = AllocatePages(AllocateAnyPages, 1, &Address);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory allocation failed, cannot proceed with page map creation */
@@ -48,7 +48,7 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
         RTL::Memory::ZeroMemory(PageMap->PtePointer, EFI_PAGE_SIZE);
 
         /* Allocate 4 pages for the Page Directories (PDs) */
-        Status = BlAllocateMemoryPages(AllocateAnyPages, 4, &DirectoryAddress);
+        Status = AllocatePages(AllocateAnyPages, 4, &DirectoryAddress);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory allocation failed, cannot proceed with page map creation */
@@ -70,7 +70,7 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
     else
     {
         /* Allocate a page for the 2-level page map structure (PAE disabled) */
-        Status = BlAllocateMemoryPages(AllocateAnyPages, 1, &Address);
+        Status = AllocatePages(AllocateAnyPages, 1, &Address);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory allocation failed, cannot proceed with page map creation */
@@ -83,7 +83,7 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
     }
 
     /* Add page mapping itself to memory mapping */
-    Status = BlpSelfMapPml(PageMap, SelfMapAddress);
+    Status = SelfMapPml(PageMap, SelfMapAddress);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* PML mapping failed */
@@ -91,8 +91,8 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
     }
 
     /* Map the trampoline code area */
-    Status = BlMapVirtualMemory(PageMap, (PVOID)MM_TRAMPOLINE_ADDRESS,(PVOID)MM_TRAMPOLINE_ADDRESS,
-                                1, LoaderFirmwareTemporary);
+    Status = MapVirtualMemory(PageMap, (PVOID)MM_TRAMPOLINE_ADDRESS,(PVOID)MM_TRAMPOLINE_ADDRESS,
+                              1, LoaderFirmwareTemporary);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Mapping trampoline code failed */
@@ -100,7 +100,7 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
     }
 
     /* Get list of XTLDR modules */
-    ModulesList = BlGetModulesList();
+    ModulesList = Protocol::GetModulesList();
     ModulesListEntry = ModulesList->Flink;
     while(ModulesListEntry != ModulesList)
     {
@@ -108,8 +108,8 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
         ModuleInfo = CONTAIN_RECORD(ModulesListEntry, XTBL_MODULE_INFO, Flink);
 
         /* Map module code */
-        Status = BlMapVirtualMemory(PageMap, ModuleInfo->ModuleBase, ModuleInfo->ModuleBase,
-                                    EFI_SIZE_TO_PAGES(ModuleInfo->ModuleSize), LoaderFirmwareTemporary);
+        Status = MapVirtualMemory(PageMap, ModuleInfo->ModuleBase, ModuleInfo->ModuleBase,
+                                  EFI_SIZE_TO_PAGES(ModuleInfo->ModuleSize), LoaderFirmwareTemporary);
 
         /* Check if mapping succeeded */
         if(Status != STATUS_EFI_SUCCESS)
@@ -126,8 +126,8 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
     if(BlpStatus.LoaderBase && BlpStatus.LoaderSize)
     {
         /* Map boot loader code as well */
-        Status = BlMapVirtualMemory(PageMap, BlpStatus.LoaderBase, BlpStatus.LoaderBase,
-                                    EFI_SIZE_TO_PAGES(BlpStatus.LoaderSize), LoaderFirmwareTemporary);
+        Status = MapVirtualMemory(PageMap, BlpStatus.LoaderBase, BlpStatus.LoaderBase,
+                                  EFI_SIZE_TO_PAGES(BlpStatus.LoaderSize), LoaderFirmwareTemporary);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Mapping boot loader code failed */
@@ -141,7 +141,7 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
     }
 
     /* Iterate through and map all the mappings*/
-    BlDebugPrint(L"Mapping and dumping EFI memory:\n");
+    Debug::Print(L"Mapping and dumping EFI memory:\n");
     ListEntry = PageMap->MemoryMap.Flink;
     while(ListEntry != &PageMap->MemoryMap)
     {
@@ -152,12 +152,12 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
         if(Mapping->VirtualAddress)
         {
             /* Dump memory mapping */
-            BlDebugPrint(L"   Type=%02lu, PhysicalBase=%.8P, VirtualBase=%.8P, Pages=%llu\n", Mapping->MemoryType,
+            Debug::Print(L"   Type=%02lu, PhysicalBase=%.8P, VirtualBase=%.8P, Pages=%llu\n", Mapping->MemoryType,
                          Mapping->PhysicalAddress, Mapping->VirtualAddress, Mapping->NumberOfPages);
 
             /* Map memory */
-            Status = BlMapPage(PageMap, (UINT_PTR)Mapping->VirtualAddress,
-                                        (UINT_PTR)Mapping->PhysicalAddress, Mapping->NumberOfPages);
+            Status = MapPage(PageMap, (UINT_PTR)Mapping->VirtualAddress,
+                             (UINT_PTR)Mapping->PhysicalAddress, Mapping->NumberOfPages);
             if(Status != STATUS_EFI_SUCCESS)
             {
                 /* Memory mapping failed */
@@ -167,116 +167,6 @@ BlBuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
 
         /* Take next element */
         ListEntry = ListEntry->Flink;
-    }
-
-    /* Return success */
-    return STATUS_EFI_SUCCESS;
-}
-
-/**
- * Does the actual virtual memory mapping.
- *
- * @param PageMap
- *        Supplies a pointer to the page mapping structure.
- *
- * @param VirtualAddress
- *        Supplies a virtual address of the mapping.
- *
- * @param PhysicalAddress
- *        Supplies a physical address of the mapping.
- *
- * @param NumberOfPages
- *        Supplies a number of the pages of the mapping.
- *
- * @return This routine returns a status code.
- *
- * @since XT 1.0
- */
-XTCDECL
-EFI_STATUS
-BlMapPage(IN PXTBL_PAGE_MAPPING PageMap,
-          IN ULONG_PTR VirtualAddress,
-          IN ULONG_PTR PhysicalAddress,
-          IN ULONG NumberOfPages)
-{
-    SIZE_T PageFrameNumber;
-    PVOID Pml1, Pml2, Pml3;
-    SIZE_T Pml1Entry, Pml2Entry, Pml3Entry;
-    PHARDWARE_LEGACY_PTE LegacyPmlTable;
-    PHARDWARE_MODERN_PTE PmlTable;
-    EFI_STATUS Status;
-
-    /* Set the Page Frame Number (PFN) */
-    PageFrameNumber = PhysicalAddress >> EFI_PAGE_SHIFT;
-
-    /* Map all requested pages */
-    while(NumberOfPages > 0)
-    {
-        /* Check the paging mode to use the correct page table structure */
-        if(PageMap->PageMapLevel == 3)
-        {
-            /* Calculate the indices for PAE page tables */
-            Pml3Entry = (VirtualAddress >> 30) & 0x3;
-            Pml2Entry = (VirtualAddress >> 21) & 0x1FF;
-            Pml1Entry = (VirtualAddress >> 12) & 0x1FF;
-
-            /* Get Page Directory Pointer Table (PML3) */
-            Pml3 = PageMap->PtePointer;
-
-            /* Get Page Directory (PML2) */
-            Status = BlpGetNextPageTable(PageMap, Pml3, Pml3Entry, &Pml2);
-            if(Status != STATUS_EFI_SUCCESS)
-            {
-                /* Failed to get the Page Table, abort mapping */
-                return Status;
-            }
-
-            /* Get Page Table (PML1) */
-            Status = BlpGetNextPageTable(PageMap, Pml2, Pml2Entry, &Pml1);
-            if(Status != STATUS_EFI_SUCCESS)
-            {
-                /* Failed to get the Page Table, abort mapping */
-                return Status;
-            }
-
-            /* Set the 64-bit PTE entry */
-            PmlTable = (PHARDWARE_MODERN_PTE)Pml1;
-            RTL::Memory::ZeroMemory(&PmlTable[Pml1Entry], sizeof(HARDWARE_MODERN_PTE));
-            PmlTable[Pml1Entry].PageFrameNumber = PageFrameNumber;
-            PmlTable[Pml1Entry].Valid = 1;
-            PmlTable[Pml1Entry].Writable = 1;
-        }
-        else
-        {
-            /* Calculate the indices for non-PAE page tables */
-            Pml2Entry = (VirtualAddress >> 22) & 0x3FF;
-            Pml1Entry = (VirtualAddress >> 12) & 0x3FF;
-
-            /* Get Page Directory (PML2) */
-            Pml2 = PageMap->PtePointer;
-
-            /* Get Page Table (PML1) */
-            Status = BlpGetNextPageTable(PageMap, Pml2, Pml2Entry, &Pml1);
-            if(Status != STATUS_EFI_SUCCESS)
-            {
-                /* Failed to get the Page Table, abort mapping */
-                return Status;
-            }
-
-            /* Set the 32-bit PTE entry */
-            LegacyPmlTable = (PHARDWARE_LEGACY_PTE)Pml1;
-            RTL::Memory::ZeroMemory(&LegacyPmlTable[Pml1Entry], sizeof(HARDWARE_LEGACY_PTE));
-            LegacyPmlTable[Pml1Entry].PageFrameNumber = (UINT32)PageFrameNumber;
-            LegacyPmlTable[Pml1Entry].Valid = 1;
-            LegacyPmlTable[Pml1Entry].Writable = 1;
-        }
-
-        /* Take next virtual address and PFN */
-        VirtualAddress += EFI_PAGE_SIZE;
-        PageFrameNumber++;
-
-        /* Decrease number of pages left */
-        NumberOfPages--;
     }
 
     /* Return success */
@@ -304,10 +194,10 @@ BlMapPage(IN PXTBL_PAGE_MAPPING PageMap,
  */
 XTCDECL
 EFI_STATUS
-BlpGetNextPageTable(IN PXTBL_PAGE_MAPPING PageMap,
-                    IN PVOID PageTable,
-                    IN SIZE_T Entry,
-                    OUT PVOID *NextPageTable)
+Memory::GetNextPageTable(IN PXTBL_PAGE_MAPPING PageMap,
+                         IN PVOID PageTable,
+                         IN SIZE_T Entry,
+                         OUT PVOID *NextPageTable)
 {
     EFI_PHYSICAL_ADDRESS Address;
     ULONGLONG PmlPointer = 0;
@@ -349,7 +239,7 @@ BlpGetNextPageTable(IN PXTBL_PAGE_MAPPING PageMap,
     else
     {
         /* Allocate pages for new PML entry */
-        Status = BlAllocateMemoryPages(AllocateAnyPages, 1, &Address);
+        Status = AllocatePages(AllocateAnyPages, 1, &Address);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory allocation failure */
@@ -357,7 +247,7 @@ BlpGetNextPageTable(IN PXTBL_PAGE_MAPPING PageMap,
         }
 
         /* Add new memory mapping */
-        Status = BlMapVirtualMemory(PageMap, NULLPTR, (PVOID)(UINT_PTR)Address, 1, LoaderMemoryData);
+        Status = MapVirtualMemory(PageMap, NULLPTR, (PVOID)(UINT_PTR)Address, 1, LoaderMemoryData);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory mapping failure */
@@ -397,6 +287,116 @@ BlpGetNextPageTable(IN PXTBL_PAGE_MAPPING PageMap,
 }
 
 /**
+ * Does the actual virtual memory mapping.
+ *
+ * @param PageMap
+ *        Supplies a pointer to the page mapping structure.
+ *
+ * @param VirtualAddress
+ *        Supplies a virtual address of the mapping.
+ *
+ * @param PhysicalAddress
+ *        Supplies a physical address of the mapping.
+ *
+ * @param NumberOfPages
+ *        Supplies a number of the pages of the mapping.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+Memory::MapPage(IN PXTBL_PAGE_MAPPING PageMap,
+                IN ULONG_PTR VirtualAddress,
+                IN ULONG_PTR PhysicalAddress,
+                IN ULONG NumberOfPages)
+{
+    SIZE_T PageFrameNumber;
+    PVOID Pml1, Pml2, Pml3;
+    SIZE_T Pml1Entry, Pml2Entry, Pml3Entry;
+    PHARDWARE_LEGACY_PTE LegacyPmlTable;
+    PHARDWARE_MODERN_PTE PmlTable;
+    EFI_STATUS Status;
+
+    /* Set the Page Frame Number (PFN) */
+    PageFrameNumber = PhysicalAddress >> EFI_PAGE_SHIFT;
+
+    /* Map all requested pages */
+    while(NumberOfPages > 0)
+    {
+        /* Check the paging mode to use the correct page table structure */
+        if(PageMap->PageMapLevel == 3)
+        {
+            /* Calculate the indices for PAE page tables */
+            Pml3Entry = (VirtualAddress >> 30) & 0x3;
+            Pml2Entry = (VirtualAddress >> 21) & 0x1FF;
+            Pml1Entry = (VirtualAddress >> 12) & 0x1FF;
+
+            /* Get Page Directory Pointer Table (PML3) */
+            Pml3 = PageMap->PtePointer;
+
+            /* Get Page Directory (PML2) */
+            Status = GetNextPageTable(PageMap, Pml3, Pml3Entry, &Pml2);
+            if(Status != STATUS_EFI_SUCCESS)
+            {
+                /* Failed to get the Page Table, abort mapping */
+                return Status;
+            }
+
+            /* Get Page Table (PML1) */
+            Status = GetNextPageTable(PageMap, Pml2, Pml2Entry, &Pml1);
+            if(Status != STATUS_EFI_SUCCESS)
+            {
+                /* Failed to get the Page Table, abort mapping */
+                return Status;
+            }
+
+            /* Set the 64-bit PTE entry */
+            PmlTable = (PHARDWARE_MODERN_PTE)Pml1;
+            RTL::Memory::ZeroMemory(&PmlTable[Pml1Entry], sizeof(HARDWARE_MODERN_PTE));
+            PmlTable[Pml1Entry].PageFrameNumber = PageFrameNumber;
+            PmlTable[Pml1Entry].Valid = 1;
+            PmlTable[Pml1Entry].Writable = 1;
+        }
+        else
+        {
+            /* Calculate the indices for non-PAE page tables */
+            Pml2Entry = (VirtualAddress >> 22) & 0x3FF;
+            Pml1Entry = (VirtualAddress >> 12) & 0x3FF;
+
+            /* Get Page Directory (PML2) */
+            Pml2 = PageMap->PtePointer;
+
+            /* Get Page Table (PML1) */
+            Status = GetNextPageTable(PageMap, Pml2, Pml2Entry, &Pml1);
+            if(Status != STATUS_EFI_SUCCESS)
+            {
+                /* Failed to get the Page Table, abort mapping */
+                return Status;
+            }
+
+            /* Set the 32-bit PTE entry */
+            LegacyPmlTable = (PHARDWARE_LEGACY_PTE)Pml1;
+            RTL::Memory::ZeroMemory(&LegacyPmlTable[Pml1Entry], sizeof(HARDWARE_LEGACY_PTE));
+            LegacyPmlTable[Pml1Entry].PageFrameNumber = (UINT32)PageFrameNumber;
+            LegacyPmlTable[Pml1Entry].Valid = 1;
+            LegacyPmlTable[Pml1Entry].Writable = 1;
+        }
+
+        /* Take next virtual address and PFN */
+        VirtualAddress += EFI_PAGE_SIZE;
+        PageFrameNumber++;
+
+        /* Decrease number of pages left */
+        NumberOfPages--;
+    }
+
+    /* Return success */
+    return STATUS_EFI_SUCCESS;
+}
+
+/**
  * Creates a recursive self mapping for all PML levels.
  *
  * @param PageMap
@@ -411,8 +411,8 @@ BlpGetNextPageTable(IN PXTBL_PAGE_MAPPING PageMap,
  */
 XTCDECL
 EFI_STATUS
-BlpSelfMapPml(IN PXTBL_PAGE_MAPPING PageMap,
-              IN ULONG_PTR SelfMapAddress)
+Memory::SelfMapPml(IN PXTBL_PAGE_MAPPING PageMap,
+                   IN ULONG_PTR SelfMapAddress)
 {
     PHARDWARE_LEGACY_PTE LegacyPml;
     PHARDWARE_MODERN_PTE Pml;

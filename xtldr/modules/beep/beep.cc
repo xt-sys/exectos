@@ -167,7 +167,7 @@ Beep::PlayTune(IN PWCHAR Arguments)
             }
 
             /* Wait for duration time */
-            XtLdrProtocol->Util.SleepExecution(60000 * Duration / Tempo);
+            XtLdrProtocol->Utils.SleepExecution(60000 * Duration / Tempo);
 
             /* Reset pitch and duration */
             Pitch = -1;

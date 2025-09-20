@@ -21,19 +21,19 @@
  */
 XTCDECL
 VOID
-BlClearConsoleLine(IN ULONGLONG LineNo)
+Console::ClearLine(IN ULONGLONG LineNo)
 {
     UINT_PTR Index, ResX, ResY;
 
     /* Query console mode */
-    BlQueryConsoleMode(&ResX, &ResY);
+    QueryMode(&ResX, &ResY);
 
     /* Set cursor position and clear line */
-    BlSetCursorPosition(0, LineNo);
+    SetCursorPosition(0, LineNo);
     for(Index = 0; Index < ResX; Index++)
     {
         /* Clear line */
-        BlConsoleWrite(L" ");
+        Write(L" ");
     }
 }
 
@@ -46,7 +46,7 @@ BlClearConsoleLine(IN ULONGLONG LineNo)
  */
 XTCDECL
 VOID
-BlClearConsoleScreen()
+Console::ClearScreen()
 {
     /* Clear screen */
     EfiSystemTable->ConOut->ClearScreen(EfiSystemTable->ConOut);
@@ -61,7 +61,7 @@ BlClearConsoleScreen()
  */
 XTCDECL
 VOID
-BlDisableConsoleCursor()
+Console::DisableCursor()
 {
     EfiSystemTable->ConOut->EnableCursor(EfiSystemTable->ConOut, FALSE);
 }
@@ -75,9 +75,39 @@ BlDisableConsoleCursor()
  */
 XTCDECL
 VOID
-BlEnableConsoleCursor()
+Console::EnableCursor()
 {
     EfiSystemTable->ConOut->EnableCursor(EfiSystemTable->ConOut, TRUE);
+}
+
+/**
+ * This routine initializes the EFI console.
+ *
+ * @return This routine returns status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+Console::InitializeConsole()
+{
+    /* Clear console buffers */
+    EfiSystemTable->ConIn->Reset(EfiSystemTable->ConIn, TRUE);
+    EfiSystemTable->ConOut->Reset(EfiSystemTable->ConOut, TRUE);
+    EfiSystemTable->StdErr->Reset(EfiSystemTable->StdErr, TRUE);
+
+    /* Make sure that current console mode is 80x25 characters, as some broken EFI implementations might
+     * set different mode that do not fit on the screen, causing a text to be displayed offscreen */
+    if(EfiSystemTable->ConOut->Mode->Mode != 0)
+    {
+        /* Set console mode to 0, which is standard, 80x25 text mode */
+        SetMode(0);
+    }
+
+    /* Clear screen and enable cursor */
+    SetAttributes(EFI_TEXT_BGCOLOR_BLACK | EFI_TEXT_FGCOLOR_LIGHTGRAY);
+    ClearScreen();
+    EnableCursor();
 }
 
 /**
@@ -95,15 +125,15 @@ BlEnableConsoleCursor()
  */
 XTCDECL
 VOID
-BlConsolePrint(IN PCWSTR Format,
+Console::Print(IN PCWSTR Format,
                IN ...)
 {
     RTL_PRINT_CONTEXT ConsolePrintContext, SerialPrintContext;
     VA_LIST Arguments;
 
     /* Initialise the print contexts */
-    ConsolePrintContext.WriteWideCharacter = BlpConsolePutChar;
-    SerialPrintContext.WriteWideCharacter = BlpDebugPutChar;
+    ConsolePrintContext.WriteWideCharacter = PutChar;
+    SerialPrintContext.WriteWideCharacter = Debug::PutChar;
 
     /* Initialise the va_list */
     VA_START(Arguments, Format);
@@ -127,50 +157,35 @@ BlConsolePrint(IN PCWSTR Format,
 }
 
 /**
- * Displays the string on the device at the current cursor location.
+ * Writes a character to the default EFI console.
  *
- * @param String
- *        The string to be displayed.
+ * @param Character
+ *        The integer promotion of the character to be written.
  *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTCDECL
-VOID
-BlConsoleWrite(IN PCWSTR String)
-{
-    EfiSystemTable->ConOut->OutputString(EfiSystemTable->ConOut, (PWSTR)String);
-}
-
-/**
- * This routine initializes the EFI console.
- *
- * @return This routine returns status code.
+ * @return This routine returns a status code.
  *
  * @since XT 1.0
  */
 XTCDECL
-VOID
-BlInitializeConsole()
+XTSTATUS
+Console::PutChar(IN WCHAR Character)
 {
-    /* Clear console buffers */
-    EfiSystemTable->ConIn->Reset(EfiSystemTable->ConIn, TRUE);
-    EfiSystemTable->ConOut->Reset(EfiSystemTable->ConOut, TRUE);
-    EfiSystemTable->StdErr->Reset(EfiSystemTable->StdErr, TRUE);
+    WCHAR Buffer[2];
 
-    /* Make sure that current console mode is 80x25 characters, as some broken EFI implementations might
-     * set different mode that do not fit on the screen, causing a text to be displayed offscreen */
-    if(EfiSystemTable->ConOut->Mode->Mode != 0)
+    /* Check if character is a newline ('\n') */
+    if(Character == L'\n')
     {
-        /* Set console mode to 0, which is standard, 80x25 text mode */
-        BlSetConsoleMode(0);
+        /* Print carriage return ('\r') as well */
+        PutChar(L'\r');
     }
 
-    /* Clear screen and enable cursor */
-    BlSetConsoleAttributes(EFI_TEXT_BGCOLOR_BLACK | EFI_TEXT_FGCOLOR_LIGHTGRAY);
-    BlClearConsoleScreen();
-    BlEnableConsoleCursor();
+    /* Write character to the screen console */
+    Buffer[0] = Character;
+    Buffer[1] = 0;
+    EfiSystemTable->ConOut->OutputString(EfiSystemTable->ConOut, Buffer);
+
+    /* Return success */
+    return STATUS_SUCCESS;
 }
 
 /**
@@ -188,7 +203,7 @@ BlInitializeConsole()
  */
 XTCDECL
 VOID
-BlQueryConsoleMode(OUT PUINT_PTR ResX,
+Console::QueryMode(OUT PUINT_PTR ResX,
                    OUT PUINT_PTR ResY)
 {
     EfiSystemTable->ConOut->QueryMode(EfiSystemTable->ConOut, EfiSystemTable->ConOut->Mode->Mode, ResX, ResY);
@@ -206,7 +221,7 @@ BlQueryConsoleMode(OUT PUINT_PTR ResX,
  */
 XTCDECL
 VOID
-BlReadKeyStroke(OUT PEFI_INPUT_KEY Key)
+Console::ReadKeyStroke(OUT PEFI_INPUT_KEY Key)
 {
     EfiSystemTable->ConIn->ReadKeyStroke(EfiSystemTable->ConIn, Key);
 }
@@ -220,7 +235,7 @@ BlReadKeyStroke(OUT PEFI_INPUT_KEY Key)
  */
 XTCDECL
 VOID
-BlResetConsoleInputBuffer()
+Console::ResetInputBuffer()
 {
     EfiSystemTable->ConIn->Reset(EfiSystemTable->ConIn, FALSE);
 }
@@ -237,26 +252,9 @@ BlResetConsoleInputBuffer()
  */
 XTCDECL
 VOID
-BlSetConsoleAttributes(IN ULONGLONG Attributes)
+Console::SetAttributes(IN ULONGLONG Attributes)
 {
     EfiSystemTable->ConOut->SetAttribute(EfiSystemTable->ConOut, Attributes);
-}
-
-/**
- * Sets the output console device to the requested mode.
- *
- * @param Mode
- *        Supplies a text mode number to set.
- *
- * @return This routine returns a status code.
- *
- * @since XT 1.0
- */
-XTCDECL
-EFI_STATUS
-BlSetConsoleMode(IN ULONGLONG Mode)
-{
-    return EfiSystemTable->ConOut->SetMode(EfiSystemTable->ConOut, Mode);
 }
 
 /**
@@ -274,40 +272,42 @@ BlSetConsoleMode(IN ULONGLONG Mode)
  */
 XTCDECL
 VOID
-BlSetCursorPosition(IN ULONGLONG PosX,
-                    IN ULONGLONG PosY)
+Console::SetCursorPosition(IN ULONGLONG PosX,
+                           IN ULONGLONG PosY)
 {
     EfiSystemTable->ConOut->SetCursorPosition(EfiSystemTable->ConOut, PosX, PosY);
 }
 
 /**
- * Writes a character to the default EFI console.
+ * Sets the output console device to the requested mode.
  *
- * @param Character
- *        The integer promotion of the character to be written.
+ * @param Mode
+ *        Supplies a text mode number to set.
  *
  * @return This routine returns a status code.
  *
  * @since XT 1.0
  */
 XTCDECL
-XTSTATUS
-BlpConsolePutChar(IN WCHAR Character)
+EFI_STATUS
+Console::SetMode(IN ULONGLONG Mode)
 {
-    WCHAR Buffer[2];
+    return EfiSystemTable->ConOut->SetMode(EfiSystemTable->ConOut, Mode);
+}
 
-    /* Check if character is a newline ('\n') */
-    if(Character == L'\n')
-    {
-        /* Print carriage return ('\r') as well */
-        BlpConsolePutChar(L'\r');
-    }
-
-    /* Write character to the screen console */
-    Buffer[0] = Character;
-    Buffer[1] = 0;
-    EfiSystemTable->ConOut->OutputString(EfiSystemTable->ConOut, Buffer);
-
-    /* Return success */
-    return STATUS_SUCCESS;
+/**
+ * Displays the string on the device at the current cursor location.
+ *
+ * @param String
+ *        The string to be displayed.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+Console::Write(IN PCWSTR String)
+{
+    EfiSystemTable->ConOut->OutputString(EfiSystemTable->ConOut, (PWSTR)String);
 }

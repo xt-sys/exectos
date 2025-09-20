@@ -11,6 +11,126 @@
 
 
 /**
+ * Determines dialog box size based on enabled components and message length.
+ *
+ * @param Handle
+ *        Supplies a pointer to the dialog box handle.
+ *
+ * @param Message
+ *        Supplies a pointer to the message string put on the dialog box.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+TextUi::DetermineDialogBoxSize(IN OUT PXTBL_DIALOG_HANDLE Handle,
+                               IN PCWSTR Message)
+{
+    UINT_PTR Width, Height, LineLength;
+    SIZE_T Index, MessageLength;
+    UCHAR Attributes;
+    ULONG Mask;
+
+    /* Set minimum dialog window size */
+    Height = 4;
+    Width = 36;
+
+    /* Zero line length */
+    LineLength = 0;
+
+    /* Adjust window height according to enabled components */
+    Mask = 1;
+    Attributes = Handle->Attributes;
+    while(Mask)
+    {
+        /* Check enabled components that affect dialog window size */
+        switch(Attributes & Mask)
+        {
+            case XTBL_TUI_DIALOG_ACTIVE_BUTTON:
+            case XTBL_TUI_DIALOG_INACTIVE_BUTTON:
+                Height += 1;
+                break;
+            case XTBL_TUI_DIALOG_ACTIVE_INPUT:
+            case XTBL_TUI_DIALOG_INACTIVE_INPUT:
+            case XTBL_TUI_DIALOG_PROGRESS_BAR:
+                Height += 2;
+                break;
+        }
+
+        /* Update component attributes mask */
+        Attributes &= ~Mask;
+        Mask <<= 1;
+    }
+
+    /* Check if input field is active */
+    if(Handle->Attributes & (XTBL_TUI_DIALOG_ACTIVE_INPUT | XTBL_TUI_DIALOG_INACTIVE_INPUT))
+    {
+        /* Set maximum dialog window width to fit input field */
+        Width = XTBL_TUI_MAX_DIALOG_WIDTH;
+    }
+
+    /* Get message length and count dialog window dimensions */
+    MessageLength = RTL::WideString::WideStringLength(Message, 0);
+    for(Index = 0; Index < MessageLength; Index++)
+    {
+        /* Check if this is multiline message */
+        if(Message[Index] == L'\n' || Index == MessageLength - 1)
+        {
+            /* Check if this line exceeds current dialog window width */
+            if(LineLength > Width)
+            {
+                /* Update dialog window width */
+                Width = LineLength;
+            }
+
+            /* Increase dialog window height to fit next line */
+            Height++;
+            LineLength = 0;
+        }
+        else
+        {
+            /* Increase dialog window width to fit next character */
+            LineLength++;
+        }
+    }
+
+    /* Add more space to dialog window to fit side borders */
+    Width += 4;
+
+    /* Get console resolution */
+    Console::QueryMode(&Handle->ResX, &Handle->ResY);
+
+    /* Make sure dialog window fits in the buffer */
+    if(Width > XTBL_TUI_MAX_DIALOG_WIDTH)
+    {
+        /* Set maximum dialog window width */
+        Width = XTBL_TUI_MAX_DIALOG_WIDTH;
+    }
+
+    /* Make sure dialog window fits on the screen (X axis) and it is not too small for input field */
+    if(Width > (Handle->ResX - 2))
+    {
+        /* Set maximum dialog window width */
+        Width = Handle->ResX - 2;
+    }
+
+    /* Make sure dialog window fits on the screen (Y axis)*/
+    if(Height > (Handle->ResY - 2))
+    {
+        /* Set maximum dialog window height */
+        Height = Handle->ResY - 2;
+    }
+
+    /* Set dialog window final dimensions */
+    Handle->PosX = (Handle->ResX - Width) / 2;
+    Handle->PosY = (Handle->ResY - Height) / 2;
+    Handle->Width = Width;
+    Handle->Height = Height;
+}
+
+/**
  * Displays a simple TUI-based boot menu.
  *
  * @return This routine does not return any value.
@@ -19,7 +139,7 @@
  */
 XTCDECL
 VOID
-BlDisplayBootMenu()
+TextUi::DisplayBootMenu()
 {
     XTBL_DIALOG_HANDLE Handle;
     PXTBL_BOOTMENU_ITEM MenuEntries = NULLPTR;
@@ -35,11 +155,11 @@ BlDisplayBootMenu()
     PWCHAR TimeOutString;
 
     /* Draw boot menu */
-    BlpDrawBootMenu(&Handle);
+    DrawBootMenu(&Handle);
 
     /* Initialize boot menu list */
     TopVisibleEntry = 0;
-    Status = BlInitializeBootMenuList(Handle.Width - 4, &MenuEntries, &NumberOfEntries, &HighligtedEntryId);
+    Status = XtLoader::InitializeBootMenuList(Handle.Width - 4, &MenuEntries, &NumberOfEntries, &HighligtedEntryId);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to initialize boot menu list, exit into XTLDR shell */
@@ -57,7 +177,7 @@ BlDisplayBootMenu()
     }
 
     /* Get timeout from the configuration */
-    BlGetConfigValue(L"TIMEOUT", &TimeOutString);
+    Configuration::GetValue(L"TIMEOUT", &TimeOutString);
     TimeOut = -1;
 
     /* Check if timeout is specified */
@@ -83,7 +203,7 @@ BlDisplayBootMenu()
         /* Redraw boot menu frame if requested */
         if(RedrawBootMenu)
         {
-            BlpDrawBootMenu(&Handle);
+            DrawBootMenu(&Handle);
             RedrawBootMenu = FALSE;
             RedrawEntries = TRUE;
         }
@@ -104,8 +224,8 @@ BlDisplayBootMenu()
                 for(Index = 0; Index < VisibleEntries; Index++)
                 {
                     /* Draw menu entry */
-                    BlpDrawBootMenuEntry(&Handle, MenuEntries[TopVisibleEntry + Index].EntryName,
-                                         Index, (BOOLEAN)((TopVisibleEntry + Index) == HighligtedEntryId));
+                    DrawBootMenuEntry(&Handle, MenuEntries[TopVisibleEntry + Index].EntryName,
+                                      Index, (BOOLEAN)((TopVisibleEntry + Index) == HighligtedEntryId));
                 }
 
                 /* Clear redraw entries flag */
@@ -115,7 +235,7 @@ BlDisplayBootMenu()
         else
         {
             /* No menu entries found, show error message */
-            BlDisplayErrorDialog(L"XTLDR", L"No boot menu entries found in the configuration. Falling back to shell.");
+            DisplayErrorDialog(L"XTLDR", L"No boot menu entries found in the configuration. Falling back to shell.");
 
             /* Exit into XTLDR shell */
             return;
@@ -150,7 +270,7 @@ BlDisplayBootMenu()
         while(TRUE)
         {
             /* Wait for EFI event */
-            BlWaitForEfiEvent(2, Events, &EventIndex);
+            EfiUtils::WaitForEfiEvent(2, Events, &EventIndex);
 
             /* Check which event was received */
             if(EventIndex == 0)
@@ -165,29 +285,29 @@ BlDisplayBootMenu()
                     EfiSystemTable->BootServices->SetTimer(TimerEvent, TimerCancel, 0);
 
                     /* Remove the timer message */
-                    BlClearConsoleLine(Handle.PosY + Handle.Height + 4);
+                    Console::ClearLine(Handle.PosY + Handle.Height + 4);
                 }
 
                 /* Read key stroke */
-                BlReadKeyStroke(&Key);
+                Console::ReadKeyStroke(&Key);
 
                 if(Key.ScanCode == 0x03 || Key.UnicodeChar == 0x0D)
                 {
                     /* ENTER or RightArrow key pressed, boot the highlighted OS */
-                    BlSetConsoleAttributes(Handle.DialogColor | Handle.TextColor);
-                    BlClearConsoleLine(Handle.PosY + Handle.Height + 4);
-                    BlSetCursorPosition(4, Handle.PosY + Handle.Height + 4);
-                    BlConsolePrint(L"Booting '%S' now...\n", MenuEntries[HighligtedEntryId].FullName);
+                    Console::SetAttributes(Handle.DialogColor | Handle.TextColor);
+                    Console::ClearLine(Handle.PosY + Handle.Height + 4);
+                    Console::SetCursorPosition(4, Handle.PosY + Handle.Height + 4);
+                    Console::Print(L"Booting '%S' now...\n", MenuEntries[HighligtedEntryId].FullName);
 
                     /* Boot the highlighted (chosen) OS */
-                    Status = BlInvokeBootProtocol(MenuEntries[HighligtedEntryId].ShortName,
-                                                  MenuEntries[HighligtedEntryId].Options);
+                    Status = Protocol::InvokeBootProtocol(MenuEntries[HighligtedEntryId].ShortName,
+                                                          MenuEntries[HighligtedEntryId].Options);
                     if(Status != STATUS_SUCCESS)
                     {
                         /* Failed to boot OS */
-                        BlDebugPrint(L"ERROR: Failed to boot '%S' (Status Code: 0x%zX)\n",
+                        Debug::Print(L"ERROR: Failed to boot '%S' (Status Code: 0x%zX)\n",
                                      MenuEntries[HighligtedEntryId].FullName, Status);
-                        BlDisplayErrorDialog(L"XTLDR", L"Failed to startup the selected Operating System.");
+                        DisplayErrorDialog(L"XTLDR", L"Failed to startup the selected Operating System.");
                         RedrawBootMenu = TRUE;
                     }
 
@@ -213,10 +333,10 @@ BlDisplayBootMenu()
                         }
 
                         /* Redraw new highlighted entry and the old one */
-                        BlpDrawBootMenuEntry(&Handle, MenuEntries[OldHighligtedEntryId].EntryName,
-                                             OldHighligtedEntryId - TopVisibleEntry, (BOOLEAN)FALSE);
-                        BlpDrawBootMenuEntry(&Handle, MenuEntries[HighligtedEntryId].EntryName,
-                                             HighligtedEntryId - TopVisibleEntry, (BOOLEAN)TRUE);
+                        DrawBootMenuEntry(&Handle, MenuEntries[OldHighligtedEntryId].EntryName,
+                                          OldHighligtedEntryId - TopVisibleEntry, (BOOLEAN)FALSE);
+                        DrawBootMenuEntry(&Handle, MenuEntries[HighligtedEntryId].EntryName,
+                                          HighligtedEntryId - TopVisibleEntry, (BOOLEAN)TRUE);
                     }
                 }
                 else if(Key.ScanCode == 0x02)
@@ -238,10 +358,10 @@ BlDisplayBootMenu()
                         }
 
                         /* Redraw new highlighted entry and the old one */
-                        BlpDrawBootMenuEntry(&Handle, MenuEntries[OldHighligtedEntryId].EntryName,
-                                             OldHighligtedEntryId - TopVisibleEntry, (BOOLEAN)FALSE);
-                        BlpDrawBootMenuEntry(&Handle, MenuEntries[HighligtedEntryId].EntryName,
-                                             HighligtedEntryId - TopVisibleEntry, (BOOLEAN)TRUE);
+                        DrawBootMenuEntry(&Handle, MenuEntries[OldHighligtedEntryId].EntryName,
+                                          OldHighligtedEntryId - TopVisibleEntry, (BOOLEAN)FALSE);
+                        DrawBootMenuEntry(&Handle, MenuEntries[HighligtedEntryId].EntryName,
+                                          HighligtedEntryId - TopVisibleEntry, (BOOLEAN)TRUE);
                     }
                 }
                 else if(Key.ScanCode == 0x09)
@@ -271,21 +391,21 @@ BlDisplayBootMenu()
                 else if(Key.ScanCode == 0x0B)
                 {
                     /* F1 key pressed, show help */
-                    BlDisplayInfoDialog(L"XTLDR", L"XTLDR, the XTOS Boot Loader for UEFI and EFI-based machines.\n"
-                                                  L" \n"
-                                                  L"Use arrow keys (Up/Down) to change the highlighted entry and\n"
-                                                  L"PgUp/PgDown keys to jump to the first/last position.\n"
-                                                  L" \n"
-                                                  L"Press ENTER key to boot the highlighted boot menu entry.\n"
-                                                  L"Press 'e' key to edit the highlighted menu entry.\n"
-                                                  L"Press 's' key to exit into XTLDR shell (enters advanced mode).\n"
-                                                  L" \n"
-                                                  L"F1 shows this help, F10 reboots into UEFI firmware interface,\n"
-                                                  L"F11 reboots the machine and F12 turns it off.\n"
-                                                  L" \n"
-                                                  L" \n"
-                                                  L"XTLDR is a part of the ExectOS Operating System.\n"
-                                                  L"Visit https://exectos.eu.org/ for more information.");
+                    DisplayInfoDialog(L"XTLDR", L"XTLDR, the XTOS Boot Loader for UEFI and EFI-based machines.\n"
+                                                L" \n"
+                                                L"Use arrow keys (Up/Down) to change the highlighted entry and\n"
+                                                L"PgUp/PgDown keys to jump to the first/last position.\n"
+                                                L" \n"
+                                                L"Press ENTER key to boot the highlighted boot menu entry.\n"
+                                                L"Press 'e' key to edit the highlighted menu entry.\n"
+                                                L"Press 's' key to exit into XTLDR shell (enters advanced mode).\n"
+                                                L" \n"
+                                                L"F1 shows this help, F10 reboots into UEFI firmware interface,\n"
+                                                L"F11 reboots the machine and F12 turns it off.\n"
+                                                L" \n"
+                                                L" \n"
+                                                L"XTLDR is a part of the ExectOS Operating System.\n"
+                                                L"Visit https://exectos.eu.org/ for more information.");
 
                     /* Break from boot menu event loop to redraw whole boot menu */
                     RedrawBootMenu = TRUE;
@@ -294,8 +414,8 @@ BlDisplayBootMenu()
                 else if(Key.ScanCode == 0x14)
                 {
                     /* F10 key pressed, reboot into UEFI setup interface */
-                    BlEnterFirmwareSetup();
-                    BlDisplayErrorDialog(L"XTLDR", L"Reboot into firmware setup interface not supported!");
+                    EfiUtils::EnterFirmwareSetup();
+                    DisplayErrorDialog(L"XTLDR", L"Reboot into firmware setup interface not supported!");
                     RedrawBootMenu = TRUE;
 
                     /* Break from boot menu event loop to redraw whole boot menu */
@@ -304,8 +424,8 @@ BlDisplayBootMenu()
                 else if(Key.ScanCode == 0x15)
                 {
                     /* F11 key pressed, reboot the machine */
-                    BlRebootSystem();
-                    BlDisplayErrorDialog(L"XTLDR", L"Failed to reboot the machine!");
+                    EfiUtils::RebootSystem();
+                    DisplayErrorDialog(L"XTLDR", L"Failed to reboot the machine!");
                     RedrawBootMenu = TRUE;
 
                     /* Break from boot menu event loop to redraw whole boot menu */
@@ -314,8 +434,8 @@ BlDisplayBootMenu()
                 else if(Key.ScanCode == 0x16)
                 {
                     /* F12 key pressed, shutdown the machine */
-                    BlShutdownSystem();
-                    BlDisplayErrorDialog(L"XTLDR", L"Failed to shutdown the machine!");
+                    EfiUtils::ShutdownSystem();
+                    DisplayErrorDialog(L"XTLDR", L"Failed to shutdown the machine!");
                     RedrawBootMenu = TRUE;
 
                     /* Break from boot menu event loop to redraw whole boot menu */
@@ -324,7 +444,7 @@ BlDisplayBootMenu()
                 else if(Key.UnicodeChar == 0x65)
                 {
                     /* 'e' key pressed, edit the highlighted entry */
-                    BlDisplayEditMenu(&MenuEntries[HighligtedEntryId]);
+                    DisplayEditMenu(&MenuEntries[HighligtedEntryId]);
                     RedrawBootMenu = TRUE;
 
                     /* Break from boot menu event loop to redraw whole boot menu */
@@ -342,32 +462,32 @@ BlDisplayBootMenu()
                 if(TimeOut > 0)
                 {
                     /* Update a message and decrease timeout value */
-                    BlSetConsoleAttributes(Handle.DialogColor | Handle.TextColor);
-                    BlClearConsoleLine(Handle.PosY + Handle.Height + 4);
-                    BlSetCursorPosition(4, Handle.PosY + Handle.Height + 4);
-                    BlConsolePrint(L"The highlighted position will be booted automatically in %ld seconds.", TimeOut);
+                    Console::SetAttributes(Handle.DialogColor | Handle.TextColor);
+                    Console::ClearLine(Handle.PosY + Handle.Height + 4);
+                    Console::SetCursorPosition(4, Handle.PosY + Handle.Height + 4);
+                    Console::Print(L"The highlighted position will be booted automatically in %ld seconds.", TimeOut);
                     TimeOut--;
                 }
                 else if(TimeOut == 0)
                 {
                     /* Time out expired, update a message */
-                    BlSetConsoleAttributes(Handle.DialogColor | Handle.TextColor);
-                    BlClearConsoleLine(Handle.PosY + Handle.Height + 4);
-                    BlSetCursorPosition(4, Handle.PosY + Handle.Height + 4);
-                    BlConsolePrint(L"Booting '%S' now...\n", MenuEntries[HighligtedEntryId].FullName);
+                    Console::SetAttributes(Handle.DialogColor | Handle.TextColor);
+                    Console::ClearLine(Handle.PosY + Handle.Height + 4);
+                    Console::SetCursorPosition(4, Handle.PosY + Handle.Height + 4);
+                    Console::Print(L"Booting '%S' now...\n", MenuEntries[HighligtedEntryId].FullName);
 
                     /* Disable the timer just in case booting OS fails */
                     TimeOut = -1;
 
                     /* Boot the highlighted (default) OS */
-                    Status = BlInvokeBootProtocol(MenuEntries[HighligtedEntryId].ShortName,
-                                                  MenuEntries[HighligtedEntryId].Options);
+                    Status = Protocol::InvokeBootProtocol(MenuEntries[HighligtedEntryId].ShortName,
+                                                          MenuEntries[HighligtedEntryId].Options);
                     if(Status != STATUS_SUCCESS)
                     {
                         /* Failed to boot OS */
-                        BlDebugPrint(L"ERROR: Failed to boot '%S' (Status Code: 0x%zX)\n",
+                        Debug::Print(L"ERROR: Failed to boot '%S' (Status Code: 0x%zX)\n",
                                      MenuEntries[HighligtedEntryId].FullName, Status);
-                        BlDisplayErrorDialog(L"XTLDR", L"Failed to startup the selected Operating System.");
+                        DisplayErrorDialog(L"XTLDR", L"Failed to startup the selected Operating System.");
                         RedrawBootMenu = TRUE;
                     }
                     break;
@@ -386,7 +506,7 @@ BlDisplayBootMenu()
  */
 XTCDECL
 VOID
-BlDisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry)
+TextUi::DisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry)
 {
     ULONG HighligtedOptionId, Index, NumberOfOptions, OldHighligtedOptionId, TopVisibleEntry, VisibleEntries;
     XTBL_DIALOG_HANDLE Handle;
@@ -398,10 +518,10 @@ BlDisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry)
     EFI_STATUS Status;
 
     /* Draw edit menu */
-    BlpDrawEditMenu(&Handle);
+    DrawEditMenu(&Handle);
 
     /* Get the list of user editable options */
-    BlGetEditableOptions(&EditableOptions, &NumberOfOptions);
+    Configuration::GetEditableOptions(&EditableOptions, &NumberOfOptions);
 
     /* Calculate how many entries can be visible in the menu box */
     VisibleEntries = Handle.Height - 2;
@@ -421,7 +541,7 @@ BlDisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry)
         /* Redraw edit menu frame if requested */
         if(RedrawEditMenu)
         {
-            BlpDrawEditMenu(&Handle);
+            DrawEditMenu(&Handle);
             RedrawEditMenu = FALSE;
             RedrawEntries = TRUE;
         }
@@ -439,14 +559,14 @@ BlDisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry)
             for(Index = 0; Index < VisibleEntries; Index++)
             {
                 /* Draw menu entry */
-                BlGetBootOptionValue(MenuEntry->Options, EditableOptions[TopVisibleEntry + Index], &Value);
-                BlpDrawEditMenuEntry(&Handle, EditableOptions[TopVisibleEntry + Index], Value, Index,
-                                     (BOOLEAN)((TopVisibleEntry + Index) == HighligtedOptionId));
+                Configuration::GetBootOptionValue(MenuEntry->Options, EditableOptions[TopVisibleEntry + Index], &Value);
+                DrawEditMenuEntry(&Handle, EditableOptions[TopVisibleEntry + Index], Value, Index,
+                                  (BOOLEAN)((TopVisibleEntry + Index) == HighligtedOptionId));
 
                 /* Free allocated value string if needed */
                 if(Value != NULLPTR)
                 {
-                    BlFreeMemoryPool(Value);
+                    Memory::FreePool(Value);
                 }
             }
 
@@ -455,15 +575,15 @@ BlDisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry)
         }
 
         /* Wait for EFI event and read key stroke */
-        BlWaitForEfiEvent(1, &EfiSystemTable->ConIn->WaitForKey, &EventIndex);
-        BlReadKeyStroke(&Key);
+        EfiUtils::WaitForEfiEvent(1, &EfiSystemTable->ConIn->WaitForKey, &EventIndex);
+        Console::ReadKeyStroke(&Key);
 
         /* Check key press scan code */
         if(Key.UnicodeChar == 0x0D || Key.UnicodeChar == 0x65)
         {
             /* ENTER or 'e' key pressed, edit the highlighted option */
             OptionName = EditableOptions[HighligtedOptionId];
-            BlGetBootOptionValue(MenuEntry->Options, OptionName, &OriginalValue);
+            Configuration::GetBootOptionValue(MenuEntry->Options, OptionName, &OriginalValue);
 
             /* If the original value is NULLPTR, use an empty string for editing */
             if(OriginalValue == NULLPTR)
@@ -477,20 +597,20 @@ BlDisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry)
 
             /* Display input dialog to edit the option value */
             NewValue = ValueToEdit;
-            BlDisplayInputDialog(OptionName, L"Enter new value:", &NewValue);
+            DisplayInputDialog(OptionName, L"Enter new value:", &NewValue);
 
             /* Check if the value was changed */
             if(NewValue != ValueToEdit)
             {
                 /* Update the boot option with the new value and free the old value */
-                BlSetBootOptionValue(MenuEntry->Options, OptionName, NewValue);
-                BlFreeMemoryPool(NewValue);
+                Configuration::SetBootOptionValue(MenuEntry->Options, OptionName, NewValue);
+                Memory::FreePool(NewValue);
             }
 
             /* Free the original value if it was allocated */
             if(OriginalValue != NULLPTR)
             {
-                BlFreeMemoryPool(OriginalValue);
+                Memory::FreePool(OriginalValue);
             }
 
             /* Mark the edit menu for redraw */
@@ -515,23 +635,23 @@ BlDisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry)
                 }
 
                 /* Redraw old highlighted entry */
-                BlGetBootOptionValue(MenuEntry->Options, EditableOptions[OldHighligtedOptionId], &Value);
-                BlpDrawEditMenuEntry(&Handle, EditableOptions[OldHighligtedOptionId], Value, OldHighligtedOptionId - TopVisibleEntry, (BOOLEAN)FALSE);
+                Configuration::GetBootOptionValue(MenuEntry->Options, EditableOptions[OldHighligtedOptionId], &Value);
+                DrawEditMenuEntry(&Handle, EditableOptions[OldHighligtedOptionId], Value, OldHighligtedOptionId - TopVisibleEntry, (BOOLEAN)FALSE);
 
                 /* Free allocated value string if needed */
                 if(Value != NULLPTR)
                 {
-                    BlFreeMemoryPool(Value);
+                    Memory::FreePool(Value);
                 }
 
                 /* Redraw new highlighted entry */
-                BlGetBootOptionValue(MenuEntry->Options, EditableOptions[HighligtedOptionId], &Value);
-                BlpDrawEditMenuEntry(&Handle, EditableOptions[HighligtedOptionId], Value, HighligtedOptionId - TopVisibleEntry, (BOOLEAN)TRUE);
+                Configuration::GetBootOptionValue(MenuEntry->Options, EditableOptions[HighligtedOptionId], &Value);
+                DrawEditMenuEntry(&Handle, EditableOptions[HighligtedOptionId], Value, HighligtedOptionId - TopVisibleEntry, (BOOLEAN)TRUE);
 
                 /* Free allocated value string if needed */
                 if(Value != NULLPTR)
                 {
-                    BlFreeMemoryPool(Value);
+                    Memory::FreePool(Value);
                 }
             }
         }
@@ -554,23 +674,23 @@ BlDisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry)
                 }
 
                 /* Redraw old highlighted entry */
-                BlGetBootOptionValue(MenuEntry->Options, EditableOptions[OldHighligtedOptionId], &Value);
-                BlpDrawEditMenuEntry(&Handle, EditableOptions[OldHighligtedOptionId], Value, OldHighligtedOptionId - TopVisibleEntry, (BOOLEAN)FALSE);
+                Configuration::GetBootOptionValue(MenuEntry->Options, EditableOptions[OldHighligtedOptionId], &Value);
+                DrawEditMenuEntry(&Handle, EditableOptions[OldHighligtedOptionId], Value, OldHighligtedOptionId - TopVisibleEntry, (BOOLEAN)FALSE);
 
                 /* Free allocated value string if needed */
                 if(Value != NULLPTR)
                 {
-                    BlFreeMemoryPool(Value);
+                    Memory::FreePool(Value);
                 }
 
                 /* Redraw new highlighted entry */
-                BlGetBootOptionValue(MenuEntry->Options, EditableOptions[HighligtedOptionId], &Value);
-                BlpDrawEditMenuEntry(&Handle, EditableOptions[HighligtedOptionId], Value, HighligtedOptionId - TopVisibleEntry, (BOOLEAN)TRUE);
+                Configuration::GetBootOptionValue(MenuEntry->Options, EditableOptions[HighligtedOptionId], &Value);
+                DrawEditMenuEntry(&Handle, EditableOptions[HighligtedOptionId], Value, HighligtedOptionId - TopVisibleEntry, (BOOLEAN)TRUE);
 
                 /* Free allocated value string if needed */
                 if(Value != NULLPTR)
                 {
-                    BlFreeMemoryPool(Value);
+                    Memory::FreePool(Value);
                 }
             }
         }
@@ -599,18 +719,18 @@ BlDisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry)
         else if(Key.UnicodeChar == 0x02)
         {
             /* CTRL-B key pressed, boot the OS */
-            BlSetConsoleAttributes(Handle.DialogColor | Handle.TextColor);
-            BlClearConsoleLine(Handle.PosY + Handle.Height + 4);
-            BlSetCursorPosition(4, Handle.PosY + Handle.Height + 4);
-            BlConsolePrint(L"Booting '%S' now...\n", MenuEntry->FullName);
+            Console::SetAttributes(Handle.DialogColor | Handle.TextColor);
+            Console::ClearLine(Handle.PosY + Handle.Height + 4);
+            Console::SetCursorPosition(4, Handle.PosY + Handle.Height + 4);
+            Console::Print(L"Booting '%S' now...\n", MenuEntry->FullName);
 
             /* Boot the OS */
-            Status = BlInvokeBootProtocol(MenuEntry->ShortName, MenuEntry->Options);
+            Status = Protocol::InvokeBootProtocol(MenuEntry->ShortName, MenuEntry->Options);
             if(Status != STATUS_SUCCESS)
             {
                 /* Failed to boot OS */
-                BlDebugPrint(L"ERROR: Failed to boot '%S' (Status Code: 0x%zX)\n", MenuEntry->FullName, Status);
-                BlDisplayErrorDialog(L"XTLDR", L"Failed to startup the selected Operating System.");
+                Debug::Print(L"ERROR: Failed to boot '%S' (Status Code: 0x%zX)\n", MenuEntry->FullName, Status);
+                DisplayErrorDialog(L"XTLDR", L"Failed to startup the selected Operating System.");
                 RedrawEditMenu = TRUE;
             }
 
@@ -640,8 +760,8 @@ BlDisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry)
  */
 XTCDECL
 VOID
-BlDisplayErrorDialog(IN PCWSTR Caption,
-                     IN PCWSTR Message)
+TextUi::DisplayErrorDialog(IN PCWSTR Caption,
+                           IN PCWSTR Message)
 {
     XTBL_DIALOG_HANDLE Handle;
     EFI_INPUT_KEY Key;
@@ -651,14 +771,14 @@ BlDisplayErrorDialog(IN PCWSTR Caption,
     Handle.Attributes = XTBL_TUI_DIALOG_ERROR_BOX | XTBL_TUI_DIALOG_ACTIVE_BUTTON;
 
     /* Determine dialog window size and position */
-    BlpDetermineDialogBoxSize(&Handle, Message);
+    DetermineDialogBoxSize(&Handle, Message);
 
     /* Disable cursor and draw dialog box */
-    BlDisableConsoleCursor();
-    BlpDrawDialogBox(&Handle, Caption, Message);
+    Console::DisableCursor();
+    DrawDialogBox(&Handle, Caption, Message);
 
     /* Draw active button */
-    BlpDrawDialogButton(&Handle);
+    DrawButton(&Handle);
 
     /* Initialize key stroke */
     Key.ScanCode = 0;
@@ -668,14 +788,14 @@ BlDisplayErrorDialog(IN PCWSTR Caption,
     while(Key.ScanCode != 0x17 && Key.UnicodeChar != 0x0D)
     {
         /* Wait for key press and read key stroke */
-        BlWaitForEfiEvent(1, &EfiSystemTable->ConIn->WaitForKey, &Index);
-        BlReadKeyStroke(&Key);
-        BlResetConsoleInputBuffer();
+        EfiUtils::WaitForEfiEvent(1, &EfiSystemTable->ConIn->WaitForKey, &Index);
+        Console::ReadKeyStroke(&Key);
+        Console::ResetInputBuffer();
     }
 
     /* Clear screen to remove dialog box */
-    BlSetConsoleAttributes(EFI_TEXT_BGCOLOR_BLACK | EFI_TEXT_FGCOLOR_LIGHTGRAY);
-    BlClearConsoleScreen();
+    Console::SetAttributes(EFI_TEXT_BGCOLOR_BLACK | EFI_TEXT_FGCOLOR_LIGHTGRAY);
+    Console::ClearScreen();
 }
 
 /**
@@ -693,8 +813,8 @@ BlDisplayErrorDialog(IN PCWSTR Caption,
  */
 XTCDECL
 VOID
-BlDisplayInfoDialog(IN PCWSTR Caption,
-                    IN PCWSTR Message)
+TextUi::DisplayInfoDialog(IN PCWSTR Caption,
+                          IN PCWSTR Message)
 {
     XTBL_DIALOG_HANDLE Handle;
     EFI_INPUT_KEY Key;
@@ -704,14 +824,14 @@ BlDisplayInfoDialog(IN PCWSTR Caption,
     Handle.Attributes = XTBL_TUI_DIALOG_GENERIC_BOX | XTBL_TUI_DIALOG_ACTIVE_BUTTON;
 
     /* Determine dialog window size and position */
-    BlpDetermineDialogBoxSize(&Handle, Message);
+    DetermineDialogBoxSize(&Handle, Message);
 
     /* Disable cursor and draw dialog box */
-    BlDisableConsoleCursor();
-    BlpDrawDialogBox(&Handle, Caption, Message);
+    Console::DisableCursor();
+    DrawDialogBox(&Handle, Caption, Message);
 
     /* Draw active button */
-    BlpDrawDialogButton(&Handle);
+    DrawButton(&Handle);
 
     /* Initialize key stroke */
     Key.ScanCode = 0;
@@ -721,14 +841,14 @@ BlDisplayInfoDialog(IN PCWSTR Caption,
     while(Key.ScanCode != 0x17 && Key.UnicodeChar != 0x0D)
     {
         /* Wait for key press and read key stroke */
-        BlWaitForEfiEvent(1, &EfiSystemTable->ConIn->WaitForKey, &Index);
-        BlReadKeyStroke(&Key);
-        BlResetConsoleInputBuffer();
+        EfiUtils::WaitForEfiEvent(1, &EfiSystemTable->ConIn->WaitForKey, &Index);
+        Console::ReadKeyStroke(&Key);
+        Console::ResetInputBuffer();
     }
 
     /* Clear screen to remove dialog box */
-    BlSetConsoleAttributes(EFI_TEXT_BGCOLOR_BLACK | EFI_TEXT_FGCOLOR_LIGHTGRAY);
-    BlClearConsoleScreen();
+    Console::SetAttributes(EFI_TEXT_BGCOLOR_BLACK | EFI_TEXT_FGCOLOR_LIGHTGRAY);
+    Console::ClearScreen();
 }
 
 /**
@@ -749,9 +869,9 @@ BlDisplayInfoDialog(IN PCWSTR Caption,
  */
 XTCDECL
 VOID
-BlDisplayInputDialog(IN PCWSTR Caption,
-                     IN PCWSTR Message,
-                     IN OUT PWCHAR *InputFieldText)
+TextUi::DisplayInputDialog(IN PCWSTR Caption,
+                           IN PCWSTR Message,
+                           IN OUT PWCHAR *InputFieldText)
 {
     SIZE_T InputFieldLength, TextCursorPosition, TextIndex, TextPosition;
     XTBL_DIALOG_HANDLE Handle;
@@ -764,17 +884,17 @@ BlDisplayInputDialog(IN PCWSTR Caption,
     Handle.Attributes = XTBL_TUI_DIALOG_GENERIC_BOX | XTBL_TUI_DIALOG_ACTIVE_INPUT | XTBL_TUI_DIALOG_INACTIVE_BUTTON;
 
     /* Determine dialog window size and position */
-    BlpDetermineDialogBoxSize(&Handle, Message);
+    DetermineDialogBoxSize(&Handle, Message);
 
     /* Disable cursor and draw dialog box */
-    BlDisableConsoleCursor();
-    BlpDrawDialogBox(&Handle, Caption, Message);
+    Console::DisableCursor();
+    DrawDialogBox(&Handle, Caption, Message);
 
     /* Draw inactive button */
-    BlpDrawDialogButton(&Handle);
+    DrawButton(&Handle);
 
     /* Draw active input field */
-    BlpDrawDialogInputField(&Handle, *InputFieldText);
+    DrawInputField(&Handle, *InputFieldText);
 
     /* Initialize key stroke */
     Key.ScanCode = 0;
@@ -784,12 +904,12 @@ BlDisplayInputDialog(IN PCWSTR Caption,
     InputFieldLength = RTL::WideString::WideStringLength(*InputFieldText, 0);
 
     /* Allocate a buffer for storing the input field text */
-    Status = BlAllocateMemoryPool(2048 * sizeof(WCHAR), (PVOID *)&InputFieldBuffer);
+    Status = Memory::AllocatePool(2048 * sizeof(WCHAR), (PVOID *)&InputFieldBuffer);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Memory allocation failure, print error message and return */
-        BlDebugPrint(L"ERROR: Memory allocation failure (Status Code: 0x%zX)\n", Status);
-        BlDisplayErrorDialog(L"XTLDR", L"Failed to allocate memory for input field buffer.");
+        Debug::Print(L"ERROR: Memory allocation failure (Status Code: 0x%zX)\n", Status);
+        DisplayErrorDialog(L"XTLDR", L"Failed to allocate memory for input field buffer.");
         return;
     }
 
@@ -799,14 +919,14 @@ BlDisplayInputDialog(IN PCWSTR Caption,
 
     /* Start at first character */
     TextPosition = 0;
-    BlSetCursorPosition(Handle.PosX + 4 + TextPosition, Handle.PosY + Handle.Height - 4);
+    Console::SetCursorPosition(Handle.PosX + 4 + TextPosition, Handle.PosY + Handle.Height - 4);
 
     /* Wait until ENTER or ESC key is pressed */
     while(TRUE)
     {
         /* Wait for key press and read key stroke */
-        BlWaitForEfiEvent(1, &EfiSystemTable->ConIn->WaitForKey, &Index);
-        BlReadKeyStroke(&Key);
+        EfiUtils::WaitForEfiEvent(1, &EfiSystemTable->ConIn->WaitForKey, &Index);
+        Console::ReadKeyStroke(&Key);
 
         /* Check key press scan code */
         if(Key.ScanCode == 0x17)
@@ -929,19 +1049,19 @@ BlDisplayInputDialog(IN PCWSTR Caption,
         }
 
         /* Redraw input field and button */
-        BlpDrawDialogButton(&Handle);
-        BlpDrawDialogInputField(&Handle, &InputFieldBuffer[TextIndex]);
+        DrawButton(&Handle);
+        DrawInputField(&Handle, &InputFieldBuffer[TextIndex]);
 
         /* Set cursor position if input field is active */
         if(Handle.Attributes & XTBL_TUI_DIALOG_ACTIVE_INPUT)
         {
-            BlSetCursorPosition(Handle.PosX + 4 + TextCursorPosition, Handle.PosY + Handle.Height - 4);
+            Console::SetCursorPosition(Handle.PosX + 4 + TextCursorPosition, Handle.PosY + Handle.Height - 4);
         }
     }
 
     /* Clear screen to remove dialog box */
-    BlSetConsoleAttributes(EFI_TEXT_BGCOLOR_BLACK | EFI_TEXT_FGCOLOR_LIGHTGRAY);
-    BlClearConsoleScreen();
+    Console::SetAttributes(EFI_TEXT_BGCOLOR_BLACK | EFI_TEXT_FGCOLOR_LIGHTGRAY);
+    Console::ClearScreen();
 }
 
 /**
@@ -962,9 +1082,9 @@ BlDisplayInputDialog(IN PCWSTR Caption,
  */
 XTCDECL
 XTBL_DIALOG_HANDLE
-BlDisplayProgressDialog(IN PCWSTR Caption,
-                        IN PCWSTR Message,
-                        IN UCHAR Percentage)
+TextUi::DisplayProgressDialog(IN PCWSTR Caption,
+                              IN PCWSTR Message,
+                              IN UCHAR Percentage)
 {
     XTBL_DIALOG_HANDLE Handle;
 
@@ -972,170 +1092,17 @@ BlDisplayProgressDialog(IN PCWSTR Caption,
     Handle.Attributes = XTBL_TUI_DIALOG_GENERIC_BOX | XTBL_TUI_DIALOG_PROGRESS_BAR;
 
     /* Determine dialog window size and position */
-    BlpDetermineDialogBoxSize(&Handle, Message);
+    DetermineDialogBoxSize(&Handle, Message);
 
     /* Disable cursor and draw dialog box */
-    BlDisableConsoleCursor();
-    BlpDrawDialogBox(&Handle, Caption, Message);
+    Console::DisableCursor();
+    DrawDialogBox(&Handle, Caption, Message);
 
     /* Draw active button */
-    BlpDrawDialogProgressBar(&Handle, Percentage);
+    DrawProgressBar(&Handle, Percentage);
 
     /* Return dialog handle */
     return Handle;
-}
-
-/**
- * Updates the progress bar on the dialog box.
- *
- * @param Handle
- *        Supplies a pointer to the dialog box handle.
- *
- * @param Message
- *        Supplies a new message that will be put on the dialog box, while updating the progress bar.
- *
- * @param Percentage
- *        Specifies the new percentage progress of the progress bar.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTCDECL
-VOID
-BlUpdateProgressBar(IN PXTBL_DIALOG_HANDLE Handle,
-                    IN PCWSTR Message,
-                    IN UCHAR Percentage)
-{
-    /* Check if message needs an update */
-    if(Message != NULLPTR)
-    {
-        /* Update a message on the dialog box */
-        BlpDrawDialogMessage(Handle, Message);
-    }
-
-    /* Update progress bar */
-    BlpDrawDialogProgressBar(Handle, Percentage);
-}
-
-/**
- * Determines dialog box size based on enabled components and message length.
- *
- * @param Handle
- *        Supplies a pointer to the dialog box handle.
- *
- * @param Message
- *        Supplies a pointer to the message string put on the dialog box.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTCDECL
-VOID
-BlpDetermineDialogBoxSize(IN OUT PXTBL_DIALOG_HANDLE Handle,
-                          IN PCWSTR Message)
-{
-    UINT_PTR Width, Height, LineLength;
-    SIZE_T Index, MessageLength;
-    UCHAR Attributes;
-    ULONG Mask;
-
-    /* Set minimum dialog window size */
-    Height = 4;
-    Width = 36;
-
-    /* Zero line length */
-    LineLength = 0;
-
-    /* Adjust window height according to enabled components */
-    Mask = 1;
-    Attributes = Handle->Attributes;
-    while(Mask)
-    {
-        /* Check enabled components that affect dialog window size */
-        switch(Attributes & Mask)
-        {
-            case XTBL_TUI_DIALOG_ACTIVE_BUTTON:
-            case XTBL_TUI_DIALOG_INACTIVE_BUTTON:
-                Height += 1;
-                break;
-            case XTBL_TUI_DIALOG_ACTIVE_INPUT:
-            case XTBL_TUI_DIALOG_INACTIVE_INPUT:
-            case XTBL_TUI_DIALOG_PROGRESS_BAR:
-                Height += 2;
-                break;
-        }
-
-        /* Update component attributes mask */
-        Attributes &= ~Mask;
-        Mask <<= 1;
-    }
-
-    /* Check if input field is active */
-    if(Handle->Attributes & (XTBL_TUI_DIALOG_ACTIVE_INPUT | XTBL_TUI_DIALOG_INACTIVE_INPUT))
-    {
-        /* Set maximum dialog window width to fit input field */
-        Width = XTBL_TUI_MAX_DIALOG_WIDTH;
-    }
-
-    /* Get message length and count dialog window dimensions */
-    MessageLength = RTL::WideString::WideStringLength(Message, 0);
-    for(Index = 0; Index < MessageLength; Index++)
-    {
-        /* Check if this is multiline message */
-        if(Message[Index] == L'\n' || Index == MessageLength - 1)
-        {
-            /* Check if this line exceeds current dialog window width */
-            if(LineLength > Width)
-            {
-                /* Update dialog window width */
-                Width = LineLength;
-            }
-
-            /* Increase dialog window height to fit next line */
-            Height++;
-            LineLength = 0;
-        }
-        else
-        {
-            /* Increase dialog window width to fit next character */
-            LineLength++;
-        }
-    }
-
-    /* Add more space to dialog window to fit side borders */
-    Width += 4;
-
-    /* Get console resolution */
-    BlQueryConsoleMode(&Handle->ResX, &Handle->ResY);
-
-    /* Make sure dialog window fits in the buffer */
-    if(Width > XTBL_TUI_MAX_DIALOG_WIDTH)
-    {
-        /* Set maximum dialog window width */
-        Width = XTBL_TUI_MAX_DIALOG_WIDTH;
-    }
-
-    /* Make sure dialog window fits on the screen (X axis) and it is not too small for input field */
-    if(Width > (Handle->ResX - 2))
-    {
-        /* Set maximum dialog window width */
-        Width = Handle->ResX - 2;
-    }
-
-    /* Make sure dialog window fits on the screen (Y axis)*/
-    if(Height > (Handle->ResY - 2))
-    {
-        /* Set maximum dialog window height */
-        Height = Handle->ResY - 2;
-    }
-
-    /* Set dialog window final dimensions */
-    Handle->PosX = (Handle->ResX - Width) / 2;
-    Handle->PosY = (Handle->ResY - Height) / 2;
-    Handle->Width = Width;
-    Handle->Height = Height;
 }
 
 /**
@@ -1150,10 +1117,10 @@ BlpDetermineDialogBoxSize(IN OUT PXTBL_DIALOG_HANDLE Handle,
  */
 XTCDECL
 VOID
-BlpDrawBootMenu(OUT PXTBL_DIALOG_HANDLE Handle)
+TextUi::DrawBootMenu(OUT PXTBL_DIALOG_HANDLE Handle)
 {
     /* Query console screen resolution */
-    BlQueryConsoleMode(&Handle->ResX, &Handle->ResY);
+    Console::QueryMode(&Handle->ResX, &Handle->ResY);
 
     /* Set boot menu parameters */
     Handle->Attributes = 0;
@@ -1165,32 +1132,32 @@ BlpDrawBootMenu(OUT PXTBL_DIALOG_HANDLE Handle)
     Handle->Height = Handle->ResY - 10;
 
     /* Clear screen and disable cursor */
-    BlSetConsoleAttributes(Handle->DialogColor | Handle->TextColor);
-    BlClearConsoleScreen();
-    BlDisableConsoleCursor();
+    Console::SetAttributes(Handle->DialogColor | Handle->TextColor);
+    Console::ClearScreen();
+    Console::DisableCursor();
 
     /* Check if debugging enabled */
     if(DEBUG)
     {
         /* Print debug version of XTLDR banner */
-        BlSetCursorPosition((Handle->ResX - 44) / 2, 1);
-        BlConsolePrint(L"XTLDR Boot Loader v%d.%d (%s-%s)\n",
+        Console::SetCursorPosition((Handle->ResX - 44) / 2, 1);
+        Console::Print(L"XTLDR Boot Loader v%d.%d (%s-%s)\n",
                        XTLDR_VERSION_MAJOR, XTLDR_VERSION_MINOR, XTOS_VERSION_DATE, XTOS_VERSION_HASH);
     }
     else
     {
         /* Print standard XTLDR banner */
-        BlSetCursorPosition((Handle->ResX - 22) / 2, 1);
-        BlConsolePrint(L"XTLDR Boot Loader v%d.%d\n", XTLDR_VERSION_MAJOR, XTLDR_VERSION_MINOR);
+        Console::SetCursorPosition((Handle->ResX - 22) / 2, 1);
+        Console::Print(L"XTLDR Boot Loader v%d.%d\n", XTLDR_VERSION_MAJOR, XTLDR_VERSION_MINOR);
     }
 
     /* Draw empty dialog box for boot menu */
-    BlpDrawDialogBox(Handle, NULLPTR, NULLPTR);
+    DrawDialogBox(Handle, NULLPTR, NULLPTR);
 
     /* Print help message below the boot menu */
-    BlSetCursorPosition(0, Handle->PosY + Handle->Height);
-    BlSetConsoleAttributes(EFI_TEXT_BGCOLOR_BLACK | EFI_TEXT_FGCOLOR_LIGHTGRAY);
-    BlConsolePrint(L"    Use cursors to change the selection. Press ENTER key to boot the chosen\n"
+    Console::SetCursorPosition(0, Handle->PosY + Handle->Height);
+    Console::SetAttributes(EFI_TEXT_BGCOLOR_BLACK | EFI_TEXT_FGCOLOR_LIGHTGRAY);
+    Console::Print(L"    Use cursors to change the selection. Press ENTER key to boot the chosen\n"
                    L"    Operating System, 'e' to edit it before booting or 's' for XTLDR shell.\n"
                    L"    Additional help available after pressing F1 key.");
 }
@@ -1216,37 +1183,37 @@ BlpDrawBootMenu(OUT PXTBL_DIALOG_HANDLE Handle)
  */
 XTCDECL
 VOID
-BlpDrawBootMenuEntry(IN PXTBL_DIALOG_HANDLE Handle,
-                     IN PWCHAR MenuEntry,
-                     IN UINT Position,
-                     IN BOOLEAN Highlighted)
+TextUi::DrawBootMenuEntry(IN PXTBL_DIALOG_HANDLE Handle,
+                          IN PWCHAR MenuEntry,
+                          IN UINT Position,
+                          IN BOOLEAN Highlighted)
 {
     UINT Index;
 
     /* Move cursor to the right position */
-    BlSetCursorPosition(5, 4 + Position);
+    Console::SetCursorPosition(5, 4 + Position);
 
     /* Check whether this entry should be highlighted */
     if(Highlighted)
     {
         /* Highlight this entry */
-        BlSetConsoleAttributes(EFI_TEXT_BGCOLOR_LIGHTGRAY | EFI_TEXT_FGCOLOR_BLACK);
+        Console::SetAttributes(EFI_TEXT_BGCOLOR_LIGHTGRAY | EFI_TEXT_FGCOLOR_BLACK);
     }
     else
     {
         /* Set default colors */
-        BlSetConsoleAttributes(EFI_TEXT_BGCOLOR_BLACK | EFI_TEXT_FGCOLOR_LIGHTGRAY);
+        Console::SetAttributes(EFI_TEXT_BGCOLOR_BLACK | EFI_TEXT_FGCOLOR_LIGHTGRAY);
     }
 
     /* Clear menu entry */
     for(Index = 0; Index < Handle->Width - 4; Index++)
     {
-        BlConsolePrint(L" ");
+        Console::Print(L" ");
     }
 
     /* Print menu entry */
-    BlSetCursorPosition(5, 4 + Position);
-    BlConsolePrint(L"%S\n", MenuEntry);
+    Console::SetCursorPosition(5, 4 + Position);
+    Console::Print(L"%S\n", MenuEntry);
 }
 
 /**
@@ -1267,9 +1234,9 @@ BlpDrawBootMenuEntry(IN PXTBL_DIALOG_HANDLE Handle,
  */
 XTCDECL
 VOID
-BlpDrawDialogBox(IN OUT PXTBL_DIALOG_HANDLE Handle,
-                 IN PCWSTR Caption,
-                 IN PCWSTR Message)
+TextUi::DrawDialogBox(IN OUT PXTBL_DIALOG_HANDLE Handle,
+                      IN PCWSTR Caption,
+                      IN PCWSTR Message)
 {
     WCHAR BoxLine[XTBL_TUI_MAX_DIALOG_WIDTH];
     SIZE_T CaptionLength;
@@ -1290,13 +1257,13 @@ BlpDrawDialogBox(IN OUT PXTBL_DIALOG_HANDLE Handle,
     }
 
     /* Set dialog box colors */
-    BlSetConsoleAttributes(Handle->DialogColor | 0x0F);
+    Console::SetAttributes(Handle->DialogColor | 0x0F);
 
     /* Iterate through dialog box lines */
     for(PosY = Handle->PosY; PosY < Handle->PosY + Handle->Height; PosY++)
     {
         /* Set cursor position in the appropriate place */
-        BlSetCursorPosition(Handle->PosX, PosY);
+        Console::SetCursorPosition(Handle->PosX, PosY);
 
         /* Draw dialog box */
         if(PosY == Handle->PosY)
@@ -1370,22 +1337,22 @@ BlpDrawDialogBox(IN OUT PXTBL_DIALOG_HANDLE Handle,
         BoxLine[Handle->Width] = 0;
 
         /* Write the line to the console */
-        BlConsoleWrite(BoxLine);
+        Console::Write(BoxLine);
     }
 
     /* Make sure there is a caption to print */
     if(Caption != NULLPTR)
     {
     /* Write dialog box caption */
-        BlSetCursorPosition(Handle->PosX + 3, Handle->PosY);
-        BlConsolePrint(L"%S", Caption);
+        Console::SetCursorPosition(Handle->PosX + 3, Handle->PosY);
+        Console::Print(L"%S", Caption);
     }
 
     /* Make sure there is a message to print */
     if(Message != NULLPTR)
     {
         /* Write a message on the dialog box */
-        BlpDrawDialogMessage(Handle, Message);
+        DrawMessage(Handle, Message);
     }
 }
 
@@ -1401,7 +1368,7 @@ BlpDrawDialogBox(IN OUT PXTBL_DIALOG_HANDLE Handle,
  */
 XTCDECL
 VOID
-BlpDrawDialogButton(IN PXTBL_DIALOG_HANDLE Handle)
+TextUi::DrawButton(IN PXTBL_DIALOG_HANDLE Handle)
 {
     ULONG ButtonColor, TextColor;
 
@@ -1430,10 +1397,10 @@ BlpDrawDialogButton(IN PXTBL_DIALOG_HANDLE Handle)
     }
 
     /* Disable cursor and draw dialog button */
-    BlDisableConsoleCursor();
-    BlSetConsoleAttributes(ButtonColor | TextColor);
-    BlSetCursorPosition(Handle->ResX / 2 - 4, Handle->PosY + Handle->Height - 2);
-    BlConsolePrint(L"[  OK  ]");
+    Console::DisableCursor();
+    Console::SetAttributes(ButtonColor | TextColor);
+    Console::SetCursorPosition(Handle->ResX / 2 - 4, Handle->PosY + Handle->Height - 2);
+    Console::Print(L"[  OK  ]");
 }
 
 /**
@@ -1451,8 +1418,8 @@ BlpDrawDialogButton(IN PXTBL_DIALOG_HANDLE Handle)
  */
 XTCDECL
 VOID
-BlpDrawDialogInputField(IN PXTBL_DIALOG_HANDLE Handle,
-                        IN PWCHAR InputFieldText)
+TextUi::DrawInputField(IN PXTBL_DIALOG_HANDLE Handle,
+                       IN PWCHAR InputFieldText)
 {
     WCHAR InputField[XTBL_TUI_MAX_DIALOG_WIDTH];
     ULONG InputColor, TextColor;
@@ -1484,9 +1451,9 @@ BlpDrawDialogInputField(IN PXTBL_DIALOG_HANDLE Handle,
     }
 
     /* Set progress bar color and position */
-    BlSetConsoleAttributes(InputColor | TextColor);
+    Console::SetAttributes(InputColor | TextColor);
     Position = (Handle->Attributes & (XTBL_TUI_DIALOG_ACTIVE_BUTTON | XTBL_TUI_DIALOG_INACTIVE_BUTTON)) ? 4 : 3;
-    BlSetCursorPosition(Handle->PosX + 4, Handle->PosY + Handle->Height - Position);
+    Console::SetCursorPosition(Handle->PosX + 4, Handle->PosY + Handle->Height - Position);
 
     /* Draw input field */
     for(Index = 0; Index < Handle->Width - 8; Index++)
@@ -1496,8 +1463,8 @@ BlpDrawDialogInputField(IN PXTBL_DIALOG_HANDLE Handle,
     }
 
     /* Disable cursor and write input field to console */
-    BlDisableConsoleCursor();
-    BlConsoleWrite(InputField);
+    Console::DisableCursor();
+    Console::Write(InputField);
 
     /* Check input field text length */
     Length = RTL::WideString::WideStringLength(InputFieldText, 0);
@@ -1518,14 +1485,14 @@ BlpDrawDialogInputField(IN PXTBL_DIALOG_HANDLE Handle,
     InputField[Handle->Width] = 0;
 
     /* Write input field text */
-    BlSetCursorPosition(Handle->PosX + 4, Handle->PosY + Handle->Height - Position);
-    BlConsoleWrite(InputField);
+    Console::SetCursorPosition(Handle->PosX + 4, Handle->PosY + Handle->Height - Position);
+    Console::Write(InputField);
 
     /* Check if this is an active input field */
     if(Handle->Attributes & XTBL_TUI_DIALOG_ACTIVE_INPUT)
     {
         /* Enable cursor for active input field */
-        BlEnableConsoleCursor();
+        Console::EnableCursor();
     }
 }
 
@@ -1544,8 +1511,8 @@ BlpDrawDialogInputField(IN PXTBL_DIALOG_HANDLE Handle,
  */
 XTCDECL
 VOID
-BlpDrawDialogMessage(IN PXTBL_DIALOG_HANDLE Handle,
-                     IN PCWSTR Message)
+TextUi::DrawMessage(IN PXTBL_DIALOG_HANDLE Handle,
+                    IN PCWSTR Message)
 {
     PWCHAR Msg, MsgLine, LastMsgLine;
     SIZE_T Index, Length, LineLength;
@@ -1554,11 +1521,11 @@ BlpDrawDialogMessage(IN PXTBL_DIALOG_HANDLE Handle,
 
     /* Allocate memory for dialog box message */
     Length = RTL::WideString::WideStringLength(Message, 0);
-    Status = BlAllocateMemoryPool(Length * sizeof(WCHAR), (PVOID *)&Msg);
+    Status = Memory::AllocatePool(Length * sizeof(WCHAR), (PVOID *)&Msg);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Memory allocation failure, print debug message and return */
-        BlDebugPrint(L"ERROR: Memory allocation failure (Status Code: 0x%zX)\n", Status);
+        Debug::Print(L"ERROR: Memory allocation failure (Status Code: 0x%zX)\n", Status);
         return;
     }
 
@@ -1577,9 +1544,9 @@ BlpDrawDialogMessage(IN PXTBL_DIALOG_HANDLE Handle,
         LineLength = RTL::WideString::WideStringLength(MsgLine, 0);
 
         /* Write line in the dialog box */
-        BlSetCursorPosition(Handle->PosX + 2, Handle->PosY + 2 + Line);
-        BlSetConsoleAttributes(Handle->DialogColor | Handle->TextColor);
-        BlConsolePrint(L"%S", MsgLine);
+        Console::SetCursorPosition(Handle->PosX + 2, Handle->PosY + 2 + Line);
+        Console::SetAttributes(Handle->DialogColor | Handle->TextColor);
+        Console::Print(L"%S", MsgLine);
 
         /* Check if message line is shorter than the dialog box working area */
         if(LineLength < Handle->Width - 4)
@@ -1587,7 +1554,7 @@ BlpDrawDialogMessage(IN PXTBL_DIALOG_HANDLE Handle,
             /* Fill the rest of the line with spaces */
             for(Index = LineLength; Index < Handle->Width - 4; Index++)
             {
-                BlConsolePrint(L" ");
+                Console::Print(L" ");
             }
         }
 
@@ -1612,8 +1579,8 @@ BlpDrawDialogMessage(IN PXTBL_DIALOG_HANDLE Handle,
  */
 XTCDECL
 VOID
-BlpDrawDialogProgressBar(IN PXTBL_DIALOG_HANDLE Handle,
-                         IN UCHAR Percentage)
+TextUi::DrawProgressBar(IN PXTBL_DIALOG_HANDLE Handle,
+                        IN UCHAR Percentage)
 {
     UINT_PTR Index, ProgressLength, ProgressBarLength;
     WCHAR ProgressBar[XTBL_TUI_MAX_DIALOG_WIDTH];
@@ -1624,9 +1591,9 @@ BlpDrawDialogProgressBar(IN PXTBL_DIALOG_HANDLE Handle,
     ProgressLength = (ProgressBarLength * Percentage) / 100;
 
     /* Set progress bar color and position */
-    BlSetConsoleAttributes(EFI_TEXT_FGCOLOR_YELLOW);
+    Console::SetAttributes(EFI_TEXT_FGCOLOR_YELLOW);
     Position = (Handle->Attributes & (XTBL_TUI_DIALOG_ACTIVE_BUTTON | XTBL_TUI_DIALOG_INACTIVE_BUTTON)) ? 4 : 3;
-    BlSetCursorPosition(Handle->PosX + 4, Handle->PosY + Handle->Height - Position);
+    Console::SetCursorPosition(Handle->PosX + 4, Handle->PosY + Handle->Height - Position);
 
     /* Draw progress bar */
     for(Index = 0; Index < ProgressBarLength; Index++)
@@ -1648,8 +1615,8 @@ BlpDrawDialogProgressBar(IN PXTBL_DIALOG_HANDLE Handle,
     ProgressBar[Index] = 0;
 
     /* Disable cursor and write progress bar to console */
-    BlDisableConsoleCursor();
-    BlConsoleWrite(ProgressBar);
+    Console::DisableCursor();
+    Console::Write(ProgressBar);
 }
 
 /**
@@ -1664,10 +1631,10 @@ BlpDrawDialogProgressBar(IN PXTBL_DIALOG_HANDLE Handle,
  */
 XTCDECL
 VOID
-BlpDrawEditMenu(OUT PXTBL_DIALOG_HANDLE Handle)
+TextUi::DrawEditMenu(OUT PXTBL_DIALOG_HANDLE Handle)
 {
     /* Query console screen resolution */
-    BlQueryConsoleMode(&Handle->ResX, &Handle->ResY);
+    Console::QueryMode(&Handle->ResX, &Handle->ResY);
 
     /* Set boot menu parameters */
     Handle->Attributes = 0;
@@ -1679,32 +1646,32 @@ BlpDrawEditMenu(OUT PXTBL_DIALOG_HANDLE Handle)
     Handle->Height = Handle->ResY - 10;
 
     /* Clear screen and disable cursor */
-    BlSetConsoleAttributes(Handle->DialogColor | Handle->TextColor);
-    BlClearConsoleScreen();
-    BlDisableConsoleCursor();
+    Console::SetAttributes(Handle->DialogColor | Handle->TextColor);
+    Console::ClearScreen();
+    Console::DisableCursor();
 
     /* Check if debugging enabled */
     if(DEBUG)
     {
         /* Print debug version of XTLDR banner */
-        BlSetCursorPosition((Handle->ResX - 44) / 2, 1);
-        BlConsolePrint(L"XTLDR Boot Loader v%d.%d (%s-%s)\n",
+        Console::SetCursorPosition((Handle->ResX - 44) / 2, 1);
+        Console::Print(L"XTLDR Boot Loader v%d.%d (%s-%s)\n",
                        XTLDR_VERSION_MAJOR, XTLDR_VERSION_MINOR, XTOS_VERSION_DATE, XTOS_VERSION_HASH);
     }
     else
     {
         /* Print standard XTLDR banner */
-        BlSetCursorPosition((Handle->ResX - 22) / 2, 1);
-        BlConsolePrint(L"XTLDR Boot Loader v%d.%d\n", XTLDR_VERSION_MAJOR, XTLDR_VERSION_MINOR);
+        Console::SetCursorPosition((Handle->ResX - 22) / 2, 1);
+        Console::Print(L"XTLDR Boot Loader v%d.%d\n", XTLDR_VERSION_MAJOR, XTLDR_VERSION_MINOR);
     }
 
     /* Draw empty dialog box for boot menu */
-    BlpDrawDialogBox(Handle, L"Edit Options", NULLPTR);
+    DrawDialogBox(Handle, L"Edit Options", NULLPTR);
 
     /* Print help message below the edit menu */
-    BlSetCursorPosition(0, Handle->PosY + Handle->Height);
-    BlSetConsoleAttributes(EFI_TEXT_BGCOLOR_BLACK | EFI_TEXT_FGCOLOR_LIGHTGRAY);
-    BlConsolePrint(L"    Use cursors to change the selection. Press ENTER key to edit the chosen\n"
+    Console::SetCursorPosition(0, Handle->PosY + Handle->Height);
+    Console::SetAttributes(EFI_TEXT_BGCOLOR_BLACK | EFI_TEXT_FGCOLOR_LIGHTGRAY);
+    Console::Print(L"    Use cursors to change the selection. Press ENTER key to edit the chosen\n"
                    L"    option, ESC to return to the main boot menu or CTRL-B to boot.\n");
 }
 
@@ -1732,11 +1699,11 @@ BlpDrawEditMenu(OUT PXTBL_DIALOG_HANDLE Handle)
  */
 XTCDECL
 EFI_STATUS
-BlpDrawEditMenuEntry(IN PXTBL_DIALOG_HANDLE Handle,
-                     IN PCWSTR OptionName,
-                     IN PCWSTR OptionValue,
-                     IN UINT Position,
-                     IN BOOLEAN Highlighted)
+TextUi::DrawEditMenuEntry(IN PXTBL_DIALOG_HANDLE Handle,
+                          IN PCWSTR OptionName,
+                          IN PCWSTR OptionValue,
+                          IN UINT Position,
+                          IN BOOLEAN Highlighted)
 {
     BOOLEAN Allocation;
     PCWSTR DisplayValue, ShortValue;
@@ -1759,11 +1726,11 @@ BlpDrawEditMenuEntry(IN PXTBL_DIALOG_HANDLE Handle,
     if(OptionValueLength > OptionWidth)
     {
         /* Allocate buffer for new, shortened value */
-        Status = BlAllocateMemoryPool((OptionWidth + 1) * sizeof(WCHAR), (PVOID *)&ShortValue); // This allocates PWCHAR
+        Status = Memory::AllocatePool((OptionWidth + 1) * sizeof(WCHAR), (PVOID *)&ShortValue); // This allocates PWCHAR
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory allocation failure, print debug message and return */
-            BlDebugPrint(L"ERROR: Memory allocation failure (Status Code: 0x%zX)\n", Status);
+            Debug::Print(L"ERROR: Memory allocation failure (Status Code: 0x%zX)\n", Status);
             return Status;
         }
 
@@ -1778,37 +1745,70 @@ BlpDrawEditMenuEntry(IN PXTBL_DIALOG_HANDLE Handle,
     }
 
     /* Move cursor to the right position */
-    BlSetCursorPosition(5, 4 + Position);
+    Console::SetCursorPosition(5, 4 + Position);
 
     /* Check whether this entry should be highlighted */
     if(Highlighted)
     {
         /* Highlight this entry */
-        BlSetConsoleAttributes(EFI_TEXT_BGCOLOR_LIGHTGRAY | EFI_TEXT_FGCOLOR_BLACK);
+        Console::SetAttributes(EFI_TEXT_BGCOLOR_LIGHTGRAY | EFI_TEXT_FGCOLOR_BLACK);
     }
     else
     {
         /* Set default colors */
-        BlSetConsoleAttributes(EFI_TEXT_BGCOLOR_BLACK | EFI_TEXT_FGCOLOR_LIGHTGRAY);
+        Console::SetAttributes(EFI_TEXT_BGCOLOR_BLACK | EFI_TEXT_FGCOLOR_LIGHTGRAY);
     }
 
     /* Clear menu entry */
     for(Index = 0; Index < Handle->Width - 4; Index++)
     {
-        BlConsolePrint(L" ");
+        Console::Print(L" ");
     }
 
     /* Print menu entry */
-    BlSetCursorPosition(5, 4 + Position);
-    BlConsolePrint(L"%S: %S", OptionName, DisplayValue);
+    Console::SetCursorPosition(5, 4 + Position);
+    Console::Print(L"%S: %S", OptionName, DisplayValue);
 
     /* Check if allocation was made */
     if(Allocation)
     {
         /* Free allocated memory */
-        BlFreeMemoryPool((PVOID)DisplayValue);
+        Memory::FreePool((PVOID)DisplayValue);
     }
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
+}
+
+/**
+ * Updates the progress bar on the dialog box.
+ *
+ * @param Handle
+ *        Supplies a pointer to the dialog box handle.
+ *
+ * @param Message
+ *        Supplies a new message that will be put on the dialog box, while updating the progress bar.
+ *
+ * @param Percentage
+ *        Specifies the new percentage progress of the progress bar.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+TextUi::UpdateProgressBar(IN PXTBL_DIALOG_HANDLE Handle,
+                          IN PCWSTR Message,
+                          IN UCHAR Percentage)
+{
+    /* Check if message needs an update */
+    if(Message != NULLPTR)
+    {
+        /* Update a message on the dialog box */
+        DrawMessage(Handle, Message);
+    }
+
+    /* Update progress bar */
+    DrawProgressBar(Handle, Percentage);
 }

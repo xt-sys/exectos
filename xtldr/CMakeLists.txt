@@ -22,7 +22,6 @@ list(APPEND XTLDR_SOURCE
     ${XTLDR_SOURCE_DIR}/debug.cc
     ${XTLDR_SOURCE_DIR}/efiutils.cc
     ${XTLDR_SOURCE_DIR}/globals.cc
-    ${XTLDR_SOURCE_DIR}/hardware.cc
     ${XTLDR_SOURCE_DIR}/memory.cc
     ${XTLDR_SOURCE_DIR}/protocol.cc
     ${XTLDR_SOURCE_DIR}/shell.cc

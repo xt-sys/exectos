@@ -22,7 +22,7 @@
  */
 XTCDECL
 EFI_STATUS
-BlCloseVolume(IN PEFI_HANDLE VolumeHandle)
+Volume::CloseVolume(IN PEFI_HANDLE VolumeHandle)
 {
     EFI_GUID LIPGuid = EFI_LOADED_IMAGE_PROTOCOL_GUID;
 
@@ -46,7 +46,7 @@ BlCloseVolume(IN PEFI_HANDLE VolumeHandle)
  */
 XTCDECL
 EFI_STATUS
-BlEnumerateBlockDevices()
+Volume::EnumerateBlockDevices()
 {
     EFI_GUID LoadedImageProtocolGuid = EFI_LOADED_IMAGE_PROTOCOL_GUID;
     EFI_GUID BlockIoGuid = EFI_BLOCK_IO_PROTOCOL_GUID;
@@ -72,7 +72,7 @@ BlEnumerateBlockDevices()
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to get boot device handle */
-        BlDebugPrint(L"ERROR: Failed to get boot device handle (Status Code: 0x%zX)\n", Status);
+        Debug::Print(L"ERROR: Failed to get boot device handle (Status Code: 0x%zX)\n", Status);
         return Status;
     }
 
@@ -84,10 +84,10 @@ BlEnumerateBlockDevices()
     RTL::LinkedList::InitializeListHead(&EfiBlockDevices);
 
     /* Discover EFI block devices and store them in linked list */
-    Status = BlpDiscoverEfiBlockDevices(&BlockDevices);
+    Status = DiscoverEfiBlockDevices(&BlockDevices);
     if(Status != STATUS_EFI_SUCCESS)
     {
-        BlDebugPrint(L"ERROR: Failed to discover EFI block devices (Status Code: 0x%zX)\n", Status);
+        Debug::Print(L"ERROR: Failed to discover EFI block devices (Status Code: 0x%zX)\n", Status);
         return Status;
     }
 
@@ -100,11 +100,11 @@ BlEnumerateBlockDevices()
         PartitionGuid = NULLPTR;
 
         /* Find last node */
-        Status = BlpFindLastBlockDeviceNode(BlockDeviceData->DevicePath, &LastNode);
+        Status = FindLastBlockDeviceNode(BlockDeviceData->DevicePath, &LastNode);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Skip this device if its last node cannot be found, as it is required for classification */
-            BlDebugPrint(L"WARNING: Block device last node not found\n");
+            Debug::Print(L"WARNING: Block device last node not found\n");
             ListEntry = ListEntry->Flink;
             continue;
         }
@@ -113,10 +113,10 @@ BlEnumerateBlockDevices()
         DriveType = XTBL_BOOT_DEVICE_UNKNOWN;
 
         /* Locate the parent for this block device to ensure it is not an orphaned entry */
-        if(!BlpFindParentBlockDevice(&BlockDevices, BlockDeviceData, &ParentNode))
+        if(!FindParentBlockDevice(&BlockDevices, BlockDeviceData, &ParentNode))
         {
             /* Orphaned device found. Log a warning and skip it as it cannot be properly classified */
-            BlDebugPrint(L"WARNING: No parent device found, skipping orphaned media device path\n");
+            Debug::Print(L"WARNING: No parent device found, skipping orphaned media device path\n");
             ListEntry = ListEntry->Flink;
             continue;
         }
@@ -125,7 +125,7 @@ BlEnumerateBlockDevices()
         if(!BlockDeviceData->BlockIo->Media)
         {
             /* The device is unusable without media info, log a warning and skip it */
-            BlDebugPrint(L"WARNING: Block device is missing media information\n");
+            Debug::Print(L"WARNING: Block device is missing media information\n");
             ListEntry = ListEntry->Flink;
             continue;
         }
@@ -144,7 +144,7 @@ BlEnumerateBlockDevices()
                 PartitionNumber = 0;
 
                 /* Print debug message */
-                BlDebugPrint(L"Found Floppy Disk (DiskNumber: %lu, MediaPresent: %u, RO: %u)\n",
+                Debug::Print(L"Found Floppy Disk (DiskNumber: %lu, MediaPresent: %u, RO: %u)\n",
                              DriveNumber, Media->MediaPresent, Media->ReadOnly);
             }
         }
@@ -159,7 +159,7 @@ BlEnumerateBlockDevices()
             PartitionNumber = 0;
 
             /* Print debug message */
-            BlDebugPrint(L"Found CD-ROM drive (DriveNumber: %lu, MediaPresent: %u, RemovableMedia: %u, RO: %u)\n",
+            Debug::Print(L"Found CD-ROM drive (DriveNumber: %lu, MediaPresent: %u, RemovableMedia: %u, RO: %u)\n",
                          DriveNumber, Media->MediaPresent, Media->RemovableMedia, Media->ReadOnly);
         }
         else if(LastNode->Type == EFI_MEDIA_DEVICE_PATH && LastNode->SubType == EFI_MEDIA_HARDDRIVE_DP)
@@ -175,7 +175,7 @@ BlEnumerateBlockDevices()
             if(BootDeviceHandle != NULLPTR)
             {
                 /* Allocate memory for device path */
-                DevicePath = BlpDuplicateDevicePath(BlockDeviceData->DevicePath);
+                DevicePath = DuplicateDevicePath(BlockDeviceData->DevicePath);
                 if(DevicePath != NULLPTR)
                 {
                     /* Check if this is the boot device */
@@ -190,7 +190,7 @@ BlEnumerateBlockDevices()
             }
 
             /* Print debug message */
-            BlDebugPrint(L"Found Hard Disk partition (DiskNumber: %lu, PartNumber: %lu, "
+            Debug::Print(L"Found Hard Disk partition (DiskNumber: %lu, PartNumber: %lu, "
                          L"MBRType: %u, GUID: {%V}, PartSize: %lluB) %S\n",
                          DriveNumber, PartitionNumber, HDPath->MBRType,
                          PartitionGuid, HDPath->PartitionSize * Media->BlockSize,
@@ -204,7 +204,7 @@ BlEnumerateBlockDevices()
             PartitionNumber = 0;
 
             /* Print debug message */
-            BlDebugPrint(L"Found RAM Disk (DiskNumber: %lu, MediaPresent: %u)\n",
+            Debug::Print(L"Found RAM Disk (DiskNumber: %lu, MediaPresent: %u)\n",
                          DriveNumber, Media->MediaPresent);
         }
 
@@ -212,15 +212,15 @@ BlEnumerateBlockDevices()
         if(DriveType != XTBL_BOOT_DEVICE_UNKNOWN)
         {
             /* Allocate memory for block device */
-            Status = BlAllocateMemoryPool(sizeof(EFI_BLOCK_DEVICE), (PVOID *)&BlockDevice);
+            Status = Memory::AllocatePool(sizeof(EFI_BLOCK_DEVICE), (PVOID *)&BlockDevice);
             if(Status != STATUS_EFI_SUCCESS)
             {
-                BlDebugPrint(L"ERROR: Failed to allocate memory pool for block device (Status Code: 0x%zX)\n", Status);
+                Debug::Print(L"ERROR: Failed to allocate memory pool for block device (Status Code: 0x%zX)\n", Status);
                 return STATUS_EFI_OUT_OF_RESOURCES;
             }
 
             /* Initialize block device */
-            BlockDevice->DevicePath = BlpDuplicateDevicePath(BlockDeviceData->DevicePath);
+            BlockDevice->DevicePath = DuplicateDevicePath(BlockDeviceData->DevicePath);
             BlockDevice->DriveType = DriveType;
             BlockDevice->DriveNumber = DriveNumber;
             BlockDevice->PartitionNumber = PartitionNumber;
@@ -256,7 +256,7 @@ BlEnumerateBlockDevices()
  */
 XTCDECL
 EFI_STATUS
-BlFindVolumeDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL FsHandle,
+Volume::FindDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL FsHandle,
                        IN CONST PWCHAR FileSystemPath,
                        OUT PEFI_DEVICE_PATH_PROTOCOL* DevicePath)
 {
@@ -294,7 +294,7 @@ BlFindVolumeDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL FsHandle,
     FsPathLength = RTL::WideString::WideStringLength(FileSystemPath, 0) * sizeof(WCHAR);
 
     /* Allocate memory pool for device path */
-    Status = BlAllocateMemoryPool(FsPathLength + DevicePathLength + sizeof(EFI_DEVICE_PATH_PROTOCOL),
+    Status = Memory::AllocatePool(FsPathLength + DevicePathLength + sizeof(EFI_DEVICE_PATH_PROTOCOL),
                                      (PVOID *)DevicePath);
     if(Status != STATUS_EFI_SUCCESS)
     {
@@ -337,8 +337,8 @@ BlFindVolumeDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL FsHandle,
  */
 XTCDECL
 EFI_STATUS
-BlGetEfiPath(IN PWCHAR SystemPath,
-             OUT PWCHAR *EfiPath)
+Volume::GetEfiPath(IN PWCHAR SystemPath,
+                   OUT PWCHAR *EfiPath)
 {
     SIZE_T Index, PathLength;
     EFI_STATUS Status;
@@ -347,11 +347,11 @@ BlGetEfiPath(IN PWCHAR SystemPath,
     PathLength = RTL::WideString::WideStringLength(SystemPath, 0);
 
     /* Allocate memory for storing EFI path */
-    Status = BlAllocateMemoryPool(sizeof(WCHAR) * (PathLength + 1), (PVOID *)EfiPath);
+    Status = Memory::AllocatePool(sizeof(WCHAR) * (PathLength + 1), (PVOID *)EfiPath);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to allocate memory, print error message and return status code */
-        BlDebugPrint(L"ERROR: Memory allocation failure (Status Code: 0x%zX)\n", Status);
+        Debug::Print(L"ERROR: Memory allocation failure (Status Code: 0x%zX)\n", Status);
         return STATUS_EFI_OUT_OF_RESOURCES;
     }
 
@@ -390,7 +390,7 @@ BlGetEfiPath(IN PWCHAR SystemPath,
  */
 XTCDECL
 EFI_STATUS
-BlGetVolumeDevicePath(IN PWCHAR SystemPath,
+Volume::GetDevicePath(IN PWCHAR SystemPath,
                       OUT PEFI_DEVICE_PATH_PROTOCOL *DevicePath,
                       OUT PWCHAR *ArcName,
                       OUT PWCHAR *Path)
@@ -429,13 +429,13 @@ BlGetVolumeDevicePath(IN PWCHAR SystemPath,
         if(PathLength == GUID_STRING_LENGTH)
         {
             /* This is EFI GUID */
-            BlDebugPrint(L"WARNING: EFI/GPT GUID in system path is not supported\n");
+            Debug::Print(L"WARNING: EFI/GPT GUID in system path is not supported\n");
             return STATUS_EFI_UNSUPPORTED;
         }
         else if(PathLength == PARTUUID_STRING_LENGTH)
         {
             /* This is MBR UUID */
-            BlDebugPrint(L"WARNING: MBR partition UUID in system path is not supported\n");
+            Debug::Print(L"WARNING: MBR partition UUID in system path is not supported\n");
             return STATUS_EFI_UNSUPPORTED;
         }
         else
@@ -447,14 +447,14 @@ BlGetVolumeDevicePath(IN PWCHAR SystemPath,
     else
     {
         /* Defaults to ARC path, dissect it */
-        Status = BlpDissectVolumeArcPath(SystemPath, ArcName, Path, &DriveType, &DriveNumber, &PartNumber);
+        Status = DissectArcPath(SystemPath, ArcName, Path, &DriveType, &DriveNumber, &PartNumber);
     }
 
     /* Check if volume path parsed successfully */
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to parse system path */
-        BlDebugPrint(L"ERROR: Failed to parse system path: '%s' (Status Code: 0x%zX)\n", SystemPath, Status);
+        Debug::Print(L"ERROR: Failed to parse system path: '%s' (Status Code: 0x%zX)\n", SystemPath, Status);
         return Status;
     }
 
@@ -492,7 +492,7 @@ BlGetVolumeDevicePath(IN PWCHAR SystemPath,
     if(*DevicePath == NULLPTR)
     {
         /* Volume not found */
-        BlDebugPrint(L"ERROR: Volume (DriveType: %u, DriveNumber: %lu, PartNumber: %lu) not found\n",
+        Debug::Print(L"ERROR: Volume (DriveType: %u, DriveNumber: %lu, PartNumber: %lu) not found\n",
                      DriveType, DriveNumber, PartNumber);
         return STATUS_EFI_NOT_FOUND;
     }
@@ -519,9 +519,9 @@ BlGetVolumeDevicePath(IN PWCHAR SystemPath,
  */
 XTCDECL
 EFI_STATUS
-BlOpenVolume(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
-             OUT PEFI_HANDLE DiskHandle,
-             OUT PEFI_FILE_HANDLE *FsHandle)
+Volume::OpenVolume(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
+                   OUT PEFI_HANDLE DiskHandle,
+                   OUT PEFI_FILE_HANDLE *FsHandle)
 {
     EFI_GUID SFSGuid = EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_GUID;
     EFI_GUID LIPGuid = EFI_LOADED_IMAGE_PROTOCOL_GUID;
@@ -563,7 +563,7 @@ BlOpenVolume(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to open the filesystem protocol, close volume */
-        BlCloseVolume(DiskHandle);
+        CloseVolume(DiskHandle);
         return Status;
     }
 
@@ -572,7 +572,7 @@ BlOpenVolume(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to open the filesystem, close volume */
-        BlCloseVolume(DiskHandle);
+        CloseVolume(DiskHandle);
         return Status;
     }
 
@@ -601,10 +601,10 @@ BlOpenVolume(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
  */
 XTCDECL
 EFI_STATUS
-BlReadFile(IN PEFI_FILE_HANDLE DirHandle,
-           IN PCWSTR FileName,
-           OUT PVOID *FileData,
-           OUT PSIZE_T FileSize)
+Volume::ReadFile(IN PEFI_FILE_HANDLE DirHandle,
+                 IN PCWSTR FileName,
+                 OUT PVOID *FileData,
+                 OUT PSIZE_T FileSize)
 {
     EFI_GUID FileInfoGuid = EFI_FILE_INFO_PROTOCOL_GUID;
     EFI_PHYSICAL_ADDRESS Address;
@@ -626,7 +626,7 @@ BlReadFile(IN PEFI_FILE_HANDLE DirHandle,
     ReadSize = sizeof(EFI_FILE_INFO) + 32;
 
     /* Allocate necessary amount of memory */
-    Status = BlAllocateMemoryPool(ReadSize, (PVOID *)&FileInfo);
+    Status = Memory::AllocatePool(ReadSize, (PVOID *)&FileInfo);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Memory allocation failure */
@@ -639,8 +639,8 @@ BlReadFile(IN PEFI_FILE_HANDLE DirHandle,
     if(Status == STATUS_EFI_BUFFER_TOO_SMALL)
     {
         /* Buffer is too small, but EFI tells the required size, so reallocate */
-        BlFreeMemoryPool(&FileInfo);
-        Status = BlAllocateMemoryPool(ReadSize, (PVOID *)&FileInfo);
+        Memory::FreePool(&FileInfo);
+        Status = Memory::AllocatePool(ReadSize, (PVOID *)&FileInfo);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory allocation failure */
@@ -657,7 +657,7 @@ BlReadFile(IN PEFI_FILE_HANDLE DirHandle,
     {
         /* Unable to get file information */
         FileHandle->Close(FileHandle);
-        BlFreeMemoryPool(&FileInfo);
+        Memory::FreePool(&FileInfo);
         return Status;
     }
 
@@ -666,12 +666,12 @@ BlReadFile(IN PEFI_FILE_HANDLE DirHandle,
     Pages = EFI_SIZE_TO_PAGES(FileInfo->FileSize);
 
     /* Allocate pages */
-    Status = BlAllocateMemoryPages(AllocateAnyPages, Pages, &Address);
+    Status = Memory::AllocatePages(AllocateAnyPages, Pages, &Address);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Pages allocation failure */
         FileHandle->Close(FileHandle);
-        BlFreeMemoryPool(&FileInfo);
+        Memory::FreePool(&FileInfo);
         return Status;
     }
 
@@ -686,14 +686,14 @@ BlReadFile(IN PEFI_FILE_HANDLE DirHandle,
     {
         /* Failed to read data */
         FileHandle->Close(FileHandle);
-        BlFreeMemoryPool(&FileInfo);
-        BlFreeMemoryPages(Pages, (EFI_PHYSICAL_ADDRESS)(UINT_PTR)*FileData);
+        Memory::FreePool(&FileInfo);
+        Memory::FreePages(Pages, (EFI_PHYSICAL_ADDRESS)(UINT_PTR)*FileData);
         return Status;
     }
 
     /* Close handle and free memory */
     FileHandle->Close(FileHandle);
-    BlFreeMemoryPool(FileInfo);
+    Memory::FreePool(FileInfo);
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
@@ -711,7 +711,7 @@ BlReadFile(IN PEFI_FILE_HANDLE DirHandle,
  */
 XTCDECL
 EFI_STATUS
-BlpDiscoverEfiBlockDevices(OUT PLIST_ENTRY BlockDevices)
+Volume::DiscoverEfiBlockDevices(OUT PLIST_ENTRY BlockDevices)
 {
     EFI_GUID DevicePathGuid = EFI_DEVICE_PATH_PROTOCOL_GUID;
     EFI_GUID IoGuid = EFI_BLOCK_IO_PROTOCOL_GUID;
@@ -723,11 +723,11 @@ BlpDiscoverEfiBlockDevices(OUT PLIST_ENTRY BlockDevices)
     EFI_STATUS Status;
 
     /* Locate handles which support the disk I/O interface */
-    Status = BlLocateProtocolHandles(&Handles, &HandlesCount, &IoGuid);
+    Status = Protocol::LocateProtocolHandles(&Handles, &HandlesCount, &IoGuid);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to locate handles */
-        BlDebugPrint(L"ERROR: Failed to locate block devices handles (Status Code: 0x%zX)\n", Status);
+        Debug::Print(L"ERROR: Failed to locate block devices handles (Status Code: 0x%zX)\n", Status);
         return Status;
     }
 
@@ -735,15 +735,15 @@ BlpDiscoverEfiBlockDevices(OUT PLIST_ENTRY BlockDevices)
     for(Index = 0; Index < HandlesCount; Index++)
     {
         /* Print debug message */
-        BlDebugPrint(L"Opening %lu block device from %lu discovered\n", Index + 1, HandlesCount);
+        Debug::Print(L"Opening %lu block device from %lu discovered\n", Index + 1, HandlesCount);
 
         /* Open I/O protocol for given handle */
         Io = NULLPTR;
-        Status = BlOpenProtocolHandle(Handles[Index], (PVOID *)&Io, &IoGuid);
+        Status = Protocol::OpenProtocolHandle(Handles[Index], (PVOID *)&Io, &IoGuid);
         if(Status != STATUS_EFI_SUCCESS || Io == NULLPTR)
         {
             /* Failed to open I/O protocol, skip it */
-            BlDebugPrint(L"WARNING: Failed to open EFI Block I/O protocol (Status Code: 0x%zX)\n", Status);
+            Debug::Print(L"WARNING: Failed to open EFI Block I/O protocol (Status Code: 0x%zX)\n", Status);
             continue;
         }
 
@@ -751,7 +751,7 @@ BlpDiscoverEfiBlockDevices(OUT PLIST_ENTRY BlockDevices)
         if(Io->Media && Io->Media->BlockSize == 1 && Io->Media->MediaId == 0x69505845U)
         {
             /* Skip stub as it is non-functional */
-            BlDebugPrint(L"WARNING: Skipping iPXE stub block I/O protocol");
+            Debug::Print(L"WARNING: Skipping iPXE stub block I/O protocol");
             continue;
         }
 
@@ -761,17 +761,17 @@ BlpDiscoverEfiBlockDevices(OUT PLIST_ENTRY BlockDevices)
         if(Status != STATUS_EFI_SUCCESS || DevicePath == NULLPTR)
         {
             /* Device failed to handle DP protocol */
-            BlDebugPrint(L"WARNING: Unable to open DevicePath protocol (Status Code: 0x%zX)\n", Status);
+            Debug::Print(L"WARNING: Unable to open DevicePath protocol (Status Code: 0x%zX)\n", Status);
             EfiSystemTable->BootServices->CloseProtocol(Handles[Index], &IoGuid, EfiImageHandle, NULLPTR);
             continue;
         }
 
         /* Allocate memory for block device */
-        Status = BlAllocateMemoryPool(sizeof(*BlockDevice), (PVOID *)&BlockDevice);
+        Status = Memory::AllocatePool(sizeof(*BlockDevice), (PVOID *)&BlockDevice);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory allocation failure */
-            BlDebugPrint(L"ERROR: Failed to allocate memory pool for block device (Status Code: 0x%zX)\n", Status);
+            Debug::Print(L"ERROR: Failed to allocate memory pool for block device (Status Code: 0x%zX)\n", Status);
             EfiSystemTable->BootServices->CloseProtocol(Handles[Index], &DevicePathGuid, EfiImageHandle, NULLPTR);
             EfiSystemTable->BootServices->CloseProtocol(Handles[Index], &IoGuid, EfiImageHandle, NULLPTR);
             return Status;
@@ -784,7 +784,7 @@ BlpDiscoverEfiBlockDevices(OUT PLIST_ENTRY BlockDevices)
     }
 
     /* Free handles buffer */
-    BlFreeMemoryPool(Handles);
+    Memory::FreePool(Handles);
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
@@ -814,12 +814,12 @@ BlpDiscoverEfiBlockDevices(OUT PLIST_ENTRY BlockDevices)
  */
 XTCDECL
 EFI_STATUS
-BlpDissectVolumeArcPath(IN PWCHAR SystemPath,
-                        OUT PWCHAR *ArcName,
-                        OUT PWCHAR *Path,
-                        OUT PUSHORT DriveType,
-                        OUT PULONG DriveNumber,
-                        OUT PULONG PartNumber)
+Volume::DissectArcPath(IN PWCHAR SystemPath,
+                       OUT PWCHAR *ArcName,
+                       OUT PWCHAR *Path,
+                       OUT PUSHORT DriveType,
+                       OUT PULONG DriveNumber,
+                       OUT PULONG PartNumber)
 {
     PWCHAR ArcPath, LocalArcName;
     ULONG ArcLength = 0;
@@ -954,7 +954,7 @@ BlpDissectVolumeArcPath(IN PWCHAR SystemPath,
     /* Store ARC name if possible */
     if(ArcName)
     {
-        BlAllocateMemoryPool(ArcLength * sizeof(WCHAR), (PVOID *)&LocalArcName);
+        Memory::AllocatePool(ArcLength * sizeof(WCHAR), (PVOID *)&LocalArcName);
         RTL::Memory::CopyMemory(LocalArcName, SystemPath, ArcLength * sizeof(WCHAR));
         LocalArcName[ArcLength] = '\0';
         *ArcName = LocalArcName;
@@ -976,7 +976,7 @@ BlpDissectVolumeArcPath(IN PWCHAR SystemPath,
  */
 XTCDECL
 PEFI_DEVICE_PATH_PROTOCOL
-BlpDuplicateDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath)
+Volume::DuplicateDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath)
 {
     PEFI_DEVICE_PATH_PROTOCOL DevicePathNode;
     PEFI_DEVICE_PATH_PROTOCOL DevicePathClone;
@@ -1012,11 +1012,11 @@ BlpDuplicateDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath)
     }
 
     /* Allocate memory for the new device path */
-    Status = BlAllocateMemoryPool(Length, (PVOID *)&DevicePathClone);
+    Status = Memory::AllocatePool(Length, (PVOID *)&DevicePathClone);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to allocate memory */
-        BlDebugPrint(L"ERROR: Failed to allocate memory pool for device path duplicate (Status Code: 0x%zX)\n", Status);
+        Debug::Print(L"ERROR: Failed to allocate memory pool for device path duplicate (Status Code: 0x%zX)\n", Status);
         return NULLPTR;
     }
 
@@ -1042,8 +1042,8 @@ BlpDuplicateDevicePath(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath)
  */
 XTCDECL
 EFI_STATUS
-BlpFindLastBlockDeviceNode(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
-                           OUT PEFI_DEVICE_PATH_PROTOCOL *LastNode)
+Volume::FindLastBlockDeviceNode(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
+                                OUT PEFI_DEVICE_PATH_PROTOCOL *LastNode)
 {
     PEFI_DEVICE_PATH_PROTOCOL EndNode, NextNode;
 
@@ -1088,9 +1088,9 @@ BlpFindLastBlockDeviceNode(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
  */
 XTCDECL
 BOOLEAN
-BlpFindParentBlockDevice(IN PLIST_ENTRY BlockDevices,
-                         IN PEFI_BLOCK_DEVICE_DATA ChildNode,
-                         OUT PEFI_BLOCK_DEVICE_DATA *ParentNode)
+Volume::FindParentBlockDevice(IN PLIST_ENTRY BlockDevices,
+                              IN PEFI_BLOCK_DEVICE_DATA ChildNode,
+                              OUT PEFI_BLOCK_DEVICE_DATA *ParentNode)
 {
     PEFI_DEVICE_PATH_PROTOCOL ChildDevicePath, ParentDevicePath;
     PEFI_BLOCK_DEVICE_DATA BlockDeviceData;

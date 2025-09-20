@@ -90,8 +90,8 @@ ChainLoader::BootSystem(IN PXTBL_BOOT_PARAMETERS Parameters)
     MemoryDevicePath[1].Header.SubType = EFI_END_ENTIRE_DP;
 
     /* Load EFI image */
-    Status = XtLdrProtocol->Util.LoadEfiImage((PEFI_DEVICE_PATH_PROTOCOL)MemoryDevicePath,
-                                              LoaderData, LoaderSize, &LoaderHandle);
+    Status = XtLdrProtocol->Utils.LoadEfiImage((PEFI_DEVICE_PATH_PROTOCOL)MemoryDevicePath,
+                                               LoaderData, LoaderSize, &LoaderHandle);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to chainload EFI binary, return error code */
@@ -121,7 +121,7 @@ ChainLoader::BootSystem(IN PXTBL_BOOT_PARAMETERS Parameters)
     LoadedImage->DeviceHandle = DiskHandle;
 
     /* Chainload EFI image */
-    return XtLdrProtocol->Util.StartEfiImage(LoaderHandle);
+    return XtLdrProtocol->Utils.StartEfiImage(LoaderHandle);
 }
 
 /**

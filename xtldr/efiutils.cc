@@ -18,7 +18,7 @@
  */
 XTCDECL
 EFI_STATUS
-BlEnterFirmwareSetup()
+EfiUtils::EnterFirmwareSetup()
 {
     EFI_GUID Guid = EFI_GLOBAL_VARIABLE_GUID;
     PULONGLONG SetupSupport = NULLPTR;
@@ -26,27 +26,27 @@ BlEnterFirmwareSetup()
     EFI_STATUS Status;
 
     /* Check if booting into firmware interface is supported */
-    Status = BlGetEfiVariable(&Guid, L"OsIndicationsSupported", (PVOID*)&SetupSupport);
+    Status = GetEfiVariable(&Guid, L"OsIndicationsSupported", (PVOID*)&SetupSupport);
     if(Status != STATUS_EFI_SUCCESS || !(*SetupSupport & EFI_OS_INDICATIONS_BOOT_TO_FW_UI))
     {
         /* Reboot into firmware setup is not supported */
-        BlDebugPrint(L"WARNING: Reboot into firmware setup interface not supported\n");
+        Debug::Print(L"WARNING: Reboot into firmware setup interface not supported\n");
         if(SetupSupport)
         {
-            BlFreeMemoryPool((PVOID)SetupSupport);
+            Memory::FreePool((PVOID)SetupSupport);
         }
         return STATUS_EFI_UNSUPPORTED;
     }
 
-    BlFreeMemoryPool((PVOID)SetupSupport);
+    Memory::FreePool((PVOID)SetupSupport);
 
     /* Get the value of OsIndications variable */
     Indications = 0;
-    Status = BlGetEfiVariable(&Guid, L"OsIndications", (PVOID*)&Indications);
+    Status = GetEfiVariable(&Guid, L"OsIndications", (PVOID*)&Indications);
 
     /* Enable FW setup on next boot */
     Indications |= EFI_OS_INDICATIONS_BOOT_TO_FW_UI;
-    Status = BlSetEfiVariable(&Guid, L"OsIndications", (PVOID)&Indications, sizeof(Indications));
+    Status = SetEfiVariable(&Guid, L"OsIndications", (PVOID)&Indications, sizeof(Indications));
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to update OsIndications variable */
@@ -54,7 +54,7 @@ BlEnterFirmwareSetup()
     }
 
     /* Reboot into firmware setup */
-    BlRebootSystem();
+    RebootSystem();
 
     /* Must not reach this point, just make the compiler happy */
     return STATUS_EFI_SUCCESS;
@@ -69,7 +69,7 @@ BlEnterFirmwareSetup()
  */
 XTCDECL
 EFI_STATUS
-BlExitBootServices()
+EfiUtils::ExitBootServices()
 {
     PEFI_MEMORY_MAP MemoryMap;
     EFI_STATUS Status;
@@ -79,11 +79,11 @@ BlExitBootServices()
     BlpStatus.BootServices = FALSE;
 
     /* Allocate buffer for EFI memory map */
-    Status = BlAllocateMemoryPool(sizeof(EFI_MEMORY_MAP), (PVOID*)&MemoryMap);
+    Status = Memory::AllocatePool(sizeof(EFI_MEMORY_MAP), (PVOID*)&MemoryMap);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Memory allocation failure */
-        BlDebugPrint(L"ERROR: Memory allocation failure (Status Code: 0x%zX)\n", Status);
+        Debug::Print(L"ERROR: Memory allocation failure (Status Code: 0x%zX)\n", Status);
         return Status;
     }
 
@@ -95,7 +95,7 @@ BlExitBootServices()
     while(Counter > 0)
     {
         /* Get memory map each time as it can change between two calls */
-        Status = BlGetMemoryMap(MemoryMap);
+        Status = Memory::GetMemoryMap(MemoryMap);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Failed to get new memory map */
@@ -132,8 +132,8 @@ BlExitBootServices()
  */
 XTCDECL
 EFI_STATUS
-BlGetConfigurationTable(IN PEFI_GUID TableGuid,
-                        OUT PVOID *Table)
+EfiUtils::GetConfigurationTable(IN PEFI_GUID TableGuid,
+                                OUT PVOID *Table)
 {
     SIZE_T Index;
 
@@ -172,9 +172,9 @@ BlGetConfigurationTable(IN PEFI_GUID TableGuid,
  */
 XTCDECL
 EFI_STATUS
-BlGetEfiVariable(IN PEFI_GUID Vendor,
-                 IN PCWSTR VariableName,
-                 OUT PVOID *VariableValue)
+EfiUtils::GetEfiVariable(IN PEFI_GUID Vendor,
+                         IN PCWSTR VariableName,
+                         OUT PVOID *VariableValue)
 {
     EFI_STATUS Status;
     PVOID Buffer;
@@ -182,7 +182,7 @@ BlGetEfiVariable(IN PEFI_GUID Vendor,
 
     /* Allocate a buffer for storing a variable's value */
     Size = EFI_MAXIMUM_VARIABLE_SIZE * sizeof(PWCHAR);
-    Status = BlAllocateMemoryPool(Size, (PVOID*)&Buffer);
+    Status = Memory::AllocatePool(Size, (PVOID*)&Buffer);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Memory allocation failure */
@@ -216,7 +216,7 @@ BlGetEfiVariable(IN PEFI_GUID Vendor,
  */
 XTCDECL
 ULONGLONG
-BlGetRandomValue(IN OUT PULONGLONG RNGBuffer)
+EfiUtils::GetRandomValue(IN OUT PULONGLONG RNGBuffer)
 {
     /* Recalculate RNG buffer with XORSHIFT */
     *RNGBuffer ^= *RNGBuffer >> 12;
@@ -236,7 +236,7 @@ BlGetRandomValue(IN OUT PULONGLONG RNGBuffer)
  */
 XTCDECL
 INT_PTR
-BlGetSecureBootStatus()
+EfiUtils::GetSecureBootStatus()
 {
     EFI_GUID VarGuid = EFI_GLOBAL_VARIABLE_GUID;
     INT_PTR SecureBootStatus = 0;
@@ -272,7 +272,7 @@ BlGetSecureBootStatus()
  */
 XTCDECL
 EFI_STATUS
-BlInitializeEntropy(PULONGLONG RNGBuffer)
+EfiUtils::InitializeEntropy(PULONGLONG RNGBuffer)
 {
     EFI_GUID RngGuid = EFI_RNG_PROTOCOL_GUID;
     PEFI_RNG_PROTOCOL Rng;
@@ -325,10 +325,10 @@ BlInitializeEntropy(PULONGLONG RNGBuffer)
  */
 XTCDECL
 EFI_STATUS
-BlLoadEfiImage(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
-               IN PVOID ImageData,
-               IN SIZE_T ImageSize,
-               OUT PEFI_HANDLE ImageHandle)
+EfiUtils::LoadEfiImage(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
+                       IN PVOID ImageData,
+                       IN SIZE_T ImageSize,
+                       OUT PEFI_HANDLE ImageHandle)
 {
     /* Load EFI image */
     return EfiSystemTable->BootServices->LoadImage(FALSE, EfiImageHandle, DevicePath, ImageData, ImageSize, ImageHandle);
@@ -343,7 +343,7 @@ BlLoadEfiImage(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
  */
 XTCDECL
 EFI_STATUS
-BlRebootSystem()
+EfiUtils::RebootSystem()
 {
     /* Reboot machine */
     return EfiSystemTable->RuntimeServices->ResetSystem(EfiResetCold, STATUS_EFI_SUCCESS, 0, NULLPTR);
@@ -370,10 +370,10 @@ BlRebootSystem()
  */
 XTCDECL
 EFI_STATUS
-BlSetEfiVariable(IN PEFI_GUID Vendor,
-                 IN PCWSTR VariableName,
-                 IN PVOID VariableValue,
-                 IN UINT_PTR Size)
+EfiUtils::SetEfiVariable(IN PEFI_GUID Vendor,
+                         IN PCWSTR VariableName,
+                         IN PVOID VariableValue,
+                         IN UINT_PTR Size)
 {
     ULONG Attributes;
 
@@ -391,7 +391,7 @@ BlSetEfiVariable(IN PEFI_GUID Vendor,
  */
 XTCDECL
 EFI_STATUS
-BlShutdownSystem()
+EfiUtils::ShutdownSystem()
 {
     /* Shutdown machine */
     return EfiSystemTable->RuntimeServices->ResetSystem(EfiResetShutdown, STATUS_EFI_SUCCESS, 0, NULLPTR);
@@ -409,7 +409,7 @@ BlShutdownSystem()
  */
 XTCDECL
 VOID
-BlSleepExecution(IN ULONG_PTR Milliseconds)
+EfiUtils::SleepExecution(IN ULONG_PTR Milliseconds)
 {
     EfiSystemTable->BootServices->Stall(Milliseconds * 1000);
 }
@@ -426,7 +426,7 @@ BlSleepExecution(IN ULONG_PTR Milliseconds)
  */
 XTCDECL
 EFI_STATUS
-BlStartEfiImage(IN EFI_HANDLE ImageHandle)
+EfiUtils::StartEfiImage(IN EFI_HANDLE ImageHandle)
 {
     return EfiSystemTable->BootServices->StartImage(ImageHandle, NULLPTR, NULLPTR);
 }
@@ -449,9 +449,9 @@ BlStartEfiImage(IN EFI_HANDLE ImageHandle)
  */
 XTCDECL
 EFI_STATUS
-BlWaitForEfiEvent(IN UINT_PTR NumberOfEvents,
-                  IN PEFI_EVENT Event,
-                  OUT PUINT_PTR Index)
+EfiUtils::WaitForEfiEvent(IN UINT_PTR NumberOfEvents,
+                          IN PEFI_EVENT Event,
+                          OUT PUINT_PTR Index)
 {
     return EfiSystemTable->BootServices->WaitForEvent(NumberOfEvents, Event, Index);
 }

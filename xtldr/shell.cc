@@ -18,13 +18,13 @@
  */
 XTCDECL
 VOID
-BlStartLoaderShell()
+Shell::StartLoaderShell()
 {
     /* Initialize console */
-    BlInitializeConsole();
+    Console::InitializeConsole();
 
     /* Print prompt */
-    BlpPrintShellPrompt();
+    PrintPrompt();
     for(;;);
 }
 
@@ -37,14 +37,14 @@ BlStartLoaderShell()
  */
 XTCDECL
 VOID
-BlpPrintShellPrompt()
+Shell::PrintPrompt()
 {
     /* Set prompt color */
-    BlSetConsoleAttributes(EFI_TEXT_BGCOLOR_BLACK | EFI_TEXT_FGCOLOR_YELLOW);
+    Console::SetAttributes(EFI_TEXT_BGCOLOR_BLACK | EFI_TEXT_FGCOLOR_YELLOW);
 
     /* Print prompt */
-    BlConsolePrint(L"XTLDR> ");
+    Console::Print(L"XTLDR> ");
 
     /* Reset standard shell colors */
-    BlSetConsoleAttributes(EFI_TEXT_BGCOLOR_BLACK | EFI_TEXT_FGCOLOR_LIGHTGRAY);
+    Console::SetAttributes(EFI_TEXT_BGCOLOR_BLACK | EFI_TEXT_FGCOLOR_LIGHTGRAY);
 }

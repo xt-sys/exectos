@@ -10,75 +10,105 @@
 
 
 /**
- * This routine formats the input string and prints it out to the debug ports.
- *
- * @param Format
- *        The formatted string that is to be written to the output.
- *
- * @param ...
- *        Depending on the format string, this routine might expect a sequence of additional arguments.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTCDECL
-VOID
-BlDebugPrint(IN PCWSTR Format,
-             IN ...)
-{
-    RTL_PRINT_CONTEXT ConsolePrintContext, SerialPrintContext;
-    VA_LIST Arguments;
-
-    /* Check if debugging enabled and if EFI serial port is fully initialized */
-    if(DEBUG)
-    {
-        /* Initialize the print contexts */
-        ConsolePrintContext.WriteWideCharacter = BlpConsolePutChar;
-        SerialPrintContext.WriteWideCharacter = BlpDebugPutChar;
-
-        /* Initialise the va_list */
-        VA_START(Arguments, Format);
-
-        /* Check if serial debug port is enabled */
-        if((BlpStatus.DebugPort & XTBL_DEBUGPORT_SERIAL) && (BlpStatus.SerialPort.Flags & COMPORT_FLAG_INIT))
-        {
-            /* Format and print the string to the serial console */
-            RTL::WideString::FormatWideString(&SerialPrintContext, (PWCHAR)Format, Arguments);
-        }
-
-        /* Check if screen debug port is enabled and Boot Services are still available */
-        if((BlpStatus.DebugPort & XTBL_DEBUGPORT_SCREEN) && (BlpStatus.BootServices == TRUE))
-        {
-            /* Format and print the string to the screen */
-            RTL::WideString::FormatWideString(&ConsolePrintContext, (PWCHAR)Format, Arguments);
-        }
-
-        /* Clean up the va_list */
-        VA_END(Arguments);
-    }
-}
-
-/**
- * Writes a character to the serial console.
- *
- * @param Character
- *        The integer promotion of the character to be written.
+ * Enables I/O space access to all serial controllers found on the PCI(E) root bridge.
  *
  * @return This routine returns a status code.
  *
  * @since XT 1.0
  */
 XTCDECL
-XTSTATUS
-BlpDebugPutChar(IN WCHAR Character)
+EFI_STATUS
+Debug::ActivateSerialIOController()
 {
-    WCHAR Buffer[2];
+    EFI_GUID PciGuid = EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL_GUID;
+    PEFI_PCI_ROOT_BRIDGE_IO_PROTOCOL PciDev;
+    USHORT Bus, Device, Function, Command;
+    UINT_PTR Index, PciHandleSize;
+    PEFI_HANDLE PciHandle = NULLPTR;
+    PCI_COMMON_HEADER PciHeader;
+    EFI_STATUS Status;
+    ULONGLONG Address;
 
-    /* Write character to the serial console */
-    Buffer[0] = Character;
-    Buffer[1] = 0;
-    return HL::ComPort::WriteComPort(&BlpStatus.SerialPort, Buffer[0]);
+    /* Allocate memory for single EFI_HANDLE, what should be enough in most cases */
+    PciHandleSize = sizeof(EFI_HANDLE);
+    Status = Memory::AllocatePool(PciHandleSize, (PVOID*)&PciHandle);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Memory allocation failure */
+        return Status;
+    }
+
+    /* Get all instances of PciRootBridgeIo */
+    Status = EfiSystemTable->BootServices->LocateHandle(ByProtocol, &PciGuid, NULLPTR, &PciHandleSize, PciHandle);
+    if(Status == STATUS_EFI_BUFFER_TOO_SMALL)
+    {
+        /* Reallocate more memory as requested by UEFI */
+        Memory::FreePool(PciHandle);
+        Status = Memory::AllocatePool(PciHandleSize, (PVOID*)&PciHandle);
+        if(Status != STATUS_EFI_SUCCESS)
+        {
+            /* Memory reallocation failure */
+            return Status;
+        }
+
+        /* Second attempt to get instances of PciRootBridgeIo */
+        Status = EfiSystemTable->BootServices->LocateHandle(ByProtocol, &PciGuid, NULLPTR, &PciHandleSize, PciHandle);
+    }
+
+    /* Make sure successfully obtained PciRootBridgeIo instances */
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to get PciRootBridgeIo instances */
+        return Status;
+    }
+
+    /* Enumerate all devices for each handle, which decides a segment and a bus number range */
+    for(Index = 0; Index < (PciHandleSize / sizeof(EFI_HANDLE)); Index++)
+    {
+        /* Get inferface from the protocol */
+        Status = EfiSystemTable->BootServices->HandleProtocol(PciHandle[Index], &PciGuid, (PVOID*)&PciDev);
+        if(Status != STATUS_EFI_SUCCESS)
+        {
+            /* Failed to get interface */
+            return Status;
+        }
+
+        /* Enumerate whole PCI bridge */
+        for(Bus = 0; Bus <= PCI_MAX_BRIDGE_NUMBER; Bus++)
+        {
+            /* Enumerate all devices for each bus */
+            for(Device = 0; Device < PCI_MAX_DEVICES; Device++)
+            {
+                /* Enumerate all functions for each devices */
+                for(Function = 0; Function < PCI_MAX_FUNCTION; Function++)
+                {
+                    /* Read configuration space */
+                    Address = ((ULONGLONG)((((UINT_PTR) Bus) << 24) + (((UINT_PTR) Device) << 16) +
+                                           (((UINT_PTR) Function) << 8) + ((UINT_PTR) 0)));
+                    PciDev->Pci.Read(PciDev, EfiPciIoWidthUint32, Address, sizeof (PciHeader) / sizeof (UINT), &PciHeader);
+
+                    /* Check if device exists */
+                    if(PciHeader.VendorId == PCI_INVALID_VENDORID)
+                    {
+                        /* Skip non-existen device */
+                        continue;
+                    }
+
+                    /* Check if device is serial controller or multiport serial controller */
+                    if(PciHeader.BaseClass == 0x07 && (PciHeader.SubClass == 0x00 || PciHeader.SubClass == 0x02))
+                    {
+                        /* Enable I/O space access */
+                        Address |= 0x4;
+                        Command = PCI_ENABLE_IO_SPACE;
+                        Status = PciDev->Pci.Write(PciDev, EfiPciIoWidthUint16, Address, 1, &Command);
+                    }
+                }
+            }
+        }
+    }
+
+    /* Return SUCCESS */
+    return STATUS_EFI_SUCCESS;
 }
 
 /**
@@ -90,7 +120,7 @@ BlpDebugPutChar(IN WCHAR Character)
  */
 XTCDECL
 EFI_STATUS
-BlpInitializeDebugConsole()
+Debug::InitializeDebugConsole()
 {
     ULONG PortAddress, PortNumber, BaudRate;
     PWCHAR DebugConfiguration, DebugPort, LastPort;
@@ -102,7 +132,7 @@ BlpInitializeDebugConsole()
     BaudRate = 0;
 
     /* Get debug configuration */
-    BlGetConfigValue(L"DEBUG", &DebugConfiguration);
+    Configuration::GetValue(L"DEBUG", &DebugConfiguration);
 
     /* Make sure any debug options are provided and debug console is not initialized yet */
     if(DebugConfiguration && BlpStatus.DebugPort == 0)
@@ -178,8 +208,8 @@ BlpInitializeDebugConsole()
             else
             {
                 /* Unsupported debug port specified */
-                BlConsolePrint(L"ERROR: Unsupported debug port ('%S') specified\n", DebugPort);
-                BlSleepExecution(3000);
+                Console::Print(L"ERROR: Unsupported debug port ('%S') specified\n", DebugPort);
+                EfiUtils::SleepExecution(3000);
             }
 
             /* Take next debug port */
@@ -190,7 +220,7 @@ BlpInitializeDebugConsole()
         if(BlpStatus.DebugPort & XTBL_DEBUGPORT_SERIAL)
         {
             /* Try to initialize COM port */
-            Status = BlpInitializeSerialPort(PortNumber, PortAddress, BaudRate);
+            Status = InitializeSerialPort(PortNumber, PortAddress, BaudRate);
             if(Status != STATUS_EFI_SUCCESS)
             {
                 /* Remove serial debug port, as COM port initialization failed and return */
@@ -222,9 +252,9 @@ BlpInitializeDebugConsole()
  */
 XTCDECL
 EFI_STATUS
-BlpInitializeSerialPort(IN ULONG PortNumber,
-                        IN ULONG PortAddress,
-                        IN ULONG BaudRate)
+Debug::InitializeSerialPort(IN ULONG PortNumber,
+                            IN ULONG PortAddress,
+                            IN ULONG BaudRate)
 {
     EFI_STATUS EfiStatus;
     XTSTATUS Status;
@@ -248,12 +278,12 @@ BlpInitializeSerialPort(IN ULONG PortNumber,
 
         /* Set custom port address based on the port number and print debug message */
         PortAddress = BlComPortList[PortNumber - 1];
-        BlConsolePrint(L"Initializing serial console at port COM%d\n", PortNumber);
+        Console::Print(L"Initializing serial console at port COM%d\n", PortNumber);
     }
     else
     {
         /* Custom port address supplied, print debug message */
-        BlConsolePrint(L"Initializing serial console at COM port address: 0x%lX\n", PortAddress);
+        Console::Print(L"Initializing serial console at COM port address: 0x%lX\n", PortAddress);
     }
 
     /* Initialize COM port */
@@ -263,11 +293,11 @@ BlpInitializeSerialPort(IN ULONG PortNumber,
     if(Status == STATUS_NOT_FOUND && PortAddress)
     {
         /* This might be PCI(E) serial controller, try to activate I/O space access first */
-        EfiStatus = BlpActivateSerialIOController();
+        EfiStatus = ActivateSerialIOController();
         if(EfiStatus == STATUS_EFI_SUCCESS)
         {
             /* Try to reinitialize COM port */
-            BlConsolePrint(L"Enabled I/O space access for all PCI(E) serial controllers found\n");
+            Console::Print(L"Enabled I/O space access for all PCI(E) serial controllers found\n");
             Status = HL::ComPort::InitializeComPort(&BlpStatus.SerialPort, (PUCHAR)UlongToPtr(PortAddress), BaudRate);
         }
     }
@@ -281,4 +311,76 @@ BlpInitializeSerialPort(IN ULONG PortNumber,
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
+}
+
+/**
+ * This routine formats the input string and prints it out to the debug ports.
+ *
+ * @param Format
+ *        The formatted string that is to be written to the output.
+ *
+ * @param ...
+ *        Depending on the format string, this routine might expect a sequence of additional arguments.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+Debug::Print(IN PCWSTR Format,
+             IN ...)
+{
+    RTL_PRINT_CONTEXT ConsolePrintContext, SerialPrintContext;
+    VA_LIST Arguments;
+
+    /* Check if debugging enabled and if EFI serial port is fully initialized */
+    if(DEBUG)
+    {
+        /* Initialize the print contexts */
+        ConsolePrintContext.WriteWideCharacter = Console::PutChar;
+        SerialPrintContext.WriteWideCharacter = PutChar;
+
+        /* Initialise the va_list */
+        VA_START(Arguments, Format);
+
+        /* Check if serial debug port is enabled */
+        if((BlpStatus.DebugPort & XTBL_DEBUGPORT_SERIAL) && (BlpStatus.SerialPort.Flags & COMPORT_FLAG_INIT))
+        {
+            /* Format and print the string to the serial console */
+            RTL::WideString::FormatWideString(&SerialPrintContext, (PWCHAR)Format, Arguments);
+        }
+
+        /* Check if screen debug port is enabled and Boot Services are still available */
+        if((BlpStatus.DebugPort & XTBL_DEBUGPORT_SCREEN) && (BlpStatus.BootServices == TRUE))
+        {
+            /* Format and print the string to the screen */
+            RTL::WideString::FormatWideString(&ConsolePrintContext, (PWCHAR)Format, Arguments);
+        }
+
+        /* Clean up the va_list */
+        VA_END(Arguments);
+    }
+}
+
+/**
+ * Writes a character to the serial console.
+ *
+ * @param Character
+ *        The integer promotion of the character to be written.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+XTSTATUS
+Debug::PutChar(IN WCHAR Character)
+{
+    WCHAR Buffer[2];
+
+    /* Write character to the serial console */
+    Buffer[0] = Character;
+    Buffer[1] = 0;
+    return HL::ComPort::WriteComPort(&BlpStatus.SerialPort, Buffer[0]);
 }

@@ -24,8 +24,8 @@
  */
 XTCDECL
 EFI_STATUS
-BlCloseProtocol(IN PEFI_HANDLE Handle,
-                IN PEFI_GUID ProtocolGuid)
+Protocol::CloseProtocol(IN PEFI_HANDLE Handle,
+                        IN PEFI_GUID ProtocolGuid)
 {
     return EfiSystemTable->BootServices->CloseProtocol(Handle, ProtocolGuid, EfiImageHandle, NULLPTR);
 }
@@ -45,8 +45,8 @@ BlCloseProtocol(IN PEFI_HANDLE Handle,
  */
 XTCDECL
 EFI_STATUS
-BlFindBootProtocol(IN PCWSTR SystemType,
-                   OUT PEFI_GUID BootProtocolGuid)
+Protocol::FindBootProtocol(IN PCWSTR SystemType,
+                           OUT PEFI_GUID BootProtocolGuid)
 {
     PXTBL_KNOWN_BOOT_PROTOCOL ProtocolEntry;
     PLIST_ENTRY ProtocolListEntry;
@@ -84,7 +84,7 @@ BlFindBootProtocol(IN PCWSTR SystemType,
  */
 XTCDECL
 PLIST_ENTRY
-BlGetModulesList()
+Protocol::GetModulesList()
 {
     /* Return a pointer to a list of all loaded modules */
     return &BlpLoadedModules;
@@ -105,13 +105,164 @@ BlGetModulesList()
  */
 XTCDECL
 EFI_STATUS
-BlInstallProtocol(IN PVOID Interface,
-                  IN PEFI_GUID Guid)
+Protocol::InstallProtocol(IN PVOID Interface,
+                          IN PEFI_GUID Guid)
 {
     EFI_HANDLE Handle = NULLPTR;
 
     /* Install protocol interface */
     return EfiSystemTable->BootServices->InstallProtocolInterface(&Handle, Guid, EFI_NATIVE_INTERFACE, Interface);
+}
+
+/**
+ * Loads all necessary modules and invokes boot protocol.
+ *
+ * @param ShortName
+ *        Supplies a pointer to a short name of the chosen boot menu entry.
+ *
+ * @param OptionsList
+ *        Supplies a pointer to list of options associated with chosen boot menu entry.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+Protocol::InvokeBootProtocol(IN PWCHAR ShortName,
+                             IN PLIST_ENTRY OptionsList)
+{
+    EFI_GUID VendorGuid = XT_BOOT_LOADER_PROTOCOL_GUID;
+    XTBL_BOOT_PARAMETERS BootParameters;
+    PXTBL_BOOT_PROTOCOL BootProtocol;
+    PLIST_ENTRY OptionsListEntry;
+    PXTBL_CONFIG_ENTRY Option;
+    EFI_GUID BootProtocolGuid;
+    SIZE_T ModuleListLength;
+    PWCHAR ModulesList;
+    EFI_HANDLE Handle;
+    EFI_STATUS Status;
+
+    /* Initialize boot parameters and a list of modules */
+    RTL::Memory::ZeroMemory(&BootParameters, sizeof(XTBL_BOOT_PARAMETERS));
+    ModulesList = NULLPTR;
+
+    /* Iterate through all options provided by boot menu entry and propagate boot parameters */
+    OptionsListEntry = OptionsList->Flink;
+    while(OptionsListEntry != OptionsList)
+    {
+        /* Get option */
+        Option = CONTAIN_RECORD(OptionsListEntry, XTBL_CONFIG_ENTRY, Flink);
+
+        /* Look for boot protocol and modules list */
+        if(RTL::WideString::CompareWideStringInsensitive(Option->Name, L"BOOTMODULES", 0) == 0)
+        {
+            /* Check a length of modules list */
+            ModuleListLength = RTL::WideString::WideStringLength(Option->Value, 0);
+
+            Status = Memory::AllocatePool(sizeof(WCHAR) * (ModuleListLength + 1), (PVOID *)&ModulesList);
+            if(Status != STATUS_EFI_SUCCESS)
+            {
+                /* Failed to allocate memory, print error message and return status code */
+                Debug::Print(L"ERROR: Memory allocation failure (Status Code: 0x%zX)\n", Status);
+                return STATUS_EFI_OUT_OF_RESOURCES;
+            }
+
+            /* Make a copy of modules list */
+            RTL::Memory::CopyMemory(ModulesList, Option->Value, sizeof(WCHAR) * (ModuleListLength + 1));
+        }
+        else if(RTL::WideString::CompareWideStringInsensitive(Option->Name, L"SYSTEMTYPE", 0) == 0)
+        {
+            /* Boot protocol found */
+            BootParameters.SystemType = Option->Value;
+        }
+        else if(RTL::WideString::CompareWideStringInsensitive(Option->Name, L"SYSTEMPATH", 0) == 0)
+        {
+            /* System path found, get volume device path */
+            Status = Volume::GetDevicePath(Option->Value, &BootParameters.DevicePath,
+                                           &BootParameters.ArcName, &BootParameters.SystemPath);
+            if(Status != STATUS_EFI_SUCCESS)
+            {
+                /* Failed to find volume */
+                Debug::Print(L"ERROR: Failed to find volume device path (Status Code: 0x%zX)\n", Status);
+                return Status;
+            }
+
+            /* Get EFI compatible system path */
+            Status = Volume::GetEfiPath(BootParameters.SystemPath, &BootParameters.EfiPath);
+            if(Status != STATUS_EFI_SUCCESS)
+            {
+                /* Failed to get EFI path */
+                Debug::Print(L"ERROR: Failed to get EFI path (Status Code: 0x%zX)\n", Status);
+                return Status;
+            }
+        }
+        else if(RTL::WideString::CompareWideStringInsensitive(Option->Name, L"KERNELFILE", 0) == 0)
+        {
+            /* Kernel file name found */
+            BootParameters.KernelFile = Option->Value;
+        }
+        else if(RTL::WideString::CompareWideStringInsensitive(Option->Name, L"INITRDFILE", 0) == 0)
+        {
+            /* Initrd file name found */
+            BootParameters.InitrdFile = Option->Value;
+        }
+        else if(RTL::WideString::CompareWideStringInsensitive(Option->Name, L"HALFILE", 0) == 0)
+        {
+            /* Hal file name found */
+            BootParameters.HalFile = Option->Value;
+        }
+        else if(RTL::WideString::CompareWideStringInsensitive(Option->Name, L"PARAMETERS", 0) == 0)
+        {
+            /* Kernel parameters found */
+            BootParameters.Parameters = Option->Value;
+        }
+
+        /* Move to the next option entry */
+        OptionsListEntry = OptionsListEntry->Flink;
+    }
+
+    /* Load all necessary modules */
+    Status = LoadModules(ModulesList);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to load modules, print error message and return status code */
+        Debug::Print(L"ERROR: Failed to load XTLDR modules (Status Code: 0x%zX)\n", Status);
+        return STATUS_EFI_NOT_READY;
+    }
+
+    /* Attempt to get boot protocol GUID */
+    Status = FindBootProtocol(BootParameters.SystemType, &BootProtocolGuid);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to get boot protocol GUID */
+        Debug::Print(L"ERROR: Unable to find appropriate boot protocol (Status Code: 0x%zX)\n", Status);
+        return STATUS_EFI_UNSUPPORTED;
+    }
+
+    /* Open boot protocol */
+    Status = OpenProtocol(&Handle, (PVOID *)&BootProtocol, &BootProtocolGuid);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to open boot protocol */
+        Debug::Print(L"ERROR: Failed to open boot protocol (Status Code: 0x%zX)\n", Status);
+        return Status;
+    }
+
+    /* Check if chosen operating system should be saved */
+    if(Configuration::GetBooleanValue(L"KEEPLASTBOOT"))
+    {
+        /* Save chosen operating system in NVRAM */
+        Status = EfiUtils::SetEfiVariable(&VendorGuid, L"XtLdrLastBootOS", (PVOID)ShortName, RTL::WideString::WideStringLength(ShortName, 0) * sizeof(WCHAR));
+        if(Status != STATUS_EFI_SUCCESS)
+        {
+            /* Failed to save chosen Operating System */
+            Debug::Print(L"WARNING: Failed to save chosen Operating System in NVRAM (Status Code: 0x%zX)\n", Status);
+        }
+    }
+
+    /* Boot Operating System */
+    return BootProtocol->BootSystem(&BootParameters);
 }
 
 /**
@@ -126,7 +277,7 @@ BlInstallProtocol(IN PVOID Interface,
  */
 XTCDECL
 EFI_STATUS
-BlLoadModule(IN PWCHAR ModuleName)
+Protocol::LoadModule(IN PWCHAR ModuleName)
 {
     EFI_GUID LIPGuid = EFI_LOADED_IMAGE_PROTOCOL_GUID;
     PLIST_ENTRY DepsListEntry, ModuleListEntry;
@@ -155,7 +306,7 @@ BlLoadModule(IN PWCHAR ModuleName)
         if(RTL::WideString::CompareWideStringInsensitive(ModuleInfo->ModuleName, ModuleName, 0) == 0)
         {
             /* Module already loaded */
-            BlDebugPrint(L"WARNING: Module '%S' already loaded!\n", ModuleName);
+            Debug::Print(L"WARNING: Module '%S' already loaded!\n", ModuleName);
             return STATUS_EFI_SUCCESS;
         }
 
@@ -164,14 +315,14 @@ BlLoadModule(IN PWCHAR ModuleName)
     }
 
     /* Print debug message */
-    BlDebugPrint(L"Loading module '%S' ...\n", ModuleName);
+    Debug::Print(L"Loading module '%S' ...\n", ModuleName);
 
     /* Set module path */
     RTL::Memory::CopyMemory(ModuleFileName, ModuleName, (RTL::WideString::WideStringLength(ModuleName, 0) + 1) * sizeof(WCHAR));
     RTL::WideString::ConcatenateWideString(ModuleFileName, (PWCHAR)L".EFI", 0);
 
     /* Open EFI volume */
-    Status = BlOpenVolume(NULLPTR, &DiskHandle, &FsHandle);
+    Status = Volume::OpenVolume(NULLPTR, &DiskHandle, &FsHandle);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to open a volume */
@@ -193,14 +344,14 @@ BlLoadModule(IN PWCHAR ModuleName)
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to open directory */
-        BlCloseVolume(&DiskHandle);
+        Volume::CloseVolume(&DiskHandle);
         return Status;
     }
 
     /* Read module file from disk and close directory and EFI volume */
-    Status = BlReadFile(DirHandle, ModuleFileName, &ModuleData, &ModuleSize);
+    Status = Volume::ReadFile(DirHandle, ModuleFileName, &ModuleData, &ModuleSize);
     DirHandle->Close(DirHandle);
-    BlCloseVolume(&DiskHandle);
+    Volume::CloseVolume(&DiskHandle);
 
     /* Make sure module file was read successfully */
     if(Status != STATUS_EFI_SUCCESS)
@@ -210,7 +361,7 @@ BlLoadModule(IN PWCHAR ModuleName)
     }
 
     /* Allocate memory for module information block */
-    Status = BlAllocateMemoryPool(sizeof(XTBL_MODULE_INFO), (PVOID*)&ModuleInfo);
+    Status = Memory::AllocatePool(sizeof(XTBL_MODULE_INFO), (PVOID*)&ModuleInfo);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to allocate memory */
@@ -247,7 +398,7 @@ BlLoadModule(IN PWCHAR ModuleName)
             SectionData = (PWCHAR)((PUCHAR)ModuleData + SectionHeader[SectionIndex].PointerToRawData);
 
             /* Get module information */
-            Status = BlpGetModuleInformation(SectionData, SectionHeader[SectionIndex].SizeOfRawData, ModuleInfo);
+            Status = GetModuleInformation(SectionData, SectionHeader[SectionIndex].SizeOfRawData, ModuleInfo);
             if(Status != STATUS_EFI_SUCCESS)
             {
                 /* Failed to read module information */
@@ -271,12 +422,12 @@ BlLoadModule(IN PWCHAR ModuleName)
         }
 
         /* Load dependency module */
-        BlDebugPrint(L"Module '%S' requires '%S' ...\n", ModuleName, ModuleDependency->ModuleName);
-        Status = BlLoadModule(ModuleDependency->ModuleName);
+        Debug::Print(L"Module '%S' requires '%S' ...\n", ModuleName, ModuleDependency->ModuleName);
+        Status = LoadModule(ModuleDependency->ModuleName);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Failed to load module, print error message and return status code */
-            BlDebugPrint(L"Failed to load dependency module '%S' (Status Code: 0x%zX)\n", ModuleDependency->ModuleName, Status);
+            Debug::Print(L"Failed to load dependency module '%S' (Status Code: 0x%zX)\n", ModuleDependency->ModuleName, Status);
             return STATUS_EFI_UNSUPPORTED;
         }
 
@@ -298,20 +449,20 @@ BlLoadModule(IN PWCHAR ModuleName)
     ModuleDevicePath[1].Header.SubType = EFI_END_ENTIRE_DP;
 
     /* Load EFI image */
-    BlDebugPrint(L"Starting module '%S' ...\n", ModuleName);
-    Status = BlLoadEfiImage((PEFI_DEVICE_PATH_PROTOCOL)ModuleDevicePath, ModuleData, ModuleSize, &ModuleHandle);
+    Debug::Print(L"Starting module '%S' ...\n", ModuleName);
+    Status = EfiUtils::LoadEfiImage((PEFI_DEVICE_PATH_PROTOCOL)ModuleDevicePath, ModuleData, ModuleSize, &ModuleHandle);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Check if caused by secure boot */
         if(Status == STATUS_EFI_ACCESS_DENIED && BlpStatus.SecureBoot >= 1)
         {
             /* SecureBoot signature validation failed */
-            BlDebugPrint(L"ERROR: SecureBoot signature validation failed, module '%S' will not be loaded\n", ModuleName);
+            Debug::Print(L"ERROR: SecureBoot signature validation failed, module '%S' will not be loaded\n", ModuleName);
         }
         else
         {
             /* Failed to load module */
-            BlDebugPrint(L"ERROR: Unable to load module '%S' (Status Code: 0x%zX)\n", ModuleName, Status);
+            Debug::Print(L"ERROR: Unable to load module '%S' (Status Code: 0x%zX)\n", ModuleName, Status);
         }
 
         /* Return error status code */
@@ -324,7 +475,7 @@ BlLoadModule(IN PWCHAR ModuleName)
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to open LoadedImage protocol */
-        BlDebugPrint(L"ERROR: Unable to access module interface (Status Code: 0x%zX)\n", Status);
+        Debug::Print(L"ERROR: Unable to access module interface (Status Code: 0x%zX)\n", Status);
         return Status;
     }
 
@@ -332,7 +483,7 @@ BlLoadModule(IN PWCHAR ModuleName)
     if(LoadedImage->ImageCodeType != EfiBootServicesCode)
     {
         /* Different type set, probably 'runtime driver', refuse to load it */
-        BlDebugPrint(L"ERROR: Loaded module is not a boot system driver\n");
+        Debug::Print(L"ERROR: Loaded module is not a boot system driver\n");
 
         /* Close protocol and skip module */
         EfiSystemTable->BootServices->CloseProtocol(LoadedImage, &LIPGuid, LoadedImage, NULLPTR);
@@ -349,11 +500,11 @@ BlLoadModule(IN PWCHAR ModuleName)
     EfiSystemTable->BootServices->CloseProtocol(LoadedImage, &LIPGuid, LoadedImage, NULLPTR);
 
     /* Start EFI image */
-    Status = BlStartEfiImage(ModuleHandle);
+    Status = EfiUtils::StartEfiImage(ModuleHandle);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to start module image */
-        BlDebugPrint(L"ERROR: Failed to start module '%S' (Status Code: 0x%zX)\n", ModuleName, Status);
+        Debug::Print(L"ERROR: Failed to start module '%S' (Status Code: 0x%zX)\n", ModuleName, Status);
         return Status;
     }
 
@@ -376,7 +527,7 @@ BlLoadModule(IN PWCHAR ModuleName)
  */
 XTCDECL
 EFI_STATUS
-BlLoadModules(IN PWCHAR ModulesList)
+Protocol::LoadModules(IN PWCHAR ModulesList)
 {
     PWCHAR LastModule, Module;
     EFI_STATUS ReturnStatus, Status;
@@ -392,11 +543,11 @@ BlLoadModules(IN PWCHAR ModulesList)
         /* Iterate over all arguments passed to boot loader */
         while(Module != NULLPTR)
         {
-            Status = BlLoadModule(Module);
+            Status = LoadModule(Module);
             if(Status != STATUS_EFI_SUCCESS)
             {
                 /* Failed to load module, print error message and set new return value */
-                BlDebugPrint(L"ERROR: Failed to load module '%S' (Status Code: 0x%zX)\n", Module, Status);
+                Debug::Print(L"ERROR: Failed to load module '%S' (Status Code: 0x%zX)\n", Module, Status);
                 ReturnStatus = STATUS_EFI_LOAD_ERROR;
             }
 
@@ -427,9 +578,9 @@ BlLoadModules(IN PWCHAR ModulesList)
  */
 XTCDECL
 EFI_STATUS
-BlLocateProtocolHandles(OUT PEFI_HANDLE *Handles,
-                        OUT PUINT_PTR Count,
-                        IN PEFI_GUID ProtocolGuid)
+Protocol::LocateProtocolHandles(OUT PEFI_HANDLE *Handles,
+                                OUT PUINT_PTR Count,
+                                IN PEFI_GUID ProtocolGuid)
 {
     return EfiSystemTable->BootServices->LocateHandleBuffer(ByProtocol, ProtocolGuid, NULLPTR, Count, Handles);
 }
@@ -452,9 +603,9 @@ BlLocateProtocolHandles(OUT PEFI_HANDLE *Handles,
  */
 XTCDECL
 EFI_STATUS
-BlOpenProtocol(OUT PEFI_HANDLE Handle,
-               OUT PVOID *ProtocolHandler,
-               IN PEFI_GUID ProtocolGuid)
+Protocol::OpenProtocol(OUT PEFI_HANDLE Handle,
+                       OUT PVOID *ProtocolHandler,
+                       IN PEFI_GUID ProtocolGuid)
 {
     PEFI_HANDLE Handles = NULLPTR;
     EFI_STATUS Status;
@@ -462,7 +613,7 @@ BlOpenProtocol(OUT PEFI_HANDLE Handle,
     UINT Index;
 
     /* Try to locate the handles */
-    Status = BlLocateProtocolHandles(&Handles, &Count, ProtocolGuid);
+    Status = LocateProtocolHandles(&Handles, &Count, ProtocolGuid);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Unable to get handles */
@@ -476,7 +627,7 @@ BlOpenProtocol(OUT PEFI_HANDLE Handle,
         for(Index = 0; Index < Count; Index++)
         {
             /* Try to open protocol */
-            Status = BlOpenProtocolHandle(Handles[Index], ProtocolHandler, ProtocolGuid);
+            Status = OpenProtocolHandle(Handles[Index], ProtocolHandler, ProtocolGuid);
 
             /* Check if successfully opened the loader protocol */
             if(Status == STATUS_EFI_SUCCESS)
@@ -520,9 +671,9 @@ BlOpenProtocol(OUT PEFI_HANDLE Handle,
  */
 XTCDECL
 EFI_STATUS
-BlOpenProtocolHandle(IN EFI_HANDLE Handle,
-                     OUT PVOID *ProtocolHandler,
-                     IN PEFI_GUID ProtocolGuid)
+Protocol::OpenProtocolHandle(IN EFI_HANDLE Handle,
+                             OUT PVOID *ProtocolHandler,
+                             IN PEFI_GUID ProtocolGuid)
 {
     return EfiSystemTable->BootServices->OpenProtocol(Handle, ProtocolGuid, ProtocolHandler, EfiImageHandle,
                                                       NULLPTR, EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
@@ -540,7 +691,7 @@ BlOpenProtocolHandle(IN EFI_HANDLE Handle,
  */
 XTCDECL
 VOID
-BlRegisterBootMenu(IN PVOID BootMenuRoutine)
+Protocol::RegisterBootMenu(IN PVOID BootMenuRoutine)
 {
     /* Set boot menu routine */
     BlpStatus.BootMenu = (PBL_XT_BOOT_MENU)BootMenuRoutine;
@@ -561,8 +712,8 @@ BlRegisterBootMenu(IN PVOID BootMenuRoutine)
  */
 XTCDECL
 EFI_STATUS
-BlRegisterBootProtocol(IN PCWSTR SystemType,
-                       IN PEFI_GUID BootProtocolGuid)
+Protocol::RegisterBootProtocol(IN PCWSTR SystemType,
+                               IN PEFI_GUID BootProtocolGuid)
 {
     PXTBL_KNOWN_BOOT_PROTOCOL ProtocolEntry;
     PLIST_ENTRY ProtocolListEntry;
@@ -586,7 +737,7 @@ BlRegisterBootProtocol(IN PCWSTR SystemType,
     }
 
     /* Create new boot protocol entry */
-    Status = BlAllocateMemoryPool(sizeof(XTBL_BOOT_PROTOCOL), (PVOID *)&ProtocolEntry);
+    Status = Memory::AllocatePool(sizeof(XTBL_BOOT_PROTOCOL), (PVOID *)&ProtocolEntry);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Memory allocation failure */
@@ -620,9 +771,9 @@ BlRegisterBootProtocol(IN PCWSTR SystemType,
  */
 XTCDECL
 EFI_STATUS
-BlpGetModuleInformation(IN PWCHAR SectionData,
-                        IN ULONG SectionSize,
-                        OUT PXTBL_MODULE_INFO ModuleInfo)
+Protocol::GetModuleInformation(IN PWCHAR SectionData,
+                               IN ULONG SectionSize,
+                               OUT PXTBL_MODULE_INFO ModuleInfo)
 {
     PXTBL_MODULE_DEPS ModuleDependencies;
     PXTBL_MODULE_AUTHORS ModuleAuthors;
@@ -636,7 +787,7 @@ BlpGetModuleInformation(IN PWCHAR SectionData,
     RTL::LinkedList::InitializeListHead(&ModuleInfo->Dependencies);
 
     /* Get information strings from '.modinfo' section */
-    Status = BlpGetModuleInfoStrings(SectionData, SectionSize, &Strings, &Count);
+    Status = GetModuleInfoStrings(SectionData, SectionSize, &Strings, &Count);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to get information strings */
@@ -664,7 +815,7 @@ BlpGetModuleInformation(IN PWCHAR SectionData,
         if(RTL::WideString::CompareWideString(Key, L"author", 6) == 0)
         {
             /* Allocate memory for module author */
-            Status = BlAllocateMemoryPool(sizeof(XTBL_MODULE_AUTHORS), (PVOID*)&ModuleAuthors);
+            Status = Memory::AllocatePool(sizeof(XTBL_MODULE_AUTHORS), (PVOID*)&ModuleAuthors);
             if(Status != STATUS_EFI_SUCCESS)
             {
                 /* Memory allocation failure */
@@ -692,7 +843,7 @@ BlpGetModuleInformation(IN PWCHAR SectionData,
             while(Dependency != NULLPTR)
             {
                 /* Allocate memory for module dependency */
-                Status = BlAllocateMemoryPool(sizeof(XTBL_MODULE_DEPS), (PVOID*)&ModuleDependencies);
+                Status = Memory::AllocatePool(sizeof(XTBL_MODULE_DEPS), (PVOID*)&ModuleDependencies);
                 if(Status != STATUS_EFI_SUCCESS)
                 {
                     /* Memory allocation failure */
@@ -739,10 +890,10 @@ BlpGetModuleInformation(IN PWCHAR SectionData,
  */
 XTCDECL
 EFI_STATUS
-BlpGetModuleInfoStrings(IN PWCHAR SectionData,
-                        IN ULONG SectionSize,
-                        OUT PWCHAR **ModInfo,
-                        OUT PULONG InfoCount)
+Protocol::GetModuleInfoStrings(IN PWCHAR SectionData,
+                               IN ULONG SectionSize,
+                               OUT PWCHAR **ModInfo,
+                               OUT PULONG InfoCount)
 {
     ULONG Count, Index, ArrayIndex;
     PCWSTR InfoStrings;
@@ -801,7 +952,7 @@ BlpGetModuleInfoStrings(IN PWCHAR SectionData,
     }
 
     /* Allocate memory for the pointer array and the string data */
-    Status = BlAllocateMemoryPool(sizeof(PWCHAR) * (Count + 1) + (DataSize + 1) * sizeof(WCHAR), (PVOID *)&Array);
+    Status = Memory::AllocatePool(sizeof(PWCHAR) * (Count + 1) + (DataSize + 1) * sizeof(WCHAR), (PVOID *)&Array);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to allocate memory */
@@ -858,42 +1009,42 @@ BlpGetModuleInfoStrings(IN PWCHAR SectionData,
  */
 XTCDECL
 EFI_STATUS
-BlpInstallXtLoaderProtocol()
+Protocol::InstallXtLoaderProtocol()
 {
     EFI_GUID Guid = XT_BOOT_LOADER_PROTOCOL_GUID;
 
     /* Set all routines available via loader protocol */
-    BlpLdrProtocol.Boot.FindProtocol = BlFindBootProtocol;
-    BlpLdrProtocol.Boot.InitializeMenuList = BlInitializeBootMenuList;
-    BlpLdrProtocol.Boot.InvokeProtocol = BlInvokeBootProtocol;
-    BlpLdrProtocol.Boot.RegisterMenu = BlRegisterBootMenu;
-    BlpLdrProtocol.Boot.RegisterProtocol = BlRegisterBootProtocol;
-    BlpLdrProtocol.BootUtil.GetBooleanParameter = BlGetBooleanParameter;
-    BlpLdrProtocol.BootUtil.GetTrampolineInformation = AR::ProcSup::GetTrampolineInformation;
-    BlpLdrProtocol.Config.GetBooleanValue = BlGetConfigBooleanValue;
-    BlpLdrProtocol.Config.GetBootOptionValue = BlGetBootOptionValue;
-    BlpLdrProtocol.Config.GetEditableOptions = BlGetEditableOptions;
-    BlpLdrProtocol.Config.GetValue = BlGetConfigValue;
-    BlpLdrProtocol.Config.SetBootOptionValue = BlSetBootOptionValue;
-    BlpLdrProtocol.Console.ClearLine = BlClearConsoleLine;
-    BlpLdrProtocol.Console.ClearScreen = BlClearConsoleScreen;
-    BlpLdrProtocol.Console.DisableCursor = BlDisableConsoleCursor;
-    BlpLdrProtocol.Console.EnableCursor = BlEnableConsoleCursor;
-    BlpLdrProtocol.Console.Print = BlConsolePrint;
-    BlpLdrProtocol.Console.QueryMode = BlQueryConsoleMode;
-    BlpLdrProtocol.Console.ReadKeyStroke = BlReadKeyStroke;
-    BlpLdrProtocol.Console.ResetInputBuffer = BlResetConsoleInputBuffer;
-    BlpLdrProtocol.Console.SetAttributes = BlSetConsoleAttributes;
-    BlpLdrProtocol.Console.SetCursorPosition = BlSetCursorPosition;
-    BlpLdrProtocol.Console.Write = BlConsoleWrite;
+    BlpLdrProtocol.Boot.FindProtocol = FindBootProtocol;
+    BlpLdrProtocol.Boot.InitializeMenuList = XtLoader::InitializeBootMenuList;
+    BlpLdrProtocol.Boot.InvokeProtocol = InvokeBootProtocol;
+    BlpLdrProtocol.Boot.RegisterMenu = RegisterBootMenu;
+    BlpLdrProtocol.Boot.RegisterProtocol = RegisterBootProtocol;
+    BlpLdrProtocol.BootUtils.GetBooleanParameter = BootUtils::GetBooleanParameter;
+    BlpLdrProtocol.BootUtils.GetTrampolineInformation = AR::ProcSup::GetTrampolineInformation;
+    BlpLdrProtocol.Config.GetBooleanValue = Configuration::GetBooleanValue;
+    BlpLdrProtocol.Config.GetBootOptionValue = Configuration::GetBootOptionValue;
+    BlpLdrProtocol.Config.GetEditableOptions = Configuration::GetEditableOptions;
+    BlpLdrProtocol.Config.GetValue = Configuration::GetValue;
+    BlpLdrProtocol.Config.SetBootOptionValue = Configuration::SetBootOptionValue;
+    BlpLdrProtocol.Console.ClearLine = Console::ClearLine;
+    BlpLdrProtocol.Console.ClearScreen = Console::ClearScreen;
+    BlpLdrProtocol.Console.DisableCursor = Console::DisableCursor;
+    BlpLdrProtocol.Console.EnableCursor = Console::EnableCursor;
+    BlpLdrProtocol.Console.Print = Console::Print;
+    BlpLdrProtocol.Console.QueryMode = Console::QueryMode;
+    BlpLdrProtocol.Console.ReadKeyStroke = Console::ReadKeyStroke;
+    BlpLdrProtocol.Console.ResetInputBuffer = Console::ResetInputBuffer;
+    BlpLdrProtocol.Console.SetAttributes = Console::SetAttributes;
+    BlpLdrProtocol.Console.SetCursorPosition = Console::SetCursorPosition;
+    BlpLdrProtocol.Console.Write = Console::Write;
     BlpLdrProtocol.Cpu.CpuId = AR::CpuFunc::CpuId;
     BlpLdrProtocol.Cpu.ReadControlRegister = AR::CpuFunc::ReadControlRegister;
     BlpLdrProtocol.Cpu.ReadModelSpecificRegister = AR::CpuFunc::ReadModelSpecificRegister;
     BlpLdrProtocol.Cpu.WriteControlRegister = AR::CpuFunc::WriteControlRegister;
-    BlpLdrProtocol.Debug.Print = BlDebugPrint;
-    BlpLdrProtocol.Disk.CloseVolume = BlCloseVolume;
-    BlpLdrProtocol.Disk.OpenVolume = BlOpenVolume;
-    BlpLdrProtocol.Disk.ReadFile = BlReadFile;
+    BlpLdrProtocol.Debug.Print = Debug::Print;
+    BlpLdrProtocol.Disk.CloseVolume = Volume::CloseVolume;
+    BlpLdrProtocol.Disk.OpenVolume = Volume::OpenVolume;
+    BlpLdrProtocol.Disk.ReadFile = Volume::ReadFile;
     BlpLdrProtocol.IoPort.Read8 = HL::IoPort::ReadPort8;
     BlpLdrProtocol.IoPort.Read16 = HL::IoPort::ReadPort16;
     BlpLdrProtocol.IoPort.Read32 = HL::IoPort::ReadPort32;
@@ -904,54 +1055,54 @@ BlpInstallXtLoaderProtocol()
     BlpLdrProtocol.LinkedList.InsertHead = RTL::LinkedList::InsertHeadList;
     BlpLdrProtocol.LinkedList.InsertTail = RTL::LinkedList::InsertTailList;
     BlpLdrProtocol.LinkedList.RemoveEntry = RTL::LinkedList::RemoveEntryList;
-    BlpLdrProtocol.Memory.AllocatePages = BlAllocateMemoryPages;
-    BlpLdrProtocol.Memory.AllocatePool = BlAllocateMemoryPool;
-    BlpLdrProtocol.Memory.BuildPageMap = BlBuildPageMap;
+    BlpLdrProtocol.Memory.AllocatePages = Memory::AllocatePages;
+    BlpLdrProtocol.Memory.AllocatePool = Memory::AllocatePool;
+    BlpLdrProtocol.Memory.BuildPageMap = Memory::BuildPageMap;
     BlpLdrProtocol.Memory.CompareMemory = RTL::Memory::CompareMemory;
     BlpLdrProtocol.Memory.CopyMemory = RTL::Memory::CopyMemory;
-    BlpLdrProtocol.Memory.FreePages = BlFreeMemoryPages;
-    BlpLdrProtocol.Memory.FreePool = BlFreeMemoryPool;
-    BlpLdrProtocol.Memory.GetMappingsCount = BlGetMappingsCount;
-    BlpLdrProtocol.Memory.GetMemoryMap = BlGetMemoryMap;
-    BlpLdrProtocol.Memory.GetVirtualAddress = BlGetVirtualAddress;
-    BlpLdrProtocol.Memory.InitializePageMap = BlInitializePageMap;
-    BlpLdrProtocol.Memory.MapEfiMemory = BlMapEfiMemory;
-    BlpLdrProtocol.Memory.MapPage = BlMapPage;
-    BlpLdrProtocol.Memory.MapVirtualMemory = BlMapVirtualMemory;
+    BlpLdrProtocol.Memory.FreePages = Memory::FreePages;
+    BlpLdrProtocol.Memory.FreePool = Memory::FreePool;
+    BlpLdrProtocol.Memory.GetMappingsCount = Memory::GetMappingsCount;
+    BlpLdrProtocol.Memory.GetMemoryMap = Memory::GetMemoryMap;
+    BlpLdrProtocol.Memory.GetVirtualAddress = Memory::GetVirtualAddress;
+    BlpLdrProtocol.Memory.InitializePageMap = Memory::InitializePageMap;
+    BlpLdrProtocol.Memory.MapEfiMemory = Memory::MapEfiMemory;
+    BlpLdrProtocol.Memory.MapPage = Memory::MapPage;
+    BlpLdrProtocol.Memory.MapVirtualMemory = Memory::MapVirtualMemory;
     BlpLdrProtocol.Memory.MoveMemory = RTL::Memory::MoveMemory;
-    BlpLdrProtocol.Memory.PhysicalAddressToVirtual = BlPhysicalAddressToVirtual;
-    BlpLdrProtocol.Memory.PhysicalListToVirtual = BlPhysicalListToVirtual;
+    BlpLdrProtocol.Memory.PhysicalAddressToVirtual = Memory::PhysicalAddressToVirtual;
+    BlpLdrProtocol.Memory.PhysicalListToVirtual = Memory::PhysicalListToVirtual;
     BlpLdrProtocol.Memory.SetMemory = RTL::Memory::SetMemory;
     BlpLdrProtocol.Memory.ZeroMemory = RTL::Memory::ZeroMemory;
-    BlpLdrProtocol.Protocol.Close = BlCloseProtocol;
-    BlpLdrProtocol.Protocol.GetModulesList = BlGetModulesList;
-    BlpLdrProtocol.Protocol.Install = BlInstallProtocol;
-    BlpLdrProtocol.Protocol.LocateHandles = BlLocateProtocolHandles;
-    BlpLdrProtocol.Protocol.Open = BlOpenProtocol;
-    BlpLdrProtocol.Protocol.OpenHandle = BlOpenProtocolHandle;
+    BlpLdrProtocol.Protocol.Close = CloseProtocol;
+    BlpLdrProtocol.Protocol.GetModulesList = GetModulesList;
+    BlpLdrProtocol.Protocol.Install = InstallProtocol;
+    BlpLdrProtocol.Protocol.LocateHandles = LocateProtocolHandles;
+    BlpLdrProtocol.Protocol.Open = OpenProtocol;
+    BlpLdrProtocol.Protocol.OpenHandle = OpenProtocolHandle;
     BlpLdrProtocol.String.Compare = RTL::String::CompareString;
     BlpLdrProtocol.String.Length = RTL::String::StringLength;
     BlpLdrProtocol.String.ToWideString = RTL::String::StringToWideString;
     BlpLdrProtocol.String.Trim = RTL::String::TrimString;
-    BlpLdrProtocol.Tui.DisplayErrorDialog = BlDisplayErrorDialog;
-    BlpLdrProtocol.Tui.DisplayInfoDialog = BlDisplayInfoDialog;
-    BlpLdrProtocol.Tui.DisplayInputDialog = BlDisplayInputDialog;
-    BlpLdrProtocol.Tui.DisplayProgressDialog = BlDisplayProgressDialog;
-    BlpLdrProtocol.Tui.UpdateProgressBar = BlUpdateProgressBar;
-    BlpLdrProtocol.Util.EnterFirmwareSetup = BlEnterFirmwareSetup;
-    BlpLdrProtocol.Util.ExitBootServices = BlExitBootServices;
-    BlpLdrProtocol.Util.GetConfigurationTable = BlGetConfigurationTable;
-    BlpLdrProtocol.Util.GetEfiVariable = BlGetEfiVariable;
-    BlpLdrProtocol.Util.GetRandomValue = BlGetRandomValue;
-    BlpLdrProtocol.Util.GetSecureBootStatus = BlGetSecureBootStatus;
-    BlpLdrProtocol.Util.InitializeEntropy = BlInitializeEntropy;
-    BlpLdrProtocol.Util.LoadEfiImage = BlLoadEfiImage;
-    BlpLdrProtocol.Util.RebootSystem = BlRebootSystem;
-    BlpLdrProtocol.Util.SetEfiVariable = BlSetEfiVariable;
-    BlpLdrProtocol.Util.ShutdownSystem = BlShutdownSystem;
-    BlpLdrProtocol.Util.SleepExecution = BlSleepExecution;
-    BlpLdrProtocol.Util.StartEfiImage = BlStartEfiImage;
-    BlpLdrProtocol.Util.WaitForEfiEvent = BlWaitForEfiEvent;
+    BlpLdrProtocol.Tui.DisplayErrorDialog = TextUi::DisplayErrorDialog;
+    BlpLdrProtocol.Tui.DisplayInfoDialog = TextUi::DisplayInfoDialog;
+    BlpLdrProtocol.Tui.DisplayInputDialog = TextUi::DisplayInputDialog;
+    BlpLdrProtocol.Tui.DisplayProgressDialog = TextUi::DisplayProgressDialog;
+    BlpLdrProtocol.Tui.UpdateProgressBar = TextUi::UpdateProgressBar;
+    BlpLdrProtocol.Utils.EnterFirmwareSetup = EfiUtils::EnterFirmwareSetup;
+    BlpLdrProtocol.Utils.ExitBootServices = EfiUtils::ExitBootServices;
+    BlpLdrProtocol.Utils.GetConfigurationTable = EfiUtils::GetConfigurationTable;
+    BlpLdrProtocol.Utils.GetEfiVariable = EfiUtils::GetEfiVariable;
+    BlpLdrProtocol.Utils.GetRandomValue = EfiUtils::GetRandomValue;
+    BlpLdrProtocol.Utils.GetSecureBootStatus = EfiUtils::GetSecureBootStatus;
+    BlpLdrProtocol.Utils.InitializeEntropy = EfiUtils::InitializeEntropy;
+    BlpLdrProtocol.Utils.LoadEfiImage = EfiUtils::LoadEfiImage;
+    BlpLdrProtocol.Utils.RebootSystem = EfiUtils::RebootSystem;
+    BlpLdrProtocol.Utils.SetEfiVariable = EfiUtils::SetEfiVariable;
+    BlpLdrProtocol.Utils.ShutdownSystem = EfiUtils::ShutdownSystem;
+    BlpLdrProtocol.Utils.SleepExecution = EfiUtils::SleepExecution;
+    BlpLdrProtocol.Utils.StartEfiImage = EfiUtils::StartEfiImage;
+    BlpLdrProtocol.Utils.WaitForEfiEvent = EfiUtils::WaitForEfiEvent;
     BlpLdrProtocol.WideString.Compare = RTL::WideString::CompareWideString;
     BlpLdrProtocol.WideString.CompareInsensitive = RTL::WideString::CompareWideStringInsensitive;
     BlpLdrProtocol.WideString.Concatenate = RTL::WideString::ConcatenateWideString;
@@ -960,6 +1111,6 @@ BlpInstallXtLoaderProtocol()
     BlpLdrProtocol.WideString.Tokenize = RTL::WideString::TokenizeWideString;
 
     /* Register XTLDR loader protocol */
-    BlDebugPrint(L"Registering XT loader protocol\n");
-    return BlInstallProtocol(&BlpLdrProtocol, &Guid);
+    Debug::Print(L"Registering XT loader protocol\n");
+    return InstallProtocol(&BlpLdrProtocol, &Guid);
 }

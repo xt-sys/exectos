@@ -24,7 +24,7 @@
  */
 XTCDECL
 EFI_STATUS
-BlAllocateMemoryPages(IN EFI_ALLOCATE_TYPE AllocationType,
+Memory::AllocatePages(IN EFI_ALLOCATE_TYPE AllocationType,
                       IN ULONGLONG NumberOfPages,
                       OUT PEFI_PHYSICAL_ADDRESS Memory)
 {
@@ -46,7 +46,7 @@ BlAllocateMemoryPages(IN EFI_ALLOCATE_TYPE AllocationType,
  */
 XTCDECL
 EFI_STATUS
-BlAllocateMemoryPool(IN UINT_PTR Size,
+Memory::AllocatePool(IN UINT_PTR Size,
                      OUT PVOID *Memory)
 {
     /* Allocate pool */
@@ -68,7 +68,7 @@ BlAllocateMemoryPool(IN UINT_PTR Size,
  */
 XTCDECL
 EFI_STATUS
-BlFreeMemoryPages(IN ULONGLONG NumberOfPages,
+Memory::FreePages(IN ULONGLONG NumberOfPages,
                   IN EFI_PHYSICAL_ADDRESS Memory)
 {
     return EfiSystemTable->BootServices->FreePages(Memory, NumberOfPages);
@@ -86,10 +86,58 @@ BlFreeMemoryPages(IN ULONGLONG NumberOfPages,
  */
 XTCDECL
 EFI_STATUS
-BlFreeMemoryPool(IN PVOID Memory)
+Memory::FreePool(IN PVOID Memory)
 {
     /* Free pool */
     return EfiSystemTable->BootServices->FreePool(Memory);
+}
+
+/**
+ * Converts EFI memory type to XTLDR memory type.
+ *
+ * @param EfiMemoryType
+ *        Specifies EFI memory type.
+ *
+ * @return This routine returns a mapped XTLDR memory type.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+LOADER_MEMORY_TYPE
+Memory::GetLoaderMemoryType(IN EFI_MEMORY_TYPE EfiMemoryType)
+{
+    LOADER_MEMORY_TYPE MemoryType;
+
+    /* Check EFI memory type and convert to XTLDR memory type */
+    switch(EfiMemoryType)
+    {
+        case EfiACPIMemoryNVS:
+        case EfiACPIReclaimMemory:
+        case EfiPalCode:
+        case EfiReservedMemoryType:
+            MemoryType = LoaderSpecialMemory;
+            break;
+        case EfiRuntimeServicesCode:
+        case EfiRuntimeServicesData:
+        case EfiMemoryMappedIO:
+        case EfiMemoryMappedIOPortSpace:
+            MemoryType = LoaderFirmwarePermanent;
+            break;
+        case EfiBootServicesData:
+        case EfiLoaderCode:
+        case EfiLoaderData:
+            MemoryType = LoaderFirmwareTemporary;
+            break;
+        case EfiUnusableMemory:
+            MemoryType = LoaderBad;
+            break;
+        default:
+            MemoryType = LoaderFree;
+            break;
+    }
+
+    /* Return XTLDR memory type */
+    return MemoryType;
 }
 
 /**
@@ -107,8 +155,8 @@ BlFreeMemoryPool(IN PVOID Memory)
  */
 XTCDECL
 VOID
-BlGetMappingsCount(IN PXTBL_PAGE_MAPPING PageMap,
-                   OUT PULONG NumberOfMappings)
+Memory::GetMappingsCount(IN PXTBL_PAGE_MAPPING PageMap,
+                         OUT PULONG NumberOfMappings)
 {
     /* Return number of mappings */
     *NumberOfMappings = PageMap->MapSize;
@@ -126,7 +174,7 @@ BlGetMappingsCount(IN PXTBL_PAGE_MAPPING PageMap,
  */
 XTCDECL
 EFI_STATUS
-BlGetMemoryMap(OUT PEFI_MEMORY_MAP MemoryMap)
+Memory::GetMemoryMap(OUT PEFI_MEMORY_MAP MemoryMap)
 {
     EFI_STATUS Status;
 
@@ -155,14 +203,14 @@ BlGetMemoryMap(OUT PEFI_MEMORY_MAP MemoryMap)
             if(MemoryMap->Map)
             {
                 /* Free allocated memory */
-                BlFreeMemoryPool(MemoryMap->Map);
+                FreePool(MemoryMap->Map);
             }
             return Status;
         }
 
         /* Allocate the desired amount of memory */
         MemoryMap->MapSize += 2 * MemoryMap->DescriptorSize;
-        BlAllocateMemoryPool(MemoryMap->MapSize, (PVOID *)&MemoryMap->Map);
+        AllocatePool(MemoryMap->MapSize, (PVOID *)&MemoryMap->Map);
     }
     while(Status == STATUS_EFI_BUFFER_TOO_SMALL);
 
@@ -192,8 +240,8 @@ BlGetMemoryMap(OUT PEFI_MEMORY_MAP MemoryMap)
  */
 XTCDECL
 PVOID
-BlGetVirtualAddress(IN PXTBL_PAGE_MAPPING PageMap,
-                    IN PVOID PhysicalAddress)
+Memory::GetVirtualAddress(IN PXTBL_PAGE_MAPPING PageMap,
+                          IN PVOID PhysicalAddress)
 {
     PXTBL_MEMORY_MAPPING Mapping;
     PLIST_ENTRY ListEntry;
@@ -243,9 +291,9 @@ BlGetVirtualAddress(IN PXTBL_PAGE_MAPPING PageMap,
  */
 XTCDECL
 VOID
-BlInitializePageMap(OUT PXTBL_PAGE_MAPPING PageMap,
-                    IN SHORT PageMapLevel,
-                    IN PAGE_SIZE PageSize)
+Memory::InitializePageMap(OUT PXTBL_PAGE_MAPPING PageMap,
+                          IN SHORT PageMapLevel,
+                          IN PAGE_SIZE PageSize)
 {
     /* Initialize memory mappings */
     RTL::LinkedList::InitializeListHead(&PageMap->MemoryMap);
@@ -274,9 +322,9 @@ BlInitializePageMap(OUT PXTBL_PAGE_MAPPING PageMap,
  */
 XTCDECL
 EFI_STATUS
-BlMapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
-               IN OUT PVOID *MemoryMapAddress,
-               IN PBL_GET_MEMTYPE_ROUTINE GetMemoryTypeRoutine)
+Memory::MapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
+                     IN OUT PVOID *MemoryMapAddress,
+                     IN PBL_GET_MEMTYPE_ROUTINE GetMemoryTypeRoutine)
 {
     PEFI_MEMORY_DESCRIPTOR Descriptor;
     LOADER_MEMORY_TYPE MemoryType;
@@ -293,15 +341,15 @@ BlMapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
     if(GetMemoryTypeRoutine == NULLPTR)
     {
         /* Use default memory type routine */
-        GetMemoryTypeRoutine = BlpGetLoaderMemoryType;
+        GetMemoryTypeRoutine = GetLoaderMemoryType;
     }
 
     /* Allocate and zero-fill buffer for EFI memory map */
-    BlAllocateMemoryPool(sizeof(EFI_MEMORY_MAP), (PVOID*)&MemoryMap);
+    AllocatePool(sizeof(EFI_MEMORY_MAP), (PVOID*)&MemoryMap);
     RTL::Memory::ZeroMemory(MemoryMap, sizeof(EFI_MEMORY_MAP));
 
     /* Get EFI memory map */
-    Status = BlGetMemoryMap(MemoryMap);
+    Status = GetMemoryMap(MemoryMap);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to get EFI memory map */
@@ -352,14 +400,14 @@ BlMapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
             if(MemoryType == LoaderFirmwareTemporary)
             {
                 /* Map EFI firmware code */
-                Status = BlMapVirtualMemory(PageMap, (PVOID)Descriptor->PhysicalStart,
-                                            (PVOID)Descriptor->PhysicalStart, Descriptor->NumberOfPages, MemoryType);
+                Status = MapVirtualMemory(PageMap, (PVOID)Descriptor->PhysicalStart,
+                                          (PVOID)Descriptor->PhysicalStart, Descriptor->NumberOfPages, MemoryType);
             }
             else if(MemoryType != LoaderFree)
             {
                 /* Add any non-free memory mapping */
-                Status = BlMapVirtualMemory(PageMap, VirtualAddress, (PVOID)Descriptor->PhysicalStart,
-                                            Descriptor->NumberOfPages, MemoryType);
+                Status = MapVirtualMemory(PageMap, VirtualAddress, (PVOID)Descriptor->PhysicalStart,
+                                          Descriptor->NumberOfPages, MemoryType);
 
                 /* Calculate next valid virtual address */
                 VirtualAddress += Descriptor->NumberOfPages * EFI_PAGE_SIZE;
@@ -367,8 +415,8 @@ BlMapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
             else
             {
                 /* Map all other memory as loader free */
-                Status = BlMapVirtualMemory(PageMap, NULLPTR, (PVOID)Descriptor->PhysicalStart,
-                                            Descriptor->NumberOfPages, LoaderFree);
+                Status = MapVirtualMemory(PageMap, NULLPTR, (PVOID)Descriptor->PhysicalStart,
+                                          Descriptor->NumberOfPages, LoaderFree);
             }
 
             /* Make sure memory mapping succeeded */
@@ -384,7 +432,7 @@ BlMapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
     }
 
     /* Always map first page */
-    Status = BlMapVirtualMemory(PageMap, NULLPTR, (PVOID)0, 1, LoaderFirmwarePermanent);
+    Status = MapVirtualMemory(PageMap, NULLPTR, (PVOID)0, 1, LoaderFirmwarePermanent);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Mapping failed */
@@ -392,7 +440,7 @@ BlMapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
     }
 
     /* Map BIOS ROM and VRAM */
-    Status = BlMapVirtualMemory(PageMap, NULLPTR, (PVOID)0xA0000, 0x60, LoaderFirmwarePermanent);
+    Status = MapVirtualMemory(PageMap, NULLPTR, (PVOID)0xA0000, 0x60, LoaderFirmwarePermanent);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Mapping failed */
@@ -428,11 +476,11 @@ BlMapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
  */
 XTCDECL
 EFI_STATUS
-BlMapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
-                   IN PVOID VirtualAddress,
-                   IN PVOID PhysicalAddress,
-                   IN ULONGLONG NumberOfPages,
-                   IN LOADER_MEMORY_TYPE MemoryType)
+Memory::MapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
+                         IN PVOID VirtualAddress,
+                         IN PVOID PhysicalAddress,
+                         IN ULONGLONG NumberOfPages,
+                         IN LOADER_MEMORY_TYPE MemoryType)
 {
     PXTBL_MEMORY_MAPPING Mapping1, Mapping2, Mapping3;
     PVOID PhysicalAddressEnd, PhysicalAddress2End;
@@ -441,7 +489,7 @@ BlMapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
     EFI_STATUS Status;
 
     /* Allocate memory for new mapping */
-    Status = BlAllocateMemoryPool(sizeof(XTBL_MEMORY_MAPPING), (PVOID *)&Mapping1);
+    Status = AllocatePool(sizeof(XTBL_MEMORY_MAPPING), (PVOID *)&Mapping1);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Memory allocation failure */
@@ -491,7 +539,7 @@ BlMapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
             if(NumberOfMappedPages > 0)
             {
                 /* Pages associated to the mapping, allocate memory for it */
-                Status = BlAllocateMemoryPool(sizeof(XTBL_MEMORY_MAPPING), (PVOID*)&Mapping3);
+                Status = AllocatePool(sizeof(XTBL_MEMORY_MAPPING), (PVOID*)&Mapping3);
                 if(Status != STATUS_EFI_SUCCESS)
                 {
                     /* Memory allocation failure */
@@ -527,7 +575,7 @@ BlMapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
             if(NumberOfMappedPages > 0)
             {
                 /* Pages associated to the mapping, allocate memory for it */
-                Status = BlAllocateMemoryPool(sizeof(XTBL_MEMORY_MAPPING), (PVOID*)&Mapping3);
+                Status = AllocatePool(sizeof(XTBL_MEMORY_MAPPING), (PVOID*)&Mapping3);
                 if(Status != STATUS_EFI_SUCCESS)
                 {
                     /* Memory allocation failure */
@@ -564,7 +612,7 @@ BlMapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
 
             /* Remove mapping from the list and free up it's memory */
             RTL::LinkedList::RemoveEntryList(&Mapping2->ListEntry);
-            Status = BlFreeMemoryPool(Mapping2);
+            Status = FreePool(Mapping2);
             ListEntry = MappingListEntry;
 
             /* Go to the next mapping */
@@ -609,9 +657,9 @@ BlMapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
  */
 XTCDECL
 PVOID
-BlPhysicalAddressToVirtual(IN PVOID PhysicalAddress,
-                           IN PVOID PhysicalBase,
-                           IN PVOID VirtualBase)
+Memory::PhysicalAddressToVirtual(IN PVOID PhysicalAddress,
+                                 IN PVOID PhysicalBase,
+                                 IN PVOID VirtualBase)
 {
     /* Convert physical address to virtual address */
     return (PUCHAR)VirtualBase + ((PUCHAR)PhysicalAddress - (PUCHAR)PhysicalBase);
@@ -638,10 +686,10 @@ BlPhysicalAddressToVirtual(IN PVOID PhysicalAddress,
  */
 XTCDECL
 EFI_STATUS
-BlPhysicalListToVirtual(IN PXTBL_PAGE_MAPPING PageMap,
-                        IN OUT PLIST_ENTRY ListHead,
-                        IN PVOID PhysicalBase,
-                        IN PVOID VirtualBase)
+Memory::PhysicalListToVirtual(IN PXTBL_PAGE_MAPPING PageMap,
+                              IN OUT PLIST_ENTRY ListHead,
+                              IN PVOID PhysicalBase,
+                              IN PVOID VirtualBase)
 {
     PLIST_ENTRY ListEntry, NextEntry;
 
@@ -663,12 +711,12 @@ BlPhysicalListToVirtual(IN PXTBL_PAGE_MAPPING PageMap,
         if(ListEntry->Blink == ListHead)
         {
             /* Find virtual address of list head */
-            ListEntry->Blink = (PLIST_ENTRY)BlGetVirtualAddress(PageMap, ListEntry->Blink);
+            ListEntry->Blink = (PLIST_ENTRY)GetVirtualAddress(PageMap, ListEntry->Blink);
         }
         else
         {
             /* Convert list entry */
-            ListEntry->Blink = (PLIST_ENTRY)BlPhysicalAddressToVirtual(ListEntry->Blink, (PVOID)PhysicalBase, VirtualBase);
+            ListEntry->Blink = (PLIST_ENTRY)PhysicalAddressToVirtual(ListEntry->Blink, (PVOID)PhysicalBase, VirtualBase);
         }
         if(ListEntry->Flink == ListHead)
         {
@@ -678,7 +726,7 @@ BlPhysicalListToVirtual(IN PXTBL_PAGE_MAPPING PageMap,
         else
         {
             /* Convert list entry */
-            ListEntry->Flink = (PLIST_ENTRY)BlPhysicalAddressToVirtual(ListEntry->Flink, (PVOID)PhysicalBase, VirtualBase);
+            ListEntry->Flink = (PLIST_ENTRY)PhysicalAddressToVirtual(ListEntry->Flink, (PVOID)PhysicalBase, VirtualBase);
         }
 
         /* Get to the next element*/
@@ -686,57 +734,9 @@ BlPhysicalListToVirtual(IN PXTBL_PAGE_MAPPING PageMap,
     }
 
     /* Convert list head */
-    ListHead->Blink = (PLIST_ENTRY)BlPhysicalAddressToVirtual(ListHead->Blink, (PVOID)PhysicalBase, VirtualBase);
-    ListHead->Flink = (PLIST_ENTRY)BlPhysicalAddressToVirtual(ListHead->Flink, (PVOID)PhysicalBase, VirtualBase);
+    ListHead->Blink = (PLIST_ENTRY)PhysicalAddressToVirtual(ListHead->Blink, (PVOID)PhysicalBase, VirtualBase);
+    ListHead->Flink = (PLIST_ENTRY)PhysicalAddressToVirtual(ListHead->Flink, (PVOID)PhysicalBase, VirtualBase);
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
-}
-
-/**
- * Converts EFI memory type to XTLDR memory type.
- *
- * @param EfiMemoryType
- *        Specifies EFI memory type.
- *
- * @return This routine returns a mapped XTLDR memory type.
- *
- * @since XT 1.0
- */
-XTCDECL
-LOADER_MEMORY_TYPE
-BlpGetLoaderMemoryType(IN EFI_MEMORY_TYPE EfiMemoryType)
-{
-    LOADER_MEMORY_TYPE MemoryType;
-
-    /* Check EFI memory type and convert to XTLDR memory type */
-    switch(EfiMemoryType)
-    {
-        case EfiACPIMemoryNVS:
-        case EfiACPIReclaimMemory:
-        case EfiPalCode:
-        case EfiReservedMemoryType:
-            MemoryType = LoaderSpecialMemory;
-            break;
-        case EfiRuntimeServicesCode:
-        case EfiRuntimeServicesData:
-        case EfiMemoryMappedIO:
-        case EfiMemoryMappedIOPortSpace:
-            MemoryType = LoaderFirmwarePermanent;
-            break;
-        case EfiBootServicesData:
-        case EfiLoaderCode:
-        case EfiLoaderData:
-            MemoryType = LoaderFirmwareTemporary;
-            break;
-        case EfiUnusableMemory:
-            MemoryType = LoaderBad;
-            break;
-        default:
-            MemoryType = LoaderFree;
-            break;
-    }
-
-    /* Return XTLDR memory type */
-    return MemoryType;
 }

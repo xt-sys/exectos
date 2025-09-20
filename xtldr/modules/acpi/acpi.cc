@@ -228,7 +228,7 @@ Acpi::GetRsdpTable(OUT PVOID *AcpiTable)
     PVOID RsdpTable;
 
     /* Get RSDP (ACPI 1.0) table from system configuration tables */
-    Status = XtLdrProtocol->Util.GetConfigurationTable(&AcpiGuid, &RsdpTable);
+    Status = XtLdrProtocol->Utils.GetConfigurationTable(&AcpiGuid, &RsdpTable);
     if(Status != STATUS_EFI_SUCCESS || !ValidateAcpiTable(RsdpTable, 20))
     {
         /* RSDP not found or checksum mismatch */
@@ -260,7 +260,7 @@ Acpi::GetSMBiosTable(OUT PVOID *SmBiosTable)
     EFI_STATUS Status;
 
     /* Get SMBIOS table from system configuration tables */
-    Status = XtLdrProtocol->Util.GetConfigurationTable(&SmBiosGuid, (PVOID*)&SmBios);
+    Status = XtLdrProtocol->Utils.GetConfigurationTable(&SmBiosGuid, (PVOID*)&SmBios);
     if(Status != STATUS_EFI_SUCCESS || !ValidateAcpiTable(SmBios, SmBios->Length))
     {
         /* SMBIOS not found or checksum mismatch */
@@ -292,7 +292,7 @@ Acpi::GetSMBios3Table(OUT PVOID *SmBiosTable)
     EFI_STATUS Status;
 
     /* Get SMBIOS3 table from system configuration tables */
-    Status = XtLdrProtocol->Util.GetConfigurationTable(&SmBios3Guid, (PVOID*)&SmBios);
+    Status = XtLdrProtocol->Utils.GetConfigurationTable(&SmBios3Guid, (PVOID*)&SmBios);
     if(Status != STATUS_EFI_SUCCESS || !ValidateAcpiTable(SmBios, SmBios->Length))
     {
         /* SMBIOS3 not found or checksum mismatch */
@@ -324,7 +324,7 @@ Acpi::GetXsdpTable(OUT PVOID *AcpiTable)
     PVOID XsdpTable;
 
     /* Get XSDP (ACPI 2.0) from system configuration tables */
-    Status = XtLdrProtocol->Util.GetConfigurationTable(&AcpiGuid, &XsdpTable);
+    Status = XtLdrProtocol->Utils.GetConfigurationTable(&AcpiGuid, &XsdpTable);
     if(Status != STATUS_EFI_SUCCESS || !ValidateAcpiTable(XsdpTable, 36))
     {
         /* XSDP not found or checksum mismatch */

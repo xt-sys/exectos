@@ -34,7 +34,7 @@ Xtos::DeterminePagingLevel(IN CONST PWCHAR Parameters)
 
     /* Check if eXtended Physical Addressing (XPA) is enabled and if PAE is supported by the CPU */
     if((CpuRegisters.Edx & CPUID_FEATURES_EDX_PAE) &&
-       !(XtLdrProtocol->BootUtil.GetBooleanParameter(Parameters, L"NOXPA")))
+       !(XtLdrProtocol->BootUtils.GetBooleanParameter(Parameters, L"NOXPA")))
     {
         /* Enable PAE (PML3) */
         return 3;
@@ -80,7 +80,7 @@ Xtos::EnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
 
     /* Exit EFI Boot Services */
     XtLdrProtocol->Debug.Print(L"Exiting EFI boot services\n");
-    Status = XtLdrProtocol->Util.ExitBootServices();
+    Status = XtLdrProtocol->Utils.ExitBootServices();
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to exit boot services */
