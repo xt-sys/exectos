@@ -9,43 +9,44 @@
 #include <xtldr.hh>
 
 
-/* XT Boot Loader registered boot protocol list */
-LIST_ENTRY BlpBootProtocols;
-
-/* XT Boot Loader serial ports list */
-ULONG BlComPortList[COMPORT_COUNT] = COMPORT_ADDRESS;
+/* XT Boot Loader menu list */
+PLIST_ENTRY Configuration::BootMenuList = NULLPTR;
 
 /* XT Boot Loader configuration list */
-LIST_ENTRY BlpConfig;
+LIST_ENTRY Configuration::Config;
 
 /* XT Boot Loader loaded configuration */
-LIST_ENTRY BlpConfigSections;
+LIST_ENTRY Configuration::ConfigSections;
 
 /* List of user-editable boot options */
-PCWSTR BlpEditableConfigOptions[] = {
+PCWSTR Configuration::EditableConfigOptions[] = {
     L"BootModules", L"SystemType", L"SystemPath",
     L"KernelFile",  L"InitrdFile", L"HalFile",
     L"Parameters", NULLPTR
 };
 
+/* XT Boot Loader serial ports list */
+ULONG Debug::ComPortList[COMPORT_COUNT] = COMPORT_ADDRESS;
+
+/* XT Boot Loader registered boot protocol list */
+LIST_ENTRY Protocol::BootProtocols;
+
 /* XT Boot Loader protocol */
-XTBL_LOADER_PROTOCOL BlpLdrProtocol;
+XTBL_LOADER_PROTOCOL Protocol::LoaderProtocol;
 
 /* XT Boot Loader loaded modules list */
-LIST_ENTRY BlpLoadedModules;
+LIST_ENTRY Protocol::LoadedModules;
 
-/* XT Boot Loader menu list */
-PLIST_ENTRY BlpMenuList = NULLPTR;
+/* List of available block devices */
+LIST_ENTRY Volume::EfiBlockDevices;
+
+
 
 /* XT Boot Loader status data */
 XTBL_STATUS BlpStatus = {0};
-
-/* List of available block devices */
-LIST_ENTRY EfiBlockDevices;
 
 /* EFI Image Handle */
 EFI_HANDLE EfiImageHandle;
 
 /* EFI System Table */
 PEFI_SYSTEM_TABLE EfiSystemTable;
-

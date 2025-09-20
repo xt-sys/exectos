@@ -136,10 +136,10 @@ Configuration::GetEditableOptions(OUT PCWSTR **OptionsArray,
     ULONG Count = 0;
 
     /* Return a pointer to the global array of editable options */
-    *OptionsArray = BlpEditableConfigOptions;
+    *OptionsArray = EditableConfigOptions;
 
     /* Calculate the number of elements in the array */
-    while(BlpEditableConfigOptions[Count])
+    while(EditableConfigOptions[Count])
     {
         Count++;
     }
@@ -176,8 +176,8 @@ Configuration::GetValue(IN PCWSTR ConfigName,
     KeyLength = RTL::WideString::WideStringLength(ConfigName, 0);
 
     /* Iterate through config entries */
-    ConfigListEntry = BlpConfig.Flink;
-    while(ConfigListEntry != &BlpConfig)
+    ConfigListEntry = Config.Flink;
+    while(ConfigListEntry != &Config)
     {
         /* Get config entry */
         ConfigEntry = CONTAIN_RECORD(ConfigListEntry, XTBL_CONFIG_ENTRY, Flink);
@@ -213,6 +213,164 @@ Configuration::GetValue(IN PCWSTR ConfigName,
 }
 
 /**
+ * Initializes a list of operating systems for XTLDR boot menu.
+ *
+ * @param MenuEntries
+ *        Supplies a pointer to memory area where operating systems list will be stored.
+ *
+ * @param EntriesCount
+ *        Supplies a pointer to memory area where number of menu entries will be stored.
+ *
+ * @param DefaultId
+ *        Supplies a pointer to memory area where ID of default menu entry will be stored.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+Configuration::InitializeBootMenuList(IN ULONG MaxNameLength,
+                                      OUT PXTBL_BOOTMENU_ITEM *MenuEntries,
+                                      OUT PULONG EntriesCount,
+                                      OUT PULONG DefaultId)
+{
+    EFI_GUID VendorGuid = XT_BOOT_LOADER_PROTOCOL_GUID;
+    PWCHAR DefaultMenuEntry, LastBooted, MenuEntryName, VisibleName;
+    PLIST_ENTRY MenuEntrySectionList, MenuEntryList;
+    PXTBL_CONFIG_SECTION MenuEntrySection;
+    PXTBL_CONFIG_ENTRY MenuEntryOption;
+    ULONG DefaultOS, NameLength,NumberOfEntries;
+    PXTBL_BOOTMENU_ITEM OsList;
+    EFI_STATUS Status;
+
+    /* Set default values */
+    DefaultOS = 0;
+    NumberOfEntries = 0;
+
+    /* Get default menu entry from configuration */
+    Configuration::GetValue(L"DEFAULT", &DefaultMenuEntry);
+
+    /* Check if configuration allows to use last booted OS */
+    if(Configuration::GetBooleanValue(L"KEEPLASTBOOT"))
+    {
+        /* Attempt to get last booted Operating System from NVRAM */
+        Status = EfiUtils::GetEfiVariable(&VendorGuid, L"XtLdrLastBootOS", (PVOID*)&LastBooted);
+        if(Status == STATUS_EFI_SUCCESS)
+        {
+            /* Set default menu entry to last booted OS */
+            DefaultMenuEntry = LastBooted;
+        }
+    }
+
+    /* Iterate through menu items to get a total number of entries */
+    MenuEntrySectionList = BootMenuList->Flink;
+    while(MenuEntrySectionList != BootMenuList)
+    {
+        /* Increase number of menu entries, and simply get next item */
+        NumberOfEntries++;
+        MenuEntrySectionList = MenuEntrySectionList->Flink;
+    }
+
+    /* Allocate memory for the OS list depending on the item count */
+    Status = Memory::AllocatePool(NumberOfEntries * sizeof(XTBL_BOOTMENU_ITEM), (PVOID*)&OsList);
+    if(Status != STATUS_EFI_SUCCESS || !OsList)
+    {
+        /* Memory allocation failure */
+        return STATUS_EFI_OUT_OF_RESOURCES;
+    }
+
+    /* Reset counter and iterate through all menu items once again */
+    NumberOfEntries = 0;
+    MenuEntrySectionList = BootMenuList->Flink;
+    while(MenuEntrySectionList != BootMenuList)
+    {
+        /* NULLify menu entry name */
+        MenuEntryName = NULLPTR;
+
+        /* Get menu section */
+        MenuEntrySection = CONTAIN_RECORD(MenuEntrySectionList, XTBL_CONFIG_SECTION, Flink);
+
+        /* Check if this is the default menu entry */
+        if((RTL::WideString::WideStringLength(MenuEntrySection->SectionName, 0) == RTL::WideString::WideStringLength(DefaultMenuEntry, 0)) &&
+           (RTL::WideString::CompareWideStringInsensitive(MenuEntrySection->SectionName, DefaultMenuEntry, 0) == 0))
+        {
+            /* Set default OS ID */
+            DefaultOS = NumberOfEntries;
+        }
+
+        /* Iterate through all entry parameters */
+        MenuEntryList = MenuEntrySection->Options.Flink;
+        while(MenuEntryList != &MenuEntrySection->Options)
+        {
+            /* Get menu entry parameter */
+            MenuEntryOption = CONTAIN_RECORD(MenuEntryList, XTBL_CONFIG_ENTRY, Flink);
+
+            /* Check if this is the menu entry display name */
+            if(RTL::WideString::CompareWideStringInsensitive(MenuEntryOption->Name, L"SYSTEMNAME", 0) == 0)
+            {
+                /* Set menu entry display name */
+                MenuEntryName = MenuEntryOption->Value;
+            }
+
+            /* Get next parameter for this menu entry */
+            MenuEntryList = MenuEntryList->Flink;
+        }
+
+        /* Add OS to the boot menu list */
+        OsList[NumberOfEntries].FullName = MenuEntryName;
+        OsList[NumberOfEntries].ShortName = MenuEntrySection->SectionName;
+        OsList[NumberOfEntries].Options = &MenuEntrySection->Options;
+
+        /* Check if the menu entry name fits the maximum length */
+        NameLength = RTL::WideString::WideStringLength(MenuEntryName, 0);
+        if(NameLength > MaxNameLength)
+        {
+            /* Menu entry name is too long, allocate memory for shorter name visible in the boot menu */
+            Status = Memory::AllocatePool((MaxNameLength + 1) * sizeof(WCHAR), (PVOID*)&VisibleName);
+            if(Status != STATUS_EFI_SUCCESS)
+            {
+                /* Memory allocation failure */
+                return STATUS_EFI_OUT_OF_RESOURCES;
+            }
+
+            /* Copy shorter name and append "..." at the end */
+            RTL::Memory::CopyMemory(VisibleName, MenuEntryName, (MaxNameLength - 3) * sizeof(WCHAR));
+            RTL::Memory::CopyMemory(VisibleName + MaxNameLength - 3, L"...", 3 * sizeof(WCHAR));
+            VisibleName[MaxNameLength] = L'\0';
+
+            /* Set visible menu entry name */
+            OsList[NumberOfEntries].EntryName = VisibleName;
+        }
+        else
+        {
+            /* Menu entry name fits the maximum length, use it as is */
+            OsList[NumberOfEntries].EntryName = MenuEntryName;
+        }
+
+        /* Get next menu entry */
+        MenuEntrySectionList = MenuEntrySectionList->Flink;
+        NumberOfEntries++;
+    }
+
+    /* Set return values */
+    *DefaultId = DefaultOS;
+    *EntriesCount = NumberOfEntries;
+    *MenuEntries = OsList;
+
+    /* Return success */
+    return STATUS_EFI_SUCCESS;
+}
+
+XTCDECL
+VOID
+Configuration::InitializeConfiguration()
+{
+    /* Initialize XTLDR configuration linked lists */
+    RTL::LinkedList::InitializeListHead(&Config);
+}
+
+/**
  * Loads and parses XTLDR configuration file.
  *
  * @return This routine returns a status code.
@@ -228,7 +386,7 @@ Configuration::LoadConfiguration()
     PCHAR ConfigData;
 
     /* Initialize configuration pointer */
-    RTL::LinkedList::InitializeListHead(&BlpConfigSections);
+    RTL::LinkedList::InitializeListHead(&ConfigSections);
 
     /* Read data from configuration file */
     Status = ReadConfigFile(XTBL_LOADER_DIRECTORY_PATH, L"XTLDR.INI", &ConfigData);
@@ -247,7 +405,7 @@ Configuration::LoadConfiguration()
     }
 
     /* Parse configuration data */
-    Status = ParseConfigFile(ConfigData, &BlpConfigSections);
+    Status = ParseConfigFile(ConfigData, &ConfigSections);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to parse configuration */
@@ -256,8 +414,8 @@ Configuration::LoadConfiguration()
     }
 
     /* Iterate through config sections */
-    SectionListEntry = BlpConfigSections.Flink;
-    while(SectionListEntry != &BlpConfigSections)
+    SectionListEntry = ConfigSections.Flink;
+    while(SectionListEntry != &ConfigSections)
     {
         /* Get config section */
         PXTBL_CONFIG_SECTION Section = CONTAIN_RECORD(SectionListEntry, XTBL_CONFIG_SECTION, Flink);
@@ -278,7 +436,7 @@ Configuration::LoadConfiguration()
     }
 
     /* Update boot menu OS list */
-    BlpMenuList = &BlpConfigSections;
+    BootMenuList = &ConfigSections;
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
@@ -800,8 +958,8 @@ Configuration::SetValue(IN PCWSTR ConfigName,
     Length = RTL::WideString::WideStringLength(ConfigName, 0);
 
     /* Iterate through config entries */
-    ConfigListEntry = BlpConfig.Flink;
-    while(ConfigListEntry != &BlpConfig)
+    ConfigListEntry = Config.Flink;
+    while(ConfigListEntry != &Config)
     {
         /* Get config entry */
         ConfigEntry = CONTAIN_RECORD(ConfigListEntry, XTBL_CONFIG_ENTRY, Flink);
@@ -877,7 +1035,7 @@ Configuration::UpdateConfiguration(IN PLIST_ENTRY NewConfig)
         {
             /* Remove new config entry from input list and put it into global config list */
             RTL::LinkedList::RemoveEntryList(&ConfigEntry->Flink);
-            RTL::LinkedList::InsertTailList(&BlpConfig, &ConfigEntry->Flink);
+            RTL::LinkedList::InsertTailList(&Config, &ConfigEntry->Flink);
         }
 
         /* Move to the next new config entry */

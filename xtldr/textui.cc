@@ -159,7 +159,7 @@ TextUi::DisplayBootMenu()
 
     /* Initialize boot menu list */
     TopVisibleEntry = 0;
-    Status = XtLoader::InitializeBootMenuList(Handle.Width - 4, &MenuEntries, &NumberOfEntries, &HighligtedEntryId);
+    Status = Configuration::InitializeBootMenuList(Handle.Width - 4, &MenuEntries, &NumberOfEntries, &HighligtedEntryId);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to initialize boot menu list, exit into XTLDR shell */

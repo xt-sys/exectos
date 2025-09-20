@@ -277,7 +277,7 @@ Debug::InitializeSerialPort(IN ULONG PortNumber,
         }
 
         /* Set custom port address based on the port number and print debug message */
-        PortAddress = BlComPortList[PortNumber - 1];
+        PortAddress = ComPortList[PortNumber - 1];
         Console::Print(L"Initializing serial console at port COM%d\n", PortNumber);
     }
     else

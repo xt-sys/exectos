@@ -25,6 +25,12 @@ class BootUtils
 
 class Configuration
 {
+    private:
+        STATIC PLIST_ENTRY BootMenuList;
+        STATIC LIST_ENTRY Config;
+        STATIC LIST_ENTRY ConfigSections;
+        STATIC PCWSTR EditableConfigOptions[];
+
     public:
         STATIC XTCDECL BOOLEAN GetBooleanValue(IN PCWSTR ConfigName);
         STATIC XTCDECL EFI_STATUS GetBootOptionValue(IN PLIST_ENTRY Options,
@@ -34,6 +40,11 @@ class Configuration
                                                OUT PULONG OptionsCount);
         STATIC XTCDECL EFI_STATUS GetValue(IN PCWSTR ConfigName,
                                            OUT PWCHAR *ConfigValue);
+        STATIC XTCDECL EFI_STATUS InitializeBootMenuList(IN ULONG MaxNameLength,
+                                                         OUT PXTBL_BOOTMENU_ITEM *MenuEntries,
+                                                         OUT PULONG EntriesCount,
+                                                         OUT PULONG DefaultId);
+        STATIC XTCDECL VOID InitializeConfiguration();
         STATIC XTCDECL EFI_STATUS LoadConfiguration();
         STATIC XTCDECL EFI_STATUS ParseCommandLine();
         STATIC XTCDECL EFI_STATUS SetBootOptionValue(IN PLIST_ENTRY Options,
@@ -77,17 +88,20 @@ class Console
 
 class Debug
 {
+    private:
+        STATIC ULONG ComPortList[COMPORT_COUNT];
+
     public:
             STATIC XTCDECL EFI_STATUS InitializeDebugConsole();
             STATIC XTCDECL VOID Print(IN PCWSTR Format,
                                       IN ...);
             STATIC XTCDECL XTSTATUS PutChar(IN WCHAR Character);
 
-        private:
-            STATIC XTCDECL EFI_STATUS ActivateSerialIOController();
-            STATIC XTCDECL EFI_STATUS InitializeSerialPort(IN ULONG PortNumber,
-                                                           IN ULONG PortAddress,
-                                                           IN ULONG BaudRate);
+    private:
+        STATIC XTCDECL EFI_STATUS ActivateSerialIOController();
+        STATIC XTCDECL EFI_STATUS InitializeSerialPort(IN ULONG PortNumber,
+                                                       IN ULONG PortAddress,
+                                                       IN ULONG BaudRate);
 };
 
 class EfiUtils
@@ -173,6 +187,11 @@ class Memory
 
 class Protocol
 {
+    private:
+        STATIC LIST_ENTRY BootProtocols;
+        STATIC XTBL_LOADER_PROTOCOL LoaderProtocol;
+        STATIC LIST_ENTRY LoadedModules;
+
     public:
         STATIC XTCDECL EFI_STATUS CloseProtocol(IN PEFI_HANDLE Handle,
                                                 IN PEFI_GUID ProtocolGuid);
@@ -181,6 +200,7 @@ class Protocol
         STATIC XTCDECL PLIST_ENTRY GetModulesList();
         STATIC XTCDECL EFI_STATUS InstallProtocol(IN PVOID Interface,
                                                  IN PEFI_GUID Guid);
+        STATIC XTCDECL VOID InitializeProtocol();
         STATIC XTCDECL EFI_STATUS InvokeBootProtocol(IN PWCHAR ShortName,
                                                      IN PLIST_ENTRY OptionsList);
         STATIC XTCDECL EFI_STATUS LoadModule(IN PWCHAR ModuleName);
@@ -265,6 +285,9 @@ class TextUi
 
 class Volume
 {
+    private:
+        STATIC LIST_ENTRY EfiBlockDevices;
+
     public:
         STATIC XTCDECL EFI_STATUS CloseVolume(IN PEFI_HANDLE VolumeHandle);
         STATIC XTCDECL EFI_STATUS EnumerateBlockDevices();
@@ -306,10 +329,6 @@ class XtLoader
 {
     public:
         STATIC XTCDECL VOID InitializeBootLoader();
-        STATIC XTCDECL EFI_STATUS InitializeBootMenuList(IN ULONG MaxNameLength,
-                                                         OUT PXTBL_BOOTMENU_ITEM *MenuEntries,
-                                                         OUT PULONG EntriesCount,
-                                                         OUT PULONG DefaultId);
 };
 
 

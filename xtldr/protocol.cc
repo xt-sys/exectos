@@ -51,8 +51,8 @@ Protocol::FindBootProtocol(IN PCWSTR SystemType,
     PXTBL_KNOWN_BOOT_PROTOCOL ProtocolEntry;
     PLIST_ENTRY ProtocolListEntry;
 
-    ProtocolListEntry = BlpBootProtocols.Flink;
-    while(ProtocolListEntry != &BlpBootProtocols)
+    ProtocolListEntry = BootProtocols.Flink;
+    while(ProtocolListEntry != &BootProtocols)
     {
         /* Get boot protocol entry */
         ProtocolEntry = CONTAIN_RECORD(ProtocolListEntry, XTBL_KNOWN_BOOT_PROTOCOL, Flink);
@@ -87,7 +87,16 @@ PLIST_ENTRY
 Protocol::GetModulesList()
 {
     /* Return a pointer to a list of all loaded modules */
-    return &BlpLoadedModules;
+    return &LoadedModules;
+}
+
+XTCDECL
+VOID
+Protocol::InitializeProtocol()
+{
+    /* Initialize list of loaded modules and boot protocols */
+    RTL::LinkedList::InitializeListHead(&BootProtocols);
+    RTL::LinkedList::InitializeListHead(&LoadedModules);
 }
 
 /**
@@ -297,8 +306,8 @@ Protocol::LoadModule(IN PWCHAR ModuleName)
     EFI_STATUS Status;
     PVOID ModuleData;
 
-    ModuleListEntry = BlpLoadedModules.Flink;
-    while(ModuleListEntry != &BlpLoadedModules)
+    ModuleListEntry = LoadedModules.Flink;
+    while(ModuleListEntry != &LoadedModules)
     {
         /* Get module information */
         ModuleInfo = CONTAIN_RECORD(ModuleListEntry, XTBL_MODULE_INFO, Flink);
@@ -509,7 +518,7 @@ Protocol::LoadModule(IN PWCHAR ModuleName)
     }
 
     /* Add module to the list of loaded modules */
-    RTL::LinkedList::InsertTailList(&BlpLoadedModules, &ModuleInfo->Flink);
+    RTL::LinkedList::InsertTailList(&LoadedModules, &ModuleInfo->Flink);
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
@@ -719,8 +728,8 @@ Protocol::RegisterBootProtocol(IN PCWSTR SystemType,
     PLIST_ENTRY ProtocolListEntry;
     EFI_STATUS Status;
 
-    ProtocolListEntry = BlpBootProtocols.Flink;
-    while(ProtocolListEntry != &BlpBootProtocols)
+    ProtocolListEntry = BootProtocols.Flink;
+    while(ProtocolListEntry != &BootProtocols)
     {
         /* Get boot protocol entry */
         ProtocolEntry = CONTAIN_RECORD(ProtocolListEntry, XTBL_KNOWN_BOOT_PROTOCOL, Flink);
@@ -747,7 +756,7 @@ Protocol::RegisterBootProtocol(IN PCWSTR SystemType,
     /* Set protocol properties and add it to the list */
     ProtocolEntry->SystemType = (PWCHAR)SystemType;
     ProtocolEntry->Guid = *BootProtocolGuid;
-    RTL::LinkedList::InsertTailList(&BlpBootProtocols, &ProtocolEntry->Flink);
+    RTL::LinkedList::InsertTailList(&BootProtocols, &ProtocolEntry->Flink);
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
@@ -1014,103 +1023,103 @@ Protocol::InstallXtLoaderProtocol()
     EFI_GUID Guid = XT_BOOT_LOADER_PROTOCOL_GUID;
 
     /* Set all routines available via loader protocol */
-    BlpLdrProtocol.Boot.FindProtocol = FindBootProtocol;
-    BlpLdrProtocol.Boot.InitializeMenuList = XtLoader::InitializeBootMenuList;
-    BlpLdrProtocol.Boot.InvokeProtocol = InvokeBootProtocol;
-    BlpLdrProtocol.Boot.RegisterMenu = RegisterBootMenu;
-    BlpLdrProtocol.Boot.RegisterProtocol = RegisterBootProtocol;
-    BlpLdrProtocol.BootUtils.GetBooleanParameter = BootUtils::GetBooleanParameter;
-    BlpLdrProtocol.BootUtils.GetTrampolineInformation = AR::ProcSup::GetTrampolineInformation;
-    BlpLdrProtocol.Config.GetBooleanValue = Configuration::GetBooleanValue;
-    BlpLdrProtocol.Config.GetBootOptionValue = Configuration::GetBootOptionValue;
-    BlpLdrProtocol.Config.GetEditableOptions = Configuration::GetEditableOptions;
-    BlpLdrProtocol.Config.GetValue = Configuration::GetValue;
-    BlpLdrProtocol.Config.SetBootOptionValue = Configuration::SetBootOptionValue;
-    BlpLdrProtocol.Console.ClearLine = Console::ClearLine;
-    BlpLdrProtocol.Console.ClearScreen = Console::ClearScreen;
-    BlpLdrProtocol.Console.DisableCursor = Console::DisableCursor;
-    BlpLdrProtocol.Console.EnableCursor = Console::EnableCursor;
-    BlpLdrProtocol.Console.Print = Console::Print;
-    BlpLdrProtocol.Console.QueryMode = Console::QueryMode;
-    BlpLdrProtocol.Console.ReadKeyStroke = Console::ReadKeyStroke;
-    BlpLdrProtocol.Console.ResetInputBuffer = Console::ResetInputBuffer;
-    BlpLdrProtocol.Console.SetAttributes = Console::SetAttributes;
-    BlpLdrProtocol.Console.SetCursorPosition = Console::SetCursorPosition;
-    BlpLdrProtocol.Console.Write = Console::Write;
-    BlpLdrProtocol.Cpu.CpuId = AR::CpuFunc::CpuId;
-    BlpLdrProtocol.Cpu.ReadControlRegister = AR::CpuFunc::ReadControlRegister;
-    BlpLdrProtocol.Cpu.ReadModelSpecificRegister = AR::CpuFunc::ReadModelSpecificRegister;
-    BlpLdrProtocol.Cpu.WriteControlRegister = AR::CpuFunc::WriteControlRegister;
-    BlpLdrProtocol.Debug.Print = Debug::Print;
-    BlpLdrProtocol.Disk.CloseVolume = Volume::CloseVolume;
-    BlpLdrProtocol.Disk.OpenVolume = Volume::OpenVolume;
-    BlpLdrProtocol.Disk.ReadFile = Volume::ReadFile;
-    BlpLdrProtocol.IoPort.Read8 = HL::IoPort::ReadPort8;
-    BlpLdrProtocol.IoPort.Read16 = HL::IoPort::ReadPort16;
-    BlpLdrProtocol.IoPort.Read32 = HL::IoPort::ReadPort32;
-    BlpLdrProtocol.IoPort.Write8 = HL::IoPort::WritePort8;
-    BlpLdrProtocol.IoPort.Write16 = HL::IoPort::WritePort16;
-    BlpLdrProtocol.IoPort.Write32 = HL::IoPort::WritePort32;
-    BlpLdrProtocol.LinkedList.InitializeHead = RTL::LinkedList::InitializeListHead;
-    BlpLdrProtocol.LinkedList.InsertHead = RTL::LinkedList::InsertHeadList;
-    BlpLdrProtocol.LinkedList.InsertTail = RTL::LinkedList::InsertTailList;
-    BlpLdrProtocol.LinkedList.RemoveEntry = RTL::LinkedList::RemoveEntryList;
-    BlpLdrProtocol.Memory.AllocatePages = Memory::AllocatePages;
-    BlpLdrProtocol.Memory.AllocatePool = Memory::AllocatePool;
-    BlpLdrProtocol.Memory.BuildPageMap = Memory::BuildPageMap;
-    BlpLdrProtocol.Memory.CompareMemory = RTL::Memory::CompareMemory;
-    BlpLdrProtocol.Memory.CopyMemory = RTL::Memory::CopyMemory;
-    BlpLdrProtocol.Memory.FreePages = Memory::FreePages;
-    BlpLdrProtocol.Memory.FreePool = Memory::FreePool;
-    BlpLdrProtocol.Memory.GetMappingsCount = Memory::GetMappingsCount;
-    BlpLdrProtocol.Memory.GetMemoryMap = Memory::GetMemoryMap;
-    BlpLdrProtocol.Memory.GetVirtualAddress = Memory::GetVirtualAddress;
-    BlpLdrProtocol.Memory.InitializePageMap = Memory::InitializePageMap;
-    BlpLdrProtocol.Memory.MapEfiMemory = Memory::MapEfiMemory;
-    BlpLdrProtocol.Memory.MapPage = Memory::MapPage;
-    BlpLdrProtocol.Memory.MapVirtualMemory = Memory::MapVirtualMemory;
-    BlpLdrProtocol.Memory.MoveMemory = RTL::Memory::MoveMemory;
-    BlpLdrProtocol.Memory.PhysicalAddressToVirtual = Memory::PhysicalAddressToVirtual;
-    BlpLdrProtocol.Memory.PhysicalListToVirtual = Memory::PhysicalListToVirtual;
-    BlpLdrProtocol.Memory.SetMemory = RTL::Memory::SetMemory;
-    BlpLdrProtocol.Memory.ZeroMemory = RTL::Memory::ZeroMemory;
-    BlpLdrProtocol.Protocol.Close = CloseProtocol;
-    BlpLdrProtocol.Protocol.GetModulesList = GetModulesList;
-    BlpLdrProtocol.Protocol.Install = InstallProtocol;
-    BlpLdrProtocol.Protocol.LocateHandles = LocateProtocolHandles;
-    BlpLdrProtocol.Protocol.Open = OpenProtocol;
-    BlpLdrProtocol.Protocol.OpenHandle = OpenProtocolHandle;
-    BlpLdrProtocol.String.Compare = RTL::String::CompareString;
-    BlpLdrProtocol.String.Length = RTL::String::StringLength;
-    BlpLdrProtocol.String.ToWideString = RTL::String::StringToWideString;
-    BlpLdrProtocol.String.Trim = RTL::String::TrimString;
-    BlpLdrProtocol.Tui.DisplayErrorDialog = TextUi::DisplayErrorDialog;
-    BlpLdrProtocol.Tui.DisplayInfoDialog = TextUi::DisplayInfoDialog;
-    BlpLdrProtocol.Tui.DisplayInputDialog = TextUi::DisplayInputDialog;
-    BlpLdrProtocol.Tui.DisplayProgressDialog = TextUi::DisplayProgressDialog;
-    BlpLdrProtocol.Tui.UpdateProgressBar = TextUi::UpdateProgressBar;
-    BlpLdrProtocol.Utils.EnterFirmwareSetup = EfiUtils::EnterFirmwareSetup;
-    BlpLdrProtocol.Utils.ExitBootServices = EfiUtils::ExitBootServices;
-    BlpLdrProtocol.Utils.GetConfigurationTable = EfiUtils::GetConfigurationTable;
-    BlpLdrProtocol.Utils.GetEfiVariable = EfiUtils::GetEfiVariable;
-    BlpLdrProtocol.Utils.GetRandomValue = EfiUtils::GetRandomValue;
-    BlpLdrProtocol.Utils.GetSecureBootStatus = EfiUtils::GetSecureBootStatus;
-    BlpLdrProtocol.Utils.InitializeEntropy = EfiUtils::InitializeEntropy;
-    BlpLdrProtocol.Utils.LoadEfiImage = EfiUtils::LoadEfiImage;
-    BlpLdrProtocol.Utils.RebootSystem = EfiUtils::RebootSystem;
-    BlpLdrProtocol.Utils.SetEfiVariable = EfiUtils::SetEfiVariable;
-    BlpLdrProtocol.Utils.ShutdownSystem = EfiUtils::ShutdownSystem;
-    BlpLdrProtocol.Utils.SleepExecution = EfiUtils::SleepExecution;
-    BlpLdrProtocol.Utils.StartEfiImage = EfiUtils::StartEfiImage;
-    BlpLdrProtocol.Utils.WaitForEfiEvent = EfiUtils::WaitForEfiEvent;
-    BlpLdrProtocol.WideString.Compare = RTL::WideString::CompareWideString;
-    BlpLdrProtocol.WideString.CompareInsensitive = RTL::WideString::CompareWideStringInsensitive;
-    BlpLdrProtocol.WideString.Concatenate = RTL::WideString::ConcatenateWideString;
-    BlpLdrProtocol.WideString.Format = RTL::WideString::FormatWideString;
-    BlpLdrProtocol.WideString.Length = RTL::WideString::WideStringLength;
-    BlpLdrProtocol.WideString.Tokenize = RTL::WideString::TokenizeWideString;
+    LoaderProtocol.Boot.FindProtocol = FindBootProtocol;
+    LoaderProtocol.Boot.InitializeMenuList = Configuration::InitializeBootMenuList;
+    LoaderProtocol.Boot.InvokeProtocol = InvokeBootProtocol;
+    LoaderProtocol.Boot.RegisterMenu = RegisterBootMenu;
+    LoaderProtocol.Boot.RegisterProtocol = RegisterBootProtocol;
+    LoaderProtocol.BootUtils.GetBooleanParameter = BootUtils::GetBooleanParameter;
+    LoaderProtocol.BootUtils.GetTrampolineInformation = AR::ProcSup::GetTrampolineInformation;
+    LoaderProtocol.Config.GetBooleanValue = Configuration::GetBooleanValue;
+    LoaderProtocol.Config.GetBootOptionValue = Configuration::GetBootOptionValue;
+    LoaderProtocol.Config.GetEditableOptions = Configuration::GetEditableOptions;
+    LoaderProtocol.Config.GetValue = Configuration::GetValue;
+    LoaderProtocol.Config.SetBootOptionValue = Configuration::SetBootOptionValue;
+    LoaderProtocol.Console.ClearLine = Console::ClearLine;
+    LoaderProtocol.Console.ClearScreen = Console::ClearScreen;
+    LoaderProtocol.Console.DisableCursor = Console::DisableCursor;
+    LoaderProtocol.Console.EnableCursor = Console::EnableCursor;
+    LoaderProtocol.Console.Print = Console::Print;
+    LoaderProtocol.Console.QueryMode = Console::QueryMode;
+    LoaderProtocol.Console.ReadKeyStroke = Console::ReadKeyStroke;
+    LoaderProtocol.Console.ResetInputBuffer = Console::ResetInputBuffer;
+    LoaderProtocol.Console.SetAttributes = Console::SetAttributes;
+    LoaderProtocol.Console.SetCursorPosition = Console::SetCursorPosition;
+    LoaderProtocol.Console.Write = Console::Write;
+    LoaderProtocol.Cpu.CpuId = AR::CpuFunc::CpuId;
+    LoaderProtocol.Cpu.ReadControlRegister = AR::CpuFunc::ReadControlRegister;
+    LoaderProtocol.Cpu.ReadModelSpecificRegister = AR::CpuFunc::ReadModelSpecificRegister;
+    LoaderProtocol.Cpu.WriteControlRegister = AR::CpuFunc::WriteControlRegister;
+    LoaderProtocol.Debug.Print = Debug::Print;
+    LoaderProtocol.Disk.CloseVolume = Volume::CloseVolume;
+    LoaderProtocol.Disk.OpenVolume = Volume::OpenVolume;
+    LoaderProtocol.Disk.ReadFile = Volume::ReadFile;
+    LoaderProtocol.IoPort.Read8 = HL::IoPort::ReadPort8;
+    LoaderProtocol.IoPort.Read16 = HL::IoPort::ReadPort16;
+    LoaderProtocol.IoPort.Read32 = HL::IoPort::ReadPort32;
+    LoaderProtocol.IoPort.Write8 = HL::IoPort::WritePort8;
+    LoaderProtocol.IoPort.Write16 = HL::IoPort::WritePort16;
+    LoaderProtocol.IoPort.Write32 = HL::IoPort::WritePort32;
+    LoaderProtocol.LinkedList.InitializeHead = RTL::LinkedList::InitializeListHead;
+    LoaderProtocol.LinkedList.InsertHead = RTL::LinkedList::InsertHeadList;
+    LoaderProtocol.LinkedList.InsertTail = RTL::LinkedList::InsertTailList;
+    LoaderProtocol.LinkedList.RemoveEntry = RTL::LinkedList::RemoveEntryList;
+    LoaderProtocol.Memory.AllocatePages = Memory::AllocatePages;
+    LoaderProtocol.Memory.AllocatePool = Memory::AllocatePool;
+    LoaderProtocol.Memory.BuildPageMap = Memory::BuildPageMap;
+    LoaderProtocol.Memory.CompareMemory = RTL::Memory::CompareMemory;
+    LoaderProtocol.Memory.CopyMemory = RTL::Memory::CopyMemory;
+    LoaderProtocol.Memory.FreePages = Memory::FreePages;
+    LoaderProtocol.Memory.FreePool = Memory::FreePool;
+    LoaderProtocol.Memory.GetMappingsCount = Memory::GetMappingsCount;
+    LoaderProtocol.Memory.GetMemoryMap = Memory::GetMemoryMap;
+    LoaderProtocol.Memory.GetVirtualAddress = Memory::GetVirtualAddress;
+    LoaderProtocol.Memory.InitializePageMap = Memory::InitializePageMap;
+    LoaderProtocol.Memory.MapEfiMemory = Memory::MapEfiMemory;
+    LoaderProtocol.Memory.MapPage = Memory::MapPage;
+    LoaderProtocol.Memory.MapVirtualMemory = Memory::MapVirtualMemory;
+    LoaderProtocol.Memory.MoveMemory = RTL::Memory::MoveMemory;
+    LoaderProtocol.Memory.PhysicalAddressToVirtual = Memory::PhysicalAddressToVirtual;
+    LoaderProtocol.Memory.PhysicalListToVirtual = Memory::PhysicalListToVirtual;
+    LoaderProtocol.Memory.SetMemory = RTL::Memory::SetMemory;
+    LoaderProtocol.Memory.ZeroMemory = RTL::Memory::ZeroMemory;
+    LoaderProtocol.Protocol.Close = CloseProtocol;
+    LoaderProtocol.Protocol.GetModulesList = GetModulesList;
+    LoaderProtocol.Protocol.Install = InstallProtocol;
+    LoaderProtocol.Protocol.LocateHandles = LocateProtocolHandles;
+    LoaderProtocol.Protocol.Open = OpenProtocol;
+    LoaderProtocol.Protocol.OpenHandle = OpenProtocolHandle;
+    LoaderProtocol.String.Compare = RTL::String::CompareString;
+    LoaderProtocol.String.Length = RTL::String::StringLength;
+    LoaderProtocol.String.ToWideString = RTL::String::StringToWideString;
+    LoaderProtocol.String.Trim = RTL::String::TrimString;
+    LoaderProtocol.Tui.DisplayErrorDialog = TextUi::DisplayErrorDialog;
+    LoaderProtocol.Tui.DisplayInfoDialog = TextUi::DisplayInfoDialog;
+    LoaderProtocol.Tui.DisplayInputDialog = TextUi::DisplayInputDialog;
+    LoaderProtocol.Tui.DisplayProgressDialog = TextUi::DisplayProgressDialog;
+    LoaderProtocol.Tui.UpdateProgressBar = TextUi::UpdateProgressBar;
+    LoaderProtocol.Utils.EnterFirmwareSetup = EfiUtils::EnterFirmwareSetup;
+    LoaderProtocol.Utils.ExitBootServices = EfiUtils::ExitBootServices;
+    LoaderProtocol.Utils.GetConfigurationTable = EfiUtils::GetConfigurationTable;
+    LoaderProtocol.Utils.GetEfiVariable = EfiUtils::GetEfiVariable;
+    LoaderProtocol.Utils.GetRandomValue = EfiUtils::GetRandomValue;
+    LoaderProtocol.Utils.GetSecureBootStatus = EfiUtils::GetSecureBootStatus;
+    LoaderProtocol.Utils.InitializeEntropy = EfiUtils::InitializeEntropy;
+    LoaderProtocol.Utils.LoadEfiImage = EfiUtils::LoadEfiImage;
+    LoaderProtocol.Utils.RebootSystem = EfiUtils::RebootSystem;
+    LoaderProtocol.Utils.SetEfiVariable = EfiUtils::SetEfiVariable;
+    LoaderProtocol.Utils.ShutdownSystem = EfiUtils::ShutdownSystem;
+    LoaderProtocol.Utils.SleepExecution = EfiUtils::SleepExecution;
+    LoaderProtocol.Utils.StartEfiImage = EfiUtils::StartEfiImage;
+    LoaderProtocol.Utils.WaitForEfiEvent = EfiUtils::WaitForEfiEvent;
+    LoaderProtocol.WideString.Compare = RTL::WideString::CompareWideString;
+    LoaderProtocol.WideString.CompareInsensitive = RTL::WideString::CompareWideStringInsensitive;
+    LoaderProtocol.WideString.Concatenate = RTL::WideString::ConcatenateWideString;
+    LoaderProtocol.WideString.Format = RTL::WideString::FormatWideString;
+    LoaderProtocol.WideString.Length = RTL::WideString::WideStringLength;
+    LoaderProtocol.WideString.Tokenize = RTL::WideString::TokenizeWideString;
 
     /* Register XTLDR loader protocol */
     Debug::Print(L"Registering XT loader protocol\n");
-    return InstallProtocol(&BlpLdrProtocol, &Guid);
+    return InstallProtocol(&LoaderProtocol, &Guid);
 }
