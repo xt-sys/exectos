@@ -242,11 +242,12 @@ TextUi::DisplayBootMenu()
         }
 
         /* Create a timer event for controlling the timeout of the boot menu */
-        Status = EfiSystemTable->BootServices->CreateEvent(EFI_EVENT_TIMER, EFI_TPL_CALLBACK, NULLPTR, NULLPTR, &TimerEvent);
+        Status = XtLoader::GetEfiSystemTable()->BootServices->CreateEvent(EFI_EVENT_TIMER, EFI_TPL_CALLBACK,
+                                                                          NULLPTR, NULLPTR, &TimerEvent);
         if(Status == STATUS_EFI_SUCCESS)
         {
             /* Setup new EFI timer */
-            Status = EfiSystemTable->BootServices->SetTimer(TimerEvent, TimerPeriodic, 10000000);
+            Status = XtLoader::GetEfiSystemTable()->BootServices->SetTimer(TimerEvent, TimerPeriodic, 10000000);
         }
 
         /* Check is EFI timer was successfully created */
@@ -257,11 +258,11 @@ TextUi::DisplayBootMenu()
         }
 
         /* Initialize EFI events */
-        Events[0] = EfiSystemTable->ConIn->WaitForKey;
+        Events[0] = XtLoader::GetEfiSystemTable()->ConIn->WaitForKey;
         Events[1] = TimerEvent;
 
         /* Flush keyboard buffer out of any keystrokes */
-        EfiSystemTable->ConIn->Reset(EfiSystemTable->ConIn, FALSE);
+        XtLoader::GetEfiSystemTable()->ConIn->Reset(XtLoader::GetEfiSystemTable()->ConIn, FALSE);
 
         /* Store old highlighted entry */
         OldHighligtedEntryId = HighligtedEntryId;
@@ -282,7 +283,7 @@ TextUi::DisplayBootMenu()
                     TimeOut = -1;
 
                     /* Cancel timer event */
-                    EfiSystemTable->BootServices->SetTimer(TimerEvent, TimerCancel, 0);
+                    XtLoader::GetEfiSystemTable()->BootServices->SetTimer(TimerEvent, TimerCancel, 0);
 
                     /* Remove the timer message */
                     Console::ClearLine(Handle.PosY + Handle.Height + 4);
@@ -575,7 +576,7 @@ TextUi::DisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry)
         }
 
         /* Wait for EFI event and read key stroke */
-        EfiUtils::WaitForEfiEvent(1, &EfiSystemTable->ConIn->WaitForKey, &EventIndex);
+        EfiUtils::WaitForEfiEvent(1, &(XtLoader::GetEfiSystemTable()->ConIn->WaitForKey), &EventIndex);
         Console::ReadKeyStroke(&Key);
 
         /* Check key press scan code */
@@ -788,7 +789,7 @@ TextUi::DisplayErrorDialog(IN PCWSTR Caption,
     while(Key.ScanCode != 0x17 && Key.UnicodeChar != 0x0D)
     {
         /* Wait for key press and read key stroke */
-        EfiUtils::WaitForEfiEvent(1, &EfiSystemTable->ConIn->WaitForKey, &Index);
+        EfiUtils::WaitForEfiEvent(1, &(XtLoader::GetEfiSystemTable()->ConIn->WaitForKey), &Index);
         Console::ReadKeyStroke(&Key);
         Console::ResetInputBuffer();
     }
@@ -841,7 +842,7 @@ TextUi::DisplayInfoDialog(IN PCWSTR Caption,
     while(Key.ScanCode != 0x17 && Key.UnicodeChar != 0x0D)
     {
         /* Wait for key press and read key stroke */
-        EfiUtils::WaitForEfiEvent(1, &EfiSystemTable->ConIn->WaitForKey, &Index);
+        EfiUtils::WaitForEfiEvent(1, &(XtLoader::GetEfiSystemTable()->ConIn->WaitForKey), &Index);
         Console::ReadKeyStroke(&Key);
         Console::ResetInputBuffer();
     }
@@ -925,7 +926,7 @@ TextUi::DisplayInputDialog(IN PCWSTR Caption,
     while(TRUE)
     {
         /* Wait for key press and read key stroke */
-        EfiUtils::WaitForEfiEvent(1, &EfiSystemTable->ConIn->WaitForKey, &Index);
+        EfiUtils::WaitForEfiEvent(1, &(XtLoader::GetEfiSystemTable()->ConIn->WaitForKey), &Index);
         Console::ReadKeyStroke(&Key);
 
         /* Check key press scan code */

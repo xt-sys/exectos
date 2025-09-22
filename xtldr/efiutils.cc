@@ -76,7 +76,7 @@ EfiUtils::ExitBootServices()
     ULONG Counter;
 
     /* Boot Services might be partially shutdown, so mark them as unavailable */
-    BlpStatus.BootServices = FALSE;
+    XtLoader::DisableBootServices();
 
     /* Allocate buffer for EFI memory map */
     Status = Memory::AllocatePool(sizeof(EFI_MEMORY_MAP), (PVOID*)&MemoryMap);
@@ -103,7 +103,8 @@ EfiUtils::ExitBootServices()
         }
 
         /* Exit boot services */
-        Status = EfiSystemTable->BootServices->ExitBootServices(EfiImageHandle, MemoryMap->MapKey);
+        Status = XtLoader::GetEfiSystemTable()->BootServices->ExitBootServices(XtLoader::GetEfiImageHandle(),
+                                                                               MemoryMap->MapKey);
         if(Status == STATUS_EFI_SUCCESS)
         {
             break;
@@ -138,13 +139,14 @@ EfiUtils::GetConfigurationTable(IN PEFI_GUID TableGuid,
     SIZE_T Index;
 
     /* Iterate through all system configuration tables */
-    for(Index = 0; Index < EfiSystemTable->NumberOfTableEntries; Index++)
+    for(Index = 0; Index < XtLoader::GetEfiSystemTable()->NumberOfTableEntries; Index++)
     {
         /* Check if this table matches requested table */
-        if(RTL::Guid::CompareGuids((PGUID)&(EfiSystemTable->ConfigurationTable[Index].VendorGuid), (PGUID)TableGuid))
+        if(RTL::Guid::CompareGuids((PGUID)&(XtLoader::GetEfiSystemTable()->ConfigurationTable[Index].VendorGuid),
+                                   (PGUID)TableGuid))
         {
             /* Found requested table, return success */
-            *Table = EfiSystemTable->ConfigurationTable[Index].VendorTable;
+            *Table = XtLoader::GetEfiSystemTable()->ConfigurationTable[Index].VendorTable;
             return STATUS_EFI_SUCCESS;
         }
     }
@@ -190,7 +192,8 @@ EfiUtils::GetEfiVariable(IN PEFI_GUID Vendor,
     }
 
     /* Attempt to get variable value */
-    Status = EfiSystemTable->RuntimeServices->GetVariable((PWCHAR)VariableName, Vendor, NULLPTR, &Size, Buffer);
+    Status = XtLoader::GetEfiSystemTable()->RuntimeServices->GetVariable((PWCHAR)VariableName, Vendor, NULLPTR,
+                                                                         &Size, Buffer);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to get variable, probably not found such one */
@@ -244,12 +247,12 @@ EfiUtils::GetSecureBootStatus()
     UINT_PTR Size;
 
     Size = sizeof(INT_PTR);
-    if(EfiSystemTable->RuntimeServices->GetVariable((PWCHAR)L"SecureBoot", &VarGuid,
+    if(XtLoader::GetEfiSystemTable()->RuntimeServices->GetVariable((PWCHAR)L"SecureBoot", &VarGuid,
        NULLPTR, &Size, &VarValue) == STATUS_EFI_SUCCESS)
     {
         SecureBootStatus = VarValue;
         Size = sizeof(INT_PTR);
-        if((EfiSystemTable->RuntimeServices->GetVariable((PWCHAR)L"SetupMode", &VarGuid,
+        if((XtLoader::GetEfiSystemTable()->RuntimeServices->GetVariable((PWCHAR)L"SetupMode", &VarGuid,
            NULLPTR, &Size, &VarValue) == STATUS_EFI_SUCCESS) && VarValue != 0)
         {
             SecureBootStatus = -1;
@@ -284,7 +287,7 @@ EfiUtils::InitializeEntropy(PULONGLONG RNGBuffer)
     Seed = 0;
 
     /* Locate RNG protocol */
-    Status = EfiSystemTable->BootServices->LocateProtocol(&RngGuid, NULLPTR, (PVOID *)&Rng);
+    Status = XtLoader::GetEfiSystemTable()->BootServices->LocateProtocol(&RngGuid, NULLPTR, (PVOID *)&Rng);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to locate RNG protocol, return status code */
@@ -331,7 +334,8 @@ EfiUtils::LoadEfiImage(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
                        OUT PEFI_HANDLE ImageHandle)
 {
     /* Load EFI image */
-    return EfiSystemTable->BootServices->LoadImage(FALSE, EfiImageHandle, DevicePath, ImageData, ImageSize, ImageHandle);
+    return XtLoader::GetEfiSystemTable()->BootServices->LoadImage(FALSE, XtLoader::GetEfiImageHandle(), DevicePath,
+                                                                  ImageData, ImageSize, ImageHandle);
 }
 
 /**
@@ -346,7 +350,7 @@ EFI_STATUS
 EfiUtils::RebootSystem()
 {
     /* Reboot machine */
-    return EfiSystemTable->RuntimeServices->ResetSystem(EfiResetCold, STATUS_EFI_SUCCESS, 0, NULLPTR);
+    return XtLoader::GetEfiSystemTable()->RuntimeServices->ResetSystem(EfiResetCold, STATUS_EFI_SUCCESS, 0, NULLPTR);
 }
 
 /**
@@ -379,7 +383,8 @@ EfiUtils::SetEfiVariable(IN PEFI_GUID Vendor,
 
     /* Set EFI variable */
     Attributes = EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS;
-    return EfiSystemTable->RuntimeServices->SetVariable((PWCHAR)VariableName, Vendor, Attributes, Size, VariableValue);
+    return XtLoader::GetEfiSystemTable()->RuntimeServices->SetVariable((PWCHAR)VariableName, Vendor, Attributes,
+                                                                       Size, VariableValue);
 }
 
 /**
@@ -394,7 +399,7 @@ EFI_STATUS
 EfiUtils::ShutdownSystem()
 {
     /* Shutdown machine */
-    return EfiSystemTable->RuntimeServices->ResetSystem(EfiResetShutdown, STATUS_EFI_SUCCESS, 0, NULLPTR);
+    return XtLoader::GetEfiSystemTable()->RuntimeServices->ResetSystem(EfiResetShutdown, STATUS_EFI_SUCCESS, 0, NULLPTR);
 }
 
 /**
@@ -411,7 +416,7 @@ XTCDECL
 VOID
 EfiUtils::SleepExecution(IN ULONG_PTR Milliseconds)
 {
-    EfiSystemTable->BootServices->Stall(Milliseconds * 1000);
+    XtLoader::GetEfiSystemTable()->BootServices->Stall(Milliseconds * 1000);
 }
 
 /**
@@ -428,7 +433,7 @@ XTCDECL
 EFI_STATUS
 EfiUtils::StartEfiImage(IN EFI_HANDLE ImageHandle)
 {
-    return EfiSystemTable->BootServices->StartImage(ImageHandle, NULLPTR, NULLPTR);
+    return XtLoader::GetEfiSystemTable()->BootServices->StartImage(ImageHandle, NULLPTR, NULLPTR);
 }
 
 /**
@@ -453,5 +458,5 @@ EfiUtils::WaitForEfiEvent(IN UINT_PTR NumberOfEvents,
                           IN PEFI_EVENT Event,
                           OUT PUINT_PTR Index)
 {
-    return EfiSystemTable->BootServices->WaitForEvent(NumberOfEvents, Event, Index);
+    return XtLoader::GetEfiSystemTable()->BootServices->WaitForEvent(NumberOfEvents, Event, Index);
 }

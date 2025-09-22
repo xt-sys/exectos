@@ -49,7 +49,7 @@ VOID
 Console::ClearScreen()
 {
     /* Clear screen */
-    EfiSystemTable->ConOut->ClearScreen(EfiSystemTable->ConOut);
+    XtLoader::GetEfiSystemTable()->ConOut->ClearScreen(XtLoader::GetEfiSystemTable()->ConOut);
 }
 
 /**
@@ -63,7 +63,7 @@ XTCDECL
 VOID
 Console::DisableCursor()
 {
-    EfiSystemTable->ConOut->EnableCursor(EfiSystemTable->ConOut, FALSE);
+    XtLoader::GetEfiSystemTable()->ConOut->EnableCursor(XtLoader::GetEfiSystemTable()->ConOut, FALSE);
 }
 
 /**
@@ -77,7 +77,7 @@ XTCDECL
 VOID
 Console::EnableCursor()
 {
-    EfiSystemTable->ConOut->EnableCursor(EfiSystemTable->ConOut, TRUE);
+    XtLoader::GetEfiSystemTable()->ConOut->EnableCursor(XtLoader::GetEfiSystemTable()->ConOut, TRUE);
 }
 
 /**
@@ -92,13 +92,13 @@ VOID
 Console::InitializeConsole()
 {
     /* Clear console buffers */
-    EfiSystemTable->ConIn->Reset(EfiSystemTable->ConIn, TRUE);
-    EfiSystemTable->ConOut->Reset(EfiSystemTable->ConOut, TRUE);
-    EfiSystemTable->StdErr->Reset(EfiSystemTable->StdErr, TRUE);
+    XtLoader::GetEfiSystemTable()->ConIn->Reset(XtLoader::GetEfiSystemTable()->ConIn, TRUE);
+    XtLoader::GetEfiSystemTable()->ConOut->Reset(XtLoader::GetEfiSystemTable()->ConOut, TRUE);
+    XtLoader::GetEfiSystemTable()->StdErr->Reset(XtLoader::GetEfiSystemTable()->StdErr, TRUE);
 
     /* Make sure that current console mode is 80x25 characters, as some broken EFI implementations might
      * set different mode that do not fit on the screen, causing a text to be displayed offscreen */
-    if(EfiSystemTable->ConOut->Mode->Mode != 0)
+    if(XtLoader::GetEfiSystemTable()->ConOut->Mode->Mode != 0)
     {
         /* Set console mode to 0, which is standard, 80x25 text mode */
         SetMode(0);
@@ -142,10 +142,10 @@ Console::Print(IN PCWSTR Format,
     RTL::WideString::FormatWideString(&ConsolePrintContext, (PWCHAR)Format, Arguments);
 
     /* Print to serial console only if not running under OVMF */
-    if(RTL::WideString::CompareWideString(EfiSystemTable->FirmwareVendor, L"EDK II", 6) != 0)
+    if(RTL::WideString::CompareWideString(XtLoader::GetEfiSystemTable()->FirmwareVendor, L"EDK II", 6) != 0)
     {
         /* Check if debugging enabled and if EFI serial port is fully initialized */
-        if(DEBUG && (BlpStatus.SerialPort.Flags & COMPORT_FLAG_INIT))
+        if(DEBUG && Debug::SerialPortReady())
         {
             /* Format and print the string to the serial console */
             RTL::WideString::FormatWideString(&SerialPrintContext, (PWCHAR)Format, Arguments);
@@ -182,7 +182,7 @@ Console::PutChar(IN WCHAR Character)
     /* Write character to the screen console */
     Buffer[0] = Character;
     Buffer[1] = 0;
-    EfiSystemTable->ConOut->OutputString(EfiSystemTable->ConOut, Buffer);
+    XtLoader::GetEfiSystemTable()->ConOut->OutputString(XtLoader::GetEfiSystemTable()->ConOut, Buffer);
 
     /* Return success */
     return STATUS_SUCCESS;
@@ -206,7 +206,8 @@ VOID
 Console::QueryMode(OUT PUINT_PTR ResX,
                    OUT PUINT_PTR ResY)
 {
-    EfiSystemTable->ConOut->QueryMode(EfiSystemTable->ConOut, EfiSystemTable->ConOut->Mode->Mode, ResX, ResY);
+    XtLoader::GetEfiSystemTable()->ConOut->QueryMode(XtLoader::GetEfiSystemTable()->ConOut,
+                                                     XtLoader::GetEfiSystemTable()->ConOut->Mode->Mode, ResX, ResY);
 }
 
 /**
@@ -223,7 +224,7 @@ XTCDECL
 VOID
 Console::ReadKeyStroke(OUT PEFI_INPUT_KEY Key)
 {
-    EfiSystemTable->ConIn->ReadKeyStroke(EfiSystemTable->ConIn, Key);
+    XtLoader::GetEfiSystemTable()->ConIn->ReadKeyStroke(XtLoader::GetEfiSystemTable()->ConIn, Key);
 }
 
 /**
@@ -237,7 +238,7 @@ XTCDECL
 VOID
 Console::ResetInputBuffer()
 {
-    EfiSystemTable->ConIn->Reset(EfiSystemTable->ConIn, FALSE);
+    XtLoader::GetEfiSystemTable()->ConIn->Reset(XtLoader::GetEfiSystemTable()->ConIn, FALSE);
 }
 
 /**
@@ -254,7 +255,7 @@ XTCDECL
 VOID
 Console::SetAttributes(IN ULONGLONG Attributes)
 {
-    EfiSystemTable->ConOut->SetAttribute(EfiSystemTable->ConOut, Attributes);
+    XtLoader::GetEfiSystemTable()->ConOut->SetAttribute(XtLoader::GetEfiSystemTable()->ConOut, Attributes);
 }
 
 /**
@@ -275,7 +276,7 @@ VOID
 Console::SetCursorPosition(IN ULONGLONG PosX,
                            IN ULONGLONG PosY)
 {
-    EfiSystemTable->ConOut->SetCursorPosition(EfiSystemTable->ConOut, PosX, PosY);
+    XtLoader::GetEfiSystemTable()->ConOut->SetCursorPosition(XtLoader::GetEfiSystemTable()->ConOut, PosX, PosY);
 }
 
 /**
@@ -292,7 +293,7 @@ XTCDECL
 EFI_STATUS
 Console::SetMode(IN ULONGLONG Mode)
 {
-    return EfiSystemTable->ConOut->SetMode(EfiSystemTable->ConOut, Mode);
+    return XtLoader::GetEfiSystemTable()->ConOut->SetMode(XtLoader::GetEfiSystemTable()->ConOut, Mode);
 }
 
 /**
@@ -309,5 +310,5 @@ XTCDECL
 VOID
 Console::Write(IN PCWSTR String)
 {
-    EfiSystemTable->ConOut->OutputString(EfiSystemTable->ConOut, (PWSTR)String);
+    XtLoader::GetEfiSystemTable()->ConOut->OutputString(XtLoader::GetEfiSystemTable()->ConOut, (PWSTR)String);
 }

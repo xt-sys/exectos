@@ -28,7 +28,8 @@ Memory::AllocatePages(IN EFI_ALLOCATE_TYPE AllocationType,
                       IN ULONGLONG NumberOfPages,
                       OUT PEFI_PHYSICAL_ADDRESS Memory)
 {
-    return EfiSystemTable->BootServices->AllocatePages(AllocationType, EfiLoaderData, NumberOfPages, Memory);
+    return XtLoader::GetEfiSystemTable()->BootServices->AllocatePages(AllocationType, EfiLoaderData,
+                                                                      NumberOfPages, Memory);
 }
 
 /**
@@ -50,7 +51,7 @@ Memory::AllocatePool(IN UINT_PTR Size,
                      OUT PVOID *Memory)
 {
     /* Allocate pool */
-    return EfiSystemTable->BootServices->AllocatePool(EfiLoaderData, Size, Memory);
+    return XtLoader::GetEfiSystemTable()->BootServices->AllocatePool(EfiLoaderData, Size, Memory);
 }
 
 /**
@@ -71,7 +72,7 @@ EFI_STATUS
 Memory::FreePages(IN ULONGLONG NumberOfPages,
                   IN EFI_PHYSICAL_ADDRESS Memory)
 {
-    return EfiSystemTable->BootServices->FreePages(Memory, NumberOfPages);
+    return XtLoader::GetEfiSystemTable()->BootServices->FreePages(Memory, NumberOfPages);
 }
 
 /**
@@ -89,7 +90,7 @@ EFI_STATUS
 Memory::FreePool(IN PVOID Memory)
 {
     /* Free pool */
-    return EfiSystemTable->BootServices->FreePool(Memory);
+    return XtLoader::GetEfiSystemTable()->BootServices->FreePool(Memory);
 }
 
 /**
@@ -190,8 +191,11 @@ Memory::GetMemoryMap(OUT PEFI_MEMORY_MAP MemoryMap)
     do
     {
         /* Attempt do get EFI memory map */
-        Status = EfiSystemTable->BootServices->GetMemoryMap(&MemoryMap->MapSize, MemoryMap->Map, &MemoryMap->MapKey,
-                                                            &MemoryMap->DescriptorSize, &MemoryMap->DescriptorVersion);
+        Status = XtLoader::GetEfiSystemTable()->BootServices->GetMemoryMap(&MemoryMap->MapSize,
+                                                                           MemoryMap->Map,
+                                                                           &MemoryMap->MapKey,
+                                                                           &MemoryMap->DescriptorSize,
+                                                                           &MemoryMap->DescriptorVersion);
         if(Status == STATUS_EFI_SUCCESS)
         {
             /* Go further if succeeded */

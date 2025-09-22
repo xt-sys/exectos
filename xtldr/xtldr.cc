@@ -9,6 +9,51 @@
 #include <xtldr.hh>
 
 
+XTCDECL
+VOID
+XtLoader::DisableBootServices()
+{
+    LoaderStatus.BootServices = FALSE;
+
+}
+
+XTCDECL
+BOOLEAN
+XtLoader::GetBootServicesStatus()
+{
+    return LoaderStatus.BootServices;
+}
+
+XTCDECL
+EFI_HANDLE
+XtLoader::GetEfiImageHandle()
+{
+    return XtLoader::EfiImageHandle;
+}
+
+XTCDECL
+PEFI_SYSTEM_TABLE
+XtLoader::GetEfiSystemTable()
+{
+    return XtLoader::EfiSystemTable;
+}
+
+XTCDECL
+VOID
+XtLoader::GetLoaderImageInformation(PVOID *LoaderBase,
+                                    PULONGLONG LoaderSize)
+{
+    *LoaderBase = XtLoader::LoaderStatus.LoaderBase;
+    *LoaderSize = XtLoader::LoaderStatus.LoaderSize;
+}
+
+XTCDECL
+INT_PTR
+XtLoader::GetSecureBootStatus()
+{
+    return LoaderStatus.SecureBoot;
+}
+
 /**
  * Initializes EFI Boot Loader (XTLDR).
  *
@@ -18,15 +63,20 @@
  */
 XTCDECL
 VOID
-XtLoader::InitializeBootLoader()
+XtLoader::InitializeBootLoader(IN EFI_HANDLE ImageHandle,
+                               IN PEFI_SYSTEM_TABLE SystemTable)
 {
     EFI_GUID LipGuid = EFI_LOADED_IMAGE_PROTOCOL_GUID;
     PEFI_LOADED_IMAGE_PROTOCOL LoadedImage;
     EFI_HANDLE Handle;
     EFI_STATUS Status;
 
+    /* Set the system table and image handle */
+    EfiImageHandle = ImageHandle;
+    EfiSystemTable = SystemTable;
+
     /* Set current XTLDR's EFI BootServices status */
-    BlpStatus.BootServices = TRUE;
+    LoaderStatus.BootServices = TRUE;
 
     /* Initialize console */
     Console::InitializeConsole();
@@ -41,15 +91,15 @@ XtLoader::InitializeBootLoader()
     Configuration::InitializeConfiguration();
 
     /* Store SecureBoot status */
-    BlpStatus.SecureBoot = EfiUtils::GetSecureBootStatus();
+    LoaderStatus.SecureBoot = EfiUtils::GetSecureBootStatus();
 
     /* Attempt to open EFI LoadedImage protocol */
     Status = Protocol::OpenProtocol(&Handle, (PVOID *)&LoadedImage, &LipGuid);
     if(Status == STATUS_EFI_SUCCESS)
     {
         /* Store boot loader image base and size */
-        BlpStatus.LoaderBase = LoadedImage->ImageBase;
-        BlpStatus.LoaderSize = LoadedImage->ImageSize;
+        LoaderStatus.LoaderBase = LoadedImage->ImageBase;
+        LoaderStatus.LoaderSize = LoadedImage->ImageSize;
 
         /* Check if debug is enabled */
         if(DEBUG)
@@ -66,12 +116,47 @@ XtLoader::InitializeBootLoader()
                            LoadedImage->ImageBase,
                            LoadedImage->ImageSize,
                            LoadedImage->Revision,
-                           BlpStatus.SecureBoot);
+                           LoaderStatus.SecureBoot);
             EfiUtils::SleepExecution(3000);
         }
 
         /* Close EFI LoadedImage protocol */
         Protocol::CloseProtocol(&Handle, &LipGuid);
+    }
+}
+
+/**
+ * Registers a boot menu callback routine, that will be used to display alternative boot menu.
+ *
+ * @param BootMenuRoutine
+ *        Supplies a pointer to the boot menu callback routine.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+XtLoader::RegisterBootMenu(IN PVOID BootMenuRoutine)
+{
+    /* Set boot menu routine */
+    BootMenu = (PBL_XT_BOOT_MENU)BootMenuRoutine;
+}
+
+XTCDECL
+VOID
+XtLoader::ShowBootMenu()
+{
+    /* Check if custom boot menu registered */
+    if(BootMenu != NULLPTR)
+    {
+        /* Display alternative boot menu */
+        BootMenu();
+    }
+    else
+    {
+        /* Display default boot menu */
+        TextUi::DisplayBootMenu();
     }
 }
 
@@ -96,12 +181,8 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
     PWCHAR Modules;
     EFI_STATUS Status;
 
-    /* Set the system table and image handle */
-    EfiImageHandle = ImageHandle;
-    EfiSystemTable = SystemTable;
-
     /* Initialize XTLDR and */
-    XtLoader::InitializeBootLoader();
+    XtLoader::InitializeBootLoader(ImageHandle, SystemTable);
 
     /* Parse configuration options passed from UEFI shell */
     Status = Configuration::ParseCommandLine();
@@ -142,7 +223,7 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
     }
 
     /* Disable watchdog timer */
-    Status = EfiSystemTable->BootServices->SetWatchdogTimer(0, 0x10000, 0, NULLPTR);
+    Status = XtLoader::GetEfiSystemTable()->BootServices->SetWatchdogTimer(0, 0x10000, 0, NULLPTR);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to disable the timer, print message */
@@ -180,17 +261,8 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
     /* Main boot loader loop */
     while(TRUE)
     {
-        /* Check if custom boot menu registered */
-        if(BlpStatus.BootMenu != NULLPTR)
-        {
-            /* Display alternative boot menu */
-            BlpStatus.BootMenu();
-        }
-        else
-        {
-            /* Display default boot menu */
-            TextUi::DisplayBootMenu();
-        }
+        /* Show boot menu */
+        XtLoader::ShowBootMenu();
 
         /* Fallback to shell, if boot menu returned */
         Shell::StartLoaderShell();

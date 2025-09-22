@@ -27,7 +27,8 @@ EFI_STATUS
 Protocol::CloseProtocol(IN PEFI_HANDLE Handle,
                         IN PEFI_GUID ProtocolGuid)
 {
-    return EfiSystemTable->BootServices->CloseProtocol(Handle, ProtocolGuid, EfiImageHandle, NULLPTR);
+    return XtLoader::GetEfiSystemTable()->BootServices->CloseProtocol(Handle, ProtocolGuid,
+                                                                      XtLoader::GetEfiImageHandle(), NULLPTR);
 }
 
 /**
@@ -120,7 +121,8 @@ Protocol::InstallProtocol(IN PVOID Interface,
     EFI_HANDLE Handle = NULLPTR;
 
     /* Install protocol interface */
-    return EfiSystemTable->BootServices->InstallProtocolInterface(&Handle, Guid, EFI_NATIVE_INTERFACE, Interface);
+    return XtLoader::GetEfiSystemTable()->BootServices->InstallProtocolInterface(&Handle, Guid, EFI_NATIVE_INTERFACE,
+                                                                                 Interface);
 }
 
 /**
@@ -463,7 +465,7 @@ Protocol::LoadModule(IN PWCHAR ModuleName)
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Check if caused by secure boot */
-        if(Status == STATUS_EFI_ACCESS_DENIED && BlpStatus.SecureBoot >= 1)
+        if(Status == STATUS_EFI_ACCESS_DENIED && XtLoader::GetSecureBootStatus() >= 1)
         {
             /* SecureBoot signature validation failed */
             Debug::Print(L"ERROR: SecureBoot signature validation failed, module '%S' will not be loaded\n", ModuleName);
@@ -479,8 +481,9 @@ Protocol::LoadModule(IN PWCHAR ModuleName)
     }
 
     /* Access module interface for further module type check */
-    Status = EfiSystemTable->BootServices->OpenProtocol(ModuleHandle, &LIPGuid, (PVOID *)&LoadedImage,
-                                                        EfiImageHandle, NULLPTR, EFI_OPEN_PROTOCOL_GET_PROTOCOL);
+    Status = XtLoader::GetEfiSystemTable()->BootServices->OpenProtocol(ModuleHandle, &LIPGuid, (PVOID *)&LoadedImage,
+                                                                       XtLoader::GetEfiImageHandle(), NULLPTR,
+                                                                       EFI_OPEN_PROTOCOL_GET_PROTOCOL);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to open LoadedImage protocol */
@@ -495,7 +498,7 @@ Protocol::LoadModule(IN PWCHAR ModuleName)
         Debug::Print(L"ERROR: Loaded module is not a boot system driver\n");
 
         /* Close protocol and skip module */
-        EfiSystemTable->BootServices->CloseProtocol(LoadedImage, &LIPGuid, LoadedImage, NULLPTR);
+        XtLoader::GetEfiSystemTable()->BootServices->CloseProtocol(LoadedImage, &LIPGuid, LoadedImage, NULLPTR);
     }
 
     /* Save additional module information, not found in '.modinfo' section */
@@ -506,7 +509,7 @@ Protocol::LoadModule(IN PWCHAR ModuleName)
     ModuleInfo->UnloadModule = LoadedImage->Unload;
 
     /* Close loaded image protocol */
-    EfiSystemTable->BootServices->CloseProtocol(LoadedImage, &LIPGuid, LoadedImage, NULLPTR);
+    XtLoader::GetEfiSystemTable()->BootServices->CloseProtocol(LoadedImage, &LIPGuid, LoadedImage, NULLPTR);
 
     /* Start EFI image */
     Status = EfiUtils::StartEfiImage(ModuleHandle);
@@ -591,7 +594,8 @@ Protocol::LocateProtocolHandles(OUT PEFI_HANDLE *Handles,
                                 OUT PUINT_PTR Count,
                                 IN PEFI_GUID ProtocolGuid)
 {
-    return EfiSystemTable->BootServices->LocateHandleBuffer(ByProtocol, ProtocolGuid, NULLPTR, Count, Handles);
+    return XtLoader::GetEfiSystemTable()->BootServices->LocateHandleBuffer(ByProtocol, ProtocolGuid, NULLPTR,
+                                                                           Count, Handles);
 }
 
 /**
@@ -649,7 +653,7 @@ Protocol::OpenProtocol(OUT PEFI_HANDLE Handle,
     }
 
     /* Free handles */
-    EfiSystemTable->BootServices->FreePool(Handles);
+    XtLoader::GetEfiSystemTable()->BootServices->FreePool(Handles);
 
     /* Make sure the loaded protocol has been found */
     if(*ProtocolHandler == NULLPTR)
@@ -684,26 +688,9 @@ Protocol::OpenProtocolHandle(IN EFI_HANDLE Handle,
                              OUT PVOID *ProtocolHandler,
                              IN PEFI_GUID ProtocolGuid)
 {
-    return EfiSystemTable->BootServices->OpenProtocol(Handle, ProtocolGuid, ProtocolHandler, EfiImageHandle,
-                                                      NULLPTR, EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
-}
-
-/**
- * Registers a boot menu callback routine, that will be used to display alternative boot menu.
- *
- * @param BootMenuRoutine
- *        Supplies a pointer to the boot menu callback routine.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTCDECL
-VOID
-Protocol::RegisterBootMenu(IN PVOID BootMenuRoutine)
-{
-    /* Set boot menu routine */
-    BlpStatus.BootMenu = (PBL_XT_BOOT_MENU)BootMenuRoutine;
+    return XtLoader::GetEfiSystemTable()->BootServices->OpenProtocol(Handle, ProtocolGuid, ProtocolHandler,
+                                                                     XtLoader::GetEfiImageHandle(),
+                                                                     NULLPTR, EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
 }
 
 /**
@@ -1026,7 +1013,7 @@ Protocol::InstallXtLoaderProtocol()
     LoaderProtocol.Boot.FindProtocol = FindBootProtocol;
     LoaderProtocol.Boot.InitializeMenuList = Configuration::InitializeBootMenuList;
     LoaderProtocol.Boot.InvokeProtocol = InvokeBootProtocol;
-    LoaderProtocol.Boot.RegisterMenu = RegisterBootMenu;
+    LoaderProtocol.Boot.RegisterMenu = XtLoader::RegisterBootMenu;
     LoaderProtocol.Boot.RegisterProtocol = RegisterBootProtocol;
     LoaderProtocol.BootUtils.GetBooleanParameter = BootUtils::GetBooleanParameter;
     LoaderProtocol.BootUtils.GetTrampolineInformation = AR::ProcSup::GetTrampolineInformation;

@@ -29,6 +29,8 @@ Memory::BuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
     EFI_PHYSICAL_ADDRESS Address, DirectoryAddress;
     PXTBL_MODULE_INFO ModuleInfo;
     PXTBL_MEMORY_MAPPING Mapping;
+    PVOID LoaderBase;
+    ULONGLONG LoaderSize;
     EFI_STATUS Status;
     ULONG Index;
 
@@ -122,12 +124,15 @@ Memory::BuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
         ModulesListEntry = ModulesListEntry->Flink;
     }
 
+    /* Get boot loader image information */
+    XtLoader::GetLoaderImageInformation(&LoaderBase, &LoaderSize);
+
     /* Make sure boot loader image base and size are set */
-    if(BlpStatus.LoaderBase && BlpStatus.LoaderSize)
+    if(LoaderBase && LoaderSize)
     {
         /* Map boot loader code as well */
-        Status = MapVirtualMemory(PageMap, BlpStatus.LoaderBase, BlpStatus.LoaderBase,
-                                  EFI_SIZE_TO_PAGES(BlpStatus.LoaderSize), LoaderFirmwareTemporary);
+        Status = MapVirtualMemory(PageMap, LoaderBase, LoaderBase,
+                                  EFI_SIZE_TO_PAGES(LoaderSize), LoaderFirmwareTemporary);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Mapping boot loader code failed */

@@ -30,7 +30,8 @@ Volume::CloseVolume(IN PEFI_HANDLE VolumeHandle)
     if(VolumeHandle != NULLPTR)
     {
         /* Close a handle */
-        return EfiSystemTable->BootServices->CloseProtocol(VolumeHandle, &LIPGuid, EfiImageHandle, NULLPTR);
+        return XtLoader::GetEfiSystemTable()->BootServices->CloseProtocol(VolumeHandle, &LIPGuid,
+                                                                          XtLoader::GetEfiImageHandle(), NULLPTR);
     }
 
     /* Return success */
@@ -68,7 +69,8 @@ Volume::EnumerateBlockDevices()
     ULONG CDCount = 0, FDCount = 0, HDCount = 0, RDCount = 0;
 
     /* Get the device handle of the image that is running */
-    Status = EfiSystemTable->BootServices->HandleProtocol(EfiImageHandle, &LoadedImageProtocolGuid, (VOID**)&LoadedImage);
+    Status = XtLoader::GetEfiSystemTable()->BootServices->HandleProtocol(XtLoader::GetEfiImageHandle(), &LoadedImageProtocolGuid,
+                                                                         (VOID**)&LoadedImage);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to get boot device handle */
@@ -179,8 +181,8 @@ Volume::EnumerateBlockDevices()
                 if(DevicePath != NULLPTR)
                 {
                     /* Check if this is the boot device */
-                    Status = EfiSystemTable->BootServices->LocateDevicePath(&BlockIoGuid, &DevicePath,
-                                                                            &DeviceHandle);
+                    Status = XtLoader::GetEfiSystemTable()->BootServices->LocateDevicePath(&BlockIoGuid, &DevicePath,
+                                                                                           &DeviceHandle);
                     if(Status == STATUS_EFI_SUCCESS && DeviceHandle == BootDeviceHandle)
                     {
                         /* Mark partition as ESP */
@@ -533,7 +535,7 @@ Volume::OpenVolume(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
     if(DevicePath != NULLPTR)
     {
         /* Locate the device path */
-        Status = EfiSystemTable->BootServices->LocateDevicePath(&SFSGuid, &DevicePath, DiskHandle);
+        Status = XtLoader::GetEfiSystemTable()->BootServices->LocateDevicePath(&SFSGuid, &DevicePath, DiskHandle);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Failed to locate device path */
@@ -543,8 +545,12 @@ Volume::OpenVolume(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
     else
     {
         /* Open the image protocol if no device path specified */
-        Status = EfiSystemTable->BootServices->OpenProtocol(EfiImageHandle, &LIPGuid, (PVOID *)&ImageProtocol,
-                                                            EfiImageHandle, NULLPTR, EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
+        Status = XtLoader::GetEfiSystemTable()->BootServices->OpenProtocol(XtLoader::GetEfiImageHandle(),
+                                                                           &LIPGuid,
+                                                                           (PVOID *)&ImageProtocol,
+                                                                           XtLoader::GetEfiImageHandle(),
+                                                                           NULLPTR,
+                                                                           EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Failed to open image protocol */
@@ -556,8 +562,10 @@ Volume::OpenVolume(IN PEFI_DEVICE_PATH_PROTOCOL DevicePath,
     }
 
     /* Open the filesystem protocol */
-    Status = EfiSystemTable->BootServices->OpenProtocol(*DiskHandle, &SFSGuid, (PVOID *)&FileSystemProtocol,
-                                                        EfiImageHandle, NULLPTR, EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
+    Status = XtLoader::GetEfiSystemTable()->BootServices->OpenProtocol(*DiskHandle, &SFSGuid,
+                                                                       (PVOID *)&FileSystemProtocol,
+                                                                       XtLoader::GetEfiImageHandle(), NULLPTR,
+                                                                       EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
 
     /* Check if filesystem protocol opened successfully */
     if(Status != STATUS_EFI_SUCCESS)
@@ -757,12 +765,14 @@ Volume::DiscoverEfiBlockDevices(OUT PLIST_ENTRY BlockDevices)
 
         /* Check if DevicePath protocol is supported by this handle */
         DevicePath = NULLPTR;
-        Status = EfiSystemTable->BootServices->HandleProtocol(Handles[Index], &DevicePathGuid, (PVOID *)&DevicePath);
+        Status = XtLoader::GetEfiSystemTable()->BootServices->HandleProtocol(Handles[Index], &DevicePathGuid,
+                                                                             (PVOID *)&DevicePath);
         if(Status != STATUS_EFI_SUCCESS || DevicePath == NULLPTR)
         {
             /* Device failed to handle DP protocol */
             Debug::Print(L"WARNING: Unable to open DevicePath protocol (Status Code: 0x%zX)\n", Status);
-            EfiSystemTable->BootServices->CloseProtocol(Handles[Index], &IoGuid, EfiImageHandle, NULLPTR);
+            XtLoader::GetEfiSystemTable()->BootServices->CloseProtocol(Handles[Index], &IoGuid,
+                                                                       XtLoader::GetEfiImageHandle(), NULLPTR);
             continue;
         }
 
@@ -772,8 +782,10 @@ Volume::DiscoverEfiBlockDevices(OUT PLIST_ENTRY BlockDevices)
         {
             /* Memory allocation failure */
             Debug::Print(L"ERROR: Failed to allocate memory pool for block device (Status Code: 0x%zX)\n", Status);
-            EfiSystemTable->BootServices->CloseProtocol(Handles[Index], &DevicePathGuid, EfiImageHandle, NULLPTR);
-            EfiSystemTable->BootServices->CloseProtocol(Handles[Index], &IoGuid, EfiImageHandle, NULLPTR);
+            XtLoader::GetEfiSystemTable()->BootServices->CloseProtocol(Handles[Index], &DevicePathGuid,
+                                                                       XtLoader::GetEfiImageHandle(), NULLPTR);
+            XtLoader::GetEfiSystemTable()->BootServices->CloseProtocol(Handles[Index], &IoGuid,
+                                                                       XtLoader::GetEfiImageHandle(), NULLPTR);
             return Status;
         }
 

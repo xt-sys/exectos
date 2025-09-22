@@ -39,7 +39,8 @@ Debug::ActivateSerialIOController()
     }
 
     /* Get all instances of PciRootBridgeIo */
-    Status = EfiSystemTable->BootServices->LocateHandle(ByProtocol, &PciGuid, NULLPTR, &PciHandleSize, PciHandle);
+    Status = XtLoader::GetEfiSystemTable()->BootServices->LocateHandle(ByProtocol, &PciGuid, NULLPTR,
+                                                                       &PciHandleSize, PciHandle);
     if(Status == STATUS_EFI_BUFFER_TOO_SMALL)
     {
         /* Reallocate more memory as requested by UEFI */
@@ -52,7 +53,8 @@ Debug::ActivateSerialIOController()
         }
 
         /* Second attempt to get instances of PciRootBridgeIo */
-        Status = EfiSystemTable->BootServices->LocateHandle(ByProtocol, &PciGuid, NULLPTR, &PciHandleSize, PciHandle);
+        Status = XtLoader::GetEfiSystemTable()->BootServices->LocateHandle(ByProtocol, &PciGuid, NULLPTR,
+                                                                           &PciHandleSize, PciHandle);
     }
 
     /* Make sure successfully obtained PciRootBridgeIo instances */
@@ -66,7 +68,7 @@ Debug::ActivateSerialIOController()
     for(Index = 0; Index < (PciHandleSize / sizeof(EFI_HANDLE)); Index++)
     {
         /* Get inferface from the protocol */
-        Status = EfiSystemTable->BootServices->HandleProtocol(PciHandle[Index], &PciGuid, (PVOID*)&PciDev);
+        Status = XtLoader::GetEfiSystemTable()->BootServices->HandleProtocol(PciHandle[Index], &PciGuid, (PVOID*)&PciDev);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Failed to get interface */
@@ -135,7 +137,7 @@ Debug::InitializeDebugConsole()
     Configuration::GetValue(L"DEBUG", &DebugConfiguration);
 
     /* Make sure any debug options are provided and debug console is not initialized yet */
-    if(DebugConfiguration && BlpStatus.DebugPort == 0)
+    if(DebugConfiguration && EnabledDebugPorts == 0)
     {
         /* Find all debug ports */
         DebugPort = RTL::WideString::TokenizeWideString(DebugConfiguration, L";", &LastPort);
@@ -198,12 +200,12 @@ Debug::InitializeDebugConsole()
                 }
 
                 /* Enable debug port */
-                BlpStatus.DebugPort |= XTBL_DEBUGPORT_SERIAL;
+                EnabledDebugPorts |= XTBL_DEBUGPORT_SERIAL;
             }
             else if(RTL::WideString::CompareWideStringInsensitive(DebugPort, L"SCREEN", 5) == 0)
             {
                 /* Enable debug port */
-                BlpStatus.DebugPort |= XTBL_DEBUGPORT_SCREEN;
+                EnabledDebugPorts |= XTBL_DEBUGPORT_SCREEN;
             }
             else
             {
@@ -217,14 +219,14 @@ Debug::InitializeDebugConsole()
         }
 
         /* Check if serial debug port is enabled */
-        if(BlpStatus.DebugPort & XTBL_DEBUGPORT_SERIAL)
+        if(EnabledDebugPorts & XTBL_DEBUGPORT_SERIAL)
         {
             /* Try to initialize COM port */
             Status = InitializeSerialPort(PortNumber, PortAddress, BaudRate);
             if(Status != STATUS_EFI_SUCCESS)
             {
                 /* Remove serial debug port, as COM port initialization failed and return */
-                BlpStatus.DebugPort &= ~XTBL_DEBUGPORT_SERIAL;
+                EnabledDebugPorts &= ~XTBL_DEBUGPORT_SERIAL;
                 return Status;
             }
         }
@@ -287,7 +289,7 @@ Debug::InitializeSerialPort(IN ULONG PortNumber,
     }
 
     /* Initialize COM port */
-    Status = HL::ComPort::InitializeComPort(&BlpStatus.SerialPort, (PUCHAR)UlongToPtr(PortAddress), BaudRate);
+    Status = HL::ComPort::InitializeComPort(&SerialPort, (PUCHAR)UlongToPtr(PortAddress), BaudRate);
 
     /* Port not found under supplied address */
     if(Status == STATUS_NOT_FOUND && PortAddress)
@@ -298,7 +300,7 @@ Debug::InitializeSerialPort(IN ULONG PortNumber,
         {
             /* Try to reinitialize COM port */
             Console::Print(L"Enabled I/O space access for all PCI(E) serial controllers found\n");
-            Status = HL::ComPort::InitializeComPort(&BlpStatus.SerialPort, (PUCHAR)UlongToPtr(PortAddress), BaudRate);
+            Status = HL::ComPort::InitializeComPort(&SerialPort, (PUCHAR)UlongToPtr(PortAddress), BaudRate);
         }
     }
 
@@ -345,14 +347,14 @@ Debug::Print(IN PCWSTR Format,
         VA_START(Arguments, Format);
 
         /* Check if serial debug port is enabled */
-        if((BlpStatus.DebugPort & XTBL_DEBUGPORT_SERIAL) && (BlpStatus.SerialPort.Flags & COMPORT_FLAG_INIT))
+        if((EnabledDebugPorts & XTBL_DEBUGPORT_SERIAL) && (SerialPort.Flags & COMPORT_FLAG_INIT))
         {
             /* Format and print the string to the serial console */
             RTL::WideString::FormatWideString(&SerialPrintContext, (PWCHAR)Format, Arguments);
         }
 
         /* Check if screen debug port is enabled and Boot Services are still available */
-        if((BlpStatus.DebugPort & XTBL_DEBUGPORT_SCREEN) && (BlpStatus.BootServices == TRUE))
+        if((EnabledDebugPorts & XTBL_DEBUGPORT_SCREEN) && (XtLoader::GetBootServicesStatus() == TRUE))
         {
             /* Format and print the string to the screen */
             RTL::WideString::FormatWideString(&ConsolePrintContext, (PWCHAR)Format, Arguments);
@@ -382,5 +384,12 @@ Debug::PutChar(IN WCHAR Character)
     /* Write character to the serial console */
     Buffer[0] = Character;
     Buffer[1] = 0;
-    return HL::ComPort::WriteComPort(&BlpStatus.SerialPort, Buffer[0]);
+    return HL::ComPort::WriteComPort(&SerialPort, Buffer[0]);
+}
+
+XTCDECL
+BOOLEAN
+Debug::SerialPortReady()
+{
+    return (BOOLEAN)(SerialPort.Flags & COMPORT_FLAG_INIT);
 }

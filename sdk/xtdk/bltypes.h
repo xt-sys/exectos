@@ -4,6 +4,7 @@
  * FILE:            sdk/xtdk/bltypes.h
  * DESCRIPTION:     XT Boot Loader structures definitions
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ *                  Aiken Harris <harraiken91@gmail.com>
  */
 
 #ifndef __XTDK_BLTYPES_H
@@ -280,13 +281,10 @@ typedef struct _XTBL_PAGE_MAPPING
 /* XTLDR Status data */
 typedef struct _XTBL_STATUS
 {
-    PBL_XT_BOOT_MENU BootMenu;
-    BOOLEAN BootServices;
-    ULONG DebugPort;
     PVOID LoaderBase;
     ULONGLONG LoaderSize;
+    BOOLEAN BootServices;
     INT_PTR SecureBoot;
-    CPPORT SerialPort;
 } XTBL_STATUS, *PXTBL_STATUS;
 
 /* XT framebuffer video mode information structure definition */

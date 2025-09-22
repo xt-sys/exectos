@@ -465,7 +465,8 @@ Configuration::ParseCommandLine(VOID)
     RTL::LinkedList::InitializeListHead(&Config);
 
     /* Handle loaded image protocol */
-    Status = EfiSystemTable->BootServices->HandleProtocol(EfiImageHandle, &LIPGuid, (PVOID *)&LoadedImage);
+    Status = XtLoader::GetEfiSystemTable()->BootServices->HandleProtocol(XtLoader::GetEfiImageHandle(),
+                                                                         &LIPGuid, (PVOID *)&LoadedImage);
     if(Status == STATUS_EFI_SUCCESS)
     {
         /* Check if launched from UEFI shell */
