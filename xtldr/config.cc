@@ -362,6 +362,13 @@ Configuration::InitializeBootMenuList(IN ULONG MaxNameLength,
     return STATUS_EFI_SUCCESS;
 }
 
+/**
+ * Initializes the XTLDR configuration subsystem.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
 XTCDECL
 VOID
 Configuration::InitializeConfiguration()

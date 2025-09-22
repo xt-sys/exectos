@@ -387,6 +387,13 @@ Debug::PutChar(IN WCHAR Character)
     return HL::ComPort::WriteComPort(&SerialPort, Buffer[0]);
 }
 
+/**
+ * Determines if the serial port has been successfully initialized and is ready for communication.
+ *
+ * @return This routine returns TRUE if the serial port is initialized and ready, FALSE otherwise.
+ *
+ * @since XT 1.0
+ */
 XTCDECL
 BOOLEAN
 Debug::SerialPortReady()

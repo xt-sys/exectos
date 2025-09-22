@@ -9,6 +9,13 @@
 #include <xtldr.hh>
 
 
+/**
+ * Disables access to EFI Boot Services.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
 XTCDECL
 VOID
 XtLoader::DisableBootServices()
@@ -17,6 +24,13 @@ XtLoader::DisableBootServices()
 
 }
 
+/**
+ * Queries the availability of EFI Boot Services.
+ *
+ * @return This routine returns TRUE if EFI Boot Services are available, FALSE otherwise.
+ *
+ * @since XT 1.0
+ */
 XTCDECL
 BOOLEAN
 XtLoader::GetBootServicesStatus()
@@ -24,6 +38,13 @@ XtLoader::GetBootServicesStatus()
     return LoaderStatus.BootServices;
 }
 
+/**
+ * Retrieves the EFI image handle.
+ *
+ * @return This routine returns a handle to the EFI-loaded image.
+ *
+ * @since XT 1.0
+ */
 XTCDECL
 EFI_HANDLE
 XtLoader::GetEfiImageHandle()
@@ -31,6 +52,13 @@ XtLoader::GetEfiImageHandle()
     return XtLoader::EfiImageHandle;
 }
 
+/**
+ * Retrieves the EFI system table pointer.
+ *
+ * @return This routine returns a pointer to the EFI system table.
+ *
+ * @since XT 1.0
+ */
 XTCDECL
 PEFI_SYSTEM_TABLE
 XtLoader::GetEfiSystemTable()
@@ -38,6 +66,19 @@ XtLoader::GetEfiSystemTable()
     return XtLoader::EfiSystemTable;
 }
 
+/**
+ * Provides base address and size of the XTLDR image.
+ *
+ * @param LoaderBase
+ *        Supplies a pointer to a variable that receives the base address of the XTLDR image.
+ *
+ * @param LoaderSize
+ *        Supplies a pointer to a variable that receives the size of the XTLDR image.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
 XTCDECL
 VOID
 XtLoader::GetLoaderImageInformation(PVOID *LoaderBase,
@@ -47,6 +88,13 @@ XtLoader::GetLoaderImageInformation(PVOID *LoaderBase,
     *LoaderSize = XtLoader::LoaderStatus.LoaderSize;
 }
 
+/**
+ * Retrieves the Secure Boot status.
+ *
+ * @return This routine returns SecureBoot status.
+ *
+ * @since XT 1.0
+ */
 XTCDECL
 INT_PTR
 XtLoader::GetSecureBootStatus()
@@ -143,6 +191,13 @@ XtLoader::RegisterBootMenu(IN PVOID BootMenuRoutine)
     BootMenu = (PBL_XT_BOOT_MENU)BootMenuRoutine;
 }
 
+/**
+ * Invokes either a custom boot menu handler, if one has been registered, or displays the default boot menu.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
 XTCDECL
 VOID
 XtLoader::ShowBootMenu()
