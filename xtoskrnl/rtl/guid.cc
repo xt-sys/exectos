@@ -34,6 +34,6 @@ RTL::Guid::CompareGuids(IN PGUID Guid1,
     Guid2Ptr = (PUINT)Guid2;
 
     /* Compare GUIDs */
-    return (BOOLEAN)(Guid1Ptr[0] == Guid2Ptr[0] && Guid1Ptr[1] == Guid2Ptr[1] &&
-                     Guid1Ptr[2] == Guid2Ptr[2] && Guid1Ptr[3] == Guid2Ptr[3]);
+    return (Guid1Ptr[0] == Guid2Ptr[0] && Guid1Ptr[1] == Guid2Ptr[1] &&
+            Guid1Ptr[2] == Guid2Ptr[2] && Guid1Ptr[3] == Guid2Ptr[3]);
 }

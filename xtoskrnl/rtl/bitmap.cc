@@ -313,7 +313,7 @@ RTL::BitMap::FindBits(IN PRTL_BITMAP BitMap,
         while(BitOffset + Length < BitMapEnd)
         {
             /* Increment offset */
-            BitOffset += CountBits(BitMap, BitMap->Size - BitOffset, BitOffset, (BOOLEAN)!SetBits);
+            BitOffset += CountBits(BitMap, BitMap->Size - BitOffset, BitOffset, !SetBits);
             if(BitOffset + Length > BitMapEnd)
             {
                 /* No match found, break loop execution */

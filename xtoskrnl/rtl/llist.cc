@@ -107,7 +107,7 @@ XTCDECL
 BOOLEAN
 RTL::LinkedList::ListEmpty(IN PLIST_ENTRY ListHead)
 {
-    return (BOOLEAN)(((ListHead->Flink == NULLPTR) && (ListHead->Blink == NULLPTR)) || (ListHead->Flink == ListHead));
+    return (((ListHead->Flink == NULLPTR) && (ListHead->Blink == NULLPTR)) || (ListHead->Flink == ListHead));
 }
 
 /**

@@ -631,7 +631,7 @@ RTL::Math::InfiniteDouble(IN DOUBLE Value)
     Var.Double = &Value;
 
     /* Return TRUE if it is infinite, or FALSE otherwise */
-    return (BOOLEAN)((Var.DoubleS->Exponent & 0x7FF) == 0x7FF);
+    return ((Var.DoubleS->Exponent & 0x7FF) == 0x7FF);
 }
 
 /**
@@ -690,5 +690,5 @@ RTL::Math::NanDouble(IN DOUBLE Value)
     Var.Double = &Value;
 
     /* Return TRUE if it is NaN, or FALSE otherwise */
-    return (BOOLEAN)(Var.DoubleS->Exponent == 0x7FF && (Var.DoubleS->MantissaHigh != 0 || Var.DoubleS->MantissaLow != 0));
+    return (Var.DoubleS->Exponent == 0x7FF && (Var.DoubleS->MantissaHigh != 0 || Var.DoubleS->MantissaLow != 0));
 }

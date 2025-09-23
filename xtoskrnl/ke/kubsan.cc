@@ -24,7 +24,7 @@ BOOLEAN
 KE::KUbsan::CheckReport(PKUBSAN_SOURCE_LOCATION Location)
 {
     /* Make sure, this error should be reported */
-    return (BOOLEAN)!ActiveFrame;
+    return !ActiveFrame;
 }
 
 /**

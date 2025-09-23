@@ -126,8 +126,8 @@ XTAPI
 BOOLEAN
 MM::Init::VerifyMemoryTypeFree(LOADER_MEMORY_TYPE MemoryType)
 {
-    return (BOOLEAN)((MemoryType == LoaderFree) || (MemoryType == LoaderFirmwareTemporary) ||
-                     (MemoryType == LoaderLoadedProgram) || (MemoryType == LoaderOsloaderStack));
+    return ((MemoryType == LoaderFree) || (MemoryType == LoaderFirmwareTemporary) ||
+            (MemoryType == LoaderLoadedProgram) || (MemoryType == LoaderOsloaderStack));
 }
 
 /**
@@ -144,7 +144,7 @@ XTAPI
 BOOLEAN
 MM::Init::VerifyMemoryTypeInvisible(LOADER_MEMORY_TYPE MemoryType)
 {
-    return (BOOLEAN)((MemoryType == LoaderFirmwarePermanent) ||
-                     (MemoryType == LoaderSpecialMemory) ||
-                     (MemoryType == LoaderBBTMemory));
+    return ((MemoryType == LoaderFirmwarePermanent) ||
+            (MemoryType == LoaderSpecialMemory) ||
+            (MemoryType == LoaderBBTMemory));
 }

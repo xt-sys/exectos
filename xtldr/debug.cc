@@ -398,5 +398,5 @@ XTCDECL
 BOOLEAN
 Debug::SerialPortReady()
 {
-    return (BOOLEAN)(SerialPort.Flags & COMPORT_FLAG_INIT);
+    return (SerialPort.Flags & COMPORT_FLAG_INIT);
 }
