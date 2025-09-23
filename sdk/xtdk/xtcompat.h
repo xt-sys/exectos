@@ -15,14 +15,26 @@
     #define XTCLINK         extern "C"
     #define NULLPTR         nullptr
 
-    /* C++ types */
+    /* C++ boolean type */
+    typedef bool BOOLEAN, *PBOOLEAN;
+    #define TRUE true
+    #define FALSE false
+
+    /* C++ widechar type */
     typedef wchar_t wchar;
 #else
     /* C definitions */
     #define XTCLINK
     #define NULLPTR         ((void *)0)
 
-    /* C types */
+    /* C boolean type */
+    typedef enum _BOOLEAN
+    {
+        FALSE = 0,
+        TRUE = 1
+    } BOOLEAN, *PBOOLEAN;
+
+    /* C widechar type */
     typedef unsigned short wchar;
 #endif
 

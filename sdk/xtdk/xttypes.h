@@ -150,13 +150,6 @@ typedef LPCWSTR PCTSTR, LPCTSTR;
 typedef LPUWSTR PUTSTR, LPUTSTR;
 typedef LPCUWSTR PCUTSTR, LPCUTSTR;
 
-/* Boolean type */
-typedef enum _BOOLEAN
-{
-    FALSE = 0,
-    TRUE = 1
-} BOOLEAN, *PBOOLEAN;
-
 /* 128-bit floats structure */
 typedef struct _FLOAT128
 {
