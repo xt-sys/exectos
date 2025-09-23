@@ -4,8 +4,8 @@ within the XTOS kernel space. It is responsible for various core services, such 
 management, and process scheduling. The kernel contains the scheduler (sometimes referred to as the Dispatcher), the
 cache, object, and memory managers, the security manager, and other executive components described below.
 
-All routines in the kernel are prefixed to indicate the subsystem they belong to, and their source code is organized
-into corresponding directories. These subsystems include:
+The source code of the kernel is organized into subsystem-specific directories. Each directory name also defines the
+corresponding C++ namespace in which the subsystem's classes and routines reside. These subsystems include:
 
  * Ar - Architecture-specific Library
  * Ex - Kernel Executive
@@ -56,13 +56,20 @@ routines, for use by other kernel components.
 
 ## Function Naming Convention
 All kernel functions adhere to a strict naming convention to enhance code readability and maintainability. The structure
-of a function name is generally composed of three parts: &lt;Prefix&gt;&lt;Operation&gt;&lt;Object&gt;
+of all public interfaces exposed by the kernel are generally composed of three parts:
+&lt;Prefix&gt;&lt;Operation&gt;&lt;Object&gt;
 
-The prefix identifies the component to which the function belongs. Additionally, the prefix indicates the function's
-visibility. Private functions, which should not be called from outside their own module, have a 'p' appended to their
-prefix.
-
-For example, consider the **KepInitializeStack()** routine:
- * **Kep** - The prefix indicates a private (p) routine belonging to the Core Kernel Library (Ke).
+The prefix identifies the component to which the function belongs. For example, consider the **KeInitializeThread()**
+routine:
+ * **Ke** - The prefix indicates a routine belonging to the Core Kernel Library (Ke).
  * **Initialize** - The operation performed by the function.
- * **Stack** - The object on which the operation is performed.
+ * **Thread** - The object on which the operation is performed.
+
+For all C++ code inside the kernel the naming model has evolved. Consider the **KE::KThread::InitializeThread()**
+routine:
+ * **KE** - The namespace replaces the prefix and indicates the subsystem. Namespaces are written in uppercase and no
+            longer use the trailing p for private routines, because classes use C++ visibility to control access.
+ * **KThread** - Within each namespace, related functionality is grouped into classes, which encapsulate variables and
+                 methods.
+ * **InitializeThread** - Method names follow the `<Operation><Object>` pattern.
+ 
