@@ -1,0 +1,155 @@
+/**
+ * PROJECT:         ExectOS
+ * COPYRIGHT:       See COPYING.md in the top level directory
+ * FILE:            xtoskrnl/ke/bootinfo.cc
+ * DESCRIPTION:     Bootloader-provided system information handling support
+ * DEVELOPERS:      Aiken Harris <harraiken91@gmail.com>
+ */
+
+#include <xtos.hh>
+
+
+/**
+ * Retrieves a pointer to the DebugPrint routine provided by the bootloader.
+ *
+ * @return This routine returns a pointer to the DebugPrint routine.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PKD_PRINT_ROUTINE
+KE::BootInformation::GetDebugPrint(VOID)
+{
+    return (PKD_PRINT_ROUTINE)InitializationBlock->LoaderInformation.DbgPrint;
+}
+
+/**
+ * Retrieves the system firmware type (BIOS or UEFI).
+ *
+ * @return This routine returns the type of the system firmware.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+SYSTEM_FIRMWARE_TYPE
+KE::BootInformation::GetFirmwareType(VOID)
+{
+    return InitializationBlock->FirmwareInformation.FirmwareType;
+}
+
+/**
+ * Retrieves a pointer to the specified kernel parameter within the kernel parameters list.
+ *
+ * @param ParameterName
+ *        Supplies a pointer to a null-terminated wide string specifying the name of the parameter to search for.
+ *
+ * @param Parameter
+ *        Supplies a pointer to a variable that receives a pointer to the matching parameter, or NULLPTR if not found.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+KE::BootInformation::GetKernelParameter(IN PCWSTR ParameterName,
+                                        OUT PCWSTR *Parameter)
+{
+    PCWSTR Match, SearchStart;
+    SIZE_T ParameterNameLength;
+
+    /* Validate input parameters */
+    if(!ParameterName || !Parameter)
+    {
+        /* Invalid input parameters, return error */
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    /* Get the length of the parameter name we are looking for */
+    ParameterNameLength = RTL::WideString::WideStringLength(ParameterName, 0);
+    if(ParameterNameLength == 0)
+    {
+        /* Do not allow empty parameter names */
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    /* Assume the requested parameter is not present in the kernel parameters */
+    *Parameter = NULLPTR;
+
+    /* Start searching from the beginning of the list */
+    SearchStart = InitializationBlock->KernelParameters;
+
+    /* Search for the parameter name */
+    while((Match = RTL::WideString::FindWideStringInsensitive(SearchStart, ParameterName)))
+    {
+        /* Check if the match is at the start of the string or preceded by a space */
+        if(Match == InitializationBlock->KernelParameters || *(Match - 1) == L' ')
+        {
+            /* Check the character after the match to avoid matching prefixes */
+            if(Match[ParameterNameLength] == L'\0' ||
+               Match[ParameterNameLength] == L' ' ||
+               Match[ParameterNameLength] == L'=')
+            {
+                /* A valid parameter was found, return a pointer to it */
+                *Parameter = Match;
+                return STATUS_SUCCESS;
+            }
+        }
+
+        /* The match was a substring of a larger token, continue searching */
+        SearchStart = Match + 1;
+    }
+
+    /* Parameter not found */
+    return STATUS_NOT_FOUND;
+}
+
+/**
+ * Retrieves a pointer to the list of memory descriptors.
+ *
+ * @return This routine returns a pointer to the list of memory descriptors.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PLIST_ENTRY
+KE::BootInformation::GetMemoryDescriptors(VOID)
+{
+    return &InitializationBlock->MemoryDescriptorListHead;
+}
+
+/**
+ * Retrieves a pointer to the list of system resources.
+ *
+ * @return This routine returns a pointer to the list of system resources.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PLIST_ENTRY
+KE::BootInformation::GetSystemResources(VOID)
+{
+    return &InitializationBlock->SystemResourcesListHead;
+}
+
+/**
+ * Initializes the bootloader-provided system information.
+ *
+ * @param Block
+ *        Supplies a pointer to the kernel initialization block.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KE::BootInformation::InitializeInitializationBlock(IN PKERNEL_INITIALIZATION_BLOCK Block)
+{
+    /* Check if the initialization block is already initialized */
+    if(!InitializationBlock)
+    {
+        /* Save the kernel initialization block */
+        InitializationBlock = Block;
+    }
+}

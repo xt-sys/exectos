@@ -85,7 +85,12 @@ endfunction()
 
 # This function installs specified target results under destination directory
 function(set_install_target TARGET DESTINATION)
+    set_target_properties(${TARGET} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "${EXECTOS_BINARY_DIR}/output/sdk/lib")
     install(TARGETS ${TARGET} DESTINATION ${EXECTOS_BINARY_DIR}/output/binaries/${DESTINATION})
+endfunction()
+
+function(set_sdk_target FILENAME DESTINATION)
+    install(DIRECTORY ${FILENAME} DESTINATION ${EXECTOS_BINARY_DIR}/output/sdk/${DESTINATION})
 endfunction()
 
 # This function is responsible for compiling module SPEC file

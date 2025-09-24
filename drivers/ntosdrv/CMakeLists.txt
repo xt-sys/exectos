@@ -7,8 +7,8 @@ include_directories(
 
 # Specify list of source code files
 list(APPEND NTOSDRV_SOURCE
-    ${NTOSDRV_SOURCE_DIR}/ntosdrv.c
-    ${NTOSDRV_SOURCE_DIR}/rtl.c)
+    ${NTOSDRV_SOURCE_DIR}/ntosdrv.cc
+    ${NTOSDRV_SOURCE_DIR}/rtl.cc)
 
 # Set module definition SPEC file
 set_specfile(ntosdrv.spec ntosdrv.sys)

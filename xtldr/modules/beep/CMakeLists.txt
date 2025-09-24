@@ -8,8 +8,8 @@ include_directories(
 
 # Specify list of source code files
 list(APPEND XTLDR_BEEP_SOURCE
-    ${XTLDR_BEEP_SOURCE_DIR}/beep.c
-    ${XTLDR_BEEP_SOURCE_DIR}/globals.c)
+    ${XTLDR_BEEP_SOURCE_DIR}/beep.cc
+    ${XTLDR_BEEP_SOURCE_DIR}/data.cc)
 
 # Link module executable
 add_executable(beep ${XTLDR_BEEP_SOURCE})

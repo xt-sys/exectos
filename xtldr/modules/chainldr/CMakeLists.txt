@@ -8,8 +8,8 @@ include_directories(
 
 # Specify list of source code files
 list(APPEND XTLDR_CHAINLDR_SOURCE
-    ${XTLDR_CHAINLDR_SOURCE_DIR}/chainldr.c
-    ${XTLDR_CHAINLDR_SOURCE_DIR}/globals.c)
+    ${XTLDR_CHAINLDR_SOURCE_DIR}/chainldr.cc
+    ${XTLDR_CHAINLDR_SOURCE_DIR}/data.cc)
 
 # Link module executable
 add_executable(chainldr ${XTLDR_CHAINLDR_SOURCE})

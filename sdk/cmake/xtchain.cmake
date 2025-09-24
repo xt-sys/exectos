@@ -12,7 +12,7 @@ endif()
 # Set build optimisation
 if(BUILD_TYPE STREQUAL "DEBUG")
     add_compiler_ccxxflags("/GS- /Zi /Ob0 /Od")
-    add_linker_flags("/DEBUG /INCREMENTAL /OPT:NOREF /OPT:NOICF /PDBSOURCEPATH:build")
+    add_linker_flags("/DEBUG /INCREMENTAL:NO /OPT:REF /OPT:NOICF /PDBSOURCEPATH:build")
 else()
     add_compiler_ccxxflags("/GS- /Ob2 /Ot /Ox /Oy")
     add_linker_flags("/INCREMENTAL:NO /OPT:REF /OPT:ICF")
@@ -50,8 +50,9 @@ add_compiler_ccxxflags("-Wno-gnu-folding-constant")
 # Disable compiler builtins
 add_compiler_ccxxflags("-fno-builtin")
 
-# Set debugging symbols output directory
+# Set symbols and libraries output directory
 set(CMAKE_PDB_OUTPUT_DIRECTORY "${EXECTOS_BINARY_DIR}/output/symbols")
+set(LIBRARY_OUTPUT_PATH "${EXECTOS_BINARY_DIR}/output/sdk/lib")
 
 # Set linker flags
 add_linker_flags("${HOTPATCH_LINKER_FLAG} /LARGEADDRESSAWARE /IGNORE:4039 /IGNORE:4104 /MANIFEST:NO /NODEFAULTLIB /SAFESEH:NO")

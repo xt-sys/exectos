@@ -8,8 +8,8 @@ include_directories(
 
 # Specify list of source code files
 list(APPEND XTLDR_DUMMY_SOURCE
-    ${XTLDR_DUMMY_SOURCE_DIR}/dummy.c
-    ${XTLDR_DUMMY_SOURCE_DIR}/globals.c)
+    ${XTLDR_DUMMY_SOURCE_DIR}/dummy.cc
+    ${XTLDR_DUMMY_SOURCE_DIR}/data.cc)
 
 # Link module executable
 add_executable(dummy ${XTLDR_DUMMY_SOURCE})

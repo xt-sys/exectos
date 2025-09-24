@@ -7,6 +7,7 @@
  */
 
 /* Base XT headers */
+#include <xtcompat.h>
 #include <xtdefs.h>
 #include <xtstatus.h>
 #include <xttarget.h>
@@ -47,9 +48,9 @@
 /* XT routines */
 #include <exfuncs.h>
 #include <hlfuncs.h>
+#include <kdfuncs.h>
 #include <kefuncs.h>
 #include <rtlfuncs.h>
 
 /* Architecture specific XT routines */
-#include ARCH_HEADER(arfuncs.h)
 #include ARCH_HEADER(hlfuncs.h)

@@ -6,9 +6,21 @@
  * DEVELOPERS:      Aiken Harris <harraiken91@gmail.com>
  */
 
-#include <amd64/asmsup.h>
+#include <ar/amd64/asmsup.h>
 
 .altmacro
 .text
 
 
+/**
+ * Starts an application processor (AP). This is just a stub.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+.global _ArStartApplicationProcessor
+_ArStartApplicationProcessor:
+
+.global _ArStartApplicationProcessorEnd
+_ArStartApplicationProcessorEnd:

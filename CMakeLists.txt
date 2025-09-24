@@ -55,9 +55,6 @@ add_definitions(-D__XTOS__)
 add_definitions(-DXTOS_SOURCE_DIR="${EXECTOS_SOURCE_DIR}")
 add_definitions(-DXTOS_BINARY_DIR="${EXECTOS_BINARY_DIR}")
 
-# Set libraries target directory
-set(LIBRARY_OUTPUT_PATH ${EXECTOS_BINARY_DIR}/output/library CACHE PATH "Build directory" FORCE)
-
 # Compute __FILE__ definition
 file(RELATIVE_PATH _PATH_PREFIX ${EXECTOS_BINARY_DIR} ${EXECTOS_SOURCE_DIR})
 add_compiler_flags(-D__RELFILE__="&__FILE__[__FILE__[0] == '.' ? sizeof \\\"${_PATH_PREFIX}\\\" - 1 : sizeof XTOS_SOURCE_DIR]")
@@ -68,5 +65,6 @@ set_disk_image_size(32)
 # Build all subprojects
 add_subdirectory(bootdata)
 add_subdirectory(drivers)
+add_subdirectory(sdk)
 add_subdirectory(xtldr)
 add_subdirectory(xtoskrnl)

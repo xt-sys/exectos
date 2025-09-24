@@ -7,89 +7,78 @@ include_directories(
     ${EXECTOS_SOURCE_DIR}/sdk/xtdk
     ${XTOSKRNL_SOURCE_DIR}/includes)
 
-# Specify list of library source code files
-list(APPEND LIBXTOS_SOURCE
-    ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/boot.S
-    ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/cpufunc.c
-    ${XTOSKRNL_SOURCE_DIR}/hl/cport.c
-    ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/ioport.c
-    ${XTOSKRNL_SOURCE_DIR}/rtl/globals.c
-    ${XTOSKRNL_SOURCE_DIR}/rtl/guid.c
-    ${XTOSKRNL_SOURCE_DIR}/rtl/math.c
-    ${XTOSKRNL_SOURCE_DIR}/rtl/memory.c
-    ${XTOSKRNL_SOURCE_DIR}/rtl/plist.c
-    ${XTOSKRNL_SOURCE_DIR}/rtl/string.c
-    ${XTOSKRNL_SOURCE_DIR}/rtl/widestr.c)
-
 # Specify list of kernel source code files
 list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/archsup.S
     ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/boot.S
-    ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/cpufunc.c
-    ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/globals.c
-    ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/procsup.c
-    ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/traps.c
-    ${XTOSKRNL_SOURCE_DIR}/ex/rundown.c
-    ${XTOSKRNL_SOURCE_DIR}/hl/acpi.c
-    ${XTOSKRNL_SOURCE_DIR}/hl/cport.c
-    ${XTOSKRNL_SOURCE_DIR}/hl/fbdev.c
-    ${XTOSKRNL_SOURCE_DIR}/hl/globals.c
-    ${XTOSKRNL_SOURCE_DIR}/hl/init.c
-    ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/cpu.c
-    ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/pic.c
-    ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/ioport.c
-    ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/runlevel.c
-    ${XTOSKRNL_SOURCE_DIR}/kd/dbginit.c
-    ${XTOSKRNL_SOURCE_DIR}/kd/dbgio.c
-    ${XTOSKRNL_SOURCE_DIR}/kd/globals.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/apc.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/dpc.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/event.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/globals.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/info.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/kprocess.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/krnlinit.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/kthread.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/kubsan.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/panic.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/runlevel.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/semphore.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/spinlock.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/sysres.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/timer.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/irqs.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/krnlinit.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/kthread.c
-    ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/proc.c
-    ${XTOSKRNL_SOURCE_DIR}/mm/globals.c
-    ${XTOSKRNL_SOURCE_DIR}/mm/hlpool.c
-    ${XTOSKRNL_SOURCE_DIR}/mm/init.c
-    ${XTOSKRNL_SOURCE_DIR}/mm/kpools.c
-    ${XTOSKRNL_SOURCE_DIR}/mm/pages.c
-    ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/globals.c
-    ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/init.c
-    ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/pages.c
-    ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/pmap.c
-    ${XTOSKRNL_SOURCE_DIR}/po/idle.c
-    ${XTOSKRNL_SOURCE_DIR}/rtl/atomic.c
-    ${XTOSKRNL_SOURCE_DIR}/rtl/bitmap.c
-    ${XTOSKRNL_SOURCE_DIR}/rtl/byteswap.c
-    ${XTOSKRNL_SOURCE_DIR}/rtl/globals.c
-    ${XTOSKRNL_SOURCE_DIR}/rtl/guid.c
-    ${XTOSKRNL_SOURCE_DIR}/rtl/ioreg.c
-    ${XTOSKRNL_SOURCE_DIR}/rtl/math.c
-    ${XTOSKRNL_SOURCE_DIR}/rtl/memory.c
-    ${XTOSKRNL_SOURCE_DIR}/rtl/plist.c
-    ${XTOSKRNL_SOURCE_DIR}/rtl/string.c
-    ${XTOSKRNL_SOURCE_DIR}/rtl/widestr.c
-    ${XTOSKRNL_SOURCE_DIR}/rtl/${ARCH}/dispatch.c
-    ${XTOSKRNL_SOURCE_DIR}/rtl/${ARCH}/exsup.c)
+    ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/cpufunc.cc
+    ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/data.cc
+    ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/procsup.cc
+    ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/traps.cc
+    ${XTOSKRNL_SOURCE_DIR}/ex/exports.cc
+    ${XTOSKRNL_SOURCE_DIR}/ex/rundown.cc
+    ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/cpu.cc
+    ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/pic.cc
+    ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/ioport.cc
+    ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/runlevel.cc
+    ${XTOSKRNL_SOURCE_DIR}/hl/acpi.cc
+    ${XTOSKRNL_SOURCE_DIR}/hl/cport.cc
+    ${XTOSKRNL_SOURCE_DIR}/hl/data.cc
+    ${XTOSKRNL_SOURCE_DIR}/hl/exports.cc
+    ${XTOSKRNL_SOURCE_DIR}/hl/fbdev.cc
+    ${XTOSKRNL_SOURCE_DIR}/hl/init.cc
+    ${XTOSKRNL_SOURCE_DIR}/hl/ioreg.cc
+    ${XTOSKRNL_SOURCE_DIR}/kd/data.cc
+    ${XTOSKRNL_SOURCE_DIR}/kd/dbgio.cc
+    ${XTOSKRNL_SOURCE_DIR}/kd/exports.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/irq.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/krnlinit.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/kthread.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/proc.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/apc.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/bootinfo.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/crash.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/data.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/dpc.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/event.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/exports.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/kprocess.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/krnlinit.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/kthread.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/kubsan.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/runlevel.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/semphore.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/spinlock.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/sysres.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/timer.cc
+    ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/init.cc
+    ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/pagemap.cc
+    ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/paging.cc
+    ${XTOSKRNL_SOURCE_DIR}/mm/data.cc
+    ${XTOSKRNL_SOURCE_DIR}/mm/hlpool.cc
+    ${XTOSKRNL_SOURCE_DIR}/mm/init.cc
+    ${XTOSKRNL_SOURCE_DIR}/mm/kpool.cc
+    ${XTOSKRNL_SOURCE_DIR}/mm/paging.cc
+    ${XTOSKRNL_SOURCE_DIR}/po/idle.cc
+    ${XTOSKRNL_SOURCE_DIR}/rtl/${ARCH}/dispatch.cc
+    ${XTOSKRNL_SOURCE_DIR}/rtl/${ARCH}/exsup.cc
+    ${XTOSKRNL_SOURCE_DIR}/rtl/atomic.cc
+    ${XTOSKRNL_SOURCE_DIR}/rtl/bitmap.cc
+    ${XTOSKRNL_SOURCE_DIR}/rtl/data.cc
+    ${XTOSKRNL_SOURCE_DIR}/rtl/endian.cc
+    ${XTOSKRNL_SOURCE_DIR}/rtl/exports.cc
+    ${XTOSKRNL_SOURCE_DIR}/rtl/guid.cc
+    ${XTOSKRNL_SOURCE_DIR}/rtl/llist.cc
+    ${XTOSKRNL_SOURCE_DIR}/rtl/math.cc
+    ${XTOSKRNL_SOURCE_DIR}/rtl/memory.cc
+    ${XTOSKRNL_SOURCE_DIR}/rtl/string.cc
+    ${XTOSKRNL_SOURCE_DIR}/rtl/widestr.cc)
 
 # Set module definition SPEC file
 set_specfile(xtoskrnl.spec xtoskrnl.exe)
 
 # Link static XTOS library
-add_library(libxtos ${LIBXTOS_SOURCE})
+add_library(libxtos ${XTOSKRNL_SOURCE})
 
 # Link kernel executable
 add_executable(xtoskrnl
