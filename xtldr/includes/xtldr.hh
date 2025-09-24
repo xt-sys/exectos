@@ -13,7 +13,6 @@
 #include <xtver.h>
 
 #include <libxtos.hh>
-#include <globals.hh>
 
 
 class BootUtils
