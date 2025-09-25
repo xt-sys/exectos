@@ -23,6 +23,21 @@ XTCDECL
 VOID
 AR::Traps::DispatchTrap(IN PKTRAP_FRAME TrapFrame)
 {
+    DebugPrint(L"Caught trap: 0x%.2lX with error code: %.4lX at EIP: 0x%.8lX\n"
+               L"EAX: 0x%.8lX, EBX: 0x%.8lX, ECX: 0x%.8lX, EDX: 0x%.8lX\n"
+               L"EBP: 0x%.8lX, ESP: 0x%.8lX, EDI: 0x%.8lX, ESI: 0x%.8lX\n"
+               L"DR0: 0x%.8lX, DR1: 0x%.8lX, DR2: 0x%.8lX, DR3: 0x%.8lX\n"
+               L"DR6: 0x%.8lX, DR7: 0x%.8lX\n"
+               L"CR2: 0x%.8lX, CR3: 0x%.8lX, CS:  0x%.8lX, DS:  0x%.8hX\n"
+               L"ES:  0x%.8hX, FS:  0x%.8hX, GS:  0x%.8hX, SS:  0x%.8lX\n",
+               TrapFrame->Vector, TrapFrame->ErrorCode, TrapFrame->Eip,
+               TrapFrame->Eax, TrapFrame->Ebx, TrapFrame->Ecx, TrapFrame->Edx,
+               TrapFrame->Ebp, TrapFrame->Esp, TrapFrame->Edi, TrapFrame->Esi,
+               TrapFrame->Dr0, TrapFrame->Dr1, TrapFrame->Dr2, TrapFrame->Dr3,
+               TrapFrame->Dr6, TrapFrame->Dr7,
+               TrapFrame->Cr2, TrapFrame->Cr3, TrapFrame->SegCs, TrapFrame->SegDs,
+               TrapFrame->SegEs, TrapFrame->SegFs, TrapFrame->SegGs, TrapFrame->SegSs);
+
     /* Check vector and call appropriate handler */
     switch(TrapFrame->Vector)
     {
@@ -144,7 +159,7 @@ VOID
 AR::Traps::HandleTrap00(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Division-By-Zero Error (0x00)!\n");
-    for(;;);
+    KE::Crash::Panic(0x00);
 }
 
 /**
@@ -162,7 +177,7 @@ VOID
 AR::Traps::HandleTrap01(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Debug exception (0x01)!\n");
-    for(;;);
+    KE::Crash::Panic(0x01);
 }
 
 /**
@@ -180,7 +195,7 @@ VOID
 AR::Traps::HandleTrap02(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Non-Maskable-Interrupt (0x02)!\n");
-    for(;;);
+    KE::Crash::Panic(0x02);
 }
 
 /**
@@ -198,7 +213,7 @@ VOID
 AR::Traps::HandleTrap03(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled INT3 (0x03)!\n");
-    for(;;);
+    KE::Crash::Panic(0x03);
 }
 
 /**
@@ -216,7 +231,7 @@ VOID
 AR::Traps::HandleTrap04(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Overflow exception (0x04)!\n");
-    for(;;);
+    KE::Crash::Panic(0x04);
 }
 
 /**
@@ -234,7 +249,7 @@ VOID
 AR::Traps::HandleTrap05(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Bound-Range-Exceeded exception (0x05)!\n");
-    for(;;);
+    KE::Crash::Panic(0x05);
 }
 
 /**
@@ -252,7 +267,7 @@ VOID
 AR::Traps::HandleTrap06(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Invalid Opcode exception (0x06)!\n");
-    for(;;);
+    KE::Crash::Panic(0x06);
 }
 
 /**
@@ -270,7 +285,7 @@ VOID
 AR::Traps::HandleTrap07(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Device Not Available exception (0x07)!\n");
-    for(;;);
+    KE::Crash::Panic(0x07);
 }
 
 /**
@@ -288,7 +303,7 @@ VOID
 AR::Traps::HandleTrap08(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Double-Fault exception (0x08)!\n");
-    for(;;);
+    KE::Crash::Panic(0x08);
 }
 
 /**
@@ -306,7 +321,7 @@ VOID
 AR::Traps::HandleTrap09(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Segment-Overrun exception (0x09)!\n");
-    for(;;);
+    KE::Crash::Panic(0x09);
 }
 
 /**
@@ -324,7 +339,7 @@ VOID
 AR::Traps::HandleTrap0A(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Invalid-TSS exception (0x0A)!\n");
-    for(;;);
+    KE::Crash::Panic(0x0A);
 }
 
 /**
@@ -342,7 +357,7 @@ VOID
 AR::Traps::HandleTrap0B(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Segment-Not-Present exception (0x0B)!\n");
-    for(;;);
+    KE::Crash::Panic(0x0B);
 }
 
 /**
@@ -360,7 +375,7 @@ VOID
 AR::Traps::HandleTrap0C(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Stack-Segment-Fault exception (0x0C)!\n");
-    for(;;);
+    KE::Crash::Panic(0x0C);
 }
 
 /**
@@ -378,7 +393,7 @@ VOID
 AR::Traps::HandleTrap0D(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled General-Protection-Fault (0x0D)!\n");
-    for(;;);
+    KE::Crash::Panic(0x0D);
 }
 
 /**
@@ -396,7 +411,7 @@ VOID
 AR::Traps::HandleTrap0E(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Page-Fault exception (0x0E)!\n");
-    for(;;);
+    KE::Crash::Panic(0x0E);
 }
 
 /**
@@ -414,7 +429,7 @@ VOID
 AR::Traps::HandleTrap10(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled x87 Floating-Point exception (0x10)!\n");
-    for(;;);
+    KE::Crash::Panic(0x10);
 }
 
 /**
@@ -432,7 +447,7 @@ VOID
 AR::Traps::HandleTrap11(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Alignment-Check exception (0x11)!\n");
-    for(;;);
+    KE::Crash::Panic(0x11);
 }
 
 /**
@@ -450,7 +465,7 @@ VOID
 AR::Traps::HandleTrap12(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Machine-Check exception (0x12)!\n");
-    for(;;);
+    KE::Crash::Panic(0x12);
 }
 
 /**
@@ -468,7 +483,7 @@ VOID
 AR::Traps::HandleTrap13(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled SIMD Floating-Point exception (0x13)!\n");
-    for(;;);
+    KE::Crash::Panic(0x13);
 }
 
 /**
@@ -520,7 +535,7 @@ VOID
 AR::Traps::HandleTrap2C(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Assertion (0x2C)!\n");
-    for(;;);
+    KE::Crash::Panic(0x2C);
 }
 
 /**
@@ -538,7 +553,7 @@ VOID
 AR::Traps::HandleTrap2D(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Debug-Service-Request (0x2D)!\n");
-    for(;;);
+    KE::Crash::Panic(0x2D);
 }
 
 /**
@@ -573,7 +588,7 @@ VOID
 AR::Traps::HandleTrapFF(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Unexpected-Interrupt (0xFF)!\n");
-    for(;;);
+    KE::Crash::Panic(0xFF);
 }
 
 /**
