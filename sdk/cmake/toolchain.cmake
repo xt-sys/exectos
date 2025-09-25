@@ -3,8 +3,10 @@ set(CMAKE_SYSTEM_NAME Windows)
 
 # Set toolchain compilers
 set(CMAKE_ASM_COMPILER clang-cl)
+set(CMAKE_ASM_LINKER ld.lld)
 set(CMAKE_C_COMPILER clang-cl)
 set(CMAKE_CXX_COMPILER clang-cl)
+set(CMAKE_LINKER lld-link)
 set(CMAKE_MC_COMPILER wmc)
 set(CMAKE_RC_COMPILER wrc)
 set(CMAKE_SPEC_COMPILER xtcspecc)

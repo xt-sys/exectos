@@ -59,6 +59,34 @@ function(add_module_linker_flags MODULE FLAGS)
     set_module_property(${MODULE} LINK_FLAGS ${FLAGS})
 endfunction()
 
+# This function compiles an assembly bootsector file into a flat binary
+function(compile_bootsector NAME SOURCE BASEADDR ENTRYPOINT)
+    set(BINARY_NAME "${NAME}.bin")
+    set(OBJECT_NAME "${NAME}.obj")
+
+    add_custom_command(
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${BINARY_NAME}
+        COMMAND ${CMAKE_ASM_COMPILER}
+            /nologo
+            --target=i386-none-elf
+            /Fo${CMAKE_CURRENT_BINARY_DIR}/${OBJECT_NAME}
+            -c -- ${SOURCE}
+        COMMAND ${CMAKE_ASM_LINKER}
+            -m elf_i386
+            --image-base=0
+            --oformat binary
+            -Ttext=${BASEADDR}
+            --entry=_start${ENTRYPOINT}
+            -o ${CMAKE_CURRENT_BINARY_DIR}/${BINARY_NAME}
+            ${CMAKE_CURRENT_BINARY_DIR}/${OBJECT_NAME}
+        DEPENDS ${SOURCE}
+    )
+
+    add_custom_target(${NAME} ALL
+        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${BINARY_NAME}
+    )
+endfunction()
+
 # This function sets a property for specified module
 function(set_module_property MODULE PROPERTY FLAGS)
     if(NOT ${ARGC} EQUAL 3)
