@@ -622,7 +622,7 @@ Configuration::ParseConfigFile(IN CONST PCHAR RawConfig,
             SectionName = InputData;
 
             /* Find end of the section name */
-            while(*InputData != ']' && *InputData != '\0' && *InputData != '\n')
+            while(*InputData != ']' && *InputData != '\0' && *InputData != '\r' && *InputData != '\n')
             {
                 /* Advance to the next character */
                 InputData++;
@@ -672,7 +672,7 @@ Configuration::ParseConfigFile(IN CONST PCHAR RawConfig,
             Key = InputData;
 
             /* Find end of the key */
-            while(*InputData != '=' && *InputData != '\0' && *InputData != '\n')
+            while(*InputData != '=' && *InputData != '\0' && *InputData != '\r' && *InputData != '\n')
             {
                 /* Advance to the next character */
                 InputData++;
@@ -700,7 +700,7 @@ Configuration::ParseConfigFile(IN CONST PCHAR RawConfig,
             Value = InputData;
 
             /* Find end of the value */
-            while(*InputData != '\0' && *InputData != '\n')
+            while(*InputData != '\0' && *InputData != '\r' && *InputData != '\n')
             {
                 /* Advance to the next character */
                 InputData++;
