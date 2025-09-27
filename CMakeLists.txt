@@ -63,6 +63,7 @@ add_compiler_flags(-D__RELFILE__="&__FILE__[__FILE__[0] == '.' ? sizeof \\\"${_P
 set_disk_image_size(32)
 
 # Build all subprojects
+add_subdirectory(boot)
 add_subdirectory(bootdata)
 add_subdirectory(drivers)
 add_subdirectory(sdk)

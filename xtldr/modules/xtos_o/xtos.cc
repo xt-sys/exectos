@@ -414,7 +414,6 @@ Xtos::InitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
 {
     PKERNEL_INITIALIZATION_BLOCK LoaderBlock;
     EFI_PHYSICAL_ADDRESS Address;
-    // PVOID RuntimeServices;
     EFI_STATUS Status;
     UINT BlockPages;
     UINT ParametersSize;
@@ -445,20 +444,10 @@ Xtos::InitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
     /* Set LoaderInformation block properties */
     LoaderBlock->LoaderInformation.DbgPrint = (PVOID)XtLdrProtocol->Debug.Print;
 
-    /* Attempt to find virtual address of the EFI Runtime Services */
-    // Status = XtLdrProtocol->GetVirtualAddress(MemoryMappings, &EfiSystemTable->RuntimeServices->Hdr, &RuntimeServices);
-    // if(Status == STATUS_EFI_SUCCESS)
-    // {
-        /* Set FirmwareInformation block properties */
-        LoaderBlock->FirmwareInformation.FirmwareType = SystemFirmwareEfi;
-        LoaderBlock->FirmwareInformation.EfiFirmware.EfiVersion = 0; //EfiSystemTable->Hdr.Revision;
-        LoaderBlock->FirmwareInformation.EfiFirmware.EfiRuntimeServices = NULLPTR;
-    // }
-    // else
-    // {
-    //     /* Set invalid firmware type to indicate that kernel cannot rely on FirmwareInformation block */
-    //     LoaderBlock->FirmwareInformation.FirmwareType = SystemFirmwareInvalid;
-    // }
+    /* Set FirmwareInformation block properties */
+    LoaderBlock->FirmwareInformation.FirmwareType = SystemFirmwareEfi;
+    // LoaderBlock->FirmwareInformation.EfiFirmware.EfiVersion = EfiSystemTable->Hdr.Revision;
+    LoaderBlock->FirmwareInformation.EfiFirmware.EfiRuntimeServices = NULLPTR;
 
     /* Copy parameters to kernel initialization block */
     LoaderBlock->KernelParameters = (PWCHAR)((UINT_PTR)*VirtualAddress + sizeof(KERNEL_INITIALIZATION_BLOCK));
@@ -663,7 +652,7 @@ Xtos::RunBootSequence(IN PEFI_FILE_HANDLE BootDir,
     /* Add kernel image memory mapping */
     Status = XtLdrProtocol->Memory.MapVirtualMemory(&PageMap, ImageContext->VirtualAddress,
                                                     ImageContext->PhysicalAddress, ImageContext->ImagePages,
-                                                    LoaderExceptionBlock); // 0 is LoaderExceptionBlock?! Should be LoaderSystemCode?
+                                                    LoaderSystemCode);
     if(Status != STATUS_EFI_SUCCESS)
     {
         return Status;
