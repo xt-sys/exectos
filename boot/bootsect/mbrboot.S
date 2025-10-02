@@ -41,8 +41,8 @@ RealStart:
     movw %ax, %ss
 
     /* Print welcome message */
+    leaw msgXtosBoot, %si
     call Print
-    .asciz "Starting XTOS boot loader...\r\n"
 
     /* Get BIOS boot drive and partition table offset */
     lea 0x1BE(%bp), %si
@@ -90,20 +90,20 @@ PartitionFound:
 
 InvalidSignature:
     /* Invalid signature error */
+    leaw msgInvalidSignature, %si
     call Print
-    .asciz "Invalid partition signature!"
     jmp HaltSystem
 
 PartitionNotFound:
     /* Active partition not found error */
+    leaw msgPartitionNotFound, %si
     call Print
-    .asciz "Bootable partition not found!"
     jmp HaltSystem
 
 VbrReadFail:
     /* VBR read failed error */
+    leaw msgVbrReadFail, %si
     call Print
-    .asciz "VBR read failed!"
     jmp HaltSystem
 
 HaltSystem:
@@ -112,18 +112,17 @@ HaltSystem:
     hlt
     jmp HaltSystem
 
-PutChar:
-    /* Simple routine to print error messages */
-    xor %bx, %bx
-    movb $0x0E, %ah
-    int $0x10
 Print:
-    pop %si
+    /* Simple routine to print messages */
     lodsb
-    push %si
-    cmp $0, %al
-    jne PutChar
-    ret
+    orb     %al, %al
+    jz      DonePrint
+    movb    $0x0E, %ah
+    movw    $0x07, %bx
+    int     $0x10
+    jmp     Print
+DonePrint:
+    retw
 
 .BootDrive:
     /* Storage for the boot drive number */
@@ -136,6 +135,18 @@ Print:
 .LbaStart:
     /* Storage for the LBA start */
     .long 0
+
+msgInvalidSignature:
+    .asciz "Invalid partition signature!"
+
+msgPartitionNotFound:
+    .asciz "Bootable partition not found!"
+
+msgVbrReadFail:
+    .asciz "VBR read failed!"
+
+msgXtosBoot:
+    .asciz "Starting XTOS boot loader...\r\n"
 
 /* Fill the rest of the MBR with zeros and add MBR signature at the end */
 .fill (510 - (. - Start)), 1, 0
