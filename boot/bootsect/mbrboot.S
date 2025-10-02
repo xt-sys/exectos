@@ -20,7 +20,7 @@ Start:
     movw %ax, %es
     movw %ax, %ss
     movw $0x7C00, %bp
-    movw %bp, %sp
+    leaw -16(%bp), %sp
     sti
 
     /* Relocate MBR to 1FE0:7C00 */
