@@ -8,8 +8,8 @@ endif()
 # This target creates a disk image
 add_custom_target(diskimg
                   DEPENDS install
-                  COMMAND diskimg -c ${EXECTOS_BINARY_DIR}/output/binaries -f 16 -o ${EXECTOS_BINARY_DIR}/output/disk.img -s ${PROJECT_DISK_IMAGE_SIZE}
-                  -m ${EXECTOS_BINARY_DIR}/boot/bootsect/mbrboot.bin
+                  COMMAND diskimg -c ${EXECTOS_BINARY_DIR}/output/binaries -f 32 -o ${EXECTOS_BINARY_DIR}/output/disk.img -s ${PROJECT_DISK_IMAGE_SIZE}
+                  -m ${EXECTOS_BINARY_DIR}/boot/bootsect/mbrboot.bin -v ${EXECTOS_BINARY_DIR}/boot/bootsect/espboot.bin
                   VERBATIM)
 
 find_program(BOCHS_EMULATOR bochs)
