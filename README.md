@@ -62,7 +62,8 @@ design, it requires a modern EFI enabled hardware. It is not possible currently 
 | boot/bootdata    | default configuration and data needed to boot XTOS           |
 | boot/bootsect    | boot sector code (MBR & VBR) initializing the boot process   |
 | drivers          | XT native drivers source code                                |
-| sdk/cmake        | Host toolchain configuration and build-related functions     |
+| sdk/cmake        | host toolchain configuration and build-related functions     |
+| sdk/firmware     | firmware enabling XTOS to boot on virtual machines           |
 | sdk/xtdk         | XT Software Development Kit headers                          |
 | services         | integral subsystems services source code                     |
 | subsystems       | environment subsystems source code                           |
