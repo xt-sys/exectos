@@ -69,6 +69,7 @@ function(compile_bootsector NAME SOURCE BASEADDR ENTRYPOINT)
         COMMAND ${CMAKE_ASM_COMPILER}
             /nologo
             --target=i386-none-elf
+            -I${CMAKE_CURRENT_SOURCE_DIR}
             /Fo${CMAKE_CURRENT_BINARY_DIR}/${OBJECT_NAME}
             -c -- ${SOURCE}
         COMMAND ${CMAKE_ASM_LINKER}
