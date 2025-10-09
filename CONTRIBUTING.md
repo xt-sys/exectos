@@ -9,8 +9,7 @@ porting drivers, fixing bugs, writing tests, creating documentation, or helping 
 love the help.
 
 ## Wish List
-If you are looking for a way to contribute, but you are not sure where to start, check our [IDEAS](IDEAS.md) and
-[KNOWN ISSUES](KNOWN_ISSUES.md) pages for suggestions. We try to keep them up to date. You can also check a list of
+If you are looking for a way to contribute, but you are not sure where to start, check our list of
 [open issues](https://git.codingworkshop.eu.org/xt-sys/exectos/issues). If you find interesting task and you are serious
 about tackling one, feel free to contact us. We will be able to provide a more detailed information and suggestions
 towards getting started.
