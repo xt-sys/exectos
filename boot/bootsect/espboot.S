@@ -151,7 +151,7 @@ ReadSectors:
 
 ReadCHS:
     /* Read sectors using CHS */
-    popal
+    pushw %cx
     pushal
     xorl %edx, %edx
     movzwl SectorsPerTrack - Start(%bp), %ecx
@@ -169,8 +169,9 @@ ReadCHS:
     orb %ah, %cl
     movw $0x0201, %ax
     int $0x13
-    jc DiskError
     popal
+    popw %cx
+    jc DiskError
     incl %eax
     movw %es, %dx
     addw $0x20, %dx
