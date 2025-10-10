@@ -45,14 +45,27 @@ if(QEMU_EMULATOR)
                                               -boot menu=on -d int -no-reboot -no-shutdown -serial stdio
                       VERBATIM USES_TERMINAL)
 
-    # This target starts up a QEMU+SEABIOS virtual machine using KVM accelerator
-    add_custom_target(testkvm
-                      DEPENDS diskimg
-                      COMMAND ${QEMU_COMMAND} -name "ExectOS-${ARCH}-BIOS-KVM" -machine type=q35,kernel_irqchip=on,accel="kvm:whpx",mem-merge=off,vmport=off -enable-kvm -cpu host,-hypervisor,+topoext
-                                              -smp 2,sockets=1,cores=1,threads=2 -m 4G -overcommit mem-lock=off -rtc clock=host,base=localtime,driftfix=none
-                                              -hda ${EXECTOS_BINARY_DIR}/output/disk.img
-                                              -boot menu=on -d int -no-reboot -no-shutdown -serial stdio
-                      VERBATIM USES_TERMINAL)
+if(WIN32)
+        # This target starts up a QEMU+OVMF virtual machine using WHPX accelerator on Windows
+        add_custom_target(testkvm
+                        DEPENDS install
+                        COMMAND ${QEMU_COMMAND} -name "ExectOS-${ARCH}-WHPX" -machine accel=whpx,kernel-irqchip=off 
+                            -bios ${EXECTOS_SOURCE_DIR}/sdk/firmware/OVMF-pure-efi.fd
+                            -hda fat:rw:${EXECTOS_BINARY_DIR}/output/binaries 
+                            -no-reboot -no-shutdown -serial stdio
+                        COMMENT "Using WHPX acceleration on Windows"
+                        VERBATIM USES_TERMINAL)
+
+else()
+        # This target starts up a QEMU+SEABIOS virtual machine using KVM accelerator
+        add_custom_target(testkvm
+                        DEPENDS diskimg
+                        COMMAND ${QEMU_COMMAND} -name "ExectOS-${ARCH}-BIOS-KVM" -machine type=q35,kernel_irqchip=on,accel="kvm:whpx",mem-merge=off,vmport=off -enable-kvm -cpu host,-hypervisor,+topoext
+                                                -smp 2,sockets=1,cores=1,threads=2 -m 4G -overcommit mem-lock=off -rtc clock=host,base=localtime,driftfix=none
+                                                -hda ${EXECTOS_BINARY_DIR}/output/disk.img
+                                                -boot menu=on -d int -no-reboot -no-shutdown -serial stdio
+                        VERBATIM USES_TERMINAL)
+endif()
 
     # This target starts up a QEMU+SEABIOS virtual machine using TCG accelerator
     add_custom_target(testtcg
