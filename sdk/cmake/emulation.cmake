@@ -23,49 +23,57 @@ endif()
 
 find_program(QEMU_EMULATOR ${QEMU_COMMAND})
 if(QEMU_EMULATOR)
-    # This target starts up a QEMU+OVMF virtual machine using KVM accelerator
-    add_custom_target(testefikvm
-                      DEPENDS install
-                      COMMAND ${QEMU_COMMAND} -name "ExectOS-${ARCH}-EFI-KVM" -machine type=q35,kernel_irqchip=on,accel="kvm:whpx",mem-merge=off,vmport=off -enable-kvm -cpu host,-hypervisor,+topoext
-                                              -smp 2,sockets=1,cores=1,threads=2 -m 4G -overcommit mem-lock=off -rtc clock=host,base=localtime,driftfix=none
-                                              -drive file=${EXECTOS_SOURCE_DIR}/sdk/firmware/ovmf_code_${ARCH}.fd,if=pflash,format=raw,unit=0,readonly=on
-                                              -drive file=${EXECTOS_SOURCE_DIR}/sdk/firmware/ovmf_vars_${ARCH}.fd,if=pflash,format=raw,unit=1
-                                              -hda fat:rw:${EXECTOS_BINARY_DIR}/output/binaries
-                                              -boot menu=on -d int -M smm=off -no-reboot -no-shutdown -serial stdio
-                      VERBATIM USES_TERMINAL)
+    if(CMAKE_HOST_LINUX)
+        # This target starts up a QEMU+OVMF virtual machine using KVM accelerator
+        add_custom_target(testefikvm
+                          DEPENDS install
+                          COMMAND ${QEMU_COMMAND} -name "ExectOS-${ARCH}-EFI-KVM" -machine type=q35,kernel_irqchip=on,accel=kvm,mem-merge=off,vmport=off -enable-kvm -cpu host,-hypervisor,+topoext
+                                                  -smp 2,sockets=1,cores=1,threads=2 -m 4G -overcommit mem-lock=off -rtc clock=host,base=localtime,driftfix=none
+                                                  -bios ${EXECTOS_SOURCE_DIR}/sdk/firmware/ovmf_${ARCH}.fd
+                                                  -hda fat:rw:${EXECTOS_BINARY_DIR}/output/binaries
+                                                  -boot menu=on -d int -M smm=off -no-reboot -no-shutdown -serial stdio
+                          VERBATIM USES_TERMINAL)
+    elseif(CMAKE_HOST_WIN32)
+        # This target starts up a QEMU+OVMF virtual machine using WHPX accelerator
+        add_custom_target(testefiwhpx
+                          DEPENDS install
+                          COMMAND ${QEMU_COMMAND} -name "ExectOS-${ARCH}-EFI-WHPX" -machine type=q35,kernel_irqchip=off,accel=whpx,mem-merge=off,vmport=off
+                                                  -m 4G -overcommit mem-lock=off -rtc clock=host,base=localtime,driftfix=none
+                                                  -bios ${EXECTOS_SOURCE_DIR}/sdk/firmware/ovmf_${ARCH}.fd
+                                                  -hda fat:rw:${EXECTOS_BINARY_DIR}/output/binaries
+                                                  -boot menu=on -d int -M smm=off -no-reboot -no-shutdown -serial stdio
+                          VERBATIM USES_TERMINAL)
+    endif()
 
     # This target starts up a QEMU+OVMF virtual machine using TCG accelerator
     add_custom_target(testefitcg
                       DEPENDS install
                       COMMAND ${QEMU_COMMAND} -name "ExectOS-${ARCH}-EFI-TCG" -machine type=q35,accel=tcg -cpu max,-hypervisor
                                               -smp 2,sockets=1,cores=1,threads=2 -m 4G -overcommit mem-lock=off -rtc clock=host,base=localtime,driftfix=none
-                                              -drive file=${EXECTOS_SOURCE_DIR}/sdk/firmware/ovmf_code_${ARCH}.fd,if=pflash,format=raw,unit=0,readonly=on
-                                              -drive file=${EXECTOS_SOURCE_DIR}/sdk/firmware/ovmf_vars_${ARCH}.fd,if=pflash,format=raw,unit=1
+                                              -bios ${EXECTOS_SOURCE_DIR}/sdk/firmware/ovmf_${ARCH}.fd
                                               -hda fat:rw:${EXECTOS_BINARY_DIR}/output/binaries
                                               -boot menu=on -d int -no-reboot -no-shutdown -serial stdio
                       VERBATIM USES_TERMINAL)
 
-if(WIN32)
-        # This target starts up a QEMU+OVMF virtual machine using WHPX accelerator on Windows
-        add_custom_target(testkvm
-                        DEPENDS install
-                        COMMAND ${QEMU_COMMAND} -name "ExectOS-${ARCH}-WHPX" -machine accel=whpx,kernel-irqchip=off 
-                            -bios ${EXECTOS_SOURCE_DIR}/sdk/firmware/OVMF-pure-efi.fd
-                            -hda fat:rw:${EXECTOS_BINARY_DIR}/output/binaries 
-                            -no-reboot -no-shutdown -serial stdio
-                        COMMENT "Using WHPX acceleration on Windows"
-                        VERBATIM USES_TERMINAL)
-
-else()
+    if(CMAKE_HOST_LINUX)
         # This target starts up a QEMU+SEABIOS virtual machine using KVM accelerator
         add_custom_target(testkvm
-                        DEPENDS diskimg
-                        COMMAND ${QEMU_COMMAND} -name "ExectOS-${ARCH}-BIOS-KVM" -machine type=q35,kernel_irqchip=on,accel="kvm:whpx",mem-merge=off,vmport=off -enable-kvm -cpu host,-hypervisor,+topoext
-                                                -smp 2,sockets=1,cores=1,threads=2 -m 4G -overcommit mem-lock=off -rtc clock=host,base=localtime,driftfix=none
-                                                -hda ${EXECTOS_BINARY_DIR}/output/disk.img
-                                                -boot menu=on -d int -no-reboot -no-shutdown -serial stdio
-                        VERBATIM USES_TERMINAL)
-endif()
+                          DEPENDS diskimg
+                          COMMAND ${QEMU_COMMAND} -name "ExectOS-${ARCH}-BIOS-KVM" -machine type=q35,kernel_irqchip=on,accel=kvm,mem-merge=off,vmport=off -enable-kvm -cpu host,-hypervisor,+topoext
+                                                  -smp 2,sockets=1,cores=1,threads=2 -m 4G -overcommit mem-lock=off -rtc clock=host,base=localtime,driftfix=none
+                                                  -hda ${EXECTOS_BINARY_DIR}/output/disk.img
+                                                  -boot menu=on -d int -no-reboot -no-shutdown -serial stdio
+                          VERBATIM USES_TERMINAL)
+    elseif(CMAKE_HOST_WIN32)
+        # This target starts up a QEMU+SEABIOS virtual machine using WHPX accelerator
+        add_custom_target(testwhpx
+                          DEPENDS diskimg
+                          COMMAND ${QEMU_COMMAND} -name "ExectOS-${ARCH}-BIOS-WHPX" -machine type=q35,kernel_irqchip=off,accel=whpx,mem-merge=off,vmport=off
+                                                  -m 4G -overcommit mem-lock=off -rtc clock=host,base=localtime,driftfix=none
+                                                  -hda ${EXECTOS_BINARY_DIR}/output/disk.img
+                                                  -boot menu=on -d int -no-reboot -no-shutdown -serial stdio
+                          VERBATIM USES_TERMINAL)
+    endif()
 
     # This target starts up a QEMU+SEABIOS virtual machine using TCG accelerator
     add_custom_target(testtcg
