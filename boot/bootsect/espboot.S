@@ -121,7 +121,7 @@ VerifyBiosParameterBlock:
     ja FsError
 
 ReadExtraCode:
-    /* Read second VBR sector with extra boot code */
+    /* Read second VBR sector with extra boot code (1 sector starting from sector 2) */
     movl HiddenSectors - Start(%bp), %eax
     addl $0x02, %eax
     movw $0x01, %cx
@@ -151,6 +151,10 @@ ReadSectors:
 
 ReadCHS:
     /* Read sectors using CHS */
+    popal
+
+CHSLoop:
+    /* Read sector by sector using CHS */
     pushw %cx
     pushal
     xorl %edx, %edx
@@ -176,7 +180,7 @@ ReadCHS:
     movw %es, %dx
     addw $0x20, %dx
     movw %dx, %es
-    loop ReadCHS
+    loop CHSLoop
     popw %es
     ret
 
