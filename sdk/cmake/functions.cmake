@@ -64,11 +64,17 @@ function(compile_bootsector NAME SOURCE BASEADDR ENTRYPOINT)
     set(BINARY_NAME "${NAME}.bin")
     set(OBJECT_NAME "${NAME}.obj")
 
+    get_directory_property(DEFS COMPILE_DEFINITIONS)
+    foreach(def ${DEFS})
+        list(APPEND ASM_DEFS "-D${def}")
+    endforeach()
+
     add_custom_command(
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${BINARY_NAME}
         COMMAND ${CMAKE_ASM_COMPILER}
             /nologo
             --target=i386-none-elf
+            ${ASM_DEFS}
             -I${CMAKE_CURRENT_SOURCE_DIR}
             /Fo${CMAKE_CURRENT_BINARY_DIR}/${OBJECT_NAME}
             -c -- ${SOURCE}
