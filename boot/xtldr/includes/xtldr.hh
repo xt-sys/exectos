@@ -15,6 +15,25 @@
 #include <libxtos.hh>
 
 
+class BiosUtils
+{
+    private:
+        STATIC USHORT CursorX;
+        STATIC USHORT CursorY;
+        STATIC CONST USHORT VgaHeight;
+        STATIC CONST USHORT VgaWidth;
+
+    public:
+        STATIC XTCDECL VOID ClearScreen();
+        STATIC XTCDECL VOID Print(IN PCWSTR Format,
+                                  IN ...);
+        STATIC XTCDECL XTSTATUS PutChar(IN WCHAR Character);
+
+    private:
+        STATIC XTCDECL VOID ScrollScreen();
+        STATIC XTCDECL VOID UpdateCursor();
+};
+
 class BootUtils
 {
     public:

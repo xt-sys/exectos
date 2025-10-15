@@ -10,6 +10,18 @@
 #include <xtldr.hh>
 
 
+/* Legacy BIOS cursor X position */
+USHORT BiosUtils::CursorX = 0;
+
+/* Legacy BIOS cursor Y position */
+USHORT BiosUtils::CursorY = 0;
+
+/* Legacy BIOS screen height */
+CONST USHORT BiosUtils::VgaHeight = 25;
+
+/* Legacy BIOS screen width */
+CONST USHORT BiosUtils::VgaWidth = 80;
+
 /* XT Boot Loader menu list */
 PLIST_ENTRY Configuration::BootMenuList = NULLPTR;
 

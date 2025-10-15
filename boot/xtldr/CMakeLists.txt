@@ -16,6 +16,7 @@ list(APPEND LIBXTLDR_SOURCE
 # Specify list of source code files
 list(APPEND XTLDR_SOURCE
     ${XTLDR_SOURCE_DIR}/arch/${ARCH}/memory.cc
+    ${XTLDR_SOURCE_DIR}/biosutil.cc
     ${XTLDR_SOURCE_DIR}/bootutil.cc
     ${XTLDR_SOURCE_DIR}/config.cc
     ${XTLDR_SOURCE_DIR}/console.cc
