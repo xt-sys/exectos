@@ -236,6 +236,15 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
     PWCHAR Modules;
     EFI_STATUS Status;
 
+    /* Check if system is EFI-based and provided parameters are valid */
+    if(ImageHandle == NULLPTR || SystemTable == NULLPTR)
+    {
+        /* Invalid parameters, print error message using BIOS calls and hang */
+        BiosUtils::ClearScreen();
+        BiosUtils::Print(L"XTLDR requires EFI-based system!");
+        for(;;);
+    }
+
     /* Initialize XTLDR and */
     XtLoader::InitializeBootLoader(ImageHandle, SystemTable);
 
