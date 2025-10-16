@@ -40,7 +40,7 @@ add_executable(xtldr ${XTLDR_SOURCE})
 target_link_libraries(xtldr libxtos)
 
 # Add linker options
-target_link_options(xtldr PRIVATE /ALIGN:512 /DYNAMICBASE:NO /FIXED)
+target_link_options(xtldr PRIVATE /ALIGN:512)
 
 # Set proper binary name and install target
 if(ARCH STREQUAL "i686")
