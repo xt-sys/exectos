@@ -53,6 +53,6 @@ set_install_target(xtldr efi/boot)
 
 # Set loader entrypoint and subsystem
 set_entrypoint(xtldr "BlStartXtLoader")
-set_imagebase(xtldr 0xF800)
+set_imagebase(xtldr ${BASEADDRESS_XTLDR})
 set_linker_map(xtldr TRUE)
 set_subsystem(xtldr efi_application)
