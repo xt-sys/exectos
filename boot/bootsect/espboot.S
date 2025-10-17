@@ -121,15 +121,15 @@ VerifyBiosParameterBlock:
     ja FsError
 
 ReadExtraCode:
-    /* Read second VBR sector with extra boot code (1 sector starting from sector 2) */
+    /* Read second VBR sector with extra boot code (3 sectors starting from sector 2) */
     movl HiddenSectors - Start(%bp), %eax
     addl $0x02, %eax
-    movw $0x01, %cx
+    movw $0x03, %cx
     xorw %bx, %bx
     movw %bx, %es
     movw $0x7E00, %bx
     call ReadSectors
-    jmp StartSectors
+    jmp StartExtraCode
 
 ReadSectors:
     /* Check for extended BIOS functions and use it only if available */
@@ -139,21 +139,21 @@ ReadSectors:
     movw $0x55AA, %bx
     movb DriveNumber - Start(%bp), %dl
     int $0x13
-    jc ReadCHS
+    jc .ReadCHS
     cmpw $0xAA55, %bx
-    jne ReadCHS
+    jne .ReadCHS
     testb $0x01, %cl
-    jz ReadCHS
+    jz .ReadCHS
 
     /* Verify drive size and determine whether to use CHS or LBA */
     cmpl %edi, %eax
-    jnb ReadLBA
+    jnb .ReadLBA
 
-ReadCHS:
+.ReadCHS:
     /* Read sectors using CHS */
     popal
 
-CHSLoop:
+.CHSLoop:
     /* Read sector by sector using CHS */
     pushw %cx
     pushal
@@ -180,11 +180,11 @@ CHSLoop:
     movw %es, %dx
     addw $0x20, %dx
     movw %dx, %es
-    loop CHSLoop
+    loop .CHSLoop
     popw %es
     ret
 
-ReadLBA:
+.ReadLBA:
     /* Prepare DAP packet and read sectors using LBA */
     popal
     pushw %cx
@@ -213,19 +213,19 @@ ReadLBA:
     movw %dx, %es
     popw %bx
     subw %si, %cx
-    jnz ReadLBA
+    jnz .ReadLBA
     popw %es
     ret
 
 DiskError:
     /* Display disk error message and reboot */
-    movw $msgDiskError, %si
+    movw $.MsgDiskError, %si
     call Print
     jmp Reboot
 
 FsError:
     /* Display FS error message and reboot */
-    movw $msgFsError, %si
+    movw $.MsgFsError, %si
     call Print
     jmp Reboot
 
@@ -233,61 +233,297 @@ Print:
     /* Simple routine to print messages */
     lodsb
     orb     %al, %al
-    jz      DonePrint
+    jz      .DonePrint
     movb    $0x0E, %ah
     movw    $0x07, %bx
     int     $0x10
     jmp     Print
-DonePrint:
+.DonePrint:
     retw
 
 Reboot:
     /* Display a message, wait for a key press and reboot */
-    movw $msgAnyKey, %si
+    movw $.MsgAnyKey, %si
     call Print
     xorw %ax, %ax
     int $0x16
     int $0x19
 
-msgAnyKey:
-    .ascii "Press any key to restart\r\n"
+.MsgAnyKey:
+    .ascii "Press any key to restart...\r\n\0"
 
-msgDiskError:
-    .ascii "Disk error\r\n"
+.MsgDiskError:
+    .ascii "Disk error!\r\n\0"
 
-msgFsError:
-    .ascii "File system error\r\n"
+.MsgFsError:
+    .ascii "File system error!\r\n\0"
 
 /* Fill the rest of the VBR with zeros and add VBR signature at the end */
 .fill (510 - (. - Start)), 1, 0
 .word 0xAA55
 
 
-StartSectors:
-    /* Print message */
-    movw $.MsgUnavailable, %si
-    call Print
+StartExtraCode:
+    /* Load XTLDR file from disk */
+    call LoadStage2
 
-    /* Wait for key press and reboot */
-    xorw %ax, %ax
-    int $0x16
-    int $0x19
+    /* Enable A20 gate */
+    call EnableA20
+
+    /* Call architecture specific initialization code */
+    call InitializeCpu
+
+    /* Jump to Stage2 */
+    call RunStage2
+
+Clear8042:
+    /* Clear 8042 PS/2 buffer */
+    nop
+    nop
+    nop
+    nop
+    inb $0x64, %al
+    cmpb $0xff, %al
+    je .Clear8042_Done
+    testb $0x02, %al
+    jnz Clear8042
+.Clear8042_Done:
+    ret
+
+EnableA20:
+    /* Enable A20 gate */
+    pushaw
+    call Clear8042
+    movb $0xD1, %al
+    outb %al, $0x64
+    call Clear8042
+    movb $0xDF, %al
+    outb %al, $0x60
+    call Clear8042
+    movb $0xFF, %al
+    outb %al, $0x64
+    call Clear8042
+    popaw
+    ret
+
+FindFatEntry:
+    /* Find a file or directory in the FAT table */
+    pushw %bx
+    pushw %cx
+    pushw %dx
+    pushw %si
+    pushw %di
+.FindFatCluster:
+    /* Find FAT32 cluster holding the entry */
+    cmp $0x0FFFFFF8, %eax
+    jae .FindEntryFail
+    pushl %eax
+    movw $0x0200, %bx
+    movw %bx, %es
+    call ReadCluster
+    popl %eax
+    movb SectorsPerCluster - Start(%bp), %cl
+    shlw $0x04, %cx
+    xorw %di, %di
+.FindEntryLoop:
+    /* Find the entry */
+    movb %es:(%di), %al
+    cmpb $0x00, %al
+    je .FindEntryFail
+    cmpb $0xE5, %al
+    je .FindSkipEntry
+    movb %es:0x0B(%di), %ah
+    cmpb $0x0F, %ah
+    je .FindSkipEntry
+    pushw %di
+    pushw %si
+    pushw %cx
+    movw $0x0B, %cx
+    repe cmpsb
+    popw %cx
+    popw %si
+    popw %di
+    jnz .FindSkipEntry
+    movw %es:0x1A(%di), %ax
+    movw %es:0x14(%di), %dx
+    shll $0x10, %edx
+    orl %edx, %eax
+    clc
+    jmp .FindEntryDone
+.FindSkipEntry:
+    /* Skip to the next entry */
+    addw $0x20, %di
+    decw %cx
+    jnz .FindEntryLoop
+    call GetFatEntry
+    jmp .FindFatCluster
+.FindEntryFail:
+    /* Error, file/directory not found */
+    stc
+.FindEntryDone:
+    /* Clean up the stack */
+    popw %di
+    popw %si
+    popw %dx
+    popw %cx
+    popw %bx
+    ret
+
+GetFatEntry:
+    /* Get FAT32 sector and offset from FAT table */
+    shll $0x02, %eax
+    movl %eax, %ecx
+    xorl %edx, %edx
+    movzwl BytesPerSector - Start(%bp), %ebx
+    pushl %ebx
+    divl %ebx
+    movzwl ReservedSectors - Start(%bp), %ebx
+    addl %ebx, %eax
+    movl HiddenSectors - Start(%bp), %ebx
+    addl %ebx, %eax
+    popl %ebx
+    decl %ebx
+    andl %ebx, %ecx
+    movzwl ExtendedFlags - Start(%bp), %ebx
+    andw $0x0F, %bx
+    jz LoadFatSector
+    cmpb FatCopies - Start(%bp), %bl
+    jae FsError
+    pushl %eax
+    movl BigSectorsPerFat - Start(%bp), %eax
+    mull %ebx
+    popl %edx
+    addl %edx, %eax
+
+LoadFatSector:
+    /* Load FAT32 sector from disk */
+    pushl %ecx
+    movw $0x9000, %bx
+    movw %bx, %es
+    cmpl %esi, %eax
+    je .LoadFatSectorDone
+    movl %eax, %esi
+    xorw %bx, %bx
+    movw $0x01, %cx
+    call ReadSectors
+.LoadFatSectorDone:
+    /* Clean up the stack */
+    popl %ecx
+    movl %es:(%ecx), %eax
+    andl $0x0FFFFFFF, %eax
+    ret
+
+LoadStage2:
+    /* Load Stage2 executable, first find file in the path */
+    movl $0xFFFFFFFF, %esi
+    pushl %esi
+    movl 0x7C2C, %eax
+    movw $.EfiDirName, %si
+    call FindFatEntry
+    jc Stage2NotLoaded
+    movw $.BootDirName, %si
+    call FindFatEntry
+    jc Stage2NotLoaded
+    movw $.Stage2FileName, %si
+    call FindFatEntry
+    jc Stage2NotLoaded
+    popl %esi
+    /* Load XTLDR file from disk */
+    cmpl $0x02, %eax
+    jb FileNotFound
+    cmpl $0x0FFFFFF8, %eax
+    jae FileNotFound
+    movw $(0xF800 / 16), %bx
+    movw %bx, %es
+.LoadStage2Loop:
+    /* Load file data from disk */
+    pushl %eax
+    xorw %bx, %bx
+    pushw %es
+    call ReadCluster
+    popw %es
+    xorw %bx, %bx
+    movb SectorsPerCluster - Start(%bp), %bl
+    shlw $0x05, %bx
+    movw %es, %ax
+    addw %bx, %ax
+    movw %ax, %es
+    popl %eax
+    pushw %es
+    call GetFatEntry
+    popw %es
+    cmpl $0x0FFFFFF8, %eax
+    jb .LoadStage2Loop
+    ret
+
+ParseExecutableHeader:
+    /* Parse Stage2 PE/COFF executable header */
+    pushw %es
+    movw $(0xF800 / 16), %ax
+    movw %ax, %es
+    movl %es:60, %eax
+    addl $(4 + 20), %eax
+    movl %es:16(%eax), %eax
+    addl $0xF800, %eax
+    popw %es
+    ret
+
+ReadCluster:
+    /* Read FAT32 cluster from disk */
+    decl %eax
+    decl %eax
+    xorl %edx, %edx
+    movzbl SectorsPerCluster - Start(%bp), %ebx
+    mull %ebx
+    pushl %eax
+    xorl %edx, %edx
+    movzbl FatCopies - Start(%bp), %eax
+    mull BigSectorsPerFat - Start(%bp)
+    movzwl ReservedSectors - Start(%bp), %ebx
+    addl %ebx, %eax
+    addl HiddenSectors - Start(%bp), %eax
+    popl %ebx
+    addl %ebx, %eax
+    xorw %bx, %bx
+    movzbw SectorsPerCluster - Start(%bp), %cx
+    call ReadSectors
+    ret
+
+/* Include architecture specific code */
+.include ARCH_ESP_SOURCE
 
 CpuUnsupported:
-    /* Unsupported CPU */
+    /* Display CPU unsupported message and reboot */
     popal
     movw $.MsgCpuUnsupported, %si
     call Print
     jmp Reboot
 
-/* Include architecture specific code */
-.include ARCH_ESP_SOURCE
+FileNotFound:
+    /* Display XTLDR not found message and reboot */
+    movw $.MsgXtLdrNotFound, %si
+    call Print
+    jmp Reboot
+
+Stage2NotLoaded:
+    /* Clean up the stack and display XTLDR not found message and reboot */
+    popl %esi
+    jmp FileNotFound
+
+.BootDirName:
+    /* Boot directory name */
+    .ascii "BOOT       "
+
+.EfiDirName:
+    /* EFI directory name */
+    .ascii "EFI        "
 
 .MsgCpuUnsupported:
     .ascii "CPU not supported!\r\n\0"
 
-.MsgUnavailable:
-    .ascii "XTLDR requires EFI-based system!\r\nPress any key to restart\r\n"
+.MsgXtLdrNotFound:
+    .ascii "XTLDR Stage2 not found!\r\n\0"
 
-/* Fill the rest of the extra VBR with zeros */
-.fill (1024 - (. - Start)), 1, 0
+/* Fill the rest of the extra VBR with zeros and add signature */
+.fill (2043 - (. - Start)), 1, 0
+.ascii "XTLDR"

@@ -1,10 +1,10 @@
 /**
-* PROJECT:         ExectOS
-* COPYRIGHT:       See COPYING.md in the top level directory
-* FILE:            boot/bootsect/amd64/cpu.S
-* DESCRIPTION:     Low-level support for CPU initialization
-* DEVELOPERS:      Aiken Harris <harraiken91@gmail.com>
-*/
+ * PROJECT:         ExectOS
+ * COPYRIGHT:       See COPYING.md in the top level directory
+ * FILE:            boot/bootsect/amd64/cpu.S
+ * DESCRIPTION:     Low-level support for CPU initialization
+ * DEVELOPERS:      Aiken Harris <harraiken91@gmail.com>
+ */
 
 
 BuildPageMap:
@@ -69,6 +69,7 @@ InitializeCpu:
     testl $0x20000000, %edx
     jz CpuUnsupported
     popal
+    call LoadGdt
     ret
 
 LoadGdt:

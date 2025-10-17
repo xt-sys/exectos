@@ -1,10 +1,10 @@
 /**
-* PROJECT:         ExectOS
-* COPYRIGHT:       See COPYING.md in the top level directory
-* FILE:            boot/bootsect/i686/cpu.S
-* DESCRIPTION:     Low-level support for CPU initialization
-* DEVELOPERS:      Aiken Harris <harraiken91@gmail.com>
-*/
+ * PROJECT:         ExectOS
+ * COPYRIGHT:       See COPYING.md in the top level directory
+ * FILE:            boot/bootsect/i686/cpu.S
+ * DESCRIPTION:     Low-level support for CPU initialization
+ * DEVELOPERS:      Aiken Harris <harraiken91@gmail.com>
+ */
 
 
 BuildPageMap:
@@ -63,6 +63,7 @@ InitializeCpu:
     cmpl %ebx, %eax
     je CpuUnsupported
     popal
+    call LoadGdt
     ret
 
 LoadGdt:
