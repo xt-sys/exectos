@@ -265,7 +265,7 @@ msgFsError:
 
 StartSectors:
     /* Print message */
-    movw $msgUnavailable, %si
+    movw $.MsgUnavailable, %si
     call Print
 
     /* Wait for key press and reboot */
@@ -273,10 +273,20 @@ StartSectors:
     int $0x16
     int $0x19
 
+CpuUnsupported:
+    /* Unsupported CPU */
+    popal
+    movw $.MsgCpuUnsupported, %si
+    call Print
+    jmp Reboot
+
 /* Include architecture specific code */
 .include ARCH_ESP_SOURCE
 
-msgUnavailable:
+.MsgCpuUnsupported:
+    .ascii "CPU not supported!\r\n\0"
+
+.MsgUnavailable:
     .ascii "XTLDR requires EFI-based system!\r\nPress any key to restart\r\n"
 
 /* Fill the rest of the extra VBR with zeros */
