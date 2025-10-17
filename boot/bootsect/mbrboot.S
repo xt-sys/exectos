@@ -41,7 +41,7 @@ RealStart:
     movw %ax, %ss
 
     /* Print welcome message */
-    leaw msgXtosBoot, %si
+    leaw .MsgXtosBoot, %si
     call Print
 
     /* Get BIOS boot drive and partition table offset */
@@ -90,19 +90,19 @@ PartitionFound:
 
 InvalidSignature:
     /* Invalid signature error */
-    leaw msgInvalidSignature, %si
+    leaw .MsgInvalidSignature, %si
     call Print
     jmp HaltSystem
 
 PartitionNotFound:
     /* Active partition not found error */
-    leaw msgPartitionNotFound, %si
+    leaw .MsgPartitionNotFound, %si
     call Print
     jmp HaltSystem
 
 VbrReadFail:
     /* VBR read failed error */
-    leaw msgVbrReadFail, %si
+    leaw .MsgVbrReadFail, %si
     call Print
     jmp HaltSystem
 
@@ -136,16 +136,16 @@ DonePrint:
     /* Storage for the LBA start */
     .long 0
 
-msgInvalidSignature:
+.MsgInvalidSignature:
     .asciz "Invalid partition signature!"
 
-msgPartitionNotFound:
+.MsgPartitionNotFound:
     .asciz "Bootable partition not found!"
 
-msgVbrReadFail:
+.MsgVbrReadFail:
     .asciz "VBR read failed!"
 
-msgXtosBoot:
+.MsgXtosBoot:
     .asciz "Starting XTOS boot loader...\r\n"
 
 /* Fill the rest of the MBR with zeros and add MBR signature at the end */
