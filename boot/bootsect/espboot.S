@@ -273,6 +273,9 @@ StartSectors:
     int $0x16
     int $0x19
 
+/* Include architecture specific code */
+.include ARCH_ESP_SOURCE
+
 msgUnavailable:
     .ascii "XTLDR requires EFI-based system!\r\nPress any key to restart\r\n"
 

@@ -4,6 +4,7 @@
  * FILE:            boot/bootsect/amd64/mbrboot.S
  * DESCRIPTION:     XT Boot Loader MBR boot code
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ *                  Aiken Harris <aiken@codingworkshop.eu.org>
  */
 
 .text
