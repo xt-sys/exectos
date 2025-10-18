@@ -72,7 +72,8 @@ namespace AR
                                          IN PVOID Handler,
                                          IN USHORT Selector,
                                          IN USHORT Ist,
-                                         IN USHORT Access);
+                                         IN USHORT Dpl,
+                                         IN USHORT Type);
             STATIC XTAPI VOID SetNonMaskableInterruptTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock,
                                                               IN PVOID KernelFaultStack);
 

@@ -67,7 +67,8 @@ namespace AR
                                          IN PVOID Handler,
                                          IN USHORT Selector,
                                          IN USHORT Ist,
-                                         IN USHORT Access);
+                                         IN USHORT Dpl,
+                                         IN USHORT Type);
     };
 }
 

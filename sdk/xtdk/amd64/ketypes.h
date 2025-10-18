@@ -272,11 +272,18 @@ typedef struct _KIDTENTRY
 {
     USHORT OffsetLow;
     USHORT Selector;
-    USHORT IstIndex:3;
-    USHORT Reserved0:5;
-    USHORT Type:5;
-    USHORT Dpl:2;
-    USHORT Present:1;
+    union
+    {
+        struct
+        {
+            USHORT IstIndex:3;
+            USHORT Reserved0:5;
+            USHORT Type:5;
+            USHORT Dpl:2;
+            USHORT Present:1;
+        };
+        USHORT Access;
+    };
     USHORT OffsetMiddle;
     ULONG OffsetHigh;
     ULONG Reserved1;

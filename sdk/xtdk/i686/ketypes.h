@@ -58,12 +58,6 @@
 #define KIDT_ACCESS_RING0                 0x00
 #define KIDT_ACCESS_RING3                 0x60
 
-/* IDT gate types */
-#define KIDT_TASK                         0x05
-#define KIDT_CALL                         0x0C
-#define KIDT_INTERRUPT                    0x0E
-#define KIDT_TRAP                         0x0F
-
 /* TSS Offsets */
 #define KTSS_ESP0                         0x04
 #define KTSS_CR3                          0x1C
@@ -284,7 +278,18 @@ typedef struct _KIDTENTRY
 {
     USHORT Offset;
     USHORT Selector;
-    USHORT Access;
+    union
+    {
+        struct
+        {
+            UCHAR Reserved;
+            UCHAR Type:4;
+            UCHAR Flag:1;
+            UCHAR Dpl:2;
+            UCHAR Present:1;
+        };
+        USHORT Access;
+    };
     USHORT ExtendedOffset;
 } KIDTENTRY, *PKIDTENTRY;
 
