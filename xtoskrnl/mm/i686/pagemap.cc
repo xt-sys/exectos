@@ -83,7 +83,7 @@ MM::PageMap::GetPteAddress(PVOID Address)
 
     /* Calculate offset and return PTE address */
     Offset = ((((ULONG_PTR)(Address)) >> MM_PTI_SHIFT) << PageMapInfo.PteShift);
-    return (PMMPTE)(MM_PTE_BASE + Offset);
+    return (PMMPTE)(PageMapInfo.PteBase + Offset);
 }
 
 /**
