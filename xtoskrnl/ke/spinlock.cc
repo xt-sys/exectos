@@ -4,6 +4,7 @@
  * FILE:            xtoskrnl/ke/spinlock.cc
  * DESCRIPTION:     Spinlocks support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ *                  Aiken Harris <harraiken91@gmail.com>
  */
 
 #include <xtos.hh>
@@ -54,6 +55,48 @@ KE::SpinLock::AcquireSpinLock(IN OUT PKSPIN_LOCK SpinLock)
 
     /* Add an explicit memory barrier */
     AR::CpuFunc::ReadWriteBarrier();
+}
+
+/**
+ * Initializes all kernel spinlocks.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KE::SpinLock::InitializeAllLocks()
+{
+    /* Initialize all spin locks */
+    InitializeSpinLock(&DispatcherLockQueue);
+    InitializeSpinLock(&PfnLockQueue);
+    InitializeSpinLock(&SystemSpaceLockQueue);
+}
+
+/**
+ * Initializes spinlock queues for current processor.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KE::SpinLock::InitializeLockQueues()
+{
+    PKPROCESSOR_CONTROL_BLOCK ControlBlock;
+
+    /* Get current processor control block */
+    ControlBlock = KE::Processor::GetCurrentProcessorControlBlock();
+
+    /* Initialize PCB lock queues */
+    ControlBlock->LockQueue[DispatcherLock].Lock = &DispatcherLockQueue;
+    ControlBlock->LockQueue[DispatcherLock].Next = NULLPTR;
+    ControlBlock->LockQueue[PfnLock].Lock = &PfnLockQueue;
+    ControlBlock->LockQueue[PfnLock].Next = NULLPTR;
+    ControlBlock->LockQueue[SystemSpaceLock].Lock = &SystemSpaceLockQueue;
+    ControlBlock->LockQueue[SystemSpaceLock].Next = NULLPTR;
 }
 
 /**
@@ -111,4 +154,30 @@ KE::SpinLock::ReleaseSpinLock(IN OUT PKSPIN_LOCK SpinLock)
 
     /* Add an explicit memory barrier */
     AR::CpuFunc::ReadWriteBarrier();
+}
+
+/**
+ * Tests a kernel spin lock.
+ *
+ * @param SpinLock
+ *        Supplies a pointer to the kernel spin lock.
+ *
+ * @return This routine returns TRUE if the lock is free, FALSE otherwise.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+BOOLEAN
+TestSpinLock(IN PKSPIN_LOCK SpinLock)
+{
+    /* Check if the lock is free */
+    if(*SpinLock)
+    {
+        /* Spinlock is busy, yield processor and return FALSE */
+        AR::CpuFunc::YieldProcessor();
+        return FALSE;
+    }
+
+    /* Spinlock is free, return TRUE */
+    return TRUE;
 }
