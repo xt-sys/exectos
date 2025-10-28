@@ -19,8 +19,20 @@ namespace KE
     {
         private:
             STATIC KSPIN_LOCK DispatcherLockQueue;
+            STATIC KSPIN_LOCK ExpansionLockQueue;
+            STATIC KSPIN_LOCK FileSystemLockQueue;
+            STATIC KSPIN_LOCK IoCancelLockQueue;
+            STATIC KSPIN_LOCK IoCompletionLockQueue;
+            STATIC KSPIN_LOCK IoDatabaseLockQueue;
+            STATIC KSPIN_LOCK IoVpbLockQueue;
+            STATIC KSPIN_LOCK MasterLockQueue;
+            STATIC KSPIN_LOCK NonPagedAllocLockQueue;
+            STATIC KSPIN_LOCK NonPagedPoolLockQueue;
             STATIC KSPIN_LOCK PfnLockQueue;
             STATIC KSPIN_LOCK SystemSpaceLockQueue;
+            STATIC KSPIN_LOCK TimerTableLockQueue;
+            STATIC KSPIN_LOCK VacbLockQueue;
+            STATIC KSPIN_LOCK WorkLockQueue;
 
         public:
             STATIC XTFASTCALL VOID AcquireQueuedSpinLock(IN KSPIN_LOCK_QUEUE_LEVEL LockLevel);

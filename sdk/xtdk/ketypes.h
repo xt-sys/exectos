@@ -150,21 +150,23 @@ typedef enum _KTHREAD_STATE
 typedef enum _KSPIN_LOCK_QUEUE_LEVEL
 {
     DispatcherLock,
-    UnusedSpareLock,
+    ExpansionLock,
     PfnLock,
     SystemSpaceLock,
     VacbLock,
     MasterLock,
-    NonPagedPoolLock,
+    NonPagedAllocPoolLock,
     IoCancelLock,
     WorkQueueLock,
     IoVpbLock,
     IoDatabaseLock,
     IoCompletionLock,
-    FsStructLock,
+    FileSystemLock,
     AfdWorkQueueLock,
     BcbLock,
-    MmNonPagedPoolLock,
+    NonPagedPoolLock,
+    ReservedSystemLock,
+    TimerTableLock,
     MaximumLock
 } KSPIN_LOCK_QUEUE_LEVEL, *PKSPIN_LOCK_QUEUE_LEVEL;
 

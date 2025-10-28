@@ -93,10 +93,40 @@ KE::SpinLock::InitializeLockQueues()
     /* Initialize PCB lock queues */
     ControlBlock->LockQueue[DispatcherLock].Lock = &DispatcherLockQueue;
     ControlBlock->LockQueue[DispatcherLock].Next = NULLPTR;
+    ControlBlock->LockQueue[ExpansionLock].Lock = &ExpansionLockQueue;
+    ControlBlock->LockQueue[ExpansionLock].Next = NULLPTR;
     ControlBlock->LockQueue[PfnLock].Lock = &PfnLockQueue;
     ControlBlock->LockQueue[PfnLock].Next = NULLPTR;
     ControlBlock->LockQueue[SystemSpaceLock].Lock = &SystemSpaceLockQueue;
     ControlBlock->LockQueue[SystemSpaceLock].Next = NULLPTR;
+    ControlBlock->LockQueue[VacbLock].Lock = &VacbLockQueue;
+    ControlBlock->LockQueue[VacbLock].Next = NULLPTR;
+    ControlBlock->LockQueue[MasterLock].Lock = &MasterLockQueue;
+    ControlBlock->LockQueue[MasterLock].Next = NULLPTR;
+    ControlBlock->LockQueue[NonPagedAllocPoolLock].Lock = &NonPagedAllocLockQueue;
+    ControlBlock->LockQueue[NonPagedAllocPoolLock].Next = NULLPTR;
+    ControlBlock->LockQueue[IoCancelLock].Lock = &IoCancelLockQueue;
+    ControlBlock->LockQueue[IoCancelLock].Next = NULLPTR;
+    ControlBlock->LockQueue[WorkQueueLock].Lock = &WorkLockQueue;
+    ControlBlock->LockQueue[WorkQueueLock].Next = NULLPTR;
+    ControlBlock->LockQueue[IoVpbLock].Lock = &IoVpbLockQueue;
+    ControlBlock->LockQueue[IoVpbLock].Next = NULLPTR;
+    ControlBlock->LockQueue[IoDatabaseLock].Lock = &IoDatabaseLockQueue;
+    ControlBlock->LockQueue[IoDatabaseLock].Next = NULLPTR;
+    ControlBlock->LockQueue[IoCompletionLock].Lock = &IoCompletionLockQueue;
+    ControlBlock->LockQueue[IoCompletionLock].Next = NULLPTR;
+    ControlBlock->LockQueue[FileSystemLock].Lock = &FileSystemLockQueue;
+    ControlBlock->LockQueue[FileSystemLock].Next = NULLPTR;
+    ControlBlock->LockQueue[AfdWorkQueueLock].Lock = NULLPTR;
+    ControlBlock->LockQueue[AfdWorkQueueLock].Next = NULLPTR;
+    ControlBlock->LockQueue[BcbLock].Lock = NULLPTR;
+    ControlBlock->LockQueue[BcbLock].Next = NULLPTR;
+    ControlBlock->LockQueue[NonPagedPoolLock].Lock = &NonPagedPoolLockQueue;
+    ControlBlock->LockQueue[NonPagedPoolLock].Next = NULLPTR;
+    ControlBlock->LockQueue[ReservedSystemLock].Lock = NULLPTR;
+    ControlBlock->LockQueue[ReservedSystemLock].Next = NULLPTR;
+    ControlBlock->LockQueue[TimerTableLock].Lock = &TimerTableLockQueue;
+    ControlBlock->LockQueue[TimerTableLock].Next = NULLPTR;
 }
 
 /**

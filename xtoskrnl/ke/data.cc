@@ -24,11 +24,47 @@ BOOLEAN KE::KUbsan::ActiveFrame = FALSE;
 /* Kernel dispatcher lock queue */
 KSPIN_LOCK KE::SpinLock::DispatcherLockQueue;
 
+/* Kernel expansion lock queue */
+KSPIN_LOCK KE::SpinLock::ExpansionLockQueue;
+
+/* Kernel file system structures lock queue */
+KSPIN_LOCK KE::SpinLock::FileSystemLockQueue;
+
+/* Kernel IO cancel lock queue */
+KSPIN_LOCK KE::SpinLock::IoCancelLockQueue;
+
+/* Kernel IO completion lock queue */
+KSPIN_LOCK KE::SpinLock::IoCompletionLockQueue;
+
+/* Kernel IO database lock queue */
+KSPIN_LOCK KE::SpinLock::IoDatabaseLockQueue;
+
+/* Kernel IO VPB lock queue */
+KSPIN_LOCK KE::SpinLock::IoVpbLockQueue;
+
+/* Kernel cache master lock queue */
+KSPIN_LOCK KE::SpinLock::MasterLockQueue;
+
+/* Kernel non-paged allocator lock queue */
+KSPIN_LOCK KE::SpinLock::NonPagedAllocLockQueue;
+
+/* Kernel non-paged pool lock queue */
+KSPIN_LOCK KE::SpinLock::NonPagedPoolLockQueue;
+
 /* Kernel PFN lock queue */
 KSPIN_LOCK KE::SpinLock::PfnLockQueue;
 
 /* Kernel system space lock queue */
 KSPIN_LOCK KE::SpinLock::SystemSpaceLockQueue;
+
+/* Kernel Timer table lock queue */
+KSPIN_LOCK KE::SpinLock::TimerTableLockQueue;
+
+/* Kernel VACB lock queue */
+KSPIN_LOCK KE::SpinLock::VacbLockQueue;
+
+/* Kernel work queue lock queue */
+KSPIN_LOCK KE::SpinLock::WorkLockQueue;
 
 /* Kernel boot resources list */
 LIST_ENTRY KE::SystemResources::ResourcesListHead;
