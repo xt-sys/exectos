@@ -22,6 +22,48 @@ namespace KE
             STATIC XTFASTCALL VOID LowerRunLevel(IN KRUNLEVEL RunLevel);
             STATIC XTFASTCALL KRUNLEVEL RaiseRunLevel(IN KRUNLEVEL RunLevel);
     };
+
+    class LowerRunLevel
+    {
+        private:
+            KRUNLEVEL PreviousRunLevel;
+
+        public:
+            LowerRunLevel(KRUNLEVEL RunLevel)
+            {
+                PreviousRunLevel = KE::RunLevel::GetCurrentRunLevel();
+                KE::RunLevel::LowerRunLevel(RunLevel);
+            }
+
+            ~LowerRunLevel()
+            {
+                KE::RunLevel::RaiseRunLevel(PreviousRunLevel);
+            }
+
+            LowerRunLevel(const LowerRunLevel&) = delete;
+            LowerRunLevel& operator=(const LowerRunLevel&) = delete;
+    };
+
+    class RaiseRunLevel
+    {
+        private:
+            KRUNLEVEL PreviousRunLevel;
+
+        public:
+            RaiseRunLevel(KRUNLEVEL RunLevel)
+            {
+                PreviousRunLevel = KE::RunLevel::GetCurrentRunLevel();
+                KE::RunLevel::RaiseRunLevel(RunLevel);
+            }
+
+            ~RaiseRunLevel()
+            {
+                KE::RunLevel::LowerRunLevel(PreviousRunLevel);
+            }
+
+            RaiseRunLevel(const RaiseRunLevel&) = delete;
+            RaiseRunLevel& operator=(const RaiseRunLevel&) = delete;
+    };
 }
 
 #endif /* __XTOSKRNL_KE_RUNLEVEL_HH */
