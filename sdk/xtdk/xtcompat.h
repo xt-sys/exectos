@@ -12,8 +12,9 @@
 
 #ifdef __cplusplus
     /* C++ definitions */
-    #define XTCLINK         extern "C"
     #define NULLPTR         nullptr
+    #define VIRTUAL         virtual
+    #define XTCLINK         extern "C"
 
     /* C++ boolean type */
     typedef bool BOOLEAN, *PBOOLEAN;
@@ -24,8 +25,9 @@
     typedef wchar_t wchar;
 #else
     /* C definitions */
-    #define XTCLINK
     #define NULLPTR         ((void *)0)
+    #define VIRTUAL
+    #define XTCLINK
 
     /* C boolean type */
     typedef enum _BOOLEAN
