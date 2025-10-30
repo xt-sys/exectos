@@ -10,6 +10,28 @@
 
 
 /**
+ * Advances a PTE pointer by a given number of entries, considering the actual PTE size.
+ *
+ * @param Pte
+ *        The PTE pointer to advance.
+ *
+ * @param Count
+ *        The number of PTE entries to advance by.
+ *
+ * @return The advanced PTE pointer.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PMMPTE
+MM::Paging::AdvancePte(PMMPTE Pte,
+                       ULONG Count)
+{
+    /* Return advanced PTE pointer */
+    return PmlRoutines->AdvancePte(Pte, Count);
+}
+
+/**
  * Clears the contents of a page table entry (PTE).
  *
  * @param PtePointer
@@ -23,6 +45,7 @@ XTAPI
 VOID
 MM::Paging::ClearPte(PHARDWARE_PTE PtePointer)
 {
+    /* Clear PTE */
     PmlRoutines->ClearPte(PtePointer);
 }
 
@@ -79,6 +102,75 @@ MM::Paging::FlushTlb(VOID)
 }
 
 /**
+ * Gets the value representing an empty PTE list.
+ *
+ * @return This routine returns the value representing an empty PTE list.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG_PTR
+MM::Paging::GetEmptyPteList(VOID)
+{
+    /* Return empty PTE list mask */
+    return (ULONG_PTR)PmlRoutines->GetEmptyPteList();
+}
+
+/**
+ * Gets the next entry in a PTE list.
+ *
+ * @param Pte
+ *        The PTE pointer to get the next entry from.
+ *
+ * @return This routine returns the next entry in the PTE list.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG_PTR
+MM::Paging::GetNextEntry(PMMPTE Pte)
+{
+    /* Return next entry in PTE list */
+    return PmlRoutines->GetNextEntry(Pte);
+}
+
+/**
+ * Advances a PTE pointer, considering the actual PTE size.
+ *
+ * @param Pte
+ *        The PTE pointer to advance.
+ *
+ * @return The advanced PTE pointer.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PMMPTE
+MM::Paging::GetNextPte(PMMPTE Pte)
+{
+    /* Return advanced PTE pointer */
+    return PmlRoutines->GetNextPte(Pte);
+}
+
+/**
+ * Checks if a PTE list contains only one entry.
+ *
+ * @param Pte
+ *        The PTE pointer to check.
+ *
+ * @return This routine returns TRUE if the PTE list has only one entry, FALSE otherwise.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+BOOLEAN
+MM::Paging::GetOneEntry(PMMPTE Pte)
+{
+    /* Return one entry status */
+    return PmlRoutines->GetOneEntry(Pte);
+}
+
+/**
  * Gets the page map routines for basic paging mode (non-XPA).
  *
  * @return This routine returns the address of the object containing non-XPA page map routines.
@@ -90,6 +182,8 @@ MM::PPAGEMAP
 MM::Paging::GetPageMapBasicRoutines(VOID)
 {
     static MM::PageMapBasic PageMapBasicRoutines;
+
+    /* Return non-XPA page map routines */
     return &PageMapBasicRoutines;
 }
 
@@ -105,6 +199,8 @@ MM::PPAGEMAP
 MM::Paging::GetPageMapXpaRoutines(VOID)
 {
     static MM::PageMapXpa PageMapXpaRoutines;
+
+    /* Return XPA page map routines */
     return &PageMapXpaRoutines;
 }
 
@@ -122,6 +218,7 @@ XTAPI
 PMMPDE
 MM::Paging::GetPdeAddress(PVOID Address)
 {
+    /* Return PDE address */
     return PmlRoutines->GetPdeAddress(Address);
 }
 
@@ -139,6 +236,7 @@ XTAPI
 PMMPPE
 MM::Paging::GetPpeAddress(PVOID Address)
 {
+    /* Return PPE address */
     return PmlRoutines->GetPpeAddress(Address);
 }
 
@@ -156,7 +254,23 @@ XTAPI
 PMMPTE
 MM::Paging::GetPteAddress(PVOID Address)
 {
+    /* Return PTE address */
     return PmlRoutines->GetPteAddress(Address);
+}
+
+/**
+ * Gets the size of a PTE.
+ *
+ * @return This routine returns the size of a PTE.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG
+MM::Paging::GetPteSize(VOID)
+{
+    /* Return the size of MMPTE */
+    return PmlRoutines->GetPteSize();
 }
 
 /**
@@ -200,7 +314,52 @@ XTAPI
 BOOLEAN
 MM::Paging::PteValid(PHARDWARE_PTE PtePointer)
 {
+    /* Check if PTE is valid */
     return PmlRoutines->PteValid(PtePointer);
+}
+
+/**
+ * Sets the next entry in a PTE list.
+ *
+ * @param Pte
+ *        The PTE pointer to modify.
+ *
+ * @param Value
+ *        The value to set as the next entry.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::Paging::SetNextEntry(PMMPTE Pte,
+                         ULONG_PTR Value)
+{
+    /* Set next entry in PTE list */
+    PmlRoutines->SetNextEntry(Pte, Value);
+}
+
+/**
+ * Sets the flag indicating whether a PTE list contains only one entry.
+ *
+ * @param Pte
+ *        The PTE pointer to modify.
+ *
+ * @param Value
+ *        The value to set. TRUE if the list has only one entry, FALSE otherwise.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::Paging::SetOneEntry(PMMPTE Pte,
+                        BOOLEAN Value)
+{
+    /* Set one entry status */
+    PmlRoutines->SetOneEntry(Pte, Value);
 }
 
 /**
@@ -225,6 +384,7 @@ MM::Paging::SetPte(PHARDWARE_PTE PtePointer,
                    PFN_NUMBER PageFrameNumber,
                    BOOLEAN Writable)
 {
+    /* Set PTE */
     PmlRoutines->SetPte(PtePointer, PageFrameNumber, Writable);
 }
 
@@ -250,5 +410,6 @@ MM::Paging::SetPteCaching(PHARDWARE_PTE PtePointer,
                           BOOLEAN CacheDisable,
                           BOOLEAN WriteThrough)
 {
+    /* Set caching attributes */
     PmlRoutines->SetPteCaching(PtePointer, CacheDisable, WriteThrough);
 }

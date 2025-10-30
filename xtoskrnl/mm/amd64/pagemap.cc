@@ -27,6 +27,7 @@ PMMPTE
 MM::PageMap::AdvancePte(PMMPTE Pte,
                         ULONG Count)
 {
+    /* Return advanced PTE pointer */
     return (PMMPTE)((ULONG_PTR)Pte + (Count * sizeof(MMPTE)));
 }
 
