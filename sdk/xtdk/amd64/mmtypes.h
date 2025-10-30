@@ -99,6 +99,7 @@ typedef struct _HARDWARE_PTE
 typedef struct _MMPAGEMAP_INFO
 {
     BOOLEAN Xpa;
+    ULONGLONG EmptyPteList;
     ULONGLONG PteBase;
     ULONGLONG PdeBase;
     ULONGLONG PpeBase;
