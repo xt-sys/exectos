@@ -43,7 +43,7 @@ MM::Paging::AdvancePte(IN PMMPTE Pte,
  */
 XTAPI
 VOID
-MM::Paging::ClearPte(IN PHARDWARE_PTE PtePointer)
+MM::Paging::ClearPte(IN PMMPTE PtePointer)
 {
     /* Clear PTE */
     PmlRoutines->ClearPte(PtePointer);
@@ -312,7 +312,7 @@ MM::Paging::InitializePageMapSupport(VOID)
  */
 XTAPI
 BOOLEAN
-MM::Paging::PteValid(IN PHARDWARE_PTE PtePointer)
+MM::Paging::PteValid(IN PMMPTE PtePointer)
 {
     /* Check if PTE is valid */
     return PmlRoutines->PteValid(PtePointer);
@@ -380,7 +380,7 @@ MM::Paging::SetOneEntry(IN PMMPTE Pte,
  */
 XTAPI
 VOID
-MM::Paging::SetPte(IN PHARDWARE_PTE PtePointer,
+MM::Paging::SetPte(IN PMMPTE PtePointer,
                    IN PFN_NUMBER PageFrameNumber,
                    IN BOOLEAN Writable)
 {
@@ -406,7 +406,7 @@ MM::Paging::SetPte(IN PHARDWARE_PTE PtePointer,
  */
 XTAPI
 VOID
-MM::Paging::SetPteCaching(IN PHARDWARE_PTE PtePointer,
+MM::Paging::SetPteCaching(IN PMMPTE PtePointer,
                           IN BOOLEAN CacheDisable,
                           IN BOOLEAN WriteThrough)
 {

@@ -23,7 +23,7 @@ namespace MM
         public:
             STATIC XTAPI PMMPTE AdvancePte(IN PMMPTE Pte,
                                            IN ULONG Count);
-            STATIC XTAPI VOID ClearPte(IN PHARDWARE_PTE PtePointer);
+            STATIC XTAPI VOID ClearPte(IN PMMPTE PtePointer);
             STATIC XTAPI VOID FlushTlb(VOID);
             STATIC XTAPI ULONG_PTR GetEmptyPteList(VOID);
             STATIC XTAPI ULONG_PTR GetNextEntry(IN PMMPTE Pte);
@@ -34,15 +34,15 @@ namespace MM
             STATIC XTAPI PMMPTE GetPteAddress(IN PVOID Address);
             STATIC XTAPI ULONG GetPteSize(VOID);
             STATIC XTAPI VOID InitializePageMapSupport(VOID);
-            STATIC XTAPI BOOLEAN PteValid(IN PHARDWARE_PTE PtePointer);
+            STATIC XTAPI BOOLEAN PteValid(IN PMMPTE PtePointer);
             STATIC XTAPI VOID SetNextEntry(IN PMMPTE Pte,
                                            IN ULONG_PTR Value);
             STATIC XTAPI VOID SetOneEntry(IN PMMPTE Pte,
                                           IN BOOLEAN Value);
-            STATIC XTAPI VOID SetPte(IN PHARDWARE_PTE PtePointer,
+            STATIC XTAPI VOID SetPte(IN PMMPTE PtePointer,
                                      IN PFN_NUMBER PageFrameNumber,
                                      IN BOOLEAN Writable);
-            STATIC XTAPI VOID SetPteCaching(IN PHARDWARE_PTE PtePointer,
+            STATIC XTAPI VOID SetPteCaching(IN PMMPTE PtePointer,
                                             IN BOOLEAN CacheDisable,
                                             IN BOOLEAN WriteThrough);
             STATIC XTFASTCALL VOID ZeroPages(IN PVOID Address,

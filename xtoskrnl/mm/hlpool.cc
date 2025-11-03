@@ -170,7 +170,7 @@ MM::HardwarePool::MapHardwareMemory(IN PHYSICAL_ADDRESS PhysicalAddress,
 {
     PVOID BaseAddress, ReturnAddress;
     PFN_NUMBER MappedPages;
-    PHARDWARE_PTE PtePointer;
+    PMMPTE PtePointer;
 
     /* Initialize variables */
     BaseAddress = HardwareHeapStart;
@@ -189,7 +189,7 @@ MM::HardwarePool::MapHardwareMemory(IN PHYSICAL_ADDRESS PhysicalAddress,
         }
 
         /* Get PTE pointer and advance to next page */
-        PtePointer = (PHARDWARE_PTE)MM::Paging::GetPteAddress(ReturnAddress);
+        PtePointer = MM::Paging::GetPteAddress(ReturnAddress);
         ReturnAddress = (PVOID)((ULONG_PTR)ReturnAddress + MM_PAGE_SIZE);
 
         /* Check if PTE is valid */
@@ -219,7 +219,7 @@ MM::HardwarePool::MapHardwareMemory(IN PHYSICAL_ADDRESS PhysicalAddress,
     while(MappedPages--)
     {
         /* Get PTE pointer */
-        PtePointer = (PHARDWARE_PTE)MM::Paging::GetPteAddress(BaseAddress);
+        PtePointer = MM::Paging::GetPteAddress(BaseAddress);
 
         /* Fill the PTE */
         MM::Paging::SetPte(PtePointer, (PFN_NUMBER)(PhysicalAddress.QuadPart >> MM_PAGE_SHIFT), TRUE);
@@ -259,18 +259,18 @@ VOID
 MM::HardwarePool::MarkHardwareMemoryWriteThrough(IN PVOID VirtualAddress,
                                                  IN PFN_NUMBER PageCount)
 {
-    PHARDWARE_PTE PtePointer;
+    PMMPTE PtePointer;
     PFN_NUMBER Page;
 
     /* Get PTE address from virtual address */
-    PtePointer = (PHARDWARE_PTE)MM::Paging::GetPteAddress(VirtualAddress);
+    PtePointer = MM::Paging::GetPteAddress(VirtualAddress);
 
     /* Iterate through mapped pages */
     for(Page = 0; Page < PageCount; Page++)
     {
         /* Mark pages as CD/WT */
         MM::Paging::SetPteCaching(PtePointer, TRUE, TRUE);
-        PtePointer++;
+        MM::Paging::GetNextEntry(PtePointer);
     }
 }
 
@@ -296,10 +296,10 @@ MM::HardwarePool::RemapHardwareMemory(IN PVOID VirtualAddress,
                                       IN PHYSICAL_ADDRESS PhysicalAddress,
                                       IN BOOLEAN FlushTlb)
 {
-    PHARDWARE_PTE PtePointer;
+    PMMPTE PtePointer;
 
     /* Get PTE address from virtual address */
-    PtePointer = (PHARDWARE_PTE)MM::Paging::GetPteAddress(VirtualAddress);
+    PtePointer = MM::Paging::GetPteAddress(VirtualAddress);
 
     /* Remap the PTE */
     MM::Paging::SetPte(PtePointer, (PFN_NUMBER)(PhysicalAddress.QuadPart >> MM_PAGE_SHIFT), TRUE);
@@ -334,7 +334,7 @@ MM::HardwarePool::UnmapHardwareMemory(IN PVOID VirtualAddress,
                                       IN PFN_NUMBER PageCount,
                                       IN BOOLEAN FlushTlb)
 {
-    PHARDWARE_PTE PtePointer;
+    PMMPTE PtePointer;
     PFN_NUMBER Page;
 
     /* Check if address is valid hardware memory */
@@ -348,7 +348,7 @@ MM::HardwarePool::UnmapHardwareMemory(IN PVOID VirtualAddress,
     VirtualAddress = (PVOID)((ULONG_PTR)VirtualAddress & ~(MM_PAGE_SIZE - 1));
 
     /* Get PTE address from virtual address */
-    PtePointer = (PHARDWARE_PTE)MM::Paging::GetPteAddress(VirtualAddress);
+    PtePointer = MM::Paging::GetPteAddress(VirtualAddress);
 
     /* Iterate through mapped pages */
     for(Page = 0; Page < PageCount; Page++)

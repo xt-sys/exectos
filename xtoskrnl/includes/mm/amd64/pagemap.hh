@@ -23,7 +23,7 @@ namespace MM
         public:
             XTAPI PMMPTE AdvancePte(IN PMMPTE Pte,
                                     IN ULONG Count);
-            XTAPI VOID ClearPte(IN PHARDWARE_PTE PtePointer);
+            XTAPI VOID ClearPte(IN PMMPTE PtePointer);
             XTAPI ULONGLONG GetEmptyPteList(VOID);
             XTAPI ULONG_PTR GetNextEntry(IN PMMPTE Pte);
             XTAPI PMMPTE GetNextPte(IN PMMPTE Pte);
@@ -45,15 +45,15 @@ namespace MM
             XTAPI ULONG GetPxeIndex(IN PVOID Address);
             XTAPI PVOID GetPxeVirtualAddress(IN PMMPXE PxePointer);
             VIRTUAL XTAPI VOID InitializePageMapInfo(VOID) = 0;
-            XTAPI BOOLEAN PteValid(IN PHARDWARE_PTE PtePointer);
+            XTAPI BOOLEAN PteValid(IN PMMPTE PtePointer);
             XTAPI VOID SetNextEntry(IN PMMPTE Pte,
                                     IN ULONG_PTR Value);
             XTAPI VOID SetOneEntry(IN PMMPTE Pte,
                                    IN BOOLEAN Value);
-            XTAPI VOID SetPte(IN PHARDWARE_PTE PtePointer,
+            XTAPI VOID SetPte(IN PMMPTE PtePointer,
                               IN PFN_NUMBER PageFrameNumber,
                               IN BOOLEAN Writable);
-            XTAPI VOID SetPteCaching(IN PHARDWARE_PTE PtePointer,
+            XTAPI VOID SetPteCaching(IN PMMPTE PtePointer,
                                      IN BOOLEAN CacheDisable,
                                      IN BOOLEAN WriteThrough);
     } PAGEMAP, *PPAGEMAP;

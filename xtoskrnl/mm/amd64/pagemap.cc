@@ -43,14 +43,10 @@ MM::PageMap::AdvancePte(IN PMMPTE Pte,
  */
 XTAPI
 VOID
-MM::PageMap::ClearPte(IN PHARDWARE_PTE PtePointer)
+MM::PageMap::ClearPte(IN PMMPTE PtePointer)
 {
     /* Clear PTE */
-    PtePointer->CacheDisable = 0;
-    PtePointer->PageFrameNumber = 0;
-    PtePointer->Valid = 0;
-    PtePointer->Writable = 0;
-    PtePointer->WriteThrough = 0;
+    PtePointer->Long = 0;
 }
 
 /**
@@ -432,10 +428,10 @@ MM::PageMap::GetPxeVirtualAddress(IN PMMPXE PxePointer)
  */
 XTAPI
 BOOLEAN
-MM::PageMap::PteValid(IN PHARDWARE_PTE PtePointer)
+MM::PageMap::PteValid(IN PMMPTE PtePointer)
 {
     /* Check if PTE is valid */
-    return (BOOLEAN)PtePointer->Valid;
+    return (BOOLEAN)PtePointer->Hardware.Valid;
 }
 
 /**
@@ -500,14 +496,14 @@ MM::PageMap::SetOneEntry(IN PMMPTE Pte,
  */
 XTAPI
 VOID
-MM::PageMap::SetPte(IN PHARDWARE_PTE PtePointer,
+MM::PageMap::SetPte(IN PMMPTE PtePointer,
                     IN PFN_NUMBER PageFrameNumber,
                     IN BOOLEAN Writable)
 {
     /* Set PTE */
-    PtePointer->PageFrameNumber = PageFrameNumber;
-    PtePointer->Valid = 1;
-    PtePointer->Writable = Writable;
+    PtePointer->Hardware.PageFrameNumber = PageFrameNumber;
+    PtePointer->Hardware.Valid = 1;
+    PtePointer->Hardware.Writable = Writable;
 }
 
 /**
@@ -528,13 +524,13 @@ MM::PageMap::SetPte(IN PHARDWARE_PTE PtePointer,
  */
 XTAPI
 VOID
-MM::PageMap::SetPteCaching(IN PHARDWARE_PTE PtePointer,
+MM::PageMap::SetPteCaching(IN PMMPTE PtePointer,
                            IN BOOLEAN CacheDisable,
                            IN BOOLEAN WriteThrough)
 {
     /* Set caching attributes */
-    PtePointer->CacheDisable = CacheDisable;
-    PtePointer->WriteThrough = WriteThrough;
+    PtePointer->Hardware.CacheDisable = CacheDisable;
+    PtePointer->Hardware.WriteThrough = WriteThrough;
 }
 
 /**

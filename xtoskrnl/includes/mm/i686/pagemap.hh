@@ -23,7 +23,7 @@ namespace MM
         public:
             VIRTUAL XTAPI PMMPTE AdvancePte(IN PMMPTE Pte,
                                             IN ULONG Count) = 0;
-            XTAPI VOID ClearPte(IN PHARDWARE_PTE PtePointer);
+            XTAPI VOID ClearPte(IN PMMPTE PtePointer);
             XTAPI ULONG GetEmptyPteList(VOID);
             VIRTUAL XTAPI ULONG_PTR GetNextEntry(IN PMMPTE Pte) = 0;
             VIRTUAL XTAPI PMMPTE GetNextPte(IN PMMPTE Pte) = 0;
@@ -39,15 +39,15 @@ namespace MM
             VIRTUAL XTAPI ULONG GetPteSize(VOID) = 0;
             XTAPI PVOID GetPteVirtualAddress(IN PMMPTE PtePointer);
             VIRTUAL XTAPI VOID InitializePageMapInfo(VOID) = 0;
-            VIRTUAL XTAPI BOOLEAN PteValid(IN PHARDWARE_PTE PtePointer) = 0;
+            VIRTUAL XTAPI BOOLEAN PteValid(IN PMMPTE PtePointer) = 0;
             VIRTUAL XTAPI VOID SetNextEntry(IN PMMPTE Pte,
                                             IN ULONG_PTR Value) = 0;
             VIRTUAL XTAPI VOID SetOneEntry(IN PMMPTE Pte,
                                            IN BOOLEAN Value) = 0;
-            VIRTUAL XTAPI VOID SetPte(IN PHARDWARE_PTE PtePointer,
+            VIRTUAL XTAPI VOID SetPte(IN PMMPTE PtePointer,
                                       IN PFN_NUMBER PageFrameNumber,
                                       IN BOOLEAN Writable) = 0;
-            VIRTUAL XTAPI VOID SetPteCaching(IN PHARDWARE_PTE PtePointer,
+            VIRTUAL XTAPI VOID SetPteCaching(IN PMMPTE PtePointer,
                                              IN BOOLEAN CacheDisable,
                                              IN BOOLEAN WriteThrough) = 0;
     } PAGEMAP, *PPAGEMAP;
@@ -62,15 +62,15 @@ namespace MM
             XTAPI BOOLEAN GetOneEntry(IN PMMPTE Pte);
             XTAPI ULONG GetPteSize(VOID);
             XTAPI VOID InitializePageMapInfo(VOID);
-            XTAPI BOOLEAN PteValid(IN PHARDWARE_PTE PtePointer);
+            XTAPI BOOLEAN PteValid(IN PMMPTE PtePointer);
             XTAPI VOID SetNextEntry(IN PMMPTE Pte,
                                     IN ULONG_PTR Value);
             XTAPI VOID SetOneEntry(IN PMMPTE Pte,
                                    IN BOOLEAN Value);
-            XTAPI VOID SetPte(IN PHARDWARE_PTE PtePointer,
+            XTAPI VOID SetPte(IN PMMPTE PtePointer,
                               IN PFN_NUMBER PageFrameNumber,
                               IN BOOLEAN Writable);
-            XTAPI VOID SetPteCaching(IN PHARDWARE_PTE PtePointer,
+            XTAPI VOID SetPteCaching(IN PMMPTE PtePointer,
                                      IN BOOLEAN CacheDisable,
                                      IN BOOLEAN WriteThrough);
     };
@@ -85,15 +85,15 @@ namespace MM
             XTAPI BOOLEAN GetOneEntry(IN PMMPTE Pte);
             XTAPI ULONG GetPteSize(VOID);
             XTAPI VOID InitializePageMapInfo(VOID);
-            XTAPI BOOLEAN PteValid(IN PHARDWARE_PTE PtePointer);
+            XTAPI BOOLEAN PteValid(IN PMMPTE PtePointer);
             XTAPI VOID SetNextEntry(IN PMMPTE Pte,
                                     IN ULONG_PTR Value);
             XTAPI VOID SetOneEntry(IN PMMPTE Pte,
                                    IN BOOLEAN Value);
-            XTAPI VOID SetPte(IN PHARDWARE_PTE PtePointer,
+            XTAPI VOID SetPte(IN PMMPTE PtePointer,
                               IN PFN_NUMBER PageFrameNumber,
                               IN BOOLEAN Writable);
-            XTAPI VOID SetPteCaching(IN PHARDWARE_PTE PtePointer,
+            XTAPI VOID SetPteCaching(IN PMMPTE PtePointer,
                                      IN BOOLEAN CacheDisable,
                                      IN BOOLEAN WriteThrough);
     };

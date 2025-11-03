@@ -21,7 +21,7 @@
  */
 XTAPI
 VOID
-MM::PageMap::ClearPte(IN PHARDWARE_PTE PtePointer)
+MM::PageMap::ClearPte(IN PMMPTE PtePointer)
 {
     /* Clear PTE */
     PtePointer->Long = 0;
@@ -339,10 +339,10 @@ MM::PageMapBasic::InitializePageMapInfo(VOID)
  */
 XTAPI
 BOOLEAN
-MM::PageMapBasic::PteValid(IN PHARDWARE_PTE PtePointer)
+MM::PageMapBasic::PteValid(IN PMMPTE PtePointer)
 {
     /* Check if PTE is valid */
-    return (BOOLEAN)PtePointer->Pml2.Valid;
+    return (BOOLEAN)PtePointer->Pml2.Hardware.Valid;
 }
 
 /**
@@ -407,14 +407,14 @@ MM::PageMapBasic::SetOneEntry(IN PMMPTE Pte,
  */
 XTAPI
 VOID
-MM::PageMapBasic::SetPte(IN PHARDWARE_PTE PtePointer,
+MM::PageMapBasic::SetPte(IN PMMPTE PtePointer,
                          IN PFN_NUMBER PageFrameNumber,
                          IN BOOLEAN Writable)
 {
     /* Set PTE */
-    PtePointer->Pml2.PageFrameNumber = PageFrameNumber;
-    PtePointer->Pml2.Valid = 1;
-    PtePointer->Pml2.Writable = Writable;
+    PtePointer->Pml2.Hardware.PageFrameNumber = PageFrameNumber;
+    PtePointer->Pml2.Hardware.Valid = 1;
+    PtePointer->Pml2.Hardware.Writable = Writable;
 }
 
 /**
@@ -435,13 +435,13 @@ MM::PageMapBasic::SetPte(IN PHARDWARE_PTE PtePointer,
  */
 XTAPI
 VOID
-MM::PageMapBasic::SetPteCaching(IN PHARDWARE_PTE PtePointer,
+MM::PageMapBasic::SetPteCaching(IN PMMPTE PtePointer,
                                 IN BOOLEAN CacheDisable,
                                 IN BOOLEAN WriteThrough)
 {
     /* Set caching attributes */
-    PtePointer->Pml2.CacheDisable = CacheDisable;
-    PtePointer->Pml2.WriteThrough = WriteThrough;
+    PtePointer->Pml2.Hardware.CacheDisable = CacheDisable;
+    PtePointer->Pml2.Hardware.WriteThrough = WriteThrough;
 }
 
 /**
@@ -573,9 +573,9 @@ MM::PageMapXpa::InitializePageMapInfo(VOID)
  */
 XTAPI
 BOOLEAN
-MM::PageMapXpa::PteValid(IN PHARDWARE_PTE PtePointer)
+MM::PageMapXpa::PteValid(IN PMMPTE PtePointer)
 {
-    return (BOOLEAN)PtePointer->Pml3.Valid;
+    return (BOOLEAN)PtePointer->Pml3.Hardware.Valid;
 }
 
 /**
@@ -640,14 +640,14 @@ MM::PageMapXpa::SetOneEntry(IN PMMPTE Pte,
  */
 XTAPI
 VOID
-MM::PageMapXpa::SetPte(IN PHARDWARE_PTE PtePointer,
+MM::PageMapXpa::SetPte(IN PMMPTE PtePointer,
                        IN PFN_NUMBER PageFrameNumber,
                        IN BOOLEAN Writable)
 {
     /* Set PTE */
-    PtePointer->Pml3.PageFrameNumber = PageFrameNumber;
-    PtePointer->Pml3.Valid = 1;
-    PtePointer->Pml3.Writable = Writable;
+    PtePointer->Pml3.Hardware.PageFrameNumber = PageFrameNumber;
+    PtePointer->Pml3.Hardware.Valid = 1;
+    PtePointer->Pml3.Hardware.Writable = Writable;
 }
 
 /**
@@ -668,11 +668,11 @@ MM::PageMapXpa::SetPte(IN PHARDWARE_PTE PtePointer,
  */
 XTAPI
 VOID
-MM::PageMapXpa::SetPteCaching(IN PHARDWARE_PTE PtePointer,
+MM::PageMapXpa::SetPteCaching(IN PMMPTE PtePointer,
                               IN BOOLEAN CacheDisable,
                               IN BOOLEAN WriteThrough)
 {
     /* Set caching attributes */
-    PtePointer->Pml3.CacheDisable = CacheDisable;
-    PtePointer->Pml3.WriteThrough = WriteThrough;
+    PtePointer->Pml3.Hardware.CacheDisable = CacheDisable;
+    PtePointer->Pml3.Hardware.WriteThrough = WriteThrough;
 }
