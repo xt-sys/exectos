@@ -21,30 +21,30 @@ namespace MM
             STATIC PPAGEMAP PmlRoutines;
 
         public:
-            STATIC XTAPI PMMPTE AdvancePte(PMMPTE Pte,
-                                            ULONG Count);
-            STATIC XTAPI VOID ClearPte(PHARDWARE_PTE PtePointer);
+            STATIC XTAPI PMMPTE AdvancePte(IN PMMPTE Pte,
+                                           IN ULONG Count);
+            STATIC XTAPI VOID ClearPte(IN PHARDWARE_PTE PtePointer);
             STATIC XTAPI VOID FlushTlb(VOID);
             STATIC XTAPI ULONG_PTR GetEmptyPteList(VOID);
-            STATIC XTAPI ULONG_PTR GetNextEntry(PMMPTE Pte);
-            STATIC XTAPI PMMPTE GetNextPte(PMMPTE Pte);
-            STATIC XTAPI BOOLEAN GetOneEntry(PMMPTE Pte);
-            STATIC XTAPI PMMPDE GetPdeAddress(PVOID Address);
-            STATIC XTAPI PMMPPE GetPpeAddress(PVOID Address);
-            STATIC XTAPI PMMPTE GetPteAddress(PVOID Address);
+            STATIC XTAPI ULONG_PTR GetNextEntry(IN PMMPTE Pte);
+            STATIC XTAPI PMMPTE GetNextPte(IN PMMPTE Pte);
+            STATIC XTAPI BOOLEAN GetOneEntry(IN PMMPTE Pte);
+            STATIC XTAPI PMMPDE GetPdeAddress(IN PVOID Address);
+            STATIC XTAPI PMMPPE GetPpeAddress(IN PVOID Address);
+            STATIC XTAPI PMMPTE GetPteAddress(IN PVOID Address);
             STATIC XTAPI ULONG GetPteSize(VOID);
             STATIC XTAPI VOID InitializePageMapSupport(VOID);
-            STATIC XTAPI BOOLEAN PteValid(PHARDWARE_PTE PtePointer);
-            STATIC XTAPI VOID SetNextEntry(PMMPTE Pte,
-                                            ULONG_PTR Value);
-            STATIC XTAPI VOID SetOneEntry(PMMPTE Pte,
-                                          BOOLEAN Value);
-            STATIC XTAPI VOID SetPte(PHARDWARE_PTE PtePointer,
-                                     PFN_NUMBER PageFrameNumber,
-                                     BOOLEAN Writable);
-            STATIC XTAPI VOID SetPteCaching(PHARDWARE_PTE PtePointer,
-                                            BOOLEAN CacheDisable,
-                                            BOOLEAN WriteThrough);
+            STATIC XTAPI BOOLEAN PteValid(IN PHARDWARE_PTE PtePointer);
+            STATIC XTAPI VOID SetNextEntry(IN PMMPTE Pte,
+                                           IN ULONG_PTR Value);
+            STATIC XTAPI VOID SetOneEntry(IN PMMPTE Pte,
+                                          IN BOOLEAN Value);
+            STATIC XTAPI VOID SetPte(IN PHARDWARE_PTE PtePointer,
+                                     IN PFN_NUMBER PageFrameNumber,
+                                     IN BOOLEAN Writable);
+            STATIC XTAPI VOID SetPteCaching(IN PHARDWARE_PTE PtePointer,
+                                            IN BOOLEAN CacheDisable,
+                                            IN BOOLEAN WriteThrough);
             STATIC XTFASTCALL VOID ZeroPages(IN PVOID Address,
                                              IN ULONG Size);
 

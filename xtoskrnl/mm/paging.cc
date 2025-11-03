@@ -24,8 +24,8 @@
  */
 XTAPI
 PMMPTE
-MM::Paging::AdvancePte(PMMPTE Pte,
-                       ULONG Count)
+MM::Paging::AdvancePte(IN PMMPTE Pte,
+                       IN ULONG Count)
 {
     /* Return advanced PTE pointer */
     return PmlRoutines->AdvancePte(Pte, Count);
@@ -43,7 +43,7 @@ MM::Paging::AdvancePte(PMMPTE Pte,
  */
 XTAPI
 VOID
-MM::Paging::ClearPte(PHARDWARE_PTE PtePointer)
+MM::Paging::ClearPte(IN PHARDWARE_PTE PtePointer)
 {
     /* Clear PTE */
     PmlRoutines->ClearPte(PtePointer);
@@ -128,7 +128,7 @@ MM::Paging::GetEmptyPteList(VOID)
  */
 XTAPI
 ULONG_PTR
-MM::Paging::GetNextEntry(PMMPTE Pte)
+MM::Paging::GetNextEntry(IN PMMPTE Pte)
 {
     /* Return next entry in PTE list */
     return PmlRoutines->GetNextEntry(Pte);
@@ -146,7 +146,7 @@ MM::Paging::GetNextEntry(PMMPTE Pte)
  */
 XTAPI
 PMMPTE
-MM::Paging::GetNextPte(PMMPTE Pte)
+MM::Paging::GetNextPte(IN PMMPTE Pte)
 {
     /* Return advanced PTE pointer */
     return PmlRoutines->GetNextPte(Pte);
@@ -164,7 +164,7 @@ MM::Paging::GetNextPte(PMMPTE Pte)
  */
 XTAPI
 BOOLEAN
-MM::Paging::GetOneEntry(PMMPTE Pte)
+MM::Paging::GetOneEntry(IN PMMPTE Pte)
 {
     /* Return one entry status */
     return PmlRoutines->GetOneEntry(Pte);
@@ -216,7 +216,7 @@ MM::Paging::GetPageMapXpaRoutines(VOID)
  */
 XTAPI
 PMMPDE
-MM::Paging::GetPdeAddress(PVOID Address)
+MM::Paging::GetPdeAddress(IN PVOID Address)
 {
     /* Return PDE address */
     return PmlRoutines->GetPdeAddress(Address);
@@ -234,7 +234,7 @@ MM::Paging::GetPdeAddress(PVOID Address)
  */
 XTAPI
 PMMPPE
-MM::Paging::GetPpeAddress(PVOID Address)
+MM::Paging::GetPpeAddress(IN PVOID Address)
 {
     /* Return PPE address */
     return PmlRoutines->GetPpeAddress(Address);
@@ -252,7 +252,7 @@ MM::Paging::GetPpeAddress(PVOID Address)
  */
 XTAPI
 PMMPTE
-MM::Paging::GetPteAddress(PVOID Address)
+MM::Paging::GetPteAddress(IN PVOID Address)
 {
     /* Return PTE address */
     return PmlRoutines->GetPteAddress(Address);
@@ -312,7 +312,7 @@ MM::Paging::InitializePageMapSupport(VOID)
  */
 XTAPI
 BOOLEAN
-MM::Paging::PteValid(PHARDWARE_PTE PtePointer)
+MM::Paging::PteValid(IN PHARDWARE_PTE PtePointer)
 {
     /* Check if PTE is valid */
     return PmlRoutines->PteValid(PtePointer);
@@ -333,8 +333,8 @@ MM::Paging::PteValid(PHARDWARE_PTE PtePointer)
  */
 XTAPI
 VOID
-MM::Paging::SetNextEntry(PMMPTE Pte,
-                         ULONG_PTR Value)
+MM::Paging::SetNextEntry(IN PMMPTE Pte,
+                         IN ULONG_PTR Value)
 {
     /* Set next entry in PTE list */
     PmlRoutines->SetNextEntry(Pte, Value);
@@ -355,15 +355,15 @@ MM::Paging::SetNextEntry(PMMPTE Pte,
  */
 XTAPI
 VOID
-MM::Paging::SetOneEntry(PMMPTE Pte,
-                        BOOLEAN Value)
+MM::Paging::SetOneEntry(IN PMMPTE Pte,
+                        IN BOOLEAN Value)
 {
     /* Set one entry status */
     PmlRoutines->SetOneEntry(Pte, Value);
 }
 
 /**
- * Sets a PML2 page table entry (PTE) with the specified physical page and access flags.
+ * Sets a Page Table Entry (PTE) with the specified physical page and access flags.
  *
  * @param PtePointer
  *        Pointer to the page table entry (PTE) to set.
@@ -380,12 +380,12 @@ MM::Paging::SetOneEntry(PMMPTE Pte,
  */
 XTAPI
 VOID
-MM::Paging::SetPte(PHARDWARE_PTE PtePointer,
-                   PFN_NUMBER PageFrameNumber,
-                   BOOLEAN Writable)
+MM::Paging::SetPte(IN PHARDWARE_PTE PtePointer,
+                   IN PFN_NUMBER PageFrameNumber,
+                   IN BOOLEAN Writable)
 {
     /* Set PTE */
-    PmlRoutines->SetPte(PtePointer, PageFrameNumber, Writable);
+    PmlRoutines->SetPte(PtePointer, PageFrameNumber, (BOOLEAN)Writable);
 }
 
 /**
@@ -406,9 +406,9 @@ MM::Paging::SetPte(PHARDWARE_PTE PtePointer,
  */
 XTAPI
 VOID
-MM::Paging::SetPteCaching(PHARDWARE_PTE PtePointer,
-                          BOOLEAN CacheDisable,
-                          BOOLEAN WriteThrough)
+MM::Paging::SetPteCaching(IN PHARDWARE_PTE PtePointer,
+                          IN BOOLEAN CacheDisable,
+                          IN BOOLEAN WriteThrough)
 {
     /* Set caching attributes */
     PmlRoutines->SetPteCaching(PtePointer, CacheDisable, WriteThrough);
