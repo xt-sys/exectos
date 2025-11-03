@@ -21,41 +21,41 @@ namespace MM
             MMPAGEMAP_INFO PageMapInfo;
 
         public:
-            XTAPI PMMPTE AdvancePte(PMMPTE Pte,
-                                    ULONG Count);
-            XTAPI VOID ClearPte(PHARDWARE_PTE PtePointer);
+            XTAPI PMMPTE AdvancePte(IN PMMPTE Pte,
+                                    IN ULONG Count);
+            XTAPI VOID ClearPte(IN PHARDWARE_PTE PtePointer);
             XTAPI ULONGLONG GetEmptyPteList(VOID);
-            XTAPI ULONG_PTR GetNextEntry(PMMPTE Pte);
-            XTAPI PMMPTE GetNextPte(PMMPTE Pte);
-            XTAPI BOOLEAN GetOneEntry(PMMPTE Pte);
-            XTAPI PMMP5E GetP5eAddress(PVOID Address);
-            XTAPI ULONG GetP5eIndex(PVOID Address);
-            XTAPI PVOID GetP5eVirtualAddress(PMMP5E P5ePointer);
-            XTAPI PMMPDE GetPdeAddress(PVOID Address);
-            XTAPI ULONG GetPdeIndex(PVOID Address);
-            XTAPI PVOID GetPdeVirtualAddress(PMMPDE PdePointer);
-            XTAPI PMMPPE GetPpeAddress(PVOID Address);
-            XTAPI ULONG GetPpeIndex(PVOID Address);
-            XTAPI PVOID GetPpeVirtualAddress(PMMPPE PpePointer);
-            XTAPI PMMPTE GetPteAddress(PVOID Address);
-            XTAPI ULONG GetPteIndex(PVOID Address);
+            XTAPI ULONG_PTR GetNextEntry(IN PMMPTE Pte);
+            XTAPI PMMPTE GetNextPte(IN PMMPTE Pte);
+            XTAPI BOOLEAN GetOneEntry(IN PMMPTE Pte);
+            XTAPI PMMP5E GetP5eAddress(IN PVOID Address);
+            XTAPI ULONG GetP5eIndex(IN PVOID Address);
+            XTAPI PVOID GetP5eVirtualAddress(IN PMMP5E P5ePointer);
+            XTAPI PMMPDE GetPdeAddress(IN PVOID Address);
+            XTAPI ULONG GetPdeIndex(IN PVOID Address);
+            XTAPI PVOID GetPdeVirtualAddress(IN PMMPDE PdePointer);
+            XTAPI PMMPPE GetPpeAddress(IN PVOID Address);
+            XTAPI ULONG GetPpeIndex(IN PVOID Address);
+            XTAPI PVOID GetPpeVirtualAddress(IN PMMPPE PpePointer);
+            XTAPI PMMPTE GetPteAddress(IN PVOID Address);
+            XTAPI ULONG GetPteIndex(IN PVOID Address);
             XTAPI ULONG GetPteSize(VOID);
-            XTAPI PVOID GetPteVirtualAddress(PMMPTE PtePointer);
-            XTAPI PMMPXE GetPxeAddress(PVOID Address);
-            XTAPI ULONG GetPxeIndex(PVOID Address);
-            XTAPI PVOID GetPxeVirtualAddress(PMMPXE PxePointer);
+            XTAPI PVOID GetPteVirtualAddress(IN PMMPTE PtePointer);
+            XTAPI PMMPXE GetPxeAddress(IN PVOID Address);
+            XTAPI ULONG GetPxeIndex(IN PVOID Address);
+            XTAPI PVOID GetPxeVirtualAddress(IN PMMPXE PxePointer);
             VIRTUAL XTAPI VOID InitializePageMapInfo(VOID) = 0;
-            XTAPI BOOLEAN PteValid(PHARDWARE_PTE PtePointer);
-            XTAPI VOID SetNextEntry(PMMPTE Pte,
-                                    ULONG_PTR Value);
-            XTAPI VOID SetOneEntry(PMMPTE Pte,
-                                   BOOLEAN Value);
-            XTAPI VOID SetPte(PHARDWARE_PTE PtePointer,
-                              PFN_NUMBER PageFrameNumber,
-                              BOOLEAN Writable);
-            XTAPI VOID SetPteCaching(PHARDWARE_PTE PtePointer,
-                                     BOOLEAN CacheDisable,
-                                     BOOLEAN WriteThrough);
+            XTAPI BOOLEAN PteValid(IN PHARDWARE_PTE PtePointer);
+            XTAPI VOID SetNextEntry(IN PMMPTE Pte,
+                                    IN ULONG_PTR Value);
+            XTAPI VOID SetOneEntry(IN PMMPTE Pte,
+                                   IN BOOLEAN Value);
+            XTAPI VOID SetPte(IN PHARDWARE_PTE PtePointer,
+                              IN PFN_NUMBER PageFrameNumber,
+                              IN BOOLEAN Writable);
+            XTAPI VOID SetPteCaching(IN PHARDWARE_PTE PtePointer,
+                                     IN BOOLEAN CacheDisable,
+                                     IN BOOLEAN WriteThrough);
     } PAGEMAP, *PPAGEMAP;
 
     class PageMapBasic final : public PageMap

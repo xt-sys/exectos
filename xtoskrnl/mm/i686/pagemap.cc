@@ -21,7 +21,7 @@
  */
 XTAPI
 VOID
-MM::PageMap::ClearPte(PHARDWARE_PTE PtePointer)
+MM::PageMap::ClearPte(IN PHARDWARE_PTE PtePointer)
 {
     /* Clear PTE */
     PtePointer->Long = 0;
@@ -54,7 +54,7 @@ MM::PageMap::GetEmptyPteList(VOID)
  */
 XTAPI
 PMMPDE
-MM::PageMap::GetPdeAddress(PVOID Address)
+MM::PageMap::GetPdeAddress(IN PVOID Address)
 {
     ULONG Offset;
 
@@ -75,7 +75,7 @@ MM::PageMap::GetPdeAddress(PVOID Address)
  */
 XTAPI
 ULONG
-MM::PageMap::GetPdeIndex(PVOID Address)
+MM::PageMap::GetPdeIndex(IN PVOID Address)
 {
     /* Return PDE index */
     return ((((ULONG_PTR)(Address)) >> PageMapInfo.PdiShift) & (PageMapInfo.Xpa ? 0x1FF : 0x3FF));
@@ -93,7 +93,7 @@ MM::PageMap::GetPdeIndex(PVOID Address)
  */
 XTAPI
 PVOID
-MM::PageMap::GetPdeVirtualAddress(PMMPDE PdePointer)
+MM::PageMap::GetPdeVirtualAddress(IN PMMPDE PdePointer)
 {
     /* Return PDE virtual address */
     return ((PVOID)((ULONG)(PdePointer) << 20));
@@ -111,7 +111,7 @@ MM::PageMap::GetPdeVirtualAddress(PMMPDE PdePointer)
  */
 XTAPI
 PMMPPE
-MM::PageMap::GetPpeAddress(PVOID Address)
+MM::PageMap::GetPpeAddress(IN PVOID Address)
 {
     /* Return zero */
     return (PMMPPE)0;
@@ -129,7 +129,7 @@ MM::PageMap::GetPpeAddress(PVOID Address)
  */
 XTAPI
 ULONG
-MM::PageMap::GetPpeIndex(PVOID Address)
+MM::PageMap::GetPpeIndex(IN PVOID Address)
 {
     /* Return PPE index */
     return ((((ULONG_PTR)(Address)) >> MM_PPI_SHIFT) & 0x3) * PageMapInfo.Xpa;
@@ -147,7 +147,7 @@ MM::PageMap::GetPpeIndex(PVOID Address)
  */
 XTAPI
 PVOID
-MM::PageMap::GetPpeVirtualAddress(PMMPPE PpePointer)
+MM::PageMap::GetPpeVirtualAddress(IN PMMPPE PpePointer)
 {
     /* Return PPE virtual address */
     return (PVOID)((ULONG)(PpePointer) << 30);
@@ -165,7 +165,7 @@ MM::PageMap::GetPpeVirtualAddress(PMMPPE PpePointer)
  */
 XTAPI
 PMMPTE
-MM::PageMap::GetPteAddress(PVOID Address)
+MM::PageMap::GetPteAddress(IN PVOID Address)
 {
     ULONG Offset;
 
@@ -186,7 +186,7 @@ MM::PageMap::GetPteAddress(PVOID Address)
  */
 XTAPI
 ULONG
-MM::PageMap::GetPteIndex(PVOID Address)
+MM::PageMap::GetPteIndex(IN PVOID Address)
 {
     /* Return PTE index */
     return ((((ULONG_PTR)(Address)) >> MM_PTI_SHIFT) & (PageMapInfo.Xpa ? 0x1FF : 0x3FF));
@@ -204,7 +204,7 @@ MM::PageMap::GetPteIndex(PVOID Address)
  */
 XTAPI
 PVOID
-MM::PageMap::GetPteVirtualAddress(PMMPTE PtePointer)
+MM::PageMap::GetPteVirtualAddress(IN PMMPTE PtePointer)
 {
     /* Return PTE virtual address */
     return ((PVOID)((ULONG)(PtePointer) << 10));
@@ -225,8 +225,8 @@ MM::PageMap::GetPteVirtualAddress(PMMPTE PtePointer)
  */
 XTAPI
 PMMPTE
-MM::PageMapBasic::AdvancePte(PMMPTE Pte,
-                             ULONG Count)
+MM::PageMapBasic::AdvancePte(IN PMMPTE Pte,
+                             IN ULONG Count)
 {
     /* Return advanced PTE pointer */
     return (PMMPTE)((ULONG_PTR)Pte + (Count * sizeof(MMPML2_PTE)));
@@ -244,7 +244,7 @@ MM::PageMapBasic::AdvancePte(PMMPTE Pte,
  */
 XTAPI
 ULONG_PTR
-MM::PageMapBasic::GetNextEntry(PMMPTE Pte)
+MM::PageMapBasic::GetNextEntry(IN PMMPTE Pte)
 {
     /* Return next entry in PTE list */
     return Pte->Pml2.List.NextEntry;
@@ -262,7 +262,7 @@ MM::PageMapBasic::GetNextEntry(PMMPTE Pte)
  */
 XTAPI
 PMMPTE
-MM::PageMapBasic::GetNextPte(PMMPTE Pte)
+MM::PageMapBasic::GetNextPte(IN PMMPTE Pte)
 {
     /* Return advanced PTE pointer */
     return AdvancePte(Pte, 1);
@@ -280,7 +280,7 @@ MM::PageMapBasic::GetNextPte(PMMPTE Pte)
  */
 XTAPI
 BOOLEAN
-MM::PageMapBasic::GetOneEntry(PMMPTE Pte)
+MM::PageMapBasic::GetOneEntry(IN PMMPTE Pte)
 {
     /* Return one entry status */
     return Pte->Pml2.List.OneEntry;
@@ -339,7 +339,7 @@ MM::PageMapBasic::InitializePageMapInfo(VOID)
  */
 XTAPI
 BOOLEAN
-MM::PageMapBasic::PteValid(PHARDWARE_PTE PtePointer)
+MM::PageMapBasic::PteValid(IN PHARDWARE_PTE PtePointer)
 {
     /* Check if PTE is valid */
     return (BOOLEAN)PtePointer->Pml2.Valid;
@@ -360,8 +360,8 @@ MM::PageMapBasic::PteValid(PHARDWARE_PTE PtePointer)
  */
 XTAPI
 VOID
-MM::PageMapBasic::SetNextEntry(PMMPTE Pte,
-                               ULONG_PTR Value)
+MM::PageMapBasic::SetNextEntry(IN PMMPTE Pte,
+                               IN ULONG_PTR Value)
 {
     /* Set next entry in PTE list */
     Pte->Pml2.List.NextEntry = Value;
@@ -382,8 +382,8 @@ MM::PageMapBasic::SetNextEntry(PMMPTE Pte,
  */
 XTAPI
 VOID
-MM::PageMapBasic::SetOneEntry(PMMPTE Pte,
-                              BOOLEAN Value)
+MM::PageMapBasic::SetOneEntry(IN PMMPTE Pte,
+                              IN BOOLEAN Value)
 {
     /* Set one entry status */
     Pte->Pml2.List.OneEntry = Value;
@@ -407,9 +407,9 @@ MM::PageMapBasic::SetOneEntry(PMMPTE Pte,
  */
 XTAPI
 VOID
-MM::PageMapBasic::SetPte(PHARDWARE_PTE PtePointer,
-                         PFN_NUMBER PageFrameNumber,
-                         BOOLEAN Writable)
+MM::PageMapBasic::SetPte(IN PHARDWARE_PTE PtePointer,
+                         IN PFN_NUMBER PageFrameNumber,
+                         IN BOOLEAN Writable)
 {
     /* Set PTE */
     PtePointer->Pml2.PageFrameNumber = PageFrameNumber;
@@ -435,9 +435,9 @@ MM::PageMapBasic::SetPte(PHARDWARE_PTE PtePointer,
  */
 XTAPI
 VOID
-MM::PageMapBasic::SetPteCaching(PHARDWARE_PTE PtePointer,
-                                BOOLEAN CacheDisable,
-                                BOOLEAN WriteThrough)
+MM::PageMapBasic::SetPteCaching(IN PHARDWARE_PTE PtePointer,
+                                IN BOOLEAN CacheDisable,
+                                IN BOOLEAN WriteThrough)
 {
     /* Set caching attributes */
     PtePointer->Pml2.CacheDisable = CacheDisable;
@@ -459,8 +459,8 @@ MM::PageMapBasic::SetPteCaching(PHARDWARE_PTE PtePointer,
  */
 XTAPI
 PMMPTE
-MM::PageMapXpa::AdvancePte(PMMPTE Pte,
-                           ULONG Count)
+MM::PageMapXpa::AdvancePte(IN PMMPTE Pte,
+                           IN ULONG Count)
 {
     /* Return advanced PTE pointer */
     return (PMMPTE)((ULONG_PTR)Pte + (Count * sizeof(MMPML3_PTE)));
@@ -478,7 +478,7 @@ MM::PageMapXpa::AdvancePte(PMMPTE Pte,
  */
 XTAPI
 ULONG_PTR
-MM::PageMapXpa::GetNextEntry(PMMPTE Pte)
+MM::PageMapXpa::GetNextEntry(IN PMMPTE Pte)
 {
     /* Return next entry in PTE list */
     return Pte->Pml3.List.NextEntry;
@@ -496,7 +496,7 @@ MM::PageMapXpa::GetNextEntry(PMMPTE Pte)
  */
 XTAPI
 PMMPTE
-MM::PageMapXpa::GetNextPte(PMMPTE Pte)
+MM::PageMapXpa::GetNextPte(IN PMMPTE Pte)
 {
     /* Return advanced PTE pointer */
     return AdvancePte(Pte, 1);
@@ -514,7 +514,7 @@ MM::PageMapXpa::GetNextPte(PMMPTE Pte)
  */
 XTAPI
 BOOLEAN
-MM::PageMapXpa::GetOneEntry(PMMPTE Pte)
+MM::PageMapXpa::GetOneEntry(IN PMMPTE Pte)
 {
     /* Return one entry status */
     return Pte->Pml3.List.OneEntry;
@@ -573,7 +573,7 @@ MM::PageMapXpa::InitializePageMapInfo(VOID)
  */
 XTAPI
 BOOLEAN
-MM::PageMapXpa::PteValid(PHARDWARE_PTE PtePointer)
+MM::PageMapXpa::PteValid(IN PHARDWARE_PTE PtePointer)
 {
     return (BOOLEAN)PtePointer->Pml3.Valid;
 }
@@ -593,8 +593,8 @@ MM::PageMapXpa::PteValid(PHARDWARE_PTE PtePointer)
  */
 XTAPI
 VOID
-MM::PageMapXpa::SetNextEntry(PMMPTE Pte,
-                             ULONG_PTR Value)
+MM::PageMapXpa::SetNextEntry(IN PMMPTE Pte,
+                             IN ULONG_PTR Value)
 {
     /* Set next entry in PTE list */
     Pte->Pml3.List.NextEntry = Value;
@@ -615,8 +615,8 @@ MM::PageMapXpa::SetNextEntry(PMMPTE Pte,
  */
 XTAPI
 VOID
-MM::PageMapXpa::SetOneEntry(PMMPTE Pte,
-                            BOOLEAN Value)
+MM::PageMapXpa::SetOneEntry(IN PMMPTE Pte,
+                            IN BOOLEAN Value)
 {
     /* Set one entry status */
     Pte->Pml3.List.OneEntry = Value;
@@ -640,9 +640,9 @@ MM::PageMapXpa::SetOneEntry(PMMPTE Pte,
  */
 XTAPI
 VOID
-MM::PageMapXpa::SetPte(PHARDWARE_PTE PtePointer,
-                       PFN_NUMBER PageFrameNumber,
-                       BOOLEAN Writable)
+MM::PageMapXpa::SetPte(IN PHARDWARE_PTE PtePointer,
+                       IN PFN_NUMBER PageFrameNumber,
+                       IN BOOLEAN Writable)
 {
     /* Set PTE */
     PtePointer->Pml3.PageFrameNumber = PageFrameNumber;
@@ -668,9 +668,9 @@ MM::PageMapXpa::SetPte(PHARDWARE_PTE PtePointer,
  */
 XTAPI
 VOID
-MM::PageMapXpa::SetPteCaching(PHARDWARE_PTE PtePointer,
-                              BOOLEAN CacheDisable,
-                              BOOLEAN WriteThrough)
+MM::PageMapXpa::SetPteCaching(IN PHARDWARE_PTE PtePointer,
+                              IN BOOLEAN CacheDisable,
+                              IN BOOLEAN WriteThrough)
 {
     /* Set caching attributes */
     PtePointer->Pml3.CacheDisable = CacheDisable;
