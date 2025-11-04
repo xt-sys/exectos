@@ -171,6 +171,23 @@ MM::Paging::GetOneEntry(IN PMMPTE Pte)
 }
 
 /**
+ * Gets the page frame number from a corresponding PTE.
+ *
+ * @param Pte
+ *        The PTE pointer to get the page frame number from.
+ *
+ * @return This routine returns the page frame number.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PFN_NUMBER
+MM::Paging::GetPageFrameNumber(IN PMMPTE Pte)
+{
+    return PmlRoutines->GetPageFrameNumber(Pte);
+}
+
+/**
  * Gets the page map routines for basic paging mode (non-XPA).
  *
  * @return This routine returns the address of the object containing non-XPA page map routines.

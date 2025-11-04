@@ -174,6 +174,23 @@ MM::PageMap::GetP5eVirtualAddress(IN PMMP5E P5ePointer)
 }
 
 /**
+ * Gets the page frame number from a corresponding PTE.
+ *
+ * @param Pte
+ *        The PTE pointer to get the page frame number from.
+ *
+ * @return This routine returns the page frame number.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PFN_NUMBER
+MM::PageMap::GetPageFrameNumber(IN PMMPTE Pte)
+{
+    return Pte->Hardware.PageFrameNumber;
+}
+
+/**
  * Gets the address of the PDE (Page Directory Entry), that maps given address.
  *
  * @param Address

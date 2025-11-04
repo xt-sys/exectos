@@ -287,6 +287,23 @@ MM::PageMapBasic::GetOneEntry(IN PMMPTE Pte)
 }
 
 /**
+ * Gets the page frame number from a corresponding PTE.
+ *
+ * @param Pte
+ *        The PTE pointer to get the page frame number from.
+ *
+ * @return This routine returns the page frame number.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PFN_NUMBER
+MM::PageMapBasic::GetPageFrameNumber(IN PMMPTE Pte)
+{
+    return Pte->Pml2.Hardware.PageFrameNumber;
+}
+
+/**
  * Gets the size of a PTE for basic paging (PML2).
  *
  * @return This routine returns the size of a PTE.
@@ -518,6 +535,23 @@ MM::PageMapXpa::GetOneEntry(IN PMMPTE Pte)
 {
     /* Return one entry status */
     return Pte->Pml3.List.OneEntry;
+}
+
+/**
+ * Gets the page frame number from a corresponding PTE.
+ *
+ * @param Pte
+ *        The PTE pointer to get the page frame number from.
+ *
+ * @return This routine returns the page frame number.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PFN_NUMBER
+MM::PageMapBasic::GetPageFrameNumber(IN PMMPTE Pte)
+{
+    return Pte->Pml3.Hardware.PageFrameNumber;
 }
 
 /**

@@ -28,6 +28,7 @@ namespace MM
             VIRTUAL XTAPI ULONG_PTR GetNextEntry(IN PMMPTE Pte) = 0;
             VIRTUAL XTAPI PMMPTE GetNextPte(IN PMMPTE Pte) = 0;
             VIRTUAL XTAPI BOOLEAN GetOneEntry(IN PMMPTE Pte) = 0;
+            VIRTUAL XTAPI PFN_NUMBER GetPageFrameNumber(IN PMMPTE Pte) = 0;
             XTAPI PMMPDE GetPdeAddress(IN PVOID Address);
             XTAPI ULONG GetPdeIndex(IN PVOID Address);
             XTAPI PVOID GetPdeVirtualAddress(IN PMMPDE PdePointer);
@@ -60,6 +61,7 @@ namespace MM
             XTAPI ULONG_PTR GetNextEntry(IN PMMPTE Pte);
             XTAPI PMMPTE GetNextPte(IN PMMPTE Pte);
             XTAPI BOOLEAN GetOneEntry(IN PMMPTE Pte);
+            XTAPI PFN_NUMBER GetPageFrameNumber(IN PMMPTE Pte);
             XTAPI ULONG GetPteSize(VOID);
             XTAPI VOID InitializePageMapInfo(VOID);
             XTAPI BOOLEAN PteValid(IN PMMPTE PtePointer);
@@ -83,6 +85,7 @@ namespace MM
             XTAPI ULONG_PTR GetNextEntry(IN PMMPTE Pte);
             XTAPI PMMPTE GetNextPte(IN PMMPTE Pte);
             XTAPI BOOLEAN GetOneEntry(IN PMMPTE Pte);
+            XTAPI PFN_NUMBER GetPageFrameNumber(IN PMMPTE Pte);
             XTAPI ULONG GetPteSize(VOID);
             XTAPI VOID InitializePageMapInfo(VOID);
             XTAPI BOOLEAN PteValid(IN PMMPTE PtePointer);
