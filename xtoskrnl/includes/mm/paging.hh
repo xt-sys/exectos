@@ -26,6 +26,7 @@ namespace MM
             STATIC XTAPI VOID ClearPte(IN PMMPTE PtePointer);
             STATIC XTAPI VOID FlushTlb(VOID);
             STATIC XTAPI ULONG_PTR GetEmptyPteList(VOID);
+            STATIC XTAPI BOOLEAN GetExtendedPhysicalAddressingStatus(VOID);
             STATIC XTAPI ULONG_PTR GetNextEntry(IN PMMPTE Pte);
             STATIC XTAPI PMMPTE GetNextPte(IN PMMPTE Pte);
             STATIC XTAPI BOOLEAN GetOneEntry(IN PMMPTE Pte);
@@ -49,7 +50,6 @@ namespace MM
                                              IN ULONG Size);
 
         private:
-            STATIC XTAPI BOOLEAN GetExtendedPhysicalAddressingStatus(VOID);
             STATIC XTAPI PPAGEMAP GetPageMapBasicRoutines(VOID);
             STATIC XTAPI PPAGEMAP GetPageMapXpaRoutines(VOID);
     };
