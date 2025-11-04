@@ -35,6 +35,40 @@
 #define MM_PTE_LEGACY_SHIFT                        2
 #define MM_PDI_LEGACY_SHIFT                        22
 
+/* PTE state flags */
+#define MM_PTE_VALID                               0x00000001
+#define MM_PTE_ACCESSED                            0x00000020
+#define MM_PTE_DIRTY                               0x00000040
+
+/* PTE scope flags */
+#define MM_PTE_LARGE_PAGE                          0x00000080
+#define MM_PTE_GLOBAL                              0x00000100
+
+/* PTE access flags */
+#define MM_PTE_NOACCESS                            0x00000000
+#define MM_PTE_READONLY                            0x00000000
+#define MM_PTE_EXECUTE                             0x00000000
+#define MM_PTE_EXECUTE_READ                        0x00000000
+#define MM_PTE_READWRITE                           0x00000002
+#define MM_PTE_WRITECOPY                           0x00000200
+#define MM_PTE_EXECUTE_READWRITE                   0x00000002
+#define MM_PTE_EXECUTE_WRITECOPY                   0x00000200
+
+/* PTE protection flags */
+#define MM_PTE_NOEXECUTE                           0x00000000
+#define MM_PTE_PROTECT                             0x00000612
+
+/* PTE cache flags */
+#define MM_PTE_CACHE_ENABLE                        0x00000000
+#define MM_PTE_CACHE_DISABLE                       0x00000010
+#define MM_PTE_CACHE_WRITECOMBINED                 0x00000010
+#define MM_PTE_CACHE_WRITETHROUGH                  0x00000008
+
+/* PTE software flags */
+#define MM_PTE_COPY_ON_WRITE                       0x00000200
+#define MM_PTE_PROTOTYPE                           0x00000400
+#define MM_PTE_TRANSITION                          0x00000800
+
 /* Minimum number of physical pages needed by the system */
 #define MM_MINIMUM_PHYSICAL_PAGES                  1100
 
