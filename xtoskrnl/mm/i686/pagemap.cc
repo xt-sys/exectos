@@ -549,7 +549,7 @@ MM::PageMapXpa::GetOneEntry(IN PMMPTE Pte)
  */
 XTAPI
 PFN_NUMBER
-MM::PageMapBasic::GetPageFrameNumber(IN PMMPTE Pte)
+MM::PageMapXpa::GetPageFrameNumber(IN PMMPTE Pte)
 {
     return Pte->Pml3.Hardware.PageFrameNumber;
 }
