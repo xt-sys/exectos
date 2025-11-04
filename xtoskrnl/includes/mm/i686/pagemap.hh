@@ -46,7 +46,7 @@ namespace MM
                                            IN BOOLEAN Value) = 0;
             VIRTUAL XTAPI VOID SetPte(IN PMMPTE PtePointer,
                                       IN PFN_NUMBER PageFrameNumber,
-                                      IN BOOLEAN Writable) = 0;
+                                      IN ULONG_PTR AttributesMask) = 0;
             VIRTUAL XTAPI VOID SetPteCaching(IN PMMPTE PtePointer,
                                              IN BOOLEAN CacheDisable,
                                              IN BOOLEAN WriteThrough) = 0;
@@ -69,7 +69,7 @@ namespace MM
                                    IN BOOLEAN Value);
             XTAPI VOID SetPte(IN PMMPTE PtePointer,
                               IN PFN_NUMBER PageFrameNumber,
-                              IN BOOLEAN Writable);
+                              IN ULONG_PTR AttributesMask);
             XTAPI VOID SetPteCaching(IN PMMPTE PtePointer,
                                      IN BOOLEAN CacheDisable,
                                      IN BOOLEAN WriteThrough);
@@ -92,7 +92,7 @@ namespace MM
                                    IN BOOLEAN Value);
             XTAPI VOID SetPte(IN PMMPTE PtePointer,
                               IN PFN_NUMBER PageFrameNumber,
-                              IN BOOLEAN Writable);
+                              IN ULONG_PTR AttributesMask);
             XTAPI VOID SetPteCaching(IN PMMPTE PtePointer,
                                      IN BOOLEAN CacheDisable,
                                      IN BOOLEAN WriteThrough);

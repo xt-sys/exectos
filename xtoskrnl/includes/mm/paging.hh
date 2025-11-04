@@ -41,7 +41,7 @@ namespace MM
                                           IN BOOLEAN Value);
             STATIC XTAPI VOID SetPte(IN PMMPTE PtePointer,
                                      IN PFN_NUMBER PageFrameNumber,
-                                     IN BOOLEAN Writable);
+                                     IN ULONG_PTR AttributesMask);
             STATIC XTAPI VOID SetPteCaching(IN PMMPTE PtePointer,
                                             IN BOOLEAN CacheDisable,
                                             IN BOOLEAN WriteThrough);

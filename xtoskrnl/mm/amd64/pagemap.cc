@@ -487,8 +487,8 @@ MM::PageMap::SetOneEntry(IN PMMPTE Pte,
  * @param PageFrameNumber
  *        Physical frame number to map.
  *
- * @param Writable
- *        Indicates whether the page should be writable.
+ * @param AttributesMask
+ *        Specifies the attributes mask to apply to the PTE.
  *
  * @return This routine does not return any value.
  *
@@ -498,12 +498,12 @@ XTAPI
 VOID
 MM::PageMap::SetPte(IN PMMPTE PtePointer,
                     IN PFN_NUMBER PageFrameNumber,
-                    IN BOOLEAN Writable)
+                    IN ULONG_PTR AttributesMask)
 {
     /* Set PTE */
     PtePointer->Hardware.PageFrameNumber = PageFrameNumber;
     PtePointer->Hardware.Valid = 1;
-    PtePointer->Hardware.Writable = Writable;
+    PtePointer->Long |= AttributesMask;
 }
 
 /**

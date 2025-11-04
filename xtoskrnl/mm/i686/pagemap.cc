@@ -398,8 +398,8 @@ MM::PageMapBasic::SetOneEntry(IN PMMPTE Pte,
  * @param PageFrameNumber
  *        Physical frame number to map.
  *
- * @param Writable
- *        Indicates whether the page should be writable.
+ * @param AttributesMask
+ *        Specifies the attributes mask to apply to the PTE.
  *
  * @return This routine does not return any value.
  *
@@ -409,12 +409,12 @@ XTAPI
 VOID
 MM::PageMapBasic::SetPte(IN PMMPTE PtePointer,
                          IN PFN_NUMBER PageFrameNumber,
-                         IN BOOLEAN Writable)
+                         IN ULONG_PTR AttributesMask)
 {
     /* Set PTE */
     PtePointer->Pml2.Hardware.PageFrameNumber = PageFrameNumber;
     PtePointer->Pml2.Hardware.Valid = 1;
-    PtePointer->Pml2.Hardware.Writable = Writable;
+    PtePointer->Long |= AttributesMask;
 }
 
 /**
@@ -631,8 +631,8 @@ MM::PageMapXpa::SetOneEntry(IN PMMPTE Pte,
  * @param PageFrameNumber
  *        Physical frame number to map.
  *
- * @param Writable
- *        Indicates whether the page should be writable.
+ * @param AttributesMask
+ *        Specifies the attributes mask to apply to the PTE.
  *
  * @return This routine does not return any value.
  *
@@ -642,12 +642,12 @@ XTAPI
 VOID
 MM::PageMapXpa::SetPte(IN PMMPTE PtePointer,
                        IN PFN_NUMBER PageFrameNumber,
-                       IN BOOLEAN Writable)
+                       IN ULONG_PTR AttributesMask)
 {
     /* Set PTE */
     PtePointer->Pml3.Hardware.PageFrameNumber = PageFrameNumber;
     PtePointer->Pml3.Hardware.Valid = 1;
-    PtePointer->Pml3.Hardware.Writable = Writable;
+    PtePointer->Long |= AttributesMask;
 }
 
 /**

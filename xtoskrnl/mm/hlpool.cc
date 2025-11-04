@@ -222,7 +222,7 @@ MM::HardwarePool::MapHardwareMemory(IN PHYSICAL_ADDRESS PhysicalAddress,
         PtePointer = MM::Paging::GetPteAddress(BaseAddress);
 
         /* Fill the PTE */
-        MM::Paging::SetPte(PtePointer, (PFN_NUMBER)(PhysicalAddress.QuadPart >> MM_PAGE_SHIFT), TRUE);
+        MM::Paging::SetPte(PtePointer, (PFN_NUMBER)(PhysicalAddress.QuadPart >> MM_PAGE_SHIFT), MM_PTE_READWRITE);
 
         /* Advance to the next address */
         PhysicalAddress.QuadPart += MM_PAGE_SIZE;
@@ -302,7 +302,7 @@ MM::HardwarePool::RemapHardwareMemory(IN PVOID VirtualAddress,
     PtePointer = MM::Paging::GetPteAddress(VirtualAddress);
 
     /* Remap the PTE */
-    MM::Paging::SetPte(PtePointer, (PFN_NUMBER)(PhysicalAddress.QuadPart >> MM_PAGE_SHIFT), TRUE);
+    MM::Paging::SetPte(PtePointer, (PFN_NUMBER)(PhysicalAddress.QuadPart >> MM_PAGE_SHIFT), MM_PTE_READWRITE);
 
     /* Check if TLB needs to be flushed */
     if(FlushTlb)
