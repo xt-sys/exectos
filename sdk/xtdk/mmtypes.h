@@ -13,6 +13,27 @@
 #include ARCH_HEADER(xtstruct.h)
 
 
+/* Memory manager page lists */
+typedef enum _MMPAGELISTS
+{
+   ZeroedPageList = 0,
+   FreePageList = 1,
+   StandbyPageList = 2,
+   ModifiedPageList = 3,
+   ModifiedNoWritePageList = 4,
+   BadPageList = 5,
+   ActiveAndValid = 6,
+   TransitionPage = 7
+} MMPAGELISTS, *PMMPAGELISTS;
+
+/* Page table pool types */
+typedef enum _MMSYSTEM_PTE_POOL_TYPE
+{
+    SystemPteSpace,
+    NonPagedPoolExpansion,
+    MaximumPtePoolTypes
+} MMSYSTEM_PTE_POOL_TYPE, *PMMSYSTEM_PTE_POOL_TYPE;
+
 /* Page map routines structure definition */
 typedef CONST STRUCT _CMMPAGEMAP_ROUTINES
 {
@@ -44,5 +65,14 @@ typedef struct _MMPFNENTRY
     USHORT Rom:1;
     USHORT ParityError:1;
 } MMPFNENTRY, *PMMPFNENTRY;
+
+/* Page Frame List structure definition */
+typedef struct _MMPFNLIST
+{
+    PFN_NUMBER Total;
+    MMPAGELISTS ListName;
+    PFN_NUMBER Flink;
+    PFN_NUMBER Blink;
+} MMPFNLIST, *PMMPFNLIST;
 
 #endif /* __XTDK_MMTYPES_H */
