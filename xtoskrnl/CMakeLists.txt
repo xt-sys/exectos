@@ -82,11 +82,12 @@ add_library(libxtos ${XTOSKRNL_SOURCE})
 
 # Link kernel executable
 add_executable(xtoskrnl
-               ${XTOSKRNL_SOURCE}
                ${CMAKE_CURRENT_BINARY_DIR}/xtoskrnl.def)
 
 # Add linker libraries
-target_link_libraries(xtoskrnl)
+target_link_libraries(xtoskrnl
+                      PRIVATE
+                      libxtos)
 
 # Set proper binary name and install target
 set_target_properties(xtoskrnl PROPERTIES SUFFIX .exe)
