@@ -4,6 +4,18 @@ within the XTOS kernel space. It is responsible for various core services, such 
 management, and process scheduling. The kernel contains the scheduler (sometimes referred to as the Dispatcher), the
 cache, object, and memory managers, the security manager, and other executive components described below.
 
+
+## Kernel Parameters
+Kernel parameters are XTOS boot-time options used to ensure proper initialization and handling of hardware peripherals.
+These parameters can be configured either temporarily by editing the boot entry in the bootloader’s selection menu, or
+permanently by modifying the XTLDR configuration file.
+
+The following is a consolidated list of available kernel parameters:
+ * **NOXPA**: Disables PAE or LA57 support, depending on the CPU architecture. This parameter is handled by the
+   bootloader, which configures paging and selects the appropriate Page Map Level (PML) before transferring control to
+   the kernel.
+
+## Source Code
 The source code of the kernel is organized into subsystem-specific directories. Each directory name also defines the
 corresponding C++ namespace in which the subsystem's classes and routines reside. These subsystems include:
 
@@ -68,8 +80,8 @@ routine:
 For all C++ code inside the kernel the naming model has evolved. Consider the **KE::KThread::InitializeThread()**
 routine:
  * **KE** - The namespace replaces the prefix and indicates the subsystem. Namespaces are written in uppercase and no
-            longer use the trailing p for private routines, because classes use C++ visibility to control access.
+   longer use the trailing p for private routines, because classes use C++ visibility to control access.
  * **KThread** - Within each namespace, related functionality is grouped into classes, which encapsulate variables and
-                 methods.
+   methods.
  * **InitializeThread** - Method names follow the `<Operation><Object>` pattern.
  
