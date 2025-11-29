@@ -211,6 +211,20 @@ MM::PageMap::GetPteVirtualAddress(IN PMMPTE PtePointer)
 }
 
 /**
+ * Gets the status of Extended Paging Address (XPA) mode.
+ *
+ * @return This routine returns TRUE if XPA is enabled, FALSE otherwise.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+BOOLEAN
+MM::PageMap::GetXpaStatus()
+{
+    return PageMapInfo.Xpa;
+}
+
+/**
  * Advances a PTE pointer by a given number of entries, considering the actual PTE size for PML2.
  *
  * @param Pte

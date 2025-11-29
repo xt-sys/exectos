@@ -39,6 +39,7 @@ namespace MM
             XTAPI ULONG GetPteIndex(IN PVOID Address);
             VIRTUAL XTAPI ULONG GetPteSize(VOID) = 0;
             XTAPI PVOID GetPteVirtualAddress(IN PMMPTE PtePointer);
+            XTAPI BOOLEAN GetXpaStatus();
             VIRTUAL XTAPI VOID InitializePageMapInfo(VOID) = 0;
             VIRTUAL XTAPI BOOLEAN PteValid(IN PMMPTE PtePointer) = 0;
             VIRTUAL XTAPI VOID SetNextEntry(IN PMMPTE Pte,
