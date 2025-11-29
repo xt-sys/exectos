@@ -25,11 +25,15 @@
 #define MM_PXE_BASE                                0xFFFFF6FB7DBED000ULL
 
 /* Page directory and page base addresses for 5-level paging */
-#define MM_PTE_LA57_BASE                           0xFFFF000000000000ULL
-#define MM_PDE_LA57_BASE                           0xFFFF010000000000ULL
-#define MM_PPE_LA57_BASE                           0xFFFF010800000000ULL
-#define MM_PXE_LA57_BASE                           0xFFFF010840000000ULL
-#define MM_P5E_LA57_BASE                           0xFFFF010840200000ULL
+#define MM_PTE_LA57_BASE                           0xFFED000000000000ULL
+#define MM_PDE_LA57_BASE                           0xFFEDF68000000000ULL
+#define MM_PPE_LA57_BASE                           0xFFEDF6FB40000000ULL
+#define MM_PXE_LA57_BASE                           0xFFEDF6FB7DA00000ULL
+#define MM_P5E_LA57_BASE                           0xFFEDF6FB7DBED000ULL
+
+/* Self map address */
+#define MM_PML4_SELF_MAP_ADDRESS                   0xFFFFF6FB7DBEDF68ULL
+#define MM_PML5_SELF_MAP_ADDRESS                   0xFFEDF6FB7DBEDF68ULL
 
 /* PTE shift values */
 #define MM_PTE_SHIFT                               3
@@ -78,6 +82,12 @@
 #define MM_PTE_COPY_ON_WRITE                       0x0000000000000200ULL
 #define MM_PTE_PROTOTYPE                           0x0000000000000400ULL
 #define MM_PTE_TRANSITION                          0x0000000000000800ULL
+
+/* PTE protection bits */
+#define MM_PTE_PROTECTION_BITS                     5
+
+/* Base address of the system page table */
+#define MM_SYSTEM_PTE_BASE                         KSEG0_BASE
 
 /* Minimum number of physical pages needed by the system */
 #define MM_MINIMUM_PHYSICAL_PAGES                  2048
@@ -287,6 +297,7 @@ typedef struct _MMPFN
             USHORT ReferenceCount;
         } e2;
     } u3;
+    ULONG UsedPageTableEntries;
     union
     {
         MMPTE OriginalPte;
@@ -297,12 +308,11 @@ typedef struct _MMPFN
         ULONG_PTR EntireFrame;
         struct
         {
-            ULONG_PTR PteFrame:58;
+            ULONG_PTR PteFrame:57;
             ULONG_PTR InPageError:1;
             ULONG_PTR VerifierAllocation:1;
             ULONG_PTR AweAllocation:1;
-            ULONG_PTR LockCharged:1;
-            ULONG_PTR KernelStack:1;
+            ULONG_PTR Priority:3;
             ULONG_PTR MustBeCached:1;
         };
     } u4;

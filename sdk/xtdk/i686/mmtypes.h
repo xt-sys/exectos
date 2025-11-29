@@ -69,6 +69,12 @@
 #define MM_PTE_PROTOTYPE                           0x00000400
 #define MM_PTE_TRANSITION                          0x00000800
 
+/* PTE protection bits */
+#define MM_PTE_PROTECTION_BITS                     5
+
+/* Base address of the system page table */
+#define MM_SYSTEM_PTE_BASE                         NULLPTR
+
 /* Minimum number of physical pages needed by the system */
 #define MM_MINIMUM_PHYSICAL_PAGES                  1100
 
