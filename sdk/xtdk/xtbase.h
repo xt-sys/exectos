@@ -29,6 +29,9 @@ typedef UCHAR KRUNLEVEL, *PKRUNLEVEL;
 /* Spin locks synchronization mechanism */
 typedef ULONG_PTR KSPIN_LOCK, *PKSPIN_LOCK;
 
+/* Page Frame Number count */
+typedef ULONG PFN_COUNT;
+
 /* Page Frame Number */
 typedef ULONG_PTR PFN_NUMBER, *PPFN_NUMBER;
 
