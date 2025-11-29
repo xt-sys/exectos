@@ -1,13 +1,13 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/includes/mm/pagemap.hh
+ * FILE:            xtoskrnl/includes/mm/amd64/pagemap.hh
  * DESCRIPTION:     Low-level support for page map manipulation
  * DEVELOPERS:      Aiken Harris <harraiken91@gmail.com>
  */
 
-#ifndef __XTOSKRNL_MM_PAGEMAP_HH
-#define __XTOSKRNL_MM_PAGEMAP_HH
+#ifndef __XTOSKRNL_MM_AMD64_PAGEMAP_HH
+#define __XTOSKRNL_MM_AMD64_PAGEMAP_HH
 
 #include <xtos.hh>
 
@@ -22,7 +22,7 @@ namespace MM
 
         public:
             XTAPI PMMPTE AdvancePte(IN PMMPTE Pte,
-                                    IN ULONG Count);
+                                    IN LONG Count);
             XTAPI VOID ClearPte(IN PMMPTE PtePointer);
             XTAPI ULONGLONG GetEmptyPteList(VOID);
             XTAPI ULONG_PTR GetNextEntry(IN PMMPTE Pte);
@@ -34,17 +34,18 @@ namespace MM
             XTAPI PFN_NUMBER GetPageFrameNumber(IN PMMPTE Pte);
             XTAPI PMMPDE GetPdeAddress(IN PVOID Address);
             XTAPI ULONG GetPdeIndex(IN PVOID Address);
-            XTAPI PVOID GetPdeVirtualAddress(IN PMMPDE PdePointer);
+            VIRTUAL XTAPI PVOID GetPdeVirtualAddress(IN PMMPDE PdePointer) = 0;
             XTAPI PMMPPE GetPpeAddress(IN PVOID Address);
             XTAPI ULONG GetPpeIndex(IN PVOID Address);
-            XTAPI PVOID GetPpeVirtualAddress(IN PMMPPE PpePointer);
+            VIRTUAL XTAPI PVOID GetPpeVirtualAddress(IN PMMPPE PpePointer) = 0;
             XTAPI PMMPTE GetPteAddress(IN PVOID Address);
             XTAPI ULONG GetPteIndex(IN PVOID Address);
             XTAPI ULONG GetPteSize(VOID);
-            XTAPI PVOID GetPteVirtualAddress(IN PMMPTE PtePointer);
+            VIRTUAL XTAPI PVOID GetPteVirtualAddress(IN PMMPTE PtePointer) = 0;
             XTAPI PMMPXE GetPxeAddress(IN PVOID Address);
             XTAPI ULONG GetPxeIndex(IN PVOID Address);
-            XTAPI PVOID GetPxeVirtualAddress(IN PMMPXE PxePointer);
+            VIRTUAL XTAPI PVOID GetPxeVirtualAddress(IN PMMPXE PxePointer) = 0;
+            XTAPI BOOLEAN GetXpaStatus();
             VIRTUAL XTAPI VOID InitializePageMapInfo(VOID) = 0;
             XTAPI BOOLEAN PteValid(IN PMMPTE PtePointer);
             XTAPI VOID SetNextEntry(IN PMMPTE Pte,
@@ -62,14 +63,22 @@ namespace MM
     class PageMapBasic final : public PageMap
     {
         public:
+            XTAPI PVOID GetPdeVirtualAddress(IN PMMPDE PdePointer);
+            XTAPI PVOID GetPpeVirtualAddress(IN PMMPPE PpePointer);
+            XTAPI PVOID GetPteVirtualAddress(IN PMMPTE PtePointer);
+            XTAPI PVOID GetPxeVirtualAddress(IN PMMPXE PxePointer);
             XTAPI VOID InitializePageMapInfo(VOID);
     };
 
     class PageMapXpa final : public PageMap
     {
         public:
+            XTAPI PVOID GetPdeVirtualAddress(IN PMMPDE PdePointer);
+            XTAPI PVOID GetPpeVirtualAddress(IN PMMPPE PpePointer);
+            XTAPI PVOID GetPteVirtualAddress(IN PMMPTE PtePointer);
+            XTAPI PVOID GetPxeVirtualAddress(IN PMMPXE PxePointer);
             XTAPI VOID InitializePageMapInfo(VOID);
     };
 }
 
-#endif /* __XTOSKRNL_MM_PAGEMAP_HH */
+#endif /* __XTOSKRNL_MM_AMD64_PAGEMAP_HH */

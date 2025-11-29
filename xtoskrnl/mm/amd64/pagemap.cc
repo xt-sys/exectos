@@ -25,7 +25,7 @@
 XTAPI
 PMMPTE
 MM::PageMap::AdvancePte(IN PMMPTE Pte,
-                        IN ULONG Count)
+                        IN LONG Count)
 {
     /* Return advanced PTE pointer */
     return (PMMPTE)((ULONG_PTR)Pte + (Count * sizeof(MMPTE)));
@@ -170,7 +170,7 @@ XTAPI
 PVOID
 MM::PageMap::GetP5eVirtualAddress(IN PMMP5E P5ePointer)
 {
-    return (PVOID)((((LONGLONG)P5ePointer << 61) >> 16) * PageMapInfo.Xpa);
+    return (PVOID)((((LONGLONG)P5ePointer << 52) >> 7) * PageMapInfo.Xpa);
 }
 
 /**
@@ -230,24 +230,6 @@ MM::PageMap::GetPdeIndex(IN PVOID Address)
 }
 
 /**
- * Gets the virtual address that is mapped by a given Page Directory Entry.
- *
- * @param PdePointer
- *        Specifies the address of the PDE.
- *
- * @return This routine returns the virtual address mapped by the PDE.
- *
- * @since XT 1.0
- */
-XTAPI
-PVOID
-MM::PageMap::GetPdeVirtualAddress(IN PMMPDE PdePointer)
-{
-    /* Return PDE virtual address */
-    return (PVOID)(((LONGLONG)PdePointer << 34) >> 16);
-}
-
-/**
  * Gets the address of the PPE (Page Directory Pointer Table Entry), that maps given address.
  *
  * @param Address
@@ -284,24 +266,6 @@ MM::PageMap::GetPpeIndex(IN PVOID Address)
 {
     /* Return PPE index */
     return ((((ULONGLONG)Address) >> MM_PPI_SHIFT) & 0x1FF);
-}
-
-/**
- * Gets the virtual address that is mapped by a given Page Directory Pointer Table Entry.
- *
- * @param PpePointer
- *        Specifies the address of the PPE.
- *
- * @return This routine returns the virtual address mapped by the PPE.
- *
- * @since XT 1.0
- */
-XTAPI
-PVOID
-MM::PageMap::GetPpeVirtualAddress(IN PMMPPE PpePointer)
-{
-    /* Return PPE virtual address */
-    return (PVOID)(((LONGLONG)PpePointer << 43) >> 16);
 }
 
 /**
@@ -359,24 +323,6 @@ MM::PageMap::GetPteSize(VOID)
 }
 
 /**
- * Gets the virtual address that is mapped by a given Page Table Entry.
- *
- * @param PtePointer
- *        Specifies the address of the PTE.
- *
- * @return This routine returns the virtual address mapped by the PTE.
- *
- * @since XT 1.0
- */
-XTAPI
-PVOID
-MM::PageMap::GetPteVirtualAddress(IN PMMPTE PtePointer)
-{
-    /* Return PTE virtual address */
-    return (PVOID)(((LONGLONG)PtePointer << 25) >> 16);
-}
-
-/**
  * Gets the address of the PXE (Extended Page Entry), that maps given address.
  *
  * @param Address
@@ -416,21 +362,17 @@ MM::PageMap::GetPxeIndex(IN PVOID Address)
 }
 
 /**
- * Gets the virtual address that is mapped by a given Extended Page Entry.
+ * Gets the status of Extended Paging Address (XPA) mode.
  *
- * @param PxePointer
- *        Specifies the address of the PXE.
- *
- * @return This routine returns the virtual address mapped by the PXE.
+ * @return This routine returns TRUE if XPA is enabled, FALSE otherwise.
  *
  * @since XT 1.0
  */
 XTAPI
-PVOID
-MM::PageMap::GetPxeVirtualAddress(IN PMMPXE PxePointer)
+BOOLEAN
+MM::PageMap::GetXpaStatus()
 {
-    /* Return PXE virtual address */
-    return (PVOID)(((LONGLONG)PxePointer << 52) >> 16);
+    return PageMapInfo.Xpa;
 }
 
 /**
@@ -551,6 +493,78 @@ MM::PageMap::SetPteCaching(IN PMMPTE PtePointer,
 }
 
 /**
+ * Gets the virtual address that is mapped by a given Page Directory Entry (PML4).
+ *
+ * @param PdePointer
+ *        Specifies the address of the PDE.
+ *
+ * @return This routine returns the virtual address mapped by the PDE.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PVOID
+MM::PageMapBasic::GetPdeVirtualAddress(IN PMMPDE PdePointer)
+{
+    /* Return PDE virtual address */
+    return (PVOID)(((LONGLONG)PdePointer << 34) >> 16);
+}
+
+/**
+ * Gets the virtual address that is mapped by a given Page Directory Pointer Table Entry (PML4).
+ *
+ * @param PpePointer
+ *        Specifies the address of the PPE.
+ *
+ * @return This routine returns the virtual address mapped by the PPE.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PVOID
+MM::PageMapBasic::GetPpeVirtualAddress(IN PMMPPE PpePointer)
+{
+    /* Return PPE virtual address */
+    return (PVOID)(((LONGLONG)PpePointer << 43) >> 16);
+}
+
+/**
+ * Gets the virtual address that is mapped by a given Page Table Entry (PML4).
+ *
+ * @param PtePointer
+ *        Specifies the address of the PTE.
+ *
+ * @return This routine returns the virtual address mapped by the PTE.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PVOID
+MM::PageMapBasic::GetPteVirtualAddress(IN PMMPTE PtePointer)
+{
+    /* Return PTE virtual address */
+    return (PVOID)(((LONGLONG)PtePointer << 25) >> 16);
+}
+
+/**
+ * Gets the virtual address that is mapped by a given Extended Page Entry (PML4).
+ *
+ * @param PxePointer
+ *        Specifies the address of the PXE.
+ *
+ * @return This routine returns the virtual address mapped by the PXE.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PVOID
+MM::PageMapBasic::GetPxeVirtualAddress(IN PMMPXE PxePointer)
+{
+    /* Return PXE virtual address */
+    return (PVOID)(((LONGLONG)PxePointer << 52) >> 16);
+}
+
+/**
  * Initializes page map information for basic paging (PML4).
  *
  * @return This routine does not return any value.
@@ -576,6 +590,78 @@ MM::PageMapBasic::InitializePageMapInfo(VOID)
 
     /* PML use 48-bit virtual addresses */
     PageMapInfo.VaBits = 48;
+}
+
+/**
+ * Gets the virtual address that is mapped by a given Page Directory Entry (PML5).
+ *
+ * @param PdePointer
+ *        Specifies the address of the PDE.
+ *
+ * @return This routine returns the virtual address mapped by the PDE.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PVOID
+MM::PageMapXpa::GetPdeVirtualAddress(IN PMMPDE PdePointer)
+{
+    /* Return PDE virtual address */
+    return (PVOID)(((LONGLONG)PdePointer << 25) >> 7);
+}
+
+/**
+ * Gets the virtual address that is mapped by a given Page Directory Pointer Table Entry (PML5).
+ *
+ * @param PpePointer
+ *        Specifies the address of the PPE.
+ *
+ * @return This routine returns the virtual address mapped by the PPE.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PVOID
+MM::PageMapXpa::GetPpeVirtualAddress(IN PMMPPE PpePointer)
+{
+    /* Return PPE virtual address */
+    return (PVOID)(((LONGLONG)PpePointer << 34) >> 7);
+}
+
+/**
+ * Gets the virtual address that is mapped by a given Page Table Entry (PML5).
+ *
+ * @param PtePointer
+ *        Specifies the address of the PTE.
+ *
+ * @return This routine returns the virtual address mapped by the PTE.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PVOID
+MM::PageMapXpa::GetPteVirtualAddress(IN PMMPTE PtePointer)
+{
+    /* Return PTE virtual address */
+    return (PVOID)(((LONGLONG)PtePointer << 16) >> 7);
+}
+
+/**
+ * Gets the virtual address that is mapped by a given Extended Page Entry (PML5).
+ *
+ * @param PxePointer
+ *        Specifies the address of the PXE.
+ *
+ * @return This routine returns the virtual address mapped by the PXE.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PVOID
+MM::PageMapXpa::GetPxeVirtualAddress(IN PMMPXE PxePointer)
+{
+    /* Return PXE virtual address */
+    return (PVOID)(((LONGLONG)PxePointer << 43) >> 7);
 }
 
 /**
