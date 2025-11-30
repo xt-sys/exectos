@@ -25,7 +25,7 @@
 XTAPI
 PMMPTE
 MM::Paging::AdvancePte(IN PMMPTE Pte,
-                       IN ULONG Count)
+                       IN LONG Count)
 {
     /* Return advanced PTE pointer */
     return PmlRoutines->AdvancePte(Pte, Count);
@@ -171,6 +171,42 @@ MM::Paging::GetOneEntry(IN PMMPTE Pte)
 }
 
 /**
+ * Gets the address of the P5E (Page Map Level 5 Entry), that maps given address.
+ *
+ * @param Address
+ *        Specifies the virtual address for which to retrieve the corresponding P5E.
+ *
+ * @return This routine returns the address of the P5E, or NULLPTR if LA57 is not enabled.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PMMPDE
+MM::Paging::GetP5eAddress(IN PVOID Address)
+{
+    /* Return PDE address */
+    return PmlRoutines->GetP5eAddress(Address);
+}
+
+/**
+ * Gets the virtual address that is mapped by a given Page Map Level 5 Entry.
+ *
+ * @param P5ePointer
+ *        Specifies the address of the P5E.
+ *
+ * @return This routine returns the virtual address mapped by the P5E, or NULLPTR if LA57 is not enabled.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PVOID
+MM::Paging::GetP5eVirtualAddress(IN PMMPTE P5ePointer)
+{
+    /* Return PTE virtual address */
+    return PmlRoutines->GetP5eVirtualAddress(P5ePointer);
+}
+
+/**
  * Gets the page frame number from a corresponding PTE.
  *
  * @param Pte
@@ -240,6 +276,24 @@ MM::Paging::GetPdeAddress(IN PVOID Address)
 }
 
 /**
+ * Gets the virtual address that is mapped by a given Page Directory Entry.
+ *
+ * @param PdePointer
+ *        Specifies the address of the PDE.
+ *
+ * @return This routine returns the virtual address mapped by the PDE.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PVOID
+MM::Paging::GetPdeVirtualAddress(IN PMMPTE PdePointer)
+{
+    /* Return PTE virtual address */
+    return PmlRoutines->GetPdeVirtualAddress(PdePointer);
+}
+
+/**
  * Gets the address of the PPE (Page Directory Pointer Table Entry), that maps given address.
  *
  * @param Address
@@ -255,6 +309,24 @@ MM::Paging::GetPpeAddress(IN PVOID Address)
 {
     /* Return PPE address */
     return PmlRoutines->GetPpeAddress(Address);
+}
+
+/**
+ * Gets the virtual address that is mapped by a given Page Directory Pointer Table Entry.
+ *
+ * @param PpePointer
+ *        Specifies the address of the PPE.
+ *
+ * @return This routine returns the virtual address mapped by the PPE.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PVOID
+MM::Paging::GetPpeVirtualAddress(IN PMMPTE PpePointer)
+{
+    /* Return PTE virtual address */
+    return PmlRoutines->GetPpeVirtualAddress(PpePointer);
 }
 
 /**
@@ -288,6 +360,74 @@ MM::Paging::GetPteSize(VOID)
 {
     /* Return the size of MMPTE */
     return PmlRoutines->GetPteSize();
+}
+
+/**
+ * Gets the virtual address that is mapped by a given Page Table Entry.
+ *
+ * @param PtePointer
+ *        Specifies the address of the PTE.
+ *
+ * @return This routine returns the virtual address mapped by the PTE.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PVOID
+MM::Paging::GetPteVirtualAddress(IN PMMPTE PtePointer)
+{
+    /* Return PTE virtual address */
+    return PmlRoutines->GetPteVirtualAddress(PtePointer);
+}
+
+/**
+ * Gets the address of the PXE (Extended Page Entry), that maps given address.
+ *
+ * @param Address
+ *        Specifies the virtual address for which to retrieve the corresponding PXE.
+ *
+ * @return This routine returns the address of the PXE.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PMMPXE
+MM::Paging::GetPxeAddress(IN PVOID Address)
+{
+    /* Return PXE address */
+    return PmlRoutines->GetPxeAddress(Address);
+}
+
+/**
+ * Gets the virtual address that is mapped by a given Extended Page Entry.
+ *
+ * @param PxePointer
+ *        Specifies the address of the PXE.
+ *
+ * @return This routine returns the virtual address mapped by the PXE.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PVOID
+MM::Paging::GetPxeVirtualAddress(IN PMMPXE PxePointer)
+{
+    /* Return PXE virtual address */
+    return PmlRoutines->GetPxeVirtualAddress(PxePointer);
+}
+
+/**
+ * Gets the status of Extended Paging Address (XPA) mode.
+ *
+ * @return This routine returns TRUE if XPA is enabled, FALSE otherwise.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+BOOLEAN
+MM::Paging::GetXpaStatus()
+{
+    return PmlRoutines->GetXpaStatus();
 }
 
 /**

@@ -22,7 +22,7 @@ namespace MM
 
         public:
             STATIC XTAPI PMMPTE AdvancePte(IN PMMPTE Pte,
-                                           IN ULONG Count);
+                                           IN LONG Count);
             STATIC XTAPI VOID ClearPte(IN PMMPTE PtePointer);
             STATIC XTAPI VOID FlushTlb(VOID);
             STATIC XTAPI ULONG_PTR GetEmptyPteList(VOID);
@@ -30,11 +30,20 @@ namespace MM
             STATIC XTAPI ULONG_PTR GetNextEntry(IN PMMPTE Pte);
             STATIC XTAPI PMMPTE GetNextPte(IN PMMPTE Pte);
             STATIC XTAPI BOOLEAN GetOneEntry(IN PMMPTE Pte);
+            STATIC XTAPI PMMPDE GetP5eAddress(IN PVOID Address);
+            STATIC XTAPI PVOID GetP5eVirtualAddress(IN PMMPTE P5ePointer);
             STATIC XTAPI PFN_NUMBER GetPageFrameNumber(IN PMMPTE Pte);
             STATIC XTAPI PMMPDE GetPdeAddress(IN PVOID Address);
+            STATIC XTAPI PVOID GetPdeVirtualAddress(IN PMMPXE PdePointer);
             STATIC XTAPI PMMPPE GetPpeAddress(IN PVOID Address);
+            STATIC XTAPI PVOID GetPpeVirtualAddress(IN PMMPXE PpePointer);
             STATIC XTAPI PMMPTE GetPteAddress(IN PVOID Address);
             STATIC XTAPI ULONG GetPteSize(VOID);
+            STATIC XTAPI PVOID GetPteVirtualAddress(IN PMMPXE PtePointer);
+            STATIC XTAPI PMMPXE GetPxeAddress(IN PVOID Address);
+            STATIC XTAPI PVOID GetPxeVirtualAddress(IN PMMPXE PxePointer);
+            STATIC XTAPI BOOLEAN GetXpaStatus();
+            STATIC XTAPI VOID InitializeSystemSpaceMapping(VOID);
             STATIC XTAPI VOID InitializePageMapSupport(VOID);
             STATIC XTAPI BOOLEAN PteValid(IN PMMPTE PtePointer);
             STATIC XTAPI VOID SetNextEntry(IN PMMPTE Pte,
