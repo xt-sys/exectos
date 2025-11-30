@@ -55,7 +55,7 @@ MM::Paging::GetP5eAddress(IN PVOID Address)
  */
 XTAPI
 PVOID
-MM::Paging::GetP5eVirtualAddress(IN PMMPTE P5ePointer)
+MM::Paging::GetP5eVirtualAddress(IN PMMP5E P5ePointer)
 {
     /* Return PTE virtual address */
     return PmlRoutines->GetP5eVirtualAddress(P5ePointer);

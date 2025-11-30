@@ -265,7 +265,7 @@ MM::Paging::GetPdeAddress(IN PVOID Address)
  */
 XTAPI
 PVOID
-MM::Paging::GetPdeVirtualAddress(IN PMMPTE PdePointer)
+MM::Paging::GetPdeVirtualAddress(IN PMMPDE PdePointer)
 {
     /* Return PTE virtual address */
     return PmlRoutines->GetPdeVirtualAddress(PdePointer);
@@ -301,7 +301,7 @@ MM::Paging::GetPpeAddress(IN PVOID Address)
  */
 XTAPI
 PVOID
-MM::Paging::GetPpeVirtualAddress(IN PMMPTE PpePointer)
+MM::Paging::GetPpeVirtualAddress(IN PMMPPE PpePointer)
 {
     /* Return PTE virtual address */
     return PmlRoutines->GetPpeVirtualAddress(PpePointer);
