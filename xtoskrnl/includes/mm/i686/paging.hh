@@ -1,13 +1,13 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/includes/mm/paging.hh
- * DESCRIPTION:     Low level page management support
+ * FILE:            xtoskrnl/includes/mm/i686/paging.hh
+ * DESCRIPTION:     Low level page management support for i686
  * DEVELOPERS:      Aiken Harris <harraiken91@gmail.com>
  */
 
-#ifndef __XTOSKRNL_MM_PAGING_HH
-#define __XTOSKRNL_MM_PAGING_HH
+#ifndef __XTOSKRNL_MM_I686_PAGING_HH
+#define __XTOSKRNL_MM_I686_PAGING_HH
 
 #include <xtos.hh>
 
@@ -30,8 +30,7 @@ namespace MM
             STATIC XTAPI ULONG_PTR GetNextEntry(IN PMMPTE Pte);
             STATIC XTAPI PMMPTE GetNextPte(IN PMMPTE Pte);
             STATIC XTAPI BOOLEAN GetOneEntry(IN PMMPTE Pte);
-            STATIC XTAPI PMMPDE GetP5eAddress(IN PVOID Address);
-            STATIC XTAPI PVOID GetP5eVirtualAddress(IN PMMPTE P5ePointer);
+            STATIC XTAPI USHORT GetPageMapLevel();
             STATIC XTAPI PFN_NUMBER GetPageFrameNumber(IN PMMPTE Pte);
             STATIC XTAPI PMMPDE GetPdeAddress(IN PVOID Address);
             STATIC XTAPI PVOID GetPdeVirtualAddress(IN PMMPXE PdePointer);
@@ -40,10 +39,6 @@ namespace MM
             STATIC XTAPI PMMPTE GetPteAddress(IN PVOID Address);
             STATIC XTAPI ULONG GetPteSize(VOID);
             STATIC XTAPI PVOID GetPteVirtualAddress(IN PMMPXE PtePointer);
-            STATIC XTAPI PMMPXE GetPxeAddress(IN PVOID Address);
-            STATIC XTAPI PVOID GetPxeVirtualAddress(IN PMMPXE PxePointer);
-            STATIC XTAPI BOOLEAN GetXpaStatus();
-            STATIC XTAPI VOID InitializeSystemSpaceMapping(VOID);
             STATIC XTAPI VOID InitializePageMapSupport(VOID);
             STATIC XTAPI BOOLEAN PteValid(IN PMMPTE PtePointer);
             STATIC XTAPI VOID SetNextEntry(IN PMMPTE Pte,
@@ -65,4 +60,4 @@ namespace MM
     };
 }
 
-#endif /* __XTOSKRNL_MM_PAGING_HH */
+#endif /* __XTOSKRNL_MM_I686_PAGING_HH */

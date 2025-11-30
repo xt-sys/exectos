@@ -26,6 +26,78 @@ MM::Paging::GetExtendedPhysicalAddressingStatus(VOID)
 }
 
 /**
+ * Gets the address of the P5E (Page Map Level 5 Entry), that maps given address.
+ *
+ * @param Address
+ *        Specifies the virtual address for which to retrieve the corresponding P5E.
+ *
+ * @return This routine returns the address of the P5E, or NULLPTR if LA57 is not enabled.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PMMPDE
+MM::Paging::GetP5eAddress(IN PVOID Address)
+{
+    /* Return PDE address */
+    return PmlRoutines->GetP5eAddress(Address);
+}
+
+/**
+ * Gets the virtual address that is mapped by a given Page Map Level 5 Entry.
+ *
+ * @param P5ePointer
+ *        Specifies the address of the P5E.
+ *
+ * @return This routine returns the virtual address mapped by the P5E, or NULLPTR if LA57 is not enabled.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PVOID
+MM::Paging::GetP5eVirtualAddress(IN PMMPTE P5ePointer)
+{
+    /* Return PTE virtual address */
+    return PmlRoutines->GetP5eVirtualAddress(P5ePointer);
+}
+
+/**
+ * Gets the address of the PXE (Extended Page Entry), that maps given address.
+ *
+ * @param Address
+ *        Specifies the virtual address for which to retrieve the corresponding PXE.
+ *
+ * @return This routine returns the address of the PXE.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PMMPXE
+MM::Paging::GetPxeAddress(IN PVOID Address)
+{
+    /* Return PXE address */
+    return PmlRoutines->GetPxeAddress(Address);
+}
+
+/**
+ * Gets the virtual address that is mapped by a given Extended Page Entry.
+ *
+ * @param PxePointer
+ *        Specifies the address of the PXE.
+ *
+ * @return This routine returns the virtual address mapped by the PXE.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PVOID
+MM::Paging::GetPxeVirtualAddress(IN PMMPXE PxePointer)
+{
+    /* Return PXE virtual address */
+    return PmlRoutines->GetPxeVirtualAddress(PxePointer);
+}
+
+/**
  * Fills a section of memory with zeroes like RtlZeroMemory(), but in more efficient way.
  *
  * @param Address

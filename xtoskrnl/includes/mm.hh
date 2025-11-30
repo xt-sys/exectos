@@ -12,10 +12,10 @@
 #include <xtos.hh>
 
 #include XTOS_ARCH_HEADER(mm, pagemap.hh)
+#include XTOS_ARCH_HEADER(mm, paging.hh)
 
 #include <mm/hlpool.hh>
 #include <mm/init.hh>
 #include <mm/kpool.hh>
-#include <mm/paging.hh>
 
 #endif /* __XTOSKRNL_MM_HH */
