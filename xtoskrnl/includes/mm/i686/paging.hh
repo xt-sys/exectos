@@ -33,12 +33,12 @@ namespace MM
             STATIC XTAPI USHORT GetPageMapLevel();
             STATIC XTAPI PFN_NUMBER GetPageFrameNumber(IN PMMPTE Pte);
             STATIC XTAPI PMMPDE GetPdeAddress(IN PVOID Address);
-            STATIC XTAPI PVOID GetPdeVirtualAddress(IN PMMPXE PdePointer);
+            STATIC XTAPI PVOID GetPdeVirtualAddress(IN PMMPDE PdePointer);
             STATIC XTAPI PMMPPE GetPpeAddress(IN PVOID Address);
-            STATIC XTAPI PVOID GetPpeVirtualAddress(IN PMMPXE PpePointer);
+            STATIC XTAPI PVOID GetPpeVirtualAddress(IN PMMPPE PpePointer);
             STATIC XTAPI PMMPTE GetPteAddress(IN PVOID Address);
             STATIC XTAPI ULONG GetPteSize(VOID);
-            STATIC XTAPI PVOID GetPteVirtualAddress(IN PMMPXE PtePointer);
+            STATIC XTAPI PVOID GetPteVirtualAddress(IN PMMPTE PtePointer);
             STATIC XTAPI VOID InitializePageMapSupport(VOID);
             STATIC XTAPI BOOLEAN PteValid(IN PMMPTE PtePointer);
             STATIC XTAPI VOID SetNextEntry(IN PMMPTE Pte,
