@@ -205,20 +205,6 @@ MM::Paging::GetPageMapBasicRoutines(VOID)
 }
 
 /**
- * Gets the current paging mode level.
- *
- * @return This routine returns 5 if 5-level paging (XPA) is enabled, otherwise 4 for 4-level paging.
- *
- * @since XT 1.0
- */
-XTAPI
-USHORT
-MM::Paging::GetPageMapLevel()
-{
-    return PmlRoutines->GetXpaStatus() ? 5 : 4;
-}
-
-/**
  * Gets the page map routines for eXtended Physical Addressing (XPA) mode.
  *
  * @return This routine returns the address of the object containing XPA page map routines.
@@ -356,6 +342,20 @@ MM::Paging::GetPteVirtualAddress(IN PMMPTE PtePointer)
 {
     /* Return PTE virtual address */
     return PmlRoutines->GetPteVirtualAddress(PtePointer);
+}
+
+/**
+ * Gets current status of eXtended Physical Addressing (XPA).
+ *
+ * @return This routine returns TRUE if PAE or LA57 (XPA) is enabled, or FALSE otherwise.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+BOOLEAN
+MM::Paging::GetXpaStatus()
+{
+    return PmlRoutines->GetXpaStatus();
 }
 
 /**
