@@ -318,6 +318,28 @@ MM::PageMapBasic::GetPageFrameNumber(IN PMMPTE Pte)
 }
 
 /**
+ * Calculates the distance between two PTE pointers.
+ *
+ * @param EndPte
+ *        Pointer to the ending Page Table Entry.
+ *
+ * @param StartPte
+ *        Pointer to the starting Page Table Entry.
+ *
+ * @return This routine returns a signed value representing the number of PTEs between EndPte and StartPte.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+LONG
+MM::PageMapBasic::GetPteDistance(PMMPTE EndPte,
+                                 PMMPTE StartPte)
+{
+    /* Return distance between PTE pointers */
+    return ((ULONG_PTR)EndPte - (ULONG_PTR)StartPte) / sizeof(MMPML2_PTE);
+}
+
+/**
  * Gets the size of a PTE for basic paging (PML2).
  *
  * @return This routine returns the size of a PTE.
@@ -566,6 +588,28 @@ PFN_NUMBER
 MM::PageMapXpa::GetPageFrameNumber(IN PMMPTE Pte)
 {
     return Pte->Pml3.Hardware.PageFrameNumber;
+}
+
+/**
+ * Calculates the distance between two PTE pointers.
+ *
+ * @param EndPte
+ *        Pointer to the ending Page Table Entry.
+ *
+ * @param StartPte
+ *        Pointer to the starting Page Table Entry.
+ *
+ * @return This routine returns a signed value representing the number of PTEs between EndPte and StartPte.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+LONG
+MM::PageMapXpa::GetPteDistance(PMMPTE EndPte,
+                               PMMPTE StartPte)
+{
+    /* Return distance between PTE pointers */
+    return ((ULONG_PTR)EndPte - (ULONG_PTR)StartPte) / sizeof(MMPML3_PTE);
 }
 
 /**

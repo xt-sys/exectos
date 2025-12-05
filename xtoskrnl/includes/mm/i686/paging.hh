@@ -35,6 +35,8 @@ namespace MM
             STATIC XTAPI PMMPPE GetPpeAddress(IN PVOID Address);
             STATIC XTAPI PVOID GetPpeVirtualAddress(IN PMMPPE PpePointer);
             STATIC XTAPI PMMPTE GetPteAddress(IN PVOID Address);
+            STATIC XTAPI LONG GetPteDistance(PMMPTE EndPte,
+                                             PMMPTE StartPte);
             STATIC XTAPI ULONG GetPteSize(VOID);
             STATIC XTAPI PVOID GetPteVirtualAddress(IN PMMPTE PtePointer);
             STATIC XTAPI BOOLEAN GetXpaStatus(VOID);

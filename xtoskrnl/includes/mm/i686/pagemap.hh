@@ -63,6 +63,8 @@ namespace MM
             XTAPI PMMPTE GetNextPte(IN PMMPTE Pte);
             XTAPI BOOLEAN GetOneEntry(IN PMMPTE Pte);
             XTAPI PFN_NUMBER GetPageFrameNumber(IN PMMPTE Pte);
+            XTAPI LONG GetPteDistance(PMMPTE EndPte,
+                                      PMMPTE StartPte);
             XTAPI ULONG GetPteSize(VOID);
             XTAPI VOID InitializePageMapInfo(VOID);
             XTAPI BOOLEAN PteValid(IN PMMPTE PtePointer);
@@ -87,6 +89,8 @@ namespace MM
             XTAPI PMMPTE GetNextPte(IN PMMPTE Pte);
             XTAPI BOOLEAN GetOneEntry(IN PMMPTE Pte);
             XTAPI PFN_NUMBER GetPageFrameNumber(IN PMMPTE Pte);
+            XTAPI LONG GetPteDistance(PMMPTE EndPte,
+                                      PMMPTE StartPte);
             XTAPI ULONG GetPteSize(VOID);
             XTAPI VOID InitializePageMapInfo(VOID);
             XTAPI BOOLEAN PteValid(IN PMMPTE PtePointer);

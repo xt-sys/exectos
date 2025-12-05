@@ -312,6 +312,28 @@ MM::Paging::GetPteAddress(IN PVOID Address)
 }
 
 /**
+ * Calculates the distance between two PTE pointers.
+ *
+ * @param EndPte
+ *        Pointer to the ending Page Table Entry.
+ *
+ * @param StartPte
+ *        Pointer to the starting Page Table Entry.
+ *
+ * @return This routine returns a signed value representing the number of PTEs between EndPte and StartPte.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+LONG
+MM::Paging::GetPteDistance(PMMPTE EndPte,
+                           PMMPTE StartPte)
+{
+    /* Return distance between PTE pointers */
+    return PmlRoutines->GetPteDistance(EndPte, StartPte);
+}
+
+/**
  * Gets the size of a PTE.
  *
  * @return This routine returns the size of a PTE.
