@@ -56,8 +56,8 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/paging.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/data.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/hlpool.cc
-    ${XTOSKRNL_SOURCE_DIR}/mm/init.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/kpool.cc
+    ${XTOSKRNL_SOURCE_DIR}/mm/mmgr.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/paging.cc
     ${XTOSKRNL_SOURCE_DIR}/po/idle.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/${ARCH}/dispatch.cc

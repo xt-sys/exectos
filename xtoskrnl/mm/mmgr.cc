@@ -1,9 +1,10 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/mm/init.cc
- * DESCRIPTION:     Memory Manager initialization routines
+ * FILE:            xtoskrnl/mm/mmgr.cc
+ * DESCRIPTION:     Memory Manager
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ *                  Aiken Harris <harraiken91@gmail.com>
  */
 
 #include <xtos.hh>
@@ -18,7 +19,7 @@
  */
 XTAPI
 VOID
-MM::Init::InitializeMemoryManager(VOID)
+MM::Manager::InitializeMemoryManager(VOID)
 {
     /* Scan memory descriptors provided by the boot loader */
     ScanMemoryDescriptors();
@@ -44,7 +45,7 @@ MM::Init::InitializeMemoryManager(VOID)
  */
 XTAPI
 VOID
-MM::Init::ScanMemoryDescriptors(VOID)
+MM::Manager::ScanMemoryDescriptors(VOID)
 {
     PLIST_ENTRY LoaderMemoryDescriptors, MemoryMappings;
     PLOADER_MEMORY_DESCRIPTOR MemoryDescriptor;
@@ -124,7 +125,7 @@ MM::Init::ScanMemoryDescriptors(VOID)
  */
 XTAPI
 BOOLEAN
-MM::Init::VerifyMemoryTypeFree(LOADER_MEMORY_TYPE MemoryType)
+MM::Manager::VerifyMemoryTypeFree(LOADER_MEMORY_TYPE MemoryType)
 {
     return ((MemoryType == LoaderFree) || (MemoryType == LoaderFirmwareTemporary) ||
             (MemoryType == LoaderLoadedProgram) || (MemoryType == LoaderOsloaderStack));
@@ -142,7 +143,7 @@ MM::Init::VerifyMemoryTypeFree(LOADER_MEMORY_TYPE MemoryType)
  */
 XTAPI
 BOOLEAN
-MM::Init::VerifyMemoryTypeInvisible(LOADER_MEMORY_TYPE MemoryType)
+MM::Manager::VerifyMemoryTypeInvisible(LOADER_MEMORY_TYPE MemoryType)
 {
     return ((MemoryType == LoaderFirmwarePermanent) ||
             (MemoryType == LoaderSpecialMemory) ||

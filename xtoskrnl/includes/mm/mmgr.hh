@@ -1,13 +1,13 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/includes/mm/init.hh
- * DESCRIPTION:     Memory Manager initialization
+ * FILE:            xtoskrnl/includes/mm/mmgr.hh
+ * DESCRIPTION:     Memory Manager
  * DEVELOPERS:      Aiken Harris <harraiken91@gmail.com>
  */
 
-#ifndef __XTOSKRNL_MM_INIT_HH
-#define __XTOSKRNL_MM_INIT_HH
+#ifndef __XTOSKRNL_MM_MMGR_HH
+#define __XTOSKRNL_MM_MMGR_HH
 
 #include <xtos.hh>
 
@@ -15,7 +15,7 @@
 /* Memory Manager */
 namespace MM
 {
-    class Init
+    class Manager
     {
         private:
             STATIC PLOADER_MEMORY_DESCRIPTOR FreeDescriptor;
@@ -36,4 +36,4 @@ namespace MM
        };
 }
 
-#endif /* __XTOSKRNL_MM_INIT_HH */
+#endif /* __XTOSKRNL_MM_MMGR_HH */
