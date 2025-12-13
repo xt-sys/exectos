@@ -33,7 +33,8 @@ MM::Manager::InitializeMemoryManager(VOID)
     }
 }
 
-/** Checks whether the specified memory type should be considered as free.
+/**
+ * Checks whether the specified memory type should be considered as free.
  *
  * @param MemoryType
  *        Specifies the memory type to verify.
@@ -46,8 +47,10 @@ XTAPI
 BOOLEAN
 MM::Manager::VerifyMemoryTypeFree(LOADER_MEMORY_TYPE MemoryType)
 {
-    return ((MemoryType == LoaderFree) || (MemoryType == LoaderFirmwareTemporary) ||
-            (MemoryType == LoaderLoadedProgram) || (MemoryType == LoaderOsloaderStack));
+    return ((MemoryType == LoaderFirmwareTemporary) ||
+            (MemoryType == LoaderFree) ||
+            (MemoryType == LoaderLoadedProgram) ||
+            (MemoryType == LoaderOsloaderStack));
 }
 
 /**
@@ -64,7 +67,7 @@ XTAPI
 BOOLEAN
 MM::Manager::VerifyMemoryTypeInvisible(LOADER_MEMORY_TYPE MemoryType)
 {
-    return ((MemoryType == LoaderFirmwarePermanent) ||
-            (MemoryType == LoaderSpecialMemory) ||
-            (MemoryType == LoaderBBTMemory));
+    return ((MemoryType == LoaderBBTMemory) ||
+            (MemoryType == LoaderFirmwarePermanent) ||
+            (MemoryType == LoaderSpecialMemory));
 }
