@@ -36,7 +36,7 @@ MM::Paging::GetExtendedPhysicalAddressingStatus(VOID)
  * @since XT 1.0
  */
 XTAPI
-PMMPDE
+PMMP5E
 MM::Paging::GetP5eAddress(IN PVOID Address)
 {
     /* Return PDE address */
