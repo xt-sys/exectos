@@ -11,6 +11,21 @@
 
 
 /**
+ * Retrieves the total number of physical pages managed by the system.
+ *
+ * @return Returns the total count of physical memory pages.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG
+MM::Pfn::GetNumberOfPhysicalPages(VOID)
+{
+    /* Return the number of physical pages */
+    return NumberOfPhysicalPages;
+}
+
+/**
  * Scans memory descriptors provided by the boot loader.
  *
  * @return This routine does not return any value.
@@ -28,53 +43,53 @@ MM::Pfn::ScanMemoryDescriptors(VOID)
     /* Initially, set number of free pages to 0 */
     FreePages = 0;
 
-    /* Get a list of memory descriptors provided by the boot loader */
+    /* Get the list head of memory descriptors */
     LoaderMemoryDescriptors = KE::BootInformation::GetMemoryDescriptors();
 
-    /* Iterate through memory mappings provided by the boot loader */
+    /* Iterate through the memory descriptors */
     MemoryMappings = LoaderMemoryDescriptors->Flink;
     while(MemoryMappings != LoaderMemoryDescriptors)
     {
-        /* Get memory descriptor */
+        /* Get the memory descriptor */
         MemoryDescriptor = CONTAIN_RECORD(MemoryMappings, LOADER_MEMORY_DESCRIPTOR, ListEntry);
 
-        /* Check if memory type is invisible or cached */
+        /* Skip invisible or hardware cached memory regions */
         if(MM::Manager::VerifyMemoryTypeInvisible(MemoryDescriptor->MemoryType) ||
-           (MemoryDescriptor->MemoryType == LoaderHardwareCachedMemory))
+            (MemoryDescriptor->MemoryType == LoaderHardwareCachedMemory))
         {
-            /* Skip this mapping */
+            /* Move to the next descriptor and skip further processing */
             MemoryMappings = MemoryMappings->Flink;
             continue;
         }
 
-        /* Make sure that memory type is not bad */
+        /* Count the number of physical pages, excluding bad memory */
         if(MemoryDescriptor->MemoryType != LoaderBad)
         {
-            /* Increment number of physical pages */
+            /* Add the pages from this descriptor to the total count */
             NumberOfPhysicalPages += MemoryDescriptor->PageCount;
         }
 
-        /* Find lowest physical page */
+        /* Check if this physical page is the lowest one yet */
         if(MemoryDescriptor->BasePage < LowestPhysicalPage)
         {
-            /* Update lowest physical page */
+            /* Update the lowest physical page number found so far */
             LowestPhysicalPage = MemoryDescriptor->BasePage;
         }
 
-        /* Find highest physical page */
-        if(MemoryDescriptor->BasePage + MemoryDescriptor->PageCount > HighestPhysicalPage)
+        /* Check if this physical page is the highest one yet */
+        if((MemoryDescriptor->BasePage + MemoryDescriptor->PageCount) > HighestPhysicalPage)
         {
-            /* Update highest physical page */
+            /* Update the highest physical page number found so far */
             HighestPhysicalPage = (MemoryDescriptor->BasePage + MemoryDescriptor->PageCount) - 1;
         }
 
-        /* Check if memory type should be considered as free */
+        /* Identify the largest block of free memory */
         if(MM::Manager::VerifyMemoryTypeFree(MemoryDescriptor->MemoryType))
         {
-            /* Check if this descriptor contains more free pages */
+            /* Check if this free memory block is the largest one yet */
             if(MemoryDescriptor->PageCount >= FreePages)
             {
-                /* Update free descriptor */
+                /* Update the largest free block size and save the descriptor */
                 FreePages = MemoryDescriptor->PageCount;
                 FreeDescriptor = MemoryDescriptor;
             }
@@ -84,6 +99,13 @@ MM::Pfn::ScanMemoryDescriptors(VOID)
         MemoryMappings = MemoryMappings->Flink;
     }
 
-    /* Store original free descriptor */
-    RTL::Memory::CopyMemory(&OldFreeDescriptor, FreeDescriptor, sizeof(LOADER_MEMORY_DESCRIPTOR));
+    /* Ensure a free memory descriptor was found */
+    if(!FreeDescriptor)
+    {
+        /* No free memory available to bootstrap the system */
+        KE::Crash::Panic(0);
+    }
+
+    /* Save a copy of the original free descriptor before it gets modified */
+    RTL::Memory::CopyMemory(&OriginalFreeDescriptor, FreeDescriptor, sizeof(LOADER_MEMORY_DESCRIPTOR));
 }

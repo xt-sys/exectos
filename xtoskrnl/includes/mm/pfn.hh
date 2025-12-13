@@ -22,9 +22,10 @@ namespace MM
             STATIC ULONG_PTR HighestPhysicalPage;
             STATIC ULONG_PTR LowestPhysicalPage;
             STATIC ULONG NumberOfPhysicalPages;
-            STATIC LOADER_MEMORY_DESCRIPTOR OldFreeDescriptor;
+            STATIC LOADER_MEMORY_DESCRIPTOR OriginalFreeDescriptor;
 
         public:
+            STATIC XTAPI ULONG GetNumberOfPhysicalPages(VOID);
             STATIC XTAPI VOID ScanMemoryDescriptors(VOID);
     };
 }

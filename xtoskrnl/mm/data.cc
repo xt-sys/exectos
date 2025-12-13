@@ -22,7 +22,7 @@ ULONG MM::HardwarePool::UsedHardwareAllocationDescriptors = 0;
 UCHAR MM::KernelPool::ProcessorStructuresData[MAXIMUM_PROCESSORS][KPROCESSOR_STRUCTURES_SIZE] = {{0}};
 
 /* Biggest free memory descriptor */
-PLOADER_MEMORY_DESCRIPTOR MM::Init::FreeDescriptor;
+PLOADER_MEMORY_DESCRIPTOR MM::Pfn::FreeDescriptor;
 
 /* Highest physical page number */
 ULONG_PTR MM::Pfn::HighestPhysicalPage;
@@ -34,7 +34,7 @@ ULONG_PTR MM::Pfn::LowestPhysicalPage = -1;
 ULONG MM::Pfn::NumberOfPhysicalPages;
 
 /* Old biggest free memory descriptor */
-LOADER_MEMORY_DESCRIPTOR MM::Pfn::OldFreeDescriptor;
+LOADER_MEMORY_DESCRIPTOR MM::Pfn::OriginalFreeDescriptor;
 
 /* Instance of the page map routines for the current PML level */
 MM::PPAGEMAP MM::Paging::PmlRoutines;

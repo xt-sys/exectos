@@ -25,7 +25,7 @@ MM::Manager::InitializeMemoryManager(VOID)
     MM::Pfn::ScanMemoryDescriptors();
 
     /* Check if there are enough physical pages */
-    if(NumberOfPhysicalPages < MM_MINIMUM_PHYSICAL_PAGES)
+    if(MM::Pfn::GetNumberOfPhysicalPages() < MM_MINIMUM_PHYSICAL_PAGES)
     {
         /* Insufficient physical pages, kernel panic */
         DebugPrint(L"Insufficient physical pages! Install additional memory\n");
