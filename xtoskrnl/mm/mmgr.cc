@@ -22,7 +22,7 @@ VOID
 MM::Manager::InitializeMemoryManager(VOID)
 {
     /* Scan memory descriptors provided by the boot loader */
-    ScanMemoryDescriptors();
+    MM::Pfn::ScanMemoryDescriptors();
 
     /* Check if there are enough physical pages */
     if(NumberOfPhysicalPages < MM_MINIMUM_PHYSICAL_PAGES)

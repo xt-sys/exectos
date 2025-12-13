@@ -39,7 +39,7 @@ MM::Pfn::ScanMemoryDescriptors(VOID)
         MemoryDescriptor = CONTAIN_RECORD(MemoryMappings, LOADER_MEMORY_DESCRIPTOR, ListEntry);
 
         /* Check if memory type is invisible or cached */
-        if(VerifyMemoryTypeInvisible(MemoryDescriptor->MemoryType) ||
+        if(MM::Manager::VerifyMemoryTypeInvisible(MemoryDescriptor->MemoryType) ||
            (MemoryDescriptor->MemoryType == LoaderHardwareCachedMemory))
         {
             /* Skip this mapping */
@@ -69,7 +69,7 @@ MM::Pfn::ScanMemoryDescriptors(VOID)
         }
 
         /* Check if memory type should be considered as free */
-        if(VerifyMemoryTypeFree(MemoryDescriptor->MemoryType))
+        if(MM::Manager::VerifyMemoryTypeFree(MemoryDescriptor->MemoryType))
         {
             /* Check if this descriptor contains more free pages */
             if(MemoryDescriptor->PageCount >= FreePages)

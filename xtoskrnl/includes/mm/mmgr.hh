@@ -19,8 +19,6 @@ namespace MM
     {
         public:
             STATIC XTAPI VOID InitializeMemoryManager(VOID);
-
-        private:
             STATIC XTAPI BOOLEAN VerifyMemoryTypeFree(LOADER_MEMORY_TYPE MemoryType);
             STATIC XTAPI BOOLEAN VerifyMemoryTypeInvisible(LOADER_MEMORY_TYPE MemoryType);
        };
