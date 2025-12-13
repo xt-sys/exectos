@@ -23,9 +23,12 @@ namespace MM
             STATIC ULONG_PTR LowestPhysicalPage;
             STATIC ULONG NumberOfPhysicalPages;
             STATIC LOADER_MEMORY_DESCRIPTOR OriginalFreeDescriptor;
+            STATIC PFN_NUMBER PfnDatabaseSize;
 
         public:
+            STATIC XTAPI VOID ComputePfnDatabaseSize(VOID);
             STATIC XTAPI ULONG GetNumberOfPhysicalPages(VOID);
+            STATIC XTAPI PFN_NUMBER GetPfnDatabaseSize(VOID);
             STATIC XTAPI VOID ScanMemoryDescriptors(VOID);
     };
 }

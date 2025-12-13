@@ -31,6 +31,9 @@ MM::Manager::InitializeMemoryManager(VOID)
         DebugPrint(L"Insufficient physical pages! Install additional memory\n");
         KE::Crash::Panic(0);
     }
+
+    /* Compute allocation size for the PFN database */
+    MM::Pfn::ComputePfnDatabaseSize();
 }
 
 /**
