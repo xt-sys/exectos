@@ -18,23 +18,23 @@ PVOID MM::HardwarePool::HardwareHeapStart = MM_HARDWARE_HEAP_START_ADDRESS;
 /* Number of used hardware allocation descriptors */
 ULONG MM::HardwarePool::UsedHardwareAllocationDescriptors = 0;
 
+/* Processor structures data (THIS IS A TEMPORARY HACK) */
+UCHAR MM::KernelPool::ProcessorStructuresData[MAXIMUM_PROCESSORS][KPROCESSOR_STRUCTURES_SIZE] = {{0}};
+
 /* Biggest free memory descriptor */
 PLOADER_MEMORY_DESCRIPTOR MM::Init::FreeDescriptor;
 
 /* Highest physical page number */
-ULONG_PTR MM::Init::HighestPhysicalPage;
+ULONG_PTR MM::Pfn::HighestPhysicalPage;
 
 /* Lowest physical page number */
-ULONG_PTR MM::Init::LowestPhysicalPage = -1;
+ULONG_PTR MM::Pfn::LowestPhysicalPage = -1;
 
 /* Number of physical pages */
-ULONG MM::Init::NumberOfPhysicalPages;
+ULONG MM::Pfn::NumberOfPhysicalPages;
 
 /* Old biggest free memory descriptor */
-LOADER_MEMORY_DESCRIPTOR MM::Init::OldFreeDescriptor;
-
-/* Processor structures data (THIS IS A TEMPORARY HACK) */
-UCHAR MM::KernelPool::ProcessorStructuresData[MAXIMUM_PROCESSORS][KPROCESSOR_STRUCTURES_SIZE] = {{0}};
+LOADER_MEMORY_DESCRIPTOR MM::Pfn::OldFreeDescriptor;
 
 /* Instance of the page map routines for the current PML level */
 MM::PPAGEMAP MM::Paging::PmlRoutines;

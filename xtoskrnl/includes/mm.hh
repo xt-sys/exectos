@@ -17,5 +17,6 @@
 #include <mm/hlpool.hh>
 #include <mm/kpool.hh>
 #include <mm/mmgr.hh>
+#include <mm/pfn.hh>
 
 #endif /* __XTOSKRNL_MM_HH */

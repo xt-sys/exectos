@@ -51,7 +51,6 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/ke/spinlock.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/sysres.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/timer.cc
-    ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/init.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/pagemap.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/paging.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/data.cc
@@ -59,6 +58,7 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/mm/kpool.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/mmgr.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/paging.cc
+    ${XTOSKRNL_SOURCE_DIR}/mm/pfn.cc
     ${XTOSKRNL_SOURCE_DIR}/po/idle.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/${ARCH}/dispatch.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/${ARCH}/exsup.cc
