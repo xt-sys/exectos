@@ -11,6 +11,64 @@
 
 
 /**
+ * Retrieves a pointer to the system's virtual memory layout structure.
+ *
+ * @return This routine returns a pointer to the memory layout structure.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PMMMEMORY_LAYOUT
+MM::Manager::GetMemoryLayout(VOID)
+{
+    /* Return a pointer to the global memory layout structure */
+    return &MemoryLayout;
+}
+
+/**
+ * Initializes the kernel's virtual memory layout.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::Manager::InitializeMemoryLayout(VOID)
+{
+    ULONG_PTR PagedPoolSize, PteCount;
+    PFN_NUMBER PfnDatabaseSize;
+
+    /* Calculate size of paged pool (at least 32MiB) */
+    PteCount = ((SIZE_TO_PAGES(33554432) + (MM_PTE_PER_PAGE - 1)) / MM_PTE_PER_PAGE);
+    PagedPoolSize = PteCount * MM_PTE_PER_PAGE * MM_PAGE_SIZE;
+
+    /* Retrieve the PFN database size */
+    PfnDatabaseSize = MM::Pfn::GetPfnDatabaseSize();
+
+    if(MM::Paging::GetXpaStatus())
+    {
+        MemoryLayout.PfnDatabaseAddress = (PMMPFN)0xFFFEFA8000000000ULL;
+        MemoryLayout.SelfMapAddress = (PVOID)0xFFEDF6FB7DBEDF68ULL;
+
+        MemoryLayout.NonPagedPoolStart = (PVOID)((ULONG_PTR)MemoryLayout.PfnDatabaseAddress + PfnDatabaseSize * MM_PAGE_SIZE);
+        MemoryLayout.NonPagedPoolEnd = (PVOID)0xFFFEFFFFFFBFFFFFULL;
+        MemoryLayout.PagedPoolStart = (PVOID)0xFFFEF8A000000000ULL;
+        MemoryLayout.PagedPoolEnd = (PVOID)(((ULONG_PTR)MemoryLayout.PagedPoolStart + PagedPoolSize) - 1);
+    }
+    else
+    {
+        MemoryLayout.PfnDatabaseAddress = (PMMPFN)0xFFFFFA8000000000ULL;
+        MemoryLayout.SelfMapAddress = (PVOID)0xFFFFF6FB7DBEDF68ULL;
+
+        MemoryLayout.NonPagedPoolStart = (PVOID)((ULONG_PTR)MemoryLayout.PfnDatabaseAddress + PfnDatabaseSize * MM_PAGE_SIZE);
+        MemoryLayout.NonPagedPoolEnd = (PVOID)0xFFFFFFFFFFBFFFFFULL;
+        MemoryLayout.PagedPoolStart = (PVOID)0xFFFFF8A000000000ULL;
+        MemoryLayout.PagedPoolEnd = (PVOID)(((ULONG_PTR)MemoryLayout.PagedPoolStart + PagedPoolSize) - 1);
+    }
+}
+
+/**
  * Performs an early initialization of the XTOS Memory Manager.
  *
  * @return This routine does not return any value.
@@ -34,6 +92,9 @@ MM::Manager::InitializeMemoryManager(VOID)
 
     /* Compute allocation size for the PFN database */
     MM::Pfn::ComputePfnDatabaseSize();
+
+    /* Initialize memory layout */
+    InitializeMemoryLayout();
 }
 
 /**

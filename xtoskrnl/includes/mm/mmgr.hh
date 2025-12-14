@@ -2,7 +2,7 @@
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
  * FILE:            xtoskrnl/includes/mm/mmgr.hh
- * DESCRIPTION:     Memory Manager
+ * DESCRIPTION:     Memory manager
  * DEVELOPERS:      Aiken Harris <harraiken91@gmail.com>
  */
 
@@ -17,7 +17,12 @@ namespace MM
 {
     class Manager
     {
+        private:
+            STATIC MMMEMORY_LAYOUT MemoryLayout;
+
         public:
+            STATIC XTAPI PMMMEMORY_LAYOUT GetMemoryLayout(VOID);
+            STATIC XTAPI VOID InitializeMemoryLayout(VOID);
             STATIC XTAPI VOID InitializeMemoryManager(VOID);
             STATIC XTAPI BOOLEAN VerifyMemoryTypeFree(LOADER_MEMORY_TYPE MemoryType);
             STATIC XTAPI BOOLEAN VerifyMemoryTypeInvisible(LOADER_MEMORY_TYPE MemoryType);

@@ -4,6 +4,7 @@
  * FILE:            sdk/xtdk/mmtypes.h
  * DESCRIPTION:     Memory management data structures
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ *                  Aiken Harris <harraiken91@gmail.com>
  */
 
 #ifndef __XTDK_MMTYPES_H
@@ -50,6 +51,17 @@ typedef struct _MMCOLOR_TABLES
     PVOID Blink;
     ULONG_PTR Count;
 } MMCOLOR_TABLES, *PMMCOLOR_TABLES;
+
+/* Memory layout structure definition */
+typedef struct _MMMEMORY_LAYOUT
+{
+    PMMPFN PfnDatabaseAddress;
+    PVOID SelfMapAddress;
+    PVOID NonPagedPoolStart;
+    PVOID NonPagedPoolEnd;
+    PVOID PagedPoolStart;
+    PVOID PagedPoolEnd;
+} MMMEMORY_LAYOUT, *PMMMEMORY_LAYOUT;
 
 /* Page Frame Entry structure definition */
 typedef struct _MMPFNENTRY
