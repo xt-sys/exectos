@@ -18,6 +18,7 @@ namespace MM
     class Pte
     {
         public:
+            STATIC XTAPI ULONG GetPtesPerPage(VOID);
             STATIC XTAPI VOID MapP5E(PVOID StartAddress,
                                      PVOID EndAddress,
                                      PMMP5E TemplateP5e);

@@ -10,6 +10,21 @@
 
 
 /**
+ * Calculates the number of Page Table Entries (PTEs) that fit within a single page.
+ *
+ * @return This routine returns the number of PTEs per page.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG
+MM::Pte::GetPtesPerPage(VOID)
+{
+    /* Calculate and return the number of PTEs per page */
+    return MM_PAGE_SIZE / MM::Paging::GetPteSize();
+}
+
+/**
  * Maps a range of virtual addresses at the P5E (PML5) level.
  *
  * @param StartAddress

@@ -38,10 +38,12 @@ MM::Manager::InitializeMemoryLayout(VOID)
 {
     ULONG_PTR PagedPoolSize, PteCount;
     PFN_NUMBER PfnDatabaseSize;
+    ULONG PtesPerPage;
 
-    /* Calculate size of paged pool (at least 32MiB) */
-    PteCount = ((SIZE_TO_PAGES(33554432) + (MM_PTE_PER_PAGE - 1)) / MM_PTE_PER_PAGE);
-    PagedPoolSize = PteCount * MM_PTE_PER_PAGE * MM_PAGE_SIZE;
+    /* Get the number of PTEs per page and calculate size of paged pool (at least 32MiB) */
+    PtesPerPage = MM::Pte::GetPtesPerPage();
+    PteCount = ((SIZE_TO_PAGES(33554432) + (PtesPerPage - 1)) / PtesPerPage);
+    PagedPoolSize = PteCount * PtesPerPage * MM_PAGE_SIZE;
 
     /* Retrieve the PFN database size */
     PfnDatabaseSize = MM::Pfn::GetPfnDatabaseSize();

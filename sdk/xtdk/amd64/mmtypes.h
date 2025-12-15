@@ -43,12 +43,6 @@
 #define MM_PXI_SHIFT                               39
 #define MM_P5I_SHIFT                               48
 
-/* Number of PTEs per page */
-#define MM_PTE_PER_PAGE                            512
-#define MM_PDE_PER_PAGE                            512
-#define MM_PPE_PER_PAGE                            512
-#define MM_PXE_PER_PAGE                            512
-
 /* PTE state flags */
 #define MM_PTE_VALID                               0x0000000000000001ULL
 #define MM_PTE_ACCESSED                            0x0000000000000020ULL
