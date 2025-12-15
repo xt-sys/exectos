@@ -11,6 +11,39 @@
 
 
 /**
+ * Allocates a block of physical pages for early kernel initialization.
+ *
+ * @param NumberOfPages
+ *        The number of physical pages to allocate.
+ *
+ * @return This routine returns the base page frame number (PFN) of the allocated block.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PFN_NUMBER
+MM::Pfn::AllocateBootstrapPages(IN PFN_NUMBER NumberOfPages)
+{
+    PFN_NUMBER Pfn;
+
+    /* Check if the largest free memory block has enough pages */
+    if(NumberOfPages > FreeDescriptor->PageCount)
+    {
+        /* Not enough physical memory available, kernel panic */
+        DebugPrint(L"Insufficient physical pages! Install additional memory\n");
+        KE::Crash::Panic(0);
+    }
+
+    /* Allocate pages from the beginning of the free descriptor */
+    Pfn = FreeDescriptor->BasePage;
+    FreeDescriptor->BasePage += NumberOfPages;
+    FreeDescriptor->PageCount -= NumberOfPages;
+
+    /* Return the base page frame number of the allocated block */
+    return Pfn;
+}
+
+/**
  * Calculates the total number of pages required for the PFN database and its associated color tables.
  *
  * @return This routine does not return any value.

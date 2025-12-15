@@ -26,6 +26,7 @@ namespace MM
             STATIC PFN_NUMBER PfnDatabaseSize;
 
         public:
+            STATIC XTAPI PFN_NUMBER AllocateBootstrapPages(IN PFN_NUMBER NumberOfPages);
             STATIC XTAPI VOID ComputePfnDatabaseSize(VOID);
             STATIC XTAPI ULONG GetNumberOfPhysicalPages(VOID);
             STATIC XTAPI PFN_NUMBER GetPfnDatabaseSize(VOID);
