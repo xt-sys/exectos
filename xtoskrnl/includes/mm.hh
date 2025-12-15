@@ -18,5 +18,6 @@
 #include <mm/kpool.hh>
 #include <mm/mmgr.hh>
 #include <mm/pfn.hh>
+#include <mm/pte.hh>
 
 #endif /* __XTOSKRNL_MM_HH */
