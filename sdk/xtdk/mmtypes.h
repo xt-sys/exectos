@@ -57,10 +57,15 @@ typedef struct _MMMEMORY_LAYOUT
 {
     PMMPFN PfnDatabaseAddress;
     PVOID SelfMapAddress;
+    PVOID HyperSpaceStart;
+    PVOID HyperSpaceEnd;
     PVOID NonPagedPoolStart;
     PVOID NonPagedPoolEnd;
     PVOID PagedPoolStart;
     PVOID PagedPoolEnd;
+    PVOID SystemSpaceStart;
+    PVOID SystemSpaceEnd;
+    PVOID UserSpaceEnd;
 } MMMEMORY_LAYOUT, *PMMMEMORY_LAYOUT;
 
 /* Page Frame Entry structure definition */

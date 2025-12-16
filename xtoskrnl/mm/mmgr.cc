@@ -57,6 +57,12 @@ MM::Manager::InitializeMemoryLayout(VOID)
         MemoryLayout.NonPagedPoolEnd = (PVOID)0xFFFEFFFFFFBFFFFFULL;
         MemoryLayout.PagedPoolStart = (PVOID)0xFFFEF8A000000000ULL;
         MemoryLayout.PagedPoolEnd = (PVOID)(((ULONG_PTR)MemoryLayout.PagedPoolStart + PagedPoolSize) - 1);
+
+        MemoryLayout.HyperSpaceStart = (PVOID)0xFFFEF70000000000ULL;
+        MemoryLayout.HyperSpaceEnd = (PVOID)0xFFFEF77FFFFFFFFFULL;
+        MemoryLayout.SystemSpaceStart = (PVOID)0xFFFEF88000000000ULL;
+        MemoryLayout.SystemSpaceEnd = (PVOID)((ULONG_PTR)MemoryLayout.SystemSpaceStart + (MM_NUMBER_SYSTEM_PTES + 1) * MM_PAGE_SIZE);
+        MemoryLayout.UserSpaceEnd = (PVOID)0x07FFFFFFFFFFFFFULL;
     }
     else
     {
@@ -67,6 +73,12 @@ MM::Manager::InitializeMemoryLayout(VOID)
         MemoryLayout.NonPagedPoolEnd = (PVOID)0xFFFFFFFFFFBFFFFFULL;
         MemoryLayout.PagedPoolStart = (PVOID)0xFFFFF8A000000000ULL;
         MemoryLayout.PagedPoolEnd = (PVOID)(((ULONG_PTR)MemoryLayout.PagedPoolStart + PagedPoolSize) - 1);
+
+        MemoryLayout.HyperSpaceStart = (PVOID)0xFFFFF70000000000ULL;
+        MemoryLayout.HyperSpaceEnd = (PVOID)0xFFFFF77FFFFFFFFFULL;
+        MemoryLayout.SystemSpaceStart = (PVOID)0xFFFFF88000000000ULL;
+        MemoryLayout.SystemSpaceEnd = (PVOID)((ULONG_PTR)MemoryLayout.SystemSpaceStart + (MM_NUMBER_SYSTEM_PTES + 1) * MM_PAGE_SIZE);
+        MemoryLayout.UserSpaceEnd = (PVOID)0x000007FFFFFEFFFFULL;
     }
 }
 
