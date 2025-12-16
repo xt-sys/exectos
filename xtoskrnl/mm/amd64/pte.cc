@@ -10,6 +10,89 @@
 
 
 /**
+ * Checks if the virtual address is valid and mapped in the page tables.
+ *
+ * @param VirtualAddress
+ *        The virtual address to check.
+ *
+ * @return This routine returns TRUE if the address is valid, or FALSE otherwise.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+BOOLEAN
+MM::Pte::AddressValid(IN PVOID VirtualAddress)
+{
+    /* Check XPA status */
+    if(MM::Paging::GetXpaStatus())
+    {
+        /* Check if the P5E is valid */
+        if(!MM::Paging::PteValid(MM::Paging::GetP5eAddress(VirtualAddress)))
+        {
+            /* Invalid P5E, return FALSE */
+            return FALSE;
+        }
+    }
+
+    /* Check if PXE, PPE, PDE and PTE are valid */
+    if(!MM::Paging::PteValid(MM::Paging::GetPxeAddress(VirtualAddress)) ||
+       !MM::Paging::PteValid(MM::Paging::GetPpeAddress(VirtualAddress)) ||
+       !MM::Paging::PteValid(MM::Paging::GetPdeAddress(VirtualAddress)) ||
+       !MM::Paging::PteValid(MM::Paging::GetPteAddress(VirtualAddress)))
+    {
+        /* Invalid PXE, PPE, PDE or PTE, return FALSE */
+        return FALSE;
+    }
+
+    /* Address is valid, return TRUE */
+    return TRUE;
+}
+
+/**
+ * Retrieves the base virtual address of the system PTEs.
+ *
+ * @return This routine returns a pointer to the first PTE in the system PTE space.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PMMPTE
+MM::Pte::GetSystemPteBaseAddress(VOID)
+{
+    PMMMEMORY_LAYOUT MemoryLayout;
+
+    /* Retrieve the system's memory layout */
+    MemoryLayout = MM::Manager::GetMemoryLayout();
+
+    /* Determine the base address for system PTEs based on the paging mode */
+    if(MM::Paging::GetXpaStatus())
+    {
+        /* For 5-level paging, system PTEs start at the beginning of system space */
+        return MM::Paging::GetPteAddress((PVOID)MemoryLayout->SystemSpaceStart);
+    }
+    else
+    {
+        /* For 4-level paging, system PTEs start at the legacy KSEG0_BASE */
+        return MM::Paging::GetPteAddress((PVOID)KSEG0_BASE);
+    }
+}
+
+
+/**
+ * Performs the initial setup of the system's page table hierarchy.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::Pte::InitializePageTable(VOID)
+{
+    UNIMPLEMENTED;
+}
+
+/**
  * Maps a range of virtual addresses at the P5E (PML5) level.
  *
  * @param StartAddress

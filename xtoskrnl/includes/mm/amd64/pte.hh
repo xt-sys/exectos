@@ -18,7 +18,10 @@ namespace MM
     class Pte
     {
         public:
+            STATIC XTAPI BOOLEAN AddressValid(IN PVOID VirtualAddress);
             STATIC XTAPI ULONG GetPtesPerPage(VOID);
+            STATIC XTAPI PMMPTE GetSystemPteBaseAddress(VOID);
+            STATIC XTAPI VOID InitializePageTable(VOID);
             STATIC XTAPI VOID MapP5E(PVOID StartAddress,
                                      PVOID EndAddress,
                                      PMMP5E TemplateP5e);
