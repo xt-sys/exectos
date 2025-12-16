@@ -1,13 +1,13 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/includes/mm/pagemap.hh
+ * FILE:            xtoskrnl/includes/mm/i686/pagemap.hh
  * DESCRIPTION:     Low-level support for page map manipulation
  * DEVELOPERS:      Aiken Harris <harraiken91@gmail.com>
  */
 
-#ifndef __XTOSKRNL_MM_PAGEMAP_HH
-#define __XTOSKRNL_MM_PAGEMAP_HH
+#ifndef __XTOSKRNL_MM_I686_PAGEMAP_HH
+#define __XTOSKRNL_MM_I686_PAGEMAP_HH
 
 #include <xtos.hh>
 
@@ -109,4 +109,4 @@ namespace MM
     };
 }
 
-#endif /* __XTOSKRNL_MM_PAGEMAP_HH */
+#endif /* __XTOSKRNL_MM_I686_PAGEMAP_HH */

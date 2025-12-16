@@ -1,13 +1,13 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/includes/mm/pte.hh
- * DESCRIPTION:     Page table entry (PTE) support
+ * FILE:            xtoskrnl/includes/mm/i686/pte.hh
+ * DESCRIPTION:     Page table entry (PTE) for i686 support
  * DEVELOPERS:      Aiken Harris <harraiken91@gmail.com>
  */
 
-#ifndef __XTOSKRNL_MM_PTE_HH
-#define __XTOSKRNL_MM_PTE_HH
+#ifndef __XTOSKRNL_MM_I686_PTE_HH
+#define __XTOSKRNL_MM_I686_PTE_HH
 
 #include <xtos.hh>
 
@@ -37,4 +37,4 @@ namespace MM
     };
 }
 
-#endif /* __XTOSKRNL_MM_PTE_HH */
+#endif /* __XTOSKRNL_MM_I686_PTE_HH */
