@@ -30,8 +30,14 @@ ULONG_PTR MM::Pfn::HighestPhysicalPage;
 /* Lowest physical page number */
 ULONG_PTR MM::Pfn::LowestPhysicalPage = -1;
 
+/* Memory layout */
+MMMEMORY_LAYOUT MM::Manager::MemoryLayout;
+
 /* Number of physical pages */
 ULONG MM::Pfn::NumberOfPhysicalPages;
+
+/* Number of system PTEs */
+PFN_NUMBER MM::Manager::NumberOfSystemPtes;
 
 /* Old biggest free memory descriptor */
 LOADER_MEMORY_DESCRIPTOR MM::Pfn::OriginalFreeDescriptor;

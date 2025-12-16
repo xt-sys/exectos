@@ -25,6 +25,13 @@ MM::Manager::GetMemoryLayout(VOID)
     return &MemoryLayout;
 }
 
+XTAPI
+PFN_NUMBER
+MM::Manager::GetNumberOfSystemPtes()
+{
+    return NumberOfSystemPtes;
+}
+
 /**
  * Initializes the kernel's virtual memory layout.
  *
@@ -48,36 +55,45 @@ MM::Manager::InitializeMemoryLayout(VOID)
     /* Retrieve the PFN database size */
     PfnDatabaseSize = MM::Pfn::GetPfnDatabaseSize();
 
+    /* Define the number of system PTEs */
+    NumberOfSystemPtes = MM_DEFAULT_NUMBER_SYSTEM_PTES;
+
     if(MM::Paging::GetXpaStatus())
     {
+        /* Configure memory layout for 5-level paging, using 57bit address space and providing a 128 PB address space */
         MemoryLayout.PfnDatabaseAddress = (PMMPFN)0xFFFEFA8000000000ULL;
         MemoryLayout.SelfMapAddress = (PVOID)0xFFEDF6FB7DBEDF68ULL;
 
+        /* Define the non-paged and paged pool regions */
         MemoryLayout.NonPagedPoolStart = (PVOID)((ULONG_PTR)MemoryLayout.PfnDatabaseAddress + PfnDatabaseSize * MM_PAGE_SIZE);
         MemoryLayout.NonPagedPoolEnd = (PVOID)0xFFFEFFFFFFBFFFFFULL;
         MemoryLayout.PagedPoolStart = (PVOID)0xFFFEF8A000000000ULL;
         MemoryLayout.PagedPoolEnd = (PVOID)(((ULONG_PTR)MemoryLayout.PagedPoolStart + PagedPoolSize) - 1);
 
+        /* Define hyperspace, system PTE space, and the user space limit */
         MemoryLayout.HyperSpaceStart = (PVOID)0xFFFEF70000000000ULL;
         MemoryLayout.HyperSpaceEnd = (PVOID)0xFFFEF77FFFFFFFFFULL;
         MemoryLayout.SystemSpaceStart = (PVOID)0xFFFEF88000000000ULL;
-        MemoryLayout.SystemSpaceEnd = (PVOID)((ULONG_PTR)MemoryLayout.SystemSpaceStart + (MM_NUMBER_SYSTEM_PTES + 1) * MM_PAGE_SIZE);
+        MemoryLayout.SystemSpaceEnd = (PVOID)((ULONG_PTR)MemoryLayout.SystemSpaceStart + (NumberOfSystemPtes + 1) * MM_PAGE_SIZE);
         MemoryLayout.UserSpaceEnd = (PVOID)0x07FFFFFFFFFFFFFULL;
     }
     else
     {
+        /* Configure memory layout for 4-level paging, using 48bit address space and providing a 128 TB address space */
         MemoryLayout.PfnDatabaseAddress = (PMMPFN)0xFFFFFA8000000000ULL;
         MemoryLayout.SelfMapAddress = (PVOID)0xFFFFF6FB7DBEDF68ULL;
 
+        /* Define the non-paged and paged pool regions */
         MemoryLayout.NonPagedPoolStart = (PVOID)((ULONG_PTR)MemoryLayout.PfnDatabaseAddress + PfnDatabaseSize * MM_PAGE_SIZE);
         MemoryLayout.NonPagedPoolEnd = (PVOID)0xFFFFFFFFFFBFFFFFULL;
         MemoryLayout.PagedPoolStart = (PVOID)0xFFFFF8A000000000ULL;
         MemoryLayout.PagedPoolEnd = (PVOID)(((ULONG_PTR)MemoryLayout.PagedPoolStart + PagedPoolSize) - 1);
 
+        /* Define hyperspace, system PTE space, and the user space limit */
         MemoryLayout.HyperSpaceStart = (PVOID)0xFFFFF70000000000ULL;
         MemoryLayout.HyperSpaceEnd = (PVOID)0xFFFFF77FFFFFFFFFULL;
         MemoryLayout.SystemSpaceStart = (PVOID)0xFFFFF88000000000ULL;
-        MemoryLayout.SystemSpaceEnd = (PVOID)((ULONG_PTR)MemoryLayout.SystemSpaceStart + (MM_NUMBER_SYSTEM_PTES + 1) * MM_PAGE_SIZE);
+        MemoryLayout.SystemSpaceEnd = (PVOID)((ULONG_PTR)MemoryLayout.SystemSpaceStart + (NumberOfSystemPtes + 1) * MM_PAGE_SIZE);
         MemoryLayout.UserSpaceEnd = (PVOID)0x000007FFFFFEFFFFULL;
     }
 }

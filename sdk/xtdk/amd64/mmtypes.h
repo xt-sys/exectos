@@ -86,6 +86,9 @@
 /* Minimum number of physical pages needed by the system */
 #define MM_MINIMUM_PHYSICAL_PAGES                  2048
 
+/* Number of system PTEs */
+#define MM_DEFAULT_NUMBER_SYSTEM_PTES              22000
+
 /* Default number of secondary colors */
 #define MM_DEFAULT_SECONDARY_COLORS                64
 
@@ -100,6 +103,9 @@
 
 /* Maximum physical address used by HAL allocations */
 #define MM_MAXIMUM_PHYSICAL_ADDRESS                0x00000000FFFFFFFFULL
+
+/* Highest system address */
+#define MM_HIGHEST_SYSTEM_ADDRESS                  0xFFFFFFFFFFFFFFFFULL
 
 /* Trampoline code address */
 #define MM_TRAMPOLINE_ADDRESS                      0x80000

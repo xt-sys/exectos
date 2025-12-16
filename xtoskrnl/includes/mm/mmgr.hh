@@ -19,9 +19,11 @@ namespace MM
     {
         private:
             STATIC MMMEMORY_LAYOUT MemoryLayout;
+            STATIC PFN_NUMBER NumberOfSystemPtes;
 
         public:
             STATIC XTAPI PMMMEMORY_LAYOUT GetMemoryLayout(VOID);
+            STATIC XTAPI PFN_NUMBER GetNumberOfSystemPtes();
             STATIC XTAPI VOID InitializeMemoryLayout(VOID);
             STATIC XTAPI VOID InitializeMemoryManager(VOID);
             STATIC XTAPI BOOLEAN VerifyMemoryTypeFree(LOADER_MEMORY_TYPE MemoryType);
