@@ -19,9 +19,6 @@ namespace MM
     {
         public:
             STATIC XTAPI ULONG GetPtesPerPage(VOID);
-            STATIC XTAPI VOID MapP5E(PVOID StartAddress,
-                                     PVOID EndAddress,
-                                     PMMP5E TemplateP5e);
             STATIC XTAPI VOID MapPDE(PVOID StartAddress,
                                      PVOID EndAddress,
                                      PMMPDE TemplatePde);
@@ -31,9 +28,6 @@ namespace MM
             STATIC XTAPI VOID MapPTE(PVOID StartAddress,
                                      PVOID EndAddress,
                                      PMMPTE TemplatePte);
-            STATIC XTAPI VOID MapPXE(PVOID StartAddress,
-                                     PVOID EndAddress,
-                                     PMMPXE TemplatePxe);
     };
 }
 
