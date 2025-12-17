@@ -20,10 +20,9 @@ XTAPI
 VOID
 MM::Manager::InitializeMemoryLayout(VOID)
 {
-    ULONG PhysicalPages;
-
-    /* Not finished yet */
-    UNIMPLEMENTED;
+    ULONG_PTR PagedPoolSize, PteCount;
+    PFN_NUMBER PfnDatabaseSize, PhysicalPages;
+    ULONG PtesPerPage;
 
     /* Define the number of system PTEs */
     NumberOfSystemPtes = MM_DEFAULT_NUMBER_SYSTEM_PTES;
