@@ -31,10 +31,6 @@
 #define MM_PXE_LA57_BASE                           0xFFEDF6FB7DA00000ULL
 #define MM_P5E_LA57_BASE                           0xFFEDF6FB7DBED000ULL
 
-/* Self map address */
-#define MM_PML4_SELF_MAP_ADDRESS                   0xFFFFF6FB7DBEDF68ULL
-#define MM_PML5_SELF_MAP_ADDRESS                   0xFFEDF6FB7DBEDF68ULL
-
 /* PTE shift values */
 #define MM_PTE_SHIFT                               3
 #define MM_PTI_SHIFT                               12

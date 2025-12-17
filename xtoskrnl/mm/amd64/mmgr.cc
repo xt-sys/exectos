@@ -40,7 +40,7 @@ MM::Manager::InitializeMemoryLayout(VOID)
     {
         /* Configure memory layout for 5-level paging, using 57bit address space and providing a 128 PB address space */
         MemoryLayout.PfnDatabaseAddress = (PMMPFN)0xFFFEFA8000000000ULL;
-        MemoryLayout.SelfMapAddress = (PVOID)MM_PML5_SELF_MAP_ADDRESS;
+        MemoryLayout.SelfMapAddress = (PVOID)MM_P5E_LA57_BASE;
 
         /* Define the non-paged and paged pool regions */
         MemoryLayout.NonPagedPoolStart = (PVOID)((ULONG_PTR)MemoryLayout.PfnDatabaseAddress + PfnDatabaseSize * MM_PAGE_SIZE);
@@ -59,7 +59,7 @@ MM::Manager::InitializeMemoryLayout(VOID)
     {
         /* Configure memory layout for 4-level paging, using 48bit address space and providing a 128 TB address space */
         MemoryLayout.PfnDatabaseAddress = (PMMPFN)0xFFFFFA8000000000ULL;
-        MemoryLayout.SelfMapAddress = (PVOID)MM_PML4_SELF_MAP_ADDRESS;
+        MemoryLayout.SelfMapAddress = (PVOID)MM_PXE_BASE;
 
         /* Define the non-paged and paged pool regions */
         MemoryLayout.NonPagedPoolStart = (PVOID)((ULONG_PTR)MemoryLayout.PfnDatabaseAddress + PfnDatabaseSize * MM_PAGE_SIZE);

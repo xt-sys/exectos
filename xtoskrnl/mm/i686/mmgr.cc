@@ -47,9 +47,39 @@ MM::Manager::InitializeMemoryLayout(VOID)
     if(MM::Paging::GetXpaStatus())
     {
         /* Configure memory layout for 3-level paging, using 36bit address space and providing a 64 GB address space */
+        MemoryLayout.PfnDatabaseAddress = (PMMPFN)0xB0000000;
+        MemoryLayout.SelfMapAddress = (PVOID)MM_PTE_BASE;
+
+        /* Define the non-paged and paged pool regions */
+        MemoryLayout.NonPagedPoolStart = (PVOID)((ULONG_PTR)MemoryLayout.PfnDatabaseAddress + PfnDatabaseSize * MM_PAGE_SIZE);
+        MemoryLayout.NonPagedPoolEnd = (PVOID)0xEEFFFFFF;
+        MemoryLayout.PagedPoolStart = (PVOID)0xE2000000;
+        MemoryLayout.PagedPoolEnd = (PVOID)(((ULONG_PTR)MemoryLayout.PagedPoolStart + PagedPoolSize) - 1);
+
+        /* Define hyperspace, system PTE space, and the user space limit */
+        MemoryLayout.HyperSpaceStart = (PVOID)0xC0800000;
+        MemoryLayout.HyperSpaceEnd = (PVOID)0xC0BFFFFF;
+        MemoryLayout.SystemSpaceStart = (PVOID)0xC0C00000;
+        MemoryLayout.SystemSpaceEnd = (PVOID)((ULONG_PTR)MemoryLayout.SystemSpaceStart + (NumberOfSystemPtes + 1) * MM_PAGE_SIZE);
+        MemoryLayout.UserSpaceEnd = (PVOID)0x7FFEFFFF;
     }
     else
     {
         /* Configure memory layout for 2-level paging, using 32bit address space and providing a 4 GB address space */
+        MemoryLayout.PfnDatabaseAddress = (PMMPFN)0xB0000000;
+        MemoryLayout.SelfMapAddress = (PVOID)MM_PTE_BASE;
+
+        /* Define the non-paged and paged pool regions */
+        MemoryLayout.NonPagedPoolStart = (PVOID)((ULONG_PTR)MemoryLayout.PfnDatabaseAddress + PfnDatabaseSize * MM_PAGE_SIZE);
+        MemoryLayout.NonPagedPoolEnd = (PVOID)0xFFBE0000;
+        MemoryLayout.PagedPoolStart = (PVOID)0xE1000000;
+        MemoryLayout.PagedPoolEnd = (PVOID)(((ULONG_PTR)MemoryLayout.PagedPoolStart + PagedPoolSize) - 1);
+
+        /* Define hyperspace, system PTE space, and the user space limit */
+        MemoryLayout.HyperSpaceStart = (PVOID)0xC0400000;
+        MemoryLayout.HyperSpaceEnd = (PVOID)0xC07FFFFF;
+        MemoryLayout.SystemSpaceStart = (PVOID)0xC0800000;
+        MemoryLayout.SystemSpaceEnd = (PVOID)((ULONG_PTR)MemoryLayout.SystemSpaceStart + (NumberOfSystemPtes + 1) * MM_PAGE_SIZE);
+        MemoryLayout.UserSpaceEnd = (PVOID)0x7FFEFFFF;
     }
 }
