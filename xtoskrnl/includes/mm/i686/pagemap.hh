@@ -30,13 +30,13 @@ namespace MM
             VIRTUAL XTAPI BOOLEAN GetOneEntry(IN PMMPTE Pte) = 0;
             VIRTUAL XTAPI PFN_NUMBER GetPageFrameNumber(IN PMMPTE Pte) = 0;
             XTAPI PMMPDE GetPdeAddress(IN PVOID Address);
-            XTAPI ULONG GetPdeIndex(IN PVOID Address);
+            XTAPI ULONG GetPdeOffset(IN PVOID Address);
             VIRTUAL XTAPI PVOID GetPdeVirtualAddress(IN PMMPDE PdePointer) = 0;
             XTAPI PMMPPE GetPpeAddress(IN PVOID Address);
-            XTAPI ULONG GetPpeIndex(IN PVOID Address);
+            XTAPI ULONG GetPpeOffset(IN PVOID Address);
             XTAPI PVOID GetPpeVirtualAddress(IN PMMPPE PpePointer);
             XTAPI PMMPTE GetPteAddress(IN PVOID Address);
-            XTAPI ULONG GetPteIndex(IN PVOID Address);
+            XTAPI ULONG GetPteOffset(IN PVOID Address);
             VIRTUAL XTAPI LONG GetPteDistance(PMMPTE EndPte,
                                               PMMPTE StartPte) = 0;
             VIRTUAL XTAPI ULONG GetPteSize(VOID) = 0;

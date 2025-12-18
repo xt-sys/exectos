@@ -29,23 +29,23 @@ namespace MM
             XTAPI PMMPTE GetNextPte(IN PMMPTE Pte);
             XTAPI BOOLEAN GetOneEntry(IN PMMPTE Pte);
             XTAPI PMMP5E GetP5eAddress(IN PVOID Address);
-            XTAPI ULONG GetP5eIndex(IN PVOID Address);
+            XTAPI ULONG GetP5eOffset(IN PVOID Address);
             XTAPI PVOID GetP5eVirtualAddress(IN PMMP5E P5ePointer);
             XTAPI PFN_NUMBER GetPageFrameNumber(IN PMMPTE Pte);
             XTAPI PMMPDE GetPdeAddress(IN PVOID Address);
-            XTAPI ULONG GetPdeIndex(IN PVOID Address);
+            XTAPI ULONG GetPdeOffset(IN PVOID Address);
             VIRTUAL XTAPI PVOID GetPdeVirtualAddress(IN PMMPDE PdePointer) = 0;
             XTAPI PMMPPE GetPpeAddress(IN PVOID Address);
-            XTAPI ULONG GetPpeIndex(IN PVOID Address);
+            XTAPI ULONG GetPpeOffset(IN PVOID Address);
             VIRTUAL XTAPI PVOID GetPpeVirtualAddress(IN PMMPPE PpePointer) = 0;
             XTAPI PMMPTE GetPteAddress(IN PVOID Address);
             XTAPI LONG GetPteDistance(PMMPTE EndPte,
                                       PMMPTE StartPte);
-            XTAPI ULONG GetPteIndex(IN PVOID Address);
+            XTAPI ULONG GetPteOffset(IN PVOID Address);
             XTAPI ULONG GetPteSize(VOID);
             VIRTUAL XTAPI PVOID GetPteVirtualAddress(IN PMMPTE PtePointer) = 0;
             XTAPI PMMPXE GetPxeAddress(IN PVOID Address);
-            XTAPI ULONG GetPxeIndex(IN PVOID Address);
+            XTAPI ULONG GetPxeOffset(IN PVOID Address);
             VIRTUAL XTAPI PVOID GetPxeVirtualAddress(IN PMMPXE PxePointer) = 0;
             XTAPI BOOLEAN GetXpaStatus();
             VIRTUAL XTAPI VOID InitializePageMapInfo(VOID) = 0;

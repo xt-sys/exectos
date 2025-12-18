@@ -64,20 +64,20 @@ MM::PageMap::GetPdeAddress(IN PVOID Address)
 }
 
 /**
- * Gets the index of the PDE (Page Directory Entry), that maps given address.
+ * Gets the Offset of the PDE (Page Directory Entry), that maps given address.
  *
  * @param Address
  *        Specifies the virtual address for which to retrieve the corresponding PDE.
  *
- * @return This routine returns the index of the PDE.
+ * @return This routine returns the Offset of the PDE.
  *
  * @since XT 1.0
  */
 XTAPI
 ULONG
-MM::PageMap::GetPdeIndex(IN PVOID Address)
+MM::PageMap::GetPdeOffset(IN PVOID Address)
 {
-    /* Return PDE index */
+    /* Return PDE Offset */
     return ((((ULONG_PTR)(Address)) >> PageMapInfo.PdiShift) & (PageMapInfo.Xpa ? 0x1FF : 0x3FF));
 }
 
@@ -101,7 +101,7 @@ MM::PageMap::GetPpeAddress(IN PVOID Address)
 }
 
 /**
- * Gets the index of the PPE (Page Directory Pointer Table Entry), that maps given address.
+ * Gets the offset of the PPE (Page Directory Pointer Table Entry), that maps given address.
  *
  * @param Address
  *        Specifies the virtual address for which to retrieve the corresponding PPE.
@@ -112,7 +112,7 @@ MM::PageMap::GetPpeAddress(IN PVOID Address)
  */
 XTAPI
 ULONG
-MM::PageMap::GetPpeIndex(IN PVOID Address)
+MM::PageMap::GetPpeOffset(IN PVOID Address)
 {
     /* Return zero */
     return 0;
@@ -158,20 +158,20 @@ MM::PageMap::GetPteAddress(IN PVOID Address)
 }
 
 /**
- * Gets the index of the PTE (Page Table Entry), that maps given address.
+ * Gets the Offset of the PTE (Page Table Entry), that maps given address.
  *
  * @param Address
  *        Specifies the virtual address for which to retrieve the corresponding PTE.
  *
- * @return This routine returns the index of the PTE.
+ * @return This routine returns the Offset of the PTE.
  *
  * @since XT 1.0
  */
 XTAPI
 ULONG
-MM::PageMap::GetPteIndex(IN PVOID Address)
+MM::PageMap::GetPteOffset(IN PVOID Address)
 {
-    /* Return PTE index */
+    /* Return PTE Offset */
     return ((((ULONG_PTR)(Address)) >> MM_PTI_SHIFT) & (PageMapInfo.Xpa ? 0x1FF : 0x3FF));
 }
 

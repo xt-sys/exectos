@@ -140,19 +140,20 @@ MM::PageMap::GetP5eAddress(IN PVOID Address)
 }
 
 /**
- * Gets the index of the P5E (Page Map Level 5 Entry), that maps given address.
+ * Gets the Offset of the P5E (Page Map Level 5 Entry), that maps given address.
  *
  * @param Address
  *        Specifies the virtual address for which to retrieve the corresponding P5E.
  *
- * @return This routine returns the index of the P5E, or NULLPTR if LA57 is not enabled.
+ * @return This routine returns the Offset of the P5E, or NULLPTR if LA57 is not enabled.
  *
  * @since XT 1.0
  */
 XTAPI
 ULONG
-MM::PageMap::GetP5eIndex(IN PVOID Address)
+MM::PageMap::GetP5eOffset(IN PVOID Address)
 {
+    /* Return P5E Offset */
     return (((((ULONGLONG)Address) >> MM_P5I_SHIFT) & 0x1FF) * PageMapInfo.Xpa);
 }
 
@@ -212,20 +213,20 @@ MM::PageMap::GetPdeAddress(IN PVOID Address)
 }
 
 /**
- * Gets the index of the PDE (Page Directory Entry), that maps given address.
+ * Gets the Offset of the PDE (Page Directory Entry), that maps given address.
  *
  * @param Address
  *        Specifies the virtual address for which to retrieve the corresponding PDE.
  *
- * @return This routine returns the index of the PDE.
+ * @return This routine returns the Offset of the PDE.
  *
  * @since XT 1.0
  */
 XTAPI
 ULONG
-MM::PageMap::GetPdeIndex(IN PVOID Address)
+MM::PageMap::GetPdeOffset(IN PVOID Address)
 {
-    /* Return PDE index */
+    /* Return PDE Offset */
     return ((((ULONGLONG)Address) >> MM_PDI_SHIFT) & 0x1FF);
 }
 
@@ -251,20 +252,20 @@ MM::PageMap::GetPpeAddress(IN PVOID Address)
 }
 
 /**
- * Gets the index of the PPE (Page Directory Pointer Table Entry), that maps given address.
+ * Gets the Offset of the PPE (Page Directory Pointer Table Entry), that maps given address.
  *
  * @param Address
  *        Specifies the virtual address for which to retrieve the corresponding PPE.
  *
- * @return This routine returns the index of the PPE.
+ * @return This routine returns the Offset of the PPE.
  *
  * @since XT 1.0
  */
 XTAPI
 ULONG
-MM::PageMap::GetPpeIndex(IN PVOID Address)
+MM::PageMap::GetPpeOffset(IN PVOID Address)
 {
-    /* Return PPE index */
+    /* Return PPE Offset */
     return ((((ULONGLONG)Address) >> MM_PPI_SHIFT) & 0x1FF);
 }
 
@@ -312,20 +313,20 @@ MM::PageMap::GetPteDistance(PMMPTE EndPte,
 }
 
 /**
- * Gets the index of the PTE (Page Table Entry), that maps given address.
+ * Gets the Offset of the PTE (Page Table Entry), that maps given address.
  *
  * @param Address
  *        Specifies the virtual address for which to retrieve the corresponding PTE.
  *
- * @return This routine returns the index of the PTE.
+ * @return This routine returns the Offset of the PTE.
  *
  * @since XT 1.0
  */
 XTAPI
 ULONG
-MM::PageMap::GetPteIndex(IN PVOID Address)
+MM::PageMap::GetPteOffset(IN PVOID Address)
 {
-    /* Return PTE index */
+    /* Return PTE Offset */
     return ((((ULONGLONG)Address) >> MM_PTI_SHIFT) & 0x1FF);
 }
 
@@ -366,20 +367,20 @@ MM::PageMap::GetPxeAddress(IN PVOID Address)
 }
 
 /**
- * Gets the index of the PXE (Extended Page Entry), that maps given address.
+ * Gets the Offset of the PXE (Extended Page Entry), that maps given address.
  *
  * @param Address
  *        Specifies the virtual address for which to retrieve the corresponding PXE.
  *
- * @return This routine returns the index of the PXE.
+ * @return This routine returns the Offset of the PXE.
  *
  * @since XT 1.0
  */
 XTAPI
 ULONG
-MM::PageMap::GetPxeIndex(IN PVOID Address)
+MM::PageMap::GetPxeOffset(IN PVOID Address)
 {
-    /* Return PXE index */
+    /* Return PXE Offset */
     return ((((ULONGLONG)Address) >> MM_PXI_SHIFT) & 0x1FF);
 }
 
