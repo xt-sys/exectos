@@ -31,7 +31,7 @@ namespace MM
             VIRTUAL XTAPI PFN_NUMBER GetPageFrameNumber(IN PMMPTE Pte) = 0;
             XTAPI PMMPDE GetPdeAddress(IN PVOID Address);
             XTAPI ULONG GetPdeIndex(IN PVOID Address);
-            XTAPI PVOID GetPdeVirtualAddress(IN PMMPDE PdePointer);
+            VIRTUAL XTAPI PVOID GetPdeVirtualAddress(IN PMMPDE PdePointer) = 0;
             XTAPI PMMPPE GetPpeAddress(IN PVOID Address);
             XTAPI ULONG GetPpeIndex(IN PVOID Address);
             XTAPI PVOID GetPpeVirtualAddress(IN PMMPPE PpePointer);
@@ -40,7 +40,7 @@ namespace MM
             VIRTUAL XTAPI LONG GetPteDistance(PMMPTE EndPte,
                                               PMMPTE StartPte) = 0;
             VIRTUAL XTAPI ULONG GetPteSize(VOID) = 0;
-            XTAPI PVOID GetPteVirtualAddress(IN PMMPTE PtePointer);
+            VIRTUAL XTAPI PVOID GetPteVirtualAddress(IN PMMPTE PtePointer) = 0;
             XTAPI BOOLEAN GetXpaStatus();
             VIRTUAL XTAPI VOID InitializePageMapInfo(VOID) = 0;
             VIRTUAL XTAPI BOOLEAN PteValid(IN PMMPTE PtePointer) = 0;
@@ -65,9 +65,11 @@ namespace MM
             XTAPI PMMPTE GetNextPte(IN PMMPTE Pte);
             XTAPI BOOLEAN GetOneEntry(IN PMMPTE Pte);
             XTAPI PFN_NUMBER GetPageFrameNumber(IN PMMPTE Pte);
+            XTAPI PVOID GetPdeVirtualAddress(IN PMMPDE PdePointer);
             XTAPI LONG GetPteDistance(PMMPTE EndPte,
                                       PMMPTE StartPte);
             XTAPI ULONG GetPteSize(VOID);
+            XTAPI PVOID GetPteVirtualAddress(IN PMMPTE PtePointer);
             XTAPI VOID InitializePageMapInfo(VOID);
             XTAPI BOOLEAN PteValid(IN PMMPTE PtePointer);
             XTAPI VOID SetNextEntry(IN PMMPTE Pte,
@@ -91,9 +93,11 @@ namespace MM
             XTAPI PMMPTE GetNextPte(IN PMMPTE Pte);
             XTAPI BOOLEAN GetOneEntry(IN PMMPTE Pte);
             XTAPI PFN_NUMBER GetPageFrameNumber(IN PMMPTE Pte);
+            XTAPI PVOID GetPdeVirtualAddress(IN PMMPDE PdePointer);
             XTAPI LONG GetPteDistance(PMMPTE EndPte,
                                       PMMPTE StartPte);
             XTAPI ULONG GetPteSize(VOID);
+            XTAPI PVOID GetPteVirtualAddress(IN PMMPTE PtePointer);
             XTAPI VOID InitializePageMapInfo(VOID);
             XTAPI BOOLEAN PteValid(IN PMMPTE PtePointer);
             XTAPI VOID SetNextEntry(IN PMMPTE Pte,

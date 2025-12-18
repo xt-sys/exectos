@@ -81,23 +81,6 @@ MM::PageMap::GetPdeIndex(IN PVOID Address)
     return ((((ULONG_PTR)(Address)) >> PageMapInfo.PdiShift) & (PageMapInfo.Xpa ? 0x1FF : 0x3FF));
 }
 
-/**
- * Gets the virtual address that is mapped by a given Page Directory Entry.
- *
- * @param PdePointer
- *        Specifies the address of the PDE.
- *
- * @return This routine returns the virtual address mapped by the PDE.
- *
- * @since XT 1.0
- */
-XTAPI
-PVOID
-MM::PageMap::GetPdeVirtualAddress(IN PMMPDE PdePointer)
-{
-    /* Return PDE virtual address */
-    return ((PVOID)((ULONG)(PdePointer) << 20));
-}
 
 /**
  * Gets the address of the PPE (Page Directory Pointer Table Entry), that maps given address.
@@ -123,7 +106,7 @@ MM::PageMap::GetPpeAddress(IN PVOID Address)
  * @param Address
  *        Specifies the virtual address for which to retrieve the corresponding PPE.
  *
- * @return This routine returns the index of the PPE.
+ * @return This routine returns the offset of the PPE.
  *
  * @since XT 1.0
  */
@@ -131,8 +114,8 @@ XTAPI
 ULONG
 MM::PageMap::GetPpeIndex(IN PVOID Address)
 {
-    /* Return PPE index */
-    return ((((ULONG_PTR)(Address)) >> MM_PPI_SHIFT) & 0x3) * PageMapInfo.Xpa;
+    /* Return zero */
+    return 0;
 }
 
 /**
@@ -149,8 +132,8 @@ XTAPI
 PVOID
 MM::PageMap::GetPpeVirtualAddress(IN PMMPPE PpePointer)
 {
-    /* Return PPE virtual address */
-    return (PVOID)((ULONG)(PpePointer) << 30);
+    /* Return zero */
+    return (PVOID)0;
 }
 
 /**
@@ -192,23 +175,6 @@ MM::PageMap::GetPteIndex(IN PVOID Address)
     return ((((ULONG_PTR)(Address)) >> MM_PTI_SHIFT) & (PageMapInfo.Xpa ? 0x1FF : 0x3FF));
 }
 
-/**
- * Gets the virtual address that is mapped by a given Page Table Entry.
- *
- * @param PtePointer
- *        Specifies the virtual address of the PTE.
- *
- * @return This routine returns the virtual address mapped by the PTE.
- *
- * @since XT 1.0
- */
-XTAPI
-PVOID
-MM::PageMap::GetPteVirtualAddress(IN PMMPTE PtePointer)
-{
-    /* Return PTE virtual address */
-    return ((PVOID)((ULONG)(PtePointer) << 10));
-}
 
 /**
  * Gets the status of Extended Paging Address (XPA) mode.
@@ -318,6 +284,24 @@ MM::PageMapBasic::GetPageFrameNumber(IN PMMPTE Pte)
 }
 
 /**
+ * Gets the virtual address that is mapped by a given Page Directory Entry.
+ *
+ * @param PdePointer
+ *        Specifies the address of the PDE.
+ *
+ * @return This routine returns the virtual address mapped by the PDE.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PVOID
+MM::PageMapBasic::GetPdeVirtualAddress(IN PMMPDE PdePointer)
+{
+    /* Return PDE virtual address */
+    return ((PVOID)((ULONG)(PdePointer) << 20));
+}
+
+/**
  * Calculates the distance between two PTE pointers.
  *
  * @param EndPte
@@ -352,6 +336,24 @@ MM::PageMapBasic::GetPteSize(VOID)
 {
     /* Return the size of MMPTE */
     return sizeof(MMPML2_PTE);
+}
+
+/**
+ * Gets the virtual address that is mapped by a given Page Table Entry.
+ *
+ * @param PtePointer
+ *        Specifies the virtual address of the PTE.
+ *
+ * @return This routine returns the virtual address mapped by the PTE.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PVOID
+MM::PageMapBasic::GetPteVirtualAddress(IN PMMPTE PtePointer)
+{
+    /* Return PTE virtual address */
+    return ((PVOID)((ULONG)(PtePointer) << 10));
 }
 
 /**
@@ -591,6 +593,24 @@ MM::PageMapXpa::GetPageFrameNumber(IN PMMPTE Pte)
 }
 
 /**
+ * Gets the virtual address that is mapped by a given Page Directory Entry.
+ *
+ * @param PdePointer
+ *        Specifies the address of the PDE.
+ *
+ * @return This routine returns the virtual address mapped by the PDE.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PVOID
+MM::PageMapXpa::GetPdeVirtualAddress(IN PMMPDE PdePointer)
+{
+    /* Return PDE virtual address */
+    return ((PVOID)((ULONG)(PdePointer) << 18));
+}
+
+/**
  * Calculates the distance between two PTE pointers.
  *
  * @param EndPte
@@ -625,6 +645,24 @@ MM::PageMapXpa::GetPteSize(VOID)
 {
     /* Return the size of MMPTE */
     return sizeof(MMPML3_PTE);
+}
+
+/**
+ * Gets the virtual address that is mapped by a given Page Table Entry.
+ *
+ * @param PtePointer
+ *        Specifies the virtual address of the PTE.
+ *
+ * @return This routine returns the virtual address mapped by the PTE.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PVOID
+MM::PageMapXpa::GetPteVirtualAddress(IN PMMPTE PtePointer)
+{
+    /* Return PTE virtual address */
+    return ((PVOID)((ULONG)(PtePointer) << 9));
 }
 
 /**
