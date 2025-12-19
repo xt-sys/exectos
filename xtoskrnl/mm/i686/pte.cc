@@ -73,3 +73,29 @@ MM::Pte::InitializePageTable(VOID)
 {
     UNIMPLEMENTED;
 }
+
+/*
+ * Maps a range of virtual addresses at the PPE (Page Directory Pointer Entry) level.
+ *
+ * @param StartAddress
+ *        The beginning of the virtual address range to map.
+ *
+ * @param EndAddress
+ *        The end of the virtual address range to map.
+ *
+ * @param TemplatePpe
+ *        A template PPE to use for creating new entries.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::Pte::MapPPE(PVOID StartAddress,
+                PVOID EndAddress,
+                PMMPPE TemplatePpe)
+{
+    /* Just a stub on i686 platform */
+    return;
+}

@@ -72,53 +72,6 @@ MM::Pte::MapPDE(PVOID StartAddress,
 }
 
 /**
- * Maps a range of virtual addresses at the PPE (Page Directory Pointer Entry) level.
- *
- * @param StartAddress
- *        The beginning of the virtual address range to map.
- *
- * @param EndAddress
- *        The end of the virtual address range to map.
- *
- * @param TemplatePpe
- *        A template PPE to use for creating new entries.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTAPI
-VOID
-MM::Pte::MapPPE(PVOID StartAddress,
-                PVOID EndAddress,
-                PMMPPE TemplatePpe)
-{
-    PMMPPE EndSpace, PointerPpe;
-
-    /* Get PPE addresses */
-    PointerPpe = MM::Paging::GetPpeAddress(StartAddress);
-    EndSpace = MM::Paging::GetPpeAddress(EndAddress);
-
-    /* Iterate over all PPEs */
-    while(PointerPpe <= EndSpace)
-    {
-        /* Check if PPE is already mapped */
-        if(!MM::Paging::PteValid(PointerPpe))
-        {
-            /* Map PPE */
-            MM::Paging::SetPte(TemplatePpe, MM::Pfn::AllocateBootstrapPages(1), 0);
-            *PointerPpe = *TemplatePpe;
-
-            /* Clear the page table */
-            RtlZeroMemory(MM::Paging::GetPteVirtualAddress(PointerPpe), MM_PAGE_SIZE);
-        }
-
-        /* Get next table entry */
-        PointerPpe = MM::Paging::GetNextPte(PointerPpe);
-    }
-}
-
-/**
  * Maps a range of virtual addresses at the PTE (Page Table Entry) level.
  *
  * @param StartAddress
