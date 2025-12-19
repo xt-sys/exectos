@@ -86,6 +86,10 @@ KE::KernelInit::StartKernel(VOID)
     /* Save processor state */
     Processor::SaveProcessorState(&Prcb->ProcessorState);
 
+    /* Initialize spin locks */
+    SpinLock::InitializeAllLocks();
+    SpinLock::InitializeLockQueues();
+
     /* Lower to APC runlevel */
     RunLevel::LowerRunLevel(APC_LEVEL);
 
