@@ -23,7 +23,7 @@ namespace MM
         public:
             VIRTUAL XTAPI PMMPTE AdvancePte(IN PMMPTE Pte,
                                             IN ULONG Count) = 0;
-            XTAPI VOID ClearPte(IN PMMPTE PtePointer);
+            VIRTUAL XTAPI VOID ClearPte(IN PMMPTE PtePointer) = 0;
             XTAPI ULONG GetEmptyPteList(VOID);
             VIRTUAL XTAPI ULONG_PTR GetNextEntry(IN PMMPTE Pte) = 0;
             VIRTUAL XTAPI PMMPTE GetNextPte(IN PMMPTE Pte) = 0;
@@ -54,6 +54,9 @@ namespace MM
             VIRTUAL XTAPI VOID SetPteCaching(IN PMMPTE PtePointer,
                                              IN BOOLEAN CacheDisable,
                                              IN BOOLEAN WriteThrough) = 0;
+            VIRTUAL XTAPI VOID WritePte(IN PMMPTE Pte,
+                                        IN MMPTE Value) = 0;
+
     } PAGEMAP, *PPAGEMAP;
 
     class PageMapBasic final : public PageMap
@@ -61,6 +64,7 @@ namespace MM
         public:
             XTAPI PMMPTE AdvancePte(IN PMMPTE Pte,
                                     IN ULONG Count);
+            XTAPI VOID ClearPte(IN PMMPTE PtePointer);
             XTAPI ULONG_PTR GetNextEntry(IN PMMPTE Pte);
             XTAPI PMMPTE GetNextPte(IN PMMPTE Pte);
             XTAPI BOOLEAN GetOneEntry(IN PMMPTE Pte);
@@ -82,6 +86,8 @@ namespace MM
             XTAPI VOID SetPteCaching(IN PMMPTE PtePointer,
                                      IN BOOLEAN CacheDisable,
                                      IN BOOLEAN WriteThrough);
+            XTAPI VOID WritePte(IN PMMPTE Pte,
+                                IN MMPTE Value);
     };
 
     class PageMapXpa final : public PageMap
@@ -89,6 +95,7 @@ namespace MM
         public:
             XTAPI PMMPTE AdvancePte(IN PMMPTE Pte,
                                     IN ULONG Count);
+            XTAPI VOID ClearPte(IN PMMPTE PtePointer);
             XTAPI ULONG_PTR GetNextEntry(IN PMMPTE Pte);
             XTAPI PMMPTE GetNextPte(IN PMMPTE Pte);
             XTAPI BOOLEAN GetOneEntry(IN PMMPTE Pte);
@@ -110,6 +117,8 @@ namespace MM
             XTAPI VOID SetPteCaching(IN PMMPTE PtePointer,
                                      IN BOOLEAN CacheDisable,
                                      IN BOOLEAN WriteThrough);
+            XTAPI VOID WritePte(IN PMMPTE Pte,
+                                IN MMPTE Value);
     };
 }
 

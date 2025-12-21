@@ -520,3 +520,25 @@ MM::Paging::SetPteCaching(IN PMMPTE PtePointer,
     /* Set caching attributes */
     PmlRoutines->SetPteCaching(PtePointer, CacheDisable, WriteThrough);
 }
+
+/**
+ * Writes a Page Table Entry (PTE) with the specified value.
+ *
+ * @param Pte
+ *        Pointer to the page table entry (PTE) to write.
+ *
+ * @param Value
+ *        The value to write to the PTE.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::Paging::WritePte(IN PMMPTE Pte,
+                     IN MMPTE Value)
+{
+    /* Assign PTE value */
+    PmlRoutines->WritePte(Pte, Value);
+}

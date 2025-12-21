@@ -516,6 +516,28 @@ MM::PageMap::SetPteCaching(IN PMMPTE PtePointer,
 }
 
 /**
+ * Writes a Page Table Entry (PTE) with the specified value.
+ *
+ * @param Pte
+ *        Pointer to the page table entry (PTE) to write.
+ *
+ * @param Value
+ *        The value to write to the PTE.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::PageMap::WritePte(IN PMMPTE Pte,
+                      IN MMPTE Value)
+{
+    /* Write PTE value */
+    Pte->Long = Value.Long;
+}
+
+/**
  * Gets the virtual address that is mapped by a given Page Directory Entry (PML4).
  *
  * @param PdePointer

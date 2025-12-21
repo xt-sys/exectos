@@ -60,6 +60,8 @@ namespace MM
             XTAPI VOID SetPteCaching(IN PMMPTE PtePointer,
                                      IN BOOLEAN CacheDisable,
                                      IN BOOLEAN WriteThrough);
+            XTAPI VOID WritePte(IN PMMPTE Pte,
+                                IN MMPTE Value);
     } PAGEMAP, *PPAGEMAP;
 
     class PageMapBasic final : public PageMap

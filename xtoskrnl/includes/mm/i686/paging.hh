@@ -52,6 +52,8 @@ namespace MM
             STATIC XTAPI VOID SetPteCaching(IN PMMPTE PtePointer,
                                             IN BOOLEAN CacheDisable,
                                             IN BOOLEAN WriteThrough);
+            STATIC XTAPI VOID WritePte(IN PMMPTE Pte,
+                                       IN MMPTE Value);
             STATIC XTFASTCALL VOID ZeroPages(IN PVOID Address,
                                              IN ULONG Size);
 

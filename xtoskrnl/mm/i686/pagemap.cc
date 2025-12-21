@@ -10,24 +10,6 @@
 
 
 /**
- * Clears the contents of a page table entry (PTE).
- *
- * @param PtePointer
- *        Pointer to the page table entry (PTE) to be cleared.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTAPI
-VOID
-MM::PageMap::ClearPte(IN PMMPTE PtePointer)
-{
-    /* Clear PTE */
-    PtePointer->Long = 0;
-}
-
-/**
  * Gets the value representing an empty PTE list.
  *
  * @return This routine returns the value representing an empty PTE list.
@@ -210,6 +192,24 @@ MM::PageMapBasic::AdvancePte(IN PMMPTE Pte,
 {
     /* Return advanced PTE pointer */
     return (PMMPTE)((ULONG_PTR)Pte + (Count * sizeof(MMPML2_PTE)));
+}
+
+/**
+ * Clears the contents of a page table entry (PTE).
+ *
+ * @param PtePointer
+ *        Pointer to the page table entry (PTE) to be cleared.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::PageMapBasic::ClearPte(IN PMMPTE PtePointer)
+{
+    /* Clear PTE */
+    PtePointer->Pml2.Long = 0;
 }
 
 /**
@@ -469,7 +469,7 @@ MM::PageMapBasic::SetPte(IN PMMPTE PtePointer,
     /* Set PTE */
     PtePointer->Pml2.Hardware.PageFrameNumber = PageFrameNumber;
     PtePointer->Pml2.Hardware.Valid = 1;
-    PtePointer->Long |= AttributesMask;
+    PtePointer->Pml2.Long |= AttributesMask;
 }
 
 /**
@@ -500,6 +500,28 @@ MM::PageMapBasic::SetPteCaching(IN PMMPTE PtePointer,
 }
 
 /**
+ * Writes a PML2 page table entry (PTE) with the specified value.
+ *
+ * @param Pte
+ *        Pointer to the page table entry (PTE) to write.
+ *
+ * @param Value
+ *        The value to write to the PTE.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::PageMapBasic::WritePte(IN PMMPTE Pte,
+                           IN MMPTE Value)
+{
+    /* Write PTE value */
+    Pte->Pml2.Long = Value.Pml2.Long;
+}
+
+/**
  * Advances a PTE pointer by a given number of entries, considering the actual PTE size for PML3.
  *
  * @param Pte
@@ -519,6 +541,24 @@ MM::PageMapXpa::AdvancePte(IN PMMPTE Pte,
 {
     /* Return advanced PTE pointer */
     return (PMMPTE)((ULONG_PTR)Pte + (Count * sizeof(MMPML3_PTE)));
+}
+
+/**
+ * Clears the contents of a page table entry (PTE).
+ *
+ * @param PtePointer
+ *        Pointer to the page table entry (PTE) to be cleared.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::PageMapXpa::ClearPte(IN PMMPTE PtePointer)
+{
+    /* Clear PTE */
+    PtePointer->Pml3.Long = 0;
 }
 
 /**
@@ -777,7 +817,7 @@ MM::PageMapXpa::SetPte(IN PMMPTE PtePointer,
     /* Set PTE */
     PtePointer->Pml3.Hardware.PageFrameNumber = PageFrameNumber;
     PtePointer->Pml3.Hardware.Valid = 1;
-    PtePointer->Long |= AttributesMask;
+    PtePointer->Pml3.Long |= AttributesMask;
 }
 
 /**
@@ -805,4 +845,26 @@ MM::PageMapXpa::SetPteCaching(IN PMMPTE PtePointer,
     /* Set caching attributes */
     PtePointer->Pml3.Hardware.CacheDisable = CacheDisable;
     PtePointer->Pml3.Hardware.WriteThrough = WriteThrough;
+}
+
+/**
+ * Writes a PML3 page table entry (PTE) with the specified value.
+ *
+ * @param Pte
+ *        Pointer to the page table entry (PTE) to write.
+ *
+ * @param Value
+ *        The value to write to the PTE.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::PageMapXpa::WritePte(IN PMMPTE Pte,
+                         IN MMPTE Value)
+{
+    /* Write PTE value */
+    Pte->Pml3.Long = Value.Pml3.Long;
 }

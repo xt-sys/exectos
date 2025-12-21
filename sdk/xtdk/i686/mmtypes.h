@@ -154,7 +154,6 @@ typedef struct _HARDWARE_MODERN_PTE
 /* Generic Page Table entry union to abstract PML2 and PML3 formats */
 typedef union _HARDWARE_PTE
 {
-    ULONGLONG Long;
     HARDWARE_LEGACY_PTE Pml2;
     HARDWARE_MODERN_PTE Pml3;
 } HARDWARE_PTE, *PHARDWARE_PTE;
@@ -250,7 +249,7 @@ typedef struct _MMPML2_PTE_TRANSITION
 typedef union _MMPML2_PTE
 {
     ULONG Long;
-    HARDWARE_PTE Flush;
+    HARDWARE_LEGACY_PTE Flush;
     MMPML2_PTE_HARDWARE Hardware;
     MMPML2_PTE_PROTOTYPE Prototype;
     MMPML2_PTE_SOFTWARE Software;
@@ -345,7 +344,7 @@ typedef struct _MMPML3_PTE_TRANSITION
 typedef union _MMPML3_PTE
 {
     ULONGLONG Long;
-    HARDWARE_PTE Flush;
+    HARDWARE_MODERN_PTE Flush;
     MMPML3_PTE_HARDWARE Hardware;
     MMPML3_PTE_PROTOTYPE Prototype;
     MMPML3_PTE_SOFTWARE Software;
@@ -357,7 +356,6 @@ typedef union _MMPML3_PTE
 /* Generic Page Table Entry union to abstract PML2 and PML3 formats */
 typedef union _MMPTE
 {
-    ULONGLONG Long;
     MMPML2_PTE Pml2;
     MMPML3_PTE Pml3;
 } MMPTE, *PMMPTE;
