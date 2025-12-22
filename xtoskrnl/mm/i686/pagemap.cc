@@ -301,6 +301,23 @@ MM::PageMapBasic::GetPdeVirtualAddress(IN PMMPDE PdePointer)
     return ((PVOID)((ULONG)(PdePointer) << 20));
 }
 
+ /**
+ * Gets the entire contents of a PML2 Page Table Entry (PTE) as a single value.
+ *
+ * @param PtePointer
+ *        Pointer to the Page Table Entry (PTE) to read.
+ *
+ * @return This routine returns the contents of the PTE as a single value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG_PTR
+MM::PageMapBasic::GetPte(IN PMMPTE PtePointer)
+{
+    /* Return PTE value */
+    return PtePointer->Pml2.Long;
+}
 /**
  * Calculates the distance between two PTE pointers.
  *
@@ -470,6 +487,27 @@ MM::PageMapBasic::SetPte(IN PMMPTE PtePointer,
     PtePointer->Pml2.Hardware.PageFrameNumber = PageFrameNumber;
     PtePointer->Pml2.Hardware.Valid = 1;
     PtePointer->Pml2.Long |= AttributesMask;
+}
+
+/**
+ * Sets a PML2 page table entry (PTE) with the specified attributes.
+ *
+ * @param PtePointer
+ *        Pointer to the page table entry (PTE) to set.
+ *
+ * @param Attributes
+ *        Specifies the attributes to apply to the PTE.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::PageMapBasic::SetPte(IN PMMPTE PtePointer,
+                       IN ULONG_PTR Attributes)
+{
+    PtePointer->Pml2.Long = Attributes;
 }
 
 /**
@@ -650,6 +688,24 @@ MM::PageMapXpa::GetPdeVirtualAddress(IN PMMPDE PdePointer)
     return ((PVOID)((ULONG)(PdePointer) << 18));
 }
 
+ /**
+ * Gets the entire contents of a PML3 Page Table Entry (PTE) as a single value.
+ *
+ * @param PtePointer
+ *        Pointer to the Page Table Entry (PTE) to read.
+ *
+ * @return This routine returns the contents of the PTE as a single value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG_PTR
+MM::PageMapXpa::GetPte(IN PMMPTE PtePointer)
+{
+    /* Return PTE value */
+    return PtePointer->Pml3.Long;
+}
+
 /**
  * Calculates the distance between two PTE pointers.
  *
@@ -818,6 +874,27 @@ MM::PageMapXpa::SetPte(IN PMMPTE PtePointer,
     PtePointer->Pml3.Hardware.PageFrameNumber = PageFrameNumber;
     PtePointer->Pml3.Hardware.Valid = 1;
     PtePointer->Pml3.Long |= AttributesMask;
+}
+
+/**
+ * Sets a PML3 page table entry (PTE) with the specified attributes.
+ *
+ * @param PtePointer
+ *        Pointer to the page table entry (PTE) to set.
+ *
+ * @param Attributes
+ *        Specifies the attributes to apply to the PTE.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::PageMapXpa::SetPte(IN PMMPTE PtePointer,
+                       IN ULONG_PTR Attributes)
+{
+    PtePointer->Pml3.Long = Attributes;
 }
 
 /**

@@ -38,6 +38,7 @@ namespace MM
             XTAPI PMMPPE GetPpeAddress(IN PVOID Address);
             XTAPI ULONG GetPpeOffset(IN PVOID Address);
             VIRTUAL XTAPI PVOID GetPpeVirtualAddress(IN PMMPPE PpePointer) = 0;
+            XTAPI ULONG_PTR GetPte(IN PMMPTE PtePointer);
             XTAPI PMMPTE GetPteAddress(IN PVOID Address);
             XTAPI LONG GetPteDistance(PMMPTE EndPte,
                                       PMMPTE StartPte);
@@ -57,6 +58,8 @@ namespace MM
             XTAPI VOID SetPte(IN PMMPTE PtePointer,
                               IN PFN_NUMBER PageFrameNumber,
                               IN ULONG_PTR AttributesMask);
+            XTAPI VOID SetPte(IN PMMPTE PtePointer,
+                              IN ULONG_PTR Attributes);
             XTAPI VOID SetPteCaching(IN PMMPTE PtePointer,
                                      IN BOOLEAN CacheDisable,
                                      IN BOOLEAN WriteThrough);

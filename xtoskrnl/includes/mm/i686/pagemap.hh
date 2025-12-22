@@ -35,6 +35,7 @@ namespace MM
             XTAPI PMMPPE GetPpeAddress(IN PVOID Address);
             XTAPI ULONG GetPpeOffset(IN PVOID Address);
             XTAPI PVOID GetPpeVirtualAddress(IN PMMPPE PpePointer);
+            VIRTUAL XTAPI ULONG_PTR GetPte(IN PMMPTE PtePointer) = 0;
             XTAPI PMMPTE GetPteAddress(IN PVOID Address);
             XTAPI ULONG GetPteOffset(IN PVOID Address);
             VIRTUAL XTAPI LONG GetPteDistance(PMMPTE EndPte,
@@ -51,6 +52,8 @@ namespace MM
             VIRTUAL XTAPI VOID SetPte(IN PMMPTE PtePointer,
                                       IN PFN_NUMBER PageFrameNumber,
                                       IN ULONG_PTR AttributesMask) = 0;
+            VIRTUAL XTAPI VOID SetPte(IN PMMPTE PtePointer,
+                                      IN ULONG_PTR Attributes) = 0;
             VIRTUAL XTAPI VOID SetPteCaching(IN PMMPTE PtePointer,
                                              IN BOOLEAN CacheDisable,
                                              IN BOOLEAN WriteThrough) = 0;
@@ -70,6 +73,7 @@ namespace MM
             XTAPI BOOLEAN GetOneEntry(IN PMMPTE Pte);
             XTAPI PFN_NUMBER GetPageFrameNumber(IN PMMPTE Pte);
             XTAPI PVOID GetPdeVirtualAddress(IN PMMPDE PdePointer);
+            XTAPI ULONG_PTR GetPte(IN PMMPTE PtePointer);
             XTAPI LONG GetPteDistance(PMMPTE EndPte,
                                       PMMPTE StartPte);
             XTAPI ULONG GetPteSize(VOID);
@@ -83,6 +87,8 @@ namespace MM
             XTAPI VOID SetPte(IN PMMPTE PtePointer,
                               IN PFN_NUMBER PageFrameNumber,
                               IN ULONG_PTR AttributesMask);
+            XTAPI VOID SetPte(IN PMMPTE PtePointer,
+                              IN ULONG_PTR Attributes);
             XTAPI VOID SetPteCaching(IN PMMPTE PtePointer,
                                      IN BOOLEAN CacheDisable,
                                      IN BOOLEAN WriteThrough);
@@ -101,6 +107,7 @@ namespace MM
             XTAPI BOOLEAN GetOneEntry(IN PMMPTE Pte);
             XTAPI PFN_NUMBER GetPageFrameNumber(IN PMMPTE Pte);
             XTAPI PVOID GetPdeVirtualAddress(IN PMMPDE PdePointer);
+            XTAPI ULONG_PTR GetPte(IN PMMPTE PtePointer);
             XTAPI LONG GetPteDistance(PMMPTE EndPte,
                                       PMMPTE StartPte);
             XTAPI ULONG GetPteSize(VOID);
@@ -114,6 +121,8 @@ namespace MM
             XTAPI VOID SetPte(IN PMMPTE PtePointer,
                               IN PFN_NUMBER PageFrameNumber,
                               IN ULONG_PTR AttributesMask);
+            XTAPI VOID SetPte(IN PMMPTE PtePointer,
+                              IN ULONG_PTR Attributes);
             XTAPI VOID SetPteCaching(IN PMMPTE PtePointer,
                                      IN BOOLEAN CacheDisable,
                                      IN BOOLEAN WriteThrough);

@@ -269,6 +269,24 @@ MM::PageMap::GetPpeOffset(IN PVOID Address)
     return ((((ULONGLONG)Address) >> MM_PPI_SHIFT) & 0x1FF);
 }
 
+ /**
+ * Gets the entire contents of a Page Table Entry (PTE) as a single value.
+ *
+ * @param PtePointer
+ *        Pointer to the Page Table Entry (PTE) to read.
+ *
+ * @return This routine returns the contents of the PTE as a single value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG_PTR
+MM::PageMap::GetPte(IN PMMPTE PtePointer)
+{
+    /* Return PTE value */
+    return PtePointer->Long;
+}
+
 /**
  * Gets the address of the PTE (Page Table Entry), that maps given address.
  *
@@ -461,7 +479,7 @@ MM::PageMap::SetOneEntry(IN PMMPTE Pte,
 }
 
 /**
- * Sets a PML2 page table entry (PTE) with the specified physical page and access flags.
+ * Sets a Page Table Entry (PTE) with the specified physical page and access flags.
  *
  * @param PtePointer
  *        Pointer to the page table entry (PTE) to set.
@@ -486,6 +504,27 @@ MM::PageMap::SetPte(IN PMMPTE PtePointer,
     PtePointer->Hardware.PageFrameNumber = PageFrameNumber;
     PtePointer->Hardware.Valid = 1;
     PtePointer->Long |= AttributesMask;
+}
+
+/**
+ * Sets a Page Table Entry (PTE) with the specified attributes.
+ *
+ * @param PtePointer
+ *        Pointer to the page table entry (PTE) to set.
+ *
+ * @param Attributes
+ *        Specifies the attributes to apply to the PTE.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::PageMap::SetPte(IN PMMPTE PtePointer,
+                    IN ULONG_PTR Attributes)
+{
+    PtePointer->Long = Attributes;
 }
 
 /**
