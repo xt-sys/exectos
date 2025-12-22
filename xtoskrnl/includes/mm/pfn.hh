@@ -21,14 +21,14 @@ namespace MM
             STATIC PLOADER_MEMORY_DESCRIPTOR FreeDescriptor;
             STATIC ULONG_PTR HighestPhysicalPage;
             STATIC ULONG_PTR LowestPhysicalPage;
-            STATIC ULONG NumberOfPhysicalPages;
+            STATIC ULONGLONG NumberOfPhysicalPages;
             STATIC LOADER_MEMORY_DESCRIPTOR OriginalFreeDescriptor;
             STATIC PFN_NUMBER PfnDatabaseSize;
 
         public:
             STATIC XTAPI PFN_NUMBER AllocateBootstrapPages(IN PFN_NUMBER NumberOfPages);
             STATIC XTAPI VOID ComputePfnDatabaseSize(VOID);
-            STATIC XTAPI ULONG GetNumberOfPhysicalPages(VOID);
+            STATIC XTAPI ULONGLONG GetNumberOfPhysicalPages(VOID);
             STATIC XTAPI PFN_NUMBER GetPfnDatabaseSize(VOID);
             STATIC XTAPI VOID ScanMemoryDescriptors(VOID);
     };

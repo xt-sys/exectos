@@ -68,7 +68,7 @@ MM::Pfn::ComputePfnDatabaseSize(VOID)
  * @since XT 1.0
  */
 XTAPI
-ULONG
+ULONGLONG
 MM::Pfn::GetNumberOfPhysicalPages(VOID)
 {
     /* Return the number of physical pages */

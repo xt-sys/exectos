@@ -34,7 +34,7 @@ ULONG_PTR MM::Pfn::LowestPhysicalPage = -1;
 MMMEMORY_LAYOUT MM::Manager::MemoryLayout;
 
 /* Number of physical pages */
-ULONG MM::Pfn::NumberOfPhysicalPages;
+ULONGLONG MM::Pfn::NumberOfPhysicalPages;
 
 /* Number of system PTEs */
 PFN_NUMBER MM::Manager::NumberOfSystemPtes;
