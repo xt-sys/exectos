@@ -71,7 +71,45 @@ XTAPI
 VOID
 MM::Pte::InitializePageTable(VOID)
 {
-    UNIMPLEMENTED;
+    PMMPTE EndSpacePte, PointerPte;
+    PMMMEMORY_LAYOUT MemoryLayout;
+    CPUID_REGISTERS CpuRegisters;
+    MMPTE TemplatePte;
+
+    /* Retrieve current paging mode and memory layout */
+    MemoryLayout = MM::Manager::GetMemoryLayout();
+
+    /* Get CPU features */
+    CpuRegisters.Leaf = CPUID_GET_STANDARD1_FEATURES;
+    AR::CpuFunc::CpuId(&CpuRegisters);
+
+    /* Check if Paging Global Extensions (PGE) is supported */
+    if(CpuRegisters.Edx & CPUID_FEATURES_EDX_PGE)
+    {
+        /* Enable the Global Paging (PGE) feature */
+        AR::CpuFunc::WriteControlRegister(4, AR::CpuFunc::ReadControlRegister(4) | CR4_PGE);
+    }
+
+    /* Get the PD user-space range for both legacy and PAE paging */
+    PointerPte = (PMMPTE)MM::Paging::GetPdeAddress(0);
+    EndSpacePte = (PMMPTE)MM::Paging::GetPdeAddress(MemoryLayout->UserSpaceEnd);
+
+    /* Clear all top-level entries mapping the user address space */
+    while(PointerPte <= EndSpacePte)
+    {
+        MM::Paging::ClearPte(PointerPte);
+        PointerPte = MM::Paging::GetNextPte(PointerPte);
+    }
+
+    /* Flush the TLB to invalidate all non-global entries */
+    AR::CpuFunc::FlushTlb();
+
+    /* Create a template PTE for mapping kernel pages */
+    MM::Paging::ClearPte(&TemplatePte);
+    MM::Paging::SetPte(&TemplatePte, 0, MM_PTE_READWRITE | MM_PTE_CACHE_ENABLE);
+
+    /* Map the kernel's PD entries */
+    MM::Pte::MapPDE(MemoryLayout->SystemSpaceStart, (PVOID)MM_HIGHEST_SYSTEM_ADDRESS, &TemplatePte);
 }
 
 /*
