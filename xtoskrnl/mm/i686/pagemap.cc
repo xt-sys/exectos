@@ -226,8 +226,8 @@ XTAPI
 ULONG_PTR
 MM::PageMapBasic::GetNextEntry(IN PMMPTE Pte)
 {
-    /* Return next entry in PTE list */
-    return Pte->Pml2.List.NextEntry;
+    /* Return next entry in PTE list, translating the hardware limit (0xFFFFF) to the logical sentinel (MAXULONG) */
+    return (Pte->Pml2.List.NextEntry == 0xFFFFF) ? MAXULONG : Pte->Pml2.List.NextEntry;
 }
 
 /**
@@ -435,8 +435,8 @@ VOID
 MM::PageMapBasic::SetNextEntry(IN PMMPTE Pte,
                                IN ULONG_PTR Value)
 {
-    /* Set next entry in PTE list */
-    Pte->Pml2.List.NextEntry = Value;
+    /* Set next entry in PTE list, translating the logical sentinel (MAXULONG) to the 20-bit hardware limit (0xFFFFF) */
+    Pte->Pml2.List.NextEntry = (Value == MAXULONG) ? 0xFFFFF : Value;
 }
 
 /**
