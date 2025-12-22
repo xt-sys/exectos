@@ -59,9 +59,22 @@ EFI_STATUS
 Xtos::EnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
 {
     EFI_STATUS Status;
+    ULONG_PTR SelfMapAddress;
+
+    /* Initialize self map address */
+    if(PageMap->PageMapLevel == 3)
+    {
+        /* For PML3 (PAE) use PTE base address */
+        SelfMapAddress = MM_PTE_BASE;
+    }
+    else
+    {
+        /* For PML2 (PAE disabled) use legacy PDE base address */
+        SelfMapAddress = MM_PDE_LEGACY_BASE;
+    }
 
     /* Build page map */
-    Status = XtLdrProtocol->Memory.BuildPageMap(PageMap, MM_PTE_BASE);
+    Status = XtLdrProtocol->Memory.BuildPageMap(PageMap, SelfMapAddress);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to build page map */
