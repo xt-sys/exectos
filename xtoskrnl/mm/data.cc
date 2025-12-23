@@ -9,6 +9,15 @@
 #include <xtos.hh>
 
 
+/* Array of free page lists segregated by cache color */
+PMMCOLOR_TABLES MM::Colors::FreePages[FreePageList + 1];
+
+/* Number of supported page colors */
+ULONG MM::Colors::PagingColors;
+
+/* Bitmask used to calculate the cache color index */
+ULONG MM::Colors::PagingColorsMask;
+
 /* Allocation descriptors dedicated for hardware layer */
 LOADER_MEMORY_DESCRIPTOR MM::HardwarePool::HardwareAllocationDescriptors[MM_HARDWARE_ALLOCATION_DESCRIPTORS];
 

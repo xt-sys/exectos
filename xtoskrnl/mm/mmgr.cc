@@ -54,6 +54,9 @@ MM::Manager::InitializeMemoryManager(VOID)
         KE::Crash::Panic(0);
     }
 
+    /* Compute page colors to reduce CPU cache conflicts */
+    MM::Colors::ComputePageColoring();
+
     /* Compute allocation size for the PFN database */
     MM::Pfn::ComputePfnDatabaseSize();
 
