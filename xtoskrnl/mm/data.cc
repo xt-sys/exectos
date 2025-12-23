@@ -56,3 +56,6 @@ LOADER_MEMORY_DESCRIPTOR MM::Pfn::OriginalFreeDescriptor;
 
 /* Size of the PFN database in pages */
 PFN_NUMBER MM::Pfn::PfnDatabaseSize;
+
+/* Template PTE entry containing standard flags for a valid, present kernel page */
+MMPTE MM::Pte::ValidPte = {MM_PTE_VALID|MM_PTE_EXECUTE_READWRITE|MM_PTE_DIRTY|MM_PTE_ACCESSED};

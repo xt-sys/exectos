@@ -17,6 +17,9 @@ namespace MM
 {
     class Pte
     {
+        private:
+            STATIC MMPTE ValidPte;
+
         public:
             STATIC XTAPI BOOLEAN AddressValid(IN PVOID VirtualAddress);
             STATIC XTAPI ULONG GetPtesPerPage(VOID);

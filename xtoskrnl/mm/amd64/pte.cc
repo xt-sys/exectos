@@ -89,7 +89,69 @@ XTAPI
 VOID
 MM::Pte::InitializePageTable(VOID)
 {
-    UNIMPLEMENTED;
+    PMMPTE EndSpacePte, PointerPte;
+    PMMMEMORY_LAYOUT MemoryLayout;
+    PVOID MappingRange;
+    MMPTE TemplatePte;
+    BOOLEAN Xpa;
+
+    /* Retrieve current paging mode and memory layout */
+    Xpa = MM::Paging::GetXpaStatus();
+    MemoryLayout = MM::Manager::GetMemoryLayout();
+
+    /* Enable the Global Paging (PGE) feature */
+    AR::CpuFunc::WriteControlRegister(4, AR::CpuFunc::ReadControlRegister(4) | CR4_PGE);
+
+    /* Check XPA status */
+    if(Xpa)
+    {
+        /* Get the PML5 user-space range if 5-level paging is active */
+        PointerPte = MM::Paging::GetP5eAddress(0);
+        EndSpacePte = MM::Paging::GetP5eAddress(MemoryLayout->UserSpaceEnd);
+    }
+    else
+    {
+        /* Otherwise, get the PML4 user-space range for 4-level paging */
+        PointerPte = MM::Paging::GetPxeAddress(0);
+        EndSpacePte = MM::Paging::GetPxeAddress(MemoryLayout->UserSpaceEnd);
+    }
+
+    /* Clear all top-level entries mapping the user address space */
+    while(PointerPte <= EndSpacePte)
+    {
+        MM::Paging::ClearPte(PointerPte);
+        PointerPte = MM::Paging::GetNextPte(PointerPte);
+    }
+
+    /* Flush the TLB to invalidate all non-global entries */
+    AR::CpuFunc::FlushTlb();
+
+    /* Create a template PTE for mapping kernel pages */
+    MM::Paging::ClearPte(&TemplatePte);
+    MM::Paging::SetPte(&TemplatePte, 0, MM_PTE_READWRITE | MM_PTE_CACHE_ENABLE);
+
+    /* Check XPA status */
+    if(Xpa)
+    {
+        /* Map the kernel's PML5 entries if 5-level paging is active */
+        MM::Pte::MapP5E(MemoryLayout->HyperSpaceStart, (PVOID)MM_HIGHEST_SYSTEM_ADDRESS, &TemplatePte);
+    }
+
+    /* Map the kernel's PML4 entries */
+    MM::Pte::MapPXE(MemoryLayout->HyperSpaceStart, (PVOID)MM_HIGHEST_SYSTEM_ADDRESS, &TemplatePte);
+
+    /* Calculate the end address of the hyperspace working set mapping */
+    MappingRange = (PVOID)((ULONG_PTR)MemoryLayout->HyperSpaceStart + MM_HYPERSPACE_PAGE_COUNT * MM_PAGE_SIZE);
+
+    /* Map the PDPT entries for paged pool and hyperspace */
+    MM::Pte::MapPPE(MemoryLayout->PagedPoolStart, MemoryLayout->PagedPoolEnd, &ValidPte);
+    MM::Pte::MapPPE(MemoryLayout->HyperSpaceStart, MemoryLayout->HyperSpaceEnd, &ValidPte);
+
+    /* Map the PDEs for the hyperspace working set */
+    MM::Pte::MapPDE(MemoryLayout->HyperSpaceStart, MappingRange, &ValidPte);
+
+    /* Set the hyperspace working set's PTE with the total PTE count */
+    MM::Paging::SetPte(MM::Paging::GetPteAddress((PVOID)MemoryLayout->HyperSpaceStart), MM_HYPERSPACE_PAGE_COUNT, 0);
 }
 
 /**
