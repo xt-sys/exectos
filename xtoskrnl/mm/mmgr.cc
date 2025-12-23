@@ -65,6 +65,9 @@ MM::Manager::InitializeMemoryManager(VOID)
 
     /* Initialize page table */
     MM::Pte::InitializePageTable();
+
+    /* Initialize system PTE space */
+    MM::Pte::InitializeSystemPteSpace();
 }
 
 /**

@@ -57,5 +57,20 @@ LOADER_MEMORY_DESCRIPTOR MM::Pfn::OriginalFreeDescriptor;
 /* Size of the PFN database in pages */
 PFN_NUMBER MM::Pfn::PfnDatabaseSize;
 
+/* Array of lists for available System PTEs, separated by pool type */
+MMPTE MM::Pte::FirstSystemFreePte[MaximumPtePoolTypes];
+
+/* Virtual base address of the System PTE space */
+PMMPTE MM::Pte::SystemPteBase;
+
+/* End addresses for the System PTE ranges */
+PMMPTE MM::Pte::SystemPtesEnd[MaximumPtePoolTypes];
+
+/* Start addresses for the System PTE ranges */
+PMMPTE MM::Pte::SystemPtesStart[MaximumPtePoolTypes];
+
+/* Total count of available System PTEs */
+ULONG MM::Pte::TotalSystemFreePtes[MaximumPtePoolTypes];
+
 /* Template PTE entry containing standard flags for a valid, present kernel page */
 MMPTE MM::Pte::ValidPte = {MM_PTE_VALID|MM_PTE_EXECUTE_READWRITE|MM_PTE_DIRTY|MM_PTE_ACCESSED};
