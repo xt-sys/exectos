@@ -112,6 +112,9 @@ KE::KernelInit::StartKernel(VOID)
     CurrentThread->WaitRunLevel = DISPATCH_LEVEL;
     CurrentProcess->ActiveProcessors |= (ULONG_PTR)1 << Prcb->CpuNumber;
 
+    /* Initialize Memory Manager */
+    MM::Manager::InitializeMemoryManager();
+
     /* Enter infinite loop */
     DebugPrint(L"KernelInit::StartKernel() finished. Entering infinite loop.\n");
     Crash::HaltSystem();
