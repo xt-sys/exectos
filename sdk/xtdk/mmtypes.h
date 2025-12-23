@@ -33,7 +33,7 @@ typedef enum _MMPAGELISTS
    FreePageList = 1,
    StandbyPageList = 2,
    ModifiedPageList = 3,
-   ModifiedNoWritePageList = 4,
+   ModifiedReadOnlyPageList = 4,
    BadPageList = 5,
    ActiveAndValid = 6,
    TransitionPage = 7
