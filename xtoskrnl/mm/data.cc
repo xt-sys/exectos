@@ -21,6 +21,15 @@ ULONG MM::HardwarePool::UsedHardwareAllocationDescriptors = 0;
 /* Processor structures data (THIS IS A TEMPORARY HACK) */
 UCHAR MM::KernelPool::ProcessorStructuresData[MAXIMUM_PROCESSORS][KPROCESSOR_STRUCTURES_SIZE] = {{0}};
 
+/* Memory layout */
+MMMEMORY_LAYOUT MM::Manager::MemoryLayout;
+
+/* Number of system PTEs */
+PFN_NUMBER MM::Manager::NumberOfSystemPtes;
+
+/* Instance of the page map routines for the current PML level */
+MM::PPAGEMAP MM::Paging::PmlRoutines;
+
 /* Biggest free memory descriptor */
 PLOADER_MEMORY_DESCRIPTOR MM::Pfn::FreeDescriptor;
 
@@ -30,17 +39,11 @@ ULONG_PTR MM::Pfn::HighestPhysicalPage;
 /* Lowest physical page number */
 ULONG_PTR MM::Pfn::LowestPhysicalPage = -1;
 
-/* Memory layout */
-MMMEMORY_LAYOUT MM::Manager::MemoryLayout;
-
 /* Number of physical pages */
 ULONGLONG MM::Pfn::NumberOfPhysicalPages;
-
-/* Number of system PTEs */
-PFN_NUMBER MM::Manager::NumberOfSystemPtes;
 
 /* Old biggest free memory descriptor */
 LOADER_MEMORY_DESCRIPTOR MM::Pfn::OriginalFreeDescriptor;
 
-/* Instance of the page map routines for the current PML level */
-MM::PPAGEMAP MM::Paging::PmlRoutines;
+/* Size of the PFN database in pages */
+PFN_NUMBER MM::Pfn::PfnDatabaseSize;
