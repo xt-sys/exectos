@@ -55,6 +55,7 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/pagemap.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/paging.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/pte.cc
+    ${XTOSKRNL_SOURCE_DIR}/mm/colors.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/data.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/hlpool.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/kpool.cc
