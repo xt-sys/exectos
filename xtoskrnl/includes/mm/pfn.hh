@@ -18,6 +18,7 @@ namespace MM
     class Pfn
     {
         private:
+            STATIC PFN_NUMBER AvailablePages;
             STATIC PLOADER_MEMORY_DESCRIPTOR FreeDescriptor;
             STATIC ULONG_PTR HighestPhysicalPage;
             STATIC ULONG_PTR LowestPhysicalPage;
@@ -31,6 +32,10 @@ namespace MM
             STATIC XTAPI ULONGLONG GetNumberOfPhysicalPages(VOID);
             STATIC XTAPI PFN_NUMBER GetPfnDatabaseSize(VOID);
             STATIC XTAPI VOID ScanMemoryDescriptors(VOID);
+
+        private:
+            STATIC XTAPI VOID DecrementAvailablePages(VOID);
+            STATIC XTAPI VOID IncrementAvailablePages(VOID);
     };
 }
 

@@ -61,6 +61,21 @@ MM::Pfn::ComputePfnDatabaseSize(VOID)
 }
 
 /**
+ * Decrements the global count of available pages.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::Pfn::DecrementAvailablePages(VOID)
+{
+    /* Decrement the global count of available pages */
+    AvailablePages--;
+}
+
+/**
  * Retrieves the total number of physical pages managed by the system.
  *
  * @return Returns the total count of physical memory pages.
@@ -88,6 +103,21 @@ MM::Pfn::GetPfnDatabaseSize(VOID)
 {
     /* Return the pre-calculated size of the PFN database in pages */
     return PfnDatabaseSize;
+}
+
+/**
+ * Increments the global count of available pages.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::Pfn::IncrementAvailablePages(VOID)
+{
+    /* Increment the global count of available pages */
+    AvailablePages++;
 }
 
 /**

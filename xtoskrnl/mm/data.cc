@@ -39,6 +39,9 @@ PFN_NUMBER MM::Manager::NumberOfSystemPtes;
 /* Instance of the page map routines for the current PML level */
 MM::PPAGEMAP MM::Paging::PmlRoutines;
 
+/* Total number of physical pages available for allocation */
+PFN_NUMBER MM::Pfn::AvailablePages;
+
 /* Biggest free memory descriptor */
 PLOADER_MEMORY_DESCRIPTOR MM::Pfn::FreeDescriptor;
 
