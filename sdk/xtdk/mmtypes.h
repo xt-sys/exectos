@@ -14,6 +14,18 @@
 #include ARCH_HEADER(xtstruct.h)
 
 
+/* Number of hyper space pages */
+#define MM_HYPERSPACE_PAGE_COUNT                   255
+
+/* Number of paging colors */
+#define MM_PAGING_COLORS                           64
+
+/* PTE frame mask definition */
+#define MM_PFN_PTE_FRAME                           (((ULONG_PTR)1 << MM_PTE_FRAME_BITS) - 1)
+
+/* Number of reserved zeroed PTEs */
+#define MM_RESERVED_ZERO_PTES                      32
+
 /* Memory manager page lists */
 typedef enum _MMPAGELISTS
 {
@@ -26,6 +38,15 @@ typedef enum _MMPAGELISTS
    ActiveAndValid = 6,
    TransitionPage = 7
 } MMPAGELISTS, *PMMPAGELISTS;
+
+/* Page cache attributes */
+typedef enum _MMPFN_CACHE_ATTRIBUTE
+{
+    PfnNonCached,
+    PfnCached,
+    PfnWriteCombined,
+    PfnNotMapped
+} MMPFN_CACHE_ATTRIBUTE, *PMMPFN_CACHE_ATTRIBUTE;
 
 /* Page table pool types */
 typedef enum _MMSYSTEM_PTE_POOL_TYPE

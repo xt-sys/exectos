@@ -73,6 +73,9 @@
 #define MM_PTE_PROTOTYPE                           0x0000000000000400ULL
 #define MM_PTE_TRANSITION                          0x0000000000000800ULL
 
+/* PTE frame bits */
+#define MM_PTE_FRAME_BITS                          57
+
 /* PTE protection bits */
 #define MM_PTE_PROTECTION_BITS                     5
 

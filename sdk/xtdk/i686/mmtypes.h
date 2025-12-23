@@ -69,6 +69,9 @@
 #define MM_PTE_PROTOTYPE                           0x00000400
 #define MM_PTE_TRANSITION                          0x00000800
 
+/* PTE frame bits */
+#define MM_PTE_FRAME_BITS                          25
+
 /* PTE protection bits */
 #define MM_PTE_PROTECTION_BITS                     5
 
@@ -386,6 +389,7 @@ typedef struct _MMPFN
             USHORT ReferenceCount;
         } e2;
     } u3;
+    ULONG UsedPageTableEntries;
     union
     {
         MMPTE OriginalPte;
@@ -396,12 +400,11 @@ typedef struct _MMPFN
         ULONG_PTR EntireFrame;
         struct
         {
-            ULONG_PTR PteFrame:26;
+            ULONG_PTR PteFrame:25;
             ULONG_PTR InPageError:1;
             ULONG_PTR VerifierAllocation:1;
             ULONG_PTR AweAllocation:1;
-            ULONG_PTR LockCharged:1;
-            ULONG_PTR KernelStack:1;
+            ULONG_PTR Priority:3;
             ULONG_PTR MustBeCached:1;
         };
     } u4;
