@@ -53,8 +53,9 @@ implement any environment subsystem to support applications that are strictly wr
  * NT drivers compatibility layer
 
 # Requirements
-ExectOS is in very early development stage, thus its requirements have been not specified yet. However according to its
-design, it requires a modern EFI enabled hardware. It is not possible currently to boot ExectOS on a legacy BIOS.
+ExectOS is currently in a very early stage of development, so its specific requirements are not fully defined yet.
+However, based on the current design, it requires modern EFI hardware. You cannot boot ExectOS on a legacy BIOS
+right now, but there are plans to add BIOS support in the future.
 
 # Source structure
 | Directory        | Description                                                  |
