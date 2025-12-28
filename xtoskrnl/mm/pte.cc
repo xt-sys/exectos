@@ -2,7 +2,7 @@
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
  * FILE:            xtoskrnl/mm/pte.cc
- * DESCRIPTION:     Page table entry (PTE) support
+ * DESCRIPTION:     Page Table Entry (PTE) support
  * DEVELOPERS:      Aiken Harris <harraiken91@gmail.com>
  */
 
@@ -235,10 +235,10 @@ MM::Pte::MapPDE(PVOID StartAddress,
         {
             /* Map PDE */
             MM::Paging::SetPte(TemplatePde, MM::Pfn::AllocateBootstrapPages(1), 0);
-            *PointerPde = *TemplatePde;
+            MM::Paging::WritePte(PointerPde, *TemplatePde);
 
             /* Clear the page table */
-            RtlZeroMemory(MM::Paging::GetPteVirtualAddress(PointerPde), MM_PAGE_SIZE);
+            RTL::Memory::ZeroMemory(MM::Paging::GetPteVirtualAddress(PointerPde), MM_PAGE_SIZE);
         }
 
         /* Get next table entry */
@@ -282,10 +282,10 @@ MM::Pte::MapPTE(PVOID StartAddress,
         {
             /* Map PTE */
             MM::Paging::SetPte(TemplatePte, MM::Pfn::AllocateBootstrapPages(1), 0);
-            *PointerPte = *TemplatePte;
+            MM::Paging::WritePte(PointerPte, *TemplatePte);
 
             /* Clear the page table */
-            RtlZeroMemory(MM::Paging::GetPteVirtualAddress(PointerPte), MM_PAGE_SIZE);
+            RTL::Memory::ZeroMemory(MM::Paging::GetPteVirtualAddress(PointerPte), MM_PAGE_SIZE);
         }
 
         /* Get next table entry */
