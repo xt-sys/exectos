@@ -105,6 +105,21 @@ MM::Pte::GetPtesPerPage(VOID)
 }
 
 /**
+ * Returns a pointer to the valid PTE.
+ *
+ * @return This routine returns a pointer to the valid PTE.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PMMPTE
+MM::Pte::GetValidPte()
+{
+    /* Return a pointer to the valid PTE */
+    return &ValidPte;
+}
+
+/**
  * Formats a range of PTEs into a freelist-based pool for system allocations.
  *
  * @param StartingPte

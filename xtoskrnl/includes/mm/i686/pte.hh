@@ -29,6 +29,7 @@ namespace MM
             STATIC XTAPI BOOLEAN AddressValid(IN PVOID VirtualAddress);
             STATIC XTAPI ULONG GetPtesPerPage(VOID);
             STATIC XTAPI PMMPTE GetSystemPteBaseAddress(VOID);
+            STATIC XTAPI PMMPTE GetValidPte(VOID);
             STATIC XTAPI VOID InitializePageTable(VOID);
             STATIC XTAPI VOID InitializeSystemPteSpace(VOID);
             STATIC XTAPI VOID MapPDE(PVOID StartAddress,

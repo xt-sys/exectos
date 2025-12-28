@@ -29,6 +29,7 @@ namespace MM
             STATIC XTAPI ULONG GetNextColor();
             STATIC XTAPI ULONG GetPagingColors();
             STATIC XTAPI ULONG GetPagingColorsMask();
+            STATIC XTAPI VOID InitializeColorTables(VOID);
     };
 }
 

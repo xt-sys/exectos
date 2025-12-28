@@ -45,6 +45,9 @@ PFN_NUMBER MM::Pfn::AvailablePages;
 /* Biggest free memory descriptor */
 PLOADER_MEMORY_DESCRIPTOR MM::Pfn::FreeDescriptor;
 
+/* List containing free physical pages */
+MMPFNLIST MM::Pfn::FreePagesList = {0, FreePageList, MAXULONG_PTR, MAXULONG_PTR};
+
 /* Highest physical page number */
 ULONG_PTR MM::Pfn::HighestPhysicalPage;
 

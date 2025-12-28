@@ -68,6 +68,9 @@ MM::Manager::InitializeMemoryManager(VOID)
 
     /* Initialize system PTE space */
     MM::Pte::InitializeSystemPteSpace();
+
+    /* Initialize PFN database */
+    MM::Pfn::InitializePfnDatabase();
 }
 
 /**
