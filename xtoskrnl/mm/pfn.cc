@@ -106,6 +106,36 @@ MM::Pfn::GetPfnDatabaseSize(VOID)
 }
 
 /**
+ * Retrieves a pointer to the PFN database entry for a given physical page.
+ *
+ * @param Pfn
+ *        The Page Frame Number (PFN) to look up.
+ *
+ * @return This routine returns a pointer to the MMPFN structure for the given PFN, or NULLPTR if the PFN is invalid.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PMMPFN
+MM::Pfn::GetPfnEntry(IN PFN_NUMBER Pfn)
+{
+    PMMMEMORY_LAYOUT MemoryLayout;
+
+    /* Validate that the PFN is within the range of managed physical memory */
+    if(Pfn > HighestPhysicalPage)
+    {
+        /* The requested page number is outside the bounds, return NULLPTR */
+        return NULLPTR;
+    }
+
+    /* Get the memory layout */
+    MemoryLayout = MM::Manager::GetMemoryLayout();
+
+    /* Calculate the address of the PFN entry by indexing into the PFN database array and return it */
+    return &((PMMPFN)MemoryLayout->PfnDatabaseAddress)[Pfn];
+}
+
+/**
  * Increments the global count of available pages.
  *
  * @return This routine does not return any value.

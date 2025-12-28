@@ -31,6 +31,7 @@ namespace MM
             STATIC XTAPI VOID ComputePfnDatabaseSize(VOID);
             STATIC XTAPI ULONGLONG GetNumberOfPhysicalPages(VOID);
             STATIC XTAPI PFN_NUMBER GetPfnDatabaseSize(VOID);
+            STATIC XTAPI PMMPFN GetPfnEntry(IN PFN_NUMBER Pfn);
             STATIC XTAPI VOID ScanMemoryDescriptors(VOID);
 
         private:
