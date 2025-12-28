@@ -77,7 +77,6 @@ MM::Pte::GetSystemPteBaseAddress(VOID)
     }
 }
 
-
 /**
  * Performs the initial setup of the system's page table hierarchy.
  *
@@ -193,7 +192,7 @@ MM::Pte::MapP5E(PVOID StartAddress,
             *PointerP5e = *TemplateP5e;
 
             /* Clear the page table */
-            RtlZeroMemory(MM::Paging::GetPteVirtualAddress(PointerP5e), MM_PAGE_SIZE);
+            RTL::Memory::ZeroMemory(MM::Paging::GetPteVirtualAddress(PointerP5e), MM_PAGE_SIZE);
         }
 
         /* Get next table entry */
@@ -240,7 +239,7 @@ MM::Pte::MapPPE(PVOID StartAddress,
             *PointerPpe = *TemplatePpe;
 
             /* Clear the page table */
-            RtlZeroMemory(MM::Paging::GetPteVirtualAddress(PointerPpe), MM_PAGE_SIZE);
+            RTL::Memory::ZeroMemory(MM::Paging::GetPteVirtualAddress(PointerPpe), MM_PAGE_SIZE);
         }
 
         /* Get next table entry */
@@ -287,7 +286,7 @@ MM::Pte::MapPXE(PVOID StartAddress,
             *PointerPxe = *TemplatePxe;
 
             /* Clear the page table */
-            RtlZeroMemory(MM::Paging::GetPteVirtualAddress(PointerPxe), MM_PAGE_SIZE);
+            RTL::Memory::ZeroMemory(MM::Paging::GetPteVirtualAddress(PointerPxe), MM_PAGE_SIZE);
         }
 
         /* Get next table entry */

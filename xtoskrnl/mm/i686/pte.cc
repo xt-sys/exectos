@@ -112,7 +112,7 @@ MM::Pte::InitializePageTable(VOID)
     MM::Pte::MapPDE(MemoryLayout->SystemSpaceStart, (PVOID)MM_HIGHEST_SYSTEM_ADDRESS, &TemplatePte);
 }
 
-/*
+/**
  * Maps a range of virtual addresses at the PPE (Page Directory Pointer Entry) level.
  *
  * @param StartAddress
