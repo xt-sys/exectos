@@ -2,7 +2,7 @@
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
  * FILE:            xtoskrnl/includes/mm/mmgr.hh
- * DESCRIPTION:     Memory manager
+ * DESCRIPTION:     Memory Manager
  * DEVELOPERS:      Aiken Harris <harraiken91@gmail.com>
  */
 

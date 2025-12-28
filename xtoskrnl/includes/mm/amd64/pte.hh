@@ -2,7 +2,7 @@
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
  * FILE:            xtoskrnl/includes/mm/amd64/pte.hh
- * DESCRIPTION:     Page table entry (PTE) for AMD64 support
+ * DESCRIPTION:     Page Table Entry (PTE) for AMD64 support
  * DEVELOPERS:      Aiken Harris <harraiken91@gmail.com>
  */
 
