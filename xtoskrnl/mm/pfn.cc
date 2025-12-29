@@ -56,6 +56,7 @@ MM::Pfn::ComputePfnDatabaseSize(VOID)
 {
     /* Calculate the total number of pages required for the PFN database */
     PfnDatabaseSize = (HighestPhysicalPage + 1) * sizeof(MMPFN);
+    PfnDatabaseSize += (MM::Colors::GetPagingColors() * sizeof(MMCOLOR_TABLES) * 2);
     PfnDatabaseSize = ROUND_UP(PfnDatabaseSize, MM_PAGE_SIZE);
     PfnDatabaseSize >>= MM_PAGE_SHIFT;
 }
