@@ -154,6 +154,20 @@ MM::Pte::InitializePageTable(VOID)
 }
 
 /**
+ * Initializes the PTE template.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::Pte::InitializePteTemplate(VOID)
+{
+    ValidPte = {MM_PTE_VALID|MM_PTE_EXECUTE_READWRITE|MM_PTE_DIRTY|MM_PTE_ACCESSED};
+}
+
+/**
  * Maps a range of virtual addresses at the P5E (PML5) level.
  *
  * @param StartAddress

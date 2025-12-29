@@ -31,6 +31,7 @@ namespace MM
             STATIC XTAPI PMMPTE GetSystemPteBaseAddress(VOID);
             STATIC XTAPI PMMPTE GetValidPte(VOID);
             STATIC XTAPI VOID InitializePageTable(VOID);
+            STATIC XTAPI VOID InitializePteTemplate(VOID);
             STATIC XTAPI VOID InitializeSystemPteSpace(VOID);
             STATIC XTAPI VOID MapPDE(PVOID StartAddress,
                                      PVOID EndAddress,

@@ -104,4 +104,4 @@ PMMPTE MM::Pte::SystemPtesStart[MaximumPtePoolTypes];
 ULONG MM::Pte::TotalSystemFreePtes[MaximumPtePoolTypes];
 
 /* Template PTE entry containing standard flags for a valid, present kernel page */
-MMPTE MM::Pte::ValidPte = {MM_PTE_VALID|MM_PTE_EXECUTE_READWRITE|MM_PTE_DIRTY|MM_PTE_ACCESSED};
+MMPTE MM::Pte::ValidPte;
