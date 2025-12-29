@@ -21,13 +21,12 @@ namespace MM
             STATIC UCHAR ProcessorStructuresData[MAXIMUM_PROCESSORS][KPROCESSOR_STRUCTURES_SIZE];
 
         public:
-            STATIC XTAPI XTSTATUS AllocateKernelStack(IN PVOID *Stack,
-                                                     IN BOOLEAN LargeStack,
-                                                     IN UCHAR SystemNode);
+            STATIC XTAPI XTSTATUS AllocateKernelStack(OUT PVOID *Stack,
+                                                      IN ULONG StackSize);
             STATIC XTAPI XTSTATUS AllocateProcessorStructures(IN ULONG CpuNumber,
-                                                             OUT PVOID *StructuresData);
+                                                              OUT PVOID *StructuresData);
             STATIC XTAPI VOID FreeKernelStack(IN PVOID Stack,
-                                             IN BOOLEAN LargeStack);
+                                              IN ULONG StackSize);
             STATIC XTAPI VOID FreeProcessorStructures(IN PVOID StructuresData);
     };
 }
