@@ -4,6 +4,7 @@
  * FILE:            xtoskrnl/mm/kpool.cc
  * DESCRIPTION:     Kernel pool memory management
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ *                  Aiken Harris <harraiken91@gmail.com>
  */
 
 #include <xtos.hh>
@@ -83,7 +84,8 @@ MM::KernelPool::AllocateKernelStack(OUT PVOID *Stack,
     }
 
     /* Zero the newly allocated stack memory, skipping the guard page */
-    RTL::Memory::ZeroMemory(MM::Paging::GetPteVirtualAddress(MM::Paging::GetNextPte(StackPte)), MM_PAGE_SIZE * StackPages);
+    RTL::Memory::ZeroMemory(MM::Paging::GetPteVirtualAddress(MM::Paging::GetNextPte(StackPte)),
+                            MM_PAGE_SIZE * StackPages);
 
     /* Return a pointer to the top of the new stack */
     *Stack = MM::Paging::GetPteVirtualAddress(MM::Paging::AdvancePte(StackPte, StackPages + 1));
