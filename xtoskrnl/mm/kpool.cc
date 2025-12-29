@@ -30,7 +30,7 @@ XTSTATUS
 MM::KernelPool::AllocateKernelStack(OUT PVOID *Stack,
                                     IN ULONG StackSize)
 {
-    PFN_COUNT StackPtes, StackPages;
+    PFN_COUNT StackPages;
     PMMPTE PointerPte, StackPte;
     MMPTE TempPte, InvalidPte;
     PFN_NUMBER PageFrameIndex;
@@ -40,11 +40,10 @@ MM::KernelPool::AllocateKernelStack(OUT PVOID *Stack,
     *Stack = NULLPTR;
 
     /* Convert the requested stack size into a page count */
-    StackPtes = SIZE_TO_PAGES(StackSize);
-    StackPages = StackPtes;
+    StackPages = SIZE_TO_PAGES(StackSize);
 
     /* Reserve PTEs for the stack pages, plus a guard page */
-    StackPte = MM::Pte::ReserveSystemPtes(StackPtes + 1, SystemPteSpace, 0);
+    StackPte = MM::Pte::ReserveSystemPtes(StackPages + 1, SystemPteSpace, 0);
     if(!StackPte)
     {
         /* Failed to reserve PTEs for the new kernel stack */
@@ -84,10 +83,10 @@ MM::KernelPool::AllocateKernelStack(OUT PVOID *Stack,
     }
 
     /* Zero the newly allocated stack memory, skipping the guard page */
-    RTL::Memory::ZeroMemory(MM::Paging::GetPteVirtualAddress(MM::Paging::GetNextPte(StackPte)), MM_PAGE_SIZE * StackPtes);
+    RTL::Memory::ZeroMemory(MM::Paging::GetPteVirtualAddress(MM::Paging::GetNextPte(StackPte)), MM_PAGE_SIZE * StackPages);
 
     /* Return a pointer to the top of the new stack */
-    *Stack = MM::Paging::GetPteVirtualAddress(MM::Paging::AdvancePte(StackPte, StackPtes + 1));
+    *Stack = MM::Paging::GetPteVirtualAddress(MM::Paging::AdvancePte(StackPte, StackPages + 1));
     return STATUS_SUCCESS;
 }
 
