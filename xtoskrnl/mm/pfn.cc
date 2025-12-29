@@ -44,6 +44,59 @@ MM::Pfn::AllocateBootstrapPages(IN PFN_NUMBER NumberOfPages)
 }
 
 /**
+ * Allocates a physical page frame (PFN) from one of the system's free page lists.
+ *
+ * @param Color
+ *        The preferred page color, used to optimize CPU cache alignment and reduce cache contention.
+ *
+ * @return This routine returns the Page Frame Number (PFN) of the allocated page.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PFN_NUMBER
+MM::Pfn::AllocatePhysicalPage(IN ULONG Color)
+{
+    PFN_NUMBER PageNumber;
+    ULONG PagingColorsMask;
+
+    /* Check if any physical pages are available in the system */
+    if(!AvailablePages)
+    {
+        /* No physical pages are available in the system, return 0 */
+        return 0;
+    }
+
+    /* Retrieve the bitmask used for calculating a page's color */
+    PagingColorsMask = MM::Colors::GetPagingColorsMask();
+
+    /* Attempt to retrieve a page from the colored free page list */
+    PageNumber = MM::Colors::GetFreePages(FreePageList, Color)->Flink;
+    if(PageNumber == MAXULONG_PTR)
+    {
+        /* No page was found in the colored free page list, check the colored zero page list */
+        PageNumber = MM::Colors::GetFreePages(ZeroedPageList, Color)->Flink;
+    }
+
+    /* Attempt to retrieve a page from the colored zero list */
+    if(PageNumber == MAXULONG_PTR)
+    {
+        /* No page was found in the colored zero page list, check the global free page list */
+        PageNumber = FreePagesList.Flink;
+    }
+
+    /* Attempt to retrieve a page from the global free page list */
+    if(PageNumber == MAXULONG_PTR)
+    {
+        /* No page was found in the global free page list, check the global zero page list */
+        PageNumber = ZeroedPagesList.Flink;
+    }
+
+    /* Remove the page from its list and return its PFN */
+    return UnlinkFreePage(PageNumber, PageNumber & PagingColorsMask);
+}
+
+/**
  * Calculates the total number of pages required for the PFN database and its associated color tables.
  *
  * @return This routine does not return any value.
@@ -85,7 +138,7 @@ MM::Pfn::DecrementAvailablePages(VOID)
  */
 XTAPI
 ULONG_PTR
-MM::Pfn::GetHighestPhysicalPage()
+MM::Pfn::GetHighestPhysicalPage(VOID)
 {
     /* Return the highest physical page number */
     return HighestPhysicalPage;
@@ -288,8 +341,8 @@ MM::Pfn::LinkFreePage(IN PFN_NUMBER PageFrameIndex)
  */
 XTAPI
 VOID
-MM::Pfn::LinkPfnForPageTable(PFN_NUMBER PageFrameIndex,
-                             PMMPTE PointerPte)
+MM::Pfn::LinkPfnForPageTable(IN PFN_NUMBER PageFrameIndex,
+                             IN PMMPTE PointerPte)
 {
     PMMPFN Pfn;
     PMMPDE PointerPde;
@@ -306,12 +359,12 @@ MM::Pfn::LinkPfnForPageTable(PFN_NUMBER PageFrameIndex,
        (MM::Pte::AddressValid(EndAddress)) && (Pfn->u3.e1.PageLocation == ActiveAndValid))
     {
         /* Initialize the PFN entry for this page table page */
+        Pfn->OriginalPte = *PointerPte;
+        Pfn->PteAddress = PointerPte;
         Pfn->u1.WsIndex = 0;
         Pfn->u2.ShareCount++;
-        Pfn->PteAddress = PointerPte;
-        Pfn->OriginalPte = *PointerPte;
-        Pfn->u3.e1.PageLocation = ActiveAndValid;
         Pfn->u3.e1.CacheAttribute = PfnNonCached;
+        Pfn->u3.e1.PageLocation = ActiveAndValid;
         Pfn->u3.e2.ReferenceCount = 1;
         Pfn->u4.PteFrame = MM::Paging::GetPageFrameNumber(MM::Paging::GetPteAddress(PointerPte));
     }
@@ -319,6 +372,84 @@ MM::Pfn::LinkPfnForPageTable(PFN_NUMBER PageFrameIndex,
     /* Increment the share count of the parent page table that contains the mapping */
     PointerPde = MM::Paging::GetPdeAddress(MM::Paging::GetPteVirtualAddress(PointerPte));
     Pfn = GetPfnEntry(MM::Paging::GetPageFrameNumber(PointerPde));
+    Pfn->u2.ShareCount++;
+}
+
+/**
+ * Links a PFN entry to its corresponding PTE and ensures the page table that contains the PTE is resident in memory.
+ *
+ * @param PageFrameIndex
+ *        Supplies the index into the PFN database for the page being initialized.
+ *
+ * @param PointerPte
+ *        Supplies the pointer to the PTE which maps the physical page.
+ *
+ * @param Modified
+ *        Supplies a flag indicating if the page's initial state is modified.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::Pfn::LinkPfnToPte(IN PFN_NUMBER PageFrameIndex,
+                      IN PMMPTE PointerPte,
+                      IN BOOLEAN Modified)
+{
+    PMMMEMORY_LAYOUT MemoryLayout;
+    XTSTATUS Status;
+    PMMPFN Pfn;
+    PMMPTE Pte;
+
+    /* Get the memory layout */
+    MemoryLayout = MM::Manager::GetMemoryLayout();
+
+    /* Point the PFN to its PTE */
+    Pfn = &((PMMPFN)MemoryLayout->PfnDatabaseAddress)[PageFrameIndex];
+    Pfn->PteAddress = PointerPte;
+
+    /* Check if the page is already mapped and in use */
+    if(MM::Paging::PteValid(PointerPte))
+    {
+        /* Clear the original PTE information */
+        MM::Paging::SetPte(&Pfn->OriginalPte, 0, MM_PTE_READWRITE | MM_PTE_CACHE_ENABLE);
+    }
+    else
+    {
+        /* Page is not resident, so save the PTE contents for later use */
+        Pfn->OriginalPte = *PointerPte;
+    }
+
+    /* Initialize the PFN database entry for this page */
+    Pfn->u2.ShareCount = 1;
+    Pfn->u3.e1.Modified = Modified;
+    Pfn->u3.e1.PageLocation = ActiveAndValid;
+    Pfn->u3.e2.ReferenceCount = 1;
+
+    /* Get the PDE that maps the page table containing this PTE */
+    Pte = MM::Paging::GetPteAddress(PointerPte);
+    if(!MM::Paging::PteValid(Pte))
+    {
+        /* Check if page table is resident */
+        Status = MM::PageFault::CheckPdeForPagedPool(PointerPte);
+        if(Status != STATUS_SUCCESS)
+        {
+            /* Could not make the page table resident, crash system */
+            KE::Crash::PanicEx(0x1,
+                              (ULONG_PTR)0x61940,
+                              (ULONG_PTR)PointerPte,
+                              MM::Paging::GetPageFrameNumber(PointerPte),
+                              (ULONG_PTR)MM::Paging::GetPteVirtualAddress(PointerPte));
+        }
+    }
+
+    /* Record the page frame of the page table itself */
+    PageFrameIndex = MM::Paging::GetPageFrameNumber(Pte);
+    Pfn->u4.PteFrame = PageFrameIndex;
+
+    /* Pin the page table in memory by incrementing its PFN share count */
+    Pfn = &((PMMPFN)MemoryLayout->PfnDatabaseAddress)[PageFrameIndex];
     Pfn->u2.ShareCount++;
 }
 
@@ -385,8 +516,8 @@ MM::Pfn::ProcessMemoryDescriptor(IN PFN_NUMBER BasePage,
                     Pfn->u3.e1.CacheAttribute = PfnNonCached;
                     Pfn->u3.e1.PageLocation = 0;
                     Pfn->u3.e1.PrototypePte = 1;
-                    Pfn->u3.e2.ReferenceCount = 0;
                     Pfn->u3.e1.Rom = 1;
+                    Pfn->u3.e2.ReferenceCount = 0;
                     Pfn->u4.InPageError = 0;
                     Pfn->u4.PteFrame = 0;
                 }
@@ -489,4 +620,106 @@ MM::Pfn::ScanMemoryDescriptors(VOID)
 
     /* Save a copy of the original free descriptor before it gets modified */
     RTL::Memory::CopyMemory(&OriginalFreeDescriptor, FreeDescriptor, sizeof(LOADER_MEMORY_DESCRIPTOR));
+}
+
+/**
+ * Unlinks a physical page from its corresponding list.
+ *
+ * @param PageIndex
+ *        The Page Frame Number (PFN) of the page to unlink.
+ *
+ * @param Color
+ *        The color of the page, used to find the correct colored list.
+ *
+ * @return This routine returns the PFN of the page that was unlinked.
+ */
+XTAPI
+PFN_NUMBER
+MM::Pfn::UnlinkFreePage(IN PFN_NUMBER PageFrameIndex,
+                        IN ULONG Color)
+{
+    PMMPFN Pfn;
+    PMMPFNLIST PfnList;
+    MMPAGELISTS PageList;
+    ULONG NodeColor;
+    PMMCOLOR_TABLES ColorTable;
+    PFN_NUMBER NextPage, PrevPage;
+
+    /* Get the PFN database entry for the target page */
+    Pfn = GetPfnEntry(PageFrameIndex);
+
+    /* Identify which list the page belongs to (FreePageList or ZeroedPageList) */
+    PfnList = PageLocationList[Pfn->u3.e1.PageLocation];
+    PageList = PfnList->ListName;
+
+    /* Update the forward link of the previous page */
+    if(Pfn->u2.Blink != MAXULONG_PTR)
+    {
+        /* The page is not the head of the list; update the previous page's Flink */
+        GetPfnEntry(Pfn->u2.Blink)->u1.Flink = Pfn->u1.Flink;
+    }
+    else
+    {
+        /* This is the first page in the list; update the list head's Flink */
+        PfnList->Flink = Pfn->u1.Flink;
+    }
+
+    /* Update the backward link of the next page */
+    if(Pfn->u1.Flink != MAXULONG_PTR)
+    {
+        /* The page is not the tail of the list; update the next page's Blink */
+        GetPfnEntry(Pfn->u1.Flink)->u2.Blink = Pfn->u2.Blink;
+    }
+    else
+    {
+        /* This is the last page in the list; update the list head's Blink */
+        PfnList->Blink = Pfn->u2.Blink;
+    }
+
+    /* Get the first page on the color list */
+    ColorTable = MM::Colors::GetFreePages(PageList, Color);
+    NodeColor = Pfn->u3.e1.PageColor;
+    PrevPage = Pfn->u4.PteFrame;
+    NextPage = MM::Paging::GetPte(&Pfn->OriginalPte);
+
+    /* Decrement the count of pages for this specific color and total page count for this list */
+    ColorTable->Count--;
+    PfnList->Total--;
+
+    /* Update the forward link of the previous colored page */
+    if(PrevPage != MM_PFN_PTE_FRAME)
+    {
+        /* This is not the first page; update the previous page's Flink */
+        MM::Paging::SetPte(&GetPfnEntry(PrevPage)->OriginalPte, NextPage);
+    }
+    else
+    {
+        /* This was the first page; update the color table's Flink */
+        ColorTable->Flink = NextPage;
+    }
+
+    /* Update the backward link of the next colored page */
+    if (NextPage != MAXULONG_PTR)
+    {
+        /* This is not the last page; update the next page's Blink */
+        GetPfnEntry(NextPage)->u4.PteFrame = PrevPage;
+    }
+    else
+    {
+        /* This was the last page; update the color table's Blink */
+        ColorTable->Blink = (PVOID)PrevPage;
+    }
+
+    /* Clear the list pointers and flags, but preserve the color and cache attributes */
+    Pfn->u1.Flink = 0;
+    Pfn->u2.Blink = 0;
+    Pfn->u3.e1.CacheAttribute = PfnNotMapped;
+    Pfn->u3.e1.PageColor = NodeColor;
+    Pfn->u3.e2.ShortFlags = 0;
+
+    /* Decrement the global count of available pages */
+    DecrementAvailablePages();
+
+    /* Return the page that was just unlinked */
+    return PageFrameIndex;
 }

@@ -19,22 +19,33 @@ namespace MM
     {
         private:
             STATIC PFN_NUMBER AvailablePages;
+            STATIC MMPFNLIST BadPagesList;
             STATIC PLOADER_MEMORY_DESCRIPTOR FreeDescriptor;
             STATIC MMPFNLIST FreePagesList;
             STATIC ULONG_PTR HighestPhysicalPage;
+            STATIC PVOID HighestUserAddress;
             STATIC ULONG_PTR LowestPhysicalPage;
+            STATIC MMPFNLIST ModifiedPagesList;
+            STATIC MMPFNLIST ModifiedReadOnlyPagesList;
             STATIC ULONGLONG NumberOfPhysicalPages;
             STATIC LOADER_MEMORY_DESCRIPTOR OriginalFreeDescriptor;
+            STATIC PMMPFNLIST PageLocationList[];
             STATIC PFN_NUMBER PfnDatabaseSize;
+            STATIC MMPFNLIST StandbyPagesList;
+            STATIC MMPFNLIST ZeroedPagesList;
 
         public:
             STATIC XTAPI PFN_NUMBER AllocateBootstrapPages(IN PFN_NUMBER NumberOfPages);
+            STATIC XTAPI PFN_NUMBER AllocatePhysicalPage(IN ULONG Color);
             STATIC XTAPI VOID ComputePfnDatabaseSize(VOID);
             STATIC XTAPI ULONG_PTR GetHighestPhysicalPage(VOID);
             STATIC XTAPI ULONGLONG GetNumberOfPhysicalPages(VOID);
             STATIC XTAPI PFN_NUMBER GetPfnDatabaseSize(VOID);
             STATIC XTAPI PMMPFN GetPfnEntry(IN PFN_NUMBER Pfn);
             STATIC XTAPI VOID InitializePfnDatabase(VOID);
+            STATIC VOID XTAPI LinkPfnToPte(IN PFN_NUMBER PageFrameIndex,
+                                           IN PMMPTE PointerPte,
+                                           IN BOOLEAN Modified);
             STATIC XTAPI VOID ScanMemoryDescriptors(VOID);
 
         private:
@@ -42,13 +53,15 @@ namespace MM
             STATIC XTAPI VOID IncrementAvailablePages(VOID);
             STATIC XTAPI VOID InitializePageTablePfns(VOID);
             STATIC XTAPI VOID LinkFreePage(IN PFN_NUMBER PageFrameIndex);
-            STATIC XTAPI VOID LinkPfnForPageTable(PFN_NUMBER PageFrameIndex,
-                                                  PMMPTE PointerPte);
-            STATIC XTAPI VOID ProcessMemoryDescriptor(PFN_NUMBER BasePage,
-                                                      PFN_NUMBER PageCount,
-                                                      LOADER_MEMORY_TYPE MemoryType);
+            STATIC XTAPI VOID LinkPfnForPageTable(IN PFN_NUMBER PageFrameIndex,
+                                                  IN PMMPTE PointerPte);
+            STATIC XTAPI VOID ProcessMemoryDescriptor(IN PFN_NUMBER BasePage,
+                                                      IN PFN_NUMBER PageCount,
+                                                      IN LOADER_MEMORY_TYPE MemoryType);
             STATIC XTAPI VOID ScanPageTable(IN PMMPTE PointerPte,
-                                            ULONG Level);
+                                            IN ULONG Level);
+            STATIC XTAPI PFN_NUMBER UnlinkFreePage(IN PFN_NUMBER PageFrameIndex,
+                                                   IN ULONG Color);
     };
 }
 

@@ -30,10 +30,10 @@ ULONG MM::HardwarePool::UsedHardwareAllocationDescriptors = 0;
 /* Processor structures data (THIS IS A TEMPORARY HACK) */
 UCHAR MM::KernelPool::ProcessorStructuresData[MAXIMUM_PROCESSORS][KPROCESSOR_STRUCTURES_SIZE] = {{0}};
 
-/* Memory layout */
+/* Global structure describing the virtual memory layout of the system */
 MMMEMORY_LAYOUT MM::Manager::MemoryLayout;
 
-/* Number of system PTEs */
+/* Total number of PTEs reserved for system space mapping */
 PFN_NUMBER MM::Manager::NumberOfSystemPtes;
 
 /* Instance of the page map routines for the current PML level */
@@ -41,6 +41,9 @@ MM::PPAGEMAP MM::Paging::PmlRoutines;
 
 /* Total number of physical pages available for allocation */
 PFN_NUMBER MM::Pfn::AvailablePages;
+
+/* Head of the list containing physical pages marked as defective */
+MMPFNLIST MM::Pfn::BadPagesList = {0, BadPageList, MAXULONG_PTR, MAXULONG_PTR};
 
 /* Biggest free memory descriptor */
 PLOADER_MEMORY_DESCRIPTOR MM::Pfn::FreeDescriptor;
@@ -54,14 +57,36 @@ ULONG_PTR MM::Pfn::HighestPhysicalPage;
 /* Lowest physical page number */
 ULONG_PTR MM::Pfn::LowestPhysicalPage = -1;
 
+/* List containing modified pages */
+MMPFNLIST MM::Pfn::ModifiedPagesList = {0, ModifiedPageList, MAXULONG_PTR, MAXULONG_PTR};
+
+/* List containing modified pages mapped as read-only */
+MMPFNLIST MM::Pfn::ModifiedReadOnlyPagesList = {0, ModifiedReadOnlyPageList, MAXULONG_PTR, MAXULONG_PTR};
+
 /* Number of physical pages */
 ULONGLONG MM::Pfn::NumberOfPhysicalPages;
 
 /* Old biggest free memory descriptor */
 LOADER_MEMORY_DESCRIPTOR MM::Pfn::OriginalFreeDescriptor;
 
+/* List containing standby pages (clean, can be reclaimed or repurposed) */
+MMPFNLIST MM::Pfn::StandbyPagesList = {0, StandbyPageList, MAXULONG_PTR, MAXULONG_PTR};
+
+/* Array of pointers to PFN lists */
+PMMPFNLIST MM::Pfn::PageLocationList[] = {&ZeroedPagesList,
+                                          &FreePagesList,
+                                          &StandbyPagesList,
+                                          &ModifiedPagesList,
+                                          &ModifiedReadOnlyPagesList,
+                                          &BadPagesList,
+                                          NULLPTR,
+                                          NULLPTR};
+
 /* Size of the PFN database in pages */
 PFN_NUMBER MM::Pfn::PfnDatabaseSize;
+
+/* List containing free physical pages that have been zeroed out */
+MMPFNLIST MM::Pfn::ZeroedPagesList = {0, ZeroedPageList, MAXULONG_PTR, MAXULONG_PTR};
 
 /* Array of lists for available System PTEs, separated by pool type */
 MMPTE MM::Pte::FirstSystemFreePte[MaximumPtePoolTypes];
