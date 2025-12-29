@@ -44,6 +44,14 @@ Memory::BuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
         return Status;
     }
 
+    /* Add new memory mapping for the page map itself */
+    Status = MapVirtualMemory(PageMap, (PVOID)(UINT_PTR)Address, (PVOID)(UINT_PTR)Address, 1, LoaderMemoryData);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Memory mapping failure */
+        return Status;
+    }
+
     /* Assign and zero-fill memory used by page mappings */
     PageMap->PtePointer = (PVOID)(UINT_PTR)Address;
     RTL::Memory::ZeroMemory(PageMap->PtePointer, EFI_PAGE_SIZE);
@@ -193,7 +201,7 @@ Memory::GetNextPageTable(IN PXTBL_PAGE_MAPPING PageMap,
         }
 
         /* Add new memory mapping */
-        Status = MapVirtualMemory(PageMap, NULLPTR, (PVOID)(UINT_PTR)Address, 1, LoaderMemoryData);
+        Status = MapVirtualMemory(PageMap, (PVOID)(UINT_PTR)Address, (PVOID)(UINT_PTR)Address, 1, LoaderMemoryData);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory mapping failure */
