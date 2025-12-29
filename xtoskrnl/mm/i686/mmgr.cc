@@ -42,6 +42,14 @@ MM::Manager::InitializeMemoryLayout(VOID)
         NumberOfSystemPtes = MM_MAXIMUM_NUMBER_SYSTEM_PTES;
     }
 
+    /* Calculate size of paged pool */
+    PtesPerPage = MM::Pte::GetPtesPerPage();
+    PteCount = (SIZE_TO_PAGES(33554432) + (PtesPerPage - 1)) / PtesPerPage;
+    PagedPoolSize = PteCount * PtesPerPage * MM_PAGE_SIZE;
+
+    /* Retrieve the PFN database size */
+    PfnDatabaseSize = MM::Pfn::GetPfnDatabaseSize();
+
     /* Check if 3-level paging (PAE) is enabled */
     if(MM::Paging::GetXpaStatus())
     {
