@@ -493,10 +493,6 @@ MM::Pfn::ProcessMemoryDescriptor(IN PFN_NUMBER BasePage,
             LinkFreePage(CurrentPage);
         }
     }
-    else if(MM::Manager::VerifyMemoryTypeInvisible(MemoryType))
-    {
-        /* This memory range should never be used, skip it */
-    }
     else
     {
         /* Handle all other (non-free) memory types */
