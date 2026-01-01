@@ -367,6 +367,40 @@ MM::Paging::GetPteSize(VOID)
 }
 
 /**
+ * Gets the software prototype value of the corresponding Page Table Entry.
+ *
+ * @param PtePointer
+ *        Specifies the address of the PTE.
+ *
+ * @return This routine returns the PTE software prototype value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG
+MM::Paging::GetPteSoftwarePrototype(IN PMMPTE PtePointer)
+{
+    return PmlRoutines->GetPteSoftwarePrototype(PtePointer);
+}
+
+/**
+ * Gets the software transition value of the corresponding Page Table Entry.
+ *
+ * @param PtePointer
+ *        Specifies the address of the PTE.
+ *
+ * @return This routine returns the PTE software transition value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG
+MM::Paging::GetPteSoftwareTransition(IN PMMPTE PtePointer)
+{
+    return PmlRoutines->GetPteSoftwareTransition(PtePointer);
+}
+
+/**
  * Gets the virtual address that is mapped by a given Page Table Entry.
  *
  * @param PtePointer

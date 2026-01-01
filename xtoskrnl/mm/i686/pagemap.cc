@@ -356,6 +356,40 @@ MM::PageMapBasic::GetPteSize(VOID)
 }
 
 /**
+ * Gets the software prototype value of the corresponding Page Table Entry.
+ *
+ * @param PtePointer
+ *        Specifies the address of the PTE.
+ *
+ * @return This routine returns the PTE software prototype value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG
+MM::PageMapBasic::GetPteSoftwarePrototype(IN PMMPTE PtePointer)
+{
+    return (ULONG)PtePointer->Pml2.Software.Prototype;
+}
+
+/**
+ * Gets the software transition value of the corresponding Page Table Entry.
+ *
+ * @param PtePointer
+ *        Specifies the address of the PTE.
+ *
+ * @return This routine returns the PTE software transition value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG
+MM::PageMapBasic::GetPteSoftwareTransition(IN PMMPTE PtePointer)
+{
+    return (ULONG)PtePointer->Pml2.Software.Transition;
+}
+
+/**
  * Gets the virtual address that is mapped by a given Page Table Entry.
  *
  * @param PtePointer
@@ -505,7 +539,7 @@ MM::PageMapBasic::SetPte(IN PMMPTE PtePointer,
 XTAPI
 VOID
 MM::PageMapBasic::SetPte(IN PMMPTE PtePointer,
-                       IN ULONG_PTR Attributes)
+                         IN ULONG_PTR Attributes)
 {
     PtePointer->Pml2.Long = Attributes;
 }
@@ -741,6 +775,40 @@ MM::PageMapXpa::GetPteSize(VOID)
 {
     /* Return the size of MMPTE */
     return sizeof(MMPML3_PTE);
+}
+
+/**
+ * Gets the software prototype value of the corresponding Page Table Entry.
+ *
+ * @param PtePointer
+ *        Specifies the address of the PTE.
+ *
+ * @return This routine returns the PTE software prototype value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG
+MM::PageMapXpa::GetPteSoftwarePrototype(IN PMMPTE PtePointer)
+{
+    return (ULONG)PtePointer->Pml3.Software.Prototype;
+}
+
+/**
+ * Gets the software transition value of the corresponding Page Table Entry.
+ *
+ * @param PtePointer
+ *        Specifies the address of the PTE.
+ *
+ * @return This routine returns the PTE software transition value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG
+MM::PageMapXpa::GetPteSoftwareTransition(IN PMMPTE PtePointer)
+{
+    return (ULONG)PtePointer->Pml3.Software.Transition;
 }
 
 /**

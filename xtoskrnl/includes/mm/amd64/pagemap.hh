@@ -44,6 +44,8 @@ namespace MM
                                       PMMPTE StartPte);
             XTAPI ULONG GetPteOffset(IN PVOID Address);
             XTAPI ULONG GetPteSize(VOID);
+            XTAPI ULONG GetPteSoftwarePrototype(IN PMMPTE PtePointer);
+            XTAPI ULONG GetPteSoftwareTransition(IN PMMPTE PtePointer);
             VIRTUAL XTAPI PVOID GetPteVirtualAddress(IN PMMPTE PtePointer) = 0;
             XTAPI PMMPXE GetPxeAddress(IN PVOID Address);
             XTAPI ULONG GetPxeOffset(IN PVOID Address);

@@ -39,6 +39,8 @@ namespace MM
             STATIC XTAPI LONG GetPteDistance(PMMPTE EndPte,
                                              PMMPTE StartPte);
             STATIC XTAPI ULONG GetPteSize(VOID);
+            STATIC XTAPI ULONG GetPteSoftwarePrototype(IN PMMPTE PtePointer);
+            STATIC XTAPI ULONG GetPteSoftwareTransition(IN PMMPTE PtePointer);
             STATIC XTAPI PVOID GetPteVirtualAddress(IN PMMPTE PtePointer);
             STATIC XTAPI BOOLEAN GetXpaStatus(VOID);
             STATIC XTAPI VOID InitializePageMapSupport(VOID);

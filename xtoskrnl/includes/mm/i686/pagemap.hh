@@ -41,6 +41,8 @@ namespace MM
             VIRTUAL XTAPI LONG GetPteDistance(PMMPTE EndPte,
                                               PMMPTE StartPte) = 0;
             VIRTUAL XTAPI ULONG GetPteSize(VOID) = 0;
+            VIRTUAL XTAPI ULONG GetPteSoftwarePrototype(IN PMMPTE PtePointer) = 0;
+            VIRTUAL XTAPI ULONG GetPteSoftwareTransition(IN PMMPTE PtePointer) = 0;
             VIRTUAL XTAPI PVOID GetPteVirtualAddress(IN PMMPTE PtePointer) = 0;
             XTAPI BOOLEAN GetXpaStatus();
             VIRTUAL XTAPI VOID InitializePageMapInfo(VOID) = 0;
@@ -77,6 +79,8 @@ namespace MM
             XTAPI LONG GetPteDistance(PMMPTE EndPte,
                                       PMMPTE StartPte);
             XTAPI ULONG GetPteSize(VOID);
+            XTAPI ULONG GetPteSoftwarePrototype(IN PMMPTE PtePointer);
+            XTAPI ULONG GetPteSoftwareTransition(IN PMMPTE PtePointer);
             XTAPI PVOID GetPteVirtualAddress(IN PMMPTE PtePointer);
             XTAPI VOID InitializePageMapInfo(VOID);
             XTAPI BOOLEAN PteValid(IN PMMPTE PtePointer);
@@ -111,6 +115,8 @@ namespace MM
             XTAPI LONG GetPteDistance(PMMPTE EndPte,
                                       PMMPTE StartPte);
             XTAPI ULONG GetPteSize(VOID);
+            XTAPI ULONG GetPteSoftwarePrototype(IN PMMPTE PtePointer);
+            XTAPI ULONG GetPteSoftwareTransition(IN PMMPTE PtePointer);
             XTAPI PVOID GetPteVirtualAddress(IN PMMPTE PtePointer);
             XTAPI VOID InitializePageMapInfo(VOID);
             XTAPI BOOLEAN PteValid(IN PMMPTE PtePointer);
