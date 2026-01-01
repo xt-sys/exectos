@@ -326,6 +326,200 @@ MM::Pfn::LinkFreePage(IN PFN_NUMBER PageFrameIndex)
     IncrementAvailablePages();
 }
 
+
+/**
+ * Links a physical page to the appropriate list.
+ *
+ * @param ListHead
+ *        Pointer to the list head.
+ *
+ * @param PageFrameIndex
+ *        The Page Frame Number (PFN) of the page to link.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::Pfn::LinkPage(IN PMMPFNLIST ListHead,
+                  IN PFN_NUMBER PageFrameIndex)
+{
+    PMMCOLOR_TABLES ColorHead;
+    MMPAGELISTS ListName;
+    PMMPFN PageFrame;
+
+    /* Get the memory layout */
+    PMMMEMORY_LAYOUT MemoryLayout = MM::Manager::GetMemoryLayout();
+
+    /* Get the PFN database entry for the target page */
+    PageFrame = &((PMMPFN)MemoryLayout->PfnDatabaseAddress)[PageFrameIndex];
+
+    /* Get the list name */
+    ListName = ListHead->ListName;
+
+    /* Handle pages being linked to the modified or standby lists */
+    if(ListName == ModifiedPageList || ListName == StandbyPageList)
+    {
+        /* Detect an invalid prototype/transition PTE state */
+        if(!MM::Paging::GetPteSoftwarePrototype(&PageFrame->OriginalPte) &&
+           MM::Paging::GetPteSoftwareTransition(&PageFrame->OriginalPte))
+        {
+            /* Crash system due to corrupted PFN/PTE state */
+            KE::Crash::PanicEx(0x71, 0x8888, 0, 0, 0);
+        }
+    }
+
+    /* Check if the page is ROM */
+    if(PageFrame->u3.e1.Rom == 1)
+    {
+        /* Link the page to the ROM list */
+        ListHead = &RomPagesList;
+        ListHead->Total++;
+
+        /* Append the page to the end of the ROM list */
+        if(ListHead->Blink != MAXULONG_PTR)
+        {
+            /* Update the previous tail to point to this page */
+            (&((PMMPFN)MemoryLayout->PfnDatabaseAddress)[ListHead->Blink])->u1.Flink = PageFrameIndex;
+        }
+        else
+        {
+            /* Initialize the list if it was empty */
+            ListHead->Flink = PageFrameIndex;
+        }
+
+        /* Update list tail and PFN linkage */
+        ListHead->Blink = PageFrameIndex;
+        PageFrame->u1.Flink = MAXULONG_PTR;
+        PageFrame->u2.Blink = ListHead->Blink;
+        PageFrame->u3.e1.PageLocation = ListName;
+
+        /* ROM pages require no further processing */
+        return;
+    }
+
+    /* Account for the page being inserted into the target list */
+    ListHead->Total++;
+
+    /* Redirect modified pages to the per-color modified list */
+    if(ListHead == &ModifiedPagesList)
+    {
+        /* Select the modified list matching the page color */
+        ListHead = MM::Colors::GetModifiedPages(PageFrame->u3.e1.PageColor);
+        ListHead->Total++;
+    }
+    else if((PageFrame->u3.e1.RemovalRequested == 1) && (ListName <= StandbyPageList))
+    {
+        /* Undo the insertion into the current list */
+        ListHead->Total--;
+
+        /* Preserve the standby location for removed pages */
+        if(ListName == StandbyPageList)
+        {
+            /* Keep the page marked as standby */
+            PageFrame->u3.e1.PageLocation = StandbyPageList;
+        }
+
+        /* Mark the page as no longer cache-mapped */
+        PageFrame->u3.e1.CacheAttribute = PfnNotMapped;
+
+        /* Move the page to the bad page list */
+        ListHead = &BadPagesList;
+        ListHead->Total++;
+        ListName = BadPageList;
+    }
+
+    /* Insert zeroed pages at the head of the list */
+    if(ListName == ZeroedPageList)
+    {
+        /* Link the page as the new list head */
+        ListHead->Flink = PageFrameIndex;
+
+        /* Initialize PFN forward and backward links */
+        PageFrame->u1.Flink = ListHead->Flink;
+        PageFrame->u2.Blink = MAXULONG_PTR;
+
+        /* Update the previous head if it exists */
+        if(ListHead->Flink != MAXULONG_PTR)
+        {
+            /* Fix up the backward link of the old head */
+            (&((PMMPFN)MemoryLayout->PfnDatabaseAddress)[ListHead->Flink])->u2.Blink = PageFrameIndex;
+        }
+        else
+        {
+            /* Set the tail if the list was empty */
+            ListHead->Blink = PageFrameIndex;
+        }
+    }
+    else
+    {
+        /* Append the page to the tail of the list */
+        if(ListHead->Blink != MAXULONG_PTR)
+        {
+            /* Link the current tail to the new page */
+            (&((PMMPFN)MemoryLayout->PfnDatabaseAddress)[ListHead->Blink])->u1.Flink = PageFrameIndex;
+        }
+        else
+        {
+            /* Initialize the list if it was empty */
+            ListHead->Flink = PageFrameIndex;
+        }
+
+        /* Update list tail */
+        ListHead->Blink = PageFrameIndex;
+
+        /* Terminate PFN forward link and set backward link */
+        PageFrame->u1.Flink = MAXULONG_PTR;
+        PageFrame->u2.Blink = ListHead->Blink;
+    }
+
+    /* Record the page’s current location */
+    PageFrame->u3.e1.PageLocation = ListName;
+
+    /* Handle pages that contribute to the available page count */
+    if(ListName <= StandbyPageList)
+    {
+        /* Increment the system-wide available page counter */
+        MM::Pfn::IncrementAvailablePages();
+
+        /* Select the free list matching the page color */
+        ColorHead = MM::Colors::GetFreePages(ZeroedPageList, PageFrameIndex & MM::Colors::GetPagingColorsMask());
+
+        /* Store the color list linkage in the original PTE */
+        MM::Paging::SetPte(&PageFrame->OriginalPte, ColorHead->Flink);
+        PageFrame->u4.PteFrame = MM_PFN_PTE_FRAME;
+
+        /* Insert the page into the color free list */
+        ColorHead->Flink = PageFrameIndex;
+
+        /* Update the previous head or initialize the tail */
+        if(ColorHead->Flink != MAXULONG_PTR)
+        {
+            /* Fix up the PTE frame of the previous entry */
+            (&((PMMPFN)MemoryLayout->PfnDatabaseAddress)[ColorHead->Flink])->u4.PteFrame = PageFrameIndex;
+        }
+        else
+        {
+            /* Set the tail for an empty color list */
+            ColorHead->Blink = (PVOID)PageFrame;
+        }
+
+        /* Increment the color list page count */
+        ColorHead->Count++;
+    }
+    else if(ListName == ModifiedPageList)
+    {
+        /* Modified page insertion logic not implemented yet */
+        UNIMPLEMENTED;
+    }
+    else if(ListName == ModifiedReadOnlyPageList)
+    {
+        /* Modified read-only page handling not implemented yet */
+        UNIMPLEMENTED;
+    }
+}
+
 /**
  * Initializes the PFN database entry for a physical page that is used as a page table.
  *

@@ -72,9 +72,6 @@ ULONGLONG MM::Pfn::NumberOfPhysicalPages;
 /* Old biggest free memory descriptor */
 LOADER_MEMORY_DESCRIPTOR MM::Pfn::OriginalFreeDescriptor;
 
-/* List containing standby pages (clean, can be reclaimed or repurposed) */
-MMPFNLIST MM::Pfn::StandbyPagesList = {0, StandbyPageList, MAXULONG_PTR, MAXULONG_PTR};
-
 /* Array of pointers to PFN lists */
 PMMPFNLIST MM::Pfn::PageLocationList[] = {&ZeroedPagesList,
                                           &FreePagesList,
@@ -87,6 +84,12 @@ PMMPFNLIST MM::Pfn::PageLocationList[] = {&ZeroedPagesList,
 
 /* Size of the PFN database in pages */
 PFN_NUMBER MM::Pfn::PfnDatabaseSize;
+
+/* List containing pages mapped as Read-Only (ROM) */
+MMPFNLIST MM::Pfn::RomPagesList = {0, StandbyPageList, MAXULONG_PTR, MAXULONG_PTR};
+
+/* List containing standby pages (clean, can be reclaimed or repurposed) */
+MMPFNLIST MM::Pfn::StandbyPagesList = {0, StandbyPageList, MAXULONG_PTR, MAXULONG_PTR};
 
 /* List containing free physical pages that have been zeroed out */
 MMPFNLIST MM::Pfn::ZeroedPagesList = {0, ZeroedPageList, MAXULONG_PTR, MAXULONG_PTR};

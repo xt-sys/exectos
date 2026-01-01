@@ -31,6 +31,7 @@ namespace MM
             STATIC LOADER_MEMORY_DESCRIPTOR OriginalFreeDescriptor;
             STATIC PMMPFNLIST PageLocationList[];
             STATIC PFN_NUMBER PfnDatabaseSize;
+            STATIC MMPFNLIST RomPagesList;
             STATIC MMPFNLIST StandbyPagesList;
             STATIC MMPFNLIST ZeroedPagesList;
 
@@ -53,6 +54,8 @@ namespace MM
             STATIC XTAPI VOID IncrementAvailablePages(VOID);
             STATIC XTAPI VOID InitializePageTablePfns(VOID);
             STATIC XTAPI VOID LinkFreePage(IN PFN_NUMBER PageFrameIndex);
+            STATIC XTAPI VOID LinkPage(IN PMMPFNLIST ListHead,
+                                       IN PFN_NUMBER PageFrameIndex);
             STATIC XTAPI VOID LinkPfnForPageTable(IN PFN_NUMBER PageFrameIndex,
                                                   IN PMMPTE PointerPte);
             STATIC XTAPI VOID ProcessMemoryDescriptor(IN PFN_NUMBER BasePage,
