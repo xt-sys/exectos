@@ -260,6 +260,9 @@ MM::Pfn::LinkFreePage(IN PFN_NUMBER PageFrameIndex)
         /* Update cache attribute to not mapped */
         PfnEntry->u3.e1.CacheAttribute = PfnNotMapped;
 
+        /* Insert the page into the bad page list instead */
+        LinkPage(&BadPagesList, PageFrameIndex);
+
         /* Do not add it to the free list */
         return;
     }
@@ -693,8 +696,8 @@ MM::Pfn::ProcessMemoryDescriptor(IN PFN_NUMBER BasePage,
         switch(MemoryType)
         {
             case LoaderBad:
-                /* This memory is marked as bad and should not be used */
-                UNIMPLEMENTED;
+                /* This memory is marked as bad and should not be used, add it to the bad pages list */
+                LinkPage(&BadPagesList, BasePage);
                 break;
             case LoaderXIPRom:
                 /* This memory range contains Read-Only Memory (ROM) */
