@@ -13,7 +13,7 @@
 PMMCOLOR_TABLES MM::Colors::FreePages[FreePageList + 1];
 
 /* Array of modified pages segregated by cache color */
-MMPFNLIST MM::Colors::ModifiedPages[MM_PAGING_COLORS];
+MMPFNLIST MM::Colors::ModifiedPages[MM_PAGING_COLORS] = {{0, ModifiedPageList, MAXULONG_PTR, MAXULONG_PTR}};
 
 /* Number of supported page colors */
 ULONG MM::Colors::PagingColors;
