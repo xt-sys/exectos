@@ -19,6 +19,7 @@ namespace MM
     {
         private:
             STATIC PMMCOLOR_TABLES FreePages[FreePageList + 1];
+            STATIC MMPFNLIST ModifiedPages[MM_PAGING_COLORS];
             STATIC ULONG PagingColors;
             STATIC ULONG PagingColorsMask;
 
@@ -26,9 +27,10 @@ namespace MM
             STATIC XTAPI VOID ComputePageColoring(VOID);
             STATIC XTAPI PMMCOLOR_TABLES GetFreePages(MMPAGELISTS PageList,
                                                       ULONG Color);
-            STATIC XTAPI ULONG GetNextColor();
-            STATIC XTAPI ULONG GetPagingColors();
-            STATIC XTAPI ULONG GetPagingColorsMask();
+            STATIC XTAPI PMMPFNLIST GetModifiedPages(IN ULONG Color);
+            STATIC XTAPI ULONG GetNextColor(VOID);
+            STATIC XTAPI ULONG GetPagingColors(VOID);
+            STATIC XTAPI ULONG GetPagingColorsMask(VOID);
             STATIC XTAPI VOID InitializeColorTables(VOID);
     };
 }

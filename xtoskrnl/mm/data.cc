@@ -12,6 +12,9 @@
 /* Array of free page lists segregated by cache color */
 PMMCOLOR_TABLES MM::Colors::FreePages[FreePageList + 1];
 
+/* Array of modified pages segregated by cache color */
+MMPFNLIST MM::Colors::ModifiedPages[MM_PAGING_COLORS];
+
 /* Number of supported page colors */
 ULONG MM::Colors::PagingColors;
 

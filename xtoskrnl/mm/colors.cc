@@ -50,6 +50,23 @@ MM::Colors::GetFreePages(MMPAGELISTS PageList,
 }
 
 /**
+ * Retrieves a pointer to the modified pages list for a specific color.
+ *
+ * @param Color
+ *        Supplies the specific color index.
+ *
+ * @return This routine returns a pointer to the corresponding MMPFNLIST structure.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PMMPFNLIST
+MM::Colors::GetModifiedPages(IN ULONG Color)
+{
+    return &ModifiedPages[Color];
+}
+
+/**
  * Retrieves the next available color for page coloring.
  *
  * @return This routine returns the next color value, ensuring it stays within the valid color range.
@@ -58,7 +75,7 @@ MM::Colors::GetFreePages(MMPAGELISTS PageList,
  */
 XTAPI
 ULONG
-MM::Colors::GetNextColor()
+MM::Colors::GetNextColor(VOID)
 {
     /* Increment the color counter and wrap it around using the mask */
     return ((++PagingColors) & PagingColorsMask);
@@ -73,7 +90,7 @@ MM::Colors::GetNextColor()
  */
 XTAPI
 ULONG
-MM::Colors::GetPagingColors()
+MM::Colors::GetPagingColors(VOID)
 {
     /* Return the total number of page colors */
     return PagingColors;
@@ -88,7 +105,7 @@ MM::Colors::GetPagingColors()
  */
 XTAPI
 ULONG
-MM::Colors::GetPagingColorsMask()
+MM::Colors::GetPagingColorsMask(VOID)
 {
     /* Return the mask used for page coloring calculations */
     return PagingColorsMask;
