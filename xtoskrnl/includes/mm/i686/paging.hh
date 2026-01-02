@@ -39,6 +39,7 @@ namespace MM
             STATIC XTAPI LONG GetPteDistance(PMMPTE EndPte,
                                              PMMPTE StartPte);
             STATIC XTAPI ULONG GetPteSize(VOID);
+            STATIC XTAPI ULONG GetPteSoftwareProtection(IN PMMPTE PtePointer);
             STATIC XTAPI ULONG GetPteSoftwarePrototype(IN PMMPTE PtePointer);
             STATIC XTAPI ULONG GetPteSoftwareTransition(IN PMMPTE PtePointer);
             STATIC XTAPI PVOID GetPteVirtualAddress(IN PMMPTE PtePointer);
@@ -59,6 +60,8 @@ namespace MM
                                             IN BOOLEAN WriteThrough);
             STATIC XTAPI VOID WritePte(IN PMMPTE Pte,
                                        IN MMPTE Value);
+            STATIC XTAPI VOID TransitionPte(IN PMMPTE PointerPte,
+                                            IN ULONG_PTR Protection);
             STATIC XTFASTCALL VOID ZeroPages(IN PVOID Address,
                                              IN ULONG Size);
 

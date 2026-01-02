@@ -41,6 +41,7 @@ namespace MM
             VIRTUAL XTAPI LONG GetPteDistance(PMMPTE EndPte,
                                               PMMPTE StartPte) = 0;
             VIRTUAL XTAPI ULONG GetPteSize(VOID) = 0;
+            VIRTUAL XTAPI ULONG GetPteSoftwareProtection(IN PMMPTE PtePointer) = 0;
             VIRTUAL XTAPI ULONG GetPteSoftwarePrototype(IN PMMPTE PtePointer) = 0;
             VIRTUAL XTAPI ULONG GetPteSoftwareTransition(IN PMMPTE PtePointer) = 0;
             VIRTUAL XTAPI PVOID GetPteVirtualAddress(IN PMMPTE PtePointer) = 0;
@@ -59,6 +60,8 @@ namespace MM
             VIRTUAL XTAPI VOID SetPteCaching(IN PMMPTE PtePointer,
                                              IN BOOLEAN CacheDisable,
                                              IN BOOLEAN WriteThrough) = 0;
+            VIRTUAL XTAPI VOID TransitionPte(IN PMMPTE PointerPte,
+                                             IN ULONG_PTR Protection) = 0;
             VIRTUAL XTAPI VOID WritePte(IN PMMPTE Pte,
                                         IN MMPTE Value) = 0;
 
@@ -79,6 +82,7 @@ namespace MM
             XTAPI LONG GetPteDistance(PMMPTE EndPte,
                                       PMMPTE StartPte);
             XTAPI ULONG GetPteSize(VOID);
+            XTAPI ULONG GetPteSoftwareProtection(IN PMMPTE PtePointer);
             XTAPI ULONG GetPteSoftwarePrototype(IN PMMPTE PtePointer);
             XTAPI ULONG GetPteSoftwareTransition(IN PMMPTE PtePointer);
             XTAPI PVOID GetPteVirtualAddress(IN PMMPTE PtePointer);
@@ -96,6 +100,8 @@ namespace MM
             XTAPI VOID SetPteCaching(IN PMMPTE PtePointer,
                                      IN BOOLEAN CacheDisable,
                                      IN BOOLEAN WriteThrough);
+            XTAPI VOID TransitionPte(IN PMMPTE PointerPte,
+                                     IN ULONG_PTR Protection);
             XTAPI VOID WritePte(IN PMMPTE Pte,
                                 IN MMPTE Value);
     };
@@ -115,6 +121,7 @@ namespace MM
             XTAPI LONG GetPteDistance(PMMPTE EndPte,
                                       PMMPTE StartPte);
             XTAPI ULONG GetPteSize(VOID);
+            XTAPI ULONG GetPteSoftwareProtection(IN PMMPTE PtePointer);
             XTAPI ULONG GetPteSoftwarePrototype(IN PMMPTE PtePointer);
             XTAPI ULONG GetPteSoftwareTransition(IN PMMPTE PtePointer);
             XTAPI PVOID GetPteVirtualAddress(IN PMMPTE PtePointer);
@@ -132,6 +139,8 @@ namespace MM
             XTAPI VOID SetPteCaching(IN PMMPTE PtePointer,
                                      IN BOOLEAN CacheDisable,
                                      IN BOOLEAN WriteThrough);
+            XTAPI VOID TransitionPte(IN PMMPTE PointerPte,
+                                     IN ULONG_PTR Protection);
             XTAPI VOID WritePte(IN PMMPTE Pte,
                                 IN MMPTE Value);
     };

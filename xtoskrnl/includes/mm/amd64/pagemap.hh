@@ -44,6 +44,7 @@ namespace MM
                                       PMMPTE StartPte);
             XTAPI ULONG GetPteOffset(IN PVOID Address);
             XTAPI ULONG GetPteSize(VOID);
+            XTAPI ULONG GetPteSoftwareProtection(IN PMMPTE PtePointer);
             XTAPI ULONG GetPteSoftwarePrototype(IN PMMPTE PtePointer);
             XTAPI ULONG GetPteSoftwareTransition(IN PMMPTE PtePointer);
             VIRTUAL XTAPI PVOID GetPteVirtualAddress(IN PMMPTE PtePointer) = 0;
@@ -65,6 +66,8 @@ namespace MM
             XTAPI VOID SetPteCaching(IN PMMPTE PtePointer,
                                      IN BOOLEAN CacheDisable,
                                      IN BOOLEAN WriteThrough);
+            XTAPI VOID TransitionPte(IN PMMPTE PointerPte,
+                                     IN ULONG_PTR Protection);
             XTAPI VOID WritePte(IN PMMPTE Pte,
                                 IN MMPTE Value);
     } PAGEMAP, *PPAGEMAP;

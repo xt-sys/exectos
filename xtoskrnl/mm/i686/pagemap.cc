@@ -356,6 +356,24 @@ MM::PageMapBasic::GetPteSize(VOID)
 }
 
 /**
+ * Gets the software protection value of the corresponding Page Table Entry.
+ *
+ * @param PtePointer
+ *        Specifies the address of the PTE.
+ *
+ * @return This routine returns the PTE software protection value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG
+MM::PageMapBasic::GetPteSoftwareProtection(IN PMMPTE PtePointer)
+{
+    /* Return PTE software protection value */
+    return (ULONG)PtePointer->Pml2.Software.Protection;
+}
+
+/**
  * Gets the software prototype value of the corresponding Page Table Entry.
  *
  * @param PtePointer
@@ -369,6 +387,7 @@ XTAPI
 ULONG
 MM::PageMapBasic::GetPteSoftwarePrototype(IN PMMPTE PtePointer)
 {
+    /* Return PTE software prototype value */
     return (ULONG)PtePointer->Pml2.Software.Prototype;
 }
 
@@ -386,6 +405,7 @@ XTAPI
 ULONG
 MM::PageMapBasic::GetPteSoftwareTransition(IN PMMPTE PtePointer)
 {
+    /* Return PTE software transition value */
     return (ULONG)PtePointer->Pml2.Software.Transition;
 }
 
@@ -569,6 +589,37 @@ MM::PageMapBasic::SetPteCaching(IN PMMPTE PtePointer,
     /* Set caching attributes */
     PtePointer->Pml2.Hardware.CacheDisable = CacheDisable;
     PtePointer->Pml2.Hardware.WriteThrough = WriteThrough;
+}
+
+/**
+ * Transitions a Page Table Entry (PTE) to invalid state
+ *
+ * @param PointerPte
+ *        Pointer to the page table entry (PTE) to transition.
+ *
+ * @param Protection
+ *        Specifies the protection attribute to apply to the PTE.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::PageMapBasic::TransitionPte(IN PMMPTE PointerPte,
+                                IN ULONG_PTR Protection)
+{
+    MMPTE TempPte;
+
+    /* Set transition PTE */
+    TempPte = *PointerPte;
+    TempPte.Pml2.Software.Protection = Protection;
+    TempPte.Pml2.Software.Prototype = 0;
+    TempPte.Pml2.Software.Transition = 1;
+    TempPte.Pml2.Software.Valid = 0;
+
+    /* Write PTE value */
+    *PointerPte = TempPte;
 }
 
 /**
@@ -778,6 +829,24 @@ MM::PageMapXpa::GetPteSize(VOID)
 }
 
 /**
+ * Gets the software protection value of the corresponding Page Table Entry.
+ *
+ * @param PtePointer
+ *        Specifies the address of the PTE.
+ *
+ * @return This routine returns the PTE software protection value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG
+MM::PageMapXpa::GetPteSoftwareProtection(IN PMMPTE PtePointer)
+{
+    /* Return PTE software protection value */
+    return (ULONG)PtePointer->Pml3.Software.Protection;
+}
+
+/**
  * Gets the software prototype value of the corresponding Page Table Entry.
  *
  * @param PtePointer
@@ -791,6 +860,7 @@ XTAPI
 ULONG
 MM::PageMapXpa::GetPteSoftwarePrototype(IN PMMPTE PtePointer)
 {
+    /* Return PTE software prototype value */
     return (ULONG)PtePointer->Pml3.Software.Prototype;
 }
 
@@ -808,6 +878,7 @@ XTAPI
 ULONG
 MM::PageMapXpa::GetPteSoftwareTransition(IN PMMPTE PtePointer)
 {
+    /* Return PTE software transition value */
     return (ULONG)PtePointer->Pml3.Software.Transition;
 }
 
@@ -990,6 +1061,37 @@ MM::PageMapXpa::SetPteCaching(IN PMMPTE PtePointer,
     /* Set caching attributes */
     PtePointer->Pml3.Hardware.CacheDisable = CacheDisable;
     PtePointer->Pml3.Hardware.WriteThrough = WriteThrough;
+}
+
+/**
+ * Transitions a Page Table Entry (PTE) to invalid state
+ *
+ * @param PointerPte
+ *        Pointer to the page table entry (PTE) to transition.
+ *
+ * @param Protection
+ *        Specifies the protection attribute to apply to the PTE.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::PageMapXpa::TransitionPte(IN PMMPTE PointerPte,
+                              IN ULONG_PTR Protection)
+{
+    MMPTE TempPte;
+
+    /* Set transition PTE */
+    TempPte = *PointerPte;
+    TempPte.Pml3.Software.Protection = Protection;
+    TempPte.Pml3.Software.Prototype = 0;
+    TempPte.Pml3.Software.Transition = 1;
+    TempPte.Pml3.Software.Valid = 0;
+
+    /* Write PTE value */
+    *PointerPte = TempPte;
 }
 
 /**
