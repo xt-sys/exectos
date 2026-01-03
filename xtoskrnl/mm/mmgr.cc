@@ -64,7 +64,7 @@ MM::Manager::InitializeMemoryManager(VOID)
     InitializeMemoryLayout();
 
     /* Initialize PTE template */
-    MM::Pte::InitializePteTemplate();
+    MM::Pte::InitializeSystemPte();
 
     /* Initialize page table */
     MM::Pte::InitializePageTable();

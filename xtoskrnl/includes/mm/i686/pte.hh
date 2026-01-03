@@ -19,6 +19,7 @@ namespace MM
     {
         private:
             STATIC MMPTE FirstSystemFreePte[MaximumPtePoolTypes];
+            STATIC ULONG_PTR ListTerminator;
             STATIC PMMPTE SystemPteBase;
             STATIC PMMPTE SystemPtesEnd[MaximumPtePoolTypes];
             STATIC PMMPTE SystemPtesStart[MaximumPtePoolTypes];
@@ -31,7 +32,7 @@ namespace MM
             STATIC XTAPI PMMPTE GetSystemPteBaseAddress(VOID);
             STATIC XTAPI PMMPTE GetValidPte(VOID);
             STATIC XTAPI VOID InitializePageTable(VOID);
-            STATIC XTAPI VOID InitializePteTemplate(VOID);
+            STATIC XTAPI VOID InitializeSystemPte(VOID);
             STATIC XTAPI VOID InitializeSystemPteSpace(VOID);
             STATIC XTAPI VOID MapPDE(PVOID StartAddress,
                                      PVOID EndAddress,

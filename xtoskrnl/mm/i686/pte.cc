@@ -113,7 +113,7 @@ MM::Pte::InitializePageTable(VOID)
 }
 
 /**
- * Initializes the PTE template.
+ * Initializes the system's PTE.
  *
  * @return This routine does not return any value.
  *
@@ -121,9 +121,13 @@ MM::Pte::InitializePageTable(VOID)
  */
 XTAPI
 VOID
-MM::Pte::InitializePteTemplate(VOID)
+MM::Pte::InitializeSystemPte(VOID)
 {
+    /* Initialize the PTE template */
     ValidPte = {{MM_PTE_VALID|MM_PTE_EXECUTE_READWRITE|MM_PTE_DIRTY|MM_PTE_ACCESSED}};
+
+    /* Initialize the system's PTE list terminator */
+    ListTerminator = MM::Paging::GetPteListTerminator();
 }
 
 /**
