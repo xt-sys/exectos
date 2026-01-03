@@ -25,7 +25,6 @@ namespace MM
                                            IN LONG Count);
             STATIC XTAPI VOID ClearPte(IN PMMPTE PtePointer);
             STATIC XTAPI VOID FlushTlb(VOID);
-            STATIC XTAPI ULONG_PTR GetEmptyPteList(VOID);
             STATIC XTAPI ULONG_PTR GetNextEntry(IN PMMPTE Pte);
             STATIC XTAPI PMMPTE GetNextPte(IN PMMPTE Pte);
             STATIC XTAPI BOOLEAN GetOneEntry(IN PMMPTE Pte);
@@ -40,7 +39,6 @@ namespace MM
             STATIC XTAPI PMMPTE GetPteAddress(IN PVOID Address);
             STATIC XTAPI LONG GetPteDistance(PMMPTE EndPte,
                                              PMMPTE StartPte);
-            STATIC XTAPI ULONG_PTR GetPteListTerminator(VOID);
             STATIC XTAPI ULONG GetPteSize(VOID);
             STATIC XTAPI ULONG GetPteSoftwareProtection(IN PMMPTE PtePointer);
             STATIC XTAPI ULONG GetPteSoftwarePrototype(IN PMMPTE PtePointer);

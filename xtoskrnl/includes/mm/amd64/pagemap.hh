@@ -24,7 +24,6 @@ namespace MM
             XTAPI PMMPTE AdvancePte(IN PMMPTE Pte,
                                     IN LONG Count);
             XTAPI VOID ClearPte(IN PMMPTE PtePointer);
-            XTAPI ULONGLONG GetEmptyPteList(VOID);
             XTAPI ULONG_PTR GetNextEntry(IN PMMPTE Pte);
             XTAPI PMMPTE GetNextPte(IN PMMPTE Pte);
             XTAPI BOOLEAN GetOneEntry(IN PMMPTE Pte);
@@ -42,7 +41,6 @@ namespace MM
             XTAPI PMMPTE GetPteAddress(IN PVOID Address);
             XTAPI LONG GetPteDistance(PMMPTE EndPte,
                                       PMMPTE StartPte);
-            XTAPI ULONG_PTR GetPteListTerminator(VOID);
             XTAPI ULONG GetPteOffset(IN PVOID Address);
             XTAPI ULONG GetPteSize(VOID);
             XTAPI ULONG GetPteSoftwareProtection(IN PMMPTE PtePointer);

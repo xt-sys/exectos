@@ -102,21 +102,6 @@ MM::Paging::FlushTlb(VOID)
 }
 
 /**
- * Gets the value representing an empty PTE list.
- *
- * @return This routine returns the value representing an empty PTE list.
- *
- * @since XT 1.0
- */
-XTAPI
-ULONG_PTR
-MM::Paging::GetEmptyPteList(VOID)
-{
-    /* Return empty PTE list mask */
-    return (ULONG_PTR)PmlRoutines->GetEmptyPteList();
-}
-
-/**
  * Gets the next entry in a PTE list.
  *
  * @param Pte
@@ -349,21 +334,6 @@ MM::Paging::GetPteDistance(PMMPTE EndPte,
 {
     /* Return distance between PTE pointers */
     return PmlRoutines->GetPteDistance(EndPte, StartPte);
-}
-
-/**
- * Gets the terminator value for a PTE list.
- *
- * @return This routine returns the terminator value for a PTE list.
- *
- * @since XT 1.0
- */
-XTAPI
-ULONG_PTR
-MM::Paging::GetPteListTerminator(VOID)
-{
-    /* Return PTE list terminator value */
-    return PmlRoutines->GetPteListTerminator();
 }
 
 /**

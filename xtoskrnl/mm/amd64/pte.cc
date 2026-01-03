@@ -166,9 +166,6 @@ MM::Pte::InitializeSystemPte(VOID)
 {
     /* Initialize the PTE template */
     ValidPte = {MM_PTE_VALID|MM_PTE_EXECUTE_READWRITE|MM_PTE_DIRTY|MM_PTE_ACCESSED};
-
-    /* Initialize the system's PTE list terminator */
-    ListTerminator = MM::Paging::GetPteListTerminator();
 }
 
 /**

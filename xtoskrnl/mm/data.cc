@@ -97,9 +97,6 @@ MMPFNLIST MM::Pfn::ZeroedPagesList = {0, ZeroedPageList, MAXULONG_PTR, MAXULONG_
 /* Array of lists for available System PTEs, separated by pool type */
 MMPTE MM::Pte::FirstSystemFreePte[MaximumPtePoolTypes];
 
-/* PTE list terminator */
-ULONG_PTR MM::Pte::ListTerminator;
-
 /* Virtual base address of the System PTE space */
 PMMPTE MM::Pte::SystemPteBase;
 

@@ -19,7 +19,6 @@ namespace MM
     {
         private:
             STATIC MMPTE FirstSystemFreePte[MaximumPtePoolTypes];
-            STATIC ULONG_PTR ListTerminator;
             STATIC PMMPTE SystemPteBase;
             STATIC PMMPTE SystemPtesEnd[MaximumPtePoolTypes];
             STATIC PMMPTE SystemPtesStart[MaximumPtePoolTypes];

@@ -10,21 +10,6 @@
 
 
 /**
- * Gets the value representing an empty PTE list.
- *
- * @return This routine returns the value representing an empty PTE list.
- *
- * @since XT 1.0
- */
-XTAPI
-ULONG
-MM::PageMap::GetEmptyPteList(VOID)
-{
-    /* Return empty PTE list mask */
-    return PageMapInfo.EmptyPteList;
-}
-
-/**
  * Gets the address of the PDE (Page Directory Entry), that maps given address.
  *
  * @param Address
@@ -341,21 +326,6 @@ MM::PageMapBasic::GetPteDistance(PMMPTE EndPte,
 }
 
 /**
- * Gets the terminator value for a PTE list (PML2).
- *
- * @return This routine returns the terminator value for a PTE list.
- *
- * @since XT 1.0
- */
-XTAPI
-ULONG_PTR
-MM::PageMapBasic::GetPteListTerminator(VOID)
-{
-    /* Return PTE list terminator value for PML2 */
-    return 0xFFFFF;
-}
-
-/**
  * Gets the size of a PTE for basic paging (PML2).
  *
  * @return This routine returns the size of a PTE.
@@ -455,9 +425,6 @@ MM::PageMapBasic::InitializePageMapInfo(VOID)
 {
     /* Set PML2 page map information */
     PageMapInfo.Xpa = FALSE;
-
-    /* Set PML2 empty PTE list mask */
-    PageMapInfo.EmptyPteList = (ULONG)0xFFFFF;
 
     /* Set PML2 base addresses */
     PageMapInfo.PteBase = MM_PTE_BASE;
@@ -829,21 +796,6 @@ MM::PageMapXpa::GetPteDistance(PMMPTE EndPte,
 }
 
 /**
- * Gets the terminator value for a PTE list (PML3).
- *
- * @return This routine returns the terminator value for a PTE list.
- *
- * @since XT 1.0
- */
-XTAPI
-ULONG_PTR
-MM::PageMapXpa::GetPteListTerminator(VOID)
-{
-    /* Return PTE list terminator value for PML3 */
-    return 0xFFFFFFFF;
-}
-
-/**
  * Gets the size of a PTE for XPA paging (PML3).
  *
  * @return This routine returns the size of a PTE.
@@ -943,9 +895,6 @@ MM::PageMapXpa::InitializePageMapInfo(VOID)
 {
     /* Set PML3 page map information */
     PageMapInfo.Xpa = TRUE;
-
-    /* Set PML3 empty PTE list mask */
-    PageMapInfo.EmptyPteList = (ULONG)0xFFFFFFFF;
 
     /* Set PML3 base addresses */
     PageMapInfo.PteBase = MM_PTE_BASE;

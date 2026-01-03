@@ -50,21 +50,6 @@ MM::PageMap::ClearPte(IN PMMPTE PtePointer)
 }
 
 /**
- * Gets the value representing an empty PTE list.
- *
- * @return This routine returns the value representing an empty PTE list.
- *
- * @since XT 1.0
- */
-XTAPI
-ULONGLONG
-MM::PageMap::GetEmptyPteList(VOID)
-{
-    /* Return empty PTE list mask */
-    return PageMapInfo.EmptyPteList;
-}
-
-/**
  * Gets the next entry in a PTE list.
  *
  * @param Pte
@@ -762,9 +747,6 @@ MM::PageMapBasic::InitializePageMapInfo(VOID)
     /* Set PML4 page map information */
     PageMapInfo.Xpa = FALSE;
 
-    /* Set PML4 empty PTE list mask */
-    PageMapInfo.EmptyPteList = 0xFFFFFFFFUI64;
-
     /* Set PML4 base addresses */
     PageMapInfo.PteBase = MM_PTE_BASE;
     PageMapInfo.PdeBase = MM_PDE_BASE;
@@ -861,9 +843,6 @@ MM::PageMapXpa::InitializePageMapInfo(VOID)
 {
     /* Set PML5 page map information */
     PageMapInfo.Xpa = TRUE;
-
-    /* Set PML5 empty PTE list mask */
-    PageMapInfo.EmptyPteList = 0xFFFFFFFFUI64;
 
     /* Set PML5 base addresses */
     PageMapInfo.PteBase = MM_PTE_LA57_BASE;
