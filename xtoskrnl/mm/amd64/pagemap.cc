@@ -331,6 +331,21 @@ MM::PageMap::GetPteDistance(PMMPTE EndPte,
 }
 
 /**
+ * Gets the terminator value for a PTE list.
+ *
+ * @return This routine returns the terminator value for a PTE list.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG_PTR
+MM::PageMap::GetPteListTerminator(VOID)
+{
+    /* Return PTE list terminator value */
+    return 0xFFFFFFFF;
+}
+
+/**
  * Gets the Offset of the PTE (Page Table Entry), that maps given address.
  *
  * @param Address

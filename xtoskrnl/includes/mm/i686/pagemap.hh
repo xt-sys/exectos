@@ -40,6 +40,7 @@ namespace MM
             XTAPI ULONG GetPteOffset(IN PVOID Address);
             VIRTUAL XTAPI LONG GetPteDistance(PMMPTE EndPte,
                                               PMMPTE StartPte) = 0;
+            VIRTUAL XTAPI ULONG_PTR GetPteListTerminator(VOID) = 0;
             VIRTUAL XTAPI ULONG GetPteSize(VOID) = 0;
             VIRTUAL XTAPI ULONG GetPteSoftwareProtection(IN PMMPTE PtePointer) = 0;
             VIRTUAL XTAPI ULONG GetPteSoftwarePrototype(IN PMMPTE PtePointer) = 0;
@@ -81,6 +82,7 @@ namespace MM
             XTAPI ULONG_PTR GetPte(IN PMMPTE PtePointer);
             XTAPI LONG GetPteDistance(PMMPTE EndPte,
                                       PMMPTE StartPte);
+            XTAPI ULONG_PTR GetPteListTerminator(VOID);
             XTAPI ULONG GetPteSize(VOID);
             XTAPI ULONG GetPteSoftwareProtection(IN PMMPTE PtePointer);
             XTAPI ULONG GetPteSoftwarePrototype(IN PMMPTE PtePointer);
@@ -120,6 +122,7 @@ namespace MM
             XTAPI ULONG_PTR GetPte(IN PMMPTE PtePointer);
             XTAPI LONG GetPteDistance(PMMPTE EndPte,
                                       PMMPTE StartPte);
+            XTAPI ULONG_PTR GetPteListTerminator(VOID);
             XTAPI ULONG GetPteSize(VOID);
             XTAPI ULONG GetPteSoftwareProtection(IN PMMPTE PtePointer);
             XTAPI ULONG GetPteSoftwarePrototype(IN PMMPTE PtePointer);

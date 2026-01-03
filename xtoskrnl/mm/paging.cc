@@ -352,6 +352,21 @@ MM::Paging::GetPteDistance(PMMPTE EndPte,
 }
 
 /**
+ * Gets the terminator value for a PTE list.
+ *
+ * @return This routine returns the terminator value for a PTE list.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG_PTR
+MM::Paging::GetPteListTerminator(VOID)
+{
+    /* Return PTE list terminator value */
+    return PmlRoutines->GetPteListTerminator();
+}
+
+/**
  * Gets the size of a PTE.
  *
  * @return This routine returns the size of a PTE.

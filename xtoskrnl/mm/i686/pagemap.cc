@@ -341,6 +341,21 @@ MM::PageMapBasic::GetPteDistance(PMMPTE EndPte,
 }
 
 /**
+ * Gets the terminator value for a PTE list (PML2).
+ *
+ * @return This routine returns the terminator value for a PTE list.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG_PTR
+MM::PageMapBasic::GetPteListTerminator(VOID)
+{
+    /* Return PTE list terminator value for PML2 */
+    return 0xFFFFF;
+}
+
+/**
  * Gets the size of a PTE for basic paging (PML2).
  *
  * @return This routine returns the size of a PTE.
@@ -811,6 +826,21 @@ MM::PageMapXpa::GetPteDistance(PMMPTE EndPte,
 {
     /* Return distance between PTE pointers */
     return ((ULONG_PTR)EndPte - (ULONG_PTR)StartPte) / sizeof(MMPML3_PTE);
+}
+
+/**
+ * Gets the terminator value for a PTE list (PML3).
+ *
+ * @return This routine returns the terminator value for a PTE list.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG_PTR
+MM::PageMapXpa::GetPteListTerminator(VOID)
+{
+    /* Return PTE list terminator value for PML3 */
+    return 0xFFFFFFFF;
 }
 
 /**

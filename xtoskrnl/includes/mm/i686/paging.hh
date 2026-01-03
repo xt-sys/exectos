@@ -38,6 +38,7 @@ namespace MM
             STATIC XTAPI PMMPTE GetPteAddress(IN PVOID Address);
             STATIC XTAPI LONG GetPteDistance(PMMPTE EndPte,
                                              PMMPTE StartPte);
+            STATIC XTAPI ULONG_PTR GetPteListTerminator(VOID);
             STATIC XTAPI ULONG GetPteSize(VOID);
             STATIC XTAPI ULONG GetPteSoftwareProtection(IN PMMPTE PtePointer);
             STATIC XTAPI ULONG GetPteSoftwarePrototype(IN PMMPTE PtePointer);

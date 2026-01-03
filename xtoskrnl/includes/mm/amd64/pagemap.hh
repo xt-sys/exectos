@@ -42,6 +42,7 @@ namespace MM
             XTAPI PMMPTE GetPteAddress(IN PVOID Address);
             XTAPI LONG GetPteDistance(PMMPTE EndPte,
                                       PMMPTE StartPte);
+            XTAPI ULONG_PTR GetPteListTerminator(VOID);
             XTAPI ULONG GetPteOffset(IN PVOID Address);
             XTAPI ULONG GetPteSize(VOID);
             XTAPI ULONG GetPteSoftwareProtection(IN PMMPTE PtePointer);
