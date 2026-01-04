@@ -192,7 +192,7 @@ MM::Pte::InitializeSystemPteSpace(VOID)
     InitializeSystemPtePool(PointerPte, MM::Manager::GetNumberOfSystemPtes(), SystemPteSpace);
 
     /* Reserve and zero a dedicated block of system PTEs */
-    FirstZeroingPte = ReserveSystemPtes(MM_RESERVED_ZERO_PTES + 1, SystemPteSpace, 0);
+    FirstZeroingPte = ReserveSystemPtes(MM_RESERVED_ZERO_PTES + 1, SystemPteSpace);
     RTL::Memory::ZeroMemory(FirstZeroingPte, (MM_RESERVED_ZERO_PTES + 1) * MM::Paging::GetPteSize());
 
     /* Use the first PTE of this block as a counter for available zeroing PTEs */
@@ -294,6 +294,125 @@ MM::Pte::MapPTE(PVOID StartAddress,
 }
 
 /**
+ * Releases a block of system PTEs into a specified pool.
+ *
+ * @param StartingPte
+ *        A pointer to the first PTE to release.
+ *
+ * @param NumberOfPtes
+ *        The number of contiguous PTEs to release.
+ *
+ * @param SystemPtePoolType
+ *        Specifies the system PTE pool to release into.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::Pte::ReleaseSystemPtes(IN PMMPTE StartingPte,
+                           IN ULONG NumberOfPtes,
+                           IN MMSYSTEM_PTE_POOL_TYPE SystemPtePoolType)
+{
+    PMMPTE NextPte, PreviousPte, ReleasedPte;
+    ULONG ClusterSize;
+
+    /* Raise runlevel and acquire lock to protect the PTE pool */
+    KE::RaiseRunLevel RunLevel(DISPATCH_LEVEL);
+    KE::QueuedSpinLockGuard SpinLock(SystemSpaceLock);
+
+    /* Increment the total number of available PTEs in this pool */
+    TotalSystemFreePtes[SystemPtePoolType] += NumberOfPtes;
+
+    /* Start at the head of the free list for this pool */
+    PreviousPte = &FirstSystemFreePte[SystemPtePoolType];
+    ReleasedPte = NULLPTR;
+
+    /* Iterate through the free list to find adjacent blocks */
+    while(MM::Paging::GetNextEntry(PreviousPte) != MAXULONG)
+    {
+        /* Get the next free cluster to check its size */
+        NextPte = MM::Paging::AdvancePte(SystemPteBase, MM::Paging::GetNextEntry(PreviousPte));
+        ClusterSize = GetClusterSize(NextPte);
+
+        /* Check if the released block is adjacent to the current free block */
+        if((MM::Paging::AdvancePte(NextPte, ClusterSize) == StartingPte) ||
+           (MM::Paging::AdvancePte(StartingPte, NumberOfPtes) == NextPte))
+        {
+            /* Merge the blocks by adding their sizes */
+            NumberOfPtes += ClusterSize;
+
+            /* Check if the current free block is before the released block */
+            if(NextPte < StartingPte)
+            {
+                /* The new merged block starts at the current free block's address */
+                StartingPte = NextPte;
+            }
+
+            /* Unlink the current free block as it is being merged */
+            MM::Paging::SetNextEntry(PreviousPte, MM::Paging::GetNextEntry(NextPte));
+
+            /* Check if the block represents more than one PTE */
+            if(!MM::Paging::GetOneEntry(NextPte))
+            {
+                /* Clear block header and move to the size PTE */
+                MM::Paging::ClearPte(NextPte);
+                NextPte = MM::Paging::GetNextPte(NextPte);
+            }
+
+            /* Clear the merged block */
+            MM::Paging::ClearPte(NextPte);
+
+            /* Reset insertion point since block size/address changed due to merge */
+            ReleasedPte = NULLPTR;
+        }
+        else
+        {
+            /* Select the first free block large enough as insertion point */
+            if((ReleasedPte == NULLPTR) && (NumberOfPtes <= ClusterSize))
+            {
+                /* Mark this as the insertion point */
+                ReleasedPte = PreviousPte;
+            }
+
+            /* Advance to the next free block */
+            PreviousPte = NextPte;
+        }
+    }
+
+    /* Check if there is only one PTE to release */
+    if(NumberOfPtes == 1)
+    {
+        /* Mark it as a single-PTE block */
+        MM::Paging::SetOneEntry(StartingPte, 1);
+    }
+    else
+    {
+        /* Otherwise, mark it as a multi-PTE block */
+        MM::Paging::SetOneEntry(StartingPte, 0);
+
+        /* The next PTE stores the size of the block */
+        NextPte = MM::Paging::GetNextPte(StartingPte);
+        MM::Paging::SetNextEntry(NextPte, NumberOfPtes);
+    }
+
+    /* Check if no suitable insertion point was found */
+    if(ReleasedPte == NULLPTR)
+    {
+        /* Insert at the end of the list */
+        ReleasedPte = PreviousPte;
+    }
+
+    /* Link the new block into the free list */
+    MM::Paging::SetNextEntry(StartingPte, MM::Paging::GetNextEntry(ReleasedPte));
+    MM::Paging::SetNextEntry(ReleasedPte, MM::Paging::GetPteDistance(StartingPte, SystemPteBase));
+
+    /* Flush the TLB to ensure address translation consistency */
+    AR::CpuFunc::FlushTlb();
+}
+
+/**
  * Reserves a contiguous block of system PTEs from a specified pool.
  *
  * @param NumberOfPtes
@@ -301,9 +420,6 @@ MM::Pte::MapPTE(PVOID StartAddress,
  *
  * @param SystemPtePoolType
  *        Specifies the system PTE pool from which to allocate.
- *
- * @param Alignment
- *        This parameter is currently unused.
  *
  * @return This routine returns a pointer to the beginning of the reserved block,
  *         or NULLPTR if not enough contiguous PTEs are available.
@@ -313,10 +429,9 @@ MM::Pte::MapPTE(PVOID StartAddress,
 XTAPI
 PMMPTE
 MM::Pte::ReserveSystemPtes(IN ULONG NumberOfPtes,
-                           IN MMSYSTEM_PTE_POOL_TYPE SystemPtePoolType,
-                           IN ULONG Alignment)
+                           IN MMSYSTEM_PTE_POOL_TYPE SystemPtePoolType)
 {
-    PMMPTE PreviousPte, NextPte, ReservedPte;
+    PMMPTE NextPte, PreviousPte, ReservedPte;
     ULONG ClusterSize;
 
     /* Raise runlevel and acquire lock to protect the PTE pool */

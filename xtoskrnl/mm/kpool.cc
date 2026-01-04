@@ -44,7 +44,7 @@ MM::KernelPool::AllocateKernelStack(OUT PVOID *Stack,
     StackPages = SIZE_TO_PAGES(StackSize);
 
     /* Reserve PTEs for the stack pages, plus a guard page */
-    StackPte = MM::Pte::ReserveSystemPtes(StackPages + 1, SystemPteSpace, 0);
+    StackPte = MM::Pte::ReserveSystemPtes(StackPages + 1, SystemPteSpace);
     if(!StackPte)
     {
         /* Failed to reserve PTEs for the new kernel stack */

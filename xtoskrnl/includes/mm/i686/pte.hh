@@ -42,9 +42,11 @@ namespace MM
             STATIC XTAPI VOID MapPTE(PVOID StartAddress,
                                      PVOID EndAddress,
                                      PMMPTE TemplatePte);
+            STATIC XTAPI VOID ReleaseSystemPtes(IN PMMPTE StartingPte,
+                                                IN ULONG NumberOfPtes,
+                                                IN MMSYSTEM_PTE_POOL_TYPE SystemPtePoolType);
             STATIC XTAPI PMMPTE ReserveSystemPtes(IN ULONG NumberOfPtes,
-                                                  IN MMSYSTEM_PTE_POOL_TYPE SystemPtePoolType,
-                                                  IN ULONG Alignment);
+                                                  IN MMSYSTEM_PTE_POOL_TYPE SystemPtePoolType);
 
         private:
             STATIC XTAPI BOOLEAN FindFreeCluster(IN ULONG NumberOfPtes,
