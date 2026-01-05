@@ -22,12 +22,12 @@ namespace MM
             STATIC PMMPTE SystemPteBase;
             STATIC PMMPTE SystemPtesEnd[MaximumPtePoolTypes];
             STATIC PMMPTE SystemPtesStart[MaximumPtePoolTypes];
-            STATIC ULONG TotalSystemFreePtes[MaximumPtePoolTypes];
+            STATIC PFN_COUNT TotalSystemFreePtes[MaximumPtePoolTypes];
             STATIC MMPTE ValidPte;
 
         public:
             STATIC XTAPI BOOLEAN AddressValid(IN PVOID VirtualAddress);
-            STATIC XTAPI ULONG GetPtesPerPage(VOID);
+            STATIC XTAPI PFN_COUNT GetPtesPerPage(VOID);
             STATIC XTAPI PMMPTE GetSystemPteBaseAddress(VOID);
             STATIC XTAPI PMMPTE GetValidPte(VOID);
             STATIC XTAPI VOID InitializePageTable(VOID);
@@ -43,19 +43,19 @@ namespace MM
                                      PVOID EndAddress,
                                      PMMPTE TemplatePte);
             STATIC XTAPI VOID ReleaseSystemPtes(IN PMMPTE StartingPte,
-                                                IN ULONG NumberOfPtes,
+                                                IN PFN_COUNT NumberOfPtes,
                                                 IN MMSYSTEM_PTE_POOL_TYPE SystemPtePoolType);
-            STATIC XTAPI PMMPTE ReserveSystemPtes(IN ULONG NumberOfPtes,
+            STATIC XTAPI PMMPTE ReserveSystemPtes(IN PFN_COUNT NumberOfPtes,
                                                   IN MMSYSTEM_PTE_POOL_TYPE SystemPtePoolType);
 
         private:
-            STATIC XTAPI BOOLEAN FindFreeCluster(IN ULONG NumberOfPtes,
+            STATIC XTAPI BOOLEAN FindFreeCluster(IN PFN_COUNT NumberOfPtes,
                                                  IN MMSYSTEM_PTE_POOL_TYPE SystemPtePoolType,
                                                  OUT PMMPTE *FoundCluster,
                                                  OUT PMMPTE *PreviousClusterNode);
             STATIC XTAPI ULONG GetClusterSize(IN PMMPTE Pte);
             STATIC XTAPI VOID InitializeSystemPtePool(IN PMMPTE StartingPte,
-                                                      IN ULONG NumberOfPtes,
+                                                      IN PFN_COUNT NumberOfPtes,
                                                       IN MMSYSTEM_PTE_POOL_TYPE PoolType);
     };
 }

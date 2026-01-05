@@ -107,7 +107,7 @@ PMMPTE MM::Pte::SystemPtesEnd[MaximumPtePoolTypes];
 PMMPTE MM::Pte::SystemPtesStart[MaximumPtePoolTypes];
 
 /* Total count of available System PTEs */
-ULONG MM::Pte::TotalSystemFreePtes[MaximumPtePoolTypes];
+PFN_COUNT MM::Pte::TotalSystemFreePtes[MaximumPtePoolTypes];
 
 /* Template PTE entry containing standard flags for a valid, present kernel page */
 MMPTE MM::Pte::ValidPte;

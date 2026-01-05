@@ -30,7 +30,7 @@
  */
 XTAPI
 BOOLEAN
-MM::Pte::FindFreeCluster(IN ULONG NumberOfPtes,
+MM::Pte::FindFreeCluster(IN PFN_COUNT NumberOfPtes,
                          IN MMSYSTEM_PTE_POOL_TYPE SystemPtePoolType,
                          OUT PMMPTE *FoundCluster,
                          OUT PMMPTE *PreviousClusterNode)
@@ -97,7 +97,7 @@ MM::Pte::GetClusterSize(IN PMMPTE Pte)
  * @since XT 1.0
  */
 XTAPI
-ULONG
+PFN_COUNT
 MM::Pte::GetPtesPerPage(VOID)
 {
     /* Calculate and return the number of PTEs per page */
@@ -138,7 +138,7 @@ MM::Pte::GetValidPte()
 XTAPI
 VOID
 MM::Pte::InitializeSystemPtePool(IN PMMPTE StartingPte,
-                                 IN ULONG NumberOfPtes,
+                                 IN PFN_COUNT NumberOfPtes,
                                  IN MMSYSTEM_PTE_POOL_TYPE PoolType)
 {
     /* Set the system PTE base address */
@@ -293,6 +293,7 @@ MM::Pte::MapPTE(PVOID StartAddress,
     }
 }
 
+
 /**
  * Releases a block of system PTEs into a specified pool.
  *
@@ -312,7 +313,7 @@ MM::Pte::MapPTE(PVOID StartAddress,
 XTAPI
 VOID
 MM::Pte::ReleaseSystemPtes(IN PMMPTE StartingPte,
-                           IN ULONG NumberOfPtes,
+                           IN PFN_COUNT NumberOfPtes,
                            IN MMSYSTEM_PTE_POOL_TYPE SystemPtePoolType)
 {
     PMMPTE NextPte, PreviousPte, ReleasedPte;
@@ -428,7 +429,7 @@ MM::Pte::ReleaseSystemPtes(IN PMMPTE StartingPte,
  */
 XTAPI
 PMMPTE
-MM::Pte::ReserveSystemPtes(IN ULONG NumberOfPtes,
+MM::Pte::ReserveSystemPtes(IN PFN_COUNT NumberOfPtes,
                            IN MMSYSTEM_PTE_POOL_TYPE SystemPtePoolType)
 {
     PMMPTE NextPte, PreviousPte, ReservedPte;
