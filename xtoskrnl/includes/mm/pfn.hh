@@ -65,6 +65,7 @@ namespace MM
                                        IN PFN_NUMBER PageFrameIndex);
             STATIC XTAPI VOID LinkPfnForPageTable(IN PFN_NUMBER PageFrameIndex,
                                                   IN PMMPTE PointerPte);
+            STATIC XTFASTCALL VOID LinkStandbyPage(IN PFN_NUMBER PageFrameIndex);
             STATIC XTAPI VOID ProcessMemoryDescriptor(IN PFN_NUMBER BasePage,
                                                       IN PFN_NUMBER PageCount,
                                                       IN LOADER_MEMORY_TYPE MemoryType);

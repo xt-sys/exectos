@@ -209,10 +209,8 @@ MM::Pfn::DecrementReferenceCount(IN PMMPFN PageFrameNumber,
             /* Link clean page to the standby list */
             if(BeginStandbyList)
             {
-                UNIMPLEMENTED;
-
-                /* Temporarily link clean page to the end of the standby list */
-                LinkPage(&StandbyPagesList, PageFrameIndex);
+                /* Link clean page to the beginning of the standby list */
+                LinkStandbyPage(PageFrameIndex);
             }
             else
             {
@@ -864,6 +862,91 @@ MM::Pfn::LinkPfnToPte(IN PFN_NUMBER PageFrameIndex,
     /* Pin the page table in memory by incrementing its PFN share count */
     Pfn = &((PMMPFN)MemoryLayout->PfnDatabaseAddress)[PageFrameIndex];
     Pfn->u2.ShareCount++;
+}
+
+/**
+ * Links a page to the beginning of the appropriate standby or ROM list.
+ *
+ * @param PageFrameIndex
+ *        The Page Frame Number (PFN) of the page to link.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+
+XTFASTCALL
+VOID
+MM::Pfn::LinkStandbyPage(IN PFN_NUMBER PageFrameIndex)
+{
+    PMMPFN AdjacentPageFrame, CurrentPageFrame;
+    PMMMEMORY_LAYOUT MemoryLayout;
+    PFN_NUMBER Flink;
+
+    /* Get the memory layout */
+    MemoryLayout = MM::Manager::GetMemoryLayout();
+
+    /* Get the PFN database entry for the target page */
+    CurrentPageFrame = &((PMMPFN)MemoryLayout->PfnDatabaseAddress)[PageFrameIndex];
+
+    /* Check if the page is part of a ROM image */
+    if(CurrentPageFrame->u3.e1.Rom == 1)
+    {
+        /* Increment the total number of ROM pages */
+        RomPagesList.Total++;
+
+        /* If the ROM list is not empty, link the new page */
+        if(RomPagesList.Blink != (ULONG_PTR)-1)
+        {
+            /* Update the old tail to point to the new page */
+            AdjacentPageFrame = &((PMMPFN)MemoryLayout->PfnDatabaseAddress)[RomPagesList.Blink];
+            AdjacentPageFrame->u1.Flink = PageFrameIndex;
+        }
+        else
+        {
+            /* Otherwise, this page is now the head of the list */
+            RomPagesList.Flink = PageFrameIndex;
+        }
+
+        /* Set the new page as the tail and update its links */
+        RomPagesList.Blink = PageFrameIndex;
+        CurrentPageFrame->u1.Flink = (ULONG_PTR)-1;
+        CurrentPageFrame->u2.Blink = RomPagesList.Blink;
+        CurrentPageFrame->u3.e1.PageLocation = StandbyPageList;
+
+        /* ROM pages require no further processing */
+        return;
+    }
+
+    /* Increment the count of pages on the standby list */
+    StandbyPagesList.Total++;
+
+    /* Save the old head and set the current page as the new head */
+    Flink = StandbyPagesList.Flink;
+    StandbyPagesList.Flink = PageFrameIndex;
+
+    /* Point the new head to the old one, marking it as the list front */
+    CurrentPageFrame->u1.Flink = Flink;
+    CurrentPageFrame->u2.Blink = MAXULONG_PTR;
+
+    /* If the ROM list is not empty, link the new page */
+    if(Flink != MAXULONG_PTR)
+    {
+        /* Update the old head to point to the new page */
+        AdjacentPageFrame = &((PMMPFN)MemoryLayout->PfnDatabaseAddress)[Flink];
+        AdjacentPageFrame->u2.Blink = PageFrameIndex;
+    }
+    else
+    {
+        /* Otherwise, this page is now the tail of the list */
+        StandbyPagesList.Blink = PageFrameIndex;
+    }
+
+    /* Update the page's location to the standby list */
+    CurrentPageFrame->u3.e1.PageLocation = StandbyPageList;
+
+    /* Increment number of available pages */
+    IncrementAvailablePages();
 }
 
 /**
