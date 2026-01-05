@@ -39,6 +39,11 @@ namespace MM
             STATIC XTAPI PFN_NUMBER AllocateBootstrapPages(IN PFN_NUMBER NumberOfPages);
             STATIC XTAPI PFN_NUMBER AllocatePhysicalPage(IN ULONG Color);
             STATIC XTAPI VOID ComputePfnDatabaseSize(VOID);
+            STATIC XTAPI VOID DecrementReferenceCount(IN PMMPFN Pfn1,
+                                                      IN PFN_NUMBER PageFrameIndex);
+            STATIC XTAPI VOID DecrementShareCount(IN PMMPFN Pfn1,
+                                                  IN PFN_NUMBER PageFrameIndex);
+            STATIC XTAPI VOID FreePhysicalPage(IN PMMPTE PointerPte);
             STATIC XTAPI ULONG_PTR GetHighestPhysicalPage(VOID);
             STATIC XTAPI ULONGLONG GetNumberOfPhysicalPages(VOID);
             STATIC XTAPI PFN_NUMBER GetPfnDatabaseSize(VOID);

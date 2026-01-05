@@ -155,7 +155,35 @@ VOID
 MM::KernelPool::FreeKernelStack(IN PVOID Stack,
                                 IN ULONG StackSize)
 {
-    UNIMPLEMENTED;
+    PFN_COUNT StackPages;
+    PMMPTE PointerPte;
+    ULONG Index;
+
+    /* Get the PTE for the top of the stack, including the guard page */
+    MM::Paging::AdvancePte(MM::Paging::GetPteAddress(Stack), -1);
+
+    /* Convert the stack size into a page count */
+    StackPages = SIZE_TO_PAGES(StackSize);
+
+    /* Acquire the PFN database lock */
+    KE::QueuedSpinLockGuard SpinLock(SystemSpaceLock);
+
+    /* Loop through each page of the stack that needs to be freed */
+    for(Index = 0; Index < StackPages; Index++)
+    {
+        /* Ensure the PTE is valid */
+        if(MM::Paging::PteValid(PointerPte))
+        {
+            /* Free the physical page */
+            MM::Pfn::FreePhysicalPage(PointerPte);
+        }
+
+        /* Advance to the next PTE */
+        PointerPte = MM::Paging::AdvancePte(PointerPte, -1);
+    }
+
+    /* Release all system PTEs used by the stack, including the guard page */
+    MM::Pte::ReleaseSystemPtes(PointerPte, StackPages + 1, SystemPteSpace);
 }
 
 /**

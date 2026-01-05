@@ -130,6 +130,203 @@ MM::Pfn::DecrementAvailablePages(VOID)
 }
 
 /**
+ * Decrements the reference count of a PFN entry.
+ *
+ * @param PageFrameNumber
+ *        A pointer to the PFN database entry for the physical page.
+ *
+ * @param PageFrameIndex
+ *        The page frame number of the physical page.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::Pfn::DecrementReferenceCount(IN PMMPFN PageFrameNumber,
+                                 IN PFN_NUMBER PageFrameIndex)
+{
+    /* Decrement the PFN reference count */
+    PageFrameNumber->u3.e2.ReferenceCount--;
+
+    /* If other references exist, no further action is needed */
+    if(PageFrameNumber->u3.e2.ReferenceCount)
+    {
+        /* No further action can be taken */
+        return;
+    }
+
+    /* If the reference count is zero, the share count should also be zero */
+    if(PageFrameNumber->u2.ShareCount)
+    {
+        /* This indicates a bug; crash the system */
+        KE::Crash::PanicEx(0x4E,
+                           0x07,
+                           PageFrameIndex,
+                           PageFrameNumber->u2.ShareCount,
+                           0);
+    }
+
+    /* Check if the PTE is marked as being ready for removal */
+    if(MM::Paging::GetPte(PageFrameNumber->PteAddress) & 0x1)
+    {
+        /* Check the page's cache attribute */
+        if((PageFrameNumber->u3.e1.CacheAttribute != PfnCached) &&
+           (PageFrameNumber->u3.e1.CacheAttribute != PfnNotMapped))
+        {
+            UNIMPLEMENTED;
+        }
+
+        /* The page is no longer needed, free it by linking it to the free list */
+        LinkFreePage(PageFrameIndex);
+
+        /* No further action is needed */
+        return;
+    }
+
+    /* The page is unreferenced and unmapped, so place it on the appropriate list */
+    if(PageFrameNumber->u3.e1.Modified == 1)
+    {
+        /* Link dirty page to the modified list */
+        LinkPage(&ModifiedPagesList, PageFrameIndex);
+    }
+    else
+    {
+        /* Check if the page has been marked for removal */
+        if(PageFrameNumber->u3.e1.RemovalRequested == 1)
+        {
+            /* Update the page location and move it to the bad pages list */
+            PageFrameNumber->u3.e1.PageLocation = StandbyPageList;
+            LinkPage(&BadPagesList, PageFrameIndex);
+        }
+        else
+        {
+            /* Link clean page to the standby list */
+            LinkPage(&StandbyPagesList, PageFrameIndex)
+        }
+    }
+}
+
+/**
+ * Decrements the share count of a PFN entry, which represents the number of PTEs mapping the page.
+ *
+ * @param PageFrameNumber
+ *        A pointer to the PFN database entry for the physical page.
+ *
+ * @param PageFrameIndex
+ *        The page frame number of the physical page.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::Pfn::DecrementShareCount(IN PMMPFN PageFrameNumber,
+                             IN PFN_NUMBER PageFrameIndex)
+{
+    /* Ensure the page is in a valid state */
+    if((PageFrameNumber->u3.e1.PageLocation != ActiveAndValid) &&
+       (PageFrameNumber->u3.e1.PageLocation != StandbyPageList))
+    {
+        /* This indicates a bug; crash the system */
+        KE::Crash::PanicEx(0x4E,
+                           0x99,
+                           PageFrameIndex,
+                           PageFrameNumber->u3.e1.PageLocation,
+                           0);
+    }
+
+    /* Decrement the PFN share count */
+    PageFrameNumber->u2.ShareCount--;
+
+    /* Check if the share count has dropped to zero */
+    if(!PageFrameNumber->u2.ShareCount)
+    {
+        /* Check if this is a prototype PTE */
+        if(PageFrameNumber->u3.e1.PrototypePte)
+        {
+            /* Transition the PTE to invalid state */
+            MM::Paging::TransitionPte(PageFrameNumber->PteAddress,
+                                      MM::Paging::GetPteSoftwareProtection(&PageFrameNumber->OriginalPte));
+        }
+
+        /* Mark the page as being in a transition state */
+        PageFrameNumber->u3.e1.PageLocation = TransitionPage;
+
+        /* Check if there are still outstanding references */
+        if(PageFrameNumber->u3.e2.ReferenceCount == 1)
+        {
+            /* Check if the PTE is marked as being ready for removal */
+            if(MM::Paging::GetPte(PageFrameNumber->PteAddress) & 0x1)
+            {
+                /* Reset the reference count */
+                PageFrameNumber->u3.e2.ReferenceCount = 0;
+
+                /* Check the page's cache attribute */
+                if((PageFrameNumber->u3.e1.CacheAttribute != PfnCached) &&
+                   (PageFrameNumber->u3.e1.CacheAttribute != PfnNotMapped))
+                {
+                    UNIMPLEMENTED;
+                }
+
+                /* Mark the page as active and valid again */
+                PageFrameNumber->u3.e1.PageLocation = ActiveAndValid;
+
+                /* The page is no longer needed, free it by linking it to the free list */
+                MM::Pfn::LinkFreePage(PageFrameIndex);
+            }
+            else
+            {
+                /* The PTE can not be removed yet, decrement the reference count */
+                DecrementReferenceCount(PageFrameNumber, PageFrameIndex);
+            }
+        }
+        else
+        {
+            /* There are still some outstanding references, decrement the reference count */
+            PageFrameNumber->u3.e2.ReferenceCount--;
+        }
+    }
+}
+
+/**
+ * Frees a physical page that is mapped by a given PTE.
+ *
+ * @param PointerPte
+ *        A pointer to the Page Table Entry (PTE) that maps the physical page to be freed.
+ *
+ * @return This routine does not return a value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::Pfn::FreePhysicalPage(IN PMMPTE PointerPte)
+{
+    PFN_COUNT PageFrameNumber, PageTableFrameNumber;
+    PMMPFN PageFrame, PageTableFrame;
+
+    /* Get the page frame number from the PTE */
+    PageFrameNumber = MM::Paging::GetPageFrameNumber(PointerPte);
+    PageFrame = MM::Pfn::GetPfnEntry(PageFrameNumber);
+
+    /* Get the page table frame number corresponding to the PTE */
+    PageTableFrameNumber = PageFrame->u4.PteFrame;
+    PageTableFrame = MM::Pfn::GetPfnEntry(PageTableFrameNumber);
+
+    /* Decrement the share count of the page table */
+    MM::Pfn::DecrementShareCount(PageTableFrame, PageTableFrameNumber);
+
+    /* Mark the PTE as being ready for removal */
+    MM::Paging::SetPte(PageFrame->PteAddress, MM::Paging::GetPte(PageFrame->PteAddress) | 1);
+
+    /* Decrement the share count of the page */
+    MM::Pfn::DecrementShareCount(PageFrame, PageFrameNumber);
+}
+
+/**
  * Retrieves the highest physical page number (PFN) detected in the system.
  *
  * @return This routine returns the highest physical page number.
