@@ -138,6 +138,9 @@ MM::Pfn::DecrementAvailablePages(VOID)
  * @param PageFrameIndex
  *        The page frame number of the physical page.
  *
+ * @param BeginStandbyList
+ *        Determines whether the page should be added to the beginning of the standby list.
+ *
  * @return This routine does not return any value.
  *
  * @since XT 1.0
@@ -145,7 +148,8 @@ MM::Pfn::DecrementAvailablePages(VOID)
 XTAPI
 VOID
 MM::Pfn::DecrementReferenceCount(IN PMMPFN PageFrameNumber,
-                                 IN PFN_NUMBER PageFrameIndex)
+                                 IN PFN_NUMBER PageFrameIndex,
+                                 IN BOOLEAN BeginStandbyList)
 {
     /* Decrement the PFN reference count */
     PageFrameNumber->u3.e2.ReferenceCount--;
@@ -203,7 +207,15 @@ MM::Pfn::DecrementReferenceCount(IN PMMPFN PageFrameNumber,
         else
         {
             /* Link clean page to the standby list */
-            LinkPage(&StandbyPagesList, PageFrameIndex);
+            if(BeginStandbyList)
+            {
+                UNIMPLEMENTED;
+            }
+            else
+            {
+                /* Link clean page to the end of the standby list */
+                LinkPage(&StandbyPagesList, PageFrameIndex);
+            }
         }
     }
 }
@@ -217,6 +229,9 @@ MM::Pfn::DecrementReferenceCount(IN PMMPFN PageFrameNumber,
  * @param PageFrameIndex
  *        The page frame number of the physical page.
  *
+ * @param BeginStandbyList
+ *        Determines whether the page should be added to the beginning of the standby list.
+ *
  * @return This routine does not return any value.
  *
  * @since XT 1.0
@@ -224,7 +239,8 @@ MM::Pfn::DecrementReferenceCount(IN PMMPFN PageFrameNumber,
 XTAPI
 VOID
 MM::Pfn::DecrementShareCount(IN PMMPFN PageFrameNumber,
-                             IN PFN_NUMBER PageFrameIndex)
+                             IN PFN_NUMBER PageFrameIndex,
+                             IN BOOLEAN BeginStandbyList)
 {
     /* Ensure the page is in a valid state */
     if((PageFrameNumber->u3.e1.PageLocation != ActiveAndValid) &&
@@ -280,7 +296,7 @@ MM::Pfn::DecrementShareCount(IN PMMPFN PageFrameNumber,
             else
             {
                 /* The PTE can not be removed yet, decrement the reference count */
-                DecrementReferenceCount(PageFrameNumber, PageFrameIndex);
+                DecrementReferenceCount(PageFrameNumber, PageFrameIndex, BeginStandbyList);
             }
         }
         else
@@ -317,13 +333,13 @@ MM::Pfn::FreePhysicalPage(IN PMMPTE PointerPte)
     PageTableFrame = MM::Pfn::GetPfnEntry(PageTableFrameNumber);
 
     /* Decrement the share count of the page table */
-    MM::Pfn::DecrementShareCount(PageTableFrame, PageTableFrameNumber);
+    MM::Pfn::DecrementShareCount(PageTableFrame, PageTableFrameNumber, FALSE);
 
     /* Mark the PTE as being ready for removal */
     MM::Paging::SetPte(PageFrame->PteAddress, MM::Paging::GetPte(PageFrame->PteAddress) | 1);
 
     /* Decrement the share count of the page */
-    MM::Pfn::DecrementShareCount(PageFrame, PageFrameNumber);
+    MM::Pfn::DecrementShareCount(PageFrame, PageFrameNumber, FALSE);
 }
 
 /**
