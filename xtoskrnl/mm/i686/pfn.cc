@@ -156,6 +156,90 @@ MM::Pfn::InitializePageTablePfns(VOID)
 }
 
 /**
+ * Processes a memory descriptor and initializes the corresponding PFN database entries
+ *
+ * @param BasePage
+ *        The starting physical page number of the memory run
+ *
+ * @param PageCount
+ *        The number of pages in the memory run
+ *
+ * @param MemoryType
+ *        The type of memory as reported by the bootloader (e.g., free, ROM, in-use)
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::Pfn::ProcessMemoryDescriptor(IN PFN_NUMBER BasePage,
+                                 IN PFN_NUMBER PageCount,
+                                 IN LOADER_MEMORY_TYPE MemoryType)
+{
+    PFN_NUMBER CurrentPage, PageNumber;
+    PMMPFN Pfn;
+
+    /* Check if the memory descriptor describes a free memory region */
+    if(MM::Manager::VerifyMemoryTypeFree(MemoryType))
+    {
+        /* Iterate over each page in this free memory run */
+        for(PageNumber = 0; PageNumber < PageCount; PageNumber++)
+        {
+            /* Get the PFN entry for the current page and set its initial cache attribute */
+            CurrentPage = BasePage + PageNumber;
+            Pfn = GetPfnEntry(CurrentPage);
+            Pfn->u3.e1.CacheAttribute = PfnNonCached;
+
+            /* Add the page to the free list to make it available for allocation */
+            LinkFreePage(CurrentPage);
+        }
+    }
+    else
+    {
+        /* Handle all other (non-free) memory types */
+        switch(MemoryType)
+        {
+            case LoaderBad:
+                /* This memory is marked as bad and should not be used, add it to the bad pages list */
+                LinkPage(&BadPagesList, BasePage);
+                break;
+            case LoaderXIPRom:
+                /* This memory range contains Read-Only Memory (ROM) */
+                for(PageNumber = 0; PageNumber < PageCount; PageNumber++)
+                {
+                    /* Get the PFN entry for the current ROM page */
+                    Pfn = GetPfnEntry(BasePage + PageNumber);
+
+                    /* Initialize the PFN entry to represent a ROM page */
+                    Pfn->PteAddress = 0;
+                    Pfn->u1.Flink = 0;
+                    Pfn->u2.ShareCount = 0;
+                    Pfn->u3.e1.CacheAttribute = PfnNonCached;
+                    Pfn->u3.e1.PageLocation = 0;
+                    Pfn->u3.e1.PrototypePte = 1;
+                    Pfn->u3.e1.Rom = 1;
+                    Pfn->u3.e2.ReferenceCount = 0;
+                    Pfn->u4.InPageError = 0;
+                    Pfn->u4.PteFrame = 0;
+                }
+                break;
+            default:
+                /* All other types are considered in-use (ie, by the kernel, ACPI, etc) */
+                for(PageNumber = 0; PageNumber < PageCount; PageNumber++)
+                {
+                    /* Get the PFN entry for the current in-use page */
+                    Pfn = GetPfnEntry(BasePage + PageNumber);
+
+                    /* Mark the PFN as active and valid to prevent it from being allocated */
+                    Pfn->u3.e1.PageLocation = ActiveAndValid;
+                }
+                break;
+        }
+    }
+}
+
+/**
  * Recursively scans a page table to initialize PFN database entries for active pages.
  *
  * @param PointerPte
