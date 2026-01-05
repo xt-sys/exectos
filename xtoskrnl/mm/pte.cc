@@ -319,6 +319,9 @@ MM::Pte::ReleaseSystemPtes(IN PMMPTE StartingPte,
     PMMPTE NextPte, PreviousPte, ReleasedPte;
     ULONG ClusterSize;
 
+    /* Clear the PTEs before releasing them */
+    RtlZeroMemory(StartingPte, NumberOfPtes * MM::Paging::GetPteSize());
+
     /* Raise runlevel and acquire lock to protect the PTE pool */
     KE::RaiseRunLevel RunLevel(DISPATCH_LEVEL);
     KE::QueuedSpinLockGuard SpinLock(SystemSpaceLock);
@@ -408,9 +411,6 @@ MM::Pte::ReleaseSystemPtes(IN PMMPTE StartingPte,
     /* Link the new block into the free list */
     MM::Paging::SetNextEntry(StartingPte, MM::Paging::GetNextEntry(ReleasedPte));
     MM::Paging::SetNextEntry(ReleasedPte, MM::Paging::GetPteDistance(StartingPte, SystemPteBase));
-
-    /* Flush the TLB to ensure address translation consistency */
-    AR::CpuFunc::FlushTlb();
 }
 
 /**
