@@ -203,7 +203,7 @@ MM::Pfn::DecrementReferenceCount(IN PMMPFN PageFrameNumber,
         else
         {
             /* Link clean page to the standby list */
-            LinkPage(&StandbyPagesList, PageFrameIndex)
+            LinkPage(&StandbyPagesList, PageFrameIndex);
         }
     }
 }
