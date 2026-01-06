@@ -201,8 +201,12 @@ MM::Pfn::ProcessMemoryDescriptor(IN PFN_NUMBER BasePage,
         switch(MemoryType)
         {
             case LoaderBad:
-                /* This memory is marked as bad and should not be used, add it to the bad pages list */
-                LinkPage(&BadPagesList, BasePage);
+                /* This memory is marked as bad and should not be used */
+                for(PageNumber = 0; PageNumber < PageCount; PageNumber++)
+                {
+                    /* Link the page to the bad pages list */
+                    LinkPage(&BadPagesList, BasePage + PageNumber);
+                }
                 break;
             case LoaderXIPRom:
                 /* This memory range contains Read-Only Memory (ROM) */
