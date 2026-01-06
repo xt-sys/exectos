@@ -189,7 +189,7 @@ MM::Pfn::ProcessMemoryDescriptor(IN PFN_NUMBER BasePage,
                                  IN PFN_NUMBER PageCount,
                                  IN LOADER_MEMORY_TYPE MemoryType)
 {
-    PFN_NUMBER CurrentPage, PageNumber;
+    PFN_NUMBER PageNumber;
     PMMPFN Pfn;
 
     /* Check if the memory descriptor describes a free memory region */
@@ -198,13 +198,13 @@ MM::Pfn::ProcessMemoryDescriptor(IN PFN_NUMBER BasePage,
         /* Iterate over each page in this free memory run */
         for(PageNumber = 0; PageNumber < PageCount; PageNumber++)
         {
-            /* Get the PFN entry for the current page and set its initial cache attribute */
-            CurrentPage = BasePage + PageNumber;
-            Pfn = GetPfnEntry(CurrentPage);
-            Pfn->u3.e1.CacheAttribute = PfnNonCached;
-
-            /* Add the page to the free list to make it available for allocation */
-            LinkFreePage(CurrentPage);
+            /* Get the PFN entry for the current page and ensure it is not referenced */
+            Pfn = GetPfnEntry(BasePage + PageNumber);
+            if(Pfn->u3.e2.ReferenceCount == 0)
+            {
+                /* Add the page to the free list to make it available for allocation */
+                LinkFreePage(BasePage + PageNumber);
+            }
         }
     }
     else
