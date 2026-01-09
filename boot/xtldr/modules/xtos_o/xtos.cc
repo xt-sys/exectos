@@ -206,7 +206,7 @@ Xtos::GetMemoryDescriptorList(IN PXTBL_PAGE_MAPPING PageMap,
         return Status;
     }
 
-    Status = XtLdrProtocol->Memory.MapVirtualMemory(PageMap, *VirtualAddress, (PVOID)Address, Pages, LoaderMemoryData);
+    Status = XtLdrProtocol->Memory.MapVirtualMemory(PageMap, (ULONGLONG)*VirtualAddress, Address, Pages, LoaderMemoryData);
     if(Status != STATUS_EFI_SUCCESS)
     {
         XtLdrProtocol->Memory.FreePages(Address, Pages);
@@ -266,7 +266,7 @@ Xtos::GetSystemResourcesList(IN PXTBL_PAGE_MAPPING PageMap,
     {
         return Status;
     }
-    Status = XtLdrProtocol->Memory.MapVirtualMemory(PageMap, *VirtualAddress, (PVOID)Address, Pages, LoaderFirmwarePermanent);
+    Status = XtLdrProtocol->Memory.MapVirtualMemory(PageMap, (ULONGLONG)*VirtualAddress, Address, Pages, LoaderFirmwarePermanent);
     if(Status != STATUS_EFI_SUCCESS)
     {
         XtLdrProtocol->Memory.FreePages(Address, Pages);
@@ -336,8 +336,8 @@ Xtos::GetSystemResourcesList(IN PXTBL_PAGE_MAPPING PageMap,
     FrameBufferResource->Header.VirtualAddress = *VirtualAddress;
 
     /* Map frame buffer memory */
-    XtLdrProtocol->Memory.MapVirtualMemory(PageMap, FrameBufferResource->Header.VirtualAddress,
-                                           FrameBufferResource->Header.PhysicalAddress,
+    XtLdrProtocol->Memory.MapVirtualMemory(PageMap, (ULONGLONG)FrameBufferResource->Header.VirtualAddress,
+                                           (ULONGLONG)FrameBufferResource->Header.PhysicalAddress,
                                            FrameBufferPages, LoaderFirmwarePermanent);
 
     /* Close FrameBuffer protocol */
@@ -389,7 +389,7 @@ Xtos::InitializeApicBase(IN PXTBL_PAGE_MAPPING PageMap)
     }
 
     /* Map APIC base address */
-    XtLdrProtocol->Memory.MapVirtualMemory(PageMap, (PVOID)APIC_BASE, ApicBaseAddress, 1, LoaderFirmwarePermanent);
+    XtLdrProtocol->Memory.MapVirtualMemory(PageMap, APIC_BASE, (ULONGLONG)ApicBaseAddress, 1, LoaderFirmwarePermanent);
     return STATUS_EFI_SUCCESS;
 }
 
@@ -456,7 +456,7 @@ Xtos::InitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
                   ParametersSize);
 
     /* Map kernel initialization block */
-    XtLdrProtocol->Memory.MapVirtualMemory(PageMap, *VirtualAddress, (PVOID)LoaderBlock,
+    XtLdrProtocol->Memory.MapVirtualMemory(PageMap, (ULONGLONG)*VirtualAddress, (ULONGLONG)LoaderBlock,
                                            BlockPages, LoaderSystemBlock);
 
     /* Calculate next valid virtual address */
@@ -650,8 +650,8 @@ Xtos::RunBootSequence(IN PEFI_FILE_HANDLE BootDir,
     }
 
     /* Add kernel image memory mapping */
-    Status = XtLdrProtocol->Memory.MapVirtualMemory(&PageMap, ImageContext->VirtualAddress,
-                                                    ImageContext->PhysicalAddress, ImageContext->ImagePages,
+    Status = XtLdrProtocol->Memory.MapVirtualMemory(&PageMap, (ULONGLONG)ImageContext->VirtualAddress,
+                                                    (ULONGLONG)ImageContext->PhysicalAddress, ImageContext->ImagePages,
                                                     LoaderSystemCode);
     if(Status != STATUS_EFI_SUCCESS)
     {

@@ -334,19 +334,9 @@ Memory::MapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
     LOADER_MEMORY_TYPE MemoryType;
     PEFI_MEMORY_MAP MemoryMap;
     SIZE_T DescriptorCount;
-    PUCHAR VirtualAddress;
+    ULONGLONG MaxAddress;
     EFI_STATUS Status;
     SIZE_T Index;
-
-    /* Set virtual address as specified in argument */
-    VirtualAddress = (PUCHAR)*MemoryMapAddress;
-
-    /* Check if custom memory type routine is specified */
-    if(GetMemoryTypeRoutine == NULLPTR)
-    {
-        /* Use default memory type routine */
-        GetMemoryTypeRoutine = GetLoaderMemoryType;
-    }
 
     /* Allocate and zero-fill buffer for EFI memory map */
     AllocatePool(sizeof(EFI_MEMORY_MAP), (PVOID*)&MemoryMap);
@@ -367,8 +357,37 @@ Memory::MapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
     /* Iterate through all descriptors from the memory map */
     for(Index = 0; Index < DescriptorCount; Index++)
     {
-        /* Make sure descriptor does not start beyond lowest physical page */
-        if(Descriptor->PhysicalStart <= MAXUINT_PTR)
+        /* Check page map level */
+        if(PageMap->PageMapLevel == 2)
+        {
+            /* Limit physical address to 4GB in legacy mode */
+            MaxAddress = 0xFFFFFFFF;
+        }
+        else if(PageMap->PageMapLevel == 3)
+        {
+            /* Limit physical address to 64GB in PAE mode */
+            MaxAddress = 0xFFFFFFFFF;
+        }
+
+        /* Check page map level */
+        if(PageMap->PageMapLevel == 2 || PageMap->PageMapLevel == 3)
+        {
+            /* Check if physical address starts beyond 4GB */
+            if(Descriptor->PhysicalStart > MaxAddress)
+            {
+                /* Go to the next descriptor */
+                Descriptor = (PEFI_MEMORY_DESCRIPTOR)((PUCHAR)Descriptor + MemoryMap->DescriptorSize);
+                continue;
+            }
+
+            /* Check if memory descriptor exceeds the lowest physical page */
+            if(Descriptor->PhysicalStart + (Descriptor->NumberOfPages << EFI_PAGE_SHIFT) > MaxAddress)
+            {
+                /* Truncate memory descriptor to the 4GB */
+                Descriptor->NumberOfPages = (((ULONGLONG)MaxAddress) - Descriptor->PhysicalStart) >> EFI_PAGE_SHIFT;
+            }
+        }
+
         {
             /* Skip EFI reserved memory */
             if(Descriptor->Type == EfiReservedMemoryType)
@@ -378,48 +397,26 @@ Memory::MapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
                 continue;
             }
 
-            /* Check if preparing page map level 2 (non-PAE i686) */
-            if(PageMap->PageMapLevel == 2)
-            {
-                /* Check if physical address starts beyond 4GB */
-                if(Descriptor->PhysicalStart > 0xFFFFFFFF)
-                {
-                    /* Go to the next descriptor */
-                    Descriptor = (PEFI_MEMORY_DESCRIPTOR)((PUCHAR)Descriptor + MemoryMap->DescriptorSize);
-                    continue;
-                }
-
-                /* Check if memory descriptor exceeds the lowest physical page */
-                if(Descriptor->PhysicalStart + (Descriptor->NumberOfPages << EFI_PAGE_SHIFT) > MAXULONG)
-                {
-                    /* Truncate memory descriptor to the 4GB */
-                    Descriptor->NumberOfPages = (((ULONGLONG)MAXULONG + 1) - Descriptor->PhysicalStart) >> EFI_PAGE_SHIFT;
-                }
-            }
-
             /* Convert EFI memory type into XTLDR memory type */
-            MemoryType = GetMemoryTypeRoutine((EFI_MEMORY_TYPE)Descriptor->Type);
+            MemoryType = GetLoaderMemoryType((EFI_MEMORY_TYPE)Descriptor->Type);
 
             /* Do memory mappings depending on memory type */
             if(MemoryType == LoaderFirmwareTemporary)
             {
                 /* Map EFI firmware code */
-                Status = MapVirtualMemory(PageMap, (PVOID)Descriptor->PhysicalStart,
-                                          (PVOID)Descriptor->PhysicalStart, Descriptor->NumberOfPages, MemoryType);
+                Status = MapVirtualMemory(PageMap, Descriptor->PhysicalStart,
+                                          Descriptor->PhysicalStart, Descriptor->NumberOfPages, MemoryType);
             }
             else if(MemoryType != LoaderFree)
             {
                 /* Add any non-free memory mapping */
-                Status = MapVirtualMemory(PageMap, VirtualAddress, (PVOID)Descriptor->PhysicalStart,
+                Status = MapVirtualMemory(PageMap, KSEG0_BASE + Descriptor->PhysicalStart, Descriptor->PhysicalStart,
                                           Descriptor->NumberOfPages, MemoryType);
-
-                /* Calculate next valid virtual address */
-                VirtualAddress += Descriptor->NumberOfPages * EFI_PAGE_SIZE;
             }
             else
             {
                 /* Map all other memory as loader free */
-                Status = MapVirtualMemory(PageMap, NULLPTR, (PVOID)Descriptor->PhysicalStart,
+                Status = MapVirtualMemory(PageMap, (ULONGLONG)NULLPTR, Descriptor->PhysicalStart,
                                           Descriptor->NumberOfPages, LoaderFree);
             }
 
@@ -436,7 +433,7 @@ Memory::MapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
     }
 
     /* Always map first page */
-    Status = MapVirtualMemory(PageMap, NULLPTR, (PVOID)0, 1, LoaderFirmwarePermanent);
+    Status = MapVirtualMemory(PageMap, (ULONGLONG)NULLPTR, 0, 1, LoaderFirmwarePermanent);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Mapping failed */
@@ -444,7 +441,7 @@ Memory::MapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
     }
 
     /* Map BIOS ROM and VRAM */
-    Status = MapVirtualMemory(PageMap, NULLPTR, (PVOID)0xA0000, 0x60, LoaderFirmwarePermanent);
+    Status = MapVirtualMemory(PageMap, (ULONGLONG)NULLPTR, 0xA0000, 0x60, LoaderFirmwarePermanent);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Mapping failed */
@@ -452,7 +449,6 @@ Memory::MapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
     }
 
     /* Store next valid virtual address and return success */
-    *MemoryMapAddress = VirtualAddress;
     return STATUS_EFI_SUCCESS;
 }
 
@@ -481,13 +477,13 @@ Memory::MapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
 XTCDECL
 EFI_STATUS
 Memory::MapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
-                         IN PVOID VirtualAddress,
-                         IN PVOID PhysicalAddress,
+                         IN ULONGLONG VirtualAddress,
+                         IN ULONGLONG PhysicalAddress,
                          IN ULONGLONG NumberOfPages,
                          IN LOADER_MEMORY_TYPE MemoryType)
 {
     PXTBL_MEMORY_MAPPING Mapping1, Mapping2, Mapping3;
-    PVOID PhysicalAddressEnd, PhysicalAddress2End;
+    ULONGLONG PhysicalAddressEnd, PhysicalAddress2End;
     PLIST_ENTRY ListEntry, MappingListEntry;
     SIZE_T NumberOfMappedPages;
     EFI_STATUS Status;
@@ -507,7 +503,7 @@ Memory::MapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
     Mapping1->MemoryType = MemoryType;
 
     /* Calculate the end of the physical address */
-    PhysicalAddressEnd = (PVOID)((ULONG_PTR)PhysicalAddress + (NumberOfPages * EFI_PAGE_SIZE) - 1);
+    PhysicalAddressEnd = PhysicalAddress + (NumberOfPages * EFI_PAGE_SIZE) - 1;
 
     /* Iterate through all the mappings already set to insert new mapping at the correct place */
     ListEntry = PageMap->MemoryMap.Flink;
@@ -515,7 +511,7 @@ Memory::MapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
     {
         /* Take a mapping from the list and calculate its end of physical address */
         Mapping2 = CONTAIN_RECORD(ListEntry, XTBL_MEMORY_MAPPING, ListEntry);
-        PhysicalAddress2End = (PVOID)((ULONG_PTR)Mapping2->PhysicalAddress + (Mapping2->NumberOfPages * EFI_PAGE_SIZE) - 1);
+        PhysicalAddress2End = Mapping2->PhysicalAddress + (Mapping2->NumberOfPages * EFI_PAGE_SIZE) - 1;
 
         /* Check if new mapping is a subset of an existing mapping */
         if(Mapping1->PhysicalAddress >= Mapping2->PhysicalAddress && PhysicalAddressEnd <= PhysicalAddress2End)
@@ -539,7 +535,7 @@ Memory::MapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
             }
 
             /* Calculate number of pages for this mapping */
-            NumberOfMappedPages = ((PUCHAR)PhysicalAddress2End - (PUCHAR)PhysicalAddressEnd) / EFI_PAGE_SIZE;
+            NumberOfMappedPages = (PhysicalAddress2End - PhysicalAddressEnd) / EFI_PAGE_SIZE;
             if(NumberOfMappedPages > 0)
             {
                 /* Pages associated to the mapping, allocate memory for it */
@@ -551,8 +547,8 @@ Memory::MapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
                 }
 
                 /* Set mapping fields and insert it on the top */
-                Mapping3->PhysicalAddress = (PUCHAR)PhysicalAddressEnd + 1;
-                Mapping3->VirtualAddress = NULLPTR;
+                Mapping3->PhysicalAddress = PhysicalAddressEnd + 1;
+                Mapping3->VirtualAddress = (ULONGLONG)NULLPTR;
                 Mapping3->NumberOfPages = NumberOfMappedPages;
                 Mapping3->MemoryType = Mapping2->MemoryType;
                 RTL::LinkedList::InsertHeadList(&Mapping2->ListEntry, &Mapping3->ListEntry);
@@ -561,7 +557,7 @@ Memory::MapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
             /* Calculate number of pages and the end of the physical address */
             Mapping2->NumberOfPages = ((PUCHAR)PhysicalAddressEnd + 1 -
                                        (PUCHAR)Mapping2->PhysicalAddress) / EFI_PAGE_SIZE;
-            PhysicalAddress2End = (PVOID)((ULONG_PTR)Mapping2->PhysicalAddress + (Mapping2->NumberOfPages * EFI_PAGE_SIZE) - 1);
+            PhysicalAddress2End = Mapping2->PhysicalAddress + (Mapping2->NumberOfPages * EFI_PAGE_SIZE) - 1;
         }
 
         /* Check if they overlap */
@@ -588,7 +584,7 @@ Memory::MapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
 
                 /* Set mapping fields and insert it on the top */
                 Mapping3->PhysicalAddress = Mapping1->PhysicalAddress;
-                Mapping3->VirtualAddress = NULLPTR;
+                Mapping3->VirtualAddress = (ULONGLONG)NULLPTR;
                 Mapping3->NumberOfPages = NumberOfMappedPages;
                 Mapping3->MemoryType = Mapping2->MemoryType;
                 RTL::LinkedList::InsertHeadList(&Mapping2->ListEntry, &Mapping3->ListEntry);
@@ -597,7 +593,7 @@ Memory::MapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
             /* Calculate number of pages and the end of the physical address */
             Mapping2->NumberOfPages = ((PUCHAR)Mapping1->PhysicalAddress -
                                        (PUCHAR)Mapping2->PhysicalAddress) / EFI_PAGE_SIZE;
-            PhysicalAddress2End = (PVOID)((ULONG_PTR)Mapping2->PhysicalAddress + (Mapping2->NumberOfPages * EFI_PAGE_SIZE) - 1);
+            PhysicalAddress2End = Mapping2->PhysicalAddress + (Mapping2->NumberOfPages * EFI_PAGE_SIZE) - 1;
         }
 
         /* Check if mapping is really needed */

@@ -45,7 +45,7 @@ Memory::BuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
     }
 
     /* Add new memory mapping for the page map itself */
-    Status = MapVirtualMemory(PageMap, (PVOID)(UINT_PTR)Address, (PVOID)(UINT_PTR)Address, 1, LoaderMemoryData);
+    Status = MapVirtualMemory(PageMap, Address, Address, 1, LoaderMemoryData);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Memory mapping failure */
@@ -65,7 +65,7 @@ Memory::BuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
     }
 
     /* Map the trampoline code area */
-    Status = MapVirtualMemory(PageMap, (PVOID)MM_TRAMPOLINE_ADDRESS,(PVOID)MM_TRAMPOLINE_ADDRESS,
+    Status = MapVirtualMemory(PageMap, MM_TRAMPOLINE_ADDRESS,MM_TRAMPOLINE_ADDRESS,
                               1, LoaderFirmwareTemporary);
     if(Status != STATUS_EFI_SUCCESS)
     {
@@ -82,7 +82,7 @@ Memory::BuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
         ModuleInfo = CONTAIN_RECORD(ModulesListEntry, XTBL_MODULE_INFO, Flink);
 
         /* Map module code */
-        Status = MapVirtualMemory(PageMap, ModuleInfo->ModuleBase, ModuleInfo->ModuleBase,
+        Status = MapVirtualMemory(PageMap, (ULONGLONG)ModuleInfo->ModuleBase, (ULONGLONG)ModuleInfo->ModuleBase,
                                   EFI_SIZE_TO_PAGES(ModuleInfo->ModuleSize), LoaderFirmwareTemporary);
 
         /* Check if mapping succeeded */
@@ -103,7 +103,7 @@ Memory::BuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
     if(LoaderBase && LoaderSize)
     {
         /* Map boot loader code as well */
-        Status = MapVirtualMemory(PageMap, LoaderBase, LoaderBase,
+        Status = MapVirtualMemory(PageMap, (ULONGLONG)LoaderBase, (ULONGLONG)LoaderBase,
                                   EFI_SIZE_TO_PAGES(LoaderSize), LoaderFirmwareTemporary);
         if(Status != STATUS_EFI_SUCCESS)
         {
@@ -201,7 +201,7 @@ Memory::GetNextPageTable(IN PXTBL_PAGE_MAPPING PageMap,
         }
 
         /* Add new memory mapping */
-        Status = MapVirtualMemory(PageMap, (PVOID)(UINT_PTR)Address, (PVOID)(UINT_PTR)Address, 1, LoaderMemoryData);
+        Status = MapVirtualMemory(PageMap, Address, Address, 1, LoaderMemoryData);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory mapping failure */
@@ -247,9 +247,9 @@ Memory::GetNextPageTable(IN PXTBL_PAGE_MAPPING PageMap,
 XTCDECL
 EFI_STATUS
 Memory::MapPage(IN PXTBL_PAGE_MAPPING PageMap,
-                IN ULONG_PTR VirtualAddress,
-                IN ULONG_PTR PhysicalAddress,
-                IN ULONG NumberOfPages)
+                IN ULONGLONG VirtualAddress,
+                IN ULONGLONG PhysicalAddress,
+                IN ULONGLONG NumberOfPages)
 {
     PVOID Pml1, Pml2, Pml3, Pml4, Pml5;
     SIZE_T Pml1Entry, Pml2Entry, Pml3Entry, Pml4Entry, Pml5Entry;

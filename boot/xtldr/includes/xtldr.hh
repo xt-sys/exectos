@@ -180,12 +180,12 @@ class Memory
                                                IN OUT PVOID *MemoryMapAddress,
                                                IN PBL_GET_MEMTYPE_ROUTINE GetMemoryTypeRoutine);
         STATIC XTCDECL EFI_STATUS MapPage(IN PXTBL_PAGE_MAPPING PageMap,
-                                          IN ULONG_PTR VirtualAddress,
-                                          IN ULONG_PTR PhysicalAddress,
-                                          IN ULONG NumberOfPages);
+                                          IN ULONGLONG VirtualAddress,
+                                          IN ULONGLONG PhysicalAddress,
+                                          IN ULONGLONG NumberOfPages);
         STATIC XTCDECL EFI_STATUS MapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
-                                                   IN PVOID VirtualAddress,
-                                                   IN PVOID PhysicalAddress,
+                                                   IN ULONGLONG VirtualAddress,
+                                                   IN ULONGLONG PhysicalAddress,
                                                    IN ULONGLONG NumberOfPages,
                                                    IN LOADER_MEMORY_TYPE MemoryType);
         STATIC XTCDECL PVOID PhysicalAddressToVirtual(IN PVOID PhysicalAddress,
