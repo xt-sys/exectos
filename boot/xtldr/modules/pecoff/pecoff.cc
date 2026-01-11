@@ -729,11 +729,11 @@ PeCoff::RelocateLoadedImage(IN PPECOFF_IMAGE_CONTEXT Image)
     }
     else
     {
-        /* Check if loaded 32-bit PE32 image should be relocated */
         /* Set relocation data directory and image base address */
         DataDirectory = &Image->PeHeader->OptionalHeader32.DataDirectory[PECOFF_IMAGE_DIRECTORY_ENTRY_BASERELOC];
         ImageBase = Image->PeHeader->OptionalHeader32.ImageBase;
 
+        /* Check if loaded 32-bit PE32 image should be relocated */
         if(Image->PeHeader->OptionalHeader32.NumberOfRvaAndSizes <= PECOFF_IMAGE_DIRECTORY_ENTRY_BASERELOC ||
         DataDirectory->VirtualAddress == 0 || DataDirectory->Size < sizeof(PECOFF_IMAGE_BASE_RELOCATION))
         {

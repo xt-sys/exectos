@@ -266,6 +266,7 @@ Xtos::GetSystemResourcesList(IN PXTBL_PAGE_MAPPING PageMap,
     {
         return Status;
     }
+
     Status = XtLdrProtocol->Memory.MapVirtualMemory(PageMap, (ULONGLONG)*VirtualAddress, Address, Pages, LoaderFirmwarePermanent);
     if(Status != STATUS_EFI_SUCCESS)
     {
@@ -545,12 +546,21 @@ Xtos::LoadModule(IN PEFI_FILE_HANDLE SystemDir,
         return Status;
     }
 
-    /* Load the PE/COFF image file */
-    Status = PeCoffProtocol->LoadImage(ModuleHandle, MemoryType, VirtualAddress, (PVOID*)ImageContext);
+    /* Load the PE/COFF image file into memory */
+    Status = PeCoffProtocol->LoadImage(ModuleHandle, MemoryType, NULLPTR, (PVOID*)ImageContext);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Unable to load the file */
         XtLdrProtocol->Debug.Print(L"ERROR: Failed to load '%S'\n", FileName);
+        return Status;
+    }
+
+    /* Relocate the PE/COFF image file */
+    Status = PeCoffProtocol->RelocateImage(*ImageContext, KSEG0_BASE + (ULONGLONG)(*ImageContext)->PhysicalAddress);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Unable to relocate the file */
+        XtLdrProtocol->Debug.Print(L"ERROR: Failed to relocate '%S'\n", FileName);
         return Status;
     }
 
@@ -577,10 +587,58 @@ Xtos::LoadModule(IN PEFI_FILE_HANDLE SystemDir,
 
     /* Print debug message */
     XtLdrProtocol->Debug.Print(L"Loaded %S at PA: %P, VA: %P\n", FileName,
-                               (*ImageContext)->PhysicalAddress, (*ImageContext)->VirtualAddress);
+                               (*ImageContext)->PhysicalAddress, KSEG0_BASE + (ULONGLONG)(*ImageContext)->VirtualAddress);
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
+}
+
+/**
+ * Adds a physical to virtual address mapping.
+ *
+ * @param PageMap
+ *        Supplies a pointer to the page mapping structure.
+ *
+ * @param PhysicalAddress
+ *        Supplies a physical address which will be mapped.
+ *
+ * @param NumberOfPages
+ *        Supplies a number of pages that will be mapped.
+ *
+ * @param MemoryType
+ *        Supplies the type of mapped memory that will be assigned to the memory descriptor.
+ *
+ * @param KernelMapping
+ *        Supplies a flag that indicates if mapping should be done in kernel mode or if identity mapping should be used.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+Xtos::MapMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
+                IN ULONGLONG Address,
+                IN ULONG NumberOfPages,
+                IN LOADER_MEMORY_TYPE MemoryType,
+                IN BOOLEAN KernelMapping)
+{
+    ULONGLONG BaseAddress;
+
+    /* Check if kernel mode mapping */
+    if(KernelMapping)
+    {
+        /* Map memory based on kernel base address */
+        BaseAddress = KSEG0_BASE;
+    }
+    else
+    {
+        /* Use identity mapping */
+        BaseAddress = (ULONGLONG)NULLPTR;
+    }
+
+    /* Map memory and return status code */
+    return XtLdrProtocol->Memory.MapVirtualMemory(PageMap, BaseAddress + Address, Address, NumberOfPages, MemoryType);
 }
 
 /**
@@ -650,11 +708,11 @@ Xtos::RunBootSequence(IN PEFI_FILE_HANDLE BootDir,
     }
 
     /* Add kernel image memory mapping */
-    Status = XtLdrProtocol->Memory.MapVirtualMemory(&PageMap, (ULONGLONG)ImageContext->VirtualAddress,
-                                                    (ULONGLONG)ImageContext->PhysicalAddress, ImageContext->ImagePages,
-                                                    LoaderSystemCode);
+    Status = MapMemory(&PageMap, (ULONGLONG)ImageContext->PhysicalAddress,
+                       ImageContext->ImagePages, LoaderSystemCode, TRUE);
     if(Status != STATUS_EFI_SUCCESS)
     {
+        /* Failed to map kernel image memory */
         return Status;
     }
 
