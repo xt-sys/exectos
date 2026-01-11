@@ -40,19 +40,17 @@ class Xtos
                                                   IN PULONG_PTR FrameBufferSize,
                                                   IN PXTBL_FRAMEBUFFER_MODE_INFORMATION FrameBufferModeInfo);
         STATIC XTCDECL EFI_STATUS GetMemoryDescriptorList(IN PXTBL_PAGE_MAPPING PageMap,
-                                                          IN PVOID *VirtualAddress,
                                                           OUT PLIST_ENTRY MemoryDescriptorList);
         STATIC XTCDECL EFI_STATUS GetSystemResourcesList(IN PXTBL_PAGE_MAPPING PageMap,
-                                                         IN PVOID *VirtualAddress,
                                                          OUT PLIST_ENTRY SystemResourcesList);
         STATIC XTCDECL EFI_STATUS InitializeApicBase(IN PXTBL_PAGE_MAPPING PageMap);
         STATIC XTCDECL EFI_STATUS InitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
-                                                        IN PVOID *VirtualAddress,
+                                                        OUT PKERNEL_INITIALIZATION_BLOCK *KernelParameters,
                                                         IN PXTBL_BOOT_PARAMETERS Parameters);
         STATIC XTCDECL EFI_STATUS LoadModule(IN PEFI_FILE_HANDLE BootDir,
                                              IN PWCHAR FileName,
-                                             IN PVOID VirtualAddress,
                                              IN LOADER_MEMORY_TYPE MemoryType,
+                                             IN OUT PXTBL_PAGE_MAPPING PageMap,
                                              OUT PPECOFF_IMAGE_CONTEXT *ImageContext);
         STATIC XTCDECL EFI_STATUS MapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap);
         STATIC XTCDECL EFI_STATUS MapMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
@@ -60,6 +58,8 @@ class Xtos
                                             IN ULONG NumberOfPages,
                                             IN LOADER_MEMORY_TYPE MemoryType,
                                             IN BOOLEAN KernelMapping);
+        STATIC XTCDECL PVOID PhysicalAddressToVirtual(PVOID PhysicalAddress);
+        STATIC XTCDECL EFI_STATUS PhysicalListToVirtual(IN OUT PLIST_ENTRY ListHead);
         STATIC XTCDECL EFI_STATUS RunBootSequence(IN PEFI_FILE_HANDLE BootDir,
                                                   IN PXTBL_BOOT_PARAMETERS Parameters);
 };
