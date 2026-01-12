@@ -232,7 +232,6 @@ Xtos::GetMemoryDescriptorList(IN PXTBL_PAGE_MAPPING PageMap,
         ListEntry = ListEntry->Flink;
     }
 
-    XtLdrProtocol->Debug.Print(L"Address: %llX, Pages: %llu\n", (ULONGLONG)PhysicalBase, Pages);
     PhysicalListToVirtual(MemoryDescriptorList);
 
     return STATUS_EFI_SUCCESS;
@@ -388,11 +387,14 @@ Xtos::InitializeApicBase(IN PXTBL_PAGE_MAPPING PageMap)
 /**
  * Initializes and maps the kernel initialization block.
  *
- * @param MemoryMappings
- *        Supplies a pointer to linked list containing all memory mappings.
+ * @param PageMap
+ *        Supplies a pointer to the page map.
  *
- * @param VirtualAddress
- *        Supplies a pointer to the next valid, free and available virtual address.
+ * @param KernelParameters
+ *        Returns a pointer to the kernel initialization block.
+ *
+ * @param Parameters
+ *        Supplies a list of input parameters passed to the kernel.
  *
  * @return This routine returns a status code.
  *
@@ -505,11 +507,11 @@ Xtos::InitializeModule(IN EFI_HANDLE ImageHandle,
  * @param FileName
  *        An on disk filename of the module that will be loaded.
  *
- * @param VirtualAddress
- *        Optional virtual address pointing to the memory area where PE/COFF file will be loaded.
- *
  * @param MemoryType
  *        Supplies the type of memory to be assigned to the memory descriptor.
+ *
+ * @param PageMap
+ *        Supplies pointer to the memory area where memory mappings will be stored.
  *
  * @param ImageContext
  *        Supplies pointer to the memory area where loaded PE/COFF image context will be stored.
@@ -596,7 +598,7 @@ Xtos::LoadModule(IN PEFI_FILE_HANDLE SystemDir,
 
     /* Print debug message */
     XtLdrProtocol->Debug.Print(L"Loaded '%S' at PA: %P, VA: %P\n", FileName, (*ImageContext)->PhysicalAddress,
-                               KSEG0_BASE + (ULONGLONG)(*ImageContext)->VirtualAddress);
+                               PhysicalAddressToVirtual((*ImageContext)->VirtualAddress));
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
