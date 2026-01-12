@@ -4,6 +4,7 @@
  * FILE:            xtldr/memory.cc
  * DESCRIPTION:     XT Boot Loader memory management
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ *                  Aiken Harris <harraiken91@gmail.com>
  */
 
 #include <xtldr.hh>
@@ -309,16 +310,68 @@ Memory::InitializePageMap(OUT PXTBL_PAGE_MAPPING PageMap,
 }
 
 /**
+ * Maps memory descriptor to the page mapping structure.
+ *
+ * @param PageMap
+ *        Supplies a pointer to the page mapping structure.
+ *
+ * @param Descriptor
+ *        Supplies a pointer to EFI memory descriptor, which will be mapped.
+ *
+ * @param BaseAddress
+ *        Supplies a base address, where EFI memory will be mapped.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+Memory::MapDescriptor(IN OUT PXTBL_PAGE_MAPPING PageMap,
+                      IN PEFI_MEMORY_DESCRIPTOR Descriptor,
+                      IN ULONG_PTR BaseAddress)
+{
+    LOADER_MEMORY_TYPE MemoryType;
+
+    /* Skip EFI reserved memory */
+    if(Descriptor->Type == EfiReservedMemoryType)
+    {
+        /* Skip EFI reserved memory */
+        return STATUS_EFI_SUCCESS;
+    }
+
+    /* Convert EFI memory type into XTLDR memory type */
+    MemoryType = Memory::GetLoaderMemoryType((EFI_MEMORY_TYPE)Descriptor->Type);
+
+    /* Do memory mappings depending on memory type */
+    if(MemoryType == LoaderFirmwareTemporary)
+    {
+        /* Map EFI firmware code */
+        return Memory::MapVirtualMemory(PageMap, Descriptor->PhysicalStart,
+                                        Descriptor->PhysicalStart, Descriptor->NumberOfPages, MemoryType);
+    }
+    else if(MemoryType != LoaderFree)
+    {
+        /* Add any non-free memory mappings based on provided base address */
+        return Memory::MapVirtualMemory(PageMap, (BaseAddress | Descriptor->PhysicalStart), Descriptor->PhysicalStart,
+                                        Descriptor->NumberOfPages, MemoryType);
+    }
+    else
+    {
+        /* Map all other memory as loader free */
+        return Memory::MapVirtualMemory(PageMap, (ULONGLONG)NULLPTR, Descriptor->PhysicalStart,
+                                        Descriptor->NumberOfPages, LoaderFree);
+    }
+}
+
+/**
  * Adds EFI memory mapping to the page mapping structure.
  *
  * @param PageMap
  *        Supplies a pointer to the page mapping structure.
  *
- * @param MemoryMapAddress
- *        Supplies a virtual address, where EFI memory will be mapped.
- *
- * @param GetMemoryTypeRoutine
- *        Supplies a pointer to the routine which will be used to match EFI memory type to the OS memory type.
+ * @param BaseAddress
+ *        Supplies a base address, where EFI memory will be mapped.
  *
  * @return This routine returns a status code.
  *
@@ -327,11 +380,9 @@ Memory::InitializePageMap(OUT PXTBL_PAGE_MAPPING PageMap,
 XTCDECL
 EFI_STATUS
 Memory::MapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
-                     IN OUT PVOID *MemoryMapAddress,
-                     IN PBL_GET_MEMTYPE_ROUTINE GetMemoryTypeRoutine)
+                     IN ULONG_PTR BaseAddress)
 {
     PEFI_MEMORY_DESCRIPTOR Descriptor;
-    LOADER_MEMORY_TYPE MemoryType;
     PEFI_MEMORY_MAP MemoryMap;
     SIZE_T DescriptorCount;
     ULONGLONG MaxAddress;
@@ -372,7 +423,7 @@ Memory::MapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
         /* Check page map level */
         if(PageMap->PageMapLevel == 2 || PageMap->PageMapLevel == 3)
         {
-            /* Check if physical address starts beyond 4GB */
+            /* Check if physical address starts beyond limit */
             if(Descriptor->PhysicalStart > MaxAddress)
             {
                 /* Go to the next descriptor */
@@ -383,49 +434,17 @@ Memory::MapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
             /* Check if memory descriptor exceeds the lowest physical page */
             if(Descriptor->PhysicalStart + (Descriptor->NumberOfPages << EFI_PAGE_SHIFT) > MaxAddress)
             {
-                /* Truncate memory descriptor to the 4GB */
+                /* Truncate memory descriptor to maximum supported address */
                 Descriptor->NumberOfPages = (((ULONGLONG)MaxAddress) - Descriptor->PhysicalStart) >> EFI_PAGE_SHIFT;
             }
         }
 
+        /* Map this descriptor and make sure it succeeded */
+        Status = MapDescriptor(PageMap, Descriptor, BaseAddress);
+        if(Status != STATUS_EFI_SUCCESS)
         {
-            /* Skip EFI reserved memory */
-            if(Descriptor->Type == EfiReservedMemoryType)
-            {
-                /* Go to the next descriptor */
-                Descriptor = (PEFI_MEMORY_DESCRIPTOR)((PUCHAR)Descriptor + MemoryMap->DescriptorSize);
-                continue;
-            }
-
-            /* Convert EFI memory type into XTLDR memory type */
-            MemoryType = GetLoaderMemoryType((EFI_MEMORY_TYPE)Descriptor->Type);
-
-            /* Do memory mappings depending on memory type */
-            if(MemoryType == LoaderFirmwareTemporary)
-            {
-                /* Map EFI firmware code */
-                Status = MapVirtualMemory(PageMap, Descriptor->PhysicalStart,
-                                          Descriptor->PhysicalStart, Descriptor->NumberOfPages, MemoryType);
-            }
-            else if(MemoryType != LoaderFree)
-            {
-                /* Add any non-free memory mapping */
-                Status = MapVirtualMemory(PageMap, KSEG0_BASE + Descriptor->PhysicalStart, Descriptor->PhysicalStart,
-                                          Descriptor->NumberOfPages, MemoryType);
-            }
-            else
-            {
-                /* Map all other memory as loader free */
-                Status = MapVirtualMemory(PageMap, (ULONGLONG)NULLPTR, Descriptor->PhysicalStart,
-                                          Descriptor->NumberOfPages, LoaderFree);
-            }
-
-            /* Make sure memory mapping succeeded */
-            if(Status != STATUS_EFI_SUCCESS)
-            {
-                /* Mapping failed */
-                return Status;
-            }
+            /* Mapping failed */
+            return Status;
         }
 
         /* Grab next descriptor */

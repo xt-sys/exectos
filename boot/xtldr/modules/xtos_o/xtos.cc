@@ -762,8 +762,7 @@ Xtos::RunBootSequence(IN PEFI_FILE_HANDLE BootDir,
     /* Initialize virtual memory mappings */
     XtLdrProtocol->Memory.InitializePageMap(&PageMap, DeterminePagingLevel(Parameters->Parameters), Size4K);
 
-    PVOID VirtualMemoryArea = (PVOID)KSEG0_BASE;
-    Status = XtLdrProtocol->Memory.MapEfiMemory(&PageMap, &VirtualMemoryArea, NULLPTR);
+    Status = XtLdrProtocol->Memory.MapEfiMemory(&PageMap, KSEG0_BASE);
     if(Status != STATUS_EFI_SUCCESS)
     {
         return Status;
