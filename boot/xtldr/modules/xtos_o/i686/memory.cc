@@ -45,6 +45,20 @@ Xtos::DeterminePagingLevel(IN CONST PWCHAR Parameters)
 }
 
 /**
+ * Returns the base address of the memory mapping.
+ *
+ * @return This routine returns the base address of the memory mapping.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+ULONG_PTR
+Xtos::GetBaseMappingAddress(VOID)
+{
+    return KSEG0_BASE;
+}
+
+/**
  * Builds the actual memory mapping page table and enables paging. This routine exits EFI boot services as well.
  *
  * @param PageMap

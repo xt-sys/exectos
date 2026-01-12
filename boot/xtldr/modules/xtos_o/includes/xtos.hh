@@ -35,6 +35,7 @@ class Xtos
     private:
         STATIC XTCDECL ULONG DeterminePagingLevel(IN CONST PWCHAR Parameters);
         STATIC XTCDECL EFI_STATUS EnablePaging(IN PXTBL_PAGE_MAPPING PageMap);
+        STATIC XTCDECL ULONG_PTR GetBaseMappingAddress(VOID);
         STATIC XTCDECL VOID GetDisplayInformation(OUT PSYSTEM_RESOURCE_FRAMEBUFFER FrameBufferResource,
                                                   IN PEFI_PHYSICAL_ADDRESS FrameBufferBase,
                                                   IN PULONG_PTR FrameBufferSize,

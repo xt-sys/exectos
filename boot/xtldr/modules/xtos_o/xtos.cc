@@ -554,7 +554,7 @@ Xtos::LoadModule(IN PEFI_FILE_HANDLE SystemDir,
     }
 
     /* Relocate the PE/COFF image file */
-    Status = PeCoffProtocol->RelocateImage(*ImageContext, KSEG0_BASE + (ULONGLONG)(*ImageContext)->PhysicalAddress);
+    Status = PeCoffProtocol->RelocateImage(*ImageContext, GetBaseMappingAddress() | (ULONGLONG)(*ImageContext)->PhysicalAddress);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Unable to relocate the file */
@@ -640,7 +640,7 @@ Xtos::MapMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
     if(KernelMapping)
     {
         /* Map memory based on kernel base address */
-        BaseAddress = KSEG0_BASE;
+        BaseAddress = GetBaseMappingAddress();
     }
     else
     {
@@ -666,7 +666,7 @@ XTCDECL
 PVOID
 Xtos::PhysicalAddressToVirtual(PVOID PhysicalAddress)
 {
-    return (PVOID)((ULONG_PTR)PhysicalAddress | KSEG0_BASE);
+    return (PVOID)((ULONG_PTR)PhysicalAddress | GetBaseMappingAddress());
 }
 
 /**
@@ -762,7 +762,7 @@ Xtos::RunBootSequence(IN PEFI_FILE_HANDLE BootDir,
     /* Initialize virtual memory mappings */
     XtLdrProtocol->Memory.InitializePageMap(&PageMap, DeterminePagingLevel(Parameters->Parameters), Size4K);
 
-    Status = XtLdrProtocol->Memory.MapEfiMemory(&PageMap, KSEG0_BASE);
+    Status = XtLdrProtocol->Memory.MapEfiMemory(&PageMap, GetBaseMappingAddress());
     if(Status != STATUS_EFI_SUCCESS)
     {
         return Status;
