@@ -42,8 +42,8 @@ MM::Colors::ComputePageColoring(VOID)
  */
 XTAPI
 PMMCOLOR_TABLES
-MM::Colors::GetFreePages(MMPAGELISTS PageList,
-                         ULONG Color)
+MM::Colors::GetFreePages(IN MMPAGELISTS PageList,
+                         IN ULONG Color)
 {
     /* Return a pointer to the requested color table entry */
     return &FreePages[PageList][Color];

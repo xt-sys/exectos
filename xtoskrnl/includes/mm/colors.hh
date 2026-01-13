@@ -25,8 +25,8 @@ namespace MM
 
         public:
             STATIC XTAPI VOID ComputePageColoring(VOID);
-            STATIC XTAPI PMMCOLOR_TABLES GetFreePages(MMPAGELISTS PageList,
-                                                      ULONG Color);
+            STATIC XTAPI PMMCOLOR_TABLES GetFreePages(IN MMPAGELISTS PageList,
+                                                      IN ULONG Color);
             STATIC XTAPI PMMPFNLIST GetModifiedPages(IN ULONG Color);
             STATIC XTAPI ULONG GetNextColor(VOID);
             STATIC XTAPI ULONG GetPagingColors(VOID);
