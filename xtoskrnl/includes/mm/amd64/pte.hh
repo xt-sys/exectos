@@ -33,21 +33,21 @@ namespace MM
             STATIC XTAPI VOID InitializePageTable(VOID);
             STATIC XTAPI VOID InitializeSystemPte(VOID);
             STATIC XTAPI VOID InitializeSystemPteSpace(VOID);
-            STATIC XTAPI VOID MapP5E(PVOID StartAddress,
-                                     PVOID EndAddress,
-                                     PMMP5E TemplateP5e);
-            STATIC XTAPI VOID MapPDE(PVOID StartAddress,
-                                     PVOID EndAddress,
-                                     PMMPDE TemplatePde);
-            STATIC XTAPI VOID MapPPE(PVOID StartAddress,
-                                     PVOID EndAddress,
-                                     PMMPPE TemplatePpe);
-            STATIC XTAPI VOID MapPTE(PVOID StartAddress,
-                                     PVOID EndAddress,
-                                     PMMPTE TemplatePte);
-            STATIC XTAPI VOID MapPXE(PVOID StartAddress,
-                                     PVOID EndAddress,
-                                     PMMPXE TemplatePxe);
+            STATIC XTAPI VOID MapP5E(IN PVOID StartAddress,
+                                     IN PVOID EndAddress,
+                                     IN PMMP5E TemplateP5e);
+            STATIC XTAPI VOID MapPDE(IN PVOID StartAddress,
+                                     IN PVOID EndAddress,
+                                     IN PMMPDE TemplatePde);
+            STATIC XTAPI VOID MapPPE(IN PVOID StartAddress,
+                                     IN PVOID EndAddress,
+                                     IN PMMPPE TemplatePpe);
+            STATIC XTAPI VOID MapPTE(IN PVOID StartAddress,
+                                     IN PVOID EndAddress,
+                                     IN PMMPTE TemplatePte);
+            STATIC XTAPI VOID MapPXE(IN PVOID StartAddress,
+                                     IN PVOID EndAddress,
+                                     IN PMMPXE TemplatePxe);
             STATIC XTAPI VOID ReleaseSystemPtes(IN PMMPTE StartingPte,
                                                 IN PFN_COUNT NumberOfPtes,
                                                 IN MMSYSTEM_PTE_POOL_TYPE SystemPtePoolType);

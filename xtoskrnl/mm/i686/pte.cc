@@ -130,9 +130,9 @@ MM::Pte::InitializePageTable(VOID)
  */
 XTAPI
 VOID
-MM::Pte::MapPPE(PVOID StartAddress,
-                PVOID EndAddress,
-                PMMPPE TemplatePpe)
+MM::Pte::MapPPE(IN PVOID StartAddress,
+                IN PVOID EndAddress,
+                IN PMMPPE TemplatePpe)
 {
     /* Just a stub on i686 platform */
     return;

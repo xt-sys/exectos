@@ -171,9 +171,9 @@ MM::Pte::InitializePageTable(VOID)
  */
 XTAPI
 VOID
-MM::Pte::MapP5E(PVOID StartAddress,
-                PVOID EndAddress,
-                PMMP5E TemplateP5e)
+MM::Pte::MapP5E(IN PVOID StartAddress,
+                IN PVOID EndAddress,
+                IN PMMP5E TemplateP5e)
 {
     PMMP5E EndSpace, PointerP5e;
 
@@ -218,9 +218,9 @@ MM::Pte::MapP5E(PVOID StartAddress,
  */
 XTAPI
 VOID
-MM::Pte::MapPPE(PVOID StartAddress,
-                PVOID EndAddress,
-                PMMPPE TemplatePpe)
+MM::Pte::MapPPE(IN PVOID StartAddress,
+                IN PVOID EndAddress,
+                IN PMMPPE TemplatePpe)
 {
     PMMPPE EndSpace, PointerPpe;
 
@@ -265,9 +265,9 @@ MM::Pte::MapPPE(PVOID StartAddress,
  */
 XTAPI
 VOID
-MM::Pte::MapPXE(PVOID StartAddress,
-                PVOID EndAddress,
-                PMMPXE TemplatePxe)
+MM::Pte::MapPXE(IN PVOID StartAddress,
+                IN PVOID EndAddress,
+                IN PMMPXE TemplatePxe)
 {
     PMMPXE EndSpace, PointerPxe;
 

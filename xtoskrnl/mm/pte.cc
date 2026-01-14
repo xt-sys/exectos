@@ -232,9 +232,9 @@ MM::Pte::InitializeSystemPteSpace(VOID)
  */
 XTAPI
 VOID
-MM::Pte::MapPDE(PVOID StartAddress,
-                PVOID EndAddress,
-                PMMPDE TemplatePde)
+MM::Pte::MapPDE(IN PVOID StartAddress,
+                IN PVOID EndAddress,
+                IN PMMPDE TemplatePde)
 {
     PMMPDE EndSpace, PointerPde;
 
@@ -279,9 +279,9 @@ MM::Pte::MapPDE(PVOID StartAddress,
  */
 XTAPI
 VOID
-MM::Pte::MapPTE(PVOID StartAddress,
-                PVOID EndAddress,
-                PMMPTE TemplatePte)
+MM::Pte::MapPTE(IN PVOID StartAddress,
+                IN PVOID EndAddress,
+                IN PMMPTE TemplatePte)
 {
     PMMPTE EndSpace, PointerPte;
 
