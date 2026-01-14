@@ -120,6 +120,21 @@ MM::Pte::GetValidPte()
 }
 
 /**
+ * Initializes the system's PTE.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::Pte::InitializeSystemPte(VOID)
+{
+    /* Initialize the PTE template */
+    MM::Paging::SetPte(&ValidPte, MM_PTE_VALID | MM_PTE_EXECUTE_READWRITE | MM_PTE_DIRTY | MM_PTE_ACCESSED);
+}
+
+/**
  * Formats a range of PTEs into a freelist-based pool for system allocations.
  *
  * @param StartingPte
