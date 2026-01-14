@@ -190,6 +190,7 @@ MM::Pfn::ProcessMemoryDescriptor(IN PFN_NUMBER BasePage,
                                  IN LOADER_MEMORY_TYPE MemoryType)
 {
     PFN_NUMBER PageNumber;
+    PMMPDE PointerPde;
     PMMPFN Pfn;
 
     /* Check if the memory descriptor describes a free memory region */
@@ -227,17 +228,24 @@ MM::Pfn::ProcessMemoryDescriptor(IN PFN_NUMBER BasePage,
                     /* Get the PFN entry for the current ROM page */
                     Pfn = GetPfnEntry(BasePage + PageNumber);
 
-                    /* Initialize the PFN entry to represent a ROM page */
-                    Pfn->PteAddress = 0;
-                    Pfn->u1.Flink = 0;
-                    Pfn->u2.ShareCount = 0;
-                    Pfn->u3.e1.CacheAttribute = PfnNonCached;
-                    Pfn->u3.e1.PageLocation = 0;
-                    Pfn->u3.e1.PrototypePte = 1;
-                    Pfn->u3.e1.Rom = 1;
-                    Pfn->u3.e2.ReferenceCount = 0;
-                    Pfn->u4.InPageError = 0;
-                    Pfn->u4.PteFrame = 0;
+                    /* Ensure that the page is not already in-use */
+                    if(Pfn->u3.e2.ReferenceCount == 0)
+                    {
+                        /* Get the page directory entry for the current page */
+                        PointerPde = MM::Paging::GetPdeAddress((PVOID)(KSEG0_BASE + (BasePage << MM_PAGE_SHIFT)));
+
+                        /* Initialize the PFN entry to represent a ROM page */
+                        Pfn->PteAddress = MM::Paging::GetPteAddress((PVOID)(KSEG0_BASE + (BasePage << MM_PAGE_SHIFT)));
+                        Pfn->u1.Flink = 0;
+                        Pfn->u2.ShareCount = 0;
+                        Pfn->u3.e1.CacheAttribute = PfnCached;
+                        Pfn->u3.e1.PageLocation = 0;
+                        Pfn->u3.e1.PrototypePte = 1;
+                        Pfn->u3.e1.Rom = 1;
+                        Pfn->u3.e2.ReferenceCount = 0;
+                        Pfn->u4.InPageError = 0;
+                        Pfn->u4.PteFrame = MM::Paging::GetPageFrameNumber(PointerPde);
+                    }
                 }
                 break;
             default:
@@ -247,8 +255,20 @@ MM::Pfn::ProcessMemoryDescriptor(IN PFN_NUMBER BasePage,
                     /* Get the PFN entry for the current in-use page */
                     Pfn = GetPfnEntry(BasePage + PageNumber);
 
-                    /* Mark the PFN as active and valid to prevent it from being allocated */
-                    Pfn->u3.e1.PageLocation = ActiveAndValid;
+                    /* Ensure that the page is not already in-use */
+                    if(Pfn->u3.e2.ReferenceCount == 0)
+                    {
+                        /* Get the page directory entry for the current page */
+                        PointerPde = MM::Paging::GetPdeAddress((PVOID)(KSEG0_BASE + (BasePage << MM_PAGE_SHIFT)));
+
+                        /* Initialize the PFN entry to represent an in-use page and prevent it from being allocated */
+                        Pfn->PteAddress = MM::Paging::GetPteAddress((PVOID)(KSEG0_BASE + (BasePage << MM_PAGE_SHIFT)));
+                        Pfn->u2.ShareCount++;
+                        Pfn->u3.e1.CacheAttribute = PfnCached;
+                        Pfn->u3.e1.PageLocation = ActiveAndValid;
+                        Pfn->u3.e2.ReferenceCount = 1;
+                        Pfn->u4.PteFrame = MM::Paging::GetPageFrameNumber(PointerPde);
+                    }
                 }
                 break;
         }
