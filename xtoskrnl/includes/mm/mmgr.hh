@@ -22,6 +22,7 @@ namespace MM
             STATIC PFN_NUMBER NumberOfSystemPtes;
 
         public:
+            STATIC XTAPI ULONG_PTR GetInstalledMemorySize(VOID);
             STATIC XTAPI PMMMEMORY_LAYOUT GetMemoryLayout(VOID);
             STATIC XTAPI PFN_NUMBER GetNumberOfSystemPtes();
             STATIC XTAPI VOID InitializeMemoryLayout(VOID);

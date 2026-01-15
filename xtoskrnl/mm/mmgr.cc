@@ -11,6 +11,21 @@
 
 
 /**
+ * Retrieves the amount of total available memory in the system.
+ *
+ * @return This routine returns the amount of available memory in the system in megabytes.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG_PTR
+MM::Manager::GetInstalledMemorySize(VOID)
+{
+    /* Return the amount of installed memory */
+    return (MM::Pfn::GetNumberOfPhysicalPages() * MM_PAGE_SIZE) / 1048576;
+}
+
+/**
  * Retrieves a pointer to the system's virtual memory layout structure.
  *
  * @return This routine returns a pointer to the memory layout structure.
