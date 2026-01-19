@@ -23,17 +23,6 @@ XTAPI
 BOOLEAN
 MM::Pte::AddressValid(IN PVOID VirtualAddress)
 {
-    /* Check XPA status */
-    if(MM::Paging::GetXpaStatus())
-    {
-        /* Check if the P5E is valid */
-        if(!MM::Paging::PteValid(MM::Paging::GetPpeAddress(VirtualAddress)))
-        {
-            /* Invalid PPE, return FALSE */
-            return FALSE;
-        }
-    }
-
     /* Check if PDE and PTE are valid */
     if(!MM::Paging::PteValid(MM::Paging::GetPdeAddress(VirtualAddress)) ||
        !MM::Paging::PteValid(MM::Paging::GetPteAddress(VirtualAddress)))
