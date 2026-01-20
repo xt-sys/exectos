@@ -1066,6 +1066,8 @@ Protocol::InstallXtLoaderProtocol()
     LoaderProtocol.Memory.MapPage = Memory::MapPage;
     LoaderProtocol.Memory.MapVirtualMemory = Memory::MapVirtualMemory;
     LoaderProtocol.Memory.MoveMemory = RTL::Memory::MoveMemory;
+    LoaderProtocol.Memory.PhysicalAddressToVirtual = Memory::PhysicalAddressToVirtual;
+    LoaderProtocol.Memory.PhysicalListToVirtual = Memory::PhysicalListToVirtual;
     LoaderProtocol.Memory.SetMemory = RTL::Memory::SetMemory;
     LoaderProtocol.Memory.ZeroMemory = RTL::Memory::ZeroMemory;
     LoaderProtocol.Protocol.Close = CloseProtocol;

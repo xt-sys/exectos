@@ -157,20 +157,6 @@ Xtos::EnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
 }
 
 /**
- * Returns the base address of the memory mapping.
- *
- * @return This routine returns the base address of the memory mapping.
- *
- * @since XT 1.0
- */
-XTCDECL
-ULONG_PTR
-Xtos::GetBaseMappingAddress(VOID)
-{
-    return KSEG0_BASE;
-}
-
-/**
  * Maps the page table for hardware layer addess space.
  *
  * @param PageMap

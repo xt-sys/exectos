@@ -191,6 +191,7 @@ Xtos::GetDisplayInformation(OUT PSYSTEM_RESOURCE_FRAMEBUFFER FrameBufferResource
 XTCDECL
 EFI_STATUS
 Xtos::GetMemoryDescriptorList(IN PXTBL_PAGE_MAPPING PageMap,
+                              IN PVOID *VirtualAddress,
                               OUT PLIST_ENTRY MemoryDescriptorList)
 {
     EFI_PHYSICAL_ADDRESS Address;
@@ -205,7 +206,7 @@ Xtos::GetMemoryDescriptorList(IN PXTBL_PAGE_MAPPING PageMap,
         return Status;
     }
 
-    Status = MapMemory(PageMap, Address, Pages, LoaderMemoryData, TRUE);
+    Status = XtLdrProtocol->Memory.MapVirtualMemory(PageMap, (ULONGLONG)*VirtualAddress, Address, Pages, LoaderMemoryData);
     if(Status != STATUS_EFI_SUCCESS)
     {
         XtLdrProtocol->Memory.FreePages(Address, Pages);
@@ -213,14 +214,13 @@ Xtos::GetMemoryDescriptorList(IN PXTBL_PAGE_MAPPING PageMap,
     }
 
     PVOID PhysicalBase = (PVOID)Address;
-    PVOID CurrentDescriptor = PhysicalBase;
 
     PLIST_ENTRY ListEntry;
     ListEntry = PageMap->MemoryMap.Flink;
     while(ListEntry != &PageMap->MemoryMap)
     {
         PXTBL_MEMORY_MAPPING MemoryMapping = CONTAIN_RECORD(ListEntry, XTBL_MEMORY_MAPPING, ListEntry);
-        PLOADER_MEMORY_DESCRIPTOR MemoryDescriptor = (PLOADER_MEMORY_DESCRIPTOR)CurrentDescriptor;
+        PLOADER_MEMORY_DESCRIPTOR MemoryDescriptor = (PLOADER_MEMORY_DESCRIPTOR)Address;
 
         MemoryDescriptor->MemoryType = MemoryMapping->MemoryType;
         MemoryDescriptor->BasePage = (UINT_PTR)MemoryMapping->PhysicalAddress / EFI_PAGE_SIZE;
@@ -228,11 +228,11 @@ Xtos::GetMemoryDescriptorList(IN PXTBL_PAGE_MAPPING PageMap,
 
         XtLdrProtocol->LinkedList.InsertTail(MemoryDescriptorList, &MemoryDescriptor->ListEntry);
 
-        CurrentDescriptor = (PUINT8)CurrentDescriptor + sizeof(LOADER_MEMORY_DESCRIPTOR);
+        Address = Address + sizeof(LOADER_MEMORY_DESCRIPTOR);
         ListEntry = ListEntry->Flink;
     }
 
-    PhysicalListToVirtual(MemoryDescriptorList);
+    XtLdrProtocol->Memory.PhysicalListToVirtual(PageMap, MemoryDescriptorList, PhysicalBase, *VirtualAddress);
 
     return STATUS_EFI_SUCCESS;
 }
@@ -240,6 +240,7 @@ Xtos::GetMemoryDescriptorList(IN PXTBL_PAGE_MAPPING PageMap,
 XTCDECL
 EFI_STATUS
 Xtos::GetSystemResourcesList(IN PXTBL_PAGE_MAPPING PageMap,
+                             IN PVOID *VirtualAddress,
                              OUT PLIST_ENTRY SystemResourcesList)
 {
     XTSTATUS Status;
@@ -256,6 +257,7 @@ Xtos::GetSystemResourcesList(IN PXTBL_PAGE_MAPPING PageMap,
     PSYSTEM_RESOURCE_ACPI AcpiResource;
     ULONGLONG Pages;
     EFI_PHYSICAL_ADDRESS Address;
+    PVOID PhysicalBase, VirtualBase;
 
     Pages = (ULONGLONG)EFI_SIZE_TO_PAGES(sizeof(SYSTEM_RESOURCE_ACPI) + sizeof(SYSTEM_RESOURCE_FRAMEBUFFER));
 
@@ -264,13 +266,18 @@ Xtos::GetSystemResourcesList(IN PXTBL_PAGE_MAPPING PageMap,
     {
         return Status;
     }
-
-    Status = MapMemory(PageMap, Address, Pages, LoaderFirmwarePermanent, TRUE);
+    Status = XtLdrProtocol->Memory.MapVirtualMemory(PageMap, (ULONGLONG)*VirtualAddress, Address, Pages, LoaderFirmwarePermanent);
     if(Status != STATUS_EFI_SUCCESS)
     {
         XtLdrProtocol->Memory.FreePages(Address, Pages);
         return Status;
     }
+
+    PhysicalBase = (PVOID)Address;
+    VirtualBase = *VirtualAddress;
+
+    /* Calculate next valid virtual address */
+    *VirtualAddress = (PUINT8)*VirtualAddress + (Pages * EFI_PAGE_SIZE);
 
     AcpiResource = (PSYSTEM_RESOURCE_ACPI)Address;
 
@@ -287,7 +294,7 @@ Xtos::GetSystemResourcesList(IN PXTBL_PAGE_MAPPING PageMap,
     AcpiResource->Header.ResourceSize = sizeof(SYSTEM_RESOURCE_ACPI);
 
     /* Get APIC and XSDP/RSDP addresses */
-    AcpiProtocol->GetApicBase((PVOID *)&AcpiResource->ApicBase);
+    AcpiProtocol->GetApicBase(&AcpiResource->ApicBase);
     AcpiProtocol->GetAcpiDescriptionPointer(&AcpiResource->Header.PhysicalAddress);
 
     /* No need to map ACPI */
@@ -326,19 +333,21 @@ Xtos::GetSystemResourcesList(IN PXTBL_PAGE_MAPPING PageMap,
     FrameBufferPages = EFI_SIZE_TO_PAGES(FbSize);
 
     /* Rewrite framebuffer address by using virtual address */
-    FrameBufferResource->Header.VirtualAddress = PhysicalAddressToVirtual(FrameBufferResource->Header.PhysicalAddress);
+    FrameBufferResource->Header.VirtualAddress = *VirtualAddress;
 
     /* Map frame buffer memory */
     XtLdrProtocol->Memory.MapVirtualMemory(PageMap, (ULONGLONG)FrameBufferResource->Header.VirtualAddress,
                                            (ULONGLONG)FrameBufferResource->Header.PhysicalAddress,
-                                           FrameBufferPages, LoaderHardwareCachedMemory);
+                                           FrameBufferPages, LoaderFirmwarePermanent);
 
     /* Close FrameBuffer protocol */
     XtLdrProtocol->Protocol.Close(&ProtocolHandle, &FrameBufGuid);
 
+    *VirtualAddress = (PUINT8)*VirtualAddress + (FrameBufferPages * EFI_PAGE_SIZE);
+
     XtLdrProtocol->LinkedList.InsertTail(SystemResourcesList, &FrameBufferResource->Header.ListEntry);
 
-    PhysicalListToVirtual(SystemResourcesList);
+    XtLdrProtocol->Memory.PhysicalListToVirtual(PageMap, SystemResourcesList, PhysicalBase, VirtualBase);
 
     return STATUS_EFI_SUCCESS;
 }
@@ -360,7 +369,7 @@ Xtos::InitializeApicBase(IN PXTBL_PAGE_MAPPING PageMap)
     EFI_GUID AcpiGuid = XT_ACPI_PROTOCOL_GUID;
     PXTBL_ACPI_PROTOCOL AcpiProtocol;
     EFI_HANDLE ProtocolHandle;
-    EFI_PHYSICAL_ADDRESS ApicBaseAddress;
+    PVOID ApicBaseAddress;
     EFI_STATUS Status;
 
     /* Open ACPI protocol */
@@ -372,7 +381,7 @@ Xtos::InitializeApicBase(IN PXTBL_PAGE_MAPPING PageMap)
     }
 
     /* Get APIC base address */
-    Status = AcpiProtocol->GetApicBase((PVOID *)&ApicBaseAddress);
+    Status = AcpiProtocol->GetApicBase(&ApicBaseAddress);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to get APIC base address */
@@ -380,21 +389,18 @@ Xtos::InitializeApicBase(IN PXTBL_PAGE_MAPPING PageMap)
     }
 
     /* Map APIC base address */
-    XtLdrProtocol->Memory.MapVirtualMemory(PageMap, APIC_BASE, ApicBaseAddress, 1, LoaderFirmwarePermanent);
+    XtLdrProtocol->Memory.MapVirtualMemory(PageMap, APIC_BASE, (ULONGLONG)ApicBaseAddress, 1, LoaderFirmwarePermanent);
     return STATUS_EFI_SUCCESS;
 }
 
 /**
  * Initializes and maps the kernel initialization block.
  *
- * @param PageMap
- *        Supplies a pointer to the page map.
+ * @param MemoryMappings
+ *        Supplies a pointer to linked list containing all memory mappings.
  *
- * @param KernelParameters
- *        Returns a pointer to the kernel initialization block.
- *
- * @param Parameters
- *        Supplies a list of input parameters passed to the kernel.
+ * @param VirtualAddress
+ *        Supplies a pointer to the next valid, free and available virtual address.
  *
  * @return This routine returns a status code.
  *
@@ -403,7 +409,7 @@ Xtos::InitializeApicBase(IN PXTBL_PAGE_MAPPING PageMap)
 XTCDECL
 EFI_STATUS
 Xtos::InitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
-                            OUT PKERNEL_INITIALIZATION_BLOCK *KernelParameters,
+                            IN PVOID *VirtualAddress,
                             IN PXTBL_BOOT_PARAMETERS Parameters)
 {
     PKERNEL_INITIALIZATION_BLOCK LoaderBlock;
@@ -411,7 +417,6 @@ Xtos::InitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
     EFI_STATUS Status;
     UINT BlockPages;
     UINT ParametersSize;
-    ULONGLONG LoaderBlockVa;
 
     /* Calculate size of parameters */
     ParametersSize = (XtLdrProtocol->WideString.Length(Parameters->Parameters, 0) + 1) * sizeof(WCHAR);
@@ -444,29 +449,25 @@ Xtos::InitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
     // LoaderBlock->FirmwareInformation.EfiFirmware.EfiVersion = EfiSystemTable->Hdr.Revision;
     LoaderBlock->FirmwareInformation.EfiFirmware.EfiRuntimeServices = NULLPTR;
 
-    /* Get the KSEG0-based virtual address for the loader block */
-    LoaderBlockVa = (ULONGLONG)PhysicalAddressToVirtual(LoaderBlock);
-    *KernelParameters = (PKERNEL_INITIALIZATION_BLOCK)LoaderBlockVa;
-
     /* Copy parameters to kernel initialization block */
-    LoaderBlock->KernelParameters = (PWCHAR)(LoaderBlockVa + sizeof(KERNEL_INITIALIZATION_BLOCK));
+    LoaderBlock->KernelParameters = (PWCHAR)((UINT_PTR)*VirtualAddress + sizeof(KERNEL_INITIALIZATION_BLOCK));
     XtLdrProtocol->Memory.CopyMemory((PVOID)((UINT_PTR)LoaderBlock + sizeof(KERNEL_INITIALIZATION_BLOCK)),
                   Parameters->Parameters,
                   ParametersSize);
 
     /* Map kernel initialization block */
-    Status = MapMemory(PageMap, (ULONGLONG)LoaderBlock, BlockPages, LoaderSystemBlock, TRUE);
-    if(Status != STATUS_EFI_SUCCESS)
-    {
-        return Status;
-    }
+    XtLdrProtocol->Memory.MapVirtualMemory(PageMap, (ULONGLONG)*VirtualAddress, (ULONGLONG)LoaderBlock,
+                                           BlockPages, LoaderSystemBlock);
+
+    /* Calculate next valid virtual address */
+    *VirtualAddress = (PUINT8)*VirtualAddress + (BlockPages * EFI_PAGE_SIZE);
 
     XtLdrProtocol->LinkedList.InitializeHead(&LoaderBlock->SystemResourcesListHead);
-    GetSystemResourcesList(PageMap, &LoaderBlock->SystemResourcesListHead);
+    GetSystemResourcesList(PageMap, VirtualAddress, &LoaderBlock->SystemResourcesListHead);
 
     /* Initialize memory descriptor list */
     XtLdrProtocol->LinkedList.InitializeHead(&LoaderBlock->MemoryDescriptorListHead);
-    GetMemoryDescriptorList(PageMap, &LoaderBlock->MemoryDescriptorListHead);
+    GetMemoryDescriptorList(PageMap, VirtualAddress, &LoaderBlock->MemoryDescriptorListHead);
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
@@ -507,11 +508,11 @@ Xtos::InitializeModule(IN EFI_HANDLE ImageHandle,
  * @param FileName
  *        An on disk filename of the module that will be loaded.
  *
+ * @param VirtualAddress
+ *        Optional virtual address pointing to the memory area where PE/COFF file will be loaded.
+ *
  * @param MemoryType
  *        Supplies the type of memory to be assigned to the memory descriptor.
- *
- * @param PageMap
- *        Supplies pointer to the memory area where memory mappings will be stored.
  *
  * @param ImageContext
  *        Supplies pointer to the memory area where loaded PE/COFF image context will be stored.
@@ -524,8 +525,8 @@ XTCDECL
 EFI_STATUS
 Xtos::LoadModule(IN PEFI_FILE_HANDLE SystemDir,
                  IN PWCHAR FileName,
+                 IN PVOID VirtualAddress,
                  IN LOADER_MEMORY_TYPE MemoryType,
-                 IN OUT PXTBL_PAGE_MAPPING PageMap,
                  OUT PPECOFF_IMAGE_CONTEXT *ImageContext)
 {
     PEFI_FILE_HANDLE ModuleHandle;
@@ -544,21 +545,12 @@ Xtos::LoadModule(IN PEFI_FILE_HANDLE SystemDir,
         return Status;
     }
 
-    /* Load the PE/COFF image file into memory */
-    Status = PeCoffProtocol->LoadImage(ModuleHandle, MemoryType, NULLPTR, (PVOID*)ImageContext);
+    /* Load the PE/COFF image file */
+    Status = PeCoffProtocol->LoadImage(ModuleHandle, MemoryType, VirtualAddress, (PVOID*)ImageContext);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Unable to load the file */
         XtLdrProtocol->Debug.Print(L"ERROR: Failed to load '%S'\n", FileName);
-        return Status;
-    }
-
-    /* Relocate the PE/COFF image file */
-    Status = PeCoffProtocol->RelocateImage(*ImageContext, GetBaseMappingAddress() | (ULONGLONG)(*ImageContext)->PhysicalAddress);
-    if(Status != STATUS_EFI_SUCCESS)
-    {
-        /* Unable to relocate the file */
-        XtLdrProtocol->Debug.Print(L"ERROR: Failed to relocate '%S'\n", FileName);
         return Status;
     }
 
@@ -583,133 +575,9 @@ Xtos::LoadModule(IN PEFI_FILE_HANDLE SystemDir,
         XtLdrProtocol->Debug.Print(L"WARNING: Loaded PE/COFF image with non-XT subsystem set\n");
     }
 
-    /* Ensure that page map is provided */
-    if(PageMap != NULLPTR)
-    {
-        /* Add kernel image memory mapping */
-        Status = MapMemory(PageMap, (ULONGLONG)(*ImageContext)->PhysicalAddress,
-                           (*ImageContext)->ImagePages, LoaderSystemCode, TRUE);
-        if(Status != STATUS_EFI_SUCCESS)
-        {
-            /* Failed to map kernel image memory */
-            return Status;
-        }
-    }
-
     /* Print debug message */
-    XtLdrProtocol->Debug.Print(L"Loaded '%S' at PA: %P, VA: %P\n", FileName, (*ImageContext)->PhysicalAddress,
-                               PhysicalAddressToVirtual((*ImageContext)->VirtualAddress));
-
-    /* Return success */
-    return STATUS_EFI_SUCCESS;
-}
-
-/**
- * Adds a physical to virtual address mapping.
- *
- * @param PageMap
- *        Supplies a pointer to the page mapping structure.
- *
- * @param PhysicalAddress
- *        Supplies a physical address which will be mapped.
- *
- * @param NumberOfPages
- *        Supplies a number of pages that will be mapped.
- *
- * @param MemoryType
- *        Supplies the type of mapped memory that will be assigned to the memory descriptor.
- *
- * @param KernelMapping
- *        Supplies a flag that indicates if mapping should be done in kernel mode or if identity mapping should be used.
- *
- * @return This routine returns a status code.
- *
- * @since XT 1.0
- */
-XTCDECL
-EFI_STATUS
-Xtos::MapMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
-                IN ULONGLONG Address,
-                IN ULONG NumberOfPages,
-                IN LOADER_MEMORY_TYPE MemoryType,
-                IN BOOLEAN KernelMapping)
-{
-    ULONGLONG BaseAddress;
-
-    /* Check if kernel mode mapping */
-    if(KernelMapping)
-    {
-        /* Map memory based on kernel base address */
-        BaseAddress = GetBaseMappingAddress();
-    }
-    else
-    {
-        /* Use identity mapping */
-        BaseAddress = (ULONGLONG)NULLPTR;
-    }
-
-    /* Map memory and return status code */
-    return XtLdrProtocol->Memory.MapVirtualMemory(PageMap, BaseAddress + Address, Address, NumberOfPages, MemoryType);
-}
-
-/**
- * Converts physical address to virtual address.
- *
- * @param PhysicalAddress
- *        Specifies physical address that will be converted to virtual address.
- *
- * @return This routine returns a mapped virtual address.
- *
- * @since XT 1.0
- */
-XTCDECL
-PVOID
-Xtos::PhysicalAddressToVirtual(PVOID PhysicalAddress)
-{
-    return (PVOID)((ULONG_PTR)PhysicalAddress | GetBaseMappingAddress());
-}
-
-/**
- * Converts whole linked list addressing from physical to virtual for future use after enabling paging.
- *
- * @param ListHead
- *        Supplies a pointer to a structure that serves as the list header.
- *
- * @return This routine returns a status code.
- *
- * @since XT 1.0
- */
-XTCDECL
-EFI_STATUS
-Xtos::PhysicalListToVirtual(IN OUT PLIST_ENTRY ListHead)
-{
-    PLIST_ENTRY ListEntry, NextEntry;
-
-    /* Make sure list is properly initialized */
-    if(ListHead->Flink == 0 || ListHead->Blink == 0)
-    {
-        /* List not initialized, return error code */
-        return STATUS_EFI_INVALID_PARAMETER;
-    }
-
-    /* Iterate through the list */
-    ListEntry = ListHead->Flink;
-    while(ListEntry != ListHead)
-    {
-        /* Store the next entry */
-        NextEntry = ListEntry->Flink;
-
-        /* Convert the list entry */
-        ListEntry->Flink = (PLIST_ENTRY)PhysicalAddressToVirtual(ListEntry->Flink);
-        ListEntry->Blink = (PLIST_ENTRY)PhysicalAddressToVirtual(ListEntry->Blink);
-
-        /* Get the next element */
-        ListEntry = NextEntry;
-    }
-
-    /* Convert the list head */
-    ListHead->Flink = (PLIST_ENTRY)PhysicalAddressToVirtual(ListHead->Flink);
-    ListHead->Blink = (PLIST_ENTRY)PhysicalAddressToVirtual(ListHead->Blink);
+    XtLdrProtocol->Debug.Print(L"Loaded %S at PA: %P, VA: %P\n", FileName,
+                               (*ImageContext)->PhysicalAddress, (*ImageContext)->VirtualAddress);
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
@@ -739,6 +607,7 @@ Xtos::RunBootSequence(IN PEFI_FILE_HANDLE BootDir,
     PXTBL_FRAMEBUFFER_PROTOCOL FrameBufProtocol;
     PPECOFF_IMAGE_CONTEXT ImageContext = NULLPTR;
     PEFI_LOADED_IMAGE_PROTOCOL ImageProtocol;
+    PVOID VirtualAddress, VirtualMemoryArea;
     PXT_ENTRY_POINT KernelEntryPoint;
     EFI_HANDLE ProtocolHandle;
     EFI_STATUS Status;
@@ -759,22 +628,38 @@ Xtos::RunBootSequence(IN PEFI_FILE_HANDLE BootDir,
     /* Close FrameBuffer protocol */
     XtLdrProtocol->Protocol.Close(&ProtocolHandle, &FrameBufGuid);
 
+    /* Set base virtual memory area for the kernel mappings */
+    VirtualMemoryArea = (PVOID)KSEG0_BASE;
+    VirtualAddress = (PVOID)(KSEG0_BASE + KSEG0_KERNEL_BASE);
+
     /* Initialize virtual memory mappings */
     XtLdrProtocol->Memory.InitializePageMap(&PageMap, DeterminePagingLevel(Parameters->Parameters), Size4K);
 
-    Status = XtLdrProtocol->Memory.MapEfiMemory(&PageMap, GetBaseMappingAddress());
+    Status = XtLdrProtocol->Memory.MapEfiMemory(&PageMap, &VirtualMemoryArea, NULLPTR);
     if(Status != STATUS_EFI_SUCCESS)
     {
         return Status;
     }
 
     /* Load the kernel */
-    Status = LoadModule(BootDir, Parameters->KernelFile, LoaderSystemCode, &PageMap, &ImageContext);
+    Status = LoadModule(BootDir, Parameters->KernelFile, VirtualAddress, LoaderSystemCode, &ImageContext);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to load the kernel */
         return Status;
     }
+
+    /* Add kernel image memory mapping */
+    Status = XtLdrProtocol->Memory.MapVirtualMemory(&PageMap, (ULONGLONG)ImageContext->VirtualAddress,
+                                                    (ULONGLONG)ImageContext->PhysicalAddress, ImageContext->ImagePages,
+                                                    LoaderSystemCode);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        return Status;
+    }
+
+    /* Set next valid virtual address right after the kernel */
+    VirtualAddress = (PUINT8)VirtualAddress + (ImageContext->ImagePages * EFI_PAGE_SIZE);
 
     /* Find and map APIC base address */
     Status = InitializeApicBase(&PageMap);
@@ -785,8 +670,11 @@ Xtos::RunBootSequence(IN PEFI_FILE_HANDLE BootDir,
         return Status;
     }
 
+    /* Store virtual address of kernel initialization block for future kernel call */
+    KernelParameters = (PKERNEL_INITIALIZATION_BLOCK)VirtualAddress;
+
     /* Setup and map kernel initialization block */
-    Status = InitializeLoaderBlock(&PageMap, &KernelParameters, Parameters);
+    Status = InitializeLoaderBlock(&PageMap, &VirtualAddress, Parameters);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to setup kernel initialization block */

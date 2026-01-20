@@ -168,7 +168,6 @@ class Memory
         STATIC XTCDECL EFI_STATUS FreePages(IN ULONGLONG NumberOfPages,
                                             IN EFI_PHYSICAL_ADDRESS Memory);
         STATIC XTCDECL EFI_STATUS FreePool(IN PVOID Memory);
-        STATIC XTCDECL LOADER_MEMORY_TYPE GetLoaderMemoryType(IN EFI_MEMORY_TYPE EfiMemoryType);
         STATIC XTCDECL VOID GetMappingsCount(IN PXTBL_PAGE_MAPPING PageMap,
                                              OUT PULONG NumberOfMappings);
         STATIC XTCDECL EFI_STATUS GetMemoryMap(OUT PEFI_MEMORY_MAP MemoryMap);
@@ -178,7 +177,8 @@ class Memory
                                               IN SHORT PageMapLevel,
                                               IN PAGE_SIZE PageSize);
         STATIC XTCDECL EFI_STATUS MapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
-                                               IN ULONG_PTR BaseAddress);
+                                               IN OUT PVOID *MemoryMapAddress,
+                                               IN PBL_GET_MEMTYPE_ROUTINE GetMemoryTypeRoutine);
         STATIC XTCDECL EFI_STATUS MapPage(IN PXTBL_PAGE_MAPPING PageMap,
                                           IN ULONGLONG VirtualAddress,
                                           IN ULONGLONG PhysicalAddress,
@@ -188,15 +188,20 @@ class Memory
                                                    IN ULONGLONG PhysicalAddress,
                                                    IN ULONGLONG NumberOfPages,
                                                    IN LOADER_MEMORY_TYPE MemoryType);
+        STATIC XTCDECL PVOID PhysicalAddressToVirtual(IN PVOID PhysicalAddress,
+                                                      IN PVOID PhysicalBase,
+                                                      IN PVOID VirtualBase);
+        STATIC XTCDECL EFI_STATUS PhysicalListToVirtual(IN PXTBL_PAGE_MAPPING PageMap,
+                                                        IN OUT PLIST_ENTRY ListHead,
+                                                        IN PVOID PhysicalBase,
+                                                        IN PVOID VirtualBase);
 
     private:
+        STATIC XTCDECL LOADER_MEMORY_TYPE GetLoaderMemoryType(IN EFI_MEMORY_TYPE EfiMemoryType);
         STATIC XTCDECL EFI_STATUS GetNextPageTable(IN PXTBL_PAGE_MAPPING PageMap,
                                                    IN PVOID PageTable,
                                                    IN SIZE_T Entry,
                                                    OUT PVOID *NextPageTable);
-        STATIC XTCDECL EFI_STATUS MapDescriptor(IN OUT PXTBL_PAGE_MAPPING PageMap,
-                                                IN PEFI_MEMORY_DESCRIPTOR Descriptor,
-                                                IN ULONG_PTR BaseAddress);
         STATIC XTCDECL EFI_STATUS SelfMapPml(IN PXTBL_PAGE_MAPPING PageMap,
                                              IN ULONG_PTR SelfMapAddress);
 };
