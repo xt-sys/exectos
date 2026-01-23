@@ -607,7 +607,7 @@ Xtos::RunBootSequence(IN PEFI_FILE_HANDLE BootDir,
     PXTBL_FRAMEBUFFER_PROTOCOL FrameBufProtocol;
     PPECOFF_IMAGE_CONTEXT ImageContext = NULLPTR;
     PEFI_LOADED_IMAGE_PROTOCOL ImageProtocol;
-    PVOID VirtualAddress, VirtualMemoryArea;
+    PVOID VirtualAddress;
     PXT_ENTRY_POINT KernelEntryPoint;
     EFI_HANDLE ProtocolHandle;
     EFI_STATUS Status;
@@ -629,13 +629,12 @@ Xtos::RunBootSequence(IN PEFI_FILE_HANDLE BootDir,
     XtLdrProtocol->Protocol.Close(&ProtocolHandle, &FrameBufGuid);
 
     /* Set base virtual memory area for the kernel mappings */
-    VirtualMemoryArea = (PVOID)KSEG0_BASE;
-    VirtualAddress = (PVOID)(KSEG0_BASE + KSEG0_KERNEL_BASE);
+    VirtualAddress = (PVOID)(KSEG0_BASE);
 
     /* Initialize virtual memory mappings */
     XtLdrProtocol->Memory.InitializePageMap(&PageMap, DeterminePagingLevel(Parameters->Parameters), Size4K);
 
-    Status = XtLdrProtocol->Memory.MapEfiMemory(&PageMap, &VirtualMemoryArea, NULLPTR);
+    Status = XtLdrProtocol->Memory.MapEfiMemory(&PageMap, &VirtualAddress, NULLPTR);
     if(Status != STATUS_EFI_SUCCESS)
     {
         return Status;
