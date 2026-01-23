@@ -422,6 +422,9 @@ Memory::MapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
                 /* Add any non-free memory mapping */
                 Status = MapVirtualMemory(PageMap, VirtualAddress, Descriptor->PhysicalStart,
                                           Descriptor->NumberOfPages, MemoryType);
+
+                /* Update virtual address */
+                VirtualAddress = VirtualAddress + (Descriptor->NumberOfPages * MM_PAGE_SIZE);
             }
             else
             {
