@@ -234,6 +234,9 @@ Xtos::GetMemoryDescriptorList(IN PXTBL_PAGE_MAPPING PageMap,
 
     XtLdrProtocol->Memory.PhysicalListToVirtual(PageMap, MemoryDescriptorList, PhysicalBase, *VirtualAddress);
 
+    /* Calculate next valid virtual address */
+    *VirtualAddress = (PUINT8)*VirtualAddress + (Pages * EFI_PAGE_SIZE);
+
     return STATUS_EFI_SUCCESS;
 }
 
@@ -468,6 +471,9 @@ Xtos::InitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
     /* Initialize memory descriptor list */
     XtLdrProtocol->LinkedList.InitializeHead(&LoaderBlock->MemoryDescriptorListHead);
     GetMemoryDescriptorList(PageMap, VirtualAddress, &LoaderBlock->MemoryDescriptorListHead);
+
+    /* Set boot image size */
+    LoaderBlock->BootImageSize = (PFN_NUMBER)(((ULONGLONG)*VirtualAddress - KSEG0_BASE) / EFI_PAGE_SIZE);
 
     /* Return success */
     return STATUS_EFI_SUCCESS;

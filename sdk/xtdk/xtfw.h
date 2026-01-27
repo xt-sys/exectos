@@ -107,6 +107,7 @@ typedef struct _KERNEL_INITIALIZATION_BLOCK
     ULONG BlockVersion;
     ULONG ProtocolVersion;
     PWCHAR KernelParameters;
+    PFN_NUMBER BootImageSize;
     LIST_ENTRY LoadOrderListHead;
     LIST_ENTRY MemoryDescriptorListHead;
     LIST_ENTRY BootDriverListHead;
