@@ -194,16 +194,21 @@ MM::Pte::InitializeSystemPteSpace(VOID)
     PMMPTE PointerPte;
     PMMPTE FirstZeroingPte;
     PMMMEMORY_LAYOUT MemoryLayout;
+    ULONGLONG NonPagedSystemPoolEnd;
 
     /* Retrieve the system's memory layout */
     MemoryLayout = MM::Manager::GetMemoryLayout();
 
+    NonPagedSystemPoolEnd = ((ULONGLONG)MemoryLayout->SystemSpaceStart +
+                             MM::Manager::GetNumberOfSystemPtes() * MM_PAGE_SIZE);
+
     /* Map the page table hierarchy for the entire system PTE space */
-    MM::Pte::MapPPE(MemoryLayout->SystemSpaceStart, MemoryLayout->SystemSpaceEnd, &ValidPte);
-    MM::Pte::MapPDE(MemoryLayout->SystemSpaceStart, MemoryLayout->SystemSpaceEnd, &ValidPte);
+    MM::Pte::MapPPE(MemoryLayout->SystemSpaceStart, (PVOID)NonPagedSystemPoolEnd, &ValidPte);
+    MM::Pte::MapPDE(MemoryLayout->SystemSpaceStart, (PVOID)NonPagedSystemPoolEnd, &ValidPte);
 
     /* Format the main block of system PTEs into a free list pool */
     PointerPte = MM::Paging::GetPteAddress(MemoryLayout->SystemSpaceStart);
+
     InitializeSystemPtePool(PointerPte, MM::Manager::GetNumberOfSystemPtes(), SystemPteSpace);
 
     /* Reserve and zero a dedicated block of system PTEs */
