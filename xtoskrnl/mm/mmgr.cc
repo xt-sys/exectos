@@ -11,6 +11,39 @@
 
 
 /**
+ * Computes the size of the boot image.
+ *
+ * @param BootImageSize
+ *        Supplies a pointer to a variable that will receive the size of the boot image in pages.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::Manager::ComputeBootImageSize(OUT PPFN_NUMBER BootImageSize)
+{
+    PKERNEL_INITIALIZATION_BLOCK InitializationBlock;
+    PFN_NUMBER ImageSize;
+    ULONG PteSize;
+
+    /* Get the kernel initialization block */
+    InitializationBlock = KE::BootInformation::GetInitializationBlock();
+
+    /* Get the size of a PTE */
+    PteSize = MM::Paging::GetPteSize();
+
+    /* Calculate the size of the boot image */
+    ImageSize = InitializationBlock->BootImageSize * MM_PAGE_SIZE;
+    ImageSize = (ImageSize + ((MM_PAGE_SIZE / PteSize) * MM_PAGE_SIZE) - 1) &
+                ~(((MM_PAGE_SIZE / PteSize) * MM_PAGE_SIZE) - 1);
+
+    /* Return number of pages used by the boot image */
+    *BootImageSize = ImageSize / MM_PAGE_SIZE;
+}
+
+/**
  * Retrieves the amount of total available memory in the system.
  *
  * @return This routine returns the amount of available memory in the system in megabytes.
@@ -40,6 +73,13 @@ MM::Manager::GetMemoryLayout(VOID)
     return &MemoryLayout;
 }
 
+/**
+ * Retrieves the number of system PTEs.
+ *
+ * @return This routine returns the number of system PTEs.
+ *
+ * @since XT 1.0
+ */
 XTAPI
 PFN_NUMBER
 MM::Manager::GetNumberOfSystemPtes()
