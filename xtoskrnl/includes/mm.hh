@@ -15,6 +15,7 @@
 #include XTOS_ARCH_HEADER(mm, paging.hh)
 #include XTOS_ARCH_HEADER(mm, pte.hh)
 
+#include <mm/alloc.hh>
 #include <mm/colors.hh>
 #include <mm/hlpool.hh>
 #include <mm/kpool.hh>
