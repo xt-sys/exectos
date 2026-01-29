@@ -35,4 +35,4 @@ namespace MM
     };
 }
 
-#endif /* __XTOSKRNL_MM_PFN_HH */
+#endif /* __XTOSKRNL_MM_COLORS_HH */
