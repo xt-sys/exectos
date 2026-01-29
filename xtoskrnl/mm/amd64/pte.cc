@@ -68,7 +68,7 @@ MM::Pte::GetSystemPteBaseAddress(VOID)
     if(MM::Paging::GetXpaStatus())
     {
         /* For 5-level paging, system PTEs start at the beginning of system space */
-        return MM::Paging::GetPteAddress((PVOID)MemoryLayout->SystemSpaceStart);
+        return MM::Paging::GetPteAddress((PVOID)MemoryLayout->NonPagedSystemPoolStart);
     }
     else
     {

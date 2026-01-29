@@ -131,7 +131,7 @@ MM::Colors::InitializeColorTables(VOID)
     MemoryLayout = MM::Manager::GetMemoryLayout();
 
     /* Set the base address of the color tables to start right after the PFN database */
-    FreePages[0] = (PMMCOLOR_TABLES)&((PMMPFN)MemoryLayout->PfnDatabaseAddress)[MM::Pfn::GetHighestPhysicalPage() + 1];
+    FreePages[0] = (PMMCOLOR_TABLES)&((PMMPFN)MemoryLayout->PfnDatabase)[MM::Pfn::GetHighestPhysicalPage() + 1];
 
     /* Calculate the virtual address range for both color tables */
     PointerPte = MM::Paging::GetPteAddress(&FreePages[0][0]);

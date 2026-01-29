@@ -39,17 +39,17 @@ MM::Pfn::InitializePfnDatabase(VOID)
     MemoryLayout = MM::Manager::GetMemoryLayout();
 
     /* Get the PFN database size and calculate the end of the PFN database virtual address space */
-    PfnDatabaseEnd = (PUCHAR)MemoryLayout->PfnDatabaseAddress + (PfnDatabaseSize * MM_PAGE_SIZE) - 1;
+    PfnDatabaseEnd = (PUCHAR)MemoryLayout->PfnDatabase + (PfnDatabaseSize * MM_PAGE_SIZE) - 1;
 
     /* Get a template PTE for mapping the PFN database pages */
     ValidPte = MM::Pte::GetValidPte();
 
     /* Map the Page Directory and Page Directory Pointer tables for the PFN database */
-    MM::Pte::MapPDE(MemoryLayout->PfnDatabaseAddress, PfnDatabaseEnd, ValidPte);
-    MM::Pte::MapPTE(MemoryLayout->PfnDatabaseAddress, PfnDatabaseEnd, ValidPte);
+    MM::Pte::MapPDE(MemoryLayout->PfnDatabase, PfnDatabaseEnd, ValidPte);
+    MM::Pte::MapPTE(MemoryLayout->PfnDatabase, PfnDatabaseEnd, ValidPte);
 
     /* Zero PFN database virtual space */
-    RTL::Memory::ZeroMemory(MemoryLayout->PfnDatabaseAddress, PfnDatabaseSize * MM_PAGE_SIZE);
+    RTL::Memory::ZeroMemory(MemoryLayout->PfnDatabase, PfnDatabaseSize * MM_PAGE_SIZE);
 
     /* Initialize the color tables */
     MM::Colors::InitializeColorTables();

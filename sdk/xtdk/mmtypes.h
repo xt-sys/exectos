@@ -76,17 +76,45 @@ typedef struct _MMCOLOR_TABLES
 /* Memory layout structure definition */
 typedef struct _MMMEMORY_LAYOUT
 {
-    PMMPFN PfnDatabaseAddress;
+    PMMPFN PfnDatabase;
+    PFN_NUMBER PfnDatabaseSize;
     PVOID SelfMapAddress;
+    PVOID HardwarePoolStart;
+    PVOID HardwarePoolEnd;
     PVOID HyperSpaceStart;
     PVOID HyperSpaceEnd;
+    PVOID LoaderMappingsStart;
+    PVOID LoaderMappingsEnd;
+    PFN_NUMBER LoaderMappingsSize;
+    PVOID NonCanonicalStart;
+    PVOID NonCanonicalEnd;
     PVOID NonPagedPoolStart;
     PVOID NonPagedPoolEnd;
+    PFN_NUMBER NonPagedPoolSize;
+    PVOID NonPagedExpansionPoolStart;
+    PVOID NonPagedExpansionPoolEnd;
+    PFN_NUMBER NonPagedExpansionPoolSize;
+    PVOID NonPagedSystemPoolStart;
+    PVOID NonPagedSystemPoolEnd;
+    PFN_NUMBER NonPagedSystemPoolSize;
     PVOID PagedPoolStart;
     PVOID PagedPoolEnd;
-    PVOID SystemSpaceStart;
-    PVOID SystemSpaceEnd;
+    PFN_NUMBER PagedPoolSize;
+    PVOID ReservedSystemPoolStart;
+    PVOID ReservedSystemPoolEnd;
+    PVOID SessionSpaceStart;
+    PVOID SessionSpaceEnd;
+    PFN_NUMBER SessionSpaceSize;
+    PVOID SharedSystemPageStart;
+    PVOID SharedSystemPageEnd;
+    PVOID SystemCacheStart;
+    PVOID SystemCacheEnd;
+    PVOID SystemWorkingSetStart;
+    PVOID SystemWorkingSetEnd;
+    PVOID UserSpaceStart;
     PVOID UserSpaceEnd;
+    PVOID PteSpaceStart;
+    PVOID PteSpaceEnd;
 } MMMEMORY_LAYOUT, *PMMMEMORY_LAYOUT;
 
 /* Page Frame Entry structure definition */

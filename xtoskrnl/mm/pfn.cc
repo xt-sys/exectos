@@ -415,7 +415,7 @@ MM::Pfn::GetPfnEntry(IN PFN_NUMBER Pfn)
     MemoryLayout = MM::Manager::GetMemoryLayout();
 
     /* Calculate the address of the PFN entry by indexing into the PFN database array and return it */
-    return &((PMMPFN)MemoryLayout->PfnDatabaseAddress)[Pfn];
+    return &((PMMPFN)MemoryLayout->PfnDatabase)[Pfn];
 }
 
 /**
@@ -531,7 +531,7 @@ MM::Pfn::LinkFreePage(IN PFN_NUMBER PageFrameIndex)
 
         /* Link with the previous last page */
         MM::Paging::SetPte(&ColoredPfn->OriginalPte, PageFrameIndex);
-        PfnEntry->u4.PteFrame = ColoredPfn - (PMMPFN)MemoryLayout->PfnDatabaseAddress;
+        PfnEntry->u4.PteFrame = ColoredPfn - (PMMPFN)MemoryLayout->PfnDatabase;
     }
 
     /* Set the page as the new tail of the colored list */
@@ -570,7 +570,7 @@ MM::Pfn::LinkPage(IN PMMPFNLIST ListHead,
     PMMMEMORY_LAYOUT MemoryLayout = MM::Manager::GetMemoryLayout();
 
     /* Get the PFN database entry for the target page */
-    PageFrame = &((PMMPFN)MemoryLayout->PfnDatabaseAddress)[PageFrameIndex];
+    PageFrame = &((PMMPFN)MemoryLayout->PfnDatabase)[PageFrameIndex];
 
     /* Get the list name */
     ListName = ListHead->ListName;
@@ -598,7 +598,7 @@ MM::Pfn::LinkPage(IN PMMPFNLIST ListHead,
         if(ListHead->Blink != MAXULONG_PTR)
         {
             /* Update the previous tail to point to this page */
-            (&((PMMPFN)MemoryLayout->PfnDatabaseAddress)[ListHead->Blink])->u1.Flink = PageFrameIndex;
+            (&((PMMPFN)MemoryLayout->PfnDatabase)[ListHead->Blink])->u1.Flink = PageFrameIndex;
         }
         else
         {
@@ -661,7 +661,7 @@ MM::Pfn::LinkPage(IN PMMPFNLIST ListHead,
         if(ListHead->Flink != MAXULONG_PTR)
         {
             /* Fix up the backward link of the old head */
-            (&((PMMPFN)MemoryLayout->PfnDatabaseAddress)[ListHead->Flink])->u2.Blink = PageFrameIndex;
+            (&((PMMPFN)MemoryLayout->PfnDatabase)[ListHead->Flink])->u2.Blink = PageFrameIndex;
         }
         else
         {
@@ -675,7 +675,7 @@ MM::Pfn::LinkPage(IN PMMPFNLIST ListHead,
         if(ListHead->Blink != MAXULONG_PTR)
         {
             /* Link the current tail to the new page */
-            (&((PMMPFN)MemoryLayout->PfnDatabaseAddress)[ListHead->Blink])->u1.Flink = PageFrameIndex;
+            (&((PMMPFN)MemoryLayout->PfnDatabase)[ListHead->Blink])->u1.Flink = PageFrameIndex;
         }
         else
         {
@@ -714,7 +714,7 @@ MM::Pfn::LinkPage(IN PMMPFNLIST ListHead,
         if(ColorHead->Flink != MAXULONG_PTR)
         {
             /* Fix up the PTE frame of the previous entry */
-            (&((PMMPFN)MemoryLayout->PfnDatabaseAddress)[ColorHead->Flink])->u4.PteFrame = PageFrameIndex;
+            (&((PMMPFN)MemoryLayout->PfnDatabase)[ColorHead->Flink])->u4.PteFrame = PageFrameIndex;
         }
         else
         {
@@ -817,7 +817,7 @@ MM::Pfn::LinkPfnToPte(IN PFN_NUMBER PageFrameIndex,
     MemoryLayout = MM::Manager::GetMemoryLayout();
 
     /* Point the PFN to its PTE */
-    Pfn = &((PMMPFN)MemoryLayout->PfnDatabaseAddress)[PageFrameIndex];
+    Pfn = &((PMMPFN)MemoryLayout->PfnDatabase)[PageFrameIndex];
     Pfn->PteAddress = PointerPte;
 
     /* Check if the page is already mapped and in use */
@@ -860,7 +860,7 @@ MM::Pfn::LinkPfnToPte(IN PFN_NUMBER PageFrameIndex,
     Pfn->u4.PteFrame = PageFrameIndex;
 
     /* Pin the page table in memory by incrementing its PFN share count */
-    Pfn = &((PMMPFN)MemoryLayout->PfnDatabaseAddress)[PageFrameIndex];
+    Pfn = &((PMMPFN)MemoryLayout->PfnDatabase)[PageFrameIndex];
     Pfn->u2.ShareCount++;
 }
 
@@ -887,7 +887,7 @@ MM::Pfn::LinkStandbyPage(IN PFN_NUMBER PageFrameIndex)
     MemoryLayout = MM::Manager::GetMemoryLayout();
 
     /* Get the PFN database entry for the target page */
-    CurrentPageFrame = &((PMMPFN)MemoryLayout->PfnDatabaseAddress)[PageFrameIndex];
+    CurrentPageFrame = &((PMMPFN)MemoryLayout->PfnDatabase)[PageFrameIndex];
 
     /* Check if the page is part of a ROM image */
     if(CurrentPageFrame->u3.e1.Rom == 1)
@@ -899,7 +899,7 @@ MM::Pfn::LinkStandbyPage(IN PFN_NUMBER PageFrameIndex)
         if(RomPagesList.Blink != (ULONG_PTR)-1)
         {
             /* Update the old tail to point to the new page */
-            AdjacentPageFrame = &((PMMPFN)MemoryLayout->PfnDatabaseAddress)[RomPagesList.Blink];
+            AdjacentPageFrame = &((PMMPFN)MemoryLayout->PfnDatabase)[RomPagesList.Blink];
             AdjacentPageFrame->u1.Flink = PageFrameIndex;
         }
         else
@@ -933,7 +933,7 @@ MM::Pfn::LinkStandbyPage(IN PFN_NUMBER PageFrameIndex)
     if(Flink != MAXULONG_PTR)
     {
         /* Update the old head to point to the new page */
-        AdjacentPageFrame = &((PMMPFN)MemoryLayout->PfnDatabaseAddress)[Flink];
+        AdjacentPageFrame = &((PMMPFN)MemoryLayout->PfnDatabase)[Flink];
         AdjacentPageFrame->u2.Blink = PageFrameIndex;
     }
     else

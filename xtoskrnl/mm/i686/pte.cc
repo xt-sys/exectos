@@ -98,7 +98,7 @@ MM::Pte::InitializePageTable(VOID)
     MM::Paging::SetPte(&TemplatePte, 0, MM_PTE_READWRITE | MM_PTE_CACHE_ENABLE);
 
     /* Map the kernel's PD entries */
-    MM::Pte::MapPDE(MemoryLayout->SystemSpaceStart, (PVOID)MM_HIGHEST_SYSTEM_ADDRESS, &TemplatePte);
+    MM::Pte::MapPDE(MemoryLayout->NonPagedSystemPoolStart, (PVOID)MM_HIGHEST_SYSTEM_ADDRESS, &TemplatePte);
 }
 
 /**

@@ -199,15 +199,15 @@ MM::Pte::InitializeSystemPteSpace(VOID)
     /* Retrieve the system's memory layout */
     MemoryLayout = MM::Manager::GetMemoryLayout();
 
-    NonPagedSystemPoolEnd = ((ULONGLONG)MemoryLayout->SystemSpaceStart +
+    NonPagedSystemPoolEnd = ((ULONGLONG)MemoryLayout->NonPagedSystemPoolStart +
                              MM::Manager::GetNumberOfSystemPtes() * MM_PAGE_SIZE);
 
     /* Map the page table hierarchy for the entire system PTE space */
-    MM::Pte::MapPPE(MemoryLayout->SystemSpaceStart, (PVOID)NonPagedSystemPoolEnd, &ValidPte);
-    MM::Pte::MapPDE(MemoryLayout->SystemSpaceStart, (PVOID)NonPagedSystemPoolEnd, &ValidPte);
+    MM::Pte::MapPPE(MemoryLayout->NonPagedSystemPoolStart, (PVOID)NonPagedSystemPoolEnd, &ValidPte);
+    MM::Pte::MapPDE(MemoryLayout->NonPagedSystemPoolStart, (PVOID)NonPagedSystemPoolEnd, &ValidPte);
 
     /* Format the main block of system PTEs into a free list pool */
-    PointerPte = MM::Paging::GetPteAddress(MemoryLayout->SystemSpaceStart);
+    PointerPte = MM::Paging::GetPteAddress(MemoryLayout->NonPagedSystemPoolStart);
 
     InitializeSystemPtePool(PointerPte, MM::Manager::GetNumberOfSystemPtes(), SystemPteSpace);
 
