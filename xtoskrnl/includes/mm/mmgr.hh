@@ -27,9 +27,12 @@ namespace MM
             STATIC XTAPI PFN_NUMBER GetNumberOfSystemPtes();
             STATIC XTAPI VOID InitializeMemoryLayout(VOID);
             STATIC XTAPI VOID InitializeMemoryManager(VOID);
-            STATIC XTAPI BOOLEAN VerifyMemoryTypeFree(LOADER_MEMORY_TYPE MemoryType);
-            STATIC XTAPI BOOLEAN VerifyMemoryTypeInvisible(LOADER_MEMORY_TYPE MemoryType);
-       };
+            STATIC XTAPI BOOLEAN VerifyMemoryTypeFree(IN LOADER_MEMORY_TYPE MemoryType);
+            STATIC XTAPI BOOLEAN VerifyMemoryTypeInvisible(IN LOADER_MEMORY_TYPE MemoryType);
+
+        private:
+            STATIC XTAPI VOID ComputeBootImageSize(OUT PPFN_NUMBER BootImageSize);
+    };
 }
 
 #endif /* __XTOSKRNL_MM_MMGR_HH */
