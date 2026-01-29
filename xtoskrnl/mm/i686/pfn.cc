@@ -39,7 +39,7 @@ MM::Pfn::InitializePfnDatabase(VOID)
     MemoryLayout = MM::Manager::GetMemoryLayout();
 
     /* Get the PFN database size and calculate the end of the PFN database virtual address space */
-    PfnDatabaseEnd = (PUCHAR)MemoryLayout->PfnDatabase + (PfnDatabaseSize * MM_PAGE_SIZE) - 1;
+    PfnDatabaseEnd = (PUCHAR)MemoryLayout->PfnDatabase + (MemoryLayout->PfnDatabaseSize * MM_PAGE_SIZE) - 1;
 
     /* Get a template PTE for mapping the PFN database pages */
     ValidPte = MM::Pte::GetValidPte();
@@ -49,7 +49,7 @@ MM::Pfn::InitializePfnDatabase(VOID)
     MM::Pte::MapPTE(MemoryLayout->PfnDatabase, PfnDatabaseEnd, ValidPte);
 
     /* Zero PFN database virtual space */
-    RTL::Memory::ZeroMemory(MemoryLayout->PfnDatabase, PfnDatabaseSize * MM_PAGE_SIZE);
+    RTL::Memory::ZeroMemory(MemoryLayout->PfnDatabase, MemoryLayout->PfnDatabaseSize * MM_PAGE_SIZE);
 
     /* Initialize the color tables */
     MM::Colors::InitializeColorTables();
@@ -73,12 +73,12 @@ MM::Pfn::InitializePfnDatabase(VOID)
         if(Descriptor == FreeDescriptor)
         {
             /* Initialize PFNs for the remaining free memory after the PFN database */
-            ProcessMemoryDescriptor(OriginalFreeDescriptor.BasePage + PfnDatabaseSize,
-                                    OriginalFreeDescriptor.PageCount - PfnDatabaseSize,
+            ProcessMemoryDescriptor(OriginalFreeDescriptor.BasePage + MemoryLayout->PfnDatabaseSize,
+                                    OriginalFreeDescriptor.PageCount - MemoryLayout->PfnDatabaseSize,
                                     LoaderFree);
 
             /* Initialize PFNs for the physical pages backing the PFN database itself */
-            ProcessMemoryDescriptor(OriginalFreeDescriptor.BasePage, PfnDatabaseSize, LoaderMemoryData);
+            ProcessMemoryDescriptor(OriginalFreeDescriptor.BasePage, MemoryLayout->PfnDatabaseSize, LoaderMemoryData);
         }
         else
         {

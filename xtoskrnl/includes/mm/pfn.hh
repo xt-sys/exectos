@@ -30,7 +30,6 @@ namespace MM
             STATIC ULONGLONG NumberOfPhysicalPages;
             STATIC LOADER_MEMORY_DESCRIPTOR OriginalFreeDescriptor;
             STATIC PMMPFNLIST PageLocationList[];
-            STATIC PFN_NUMBER PfnDatabaseSize;
             STATIC MMPFNLIST RomPagesList;
             STATIC MMPFNLIST StandbyPagesList;
             STATIC MMPFNLIST ZeroedPagesList;
@@ -38,7 +37,7 @@ namespace MM
         public:
             STATIC XTAPI PFN_NUMBER AllocateBootstrapPages(IN PFN_NUMBER NumberOfPages);
             STATIC XTAPI PFN_NUMBER AllocatePhysicalPage(IN ULONG Color);
-            STATIC XTAPI VOID ComputePfnDatabaseSize(VOID);
+            STATIC XTAPI VOID ComputePfnDatabaseSize(OUT PPFN_NUMBER DatabaseSize);
             STATIC XTAPI VOID DecrementReferenceCount(IN PMMPFN Pfn1,
                                                       IN PFN_NUMBER PageFrameIndex,
                                                       IN BOOLEAN BeginStandbyList = FALSE);
@@ -48,7 +47,6 @@ namespace MM
             STATIC XTAPI VOID FreePhysicalPage(IN PMMPTE PointerPte);
             STATIC XTAPI ULONG_PTR GetHighestPhysicalPage(VOID);
             STATIC XTAPI ULONGLONG GetNumberOfPhysicalPages(VOID);
-            STATIC XTAPI PFN_NUMBER GetPfnDatabaseSize(VOID);
             STATIC XTAPI PMMPFN GetPfnEntry(IN PFN_NUMBER Pfn);
             STATIC XTAPI VOID InitializePfnDatabase(VOID);
             STATIC VOID XTAPI LinkPfnToPte(IN PFN_NUMBER PageFrameIndex,

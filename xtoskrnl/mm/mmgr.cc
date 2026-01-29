@@ -112,9 +112,6 @@ MM::Manager::InitializeMemoryManager(VOID)
     /* Compute page colors to reduce CPU cache conflicts */
     MM::Colors::ComputePageColoring();
 
-    /* Compute allocation size for the PFN database */
-    MM::Pfn::ComputePfnDatabaseSize();
-
     /* Initialize memory layout */
     InitializeMemoryLayout();
 

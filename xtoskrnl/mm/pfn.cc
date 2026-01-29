@@ -99,19 +99,27 @@ MM::Pfn::AllocatePhysicalPage(IN ULONG Color)
 /**
  * Calculates the total number of pages required for the PFN database and its associated color tables.
  *
+ * @param DatabaseSize
+ *        A pointer to a variable that will receive the number of pages required for the PFN database.
+ *
  * @return This routine does not return any value.
  *
  * @since XT 1.0
  */
 XTAPI
 VOID
-MM::Pfn::ComputePfnDatabaseSize(VOID)
+MM::Pfn::ComputePfnDatabaseSize(OUT PPFN_NUMBER DatabaseSize)
 {
+    PFN_NUMBER PfnDatabaseSize;
+
     /* Calculate the total number of pages required for the PFN database */
     PfnDatabaseSize = (HighestPhysicalPage + 1) * sizeof(MMPFN);
     PfnDatabaseSize += (MM::Colors::GetPagingColors() * sizeof(MMCOLOR_TABLES) * 2);
     PfnDatabaseSize = ROUND_UP(PfnDatabaseSize, MM_PAGE_SIZE);
     PfnDatabaseSize >>= MM_PAGE_SHIFT;
+
+    /* Return the PFN database size */
+    *DatabaseSize = PfnDatabaseSize;
 }
 
 /**
@@ -371,21 +379,6 @@ MM::Pfn::GetNumberOfPhysicalPages(VOID)
 {
     /* Return the number of physical pages */
     return NumberOfPhysicalPages;
-}
-
-/**
- * Gets the size of the PFN database and its associated structures, in pages.
- *
- * @return This routine returns the total number of pages required for the PFN database and its associated structures.
- *
- * @since XT 1.0
- */
-XTAPI
-PFN_NUMBER
-MM::Pfn::GetPfnDatabaseSize(VOID)
-{
-    /* Return the pre-calculated size of the PFN database in pages */
-    return PfnDatabaseSize;
 }
 
 /**

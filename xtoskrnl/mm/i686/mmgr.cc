@@ -21,7 +21,7 @@ VOID
 MM::Manager::InitializeMemoryLayout(VOID)
 {
     ULONG_PTR PagedPoolSize, PteCount;
-    PFN_NUMBER PfnDatabaseSize, PhysicalPages;
+    PFN_NUMBER PhysicalPages;
     ULONG PtesPerPage;
 
     /* Define the number of system PTEs */
@@ -48,7 +48,7 @@ MM::Manager::InitializeMemoryLayout(VOID)
     PagedPoolSize = PteCount * PtesPerPage * MM_PAGE_SIZE;
 
     /* Retrieve the PFN database size */
-    PfnDatabaseSize = MM::Pfn::GetPfnDatabaseSize();
+    MM::Pfn::GetPfnDatabaseSize(&MemoryLayout.PfnDatabaseSize);
 
     /* Check if 3-level paging (PAE) is enabled */
     if(MM::Paging::GetXpaStatus())
@@ -58,7 +58,7 @@ MM::Manager::InitializeMemoryLayout(VOID)
         MemoryLayout.SelfMapAddress = (PVOID)MM_PTE_BASE;
 
         /* Define the non-paged and paged pool regions */
-        MemoryLayout.NonPagedPoolStart = (PVOID)((ULONG_PTR)MemoryLayout.PfnDatabase + PfnDatabaseSize * MM_PAGE_SIZE);
+        MemoryLayout.NonPagedPoolStart = (PVOID)((ULONG_PTR)MemoryLayout.PfnDatabase + MemoryLayout.PfnDatabaseSize * MM_PAGE_SIZE);
         MemoryLayout.NonPagedPoolEnd = (PVOID)0xEEFFFFFF;
         MemoryLayout.PagedPoolStart = (PVOID)0xE2000000;
         MemoryLayout.PagedPoolEnd = (PVOID)(((ULONG_PTR)MemoryLayout.PagedPoolStart + PagedPoolSize) - 1);
@@ -75,7 +75,7 @@ MM::Manager::InitializeMemoryLayout(VOID)
         MemoryLayout.SelfMapAddress = (PVOID)MM_PTE_BASE;
 
         /* Define the non-paged and paged pool regions */
-        MemoryLayout.NonPagedPoolStart = (PVOID)((ULONG_PTR)MemoryLayout.PfnDatabase + PfnDatabaseSize * MM_PAGE_SIZE);
+        MemoryLayout.NonPagedPoolStart = (PVOID)((ULONG_PTR)MemoryLayout.PfnDatabase + MemoryLayout.PfnDatabaseSize * MM_PAGE_SIZE);
         MemoryLayout.NonPagedPoolEnd = (PVOID)0xFFBE0000;
         MemoryLayout.PagedPoolStart = (PVOID)0xE1000000;
         MemoryLayout.PagedPoolEnd = (PVOID)(((ULONG_PTR)MemoryLayout.PagedPoolStart + PagedPoolSize) - 1);

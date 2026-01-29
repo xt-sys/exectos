@@ -82,9 +82,6 @@ PMMPFNLIST MM::Pfn::PageLocationList[] = {&ZeroedPagesList,
                                           NULLPTR,
                                           NULLPTR};
 
-/* Size of the PFN database in pages */
-PFN_NUMBER MM::Pfn::PfnDatabaseSize;
-
 /* List containing pages mapped as Read-Only (ROM) */
 MMPFNLIST MM::Pfn::RomPagesList = {0, StandbyPageList, MAXULONG_PTR, MAXULONG_PTR};
 
