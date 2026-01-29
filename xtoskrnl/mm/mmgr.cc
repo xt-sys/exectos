@@ -121,6 +121,9 @@ MM::Manager::InitializeMemoryManager(VOID)
     /* Initialize page table */
     MM::Pte::InitializePageTable();
 
+    /* Initialize non-paged pool */
+    MM::Allocator::InitializeNonPagedPool();
+
     /* Initialize system PTE space */
     MM::Pte::InitializeSystemPteSpace();
 
