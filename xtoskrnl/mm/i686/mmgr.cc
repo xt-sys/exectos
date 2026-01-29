@@ -48,7 +48,7 @@ MM::Manager::InitializeMemoryLayout(VOID)
     PagedPoolSize = PteCount * PtesPerPage * MM_PAGE_SIZE;
 
     /* Retrieve the PFN database size */
-    MM::Pfn::GetPfnDatabaseSize(&MemoryLayout.PfnDatabaseSize);
+    MM::Pfn::ComputePfnDatabaseSize(&MemoryLayout.PfnDatabaseSize);
 
     /* Check if 3-level paging (PAE) is enabled */
     if(MM::Paging::GetXpaStatus())

@@ -29,7 +29,7 @@ MM::Manager::InitializeMemoryLayout(VOID)
     PagedPoolSize = PteCount * PtesPerPage * MM_PAGE_SIZE;
 
     /* Retrieve the PFN database size */
-    MM::Pfn::GetPfnDatabaseSize(&MemoryLayout.PfnDatabaseSize);
+    MM::Pfn::ComputePfnDatabaseSize(&MemoryLayout.PfnDatabaseSize);
 
     /* Define the number of system PTEs */
     NumberOfSystemPtes = MM_DEFAULT_NUMBER_SYSTEM_PTES;
