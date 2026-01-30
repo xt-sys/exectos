@@ -406,9 +406,8 @@ MM::Manager::InitializeMemoryLayout(VOID)
     /* Insert the PFN database right after the loader mappings */
     MemoryLayout.PfnDatabase = (PMMPFN)MemoryLayout.LoaderMappingsEnd;
 
-    /* Compute the PFN database page-aligned end address */
+    /* Compute the PFN database end address */
     PfnDatabaseEnd = (ULONG_PTR)MemoryLayout.PfnDatabase + (MemoryLayout.PfnDatabaseSize * MM_PAGE_SIZE);
-    PfnDatabaseEnd = ROUND_UP(PfnDatabaseEnd, MM_PAGE_SIZE);
 
     /* Check in non-paged pool fits before session space */
     if(MemoryLayout.NonPagedPoolSize * MM_PAGE_SIZE <= ((ULONG_PTR)MemoryLayout.SessionSpaceStart - PfnDatabaseEnd))
