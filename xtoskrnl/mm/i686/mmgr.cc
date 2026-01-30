@@ -442,7 +442,4 @@ MM::Manager::InitializeMemoryLayout(VOID)
     /* Compute non-paged expansion pool size */
     MemoryLayout.NonPagedExpansionPoolSize = ((ULONG_PTR)MemoryLayout.NonPagedExpansionPoolEnd -
                                                 (ULONG_PTR)MemoryLayout.NonPagedExpansionPoolStart) / MM_PAGE_SIZE;
-
-    /* Dump memory layout */
-    DumpMemoryLayout();
 }

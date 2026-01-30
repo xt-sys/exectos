@@ -387,7 +387,4 @@ MM::Manager::InitializeMemoryLayout(VOID)
     /* Update paged pool end address */
     MemoryLayout.PagedPoolEnd = (PVOID)(((ULONGLONG)MemoryLayout.PagedPoolStart +
                                          MemoryLayout.PagedPoolSize * MM_PAGE_SIZE) - 1);
-
-    /* Dump memory layout */
-    DumpMemoryLayout();
 }

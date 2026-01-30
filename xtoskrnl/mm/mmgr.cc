@@ -112,8 +112,9 @@ MM::Manager::InitializeMemoryManager(VOID)
     /* Compute page colors to reduce CPU cache conflicts */
     MM::Colors::ComputePageColoring();
 
-    /* Initialize memory layout */
+    /* Initialize and dump memory layout */
     InitializeMemoryLayout();
+    DumpMemoryLayout();
 
     /* Initialize PTE template */
     MM::Pte::InitializeSystemPte();
