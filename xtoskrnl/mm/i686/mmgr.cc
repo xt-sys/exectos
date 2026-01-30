@@ -396,52 +396,52 @@ MM::Manager::InitializeMemoryLayout(VOID)
     /* Compute system PTE size */
     ComputeSystemPteSize(&NumberOfSystemPtes);
 
-    /* Compute non-paged pool size */
+    /* Compute the initial and maximum non-paged pool sizes */
     ComputeNonPagedPoolSize(&MemoryLayout.NonPagedPoolSize);
     ComputeMaximumNonPagedPoolSize(&MaximumNonPagedPoolSize);
 
     /* Compute paged pool size */
     ComputePagedPoolSize(&MemoryLayout.PagedPoolSize);
 
-    /* Insert the PFN database right after the loader mappings */
+    /* Position the PFN database right after the loader mappings */
     MemoryLayout.PfnDatabase = (PMMPFN)MemoryLayout.LoaderMappingsEnd;
 
     /* Compute the PFN database end address */
     PfnDatabaseEnd = (ULONG_PTR)MemoryLayout.PfnDatabase + (MemoryLayout.PfnDatabaseSize * MM_PAGE_SIZE);
 
-    /* Check in non-paged pool fits before session space */
-    if(MemoryLayout.NonPagedPoolSize * MM_PAGE_SIZE <= ((ULONG_PTR)MemoryLayout.SessionSpaceStart - PfnDatabaseEnd))
-    {
-        /* Set non-paged pool start and end addresses */
-        MemoryLayout.NonPagedPoolStart = (PVOID)PfnDatabaseEnd;
-        MemoryLayout.NonPagedPoolEnd = (PVOID)(PfnDatabaseEnd + MemoryLayout.NonPagedPoolSize * MM_PAGE_SIZE);
+    /* Position the initial non-paged pool immediately after the PFN database */
+    MemoryLayout.NonPagedPoolStart = (PVOID)PfnDatabaseEnd;
 
-        /* Check if non-paged expansion pool overflows */
+    /* Check if the calculated non-paged pool size fits in the KVA */
+    if((MemoryLayout.NonPagedPoolSize * MM_PAGE_SIZE) >
+       ((ULONG_PTR)MemoryLayout.SessionSpaceStart - (ULONG_PTR)MemoryLayout.NonPagedPoolStart))
+    {
+        /* Set the final size for the non-paged pool */
+        MemoryLayout.NonPagedPoolSize = ((ULONG_PTR)MemoryLayout.NonPagedPoolEnd -
+                                        (ULONG_PTR)MemoryLayout.NonPagedPoolStart) / MM_PAGE_SIZE;
+    }
+
+    /* Set the final non-paged pool end address */
+    MemoryLayout.NonPagedPoolEnd = (PVOID)((ULONG_PTR)MemoryLayout.NonPagedPoolStart +
+                                           MemoryLayout.NonPagedPoolSize * MM_PAGE_SIZE);
+
+    /* Check if non-paged expansion pool overflows */
+    if((ULONG_PTR)MemoryLayout.NonPagedExpansionPoolStart + MaximumNonPagedPoolSize *
+        MM_PAGE_SIZE >= (ULONG_PTR)MemoryLayout.NonPagedExpansionPoolStart)
+    {
+        /* Check if non-paged expansion pool fits */
         if((ULONG_PTR)MemoryLayout.NonPagedExpansionPoolStart + MaximumNonPagedPoolSize *
-           MM_PAGE_SIZE >= (ULONG_PTR)MemoryLayout.NonPagedExpansionPoolStart)
+            MM_PAGE_SIZE <= (ULONG_PTR)MemoryLayout.NonPagedExpansionPoolEnd)
         {
-            /* Check if non-paged expansion pool fits */
-            if((ULONG_PTR)MemoryLayout.NonPagedExpansionPoolStart + MaximumNonPagedPoolSize *
-               MM_PAGE_SIZE <= (ULONG_PTR)MemoryLayout.NonPagedExpansionPoolEnd)
-            {
-                /* Set non-paged expansion pool end address */
-                MemoryLayout.NonPagedExpansionPoolEnd = (PVOID)((ULONG_PTR)MemoryLayout.NonPagedExpansionPoolStart +
-                                                                MaximumNonPagedPoolSize * MM_PAGE_SIZE);
-            }
+            /* Set new non-paged expansion pool end address */
+            MemoryLayout.NonPagedExpansionPoolEnd = (PVOID)((ULONG_PTR)MemoryLayout.NonPagedExpansionPoolStart +
+                                                            MaximumNonPagedPoolSize * MM_PAGE_SIZE);
         }
-
-        /* Compute non-paged expansion pool size */
-        MemoryLayout.NonPagedExpansionPoolSize = ((ULONG_PTR)MemoryLayout.NonPagedExpansionPoolEnd -
-                                                  (ULONG_PTR)MemoryLayout.NonPagedExpansionPoolStart) / MM_PAGE_SIZE;
-    }
-    else
-    {
-        /* Unfortunally non-paged pool does not fit before session space. What can we do? */
     }
 
-    /* Update paged pool end address */
-    MemoryLayout.PagedPoolEnd = (PVOID)(((ULONG_PTR)MemoryLayout.PagedPoolStart +
-                                         MemoryLayout.PagedPoolSize * MM_PAGE_SIZE) - 1);
+    /* Compute non-paged expansion pool size */
+    MemoryLayout.NonPagedExpansionPoolSize = ((ULONG_PTR)MemoryLayout.NonPagedExpansionPoolEnd -
+                                                (ULONG_PTR)MemoryLayout.NonPagedExpansionPoolStart) / MM_PAGE_SIZE;
 
     /* Dump memory layout */
     DumpMemoryLayout();
