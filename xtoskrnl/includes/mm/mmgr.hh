@@ -32,6 +32,12 @@ namespace MM
 
         private:
             STATIC XTAPI VOID ComputeBootImageSize(OUT PPFN_NUMBER BootImageSize);
+            STATIC XTAPI VOID ComputeMaximumNonPagedPoolSize(OUT PPFN_NUMBER PoolSize);
+            STATIC XTAPI VOID ComputeNonPagedPoolSize(OUT PPFN_NUMBER PoolSize);
+            STATIC XTAPI VOID ComputePagedPoolSize(OUT PPFN_NUMBER PoolSize);
+            STATIC XTAPI VOID ComputeSessionSpaceSize(OUT PPFN_NUMBER SpaceSize);
+            STATIC XTAPI VOID ComputeSystemPteSize(OUT PPFN_NUMBER PteSize);
+            STATIC XTAPI VOID DumpMemoryLayout(VOID);
     };
 }
 
