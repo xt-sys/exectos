@@ -157,8 +157,9 @@ Memory::BuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
         if(Mapping->VirtualAddress)
         {
             /* Dump memory mapping */
-            Debug::Print(L"   Type=%02lu, PhysicalBase=%.8P, VirtualBase=%.8P, Pages=%llu\n", Mapping->MemoryType,
-                         Mapping->PhysicalAddress, Mapping->VirtualAddress, Mapping->NumberOfPages);
+            Debug::Print(L"   Type=%02lu, PhysicalBase=0x%.8llX, VirtualBase=0x%.8llX, Pages=%llu\n",
+                         Mapping->MemoryType, Mapping->PhysicalAddress,
+                         Mapping->VirtualAddress, Mapping->NumberOfPages);
 
             /* Map memory */
             Status = MapPage(PageMap, (UINT_PTR)Mapping->VirtualAddress,
