@@ -317,7 +317,7 @@ Memory::MapPage(IN PXTBL_PAGE_MAPPING PageMap,
                 IN ULONGLONG PhysicalAddress,
                 IN ULONGLONG NumberOfPages)
 {
-    SIZE_T PageFrameNumber;
+    ULONGLONG PageFrameNumber;
     PVOID Pml1, Pml2, Pml3;
     SIZE_T Pml1Entry, Pml2Entry, Pml3Entry;
     PHARDWARE_LEGACY_PTE LegacyPmlTable;
