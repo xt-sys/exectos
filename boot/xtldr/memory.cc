@@ -376,14 +376,14 @@ Memory::MapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
         else if(PageMap->PageMapLevel == 3)
         {
             /* Limit physical address to 64GB in PAE mode */
-            MaxAddress = 0xFFFFFFFFF;
+            MaxAddress = 0xFFFFFFFFFULL;
         }
 
         /* Check page map level */
         if(PageMap->PageMapLevel == 2 || PageMap->PageMapLevel == 3)
         {
             /* Check if physical address starts beyond limit */
-            if(Descriptor->PhysicalStart > MaxAddress)
+            if(Descriptor->PhysicalStart >= MaxAddress)
             {
                 /* Go to the next descriptor */
                 Descriptor = (PEFI_MEMORY_DESCRIPTOR)((PUCHAR)Descriptor + MemoryMap->DescriptorSize);
@@ -394,7 +394,7 @@ Memory::MapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
             if(Descriptor->PhysicalStart + (Descriptor->NumberOfPages << EFI_PAGE_SHIFT) > MaxAddress)
             {
                 /* Truncate memory descriptor to the lowest supported physical page */
-                Descriptor->NumberOfPages = (((ULONGLONG)MaxAddress) - Descriptor->PhysicalStart) >> EFI_PAGE_SHIFT;
+                Descriptor->NumberOfPages = (MaxAddress - Descriptor->PhysicalStart) >> EFI_PAGE_SHIFT;
             }
         }
 
