@@ -24,7 +24,6 @@ MM::Pfn::InitializePfnDatabase(VOID)
     PKERNEL_INITIALIZATION_BLOCK InitializationBlock;
     PLIST_ENTRY ListEntry;
     PLOADER_MEMORY_DESCRIPTOR Descriptor;
-    PFN_NUMBER BasePage, PageCount;
     PUCHAR PfnDatabaseEnd;
     PMMMEMORY_LAYOUT MemoryLayout;
     PMMPTE ValidPte;
@@ -67,42 +66,40 @@ MM::Pfn::InitializePfnDatabase(VOID)
             continue;
         }
 
-        /* Determine the physical page range to process */
+        /* Check if this is the modified free descriptor */
         if(Descriptor == FreeDescriptor)
         {
-            BasePage  = OriginalFreeDescriptor.BasePage;
-            PageCount = OriginalFreeDescriptor.PageCount;
+            /* Switch to the original descriptor */
+            Descriptor = &OriginalFreeDescriptor;
         }
-        else
+
+        /* Map PFN database entries for this range */
+        MM::Pte::MapPTE(&((PMMPFN)MemoryLayout->PfnDatabase)[Descriptor->BasePage],
+                        (PUCHAR)&((PMMPFN)MemoryLayout->PfnDatabase)[Descriptor->BasePage + Descriptor->PageCount] - 1,
+                        ValidPte);
+
+        /* Check if the free memory block that was split is being processed */
+        if(Descriptor == &OriginalFreeDescriptor)
         {
-            BasePage  = Descriptor->BasePage;
-            PageCount = Descriptor->PageCount;
+            /* Skip loop processing, free memory is initialized separately */
+            ListEntry = ListEntry->Flink;
+            continue;
         }
 
         /* Map PFN database entries for this physical range */
-        MM::Pte::MapPTE(&((PMMPFN)MemoryLayout->PfnDatabase)[BasePage],
-                        (PUCHAR)&((PMMPFN)MemoryLayout->PfnDatabase)[BasePage + PageCount] - 1,
-                        ValidPte);
-
-        /* Split PFN database allocation out of the free descriptor */
-        if(Descriptor == FreeDescriptor)
-        {
-            /* Initialize PFNs for the remaining free memory */
-            ProcessMemoryDescriptor(BasePage + MemoryLayout->PfnDatabaseSize,
-                                    PageCount - MemoryLayout->PfnDatabaseSize, LoaderFree);
-
-            /* Initialize PFNs for the physical pages backing the PFN database */
-            ProcessMemoryDescriptor(BasePage, MemoryLayout->PfnDatabaseSize, LoaderMemoryData);
-        }
-        else
-        {
-            /* Initialize PFNs for this memory range */
-            ProcessMemoryDescriptor(BasePage, PageCount, Descriptor->MemoryType);
-        }
+        ProcessMemoryDescriptor(Descriptor->BasePage, Descriptor->PageCount, Descriptor->MemoryType);
 
         /* Move to the next descriptor */
         ListEntry = ListEntry->Flink;
     }
+
+    /* Initialize PFNs for the free memory */
+    ProcessMemoryDescriptor(FreeDescriptor->BasePage, FreeDescriptor->PageCount, LoaderFree);
+
+    /* Initialize PFNs for the physical pages backing the PFN database */
+    ProcessMemoryDescriptor(OriginalFreeDescriptor.BasePage,
+                            FreeDescriptor->BasePage - OriginalFreeDescriptor.BasePage,
+                            LoaderMemoryData);
 
     /* Restore original free descriptor */
     *FreeDescriptor = OriginalFreeDescriptor;
