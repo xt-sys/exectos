@@ -69,26 +69,35 @@ MM::Pfn::InitializePfnDatabase(VOID)
             continue;
         }
 
-        /* Split PFN DB allocation out of free descriptor */
+        /* Check if this is the modified free descriptor */
         if(Descriptor == FreeDescriptor)
         {
-            /* Initialize PFNs for the remaining free memory after the PFN database */
-            ProcessMemoryDescriptor(OriginalFreeDescriptor.BasePage + MemoryLayout->PfnDatabaseSize,
-                                    OriginalFreeDescriptor.PageCount - MemoryLayout->PfnDatabaseSize,
-                                    LoaderFree);
+            /* Switch to the original descriptor */
+            Descriptor = &OriginalFreeDescriptor;
+        }
 
-            /* Initialize PFNs for the physical pages backing the PFN database itself */
-            ProcessMemoryDescriptor(OriginalFreeDescriptor.BasePage, MemoryLayout->PfnDatabaseSize, LoaderMemoryData);
-        }
-        else
+        /* Check if the free memory block that was split is being processed */
+        if(Descriptor == &OriginalFreeDescriptor)
         {
-            /* Initialize PFNs for the physical pages described by this descriptor */
-            ProcessMemoryDescriptor(Descriptor->BasePage, Descriptor->PageCount, Descriptor->MemoryType);
+            /* Skip loop processing, free memory is initialized separately */
+            ListEntry = ListEntry->Flink;
+            continue;
         }
+
+        /* Initialize PFNs for this memory range */
+        ProcessMemoryDescriptor(Descriptor->BasePage, Descriptor->PageCount, Descriptor->MemoryType);
 
         /* Move to the next descriptor */
         ListEntry = ListEntry->Flink;
     }
+
+    /* Initialize PFNs for the free memory */
+    ProcessMemoryDescriptor(FreeDescriptor->BasePage, FreeDescriptor->PageCount, LoaderFree);
+
+    /* Initialize PFNs for the physical pages backing the PFN database */
+    ProcessMemoryDescriptor(OriginalFreeDescriptor.BasePage,
+                            FreeDescriptor->BasePage - OriginalFreeDescriptor.BasePage,
+                            LoaderMemoryData);
 
     /* Restore original free descriptor */
     *FreeDescriptor = OriginalFreeDescriptor;
