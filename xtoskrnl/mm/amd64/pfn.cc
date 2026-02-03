@@ -47,6 +47,10 @@ MM::Pfn::InitializePfnDatabase(VOID)
     /* Map the Page Directory and Page Directory Pointer tables for the PFN database */
     MM::Pte::MapPPE(MemoryLayout->PfnDatabase, PfnDatabaseEnd, ValidPte);
     MM::Pte::MapPDE(MemoryLayout->PfnDatabase, PfnDatabaseEnd, ValidPte);
+    MM::Pte::MapPTE(MemoryLayout->PfnDatabase, PfnDatabaseEnd, ValidPte);
+
+    /* Zero PFN database virtual space */
+    RTL::Memory::ZeroMemory(MemoryLayout->PfnDatabase, MemoryLayout->PfnDatabaseSize * MM_PAGE_SIZE);
 
     /* Initialize the color tables */
     MM::Colors::InitializeColorTables();
@@ -72,11 +76,6 @@ MM::Pfn::InitializePfnDatabase(VOID)
             /* Switch to the original descriptor */
             Descriptor = &OriginalFreeDescriptor;
         }
-
-        /* Map PFN database entries for this range */
-        MM::Pte::MapPTE(&((PMMPFN)MemoryLayout->PfnDatabase)[Descriptor->BasePage],
-                        (PUCHAR)&((PMMPFN)MemoryLayout->PfnDatabase)[Descriptor->BasePage + Descriptor->PageCount] - 1,
-                        ValidPte);
 
         /* Check if the free memory block that was split is being processed */
         if(Descriptor == &OriginalFreeDescriptor)
