@@ -160,7 +160,7 @@ MM::KernelPool::FreeKernelStack(IN PVOID Stack,
     ULONG Index;
 
     /* Get the PTE for the top of the stack, including the guard page */
-    MM::Paging::AdvancePte(MM::Paging::GetPteAddress(Stack), -1);
+    PointerPte = MM::Paging::AdvancePte(MM::Paging::GetPteAddress(Stack), -1);
 
     /* Convert the stack size into a page count */
     StackPages = SIZE_TO_PAGES(StackSize);
