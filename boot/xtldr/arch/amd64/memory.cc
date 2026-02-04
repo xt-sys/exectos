@@ -45,7 +45,7 @@ Memory::BuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
     }
 
     /* Add new memory mapping for the page map itself */
-    Status = MapVirtualMemory(PageMap, Address, Address, 1, LoaderMemoryData);
+    Status = MapVirtualMemory(PageMap, (ULONGLONG)NULLPTR, Address, 1, LoaderMemoryData);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Memory mapping failure */
@@ -201,7 +201,7 @@ Memory::GetNextPageTable(IN PXTBL_PAGE_MAPPING PageMap,
         }
 
         /* Add new memory mapping */
-        Status = MapVirtualMemory(PageMap, Address, Address, 1, LoaderMemoryData);
+        Status = MapVirtualMemory(PageMap, (ULONGLONG)NULLPTR, Address, 1, LoaderMemoryData);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory mapping failure */
