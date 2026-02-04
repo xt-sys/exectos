@@ -93,8 +93,7 @@ Memory::BuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
     }
 
     /* Map the trampoline code area */
-    Status = MapVirtualMemory(PageMap, MM_TRAMPOLINE_ADDRESS,MM_TRAMPOLINE_ADDRESS,
-                              1, LoaderFirmwareTemporary);
+    Status = MapVirtualMemory(PageMap, MM_TRAMPOLINE_ADDRESS, MM_TRAMPOLINE_ADDRESS, 1, LoaderFirmwareTemporary);
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Mapping trampoline code failed */
