@@ -11,6 +11,102 @@
 
 
 /**
+ * Allocates and initializes page directory structures for a range of PDEs.
+ *
+ * @param StartingPde
+ *        Supplies a pointer to the first PDE in the range to initialize
+ *
+ * @param EndingPde
+ *        Supplies a pointer to the last PDE in the range to initialize
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::Pfn::InitializePageDirectory(IN PMMPDE StartingPde,
+                                 IN PMMPDE EndingPde)
+{
+    PMMPTE ParentPte, ValidPte;
+    BOOLEAN PteValidated;
+
+    /* Get a template PTE for mapping the PFN database pages */
+    ValidPte = MM::Pte::GetValidPte();
+
+    /* Initialize validation flag */
+    PteValidated = FALSE;
+
+    /* Iterate through the range of PDEs to ensure the paging hierarchy is fully mapped */
+    while(StartingPde <= EndingPde)
+    {
+        /* Check if there is a need to validate upper-level page table entries */
+        if(!PteValidated || ((ULONG_PTR)StartingPde & (MM_PAGE_SIZE - 1)) == 0)
+        {
+            /* For LA57, ensure PML5 entry exists */
+            if(MM::Paging::GetXpaStatus())
+            {
+                /* Get the P5E that maps the PXE page containing this hierarchy */
+                ParentPte = MM::Paging::GetPpeAddress(StartingPde);
+
+                /* Check if P5E entry is valid */
+                if(!MM::Paging::PteValid(ParentPte))
+                {
+                    /* Allocate a new PML4 page and map P5E to it */
+                    MM::Paging::SetPte(ValidPte, AllocateBootstrapPages(1), 0);
+                    *ParentPte = *ValidPte;
+
+                    /* Clear the newly created page */
+                    RTL::Memory::ZeroMemory(MM::Paging::GetPteVirtualAddress(ParentPte), MM_PAGE_SIZE);
+                }
+            }
+
+            /* Get the PXE that maps the PPE page containing PDE */
+            ParentPte = MM::Paging::GetPdeAddress(StartingPde);
+
+            /* Check if PXE entry is valid */
+            if(!MM::Paging::PteValid(ParentPte))
+            {
+                /* Allocate a new PPE page and map PXE to it */
+                MM::Paging::SetPte(ValidPte, AllocateBootstrapPages(1), 0);
+                *ParentPte = *ValidPte;
+
+                /* Clear the newly created page */
+                RTL::Memory::ZeroMemory(MM::Paging::GetPteVirtualAddress(ParentPte), MM_PAGE_SIZE);
+            }
+
+            /* Get the PPE that maps the PDE page containing PTE */
+            ParentPte = MM::Paging::GetPteAddress(StartingPde);
+
+            /* Check if PPE entry is valid */
+            if(!MM::Paging::PteValid(ParentPte))
+            {
+                /* Allocate a new PDE page and map PPE to it */
+                MM::Paging::SetPte(ValidPte, AllocateBootstrapPages(1), 0);
+                *ParentPte = *ValidPte;
+
+                /* Clear the newly created page */
+                RTL::Memory::ZeroMemory(MM::Paging::GetPteVirtualAddress(ParentPte), MM_PAGE_SIZE);
+            }
+
+            /* Upper levels for this PDE have been validated */
+            PteValidated = TRUE;
+        }
+
+        /* Ensure the PDE has a PTE page allocated */
+        if(!MM::Paging::PteValid(StartingPde))
+        {
+            /* Allocate a new PTE page and map PDE to it */
+            MM::Paging::SetPte(ValidPte, AllocateBootstrapPages(1), 0);
+            *StartingPde = *ValidPte;
+        }
+
+        /* Move to the next PDE */
+        StartingPde = MM::Paging::GetNextPte(StartingPde);
+    }
+}
+
+/**
  * Initializes the PFN database by mapping virtual memory and populating entries.
  *
  * @return This routine does not return any value.

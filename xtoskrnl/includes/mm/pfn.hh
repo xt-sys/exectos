@@ -57,6 +57,8 @@ namespace MM
         private:
             STATIC XTAPI VOID DecrementAvailablePages(VOID);
             STATIC XTAPI VOID IncrementAvailablePages(VOID);
+            STATIC XTAPI VOID InitializePageDirectory(IN PMMPDE StartingPde,
+                                                      IN PMMPDE EndingPde);
             STATIC XTAPI VOID InitializePageTablePfns(VOID);
             STATIC XTAPI VOID LinkFreePage(IN PFN_NUMBER PageFrameIndex);
             STATIC XTAPI VOID LinkPage(IN PMMPFNLIST ListHead,
