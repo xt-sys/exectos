@@ -181,7 +181,7 @@ MM::Pfn::InitializePfnDatabase(VOID)
             continue;
         }
 
-        /* Map PFN database entries for this physical range */
+        /* Initialize PFNs for this memory range */
         ProcessMemoryDescriptor(Descriptor->BasePage, Descriptor->PageCount, Descriptor->MemoryType);
 
         /* Move to the next descriptor */
