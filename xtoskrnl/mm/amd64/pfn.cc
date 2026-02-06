@@ -282,6 +282,7 @@ MM::Pfn::ProcessMemoryDescriptor(IN PFN_NUMBER BasePage,
                                  IN PFN_NUMBER PageCount,
                                  IN LOADER_MEMORY_TYPE MemoryType)
 {
+    PVOID VirtualRangeStart, VirtualRangeEnd;
     PFN_NUMBER PageNumber;
     PMMPDE PointerPde;
     PMMPFN Pfn;
@@ -303,6 +304,10 @@ MM::Pfn::ProcessMemoryDescriptor(IN PFN_NUMBER BasePage,
     }
     else
     {
+        /* Calculate the virtual address range for this physical memory region */
+        VirtualRangeStart = (PVOID)(KSEG0_BASE + (BasePage << MM_PAGE_SHIFT));
+        VirtualRangeEnd = (PVOID)(KSEG0_BASE + ((BasePage + PageCount) << MM_PAGE_SHIFT));
+
         /* Handle all other (non-free) memory types */
         switch(MemoryType)
         {
@@ -315,6 +320,12 @@ MM::Pfn::ProcessMemoryDescriptor(IN PFN_NUMBER BasePage,
                 }
                 break;
             case LoaderXIPRom:
+                /* Get the page directory entry for the current page */
+                PointerPde = MM::Paging::GetPdeAddress(VirtualRangeStart);
+
+                /* Initialize the page directory entries covering this memory range */
+                InitializePageDirectory(PointerPde, MM::Paging::GetPdeAddress(VirtualRangeEnd));
+
                 /* This memory range contains Read-Only Memory (ROM) */
                 for(PageNumber = 0; PageNumber < PageCount; PageNumber++)
                 {
@@ -324,11 +335,8 @@ MM::Pfn::ProcessMemoryDescriptor(IN PFN_NUMBER BasePage,
                     /* Ensure that the page is not already in-use */
                     if(Pfn->u3.e2.ReferenceCount == 0)
                     {
-                        /* Get the page directory entry for the current page */
-                        PointerPde = MM::Paging::GetPdeAddress((PVOID)(KSEG0_BASE + (BasePage << MM_PAGE_SHIFT)));
-
                         /* Initialize the PFN entry to represent a ROM page */
-                        Pfn->PteAddress = MM::Paging::GetPteAddress((PVOID)(KSEG0_BASE + (BasePage << MM_PAGE_SHIFT)));
+                        Pfn->PteAddress = MM::Paging::GetPteAddress(VirtualRangeStart);
                         Pfn->u1.Flink = 0;
                         Pfn->u2.ShareCount = 0;
                         Pfn->u3.e1.CacheAttribute = PfnCached;
@@ -342,6 +350,12 @@ MM::Pfn::ProcessMemoryDescriptor(IN PFN_NUMBER BasePage,
                 }
                 break;
             default:
+                /* Get the page directory entry for the current page */
+                PointerPde = MM::Paging::GetPdeAddress(VirtualRangeStart);
+
+                /* Initialize the page directory entries covering this memory range */
+                InitializePageDirectory(PointerPde, MM::Paging::GetPdeAddress(VirtualRangeEnd));
+
                 /* All other types are considered in-use (ie, by the kernel, ACPI, etc) */
                 for(PageNumber = 0; PageNumber < PageCount; PageNumber++)
                 {
@@ -351,11 +365,8 @@ MM::Pfn::ProcessMemoryDescriptor(IN PFN_NUMBER BasePage,
                     /* Ensure that the page is not already in-use */
                     if(Pfn->u3.e2.ReferenceCount == 0)
                     {
-                        /* Get the page directory entry for the current page */
-                        PointerPde = MM::Paging::GetPdeAddress((PVOID)(KSEG0_BASE + (BasePage << MM_PAGE_SHIFT)));
-
                         /* Initialize the PFN entry to represent an in-use page and prevent it from being allocated */
-                        Pfn->PteAddress = MM::Paging::GetPteAddress((PVOID)(KSEG0_BASE + (BasePage << MM_PAGE_SHIFT)));
+                        Pfn->PteAddress = MM::Paging::GetPteAddress(VirtualRangeStart);
                         Pfn->u2.ShareCount++;
                         Pfn->u3.e1.CacheAttribute = PfnCached;
                         Pfn->u3.e1.PageLocation = ActiveAndValid;
