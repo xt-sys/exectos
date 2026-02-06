@@ -14,10 +14,10 @@
  * Allocates and initializes page directory structures for a range of PDEs.
  *
  * @param StartingPde
- *        Supplies a pointer to the first PDE in the range to initialize
+ *        Supplies a pointer to the first PDE in the range to initialize.
  *
  * @param EndingPde
- *        Supplies a pointer to the last PDE in the range to initialize
+ *        Supplies a pointer to the last PDE in the range to initialize.
  *
  * @return This routine does not return any value.
  *

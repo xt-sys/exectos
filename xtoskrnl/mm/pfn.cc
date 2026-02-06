@@ -684,7 +684,7 @@ MM::Pfn::LinkPage(IN PMMPFNLIST ListHead,
         PageFrame->u2.Blink = ListHead->Blink;
     }
 
-    /* Record the page’s current location */
+    /* Record the page's current location */
     PageFrame->u3.e1.PageLocation = ListName;
 
     /* Handle pages that contribute to the available page count */
@@ -943,16 +943,16 @@ MM::Pfn::LinkStandbyPage(IN PFN_NUMBER PageFrameIndex)
 }
 
 /**
- * Processes a memory descriptor and initializes the corresponding PFN database entries
+ * Processes a memory descriptor and initializes the corresponding PFN database entries.
  *
  * @param BasePage
- *        The starting physical page number of the memory run
+ *        The starting physical page number of the memory run.
  *
  * @param PageCount
- *        The number of pages in the memory run
+ *        The number of pages in the memory run.
  *
  * @param MemoryType
- *        The type of memory as reported by the bootloader (e.g., free, ROM, in-use)
+ *        The type of memory as reported by the bootloader (e.g., free, ROM, in-use).
  *
  * @return This routine does not return any value.
  *
