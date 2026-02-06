@@ -10,6 +10,21 @@
 
 
 /**
+ * Determines the appropriate EFI memory mapping strategy for the i686 architecture.
+ *
+ * @return This routine returns FALSE, what results in a sequential mapping.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+BOOLEAN
+Xtos::DetermineMappingStrategy()
+{
+    /* Use a sequential mapping strategy */
+    return FALSE;
+}
+
+/**
  * Determines the appropriate paging level (PML) for the i686 architecture.
  *
  * @param Parameters

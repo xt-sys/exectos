@@ -11,6 +11,21 @@
 
 
 /**
+ * Determines the appropriate EFI memory mapping strategy for the AMD64 architecture.
+ *
+ * @return This routine returns TRUE, what results in an identity mapping.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+BOOLEAN
+Xtos::DetermineMappingStrategy()
+{
+    /* Use an identity mapping strategy */
+    return TRUE;
+}
+
+/**
  * Determines the appropriate paging level (PML) for the AMD64 architecture.
  *
  * @param Parameters

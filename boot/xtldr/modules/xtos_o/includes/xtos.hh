@@ -39,6 +39,7 @@ class Xtos
                                                           IN UINT NumberOfPages,
                                                           IN LOADER_MEMORY_TYPE MemoryType);
         STATIC XTCDECL LOADER_MEMORY_TYPE ConvertEfiMemoryType(IN EFI_MEMORY_TYPE EfiMemoryType);
+        STATIC XTCDECL BOOLEAN DetermineMappingStrategy();
         STATIC XTCDECL ULONG DeterminePagingLevel(IN CONST PWCHAR Parameters);
         STATIC XTCDECL EFI_STATUS EnablePaging(IN PXTBL_PAGE_MAPPING PageMap);
         STATIC XTCDECL VOID GetDisplayInformation(OUT PSYSTEM_RESOURCE_FRAMEBUFFER FrameBufferResource,

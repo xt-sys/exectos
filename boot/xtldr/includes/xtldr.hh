@@ -177,7 +177,8 @@ class Memory
                                               IN SHORT PageMapLevel,
                                               IN PAGE_SIZE PageSize);
         STATIC XTCDECL EFI_STATUS MapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
-                                               IN OUT PVOID *MemoryMapAddress,
+                                               IN OUT PVOID *BaseAddress,
+                                               IN BOOLEAN IdentityMapping,
                                                IN PBL_GET_MEMTYPE_ROUTINE GetMemoryTypeRoutine);
         STATIC XTCDECL EFI_STATUS MapPage(IN PXTBL_PAGE_MAPPING PageMap,
                                           IN ULONGLONG VirtualAddress,

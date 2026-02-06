@@ -314,8 +314,11 @@ Memory::InitializePageMap(OUT PXTBL_PAGE_MAPPING PageMap,
  * @param PageMap
  *        Supplies a pointer to the page mapping structure.
  *
- * @param MemoryMapAddress
+ * @param BaseAddress
  *        Supplies a virtual address, where EFI memory will be mapped.
+ *
+ * @param IdentityMapping
+ *        Specifies whether EFI non-free memory should be mapped by identity or sequential mapping.
  *
  * @param GetMemoryTypeRoutine
  *        Supplies a pointer to the routine which will be used to match EFI memory type to the OS memory type.
@@ -327,7 +330,8 @@ Memory::InitializePageMap(OUT PXTBL_PAGE_MAPPING PageMap,
 XTCDECL
 EFI_STATUS
 Memory::MapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
-                     IN OUT PVOID *MemoryMapAddress,
+                     IN OUT PVOID *BaseAddress,
+                     IN BOOLEAN IdentityMapping,
                      IN PBL_GET_MEMTYPE_ROUTINE GetMemoryTypeRoutine)
 {
     ULONGLONG MaxAddress, VirtualAddress;
@@ -339,7 +343,7 @@ Memory::MapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
     SIZE_T Index;
 
     /* Set virtual address as specified in argument */
-    VirtualAddress = (ULONGLONG)*MemoryMapAddress;
+    VirtualAddress = (ULONGLONG)*BaseAddress;
 
     /* Check if custom memory type routine is specified */
     if(GetMemoryTypeRoutine == NULLPTR)
@@ -419,12 +423,22 @@ Memory::MapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
             }
             else if(MemoryType != LoaderFree)
             {
-                /* Add any non-free memory mapping */
-                Status = MapVirtualMemory(PageMap, VirtualAddress, Descriptor->PhysicalStart,
-                                          Descriptor->NumberOfPages, MemoryType);
+                /* Check mapping strategy */
+                if(IdentityMapping)
+                {
+                    /* Add any non-free memory using identity mapping */
+                    Status = MapVirtualMemory(PageMap, Descriptor->PhysicalStart + KSEG0_BASE, Descriptor->PhysicalStart,
+                                              Descriptor->NumberOfPages, MemoryType);
+                }
+                else
+                {
+                    /* Add any non-free memory using sequential mapping */
+                    Status = MapVirtualMemory(PageMap, VirtualAddress, Descriptor->PhysicalStart,
+                                              Descriptor->NumberOfPages, MemoryType);
 
-                /* Update virtual address */
-                VirtualAddress = VirtualAddress + (Descriptor->NumberOfPages * MM_PAGE_SIZE);
+                    /* Update virtual address */
+                    VirtualAddress = VirtualAddress + (Descriptor->NumberOfPages * MM_PAGE_SIZE);
+                }
             }
             else
             {
@@ -462,7 +476,7 @@ Memory::MapEfiMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
     }
 
     /* Store next valid virtual address and return success */
-    *MemoryMapAddress = (PVOID)VirtualAddress;
+    *BaseAddress = (PVOID)VirtualAddress;
     return STATUS_EFI_SUCCESS;
 }
 

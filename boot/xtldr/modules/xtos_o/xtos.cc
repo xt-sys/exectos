@@ -618,6 +618,7 @@ Xtos::RunBootSequence(IN PEFI_FILE_HANDLE BootDir,
     EFI_HANDLE ProtocolHandle;
     EFI_STATUS Status;
     XTBL_PAGE_MAPPING PageMap;
+    BOOLEAN IdentityMapping;
 
     /* Initialize XTOS startup sequence */
     XtLdrProtocol->Debug.Print(L"Initializing XTOS startup sequence\n");
@@ -634,16 +635,28 @@ Xtos::RunBootSequence(IN PEFI_FILE_HANDLE BootDir,
     /* Close FrameBuffer protocol */
     XtLdrProtocol->Protocol.Close(&ProtocolHandle, &FrameBufGuid);
 
+    /* Determine whether to use a sequential or an identity mapping strategy */
+    IdentityMapping = DetermineMappingStrategy();
+
     /* Set base virtual memory area for the kernel mappings */
     VirtualAddress = (PVOID)(KSEG0_BASE);
 
     /* Initialize virtual memory mappings */
     XtLdrProtocol->Memory.InitializePageMap(&PageMap, DeterminePagingLevel(Parameters->Parameters), Size4K);
 
-    Status = XtLdrProtocol->Memory.MapEfiMemory(&PageMap, &VirtualAddress, NULLPTR);
+    /* Map all EFI memory regions */
+    Status = XtLdrProtocol->Memory.MapEfiMemory(&PageMap, &VirtualAddress, IdentityMapping, NULLPTR);
     if(Status != STATUS_EFI_SUCCESS)
     {
+        /* Mapping failed */
         return Status;
+    }
+
+    /* Check mapping strategy */
+    if(IdentityMapping)
+    {
+        /* Adjust virtual address to skip the identity-mapped physical range */
+        VirtualAddress = (PVOID)((ULONGLONG)VirtualAddress + 0x800000000);
     }
 
     /* Load the kernel */
