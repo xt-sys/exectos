@@ -26,18 +26,17 @@ MM::Manager::ComputeBootImageSize(OUT PPFN_NUMBER BootImageSize)
 {
     PKERNEL_INITIALIZATION_BLOCK InitializationBlock;
     PFN_NUMBER ImageSize;
-    ULONG PteSize;
+    ULONG_PTR Alignment;
 
     /* Get the kernel initialization block */
     InitializationBlock = KE::BootInformation::GetInitializationBlock();
 
-    /* Get the size of a PTE */
-    PteSize = MM::Paging::GetPteSize();
+    /* Calculate the alignment based on the PTE size */
+    Alignment = ((MM_PAGE_SIZE / MM::Paging::GetPteSize()) * MM_PAGE_SIZE);
 
     /* Calculate the size of the boot image */
     ImageSize = InitializationBlock->BootImageSize * MM_PAGE_SIZE;
-    ImageSize = (ImageSize + ((MM_PAGE_SIZE / PteSize) * MM_PAGE_SIZE) - 1) &
-                ~(((MM_PAGE_SIZE / PteSize) * MM_PAGE_SIZE) - 1);
+    ImageSize = (ImageSize + Alignment - 1) & ~(Alignment - 1);
 
     /* Return number of pages used by the boot image */
     *BootImageSize = ImageSize / MM_PAGE_SIZE;
