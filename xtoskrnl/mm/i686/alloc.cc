@@ -13,5 +13,13 @@ XTAPI
 VOID
 MM::Allocator::InitializeNonPagedPool(VOID)
 {
+    PMMMEMORY_LAYOUT MemoryLayout;
     UNIMPLEMENTED;
+
+    /* Retrieve memory layout */
+    MemoryLayout = MM::Manager::GetMemoryLayout();
+
+    /* Map PDE and PTE for the base of the non-paged pool */
+    MM::Pte::MapPDE(MemoryLayout->NonPagedPoolStart, (PCHAR)MemoryLayout->NonPagedPoolEnd - 1, MM::Pte::GetValidPte());
+    MM::Pte::MapPTE(MemoryLayout->NonPagedPoolStart, (PCHAR)MemoryLayout->NonPagedPoolEnd - 1, MM::Pte::GetValidPte());
 }
