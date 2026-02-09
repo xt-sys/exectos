@@ -194,49 +194,63 @@ Xtos::GetMemoryDescriptorList(IN PXTBL_PAGE_MAPPING PageMap,
                               IN PVOID *VirtualAddress,
                               OUT PLIST_ENTRY MemoryDescriptorList)
 {
+    PLOADER_MEMORY_DESCRIPTOR Descriptor;
+    PXTBL_MEMORY_MAPPING MemoryMapping;
     EFI_PHYSICAL_ADDRESS Address;
+    PLIST_ENTRY ListEntry;
     EFI_STATUS Status;
     ULONGLONG Pages;
 
+    /* Calculate the number of pages required to store the memory descriptor array */
     Pages = (ULONGLONG)EFI_SIZE_TO_PAGES((PageMap->MapSize + 1) * sizeof(LOADER_MEMORY_DESCRIPTOR));
 
+    /* Allocate physical pages to hold the memory descriptor list */
     Status = XtLdrProtocol->Memory.AllocatePages(AllocateAnyPages, Pages, &Address);
     if(Status != STATUS_EFI_SUCCESS)
     {
+        /* Page allocation failed, return the status code */
         return Status;
     }
 
+    /* Create a virtual memory mapping for the allocated descriptor buffer */
     Status = XtLdrProtocol->Memory.MapVirtualMemory(PageMap, (ULONGLONG)*VirtualAddress, Address, Pages, LoaderMemoryData);
     if(Status != STATUS_EFI_SUCCESS)
     {
+        /* Release the allocated pages as the virtual mapping failed and return status code */
         XtLdrProtocol->Memory.FreePages(Address, Pages);
         return Status;
     }
 
-    PVOID PhysicalBase = (PVOID)Address;
+    /* Initialize the descriptor pointer to the start of the allocated physical buffer */
+    Descriptor = (PLOADER_MEMORY_DESCRIPTOR)Address;
 
-    PLIST_ENTRY ListEntry;
+    /* Get the first entry from the internal boot loader memory map */
     ListEntry = PageMap->MemoryMap.Flink;
+
+    /* Iterate through the internal memory map and populate the loader descriptor list */
     while(ListEntry != &PageMap->MemoryMap)
     {
-        PXTBL_MEMORY_MAPPING MemoryMapping = CONTAIN_RECORD(ListEntry, XTBL_MEMORY_MAPPING, ListEntry);
-        PLOADER_MEMORY_DESCRIPTOR MemoryDescriptor = (PLOADER_MEMORY_DESCRIPTOR)Address;
+        /* Retrieve the internal memory mapping record from the current list entry */
+        MemoryMapping = CONTAIN_RECORD(ListEntry, XTBL_MEMORY_MAPPING, ListEntry);
 
-        MemoryDescriptor->MemoryType = MemoryMapping->MemoryType;
-        MemoryDescriptor->BasePage = (UINT_PTR)MemoryMapping->PhysicalAddress / EFI_PAGE_SIZE;
-        MemoryDescriptor->PageCount = MemoryMapping->NumberOfPages;
+        /* Transfer memory type and address information to the kernel descriptor */
+        Descriptor->MemoryType = MemoryMapping->MemoryType;
+        Descriptor->BasePage = (UINT_PTR)(MemoryMapping->PhysicalAddress / EFI_PAGE_SIZE);
+        Descriptor->PageCount = (ULONG)MemoryMapping->NumberOfPages;
 
-        XtLdrProtocol->LinkedList.InsertTail(MemoryDescriptorList, &MemoryDescriptor->ListEntry);
+        /* Link the entry */
+        XtLdrProtocol->LinkedList.InsertTail(MemoryDescriptorList, &Descriptor->ListEntry);
 
-        Address = Address + sizeof(LOADER_MEMORY_DESCRIPTOR);
+        /* Move to the next slot in the allocated buffer */
+        Descriptor++;
         ListEntry = ListEntry->Flink;
     }
 
-    XtLdrProtocol->Memory.PhysicalListToVirtual(PageMap, MemoryDescriptorList, PhysicalBase, *VirtualAddress);
+    /* Convert all physical link pointers in the list to their corresponding virtual addresses */
+    XtLdrProtocol->Memory.PhysicalListToVirtual(PageMap, MemoryDescriptorList, (PVOID)Address, *VirtualAddress);
 
-    /* Calculate next valid virtual address */
+    /* Advance the virtual address pointer to the next available free region and return success */
     *VirtualAddress = (PUINT8)*VirtualAddress + (Pages * EFI_PAGE_SIZE);
-
     return STATUS_EFI_SUCCESS;
 }
 
