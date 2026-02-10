@@ -26,7 +26,7 @@ namespace RTL
                                                IN PLIST_ENTRY Entry);
             STATIC XTCDECL BOOLEAN ListEmpty(IN PLIST_ENTRY ListHead);
             STATIC XTCDECL BOOLEAN ListLoop(IN PLIST_ENTRY ListHead);
-            STATIC XTCDECL VOID RemoveEntryList(IN PLIST_ENTRY Entry);
+            STATIC XTCDECL BOOLEAN RemoveEntryList(IN PLIST_ENTRY Entry);
     };
 }
 

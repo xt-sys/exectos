@@ -162,14 +162,18 @@ RTL::LinkedList::ListLoop(IN PLIST_ENTRY ListHead)
  * @param Entry
  *        Pointer to the entry that will be removed from the list.
  *
- * @return This routine does not return any value.
+ * @return This routine returns TRUE if the list is empty after removal, or FALSE otherwise.
  *
  * @since XT 1.0
  */
 XTCDECL
-VOID
+BOOLEAN
 RTL::LinkedList::RemoveEntryList(IN PLIST_ENTRY Entry)
 {
+    /* Remove entry from the list */
     Entry->Flink->Blink = Entry->Blink;
     Entry->Blink->Flink = Entry->Flink;
+
+    /* Return TRUE if list is empty, or FALSE otherwise */
+    return (BOOLEAN)(Entry->Blink == Entry->Flink);
 }
