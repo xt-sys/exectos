@@ -30,6 +30,7 @@ namespace MM
             XTAPI PMMP5E GetP5eAddress(IN PVOID Address);
             XTAPI ULONG GetP5eOffset(IN PVOID Address);
             XTAPI PVOID GetP5eVirtualAddress(IN PMMP5E P5ePointer);
+            XTAPI USHORT GetPageMapLevel();
             XTAPI PFN_NUMBER GetPageFrameNumber(IN PMMPTE Pte);
             XTAPI PMMPDE GetPdeAddress(IN PVOID Address);
             XTAPI ULONG GetPdeOffset(IN PVOID Address);

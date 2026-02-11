@@ -28,6 +28,7 @@ namespace MM
             VIRTUAL XTAPI PMMPTE GetNextPte(IN PMMPTE Pte) = 0;
             VIRTUAL XTAPI BOOLEAN GetOneEntry(IN PMMPTE Pte) = 0;
             VIRTUAL XTAPI PFN_NUMBER GetPageFrameNumber(IN PMMPTE Pte) = 0;
+            XTAPI USHORT GetPageMapLevel();
             XTAPI PMMPDE GetPdeAddress(IN PVOID Address);
             XTAPI ULONG GetPdeOffset(IN PVOID Address);
             VIRTUAL XTAPI PVOID GetPdeVirtualAddress(IN PMMPDE PdePointer) = 0;

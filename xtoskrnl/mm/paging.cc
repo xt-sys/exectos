@@ -190,6 +190,20 @@ MM::Paging::GetPageMapBasicRoutines(VOID)
 }
 
 /**
+ * Gets Page Map Level (PML) for current paging mode.
+ *
+ * @return This routine returns the page map level.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+USHORT
+MM::Paging::GetPageMapLevel()
+{
+    return PmlRoutines->GetPageMapLevel();
+}
+
+/**
  * Gets the page map routines for eXtended Physical Addressing (XPA) mode.
  *
  * @return This routine returns the address of the object containing XPA page map routines.

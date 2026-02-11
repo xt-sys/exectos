@@ -177,6 +177,20 @@ MM::PageMap::GetPageFrameNumber(IN PMMPTE Pte)
 }
 
 /**
+ * Gets Page Map Level (PML) for current paging mode.
+ *
+ * @return This routine returns the page map level.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+USHORT
+MM::PageMap::GetPageMapLevel()
+{
+    return PageMapInfo.Xpa ? 5 : 4;
+}
+
+/**
  * Gets the address of the PDE (Page Directory Entry), that maps given address.
  *
  * @param Address

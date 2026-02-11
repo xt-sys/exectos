@@ -31,6 +31,7 @@ namespace MM
             STATIC XTAPI PMMP5E GetP5eAddress(IN PVOID Address);
             STATIC XTAPI PVOID GetP5eVirtualAddress(IN PMMP5E P5ePointer);
             STATIC XTAPI PFN_NUMBER GetPageFrameNumber(IN PMMPTE Pte);
+            STATIC XTAPI USHORT GetPageMapLevel();
             STATIC XTAPI PMMPDE GetPdeAddress(IN PVOID Address);
             STATIC XTAPI PVOID GetPdeVirtualAddress(IN PMMPDE PdePointer);
             STATIC XTAPI PMMPPE GetPpeAddress(IN PVOID Address);
