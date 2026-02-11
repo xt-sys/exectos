@@ -175,5 +175,5 @@ RTL::LinkedList::RemoveEntryList(IN PLIST_ENTRY Entry)
     Entry->Blink->Flink = Entry->Flink;
 
     /* Return TRUE if list is empty, or FALSE otherwise */
-    return (BOOLEAN)(Entry->Blink == Entry->Flink);
+    return ListEmpty(Entry);
 }
