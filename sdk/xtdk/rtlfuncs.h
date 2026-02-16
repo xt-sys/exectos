@@ -221,7 +221,7 @@ RtlMultiplyLargeInteger(IN LARGE_INTEGER Multiplicand,
 
 XTCLINK
 XTCDECL
-BOOLEAN
+VOID
 RtlRemoveEntryList(IN PLIST_ENTRY Entry);
 
 XTCLINK

@@ -763,16 +763,16 @@ RtlMultiplyLargeInteger(IN LARGE_INTEGER Multiplicand,
  * @param Entry
  *        Pointer to the entry that will be removed from the list.
  *
- * @return This routine returns TRUE if the list is empty after removal, or FALSE otherwise.
+ * @return This routine does not return any value.
  *
  * @since XT 1.0
  */
 XTCLINK
 XTCDECL
-BOOLEAN
+VOID
 RtlRemoveEntryList(IN PLIST_ENTRY Entry)
 {
-    return RTL::LinkedList::RemoveEntryList(Entry);
+    RTL::LinkedList::RemoveEntryList(Entry);
 }
 
 /**

@@ -4,6 +4,7 @@
  * FILE:            xtoskrnl/includes/rtl/llist.hh
  * DESCRIPTION:     Linked list manipulation routines
  * DEVELOPERS:      Aiken Harris <harraiken91@gmail.com>
+ *                  Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
 #ifndef __XTOSKRNL_RTL_LLIST_HH
@@ -18,6 +19,7 @@ namespace RTL
     class LinkedList
     {
         public:
+            STATIC XTCDECL PLIST_ENTRY GetFirstEntry(IN PLIST_ENTRY ListHead);
             STATIC XTCDECL VOID InitializeListHead(IN PLIST_ENTRY ListHead);
             STATIC XTCDECL VOID InitializeListHead32(IN PLIST_ENTRY32 ListHead);
             STATIC XTCDECL VOID InsertHeadList(IN OUT PLIST_ENTRY ListHead,
@@ -26,7 +28,11 @@ namespace RTL
                                                IN PLIST_ENTRY Entry);
             STATIC XTCDECL BOOLEAN ListEmpty(IN PLIST_ENTRY ListHead);
             STATIC XTCDECL BOOLEAN ListLoop(IN PLIST_ENTRY ListHead);
-            STATIC XTCDECL BOOLEAN RemoveEntryList(IN PLIST_ENTRY Entry);
+            STATIC XTCDECL VOID RemoveEntryList(IN PLIST_ENTRY Entry);
+            STATIC XTCDECL VOID SpliceHeadList(IN OUT PLIST_ENTRY ListHead,
+                                               IN OUT PLIST_ENTRY SpliceList);
+            STATIC XTCDECL VOID SpliceTailList(IN OUT PLIST_ENTRY ListHead,
+                                               IN OUT PLIST_ENTRY SpliceList);
     };
 }
 

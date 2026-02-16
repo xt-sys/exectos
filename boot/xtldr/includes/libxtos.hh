@@ -80,7 +80,7 @@ namespace RTL
                                                IN PLIST_ENTRY Entry);
             STATIC XTCDECL VOID InsertTailList(IN OUT PLIST_ENTRY ListHead,
                                                IN PLIST_ENTRY Entry);
-            STATIC XTCDECL BOOLEAN RemoveEntryList(IN PLIST_ENTRY Entry);
+            STATIC XTCDECL VOID RemoveEntryList(IN PLIST_ENTRY Entry);
     };
 
     class Memory
