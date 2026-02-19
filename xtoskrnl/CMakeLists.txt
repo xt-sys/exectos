@@ -71,6 +71,7 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/rtl/llist.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/math.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/memory.cc
+    ${XTOSKRNL_SOURCE_DIR}/rtl/sha1.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/string.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/widestr.cc)
 

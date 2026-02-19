@@ -49,6 +49,10 @@
 #define PFL_DIGIT_PRECISION             0x00002000
 #define PFL_THOUSANDS_GROUPING          0x00004000
 
+/* Cryptographic related definitions */
+#define SHA1_BLOCK_SIZE                 64
+#define SHA1_DIGEST_SIZE                20
+
 /* Runtime Library routine callbacks */
 typedef XTSTATUS (*PWRITE_CHARACTER)(IN CHAR Character);
 typedef XTSTATUS (*PWRITE_WIDE_CHARACTER)(IN WCHAR Character);
@@ -94,5 +98,13 @@ typedef struct _RTL_PRINT_FORMAT_PROPERTIES
     LONG Precision;
     LONG Flags;
 } RTL_PRINT_FORMAT_PROPERTIES, *PRTL_PRINT_FORMAT_PROPERTIES;
+
+/* Runtime Library SHA-1 context structure definition */
+typedef struct _RTL_SHA1_CONTEXT
+{
+    ULONG   State[5];
+    ULONG   Count[2];
+    UCHAR   Buffer[SHA1_BLOCK_SIZE];
+} RTL_SHA1_CONTEXT, *PRTL_SHA1_CONTEXT;
 
 #endif /* __XTDK_RTLTYPES_H */

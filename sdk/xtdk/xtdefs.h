@@ -80,6 +80,10 @@
 /* Macro that returns offset of the virtual address */
 #define PAGE_OFFSET(VirtualAddress)            ((ULONG)((ULONG_PTR)VirtualAddress & MM_PAGE_MASK))
 
+/* Macros for bitwise rotating */
+#define ROTATE_LEFT(Value, Count)              ((Value << Count) | (Value >> (32 - Count)))
+#define ROTATE_RIGHT(Value, Count)             ((Value >> Count) | (Value << (32 - Count)))
+
 /* Macro for rounding down */
 #define ROUND_DOWN(Value, Alignment)           ((Value) & ~((Alignment) - 1))
 
@@ -104,7 +108,7 @@
 
 /* Variadic ABI functions */
 typedef __builtin_va_list VA_LIST, *PVA_LIST;
-#define VA_ARG(Marker, Type)                   ((sizeof (Type) < sizeof(UINT_PTR)) ? \
+#define VA_ARG(Marker, Type)                   ((sizeof(Type) < sizeof(UINT_PTR)) ? \
                                                (Type)(__builtin_va_arg(Marker, UINT_PTR)) : \
                                                (Type)(__builtin_va_arg(Marker, Type)))
 #define VA_COPY(Dest, Start)                   __builtin_va_copy(Dest, Start)
