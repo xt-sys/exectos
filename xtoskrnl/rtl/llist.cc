@@ -2,7 +2,7 @@
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
  * FILE:            xtoskrnl/rtl/llist.cc
- * DESCRIPTION:     Linked list manipulation routines
+ * DESCRIPTION:     Doubly linked list manipulation routines
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
@@ -10,13 +10,12 @@
 
 
 /**
- * Retrieves the first entry from a double-linked list without removing it from the list.
+ * Retrieves the first entry from a doubly linked list without removing it from the list.
  *
  * @param ListHead
- *        Pointer to a structure that serves as the list header.
+ *        Supplies a pointer to a structure that serves as the list header.
  *
- * @return This routine returns a pointer to the first entry in the list.
- *         If the list is empty, the return value points to the list head.
+ * @return This routine returns a pointer to the first entry in the list, or NULLPTR if the list is empty.
  *
  * @since XT 1.0
  */
@@ -36,10 +35,10 @@ RTL::LinkedList::GetFirstEntry(IN PLIST_ENTRY ListHead)
 }
 
 /**
- * This routine initializes a structure representing the head of a double-linked list.
+ * Initializes a structure representing the head of a doubly linked list.
  *
  * @param ListHead
- *        Pointer to a structure that serves as the list header.
+ *        Supplies a pointer to a structure that serves as the list header.
  *
  * @return This routine does not return any value.
  *
@@ -55,10 +54,10 @@ RTL::LinkedList::InitializeListHead(IN PLIST_ENTRY ListHead)
 }
 
 /**
- * This routine initializes a structure representing the head of a 32bit double-linked list.
+ * Initializes a structure representing the head of a 32bit doubly linked list.
  *
  * @param ListHead
- *        Pointer to a structure that serves as the list header.
+ *        Supplies a pointer to a structure that serves as the list header.
  *
  * @return This routine does not return any value.
  *
@@ -74,13 +73,13 @@ RTL::LinkedList::InitializeListHead32(IN PLIST_ENTRY32 ListHead)
 }
 
 /**
- * This routine inserts an entry at the head of a doubly linked list.
+ * Inserts an entry at the head of a doubly linked list.
  *
  * @param ListHead
- *        Pointer to the head of the list.
+ *        Supplies a pointer to the head of the list.
  *
  * @param Entry
- *        Pointer to the entry that will be inserted in the list.
+ *        Supplies a pointer to the entry that will be inserted in the list.
  *
  * @return This routine does not return any value.
  *
@@ -99,13 +98,13 @@ RTL::LinkedList::InsertHeadList(IN OUT PLIST_ENTRY ListHead,
 }
 
 /**
- * This routine inserts an entry at the tail of a doubly linked list.
+ * Inserts an entry at the tail of a doubly linked list.
  *
  * @param ListHead
- *        Pointer to the head of the list.
+ *        Supplies a pointer to the head of the list.
  *
  * @param Entry
- *        Pointer to the entry that will be inserted in the list.
+ *        Supplies a pointer to the entry that will be inserted in the list.
  *
  * @return This routine does not return any value.
  *
@@ -127,9 +126,9 @@ RTL::LinkedList::InsertTailList(IN OUT PLIST_ENTRY ListHead,
  * Indicates whether a doubly linked list structure is empty, or not initialized at all.
  *
  * @param ListHead
- *        Pointer to a structure that represents the head of the list.
+ *        Supplies a pointer to a structure that represents the head of the list.
  *
- * @return TRUE if there are currently no entries in the list or FALSE otherwise.
+ * @return This routine returns TRUE if there are currently no entries in the list or FALSE otherwise.
  *
  * @since XT 1.0
  */
@@ -142,10 +141,10 @@ RTL::LinkedList::ListEmpty(IN PLIST_ENTRY ListHead)
 }
 
 /**
- * This routine detects a loop in a doubly linked list.
+ * Detects a loop in a doubly linked list.
  *
  * @param ListHead
- *        Pointer to a structure that represents the head of the list.
+ *        Supplies a pointer to a structure that represents the head of the list.
  *
  * @return TRUE if linked list contains a loop or FALSE otherwise.
  *
@@ -188,10 +187,10 @@ RTL::LinkedList::ListLoop(IN PLIST_ENTRY ListHead)
 }
 
 /**
- * This routine removes an entry from a doubly linked list.
+ * Removes an entry from a doubly linked list.
  *
  * @param Entry
- *        Pointer to the entry that will be removed from the list.
+ *        Supplies a pointer to the entry that will be removed from the list.
  *
  * @return This routine does not return any value.
  *
@@ -210,10 +209,10 @@ RTL::LinkedList::RemoveEntryList(IN PLIST_ENTRY Entry)
  * Splices a doubly linked list at the head of another list. The source list is reinitialized to empty.
  *
  * @param ListHead
- *        Pointer to a structure that represents the head of the list.
+ *        Supplies a pointer to a structure that represents the head of the list.
  *
  * @param SpliceList
- *        Pointer to a structure that represents the head of the list that will be spliced.
+ *        Supplies a pointer to a structure that represents the head of the list that will be spliced.
  *
  * @return This routine does not return any value.
  *
@@ -252,10 +251,10 @@ RTL::LinkedList::SpliceHeadList(IN OUT PLIST_ENTRY ListHead,
  * Splices a doubly linked list at the tail of another list. The source list is reinitialized to empty.
  *
  * @param ListHead
- *        Pointer to the head of the destination list.
+ *        Supplies a pointer to the head of the destination list.
  *
  * @param SpliceList
- *        Pointer to the head of the list that will be spliced.
+ *        Supplies a pointer to the head of the list that will be spliced.
  *
  * @return This routine does not return any value.
  *
