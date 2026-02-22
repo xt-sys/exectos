@@ -20,6 +20,7 @@
 #include <rtl/math.hh>
 #include <rtl/memory.hh>
 #include <rtl/sha1.hh>
+#include <rtl/slist.hh>
 #include <rtl/string.hh>
 #include <rtl/widestr.hh>
 
