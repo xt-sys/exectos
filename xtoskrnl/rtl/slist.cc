@@ -48,7 +48,7 @@ XTCDECL
 VOID
 RTL::SinglyList::InitializeListHead(IN PSINGLE_LIST_HEADER ListHead)
 {
-    /* Initialize the list head */
+    /* Initialize the singly linked list head */
     ListHead->Alignment = 0;
 }
 
@@ -61,19 +61,27 @@ RTL::SinglyList::InitializeListHead(IN PSINGLE_LIST_HEADER ListHead)
  * @param Entry
  *        Supplies a pointer to the entry that will be inserted in the list.
  *
- * @return This routine does not return any value.
+ * @return This routine returns a pointer to the original first entry in the list.
  *
  * @since XT 1.0
  */
 XTCDECL
-VOID
+PSINGLE_LIST_ENTRY
 RTL::SinglyList::InsertHeadList(IN OUT PSINGLE_LIST_HEADER ListHead,
                                 IN PSINGLE_LIST_ENTRY Entry)
 {
+    PSINGLE_LIST_ENTRY OriginalEntry;
+
+    /* Store the original first entry */
+    OriginalEntry = ListHead->Next.Next;
+
     /* Insert entry at the head of the list and increment depth */
     Entry->Next = ListHead->Next.Next;
     ListHead->Next.Next = Entry;
     ListHead->Depth++;
+
+    /* Return original first entry */
+    return OriginalEntry;
 }
 
 /**
@@ -85,16 +93,16 @@ RTL::SinglyList::InsertHeadList(IN OUT PSINGLE_LIST_HEADER ListHead,
  * @param Entry
  *        Supplies a pointer to the entry that will be inserted in the list.
  *
- * @return This routine does not return any value.
+ * @return This routine returns a pointer to the original last entry in the list.
  *
  * @since XT 1.0
  */
 XTCDECL
-VOID
+PSINGLE_LIST_ENTRY
 RTL::SinglyList::InsertTailList(IN OUT PSINGLE_LIST_HEADER ListHead,
                                 IN PSINGLE_LIST_ENTRY Entry)
 {
-    PSINGLE_LIST_ENTRY CurrentEntry;
+    PSINGLE_LIST_ENTRY CurrentEntry, OriginalEntry;
 
     /* Set Next pointer of the new entry to NULLPTR */
     Entry->Next = NULLPTR;
@@ -102,6 +110,9 @@ RTL::SinglyList::InsertTailList(IN OUT PSINGLE_LIST_HEADER ListHead,
     /* Check if the list is empty */
     if(ListEmpty(ListHead))
     {
+        /* Store the original last entry */
+        OriginalEntry = ListHead->Next.Next;
+
         /* Insert entry at the head */
         ListHead->Next.Next = Entry;
     }
@@ -115,12 +126,18 @@ RTL::SinglyList::InsertTailList(IN OUT PSINGLE_LIST_HEADER ListHead,
             CurrentEntry = CurrentEntry->Next;
         }
 
+        /* Store the original last entry */
+        OriginalEntry = CurrentEntry;
+
         /* Insert entry at the tail */
         CurrentEntry->Next = Entry;
     }
 
     /* Increment list depth */
     ListHead->Depth++;
+
+    /* Return original last entry */
+    return OriginalEntry;
 }
 
 /**
@@ -189,7 +206,7 @@ RTL::SinglyList::RemoveEntryList(IN PSINGLE_LIST_HEADER ListHead,
     /* Check if the list is empty */
     if(ListEmpty(ListHead))
     {
-        /* List is empty, nothing to remove */
+        /* List is empty, nothing to remove, return */
         return;
     }
 
@@ -200,7 +217,7 @@ RTL::SinglyList::RemoveEntryList(IN PSINGLE_LIST_HEADER ListHead,
         ListHead->Next.Next = Entry->Next;
         ListHead->Depth--;
 
-        /* Nothing else to do */
+        /* Nothing else to do, return */
         return;
     }
 
@@ -214,7 +231,7 @@ RTL::SinglyList::RemoveEntryList(IN PSINGLE_LIST_HEADER ListHead,
         /* Check if we reached the end of the list */
         if(PreviousEntry == NULLPTR)
         {
-            /* Entry not found */
+            /* Entry not found, return */
             return;
         }
     }
@@ -233,22 +250,25 @@ RTL::SinglyList::RemoveEntryList(IN PSINGLE_LIST_HEADER ListHead,
  * @param SpliceList
  *        Supplies a pointer to a structure that represents the head of the list that will be spliced.
  *
- * @return This routine does not return any value.
+ * @return This routine returns a pointer to the original first entry in the list.
  *
  * @since XT 1.0
  */
 XTCDECL
-VOID
+PSINGLE_LIST_ENTRY
 RTL::SinglyList::SpliceHeadList(IN OUT PSINGLE_LIST_HEADER ListHead,
                                 IN OUT PSINGLE_LIST_HEADER SpliceList)
 {
-    PSINGLE_LIST_ENTRY LastEntry;
+    PSINGLE_LIST_ENTRY LastEntry, OriginalEntry;
+
+    /* Store the original last entry */
+    OriginalEntry = ListHead->Next.Next;
 
     /* Check if the list to splice is empty */
     if(ListEmpty(SpliceList))
     {
-        /* Nothing to splice, return */
-        return;
+        /* Nothing to splice, return original first entry */
+        return OriginalEntry;
     }
 
     /* Find the last entry of the list to splice */
@@ -269,6 +289,9 @@ RTL::SinglyList::SpliceHeadList(IN OUT PSINGLE_LIST_HEADER ListHead,
     /* Reinitialize the source list to empty */
     SpliceList->Next.Next = NULLPTR;
     SpliceList->Depth = 0;
+
+    /* Return the original last entry */
+    return OriginalEntry;
 }
 
 /**
@@ -280,28 +303,24 @@ RTL::SinglyList::SpliceHeadList(IN OUT PSINGLE_LIST_HEADER ListHead,
  * @param SpliceList
  *        Supplies a pointer to the head of the list that will be spliced.
  *
- * @return This routine does not return any value.
+ * @return This routine returns a pointer to the original last entry in the list.
  *
  * @since XT 1.0
  */
 XTCDECL
-VOID
+PSINGLE_LIST_ENTRY
 RTL::SinglyList::SpliceTailList(IN OUT PSINGLE_LIST_HEADER ListHead,
                                 IN OUT PSINGLE_LIST_HEADER SpliceList)
 {
-    PSINGLE_LIST_ENTRY LastEntry;
-
-    /* Check if the list to splice is empty */
-    if(ListEmpty(SpliceList))
-    {
-        /* Nothing to splice, return */
-        return;
-    }
+    PSINGLE_LIST_ENTRY LastEntry, OriginalEntry;
 
     /* Check if the destination list is empty */
-    if(ListHead->Next.Next == NULLPTR)
+    if(ListEmpty(ListHead))
     {
-        /* Simply move the splice list to the destination head */
+        /* Destination is empty, original last entry is NULLPTR */
+        OriginalEntry = NULLPTR;
+
+        /* Move the splice list to the destination head */
         ListHead->Next.Next = SpliceList->Next.Next;
     }
     else
@@ -314,6 +333,9 @@ RTL::SinglyList::SpliceTailList(IN OUT PSINGLE_LIST_HEADER ListHead,
             LastEntry = LastEntry->Next;
         }
 
+        /* Store the original last entry */
+        OriginalEntry = LastEntry;
+
         /* Splice the list at the tail of destination */
         LastEntry->Next = SpliceList->Next.Next;
     }
@@ -324,4 +346,41 @@ RTL::SinglyList::SpliceTailList(IN OUT PSINGLE_LIST_HEADER ListHead,
     /* Reinitialize the source list to empty */
     SpliceList->Next.Next = NULLPTR;
     SpliceList->Depth = 0;
+
+    /* Return the original last entry */
+    return OriginalEntry;
+}
+
+/**
+ * Retrieves the first entry from a singly linked list and removes it from the list.
+ *
+ * @param ListHead
+ *        Pointer to a structure that serves as the list header.
+ *
+ * @return This routine returns a pointer to the first entry in the list, or NULLPTR if the list is empty.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+PSINGLE_LIST_ENTRY
+RTL::SinglyList::TakeFirstEntry(IN PSINGLE_LIST_HEADER ListHead)
+{
+    PSINGLE_LIST_ENTRY Entry;
+
+    /* Check if the list is empty */
+    if(ListEmpty(ListHead))
+    {
+        /* List is empty, return NULLPTR */
+        return NULLPTR;
+    }
+
+    /* Get the first entry */
+    Entry = ListHead->Next.Next;
+
+    /* Remove entry from the list */
+    ListHead->Next.Next = Entry->Next;
+    ListHead->Depth--;
+
+    /* Return the first entry */
+    return Entry;
 }
