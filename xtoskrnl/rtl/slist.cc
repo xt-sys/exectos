@@ -75,10 +75,11 @@ RTL::SinglyList::InsertHeadList(IN OUT PSINGLE_LIST_HEADER ListHead,
     /* Store the original first entry */
     OriginalEntry = ListHead->Next.Next;
 
-    /* Insert entry at the head of the list and increment depth */
+    /* Insert entry at the head of the list and increment depth and sequence */
     Entry->Next = ListHead->Next.Next;
     ListHead->Next.Next = Entry;
     ListHead->Depth++;
+    ListHead->Sequence++;
 
     /* Return original first entry */
     return OriginalEntry;
@@ -133,8 +134,9 @@ RTL::SinglyList::InsertTailList(IN OUT PSINGLE_LIST_HEADER ListHead,
         CurrentEntry->Next = Entry;
     }
 
-    /* Increment list depth */
+    /* Increment list depth and sequence */
     ListHead->Depth++;
+    ListHead->Sequence++;
 
     /* Return original last entry */
     return OriginalEntry;
@@ -283,8 +285,9 @@ RTL::SinglyList::SpliceHeadList(IN OUT PSINGLE_LIST_HEADER ListHead,
     LastEntry->Next = ListHead->Next.Next;
     ListHead->Next.Next = SpliceList->Next.Next;
 
-    /* Update depth of the destination list */
+    /* Update depth and sequence of the destination list */
     ListHead->Depth += SpliceList->Depth;
+    ListHead->Sequence++;
 
     /* Reinitialize the source list to empty */
     SpliceList->Next.Next = NULLPTR;
@@ -340,8 +343,9 @@ RTL::SinglyList::SpliceTailList(IN OUT PSINGLE_LIST_HEADER ListHead,
         LastEntry->Next = SpliceList->Next.Next;
     }
 
-    /* Update depth of the destination list */
+    /* Update depth and sequence of the destination list */
     ListHead->Depth += SpliceList->Depth;
+    ListHead->Sequence++;
 
     /* Reinitialize the source list to empty */
     SpliceList->Next.Next = NULLPTR;
