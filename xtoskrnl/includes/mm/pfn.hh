@@ -45,6 +45,7 @@ namespace MM
                                                   IN PFN_NUMBER PageFrameIndex,
                                                   IN BOOLEAN BeginStandbyList = FALSE);
             STATIC XTAPI VOID FreePhysicalPage(IN PMMPTE PointerPte);
+            STATIC XTAPI PFN_NUMBER GetAvailablePages(VOID);
             STATIC XTAPI ULONG_PTR GetHighestPhysicalPage(VOID);
             STATIC XTAPI ULONGLONG GetNumberOfPhysicalPages(VOID);
             STATIC XTAPI PMMPFN GetPfnEntry(IN PFN_NUMBER Pfn);

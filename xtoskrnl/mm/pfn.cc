@@ -352,6 +352,21 @@ MM::Pfn::FreePhysicalPage(IN PMMPTE PointerPte)
 }
 
 /**
+ * Retrieves the number of available physical pages.
+ *
+ * @return This routine returns the number of available physical pages.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PFN_NUMBER
+MM::Pfn::GetAvailablePages(VOID)
+{
+    /* Return the number of available pages */
+    return AvailablePages;
+}
+
+/**
  * Retrieves the highest physical page number (PFN) detected in the system.
  *
  * @return This routine returns the highest physical page number.
