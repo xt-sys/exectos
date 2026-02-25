@@ -52,7 +52,7 @@ MM::KernelPool::AllocateKernelStack(OUT PVOID *Stack,
     }
 
     /* Set up a template for an invalid PTE */
-    MM::Paging::SetPte(&InvalidPte, 0, 0x18);
+    MM::Paging::SetPte(&InvalidPte, 0, MM_PTE_GUARDED);
 
     /* Set up a template for a valid, writable stack PTE */
     MM::Paging::ClearPte(&TempPte);

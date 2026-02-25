@@ -56,6 +56,7 @@
 
 /* PTE protection flags */
 #define MM_PTE_NOEXECUTE                           0x00000000
+#define MM_PTE_GUARDED                             0x00000018
 #define MM_PTE_PROTECT                             0x00000612
 
 /* PTE cache flags */
