@@ -76,7 +76,7 @@ MM::KernelPool::AllocateKernelStack(OUT PVOID *Stack,
         *PointerPte = InvalidPte;
 
         /* Associate the physical page with its corresponding PTE in the PFN database */
-        MM::Pfn::LinkPfnToPte(PageFrameIndex, PointerPte, 1);
+        MM::Pfn::LinkPfn(PageFrameIndex, PointerPte, TRUE);
 
         /* Make the PTE valid, mapping the virtual address to the physical page */
         MM::Paging::SetPte(&TempPte, PageFrameIndex, 0);

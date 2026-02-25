@@ -731,6 +731,84 @@ MM::Pfn::LinkPage(IN PMMPFNLIST ListHead,
 }
 
 /**
+ * Links a PFN entry to its corresponding PTE and ensures the page table that contains the PTE is resident in memory.
+ *
+ * @param PageFrameIndex
+ *        Supplies the index into the PFN database for the page being initialized.
+ *
+ * @param PointerPte
+ *        Supplies the pointer to the PTE which maps the physical page.
+ *
+ * @param Modified
+ *        Supplies a flag indicating if the page's initial state is modified.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::Pfn::LinkPfn(IN PFN_NUMBER PageFrameIndex,
+                 IN PMMPTE PointerPte,
+                 IN BOOLEAN Modified)
+{
+    PMMMEMORY_LAYOUT MemoryLayout;
+    XTSTATUS Status;
+    PMMPFN Pfn;
+    PMMPTE Pte;
+
+    /* Get the memory layout */
+    MemoryLayout = MM::Manager::GetMemoryLayout();
+
+    /* Point the PFN to its PTE */
+    Pfn = &((PMMPFN)MemoryLayout->PfnDatabase)[PageFrameIndex];
+    Pfn->PteAddress = PointerPte;
+
+    /* Check if the page is already mapped and in use */
+    if(MM::Paging::PteValid(PointerPte))
+    {
+        /* Clear the original PTE information */
+        MM::Paging::SetPte(&Pfn->OriginalPte, 0, MM_PTE_READWRITE | MM_PTE_CACHE_ENABLE);
+    }
+    else
+    {
+        /* Page is not resident, so save the PTE contents for later use */
+        Pfn->OriginalPte = *PointerPte;
+    }
+
+    /* Initialize the PFN database entry for this page */
+    Pfn->u2.ShareCount = 1;
+    Pfn->u3.e1.Modified = Modified;
+    Pfn->u3.e1.PageLocation = ActiveAndValid;
+    Pfn->u3.e2.ReferenceCount = 1;
+
+    /* Get the PDE that maps the page table containing this PTE */
+    Pte = MM::Paging::GetPteAddress(PointerPte);
+    if(!MM::Paging::PteValid(Pte))
+    {
+        /* Check if page table is resident */
+        Status = MM::PageFault::CheckPdeForPagedPool(PointerPte);
+        if(Status != STATUS_SUCCESS)
+        {
+            /* Could not make the page table resident, crash system */
+            KE::Crash::PanicEx(0x1,
+                              (ULONG_PTR)0x61940,
+                              (ULONG_PTR)PointerPte,
+                              MM::Paging::GetPageFrameNumber(PointerPte),
+                              (ULONG_PTR)MM::Paging::GetPteVirtualAddress(PointerPte));
+        }
+    }
+
+    /* Record the page frame of the page table itself */
+    PageFrameIndex = MM::Paging::GetPageFrameNumber(Pte);
+    Pfn->u4.PteFrame = PageFrameIndex;
+
+    /* Pin the page table in memory by incrementing its PFN share count */
+    Pfn = &((PMMPFN)MemoryLayout->PfnDatabase)[PageFrameIndex];
+    Pfn->u2.ShareCount++;
+}
+
+/**
  * Initializes the PFN database entry for a physical page that is used as a page table.
  *
  * @param PageFrameIndex
@@ -788,8 +866,8 @@ MM::Pfn::LinkPfnForPageTable(IN PFN_NUMBER PageFrameIndex,
  * @param PointerPte
  *        Supplies the pointer to the PTE which maps the physical page.
  *
- * @param Modified
- *        Supplies a flag indicating if the page's initial state is modified.
+ * @param ParentFrame
+ *        Supplies the page frame number of the page table that contains the PTE.
  *
  * @return This routine does not return any value.
  *
@@ -797,14 +875,12 @@ MM::Pfn::LinkPfnForPageTable(IN PFN_NUMBER PageFrameIndex,
  */
 XTAPI
 VOID
-MM::Pfn::LinkPfnToPte(IN PFN_NUMBER PageFrameIndex,
-                      IN PMMPTE PointerPte,
-                      IN BOOLEAN Modified)
+MM::Pfn::LinkPfnWithParent(IN PFN_NUMBER PageFrameIndex,
+                           IN PMMPTE PointerPte,
+                           IN PFN_NUMBER ParentFrame)
 {
     PMMMEMORY_LAYOUT MemoryLayout;
-    XTSTATUS Status;
     PMMPFN Pfn;
-    PMMPTE Pte;
 
     /* Get the memory layout */
     MemoryLayout = MM::Manager::GetMemoryLayout();
@@ -813,48 +889,27 @@ MM::Pfn::LinkPfnToPte(IN PFN_NUMBER PageFrameIndex,
     Pfn = &((PMMPFN)MemoryLayout->PfnDatabase)[PageFrameIndex];
     Pfn->PteAddress = PointerPte;
 
-    /* Check if the page is already mapped and in use */
-    if(MM::Paging::PteValid(PointerPte))
-    {
-        /* Clear the original PTE information */
-        MM::Paging::SetPte(&Pfn->OriginalPte, 0, MM_PTE_READWRITE | MM_PTE_CACHE_ENABLE);
-    }
-    else
-    {
-        /* Page is not resident, so save the PTE contents for later use */
-        Pfn->OriginalPte = *PointerPte;
-    }
+    /* Initialize the PTE */
+    MM::Paging::SetPte(&Pfn->OriginalPte, 0, MM_PTE_GUARDED);
 
-    /* Initialize the PFN database entry for this page */
-    Pfn->u2.ShareCount = 1;
-    Pfn->u3.e1.Modified = Modified;
-    Pfn->u3.e1.PageLocation = ActiveAndValid;
-    Pfn->u3.e2.ReferenceCount = 1;
-
-    /* Get the PDE that maps the page table containing this PTE */
-    Pte = MM::Paging::GetPteAddress(PointerPte);
-    if(!MM::Paging::PteValid(Pte))
-    {
-        /* Check if page table is resident */
-        Status = MM::PageFault::CheckPdeForPagedPool(PointerPte);
-        if(Status != STATUS_SUCCESS)
-        {
-            /* Could not make the page table resident, crash system */
-            KE::Crash::PanicEx(0x1,
-                              (ULONG_PTR)0x61940,
-                              (ULONG_PTR)PointerPte,
-                              MM::Paging::GetPageFrameNumber(PointerPte),
-                              (ULONG_PTR)MM::Paging::GetPteVirtualAddress(PointerPte));
-        }
-    }
-
-    /* Record the page frame of the page table itself */
-    PageFrameIndex = MM::Paging::GetPageFrameNumber(Pte);
-    Pfn->u4.PteFrame = PageFrameIndex;
-
-    /* Pin the page table in memory by incrementing its PFN share count */
-    Pfn = &((PMMPFN)MemoryLayout->PfnDatabase)[PageFrameIndex];
+    /* Initialize the PFN entry */
     Pfn->u2.ShareCount++;
+    Pfn->u3.e1.CacheAttribute = PfnCached;
+    Pfn->u3.e1.Modified = TRUE;
+    Pfn->u3.e1.PageLocation = ActiveAndValid;
+    Pfn->u3.e2.ReferenceCount++;
+    Pfn->u4.InPageError = FALSE;
+
+    /* Check if parent PTE frame exists */
+    if(ParentFrame)
+    {
+        /* Link the page table to its parent */
+        Pfn->u4.PteFrame = ParentFrame;
+
+        /* Get the PFN entry for parent PTE and increment share count */
+        Pfn = &((PMMPFN)MemoryLayout->PfnDatabase)[ParentFrame];
+        Pfn->u2.ShareCount++;
+    }
 }
 
 /**

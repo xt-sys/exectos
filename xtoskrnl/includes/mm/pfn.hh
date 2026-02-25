@@ -49,9 +49,12 @@ namespace MM
             STATIC XTAPI ULONGLONG GetNumberOfPhysicalPages(VOID);
             STATIC XTAPI PMMPFN GetPfnEntry(IN PFN_NUMBER Pfn);
             STATIC XTAPI VOID InitializePfnDatabase(VOID);
-            STATIC VOID XTAPI LinkPfnToPte(IN PFN_NUMBER PageFrameIndex,
-                                           IN PMMPTE PointerPte,
-                                           IN BOOLEAN Modified);
+            STATIC XTAPI VOID LinkPfn(IN PFN_NUMBER PageFrameIndex,
+                                      IN PMMPTE PointerPte,
+                                      IN BOOLEAN Modified);
+            STATIC XTAPI VOID LinkPfnWithParent(IN PFN_NUMBER PageFrameIndex,
+                                                IN PMMPTE PointerPte,
+                                                IN PFN_NUMBER ParentFrame);
             STATIC XTAPI VOID ScanMemoryDescriptors(VOID);
 
         private:
