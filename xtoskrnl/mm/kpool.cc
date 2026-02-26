@@ -165,7 +165,7 @@ MM::KernelPool::FreeKernelStack(IN PVOID Stack,
     /* Convert the stack size into a page count */
     StackPages = SIZE_TO_PAGES(StackSize);
 
-    /* Start guarded code block */
+    /* Start a guarded code block */
     {
         /* Acquire the PFN database lock */
         KE::QueuedSpinLockGuard SpinLock(SystemSpaceLock);
