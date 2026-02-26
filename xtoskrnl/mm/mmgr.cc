@@ -124,12 +124,14 @@ MM::Manager::InitializeMemoryManager(VOID)
     /* Initialize system PTE space */
     MM::Pte::InitializeSystemPteSpace();
 
-    /* Initialize non-paged and paged pools */
+    /* Initialize non-paged pool */
     MM::Allocator::InitializeNonPagedPool();
-    MM::Allocator::InitializePagedPool();
 
     /* Initialize PFN database */
     MM::Pfn::InitializePfnDatabase();
+
+    /* Initialize paged pool */
+    MM::Allocator::InitializePagedPool();
 
     /* Flush TLB */
     AR::CpuFunc::FlushTlb();
