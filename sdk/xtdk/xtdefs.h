@@ -74,6 +74,10 @@
 /* Macro for calculating size of a field in the structure */
 #define FIELD_SIZE(Structure, Field)           (sizeof(((Structure *)0)->Field))
 
+/* Macros for calculating minimum and maximum of two values */
+#define MIN(A, B)                              (((A) < (B)) ? (A) : (B))
+#define MAX(A, B)                              (((A) > (B)) ? (A) : (B))
+
 /* Macro that page-aligns a virtual address */
 #define PAGE_ALIGN(VirtualAddress)             ((PVOID)((ULONG_PTR)VirtualAddress & ~MM_PAGE_MASK))
 
