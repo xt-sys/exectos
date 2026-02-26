@@ -18,7 +18,18 @@ namespace MM
     class Allocator
     {
         public:
+            STATIC XTAPI XTSTATUS AllocatePages(IN MMPOOL_TYPE PoolType,
+                                                IN SIZE_T Bytes,
+                                                OUT PVOID *Memory);
             STATIC XTAPI VOID InitializeNonPagedPool(VOID);
+            STATIC XTAPI VOID InitializePagedPool(VOID);
+
+        private:
+            STATIC XTAPI XTSTATUS AllocateNonPagedPoolPages(IN PFN_COUNT Pages,
+                                                            OUT PVOID *Memory);
+            STATIC XTAPI XTSTATUS AllocatePagedPoolPages(IN PFN_COUNT Pages,
+                                                         OUT PVOID *Memory);
+            STATIC XTAPI VOID MapNonPagedPool(VOID);
     };
 }
 

@@ -17,11 +17,17 @@
 /* Number of hyper space pages */
 #define MM_HYPERSPACE_PAGE_COUNT                   255
 
+/* Number of free page list heads */
+#define MM_MAX_FREE_PAGE_LIST_HEADS                4
+
 /* Number of paging colors */
 #define MM_PAGING_COLORS                           64
 
 /* PTE frame mask definition */
 #define MM_PFN_PTE_FRAME                           (((ULONG_PTR)1 << MM_PTE_FRAME_BITS) - 1)
+
+/* Memory manager pool type mask definition */
+#define MM_POOL_TYPE_MASK                          1
 
 /* Number of reserved zeroed PTEs */
 #define MM_RESERVED_ZERO_PTES                      32
@@ -48,6 +54,24 @@ typedef enum _MMPFN_CACHE_ATTRIBUTE
     PfnNotMapped
 } MMPFN_CACHE_ATTRIBUTE, *PMMPFN_CACHE_ATTRIBUTE;
 
+/* Memory Manager pool types */
+typedef enum _MMPOOL_TYPE
+{
+    NonPagedPool = 0,
+    PagedPool = 1,
+    NonPagedPoolMustSucceed = 2,
+    NonPagedPoolCacheAligned = 4,
+    PagedPoolCacheAligned = 5,
+    NonPagedPoolCacheAlignedMustS = 6,
+    MaxPoolType = 7,
+    NonPagedPoolSession = 32,
+    PagedPoolSession = 33,
+    NonPagedPoolMustSucceedSession = 34,
+    NonPagedPoolCacheAlignedSession = 36,
+    PagedPoolCacheAlignedSession = 37,
+    NonPagedPoolCacheAlignedMustSSession = 38
+} MMPOOL_TYPE, *PMMPOOL_TYPE;
+
 /* Page table pool types */
 typedef enum _MMSYSTEM_PTE_POOL_TYPE
 {
@@ -72,6 +96,13 @@ typedef struct _MMCOLOR_TABLES
     PVOID Blink;
     ULONG_PTR Count;
 } MMCOLOR_TABLES, *PMMCOLOR_TABLES;
+
+/* Free pool entry structure definition */
+typedef struct _MMFREE_POOL_ENTRY
+{
+    LIST_ENTRY List;
+    PFN_COUNT Size;
+} MMFREE_POOL_ENTRY, *PMMFREE_POOL_ENTRY;
 
 /* Memory layout structure definition */
 typedef struct _MMMEMORY_LAYOUT

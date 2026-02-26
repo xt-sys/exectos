@@ -9,12 +9,18 @@
 #include <xtos.hh>
 
 
+/**
+ * Maps the PTE for the base of the non-paged pool.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
 XTAPI
 VOID
-MM::Allocator::InitializeNonPagedPool(VOID)
+MM::Allocator::MapNonPagedPool(VOID)
 {
     PMMMEMORY_LAYOUT MemoryLayout;
-    UNIMPLEMENTED;
 
     /* Retrieve memory layout */
     MemoryLayout = MM::Manager::GetMemoryLayout();
