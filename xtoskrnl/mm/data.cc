@@ -9,6 +9,9 @@
 #include <xtos.hh>
 
 
+/* Array of non-paged pool free list heads */
+LIST_ENTRY MM::Allocator::NonPagedPoolFreeList[MM_MAX_FREE_PAGE_LIST_HEADS];
+
 /* Array of free page lists segregated by cache color */
 PMMCOLOR_TABLES MM::Colors::FreePages[FreePageList + 1];
 

@@ -17,6 +17,9 @@ namespace MM
 {
     class Allocator
     {
+        private:
+            STATIC LIST_ENTRY NonPagedPoolFreeList[MM_MAX_FREE_PAGE_LIST_HEADS];
+
         public:
             STATIC XTAPI XTSTATUS AllocatePages(IN MMPOOL_TYPE PoolType,
                                                 IN SIZE_T Bytes,
