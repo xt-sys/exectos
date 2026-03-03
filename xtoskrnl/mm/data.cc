@@ -61,7 +61,7 @@ MMPFNLIST MM::Pfn::FreePagesList = {0, FreePageList, MAXULONG_PTR, MAXULONG_PTR}
 ULONG_PTR MM::Pfn::HighestPhysicalPage;
 
 /* Lowest physical page number */
-ULONG_PTR MM::Pfn::LowestPhysicalPage = -1;
+ULONG_PTR MM::Pfn::LowestPhysicalPage;
 
 /* List containing modified pages */
 MMPFNLIST MM::Pfn::ModifiedPagesList = {0, ModifiedPageList, MAXULONG_PTR, MAXULONG_PTR};
