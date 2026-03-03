@@ -99,6 +99,9 @@ MM::Pfn::InitializePageDirectory(IN PMMPDE StartingPde,
             /* Allocate a new PTE page and map PDE to it */
             MM::Paging::SetPte(ValidPte, AllocateBootstrapPages(1), 0);
             *StartingPde = *ValidPte;
+
+            /* Clear the newly created page */
+            RTL::Memory::ZeroMemory(MM::Paging::GetPteVirtualAddress(StartingPde), MM_PAGE_SIZE);
         }
 
         /* Move to the next PDE */
