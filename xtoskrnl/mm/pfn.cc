@@ -1146,9 +1146,9 @@ MM::Pfn::ScanMemoryDescriptors(VOID)
     PLOADER_MEMORY_DESCRIPTOR MemoryDescriptor;
     PFN_NUMBER FreePages;
 
-    /* Initialize the lowest and highest physical page numbers */
-    LowestPhysicalPage = ~0;
-    HighestPhysicalPage = 0;
+    /* Initialize the highest and lowest physical page numbers */
+    HighestPhysicalPage = (ULONG_PTR)0;
+    LowestPhysicalPage = (ULONG_PTR)~0;
 
     /* Initially, set number of free pages to 0 */
     FreePages = 0;
