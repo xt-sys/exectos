@@ -265,8 +265,8 @@ XTAPI
 VOID
 MM::Allocator::InitializeNonPagedPool(VOID)
 {
+    PMMFREE_POOL_ENTRY FreeEntry, SetupEntry;
     PMMMEMORY_LAYOUT MemoryLayout;
-    PMMFREE_POOL_ENTRY FreeEntry;
     ULONG Index;
 
     /* Retrieve memory layout */
@@ -282,8 +282,9 @@ MM::Allocator::InitializeNonPagedPool(VOID)
         RTL::LinkedList::InitializeListHead(&NonPagedPoolFreeList[Index]);
     }
 
-    /* Take the first free page from the pool */
+    /* Take the first free entry from the pool and set its size */
     FreeEntry = (PMMFREE_POOL_ENTRY)MemoryLayout->NonPagedPoolStart;
+    FreeEntry->Size = MemoryLayout->NonPagedPoolSize;
 
     /* Take number of pages in the pool */
     Index = (ULONG)(MemoryLayout->NonPagedPoolSize - 1);
@@ -293,9 +294,17 @@ MM::Allocator::InitializeNonPagedPool(VOID)
         Index = MM_MAX_FREE_PAGE_LIST_HEADS - 1;
     }
 
-    /* Insert the first free page into the free page list and set its size */
+    /* Insert the first free entry into the free page list */
     RTL::LinkedList::InsertHeadList(&NonPagedPoolFreeList[Index], &FreeEntry->List);
-    FreeEntry->Size = MemoryLayout->NonPagedPoolSize;
+
+    /* Create a free entry for each page in the pool */
+    SetupEntry = FreeEntry;
+    for(Index = 0; Index < MemoryLayout->NonPagedPoolSize; Index++)
+    {
+        /* Initialize the owner for each entry */
+        SetupEntry->Owner = FreeEntry;
+        SetupEntry = (PMMFREE_POOL_ENTRY)((ULONG_PTR)SetupEntry + MM_PAGE_SIZE);
+    }
 }
 
 /**

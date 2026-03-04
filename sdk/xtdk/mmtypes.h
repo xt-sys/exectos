@@ -102,6 +102,7 @@ typedef struct _MMFREE_POOL_ENTRY
 {
     LIST_ENTRY List;
     PFN_COUNT Size;
+    PMMFREE_POOL_ENTRY Owner;
 } MMFREE_POOL_ENTRY, *PMMFREE_POOL_ENTRY;
 
 /* Memory layout structure definition */
