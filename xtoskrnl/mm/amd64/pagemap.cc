@@ -32,6 +32,29 @@ MM::PageMap::AdvancePte(IN PMMPTE Pte,
 }
 
 /**
+ * Checks if the given address is canonical.
+ *
+ * @param VirtualAddress
+ *        Specifies the virtual address to check.
+ *
+ * @return This routine returns TRUE if the address is canonical, FALSE otherwise.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+BOOLEAN
+MM::PageMap::CanonicalAddress(IN PVOID VirtualAddress)
+{
+    ULONG Shift;
+
+    /* Calculate the number of unused upper bits based on the paging mode */
+    Shift = 64 - PageMapInfo.VaBits;
+
+    /* Sign-extend via arithmetic shifts to verify the canonical form */
+    return ((((LONGLONG)VirtualAddress << Shift) >> Shift) == (LONGLONG)VirtualAddress);
+}
+
+/**
  * Clears the contents of a page table entry (PTE).
  *
  * @param PtePointer

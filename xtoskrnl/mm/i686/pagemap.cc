@@ -10,6 +10,24 @@
 
 
 /**
+ * Checks if the given address is canonical.
+ *
+ * @param VirtualAddress
+ *        Specifies the virtual address to check.
+ *
+ * @return This routine returns TRUE, as all addresses in i686 are canonical.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+BOOLEAN
+MM::PageMap::CanonicalAddress(IN PVOID VirtualAddress)
+{
+    /* All addresses in i686 are canonical */
+    return TRUE;
+}
+
+/**
  * Gets Page Map Level (PML) for current paging mode.
  *
  * @return This routine returns the page map level.

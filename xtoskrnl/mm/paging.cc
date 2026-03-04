@@ -32,6 +32,24 @@ MM::Paging::AdvancePte(IN PMMPTE Pte,
 }
 
 /**
+ * Checks if the given address is canonical.
+ *
+ * @param VirtualAddress
+ *        Specifies the virtual address to check.
+ *
+ * @return This routine returns TRUE if the address is canonical, FALSE otherwise.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+BOOLEAN
+MM::Paging::CanonicalAddress(IN PVOID VirtualAddress)
+{
+    /* Return canonical address status */
+    return PmlRoutines->CanonicalAddress(VirtualAddress);
+}
+
+/**
  * Clears the contents of a page table entry (PTE).
  *
  * @param PtePointer

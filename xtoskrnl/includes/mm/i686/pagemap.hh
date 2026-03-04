@@ -23,6 +23,7 @@ namespace MM
         public:
             VIRTUAL XTAPI PMMPTE AdvancePte(IN PMMPTE Pte,
                                             IN ULONG Count) = 0;
+            XTAPI BOOLEAN CanonicalAddress(IN PVOID VirtualAddress);
             VIRTUAL XTAPI VOID ClearPte(IN PMMPTE PtePointer) = 0;
             VIRTUAL XTAPI ULONG_PTR GetNextEntry(IN PMMPTE Pte) = 0;
             VIRTUAL XTAPI PMMPTE GetNextPte(IN PMMPTE Pte) = 0;
