@@ -9,6 +9,12 @@
 #include <xtos.hh>
 
 
+/* PFN marking the initial non-paged pool end boundary */
+PFN_NUMBER MM::Allocator::NonPagedPoolFrameEnd;
+
+/* PFN marking the initial non-paged pool start boundary */
+PFN_NUMBER MM::Allocator::NonPagedPoolFrameStart;
+
 /* Array of non-paged pool free list heads */
 LIST_ENTRY MM::Allocator::NonPagedPoolFreeList[MM_MAX_FREE_PAGE_LIST_HEADS];
 

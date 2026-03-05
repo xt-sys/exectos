@@ -18,12 +18,15 @@ namespace MM
     class Allocator
     {
         private:
+            STATIC PFN_NUMBER NonPagedPoolFrameEnd;
+            STATIC PFN_NUMBER NonPagedPoolFrameStart;
             STATIC LIST_ENTRY NonPagedPoolFreeList[MM_MAX_FREE_PAGE_LIST_HEADS];
 
         public:
             STATIC XTAPI XTSTATUS AllocatePages(IN MMPOOL_TYPE PoolType,
                                                 IN SIZE_T Bytes,
                                                 OUT PVOID *Memory);
+            STATIC XTAPI XTSTATUS FreePages(IN PVOID VirtualAddress);
             STATIC XTAPI VOID InitializeNonPagedPool(VOID);
             STATIC XTAPI VOID InitializePagedPool(VOID);
 
@@ -32,6 +35,8 @@ namespace MM
                                                             OUT PVOID *Memory);
             STATIC XTAPI XTSTATUS AllocatePagedPoolPages(IN PFN_COUNT Pages,
                                                          OUT PVOID *Memory);
+            STATIC XTAPI XTSTATUS FreeNonPagedPoolPages(IN PVOID VirtualAddress);
+            STATIC XTAPI XTSTATUS FreePagedPoolPages(IN PVOID VirtualAddress);
             STATIC XTAPI VOID MapNonPagedPool(VOID);
     };
 }

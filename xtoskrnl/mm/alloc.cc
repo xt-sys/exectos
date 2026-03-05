@@ -255,6 +255,241 @@ MM::Allocator::AllocatePages(IN MMPOOL_TYPE PoolType,
 }
 
 /**
+ * Frees a previously allocated block of pages from the non-paged pool.
+ *
+ * @param VirtualAddress
+ *        Supplies the base virtual address of the non-paged pool allocation to free.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+MM::Allocator::FreeNonPagedPoolPages(IN PVOID VirtualAddress)
+{
+    PMMFREE_POOL_ENTRY FreePage, NextPage, LastPage;
+    PFN_COUNT FreePages, Pages;
+    PMMMEMORY_LAYOUT MemoryLayout;
+    PMMPFN Pfn, FirstPfn;
+    PMMPTE PointerPte;
+    ULONG Index;
+
+    /* Retrieve memory layout */
+    MemoryLayout = MM::Manager::GetMemoryLayout();
+
+    /* Get the first PTE of the allocation */
+    PointerPte = MM::Paging::GetPteAddress(VirtualAddress);
+    Pfn = MM::Pfn::GetPfnEntry(MM::Paging::GetPageFrameNumber(PointerPte));
+
+    /* Basic sanity check to prevent double-frees or freeing unallocated memory */
+    if(Pfn->u3.e1.ReadInProgress == 0)
+    {
+        /* Memory is not marked as the start of an allocation, return error */
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    /* Save the first PFN entry and initialize the allocation page counter */
+    FirstPfn = Pfn;
+    Pages = 1;
+
+    /* Seek to the end of the allocation */
+    while(Pfn->u3.e1.WriteInProgress == 0)
+    {
+        /* Get the next PTE and its PFN */
+        PointerPte = MM::Paging::GetNextPte(PointerPte);
+        Pfn = MM::Pfn::GetPfnEntry(MM::Paging::GetPageFrameNumber(PointerPte));
+
+        /* Increment the page count */
+        Pages++;
+    }
+
+    /* Save the total free page count */
+    FreePages = Pages;
+
+    /* Acquire the Non-Paged pool lock and raise runlevel to DISPATCH_LEVEL */
+    KE::RaiseRunLevel RunLevel(DISPATCH_LEVEL);
+    KE::QueuedSpinLockGuard NonPagedPoolSpinLock(NonPagedPoolLock);
+
+    /* Denote allocation boundaries */
+    FirstPfn->u3.e1.ReadInProgress = 0;
+    Pfn->u3.e1.WriteInProgress = 0;
+
+    /* Get the next PTE */
+    PointerPte = MM::Paging::GetNextPte(PointerPte);
+
+    /* Check if the end of the initial nonpaged pool has been reached */
+    if(Pfn - MemoryLayout->PfnDatabase == NonPagedPoolFrameEnd)
+    {
+        /* Ignore the last page of the initial nonpaged pool */
+        Pfn = NULLPTR;
+    }
+    else
+    {
+        /* Check if the PTE is valid */
+        if(MM::Paging::PteValid(PointerPte))
+        {
+            /* Get the PFN entry for the page laying in either the expansion or initial nonpaged pool */
+            Pfn = MM::Pfn::GetPfnEntry(MM::Paging::GetPageFrameNumber(PointerPte));
+        }
+        else
+        {
+            /* Ignore the last page of the expansion nonpaged pool */
+            Pfn = NULLPTR;
+        }
+    }
+
+    /* Check if the adjacent physical page following the allocation is free */
+    if((Pfn) && (Pfn->u3.e1.ReadInProgress == 0))
+    {
+        /* Calculate the virtual address of the adjacent forward free pool entry */
+        FreePage = (PMMFREE_POOL_ENTRY)((ULONG_PTR)VirtualAddress + (Pages << MM_PAGE_SHIFT));
+
+        /* Absorb the adjacent free block's pages into the current free page count */
+        FreePages += FreePage->Size;
+
+        /* Unlink the adjacent free block from its current segregated free list */
+        RTL::LinkedList::RemoveEntryList(&FreePage->List);
+    }
+
+    /* Get the free pool entry structure from the list entry */
+    FreePage = (PMMFREE_POOL_ENTRY)VirtualAddress;
+
+    /* Check if the beginning of the initial nonpaged pool has been reached */
+    if(FirstPfn - MemoryLayout->PfnDatabase == NonPagedPoolFrameStart)
+    {
+        /* Ignore the first page of the initial nonpaged pool */
+        Pfn = NULLPTR;
+    }
+    else
+    {
+        /* Calculate the PTE address for the page immediately preceding the allocation */
+        PointerPte = MM::Paging::AdvancePte(PointerPte, -Pages - 1);
+
+        /* Check if the PTE is valid */
+        if(MM::Paging::PteValid(PointerPte))
+        {
+            /* Get the PFN entry for the page laying in either the expansion or initial nonpaged pool */
+            Pfn = MM::Pfn::GetPfnEntry(MM::Paging::GetPageFrameNumber(PointerPte));
+        }
+        else
+        {
+            /* Ignore the first page of the expansion nonpaged pool */
+            Pfn = NULLPTR;
+        }
+    }
+
+    /* Check if the adjacent physical page preceding the allocation is free */
+    if((Pfn) && (Pfn->u3.e1.WriteInProgress == 0))
+    {
+        /* Retrieve the owner header of the preceding free block for backward coalescing */
+        FreePage = (PMMFREE_POOL_ENTRY)((ULONG_PTR)VirtualAddress - MM_PAGE_SIZE);
+        FreePage = FreePage->Owner;
+
+        /* Check if the allocation is small enough */
+        if(FreePage->Size < MM_MAX_FREE_PAGE_LIST_HEADS)
+        {
+            /* Remove the entry from the list */
+            RTL::LinkedList::RemoveEntryList(&FreePage->List);
+
+            /* Adjust the size of the free block to account for the allocated pages */
+            FreePage->Size += FreePages;
+
+            /* Calculate the new list index */
+            Index = MIN(FreePage->Size, MM_MAX_FREE_PAGE_LIST_HEADS) - 1;
+
+            /* Insert the entry into the head of the list */
+            RTL::LinkedList::InsertHeadList(&NonPagedPoolFreeList[Index], &FreePage->List);
+        }
+        else
+        {
+            /* Adjust the size of the free block to account for the allocated pages */
+            FreePage->Size += FreePages;
+        }
+    }
+
+    /* Check if backward coalescing failed, requiring the freed block to become a new list head */
+    if(FreePage == VirtualAddress)
+    {
+        /* Adjust the size of the free block to account for the allocated pages */
+        FreePage->Size = FreePages;
+
+        /* Calculate the new list index */
+        Index = MIN(FreePage->Size, MM_MAX_FREE_PAGE_LIST_HEADS) - 1;
+
+        /* Insert the entry into the head of the list */
+        RTL::LinkedList::InsertHeadList(&NonPagedPoolFreeList[Index], &FreePage->List);
+    }
+
+    /* Calculate the start and end boundaries for updating the owner pointers */
+    NextPage = (PMMFREE_POOL_ENTRY)VirtualAddress;
+    LastPage = (PMMFREE_POOL_ENTRY)((ULONG_PTR)NextPage + (FreePages << MM_PAGE_SHIFT));
+
+    /* Iterate through all freed and coalesced pages to update their owner reference */
+    while(NextPage != LastPage)
+    {
+        /* Link the page to the owner */
+        NextPage->Owner = FreePage;
+        NextPage = (PMMFREE_POOL_ENTRY)((ULONG_PTR)NextPage + MM_PAGE_SIZE);
+    }
+
+    /* Return success */
+    return STATUS_SUCCESS;
+}
+
+/**
+ * Frees a previously allocated block of pages from the paged pool.
+ *
+ * @param VirtualAddress
+ *        Supplies the base virtual address of the paged pool allocation to free.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+MM::Allocator::FreePagedPoolPages(IN PVOID VirtualAddress)
+{
+    UNIMPLEMENTED;
+
+    /* Return not implemented status code */
+    return STATUS_NOT_IMPLEMENTED;
+}
+
+/**
+ * Frees a previously allocated block of pages.
+ *
+ * @param VirtualAddress
+ *        Supplies the base virtual address of the paged pool allocation to free.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+MM::Allocator::FreePages(IN PVOID VirtualAddress)
+{
+    PMMMEMORY_LAYOUT MemoryLayout;
+
+    /* Retrieve memory layout */
+    MemoryLayout = MM::Manager::GetMemoryLayout();
+
+    /* Check if the address is in the paged pool */
+    if(VirtualAddress >= MemoryLayout->PagedPoolStart && VirtualAddress < MemoryLayout->PagedPoolEnd)
+    {
+        /* Free pages from the paged pool */
+        return FreePagedPoolPages(VirtualAddress);
+    }
+    else
+    {
+        /* Free pages from the non-paged pool */
+        return FreeNonPagedPoolPages(VirtualAddress);
+    }
+}
+
+/**
  * Initializes the non-paged pool for memory allocator.
  *
  * @return This routine does not return any value.
@@ -265,7 +500,7 @@ XTAPI
 VOID
 MM::Allocator::InitializeNonPagedPool(VOID)
 {
-    PMMFREE_POOL_ENTRY FreeEntry, SetupEntry;
+    PMMFREE_POOL_ENTRY FreePage, SetupPage;
     PMMMEMORY_LAYOUT MemoryLayout;
     ULONG Index;
 
@@ -282,9 +517,9 @@ MM::Allocator::InitializeNonPagedPool(VOID)
         RTL::LinkedList::InitializeListHead(&NonPagedPoolFreeList[Index]);
     }
 
-    /* Take the first free entry from the pool and set its size */
-    FreeEntry = (PMMFREE_POOL_ENTRY)MemoryLayout->NonPagedPoolStart;
-    FreeEntry->Size = MemoryLayout->NonPagedPoolSize;
+    /* Take the first free page from the pool and set its size */
+    FreePage = (PMMFREE_POOL_ENTRY)MemoryLayout->NonPagedPoolStart;
+    FreePage->Size = MemoryLayout->NonPagedPoolSize;
 
     /* Take number of pages in the pool */
     Index = (ULONG)(MemoryLayout->NonPagedPoolSize - 1);
@@ -294,17 +529,21 @@ MM::Allocator::InitializeNonPagedPool(VOID)
         Index = MM_MAX_FREE_PAGE_LIST_HEADS - 1;
     }
 
-    /* Insert the first free entry into the free page list */
-    RTL::LinkedList::InsertHeadList(&NonPagedPoolFreeList[Index], &FreeEntry->List);
+    /* Insert the first free page into the free page list */
+    RTL::LinkedList::InsertHeadList(&NonPagedPoolFreeList[Index], &FreePage->List);
 
-    /* Create a free entry for each page in the pool */
-    SetupEntry = FreeEntry;
+    /* Create a free page for each page in the pool */
+    SetupPage = FreePage;
     for(Index = 0; Index < MemoryLayout->NonPagedPoolSize; Index++)
     {
-        /* Initialize the owner for each entry */
-        SetupEntry->Owner = FreeEntry;
-        SetupEntry = (PMMFREE_POOL_ENTRY)((ULONG_PTR)SetupEntry + MM_PAGE_SIZE);
+        /* Initialize the owner for each page */
+        SetupPage->Owner = FreePage;
+        SetupPage = (PMMFREE_POOL_ENTRY)((ULONG_PTR)SetupPage + MM_PAGE_SIZE);
     }
+
+    /* Store first and last allocated non-paged pool page */
+    NonPagedPoolFrameStart = MM::Paging::GetPageFrameNumber(MM::Paging::GetPteAddress(MemoryLayout->NonPagedPoolStart));
+    NonPagedPoolFrameEnd = MM::Paging::GetPageFrameNumber(MM::Paging::GetPteAddress(MemoryLayout->NonPagedPoolEnd));
 }
 
 /**
