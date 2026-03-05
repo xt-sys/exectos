@@ -27,8 +27,8 @@ XTSTATUS
 MM::Allocator::AllocateNonPagedPoolPages(IN PFN_COUNT Pages,
                                          OUT PVOID *Memory)
 {
+    PMMPTE CurrentPte, PointerPte, ValidPte;
     PLIST_ENTRY Entry, LastHead, ListHead;
-    PMMPTE PointerPte, ValidPte;
     PMMFREE_POOL_ENTRY FreePage;
     PFN_NUMBER PageFrameNumber;
     PVOID BaseAddress;
@@ -139,6 +139,9 @@ MM::Allocator::AllocateNonPagedPoolPages(IN PFN_COUNT Pages,
         return STATUS_INSUFFICIENT_RESOURCES;
     }
 
+    /* Set the tracking pointer to iterate through the reserved PTE space */
+    CurrentPte = PointerPte;
+
     /* Get a template valid PTE and loop through the allocation to map physical pages */
     ValidPte = MM::Pte::GetValidPte();
     do
@@ -148,7 +151,7 @@ MM::Allocator::AllocateNonPagedPoolPages(IN PFN_COUNT Pages,
 
         /* Initialize the PFN entry for the allocated physical page */
         Pfn = MM::Pfn::GetPfnEntry(PageFrameNumber);
-        Pfn->PteAddress = PointerPte;
+        Pfn->PteAddress = CurrentPte;
         Pfn->u2.ShareCount = 1;
         Pfn->u3.e1.PageLocation = ActiveAndValid;
         Pfn->u3.e2.ReferenceCount = 1;
@@ -157,8 +160,9 @@ MM::Allocator::AllocateNonPagedPoolPages(IN PFN_COUNT Pages,
         /* Build a valid PTE pointing to the allocated page frame */
         MM::Paging::SetPte(ValidPte, PageFrameNumber, 0);
 
-        /* Write the valid PTE into the system PTE range */
-        *(MM::Paging::GetNextPte(PointerPte)) = *ValidPte;
+        /* Write the valid PTE into the system PTE range and advance to the next PTE */
+        *CurrentPte = *ValidPte;
+        CurrentPte = MM::Paging::GetNextPte(CurrentPte);
     }
     while(--Pages > 0);
 
