@@ -548,6 +548,11 @@ MM::Allocator::InitializeNonPagedPool(VOID)
     /* Store first and last allocated non-paged pool page */
     NonPagedPoolFrameStart = MM::Paging::GetPageFrameNumber(MM::Paging::GetPteAddress(MemoryLayout->NonPagedPoolStart));
     NonPagedPoolFrameEnd = MM::Paging::GetPageFrameNumber(MM::Paging::GetPteAddress(MemoryLayout->NonPagedPoolEnd));
+
+    /* Initialize system PTE pool for the non-paged expansion pool */
+    Pte::InitializeSystemPtePool(Paging::GetNextPte(Paging::GetPteAddress(MemoryLayout->NonPagedExpansionPoolStart)),
+                                                                          MemoryLayout->NonPagedExpansionPoolSize - 2,
+                                                                          NonPagedPoolExpansion);
 }
 
 /**
