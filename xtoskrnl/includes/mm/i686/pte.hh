@@ -32,6 +32,9 @@ namespace MM
             STATIC XTAPI PMMPTE GetValidPte(VOID);
             STATIC XTAPI VOID InitializePageTable(VOID);
             STATIC XTAPI VOID InitializeSystemPte(VOID);
+            STATIC XTAPI VOID InitializeSystemPtePool(IN PMMPTE StartingPte,
+                                                      IN PFN_COUNT NumberOfPtes,
+                                                      IN MMSYSTEM_PTE_POOL_TYPE PoolType);
             STATIC XTAPI VOID InitializeSystemPteSpace(VOID);
             STATIC XTAPI VOID MapPDE(IN PVOID StartAddress,
                                      IN PVOID EndAddress,
@@ -54,9 +57,6 @@ namespace MM
                                                  OUT PMMPTE *FoundCluster,
                                                  OUT PMMPTE *PreviousClusterNode);
             STATIC XTAPI ULONG GetClusterSize(IN PMMPTE Pte);
-            STATIC XTAPI VOID InitializeSystemPtePool(IN PMMPTE StartingPte,
-                                                      IN PFN_COUNT NumberOfPtes,
-                                                      IN MMSYSTEM_PTE_POOL_TYPE PoolType);
     };
 }
 
