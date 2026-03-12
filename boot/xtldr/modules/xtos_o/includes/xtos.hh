@@ -38,6 +38,7 @@ class Xtos
                                                           IN PVOID PhysicalAddress,
                                                           IN UINT NumberOfPages,
                                                           IN LOADER_MEMORY_TYPE MemoryType);
+        STATIC XTCDECL EFI_STATUS BuildPageMap(IN PXTBL_PAGE_MAPPING PageMap);
         STATIC XTCDECL LOADER_MEMORY_TYPE ConvertEfiMemoryType(IN EFI_MEMORY_TYPE EfiMemoryType);
         STATIC XTCDECL BOOLEAN DetermineMappingStrategy();
         STATIC XTCDECL ULONG DeterminePagingLevel(IN CONST PWCHAR Parameters);
@@ -47,10 +48,13 @@ class Xtos
                                                   IN PULONG_PTR FrameBufferSize,
                                                   IN PXTBL_FRAMEBUFFER_MODE_INFORMATION FrameBufferModeInfo);
         STATIC XTCDECL EFI_STATUS GetMemoryDescriptorList(IN PXTBL_PAGE_MAPPING PageMap,
-                                                          IN PVOID *VirtualAddress,
+                                                          IN EFI_PHYSICAL_ADDRESS PhysicalBase,
+                                                          IN PVOID VirtualBase,
                                                           OUT PLIST_ENTRY MemoryDescriptorList);
         STATIC XTCDECL EFI_STATUS GetSystemResourcesList(IN PXTBL_PAGE_MAPPING PageMap,
-                                                         IN PVOID *VirtualAddress,
+                                                         IN EFI_PHYSICAL_ADDRESS PhysicalBase,
+                                                         IN PVOID VirtualBase,
+                                                         IN PVOID FrameBufferVirtualBase,
                                                          OUT PLIST_ENTRY SystemResourcesList);
         STATIC XTCDECL EFI_STATUS GetVirtualAddress(IN PLIST_ENTRY MemoryMappings,
                                                     IN PVOID PhysicalAddress,

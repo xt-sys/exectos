@@ -25,13 +25,12 @@ EFI_STATUS
 Memory::BuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
                      IN ULONG_PTR SelfMapAddress)
 {
-    PLIST_ENTRY ListEntry, ModulesList, ModulesListEntry;
     EFI_PHYSICAL_ADDRESS Address, DirectoryAddress;
+    PLIST_ENTRY ModulesList, ModulesListEntry;
     PXTBL_MODULE_INFO ModuleInfo;
-    PXTBL_MEMORY_MAPPING Mapping;
-    PVOID LoaderBase;
     ULONGLONG LoaderSize;
     EFI_STATUS Status;
+    PVOID LoaderBase;
     ULONG Index;
 
     /* Check the page map level to determine which paging structure to create */
@@ -45,6 +44,14 @@ Memory::BuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
             return Status;
         }
 
+        /* Add new memory mapping for the page map itself */
+        Status = MapVirtualMemory(PageMap, (ULONGLONG)NULLPTR, Address, 1, LoaderMemoryData);
+        if(Status != STATUS_EFI_SUCCESS)
+        {
+            /* Memory mapping failure */
+            return Status;
+        }
+
         /* Assign the allocated page to the page map and zero it out */
         PageMap->PtePointer = (PVOID)(UINT_PTR)Address;
         RTL::Memory::ZeroMemory(PageMap->PtePointer, EFI_PAGE_SIZE);
@@ -54,6 +61,14 @@ Memory::BuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory allocation failed, cannot proceed with page map creation */
+            return Status;
+        }
+
+        /* Add new memory mapping for the Page Directories (PDs) */
+        Status = MapVirtualMemory(PageMap, (ULONGLONG)NULLPTR, DirectoryAddress, 4, LoaderMemoryData);
+        if(Status != STATUS_EFI_SUCCESS)
+        {
+            /* Memory mapping failure */
             return Status;
         }
 
@@ -76,6 +91,14 @@ Memory::BuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Memory allocation failed, cannot proceed with page map creation */
+            return Status;
+        }
+
+        /* Add new memory mapping for the page map itself */
+        Status = MapVirtualMemory(PageMap, (ULONGLONG)NULLPTR, Address, 1, LoaderMemoryData);
+        if(Status != STATUS_EFI_SUCCESS)
+        {
+            /* Memory mapping failure */
             return Status;
         }
 
@@ -143,6 +166,28 @@ Memory::BuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
         /* Boot loader image information re not available */
         return STATUS_EFI_PROTOCOL_ERROR;
     }
+
+    /* Return success */
+    return STATUS_EFI_SUCCESS;
+}
+
+/**
+ * Iterates through the memory map and physically maps all virtual addresses to page tables.
+ *
+ * @param PageMap
+ *        Supplies a pointer to the page mapping structure.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+EFI_STATUS
+Memory::CommitPageMap(IN PXTBL_PAGE_MAPPING PageMap)
+{
+    PXTBL_MEMORY_MAPPING Mapping;
+    PLIST_ENTRY ListEntry;
+    EFI_STATUS Status;
 
     /* Iterate through and map all the mappings*/
     Debug::Print(L"Mapping and dumping EFI memory:\n");

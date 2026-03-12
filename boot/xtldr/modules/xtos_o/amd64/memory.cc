@@ -10,6 +10,34 @@
 #include <xtos.hh>
 
 
+XTCDECL
+EFI_STATUS
+Xtos::BuildPageMap(IN PXTBL_PAGE_MAPPING PageMap)
+{
+    EFI_STATUS Status;
+
+    /* Build page map */
+    Status = XtLdrProtocol->Memory.BuildPageMap(PageMap, (PageMap->PageMapLevel > 4) ? MM_P5E_LA57_BASE : MM_PXE_BASE);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to build page map */
+        XtLdrProtocol->Debug.Print(L"Failed to build page map (Status code: %zX)\n", Status);
+        return Status;
+    }
+
+    /* Map memory for hardware layer */
+    Status = MapHardwareMemoryPool(PageMap);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to map memory for hardware layer */
+        XtLdrProtocol->Debug.Print(L"Failed to map memory for hardware leyer (Status code: %zX)\n", Status);
+        return Status;
+    }
+
+    /* Return success */
+    return STATUS_EFI_SUCCESS;
+}
+
 /**
  * Determines the appropriate EFI memory mapping strategy for the AMD64 architecture.
  *
@@ -91,24 +119,6 @@ Xtos::EnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
     ULONG_PTR TrampolineSize;
     PVOID TrampolineCode;
 
-    /* Build page map */
-    Status = XtLdrProtocol->Memory.BuildPageMap(PageMap, (PageMap->PageMapLevel > 4) ? MM_P5E_LA57_BASE : MM_PXE_BASE);
-    if(Status != STATUS_EFI_SUCCESS)
-    {
-        /* Failed to build page map */
-        XtLdrProtocol->Debug.Print(L"Failed to build page map (Status code: %zX)\n", Status);
-        return Status;
-    }
-
-    /* Map memory for hardware layer */
-    Status = MapHardwareMemoryPool(PageMap);
-    if(Status != STATUS_EFI_SUCCESS)
-    {
-        /* Failed to map memory for hardware layer */
-        XtLdrProtocol->Debug.Print(L"Failed to map memory for hardware leyer (Status code: %zX)\n", Status);
-        return Status;
-    }
-
     /* Check the configured page map level to set the LA57 state accordingly */
     if(PageMap->PageMapLevel == 5)
     {
@@ -188,6 +198,7 @@ Xtos::MapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
     PHARDWARE_PTE P5eBase, PdeBase, PpeBase, PxeBase;
     EFI_PHYSICAL_ADDRESS Address;
     EFI_STATUS Status;
+    ULONG Index;
 
     if(PageMap->PageMapLevel == 5)
     {
@@ -204,6 +215,9 @@ Xtos::MapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
                 /* Memory allocation failure, return error */
                 return Status;
             }
+
+            /* Map hardware memory */
+            XtLdrProtocol->Memory.MapVirtualMemory(PageMap, (ULONGLONG)NULLPTR, Address, 1, LoaderMemoryData);
 
             /* Zero fill memory used by P5E */
             XtLdrProtocol->Memory.ZeroMemory((PVOID)Address, EFI_PAGE_SIZE);
@@ -239,6 +253,9 @@ Xtos::MapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
             return Status;
         }
 
+        /* Map hardware memory */
+        XtLdrProtocol->Memory.MapVirtualMemory(PageMap, (ULONGLONG)NULLPTR, Address, 1, LoaderMemoryData);
+
         /* Zero fill memory used by PXE */
         XtLdrProtocol->Memory.ZeroMemory((PVOID)Address, EFI_PAGE_SIZE);
 
@@ -267,6 +284,9 @@ Xtos::MapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
             return Status;
         }
 
+        /* Map hardware memory */
+        XtLdrProtocol->Memory.MapVirtualMemory(PageMap, (ULONGLONG)NULLPTR, Address, 1, LoaderMemoryData);
+
         /* Zero fill memory used by PPE */
         XtLdrProtocol->Memory.ZeroMemory((PVOID)Address, EFI_PAGE_SIZE);
 
@@ -285,7 +305,7 @@ Xtos::MapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
     }
 
     /* Loop through 2 PDE entries */
-    for(UINT Index = 0 ; Index < 2 ; Index++)
+    for(Index = 0 ; Index < 2 ; Index++)
     {
         /* Check if PDE entry already exists */
         if(!PdeBase[((MM_HARDWARE_VA_START >> MM_PDI_SHIFT) & 0x1FF) + Index].Valid)
@@ -297,6 +317,9 @@ Xtos::MapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
                 /* Memory allocation failure, return error */
                 return Status;
             }
+
+            /* Map hardware memory */
+            XtLdrProtocol->Memory.MapVirtualMemory(PageMap, (ULONGLONG)NULLPTR, Address, 1, LoaderMemoryData);
 
             /* Zero fill memory used by PDE */
             XtLdrProtocol->Memory.ZeroMemory((PVOID)Address, EFI_PAGE_SIZE);
