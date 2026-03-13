@@ -409,8 +409,8 @@ Xtos::InitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
     }
     FbPages = EFI_SIZE_TO_PAGES(FbSize);
 
-    /* Add padding to MapSize to account for the ledger mappings */
-    DescriptorPages = EFI_SIZE_TO_PAGES((PageMap->MapSize + 16) * sizeof(LOADER_MEMORY_DESCRIPTOR));
+    /* Calculate number of pages needed for memory descriptor list */
+    DescriptorPages = EFI_SIZE_TO_PAGES(PageMap->MapSize * sizeof(LOADER_MEMORY_DESCRIPTOR));
 
     /* Allocate memory for the kernel initialization block and boot parameters */
     Status = XtLdrProtocol->Memory.AllocatePages(AllocateAnyPages, BlockPages, &PhysicalBlock);
