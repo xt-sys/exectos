@@ -43,7 +43,7 @@ XTAPI
 VOID
 KE::Crash::Panic(IN ULONG Code)
 {
-    PanicEx(Code, 0, 0, 0, 0);
+    Panic(Code, 0, 0, 0, 0);
 }
 
 /**
@@ -70,11 +70,11 @@ KE::Crash::Panic(IN ULONG Code)
  */
 XTAPI
 VOID
-KE::Crash::PanicEx(IN ULONG Code,
-               IN ULONG_PTR Parameter1,
-               IN ULONG_PTR Parameter2,
-               IN ULONG_PTR Parameter3,
-               IN ULONG_PTR Parameter4)
+KE::Crash::Panic(IN ULONG Code,
+                 IN ULONG_PTR Parameter1,
+                 IN ULONG_PTR Parameter2,
+                 IN ULONG_PTR Parameter3,
+                 IN ULONG_PTR Parameter4)
 {
     KD::DebugIo::KdPrint(L"Fatal System Error: 0x%08lx\nKernel Panic!\n\n", Code);
     HaltSystem();

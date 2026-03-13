@@ -20,11 +20,11 @@ namespace KE
         public:
             STATIC XTAPI VOID HaltSystem(VOID);
             STATIC XTAPI VOID Panic(IN ULONG Code);
-            STATIC XTAPI VOID PanicEx(IN ULONG Code,
-                                      IN ULONG_PTR Parameter1,
-                                      IN ULONG_PTR Parameter2,
-                                      IN ULONG_PTR Parameter3,
-                                      IN ULONG_PTR Parameter4);
+            STATIC XTAPI VOID Panic(IN ULONG Code,
+                                    IN ULONG_PTR Parameter1,
+                                    IN ULONG_PTR Parameter2,
+                                    IN ULONG_PTR Parameter3,
+                                    IN ULONG_PTR Parameter4);
     };
 }
 
