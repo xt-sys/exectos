@@ -1034,7 +1034,7 @@ MM::Pfn::ProcessMemoryDescriptor(IN PFN_NUMBER BasePage,
                                  IN PFN_NUMBER PageCount,
                                  IN LOADER_MEMORY_TYPE MemoryType)
 {
-    PVOID VirtualRangeStart, VirtualRangeEnd;
+    PVOID VirtualAddress, VirtualRangeStart, VirtualRangeEnd;
     PFN_NUMBER PageNumber;
     PMMPDE PointerPde;
     PMMPFN Pfn;
@@ -1087,8 +1087,12 @@ MM::Pfn::ProcessMemoryDescriptor(IN PFN_NUMBER BasePage,
                     /* Ensure that the page is not already in-use */
                     if(Pfn->u3.e2.ReferenceCount == 0)
                     {
+                        /* Calculate the virtual address for this page */
+                        VirtualAddress = (PVOID)(KSEG0_BASE + ((BasePage + PageNumber) << MM_PAGE_SHIFT));
+                        PointerPde = MM::Paging::GetPdeAddress(VirtualAddress);
+
                         /* Initialize the PFN entry to represent a ROM page */
-                        Pfn->PteAddress = MM::Paging::GetPteAddress(VirtualRangeStart);
+                        Pfn->PteAddress = MM::Paging::GetPteAddress(VirtualAddress);
                         Pfn->u1.Flink = 0;
                         Pfn->u2.ShareCount = 0;
                         Pfn->u3.e1.CacheAttribute = PfnCached;
@@ -1117,8 +1121,12 @@ MM::Pfn::ProcessMemoryDescriptor(IN PFN_NUMBER BasePage,
                     /* Ensure that the page is not already in-use */
                     if(Pfn->u3.e2.ReferenceCount == 0)
                     {
+                        /* Calculate the virtual address for this page */
+                        VirtualAddress = (PVOID)(KSEG0_BASE + ((BasePage + PageNumber) << MM_PAGE_SHIFT));
+                        PointerPde = MM::Paging::GetPdeAddress(VirtualAddress);
+
                         /* Initialize the PFN entry to represent an in-use page and prevent it from being allocated */
-                        Pfn->PteAddress = MM::Paging::GetPteAddress(VirtualRangeStart);
+                        Pfn->PteAddress = MM::Paging::GetPteAddress(VirtualAddress);
                         Pfn->u2.ShareCount++;
                         Pfn->u3.e1.CacheAttribute = PfnCached;
                         Pfn->u3.e1.PageLocation = ActiveAndValid;
