@@ -173,11 +173,11 @@ MM::Pfn::DecrementReferenceCount(IN PMMPFN PageFrameNumber,
     if(PageFrameNumber->u2.ShareCount)
     {
         /* This indicates a bug; crash the system */
-        KE::Crash::PanicEx(0x4E,
-                           0x07,
-                           PageFrameIndex,
-                           PageFrameNumber->u2.ShareCount,
-                           0);
+        KE::Crash::Panic(0x4E,
+                         0x07,
+                         PageFrameIndex,
+                         PageFrameNumber->u2.ShareCount,
+                         0);
     }
 
     /* Check if the PTE is marked as being ready for removal */
@@ -256,11 +256,11 @@ MM::Pfn::DecrementShareCount(IN PMMPFN PageFrameNumber,
        (PageFrameNumber->u3.e1.PageLocation != StandbyPageList))
     {
         /* This indicates a bug; crash the system */
-        KE::Crash::PanicEx(0x4E,
-                           0x99,
-                           PageFrameIndex,
-                           PageFrameNumber->u3.e1.PageLocation,
-                           0);
+        KE::Crash::Panic(0x4E,
+                         0x99,
+                         PageFrameIndex,
+                         PageFrameNumber->u3.e1.PageLocation,
+                         0);
     }
 
     /* Decrement the PFN share count */
@@ -591,7 +591,7 @@ MM::Pfn::LinkPage(IN PMMPFNLIST ListHead,
            MM::Paging::GetPteSoftwareTransition(&PageFrame->OriginalPte))
         {
             /* Crash system due to corrupted PFN/PTE state */
-            KE::Crash::PanicEx(0x71, 0x8888, 0, 0, 0);
+            KE::Crash::Panic(0x71, 0x8888, 0, 0, 0);
         }
     }
 
@@ -806,11 +806,11 @@ MM::Pfn::LinkPfn(IN PFN_NUMBER PageFrameIndex,
         if(Status != STATUS_SUCCESS)
         {
             /* Could not make the page table resident, crash system */
-            KE::Crash::PanicEx(0x1,
-                              (ULONG_PTR)0x61940,
-                              (ULONG_PTR)PointerPte,
-                              MM::Paging::GetPageFrameNumber(PointerPte),
-                              (ULONG_PTR)MM::Paging::GetPteVirtualAddress(PointerPte));
+            KE::Crash::Panic(0x1,
+                            (ULONG_PTR)0x61940,
+                            (ULONG_PTR)PointerPte,
+                            MM::Paging::GetPageFrameNumber(PointerPte),
+                            (ULONG_PTR)MM::Paging::GetPteVirtualAddress(PointerPte));
         }
     }
 
