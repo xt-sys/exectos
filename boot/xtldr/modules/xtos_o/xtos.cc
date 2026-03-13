@@ -480,7 +480,7 @@ Xtos::InitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
     XtLdrProtocol->Memory.CopyMemory((PVOID)((UINT_PTR)LoaderBlock + sizeof(KERNEL_INITIALIZATION_BLOCK)),
                                      Parameters->Parameters, ParametersSize);
 
-    /* HACK: Commit page map to avoid memory leaks (AGAIN!) */
+    /* Commit mappings */
     XtLdrProtocol->Memory.CommitPageMap(PageMap);
 
     /* Initialize system resources list */
@@ -725,14 +725,6 @@ Xtos::RunBootSequence(IN PEFI_FILE_HANDLE BootDir,
         return Status;
     }
 
-    /* Commit mappings */
-    Status = XtLdrProtocol->Memory.CommitPageMap(&PageMap);
-    if(Status != STATUS_EFI_SUCCESS)
-    {
-        XtLdrProtocol->Debug.Print(L"Failed to commit hardware mappings (Pass 1)\n");
-        return Status;
-    }
-
     /* Store virtual address of kernel initialization block for future kernel call */
     KernelParameters = (PKERNEL_INITIALIZATION_BLOCK)VirtualAddress;
 
@@ -742,15 +734,6 @@ Xtos::RunBootSequence(IN PEFI_FILE_HANDLE BootDir,
     {
         /* Failed to setup kernel initialization block */
         XtLdrProtocol->Debug.Print(L"Failed to setup kernel initialization block (Status Code: 0x%zX)\n", Status);
-        return Status;
-    }
-
-    /* HACK: Commit mappings again to include the kernel initialization block */
-    Status = XtLdrProtocol->Memory.CommitPageMap(&PageMap);
-    if(Status != STATUS_EFI_SUCCESS)
-    {
-        /* Failed to build page map */
-        XtLdrProtocol->Debug.Print(L"Failed to build page map (Status code: %zX)\n", Status);
         return Status;
     }
 
