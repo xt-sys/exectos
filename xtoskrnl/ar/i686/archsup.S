@@ -75,12 +75,20 @@ _ArTrap\Vector:
     /* Test previous mode and swap GS if needed */
     movl $0, TrapPreviousMode(%ebp)
     mov %cs, %ax
-    and $1, %al
+    and $3, %al
     mov %al, TrapPreviousMode(%ebp)
     jz KernelMode$\Vector
     swapgs
+    jmp UserMode$\Vector
 
 KernelMode$\Vector:
+    /* Save kernel stack pointer (SS:ESP) as CPU did not push them */
+    movl %ss, %eax
+    mov %eax, TrapSegSs(%ebp)
+    lea TrapEsp(%ebp), %eax
+    mov %eax, TrapEsp(%ebp)
+
+UserMode$\Vector:
     /* Push Frame Pointer, clear direction flag and pass to trap dispatcher */
     push %esp
     cld
@@ -100,6 +108,7 @@ KernelModeReturn$\Vector:
     mov TrapSegDs(%ebp), %ds
     mov TrapSegEs(%ebp), %es
     mov TrapSegFs(%ebp), %fs
+    mov TrapSegGs(%ebp), %gs
 
     /* Free stack space */
     add $(TRAP_FRAME_SIZE - TRAP_REGISTERS_SIZE), %esp
