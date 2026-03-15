@@ -104,12 +104,20 @@ ArTrap\Vector:
     /* Test previous mode and swap GS if needed */
     movl $0, TrapPreviousMode(%rbp)
     mov %cs, %ax
-    and $1, %al
+    and $3, %al
     mov %al, TrapPreviousMode(%rbp)
     jz KernelMode$\Vector
     swapgs
+    jmp UserMode$\Vector
 
 KernelMode$\Vector:
+    /* Save kernel stack pointer (SS:RSP) */
+    movl %ss, %eax
+    mov %eax, TrapSegSs(%rbp)
+    lea TRAP_FRAME_SIZE(%rbp), %rax
+    mov %rax, TrapRsp(%rbp)
+
+UserMode$\Vector:
     /* Push Frame Pointer, clear direction flag and pass to trap dispatcher */
     mov %rsp, %rcx
     cld
