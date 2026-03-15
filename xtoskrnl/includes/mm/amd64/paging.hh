@@ -37,7 +37,7 @@ namespace MM
             STATIC XTAPI PVOID GetPdeVirtualAddress(IN PMMPDE PdePointer);
             STATIC XTAPI PMMPPE GetPpeAddress(IN PVOID Address);
             STATIC XTAPI PVOID GetPpeVirtualAddress(IN PMMPPE PpePointer);
-            STATIC XTAPI ULONG_PTR GetPte(IN PMMPTE PtePointer);
+            STATIC XTAPI ULONGLONG GetPte(IN PMMPTE PtePointer);
             STATIC XTAPI PMMPTE GetPteAddress(IN PVOID Address);
             STATIC XTAPI LONG GetPteDistance(PMMPTE EndPte,
                                              PMMPTE StartPte);
@@ -57,9 +57,9 @@ namespace MM
                                           IN BOOLEAN Value);
             STATIC XTAPI VOID SetPte(IN PMMPTE PtePointer,
                                      IN PFN_NUMBER PageFrameNumber,
-                                     IN ULONG_PTR AttributesMask);
+                                     IN ULONGLONG AttributesMask);
             STATIC XTAPI VOID SetPte(IN PMMPTE PtePointer,
-                                     IN ULONG_PTR Attributes);
+                                     IN ULONGLONG Attributes);
             STATIC XTAPI VOID SetPteCaching(IN PMMPTE PtePointer,
                                             IN BOOLEAN CacheDisable,
                                             IN BOOLEAN WriteThrough);

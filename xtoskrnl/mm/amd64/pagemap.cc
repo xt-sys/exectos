@@ -302,7 +302,7 @@ MM::PageMap::GetPpeOffset(IN PVOID Address)
  * @since XT 1.0
  */
 XTAPI
-ULONG_PTR
+ULONGLONG
 MM::PageMap::GetPte(IN PMMPTE PtePointer)
 {
     /* Return PTE value */
@@ -574,7 +574,7 @@ XTAPI
 VOID
 MM::PageMap::SetPte(IN PMMPTE PtePointer,
                     IN PFN_NUMBER PageFrameNumber,
-                    IN ULONG_PTR AttributesMask)
+                    IN ULONGLONG AttributesMask)
 {
     /* Set PTE */
     PtePointer->Hardware.PageFrameNumber = PageFrameNumber;
@@ -598,7 +598,7 @@ MM::PageMap::SetPte(IN PMMPTE PtePointer,
 XTAPI
 VOID
 MM::PageMap::SetPte(IN PMMPTE PtePointer,
-                    IN ULONG_PTR Attributes)
+                    IN ULONGLONG Attributes)
 {
     PtePointer->Long = Attributes;
 }

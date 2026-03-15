@@ -321,7 +321,7 @@ MM::Paging::GetPpeVirtualAddress(IN PMMPPE PpePointer)
  * @since XT 1.0
  */
 XTAPI
-ULONG_PTR
+ULONGLONG
 MM::Paging::GetPte(IN PMMPTE PtePointer)
 {
     /* Return PTE value */
@@ -578,7 +578,7 @@ XTAPI
 VOID
 MM::Paging::SetPte(IN PMMPTE PtePointer,
                    IN PFN_NUMBER PageFrameNumber,
-                   IN ULONG_PTR AttributesMask)
+                   IN ULONGLONG AttributesMask)
 {
     /* Set PTE */
     PmlRoutines->SetPte(PtePointer, PageFrameNumber, AttributesMask);
@@ -600,7 +600,7 @@ MM::Paging::SetPte(IN PMMPTE PtePointer,
 XTAPI
 VOID
 MM::Paging::SetPte(IN PMMPTE PtePointer,
-                   IN ULONG_PTR Attributes)
+                   IN ULONGLONG Attributes)
 {
     PmlRoutines->SetPte(PtePointer, Attributes);
 }

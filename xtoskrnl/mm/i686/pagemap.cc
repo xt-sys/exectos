@@ -80,7 +80,6 @@ MM::PageMap::GetPdeOffset(IN PVOID Address)
     return ((((ULONG_PTR)(Address)) >> PageMapInfo.PdiShift) & (PageMapInfo.Xpa ? 0x1FF : 0x3FF));
 }
 
-
 /**
  * Gets the address of the PPE (Page Directory Pointer Table Entry), that maps given address.
  *
@@ -173,7 +172,6 @@ MM::PageMap::GetPteOffset(IN PVOID Address)
     /* Return PTE Offset */
     return ((((ULONG_PTR)(Address)) >> MM_PTI_SHIFT) & (PageMapInfo.Xpa ? 0x1FF : 0x3FF));
 }
-
 
 /**
  * Gets the status of Extended Paging Address (XPA) mode.
@@ -318,7 +316,7 @@ MM::PageMapBasic::GetPdeVirtualAddress(IN PMMPDE PdePointer)
     return ((PVOID)((ULONG)(PdePointer) << 20));
 }
 
- /**
+/**
  * Gets the entire contents of a PML2 Page Table Entry (PTE) as a single value.
  *
  * @param PtePointer
@@ -329,12 +327,13 @@ MM::PageMapBasic::GetPdeVirtualAddress(IN PMMPDE PdePointer)
  * @since XT 1.0
  */
 XTAPI
-ULONG_PTR
+ULONGLONG
 MM::PageMapBasic::GetPte(IN PMMPTE PtePointer)
 {
     /* Return PTE value */
-    return PtePointer->Pml2.Long;
+    return (ULONGLONG)PtePointer->Pml2.Long;
 }
+
 /**
  * Calculates the distance between two PTE pointers.
  *
@@ -549,12 +548,12 @@ XTAPI
 VOID
 MM::PageMapBasic::SetPte(IN PMMPTE PtePointer,
                          IN PFN_NUMBER PageFrameNumber,
-                         IN ULONG_PTR AttributesMask)
+                         IN ULONGLONG AttributesMask)
 {
     /* Set PTE */
     PtePointer->Pml2.Hardware.PageFrameNumber = PageFrameNumber;
     PtePointer->Pml2.Hardware.Valid = 1;
-    PtePointer->Pml2.Long |= AttributesMask;
+    PtePointer->Pml2.Long |= (ULONG)AttributesMask;
 }
 
 /**
@@ -573,9 +572,9 @@ MM::PageMapBasic::SetPte(IN PMMPTE PtePointer,
 XTAPI
 VOID
 MM::PageMapBasic::SetPte(IN PMMPTE PtePointer,
-                         IN ULONG_PTR Attributes)
+                         IN ULONGLONG Attributes)
 {
-    PtePointer->Pml2.Long = Attributes;
+    PtePointer->Pml2.Long = (ULONG)Attributes;
 }
 
 /**
@@ -626,14 +625,14 @@ MM::PageMapBasic::TransitionPte(IN PMMPTE PointerPte,
     MMPTE TempPte;
 
     /* Set transition PTE */
-    TempPte = *PointerPte;
+    TempPte.Pml2.Long = PointerPte->Pml2.Long;
     TempPte.Pml2.Software.Protection = Protection;
     TempPte.Pml2.Software.Prototype = 0;
     TempPte.Pml2.Software.Transition = 1;
     TempPte.Pml2.Software.Valid = 0;
 
     /* Write PTE value */
-    *PointerPte = TempPte;
+    PointerPte->Pml2.Long = TempPte.Pml2.Long;
 }
 
 /**
@@ -798,7 +797,7 @@ MM::PageMapXpa::GetPdeVirtualAddress(IN PMMPDE PdePointer)
  * @since XT 1.0
  */
 XTAPI
-ULONG_PTR
+ULONGLONG
 MM::PageMapXpa::GetPte(IN PMMPTE PtePointer)
 {
     /* Return PTE value */
@@ -1018,7 +1017,7 @@ XTAPI
 VOID
 MM::PageMapXpa::SetPte(IN PMMPTE PtePointer,
                        IN PFN_NUMBER PageFrameNumber,
-                       IN ULONG_PTR AttributesMask)
+                       IN ULONGLONG AttributesMask)
 {
     /* Set PTE */
     PtePointer->Pml3.Hardware.PageFrameNumber = PageFrameNumber;
@@ -1042,7 +1041,7 @@ MM::PageMapXpa::SetPte(IN PMMPTE PtePointer,
 XTAPI
 VOID
 MM::PageMapXpa::SetPte(IN PMMPTE PtePointer,
-                       IN ULONG_PTR Attributes)
+                       IN ULONGLONG Attributes)
 {
     PtePointer->Pml3.Long = Attributes;
 }
@@ -1095,14 +1094,14 @@ MM::PageMapXpa::TransitionPte(IN PMMPTE PointerPte,
     MMPTE TempPte;
 
     /* Set transition PTE */
-    TempPte = *PointerPte;
+    TempPte.Pml3.Long = PointerPte->Pml3.Long;
     TempPte.Pml3.Software.Protection = Protection;
     TempPte.Pml3.Software.Prototype = 0;
     TempPte.Pml3.Software.Transition = 1;
     TempPte.Pml3.Software.Valid = 0;
 
     /* Write PTE value */
-    *PointerPte = TempPte;
+    PointerPte->Pml3.Long = TempPte.Pml3.Long;
 }
 
 /**
