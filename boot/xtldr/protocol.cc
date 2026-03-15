@@ -1054,6 +1054,7 @@ Protocol::InstallXtLoaderProtocol()
     LoaderProtocol.Memory.AllocatePages = Memory::AllocatePages;
     LoaderProtocol.Memory.AllocatePool = Memory::AllocatePool;
     LoaderProtocol.Memory.BuildPageMap = Memory::BuildPageMap;
+    LoaderProtocol.Memory.CommitPageMap = Memory::CommitPageMap;
     LoaderProtocol.Memory.CompareMemory = RTL::Memory::CompareMemory;
     LoaderProtocol.Memory.CopyMemory = RTL::Memory::CopyMemory;
     LoaderProtocol.Memory.FreePages = Memory::FreePages;

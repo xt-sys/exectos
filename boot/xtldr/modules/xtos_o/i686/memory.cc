@@ -9,6 +9,47 @@
 #include <xtos.hh>
 
 
+XTCDECL
+EFI_STATUS
+Xtos::BuildPageMap(IN PXTBL_PAGE_MAPPING PageMap)
+{
+    ULONG_PTR SelfMapAddress;
+    EFI_STATUS Status;
+
+    /* Initialize self map address */
+    if(PageMap->PageMapLevel == 3)
+    {
+        /* For PML3 (PAE) use PTE base address */
+        SelfMapAddress = MM_PTE_BASE;
+    }
+    else
+    {
+        /* For PML2 (PAE disabled) use legacy PDE base address */
+        SelfMapAddress = MM_PDE_LEGACY_BASE;
+    }
+
+    /* Build page map */
+    Status = XtLdrProtocol->Memory.BuildPageMap(PageMap, SelfMapAddress);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to build page map */
+        XtLdrProtocol->Debug.Print(L"Failed to build page map (Status code: %zX)\n", Status);
+        return Status;
+    }
+
+    /* Map memory for hardware layer */
+    Status = MapHardwareMemoryPool(PageMap);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to map memory for hardware layer */
+        XtLdrProtocol->Debug.Print(L"Failed to map memory for hardware layer (Status code: %zX)\n", Status);
+        return Status;
+    }
+
+    /* Return success */
+    return STATUS_EFI_SUCCESS;
+}
+
 /**
  * Determines the appropriate EFI memory mapping strategy for the i686 architecture.
  *
@@ -74,37 +115,6 @@ EFI_STATUS
 Xtos::EnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
 {
     EFI_STATUS Status;
-    ULONG_PTR SelfMapAddress;
-
-    /* Initialize self map address */
-    if(PageMap->PageMapLevel == 3)
-    {
-        /* For PML3 (PAE) use PTE base address */
-        SelfMapAddress = MM_PTE_BASE;
-    }
-    else
-    {
-        /* For PML2 (PAE disabled) use legacy PDE base address */
-        SelfMapAddress = MM_PDE_LEGACY_BASE;
-    }
-
-    /* Build page map */
-    Status = XtLdrProtocol->Memory.BuildPageMap(PageMap, SelfMapAddress);
-    if(Status != STATUS_EFI_SUCCESS)
-    {
-        /* Failed to build page map */
-        XtLdrProtocol->Debug.Print(L"Failed to build page map (Status code: %zX)\n", Status);
-        return Status;
-    }
-
-    /* Map memory for hardware layer */
-    Status = MapHardwareMemoryPool(PageMap);
-    if(Status != STATUS_EFI_SUCCESS)
-    {
-        /* Failed to map memory for hardware layer */
-        XtLdrProtocol->Debug.Print(L"Failed to map memory for hardware layer (Status code: %zX)\n", Status);
-        return Status;
-    }
 
     /* Exit EFI Boot Services */
     XtLdrProtocol->Debug.Print(L"Exiting EFI boot services\n");
@@ -172,6 +182,9 @@ Xtos::MapHardwareMemoryPool(IN PXTBL_PAGE_MAPPING PageMap)
 
     /* Zero fill allocated memory */
     XtLdrProtocol->Memory.ZeroMemory((PVOID)Address, EFI_PAGE_SIZE);
+
+    /* Map hardware memory */
+    XtLdrProtocol->Memory.MapVirtualMemory(PageMap, (ULONGLONG)NULLPTR, Address, 1, LoaderMemoryData);
 
     /* Check if PAE is enabled (3-level paging) */
     if(PageMap->PageMapLevel == 3)

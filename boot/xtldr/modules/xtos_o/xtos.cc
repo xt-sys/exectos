@@ -191,38 +191,16 @@ Xtos::GetDisplayInformation(OUT PSYSTEM_RESOURCE_FRAMEBUFFER FrameBufferResource
 XTCDECL
 EFI_STATUS
 Xtos::GetMemoryDescriptorList(IN PXTBL_PAGE_MAPPING PageMap,
-                              IN PVOID *VirtualAddress,
+                              IN EFI_PHYSICAL_ADDRESS PhysicalBase,
+                              IN PVOID VirtualBase,
                               OUT PLIST_ENTRY MemoryDescriptorList)
 {
     PLOADER_MEMORY_DESCRIPTOR Descriptor;
     PXTBL_MEMORY_MAPPING MemoryMapping;
-    EFI_PHYSICAL_ADDRESS Address;
     PLIST_ENTRY ListEntry;
-    EFI_STATUS Status;
-    ULONGLONG Pages;
-
-    /* Calculate the number of pages required to store the memory descriptor array */
-    Pages = (ULONGLONG)EFI_SIZE_TO_PAGES((PageMap->MapSize + 1) * sizeof(LOADER_MEMORY_DESCRIPTOR));
-
-    /* Allocate physical pages to hold the memory descriptor list */
-    Status = XtLdrProtocol->Memory.AllocatePages(AllocateAnyPages, Pages, &Address);
-    if(Status != STATUS_EFI_SUCCESS)
-    {
-        /* Page allocation failed, return the status code */
-        return Status;
-    }
-
-    /* Create a virtual memory mapping for the allocated descriptor buffer */
-    Status = XtLdrProtocol->Memory.MapVirtualMemory(PageMap, (ULONGLONG)*VirtualAddress, Address, Pages, LoaderMemoryData);
-    if(Status != STATUS_EFI_SUCCESS)
-    {
-        /* Release the allocated pages as the virtual mapping failed and return status code */
-        XtLdrProtocol->Memory.FreePages(Address, Pages);
-        return Status;
-    }
 
     /* Initialize the descriptor pointer to the start of the allocated physical buffer */
-    Descriptor = (PLOADER_MEMORY_DESCRIPTOR)Address;
+    Descriptor = (PLOADER_MEMORY_DESCRIPTOR)PhysicalBase;
 
     /* Get the first entry from the internal boot loader memory map */
     ListEntry = PageMap->MemoryMap.Flink;
@@ -247,17 +225,18 @@ Xtos::GetMemoryDescriptorList(IN PXTBL_PAGE_MAPPING PageMap,
     }
 
     /* Convert all physical link pointers in the list to their corresponding virtual addresses */
-    XtLdrProtocol->Memory.PhysicalListToVirtual(PageMap, MemoryDescriptorList, (PVOID)Address, *VirtualAddress);
+    XtLdrProtocol->Memory.PhysicalListToVirtual(PageMap, MemoryDescriptorList, (PVOID)PhysicalBase, VirtualBase);
 
-    /* Advance the virtual address pointer to the next available free region and return success */
-    *VirtualAddress = (PUINT8)*VirtualAddress + (Pages * EFI_PAGE_SIZE);
+    /* Return success */
     return STATUS_EFI_SUCCESS;
 }
 
 XTCDECL
 EFI_STATUS
 Xtos::GetSystemResourcesList(IN PXTBL_PAGE_MAPPING PageMap,
-                             IN PVOID *VirtualAddress,
+                             IN EFI_PHYSICAL_ADDRESS PhysicalBase,
+                             IN PVOID VirtualBase,
+                             IN PVOID FrameBufferVirtualBase,
                              OUT PLIST_ENTRY SystemResourcesList)
 {
     XTSTATUS Status;
@@ -268,39 +247,18 @@ Xtos::GetSystemResourcesList(IN PXTBL_PAGE_MAPPING PageMap,
     PXTBL_FRAMEBUFFER_PROTOCOL FrameBufProtocol;
     XTBL_FRAMEBUFFER_MODE_INFORMATION FbModeInfo;
     EFI_PHYSICAL_ADDRESS FbAddress;
+    EFI_PHYSICAL_ADDRESS OriginalPhysicalBase;
     ULONG_PTR FbSize;
-    UINT FrameBufferPages;
     PSYSTEM_RESOURCE_FRAMEBUFFER FrameBufferResource;
     PSYSTEM_RESOURCE_ACPI AcpiResource;
-    ULONGLONG Pages;
-    EFI_PHYSICAL_ADDRESS Address;
-    PVOID PhysicalBase, VirtualBase;
 
-    Pages = (ULONGLONG)EFI_SIZE_TO_PAGES(sizeof(SYSTEM_RESOURCE_ACPI) + sizeof(SYSTEM_RESOURCE_FRAMEBUFFER));
+    /* Save original physical base */
+    OriginalPhysicalBase = PhysicalBase;
 
-    Status = XtLdrProtocol->Memory.AllocatePages(AllocateAnyPages, Pages, &Address);
-    if(Status != STATUS_EFI_SUCCESS)
-    {
-        return Status;
-    }
-    Status = XtLdrProtocol->Memory.MapVirtualMemory(PageMap, (ULONGLONG)*VirtualAddress, Address, Pages, LoaderFirmwarePermanent);
-    if(Status != STATUS_EFI_SUCCESS)
-    {
-        XtLdrProtocol->Memory.FreePages(Address, Pages);
-        return Status;
-    }
-
-    PhysicalBase = (PVOID)Address;
-    VirtualBase = *VirtualAddress;
-
-    /* Calculate next valid virtual address */
-    *VirtualAddress = (PUINT8)*VirtualAddress + (Pages * EFI_PAGE_SIZE);
-
-    AcpiResource = (PSYSTEM_RESOURCE_ACPI)Address;
-
+    AcpiResource = (PSYSTEM_RESOURCE_ACPI)PhysicalBase;
     XtLdrProtocol->Memory.ZeroMemory(AcpiResource, sizeof(SYSTEM_RESOURCE_ACPI));
 
-    /* Load FrameBuffer protocol */
+    /* Load ACPI protocol */
     Status = XtLdrProtocol->Protocol.Open(&ProtocolHandle, (PVOID*)&AcpiProtocol, &AcpiGuid);
     if(Status != STATUS_EFI_SUCCESS)
     {
@@ -319,13 +277,11 @@ Xtos::GetSystemResourcesList(IN PXTBL_PAGE_MAPPING PageMap,
 
     XtLdrProtocol->LinkedList.InsertTail(SystemResourcesList, &AcpiResource->Header.ListEntry);
 
-    /* Close FrameBuffer protocol */
-    XtLdrProtocol->Protocol.Close(&ProtocolHandle, &FrameBufGuid);
+    /* Close ACPI protocol */
+    XtLdrProtocol->Protocol.Close(&ProtocolHandle, &AcpiGuid);
 
-    Address = Address + sizeof(SYSTEM_RESOURCE_ACPI);
-
-    FrameBufferResource = (PSYSTEM_RESOURCE_FRAMEBUFFER)Address;
-
+    PhysicalBase = PhysicalBase + sizeof(SYSTEM_RESOURCE_ACPI);
+    FrameBufferResource = (PSYSTEM_RESOURCE_FRAMEBUFFER)PhysicalBase;
     XtLdrProtocol->Memory.ZeroMemory(FrameBufferResource, sizeof(SYSTEM_RESOURCE_FRAMEBUFFER));
 
     /* Load FrameBuffer protocol */
@@ -346,26 +302,16 @@ Xtos::GetSystemResourcesList(IN PXTBL_PAGE_MAPPING PageMap,
         return Status;
     }
 
-    /* Calculate pages needed to map framebuffer */
-    FrameBufferPages = EFI_SIZE_TO_PAGES(FbSize);
-
-    /* Rewrite framebuffer address by using virtual address */
-    FrameBufferResource->Header.VirtualAddress = *VirtualAddress;
-
-    /* Map frame buffer memory */
-    XtLdrProtocol->Memory.MapVirtualMemory(PageMap, (ULONGLONG)FrameBufferResource->Header.VirtualAddress,
-                                           (ULONGLONG)FrameBufferResource->Header.PhysicalAddress,
-                                           FrameBufferPages, LoaderFirmwarePermanent);
-
-    /* Close FrameBuffer protocol */
+    /* Assign the pre-mapped virtual address to the resource block */
+    FrameBufferResource->Header.VirtualAddress = FrameBufferVirtualBase;
     XtLdrProtocol->Protocol.Close(&ProtocolHandle, &FrameBufGuid);
-
-    *VirtualAddress = (PUINT8)*VirtualAddress + (FrameBufferPages * EFI_PAGE_SIZE);
 
     XtLdrProtocol->LinkedList.InsertTail(SystemResourcesList, &FrameBufferResource->Header.ListEntry);
 
-    XtLdrProtocol->Memory.PhysicalListToVirtual(PageMap, SystemResourcesList, PhysicalBase, VirtualBase);
+    /* Convert list pointers to virtual */
+    XtLdrProtocol->Memory.PhysicalListToVirtual(PageMap, SystemResourcesList, (PVOID)OriginalPhysicalBase, VirtualBase);
 
+    /* Return success */
     return STATUS_EFI_SUCCESS;
 }
 
@@ -426,34 +372,97 @@ Xtos::InitializeApicBase(IN PXTBL_PAGE_MAPPING PageMap)
 XTCDECL
 EFI_STATUS
 Xtos::InitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
-                            IN PVOID *VirtualAddress,
+                            IN OUT PVOID *VirtualAddress,
                             IN PXTBL_BOOT_PARAMETERS Parameters)
 {
+    EFI_PHYSICAL_ADDRESS FbPhysicalAddress, PhysicalBlock, PhysicalDescriptor, PhysicalResources;
+    PVOID FbVirtualAddress, VirtualBlock, VirtualResources, VirtualDescriptor;
+    UINT BlockPages, DescriptorPages, FbPages, ParametersSize, ResourcesPages;
+    XTBL_FRAMEBUFFER_MODE_INFORMATION FbModeInfo;
+    PXTBL_FRAMEBUFFER_PROTOCOL FrameBufProtocol;
     PKERNEL_INITIALIZATION_BLOCK LoaderBlock;
-    EFI_PHYSICAL_ADDRESS Address;
+    EFI_HANDLE ProtocolHandle;
     EFI_STATUS Status;
-    UINT BlockPages;
-    UINT ParametersSize;
+    ULONG_PTR FbSize;
+
+    EFI_GUID FrameBufGuid = XT_FRAMEBUFFER_PROTOCOL_GUID;
+
+    /* Initialize Framebuffer information */
+    FbPhysicalAddress = 0;
+    FbSize = 0;
+    FbVirtualAddress = NULLPTR;
+    FbPages = 0;
 
     /* Calculate size of parameters */
     ParametersSize = (XtLdrProtocol->WideString.Length(Parameters->Parameters, 0) + 1) * sizeof(WCHAR);
 
     /* Calculate number of pages needed for initialization block */
     BlockPages = EFI_SIZE_TO_PAGES(sizeof(KERNEL_INITIALIZATION_BLOCK) + ParametersSize);
+    ResourcesPages = EFI_SIZE_TO_PAGES(sizeof(SYSTEM_RESOURCE_ACPI) + sizeof(SYSTEM_RESOURCE_FRAMEBUFFER));
 
-    /* Allocate memory for kernel initialization block */
-    Status = XtLdrProtocol->Memory.AllocatePages(AllocateAnyPages, BlockPages, &Address);
+    /* Query Framebuffer size for allocation */
+    if(XtLdrProtocol->Protocol.Open(&ProtocolHandle, (PVOID*)&FrameBufProtocol, &FrameBufGuid) == STATUS_EFI_SUCCESS)
+    {
+        /* Get FrameBuffer information */
+        FrameBufProtocol->GetDisplayInformation(&FbPhysicalAddress, &FbSize, &FbModeInfo);
+        XtLdrProtocol->Protocol.Close(&ProtocolHandle, &FrameBufGuid);
+    }
+    FbPages = EFI_SIZE_TO_PAGES(FbSize);
+
+    /* Calculate number of pages needed for memory descriptor list */
+    DescriptorPages = EFI_SIZE_TO_PAGES(PageMap->MapSize * sizeof(LOADER_MEMORY_DESCRIPTOR));
+
+    /* Allocate memory for the kernel initialization block and boot parameters */
+    Status = XtLdrProtocol->Memory.AllocatePages(AllocateAnyPages, BlockPages, &PhysicalBlock);
     if(Status != STATUS_EFI_SUCCESS)
     {
-        /* Memory allocation failure */
+        /* Memory allocation failure, return status code */
         return Status;
     }
 
-    /* Initialize and zero-fill kernel initialization block */
-    LoaderBlock = (PKERNEL_INITIALIZATION_BLOCK)(UINT_PTR)Address;
-    XtLdrProtocol->Memory.ZeroMemory(LoaderBlock, sizeof(KERNEL_INITIALIZATION_BLOCK) + ParametersSize);
+    /* Allocate memory for the system resources data structures */
+    Status = XtLdrProtocol->Memory.AllocatePages(AllocateAnyPages, ResourcesPages, &PhysicalResources);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Memory allocation failure, return status code */
+        return Status;
+    }
+
+    /* Allocate memory for the memory descriptor list */
+    Status = XtLdrProtocol->Memory.AllocatePages(AllocateAnyPages, DescriptorPages, &PhysicalDescriptor);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Memory allocation failure, return status code */
+        return Status;
+    }
+
+    /* Map the Kernel Initialization Block into virtual memory and advance the virtual address pointer */
+    VirtualBlock = *VirtualAddress;
+    XtLdrProtocol->Memory.MapVirtualMemory(PageMap, (ULONGLONG)VirtualBlock, PhysicalBlock, BlockPages, LoaderSystemBlock);
+    *VirtualAddress = (PUINT8)*VirtualAddress + (BlockPages * EFI_PAGE_SIZE);
+
+    /* Map the system resources physical memory into virtual address space and update the allocation pointer */
+    VirtualResources = *VirtualAddress;
+    XtLdrProtocol->Memory.MapVirtualMemory(PageMap, (ULONGLONG)VirtualResources, PhysicalResources, ResourcesPages, LoaderFirmwarePermanent);
+    *VirtualAddress = (PUINT8)*VirtualAddress + (ResourcesPages * EFI_PAGE_SIZE);
+
+    /* Check if a framebuffer was detected and requires memory mapping */
+    if(FbPages > 0)
+    {
+        /* Map the framebuffer physical memory range into virtual address space */
+        FbVirtualAddress = *VirtualAddress;
+        XtLdrProtocol->Memory.MapVirtualMemory(PageMap, (ULONGLONG)FbVirtualAddress, FbPhysicalAddress, FbPages, LoaderFirmwarePermanent);
+        *VirtualAddress = (PUINT8)*VirtualAddress + (FbPages * EFI_PAGE_SIZE);
+    }
+
+    /* Map the allocated physical memory for memory descriptors into the virtual address space */
+    VirtualDescriptor = *VirtualAddress;
+    XtLdrProtocol->Memory.MapVirtualMemory(PageMap, (ULONGLONG)VirtualDescriptor, PhysicalDescriptor, DescriptorPages, LoaderMemoryData);
+    *VirtualAddress = (PUINT8)*VirtualAddress + (DescriptorPages * EFI_PAGE_SIZE);
 
     /* Set basic loader block properties */
+    XtLdrProtocol->Memory.ZeroMemory((PVOID)PhysicalBlock, sizeof(KERNEL_INITIALIZATION_BLOCK) + ParametersSize);
+    LoaderBlock = (PKERNEL_INITIALIZATION_BLOCK)PhysicalBlock;
     LoaderBlock->BlockSize = sizeof(KERNEL_INITIALIZATION_BLOCK);
     LoaderBlock->BlockVersion = INITIALIZATION_BLOCK_VERSION;
     LoaderBlock->ProtocolVersion = BOOT_PROTOCOL_VERSION;
@@ -467,24 +476,30 @@ Xtos::InitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
     LoaderBlock->FirmwareInformation.EfiFirmware.EfiRuntimeServices = NULLPTR;
 
     /* Copy parameters to kernel initialization block */
-    LoaderBlock->KernelParameters = (PWCHAR)((UINT_PTR)*VirtualAddress + sizeof(KERNEL_INITIALIZATION_BLOCK));
+    LoaderBlock->KernelParameters = (PWCHAR)((UINT_PTR)VirtualBlock + sizeof(KERNEL_INITIALIZATION_BLOCK));
     XtLdrProtocol->Memory.CopyMemory((PVOID)((UINT_PTR)LoaderBlock + sizeof(KERNEL_INITIALIZATION_BLOCK)),
-                  Parameters->Parameters,
-                  ParametersSize);
+                                     Parameters->Parameters, ParametersSize);
 
-    /* Map kernel initialization block */
-    XtLdrProtocol->Memory.MapVirtualMemory(PageMap, (ULONGLONG)*VirtualAddress, (ULONGLONG)LoaderBlock,
-                                           BlockPages, LoaderSystemBlock);
+    /* Commit mappings */
+    XtLdrProtocol->Memory.CommitPageMap(PageMap);
 
-    /* Calculate next valid virtual address */
-    *VirtualAddress = (PUINT8)*VirtualAddress + (BlockPages * EFI_PAGE_SIZE);
-
+    /* Initialize system resources list */
     XtLdrProtocol->LinkedList.InitializeHead(&LoaderBlock->SystemResourcesListHead);
-    GetSystemResourcesList(PageMap, VirtualAddress, &LoaderBlock->SystemResourcesListHead);
+    Status = GetSystemResourcesList(PageMap, PhysicalResources, VirtualResources, FbVirtualAddress, &LoaderBlock->SystemResourcesListHead);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to initialize system resources list, return status code */
+        return Status;
+    }
 
     /* Initialize memory descriptor list */
     XtLdrProtocol->LinkedList.InitializeHead(&LoaderBlock->MemoryDescriptorListHead);
-    GetMemoryDescriptorList(PageMap, VirtualAddress, &LoaderBlock->MemoryDescriptorListHead);
+    Status = GetMemoryDescriptorList(PageMap, PhysicalDescriptor, VirtualDescriptor, &LoaderBlock->MemoryDescriptorListHead);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to initialize memory descriptor list, return status code */
+        return Status;
+    }
 
     /* Set boot image size */
     LoaderBlock->BootImageSize = (PFN_NUMBER)(((ULONGLONG)*VirtualAddress - KSEG0_BASE) / EFI_PAGE_SIZE);
@@ -699,6 +714,14 @@ Xtos::RunBootSequence(IN PEFI_FILE_HANDLE BootDir,
     {
         /* Failed to setup kernel initialization block */
         XtLdrProtocol->Debug.Print(L"Failed to initialize APIC (Status Code: 0x%zX)\n", Status);
+        return Status;
+    }
+
+    /* Build page map */
+    Status = BuildPageMap(&PageMap);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        XtLdrProtocol->Debug.Print(L"Failed to build page map (Status code: %zX)\n", Status);
         return Status;
     }
 

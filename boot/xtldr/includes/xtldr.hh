@@ -165,6 +165,7 @@ class Memory
                                                OUT PVOID *Memory);
         STATIC XTCDECL EFI_STATUS BuildPageMap(IN PXTBL_PAGE_MAPPING PageMap,
                                                IN ULONG_PTR SelfMapAddress);
+        STATIC XTCDECL EFI_STATUS CommitPageMap(IN PXTBL_PAGE_MAPPING PageMap);
         STATIC XTCDECL EFI_STATUS FreePages(IN ULONGLONG NumberOfPages,
                                             IN EFI_PHYSICAL_ADDRESS Memory);
         STATIC XTCDECL EFI_STATUS FreePool(IN PVOID Memory);
