@@ -856,7 +856,7 @@ MM::Pfn::LinkPfnForPageTable(IN PFN_NUMBER PageFrameIndex,
        (MM::Pte::AddressValid(EndAddress)) && (Pfn->u3.e1.PageLocation == ActiveAndValid))
     {
         /* Initialize the PFN entry for this page table page */
-        Pfn->OriginalPte = *PointerPte;
+        MM::Paging::SetPte(&Pfn->OriginalPte, MM::Paging::GetPte(PointerPte));
         Pfn->PteAddress = PointerPte;
         Pfn->u1.WsIndex = 0;
         Pfn->u2.ShareCount++;
