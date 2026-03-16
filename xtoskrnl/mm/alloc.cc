@@ -312,6 +312,16 @@ MM::Allocator::AllocatePool(IN MMPOOL_TYPE PoolType,
 {
     UNIMPLEMENTED;
 
+    /* Verify run level for the specified pool */
+    VerifyRunLevel(PoolType, Bytes, NULLPTR);
+
+    /* Check if there are any bytes to allocate */
+    if(!Bytes)
+    {
+        /* Allocate at least a single byte */
+        Bytes = 1;
+    }
+
     /* Allocate pages */
     return AllocatePages(PoolType, Bytes, Memory);
 }
@@ -667,4 +677,59 @@ VOID
 MM::Allocator::InitializePagedPool(VOID)
 {
     UNIMPLEMENTED;
+}
+
+/**
+ * Validates the run level for the specified pool. If the run level is invalid, the kernel panics.
+ *
+ * @param PoolType
+ *        Supplies the pool type.
+ *
+ * @param Bytes
+ *        Supplies the size of the allocation.
+ *
+ * @param Entry
+ *        Supplies a pointer to the allocation entry.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTINLINE
+VOID
+MM::Allocator::VerifyRunLevel(IN MMPOOL_TYPE PoolType,
+                              IN SIZE_T Bytes,
+                              IN PVOID Entry)
+{
+    KRUNLEVEL RunLevel;
+
+    /* Get current run level */
+    RunLevel = KE::RunLevel::GetCurrentRunLevel();
+
+    /* Validate run level */
+    if((PoolType & MM_POOL_TYPE_MASK) == PagedPool)
+    {
+        /* Paged pool runs up to APC level */
+        if(RunLevel <= APC_LEVEL)
+        {
+            /* Run level is valid */
+            return;
+        }
+    }
+    else
+    {
+        /* Non-paged pool runs up to DISPATCH_LEVEL */
+        if(RunLevel <= DISPATCH_LEVEL)
+        {
+            /* Run level is valid */
+            return;
+        }
+    }
+
+    /* Invalid run level for specified pool, kernel panic */
+    KE::Crash::Panic(0xC2,
+                     (Entry ? MM_POOL_INVALID_FREE_RUNLEVEL : MM_POOL_INVALID_ALLOC_RUNLEVEL),
+                     RunLevel,
+                     PoolType,
+                     (Entry ? (ULONG_PTR)Entry : Bytes));
 }

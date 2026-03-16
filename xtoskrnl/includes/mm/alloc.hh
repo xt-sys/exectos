@@ -48,6 +48,9 @@ namespace MM
             STATIC XTAPI XTSTATUS FreeNonPagedPoolPages(IN PVOID VirtualAddress);
             STATIC XTAPI XTSTATUS FreePagedPoolPages(IN PVOID VirtualAddress);
             STATIC XTAPI VOID MapNonPagedPool(VOID);
+            STATIC XTINLINE VOID VerifyRunLevel(IN MMPOOL_TYPE PoolType,
+                                                IN SIZE_T Bytes,
+                                                IN PVOID Entry);
     };
 }
 

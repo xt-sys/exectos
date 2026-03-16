@@ -29,6 +29,10 @@
 /* Memory manager pool type mask definition */
 #define MM_POOL_TYPE_MASK                          1
 
+/* Bad pool caller reasons */
+#define MM_POOL_INVALID_ALLOC_RUNLEVEL             8
+#define MM_POOL_INVALID_FREE_RUNLEVEL              9
+
 /* Number of reserved zeroed PTEs */
 #define MM_RESERVED_ZERO_PTES                      32
 
