@@ -31,7 +31,11 @@ MM::Pfn::AllocateBootstrapPages(IN PFN_NUMBER NumberOfPages)
     {
         /* Not enough physical memory available, kernel panic */
         DebugPrint(L"Insufficient physical pages! Install additional memory\n");
-        KE::Crash::Panic(0);
+        KE::Crash::Panic(0x7D,
+                         NumberOfPhysicalPages,
+                         FreeDescriptor->PageCount,
+                         OriginalFreeDescriptor.PageCount,
+                         NumberOfPages);
     }
 
     /* Allocate pages from the beginning of the free descriptor */
@@ -591,7 +595,7 @@ MM::Pfn::LinkPage(IN PMMPFNLIST ListHead,
            MM::Paging::GetPteSoftwareTransition(&PageFrame->OriginalPte))
         {
             /* Crash system due to corrupted PFN/PTE state */
-            KE::Crash::Panic(0x71, 0x8888, 0, 0, 0);
+            KE::Crash::Panic(0x1A, 0x8888, 0, 0, 0);
         }
     }
 
@@ -806,7 +810,7 @@ MM::Pfn::LinkPfn(IN PFN_NUMBER PageFrameIndex,
         if(Status != STATUS_SUCCESS)
         {
             /* Could not make the page table resident, crash system */
-            KE::Crash::Panic(0x1,
+            KE::Crash::Panic(0x1A,
                             (ULONG_PTR)0x61940,
                             (ULONG_PTR)PointerPte,
                             MM::Paging::GetPageFrameNumber(PointerPte),
@@ -1221,7 +1225,7 @@ MM::Pfn::ScanMemoryDescriptors(VOID)
     if(!FreeDescriptor)
     {
         /* No free memory available to bootstrap the system */
-        KE::Crash::Panic(0);
+        KE::Crash::Panic(0x7D, LowestPhysicalPage, HighestPhysicalPage, FreePages, 0x1);
     }
 
     /* Save a copy of the original free descriptor before it gets modified */

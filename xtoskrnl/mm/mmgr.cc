@@ -105,7 +105,7 @@ MM::Manager::InitializeMemoryManager(VOID)
     {
         /* Insufficient physical pages, kernel panic */
         DebugPrint(L"Insufficient physical pages! Install additional memory\n");
-        KE::Crash::Panic(0);
+        KE::Crash::Panic(0x7D, MM::Pfn::GetNumberOfPhysicalPages(), MM_MINIMUM_PHYSICAL_PAGES, 0x0, 0x2);
     }
 
     /* Compute page colors to reduce CPU cache conflicts */
