@@ -423,6 +423,13 @@ MM::Pfn::GetPfnEntry(IN PFN_NUMBER Pfn)
         return NULLPTR;
     }
 
+    /* Make sure this page has a PFN entry set */
+    if(PfnBitMap.Buffer && !RTL::BitMap::TestBit(&PfnBitMap, Pfn))
+    {
+        /* The requested page number is not set in the bitmap, return NULLPTR */
+        return NULLPTR;
+    }
+
     /* Get the memory layout */
     MemoryLayout = MM::Manager::GetMemoryLayout();
 
@@ -443,6 +450,60 @@ MM::Pfn::IncrementAvailablePages(VOID)
 {
     /* Increment the global count of available pages */
     AvailablePages++;
+}
+
+/**
+ * Initializes the PFN bitmap to track available physical memory.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::Pfn::InitializePfnBitmap(VOID)
+{
+    PPHYSICAL_MEMORY_DESCRIPTOR PhysicalMemoryBlock;
+    XTSTATUS Status;
+    PVOID BitMap;
+    ULONG Index;
+
+    /* Retrieve the global physical memory descriptor block */
+    PhysicalMemoryBlock = MM::Manager::GetPhysicalMemoryBlock();
+    if(!PhysicalMemoryBlock)
+    {
+        /* Physical memory layout unavailable, kernel panic */
+        KE::Crash::Panic(0x7D, NumberOfPhysicalPages, LowestPhysicalPage, HighestPhysicalPage, 0x100);
+    }
+
+    /* Calculate the required bitmap size and allocate memory */
+    Status = MM::Allocator::AllocatePool(NonPagedPool,
+                                         (((HighestPhysicalPage + 1) + 31) / 32) * 4,
+                                         (PVOID *)&BitMap,
+                                         SIGNATURE32('M', 'M', 'g', 'r'));
+    if(Status != STATUS_SUCCESS || !BitMap)
+    {
+        /* Memory allocation failed, kernel panic */
+        DebugPrint(L"Insufficient physical pages! Install additional memory\n");
+        KE::Crash::Panic(0x7D, NumberOfPhysicalPages, LowestPhysicalPage, HighestPhysicalPage, 0x101);
+    }
+
+    /* Initialize the PFN bitmap structure and clear all bits by default */
+    RTL::BitMap::InitializeBitMap(&PfnBitMap, (PULONG_PTR)BitMap, (ULONG)HighestPhysicalPage + 1);
+    RTL::BitMap::ClearAllBits(&PfnBitMap);
+
+    /* Iterate through all contiguous physical memory runs to populate the availability map */
+    for(Index = 0; Index < PhysicalMemoryBlock->NumberOfRuns; Index++)
+    {
+        /* Ensure the current memory run contains at least one valid page frame */
+        if((&PhysicalMemoryBlock->Run[Index])->PageCount)
+        {
+            /* Set the corresponding bits to mark these physical pages as available for allocation */
+            RtlSetBits(&PfnBitMap,
+                       (ULONG)(&PhysicalMemoryBlock->Run[Index])->BasePage,
+                       (ULONG)(&PhysicalMemoryBlock->Run[Index])->PageCount);
+        }
+    }
 }
 
 /**

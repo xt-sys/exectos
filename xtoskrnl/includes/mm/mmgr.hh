@@ -20,11 +20,13 @@ namespace MM
         private:
             STATIC MMMEMORY_LAYOUT MemoryLayout;
             STATIC PFN_NUMBER NumberOfSystemPtes;
+            STATIC PPHYSICAL_MEMORY_DESCRIPTOR PhysicalMemoryBlock;
 
         public:
             STATIC XTAPI ULONG_PTR GetInstalledMemorySize(VOID);
             STATIC XTAPI PMMMEMORY_LAYOUT GetMemoryLayout(VOID);
-            STATIC XTAPI PFN_NUMBER GetNumberOfSystemPtes();
+            STATIC XTAPI PFN_NUMBER GetNumberOfSystemPtes(VOID);
+            STATIC XTAPI PPHYSICAL_MEMORY_DESCRIPTOR GetPhysicalMemoryBlock(VOID);
             STATIC XTAPI VOID InitializeMemoryLayout(VOID);
             STATIC XTAPI VOID InitializeMemoryManager(VOID);
             STATIC XTAPI BOOLEAN VerifyMemoryTypeFree(IN LOADER_MEMORY_TYPE MemoryType);

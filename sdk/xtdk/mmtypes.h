@@ -177,4 +177,19 @@ typedef struct _MMPFNLIST
     PFN_NUMBER Blink;
 } MMPFNLIST, *PMMPFNLIST;
 
+/* Physical memory run structure definition */
+typedef struct _PHYSICAL_MEMORY_RUN
+{
+    PFN_NUMBER BasePage;
+    PFN_NUMBER PageCount;
+} PHYSICAL_MEMORY_RUN, *PPHYSICAL_MEMORY_RUN;
+
+/* Physical memory descriptor structure definition */
+typedef struct _PHYSICAL_MEMORY_DESCRIPTOR
+{
+    ULONG NumberOfRuns;
+    PFN_NUMBER NumberOfPages;
+    PHYSICAL_MEMORY_RUN Run[1];
+} PHYSICAL_MEMORY_DESCRIPTOR, *PPHYSICAL_MEMORY_DESCRIPTOR;
+
 #endif /* __XTDK_MMTYPES_H */

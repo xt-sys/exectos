@@ -81,9 +81,144 @@ MM::Manager::GetMemoryLayout(VOID)
  */
 XTAPI
 PFN_NUMBER
-MM::Manager::GetNumberOfSystemPtes()
+MM::Manager::GetNumberOfSystemPtes(VOID)
 {
     return NumberOfSystemPtes;
+}
+
+/**
+ * Initializes and returns the system physical memory descriptor block.
+ *
+ * @return This routine returns a pointer to the structure representing the system usable physical memory block.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PPHYSICAL_MEMORY_DESCRIPTOR
+MM::Manager::GetPhysicalMemoryBlock(VOID)
+{
+    PPHYSICAL_MEMORY_DESCRIPTOR PrimaryBuffer, SecondaryBuffer;
+    PKERNEL_INITIALIZATION_BLOCK InitializationBlock;
+    PLOADER_MEMORY_DESCRIPTOR MemoryDescriptor;
+    PFN_NUMBER PageFrameNumer, NumberOfPages;
+    ULONG DescriptorCount, RunCount;
+    PLIST_ENTRY ListEntry;
+    XTSTATUS Status;
+
+    /* Check if the physical memory block has already been initialized */
+    if(!PhysicalMemoryBlock)
+    {
+        /* Reset local tracking variables */
+        DescriptorCount = 0;
+        NumberOfPages = 0;
+        PageFrameNumer = -1;
+        RunCount = 0;
+
+        /* Retrieve the kernel initialization block */
+        InitializationBlock = KE::BootInformation::GetInitializationBlock();
+
+        /* Iterate through the loader memory descriptor list to determine its size */
+        ListEntry = InitializationBlock->MemoryDescriptorListHead.Flink;
+        while(ListEntry != &InitializationBlock->MemoryDescriptorListHead)
+        {
+            /* Count this descriptor */
+            DescriptorCount++;
+
+            /* Go to the next descriptor */
+            ListEntry = ListEntry->Flink;
+        }
+
+        /* Ensure the memory descriptor list is not empty */
+        if(DescriptorCount == 0)
+        {
+            /* Fail gracefully if no memory descriptors were found, by returning NULLPTR */
+            return NULLPTR;
+        }
+
+        /* Allocate a primary buffer sized for the maximum possible number of runs */
+        Status = MM::Allocator::AllocatePool(NonPagedPool,
+                                             sizeof(PHYSICAL_MEMORY_DESCRIPTOR) +
+                                             sizeof(PHYSICAL_MEMORY_RUN) *
+                                             (DescriptorCount - 1),
+                                             (PVOID*)&PrimaryBuffer,
+                                             SIGNATURE32('M', 'M', 'g', 'r'));
+        if(Status != STATUS_SUCCESS || !PrimaryBuffer)
+        {
+            /* Primary pool allocation failed, return NULLPTR */
+            return NULLPTR;
+        }
+
+        /* Traverse the memory descriptor list a second time to build the map */
+        ListEntry = InitializationBlock->MemoryDescriptorListHead.Flink;
+        while(ListEntry != &InitializationBlock->MemoryDescriptorListHead)
+        {
+            /* Resolve the memory descriptor record from the current list entry */
+            MemoryDescriptor = CONTAIN_RECORD(ListEntry, LOADER_MEMORY_DESCRIPTOR, ListEntry);
+
+            /* Filter out bad, reserved, or invisible memory types */
+            if((MemoryDescriptor->MemoryType < LoaderMaximum) &&
+               (MemoryDescriptor->MemoryType != LoaderBad) &&
+               !VerifyMemoryTypeInvisible(MemoryDescriptor->MemoryType))
+            {
+                /* Accumulate the total number of usable physical pages */
+                NumberOfPages += MemoryDescriptor->PageCount;
+
+                /* Check if the current descriptor is contiguous with the previous run */
+                if(RunCount > 0 && MemoryDescriptor->BasePage == PageFrameNumer)
+                {
+                    /* Coalesce the contiguous descriptor into the existing physical run */
+                    PrimaryBuffer->Run[RunCount - 1].PageCount += MemoryDescriptor->PageCount;
+                    PageFrameNumer += MemoryDescriptor->PageCount;
+                }
+                else
+                {
+                    /* Start a new physical run with the new descriptor's boundaries */
+                    PrimaryBuffer->Run[RunCount].BasePage = MemoryDescriptor->BasePage;
+                    PrimaryBuffer->Run[RunCount].PageCount = MemoryDescriptor->PageCount;
+
+                    /* Update the expected next page frame number for future contiguity checks */
+                    PageFrameNumer = PrimaryBuffer->Run[RunCount].BasePage + PrimaryBuffer->Run[RunCount].PageCount;
+
+                    /* Increment the total number of distinct physical memory runs */
+                    RunCount++;
+                }
+            }
+
+            /* Go to the next descriptor */
+            ListEntry = ListEntry->Flink;
+        }
+
+        /* Check if the buffer can be shrunk due to coalesced memory runs */
+        if(DescriptorCount > RunCount)
+        {
+            /* Allocate a secondary, more tightly sized buffer to reduce memory footprint */
+            Status = MM::Allocator::AllocatePool(NonPagedPool,
+                                                 sizeof(PHYSICAL_MEMORY_DESCRIPTOR) +
+                                                 sizeof(PHYSICAL_MEMORY_RUN) *
+                                                 (RunCount - 1),
+                                                 (PVOID*)&SecondaryBuffer,
+                                                 SIGNATURE32('M', 'M', 'g', 'r'));
+            if(Status == STATUS_SUCCESS && SecondaryBuffer)
+            {
+                /* Copy the coalesced runs from the oversized primary buffer */
+                RtlCopyMemory(SecondaryBuffer->Run, PrimaryBuffer->Run, sizeof(PHYSICAL_MEMORY_RUN) * RunCount);
+
+                /* Free the primary buffer */
+                MM::Allocator::FreePool(PrimaryBuffer, SIGNATURE32('M', 'M', 'g', 'r'));
+
+                /* Update the primary buffer pointer */
+                PrimaryBuffer = SecondaryBuffer;
+            }
+        }
+
+        /* Populate the final metadata and save the physical memory block globally */
+        PrimaryBuffer->NumberOfRuns = RunCount;
+        PrimaryBuffer->NumberOfPages = NumberOfPages;
+        PhysicalMemoryBlock = PrimaryBuffer;
+    }
+
+    /* Return a pointer to the physical memory block */
+    return PhysicalMemoryBlock;
 }
 
 /**
@@ -129,6 +264,9 @@ MM::Manager::InitializeMemoryManager(VOID)
 
     /* Initialize PFN database */
     MM::Pfn::InitializePfnDatabase();
+
+    /* Initialize PFN bitmap */
+    MM::Pfn::InitializePfnBitmap();
 
     /* Initialize paged pool */
     MM::Allocator::InitializePagedPool();

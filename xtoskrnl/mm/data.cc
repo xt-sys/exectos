@@ -48,6 +48,9 @@ MMMEMORY_LAYOUT MM::Manager::MemoryLayout;
 /* Total number of PTEs reserved for system space mapping */
 PFN_NUMBER MM::Manager::NumberOfSystemPtes;
 
+/* Physical memory block descriptor */
+PPHYSICAL_MEMORY_DESCRIPTOR MM::Manager::PhysicalMemoryBlock;
+
 /* Instance of the page map routines for the current PML level */
 MM::PPAGEMAP MM::Paging::PmlRoutines;
 
@@ -90,6 +93,9 @@ PMMPFNLIST MM::Pfn::PageLocationList[] = {&ZeroedPagesList,
                                           &BadPagesList,
                                           NULLPTR,
                                           NULLPTR};
+
+/* Bitmap used to track physical pages */
+RTL_BITMAP MM::Pfn::PfnBitMap;
 
 /* List containing pages mapped as Read-Only (ROM) */
 MMPFNLIST MM::Pfn::RomPagesList = {0, StandbyPageList, MAXULONG_PTR, MAXULONG_PTR};
