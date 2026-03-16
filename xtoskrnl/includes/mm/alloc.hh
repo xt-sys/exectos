@@ -26,7 +26,17 @@ namespace MM
             STATIC XTAPI XTSTATUS AllocatePages(IN MMPOOL_TYPE PoolType,
                                                 IN SIZE_T Bytes,
                                                 OUT PVOID *Memory);
+            STATIC XTAPI XTSTATUS AllocatePool(IN MMPOOL_TYPE PoolType,
+                                               IN SIZE_T Bytes,
+                                               OUT PVOID *Memory);
+            STATIC XTAPI XTSTATUS AllocatePool(IN MMPOOL_TYPE PoolType,
+                                               IN SIZE_T Bytes,
+                                               OUT PVOID *Memory,
+                                               IN ULONG Tag);
             STATIC XTAPI XTSTATUS FreePages(IN PVOID VirtualAddress);
+            STATIC XTAPI XTSTATUS FreePool(IN PVOID VirtualAddress);
+            STATIC XTAPI XTSTATUS FreePool(IN PVOID VirtualAddress,
+                                           IN ULONG Tag);
             STATIC XTAPI VOID InitializeNonPagedPool(VOID);
             STATIC XTAPI VOID InitializePagedPool(VOID);
 

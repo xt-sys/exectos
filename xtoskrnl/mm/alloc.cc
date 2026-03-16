@@ -16,7 +16,7 @@
  *        Specifies the number of pages to allocate.
  *
  * @param Memory
- *        Supplies a pointer to the allocated pool.
+ *        Supplies a pointer to the allocated pool of pages.
  *
  * @return This routine returns a status code.
  *
@@ -189,7 +189,7 @@ MM::Allocator::AllocateNonPagedPoolPages(IN PFN_COUNT Pages,
  *        Specifies the number of pages to allocate.
  *
  * @param Memory
- *        Supplies a pointer to the allocated pool.
+ *        Supplies a pointer to the allocated pool of pages.
  *
  * @return This routine returns a status code.
  *
@@ -216,7 +216,7 @@ MM::Allocator::AllocatePagedPoolPages(IN PFN_COUNT Pages,
  *        Specifies the number of bytes to allocate.
  *
  * @param Memory
- *        Supplies a pointer to the allocated pool.
+ *        Supplies a pointer to the allocated pool of pages.
  *
  * @return This routine returns a status code.
  *
@@ -259,10 +259,68 @@ MM::Allocator::AllocatePages(IN MMPOOL_TYPE PoolType,
 }
 
 /**
+ * Allocates a block of memory from the specified pool type.
+ *
+ * @param PoolType
+ *        Specifies the type of pool to allocate from.
+ *
+ * @param Bytes
+ *        Specifies the number of bytes to allocate.
+ *
+ * @param Memory
+ *        Supplies a pointer to the allocated memory.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+MM::Allocator::AllocatePool(IN MMPOOL_TYPE PoolType,
+                            IN SIZE_T Bytes,
+                            OUT PVOID *Memory)
+{
+    /* Allocate pool */
+    return AllocatePool(PoolType, Bytes, Memory, SIGNATURE32('N', 'o', 'n', 'e'));
+}
+
+/**
+ * Allocates a block of memory from the specified pool type.
+ *
+ * @param PoolType
+ *        Specifies the type of pool to allocate from.
+ *
+ * @param Bytes
+ *        Specifies the number of bytes to allocate.
+ *
+ * @param Memory
+ *        Supplies a pointer to the allocated memory.
+ *
+ * @param Tag
+ *        Specifies the allocation identifying tag.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+MM::Allocator::AllocatePool(IN MMPOOL_TYPE PoolType,
+                            IN SIZE_T Bytes,
+                            OUT PVOID *Memory,
+                            IN ULONG Tag)
+{
+    UNIMPLEMENTED;
+
+    /* Allocate pages */
+    return AllocatePages(PoolType, Bytes, Memory);
+}
+
+/**
  * Frees a previously allocated block of pages from the non-paged pool.
  *
  * @param VirtualAddress
- *        Supplies the base virtual address of the non-paged pool allocation to free.
+ *        Supplies the base virtual address of the non-paged pool pages allocation to free.
  *
  * @return This routine returns a status code.
  *
@@ -445,7 +503,7 @@ MM::Allocator::FreeNonPagedPoolPages(IN PVOID VirtualAddress)
  * Frees a previously allocated block of pages from the paged pool.
  *
  * @param VirtualAddress
- *        Supplies the base virtual address of the paged pool allocation to free.
+ *        Supplies the base virtual address of the paged pool pages allocation to free.
  *
  * @return This routine returns a status code.
  *
@@ -465,7 +523,7 @@ MM::Allocator::FreePagedPoolPages(IN PVOID VirtualAddress)
  * Frees a previously allocated block of pages.
  *
  * @param VirtualAddress
- *        Supplies the base virtual address of the paged pool allocation to free.
+ *        Supplies the base virtual address of the pages allocation to free.
  *
  * @return This routine returns a status code.
  *
@@ -491,6 +549,48 @@ MM::Allocator::FreePages(IN PVOID VirtualAddress)
         /* Free pages from the non-paged pool */
         return FreeNonPagedPoolPages(VirtualAddress);
     }
+}
+
+/**
+ * Frees a previously allocated memory pool.
+ *
+ * @param VirtualAddress
+ *        Supplies the base virtual address of the pool allocation to free.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+MM::Allocator::FreePool(IN PVOID VirtualAddress)
+{
+    /* Free pool */
+    return FreePool(VirtualAddress, SIGNATURE32('N', 'o', 'n', 'e'));
+}
+
+/**
+ * Frees a previously allocated memory pool.
+ *
+ * @param VirtualAddress
+ *        Supplies the base virtual address of the pool allocation to free.
+ *
+ * @param Tag
+ *        Specifies the allocation identifying tag.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+MM::Allocator::FreePool(IN PVOID VirtualAddress,
+                        IN ULONG Tag)
+{
+    UNIMPLEMENTED;
+
+    /* Free pages */
+    return FreePages(VirtualAddress);
 }
 
 /**
