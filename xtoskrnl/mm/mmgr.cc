@@ -260,7 +260,7 @@ MM::Manager::InitializeMemoryManager(VOID)
     MM::Pte::InitializeSystemPteSpace();
 
     /* Initialize non-paged pool */
-    MM::Allocator::InitializeNonPagedPool();
+    MM::Pool::InitializeNonPagedPool();
 
     /* Initialize PFN database */
     MM::Pfn::InitializePfnDatabase();
@@ -269,7 +269,7 @@ MM::Manager::InitializeMemoryManager(VOID)
     MM::Pfn::InitializePfnBitmap();
 
     /* Initialize paged pool */
-    MM::Allocator::InitializePagedPool();
+    MM::Pool::InitializePagedPool();
 
     /* Flush TLB */
     AR::CpuFunc::FlushTlb();

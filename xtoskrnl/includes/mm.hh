@@ -22,5 +22,6 @@
 #include <mm/mmgr.hh>
 #include <mm/pfault.hh>
 #include <mm/pfn.hh>
+#include <mm/pool.hh>
 
 #endif /* __XTOSKRNL_MM_HH */

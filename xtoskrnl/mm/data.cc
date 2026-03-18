@@ -9,15 +9,6 @@
 #include <xtos.hh>
 
 
-/* PFN marking the initial non-paged pool end boundary */
-PFN_NUMBER MM::Allocator::NonPagedPoolFrameEnd;
-
-/* PFN marking the initial non-paged pool start boundary */
-PFN_NUMBER MM::Allocator::NonPagedPoolFrameStart;
-
-/* Array of non-paged pool free list heads */
-LIST_ENTRY MM::Allocator::NonPagedPoolFreeList[MM_MAX_FREE_PAGE_LIST_HEADS];
-
 /* Array of free page lists segregated by cache color */
 PMMCOLOR_TABLES MM::Colors::FreePages[FreePageList + 1];
 
@@ -105,6 +96,15 @@ MMPFNLIST MM::Pfn::StandbyPagesList = {0, StandbyPageList, MAXULONG_PTR, MAXULON
 
 /* List containing free physical pages that have been zeroed out */
 MMPFNLIST MM::Pfn::ZeroedPagesList = {0, ZeroedPageList, MAXULONG_PTR, MAXULONG_PTR};
+
+/* PFN marking the initial non-paged pool end boundary */
+PFN_NUMBER MM::Pool::NonPagedPoolFrameEnd;
+
+/* PFN marking the initial non-paged pool start boundary */
+PFN_NUMBER MM::Pool::NonPagedPoolFrameStart;
+
+/* Array of non-paged pool free list heads */
+LIST_ENTRY MM::Pool::NonPagedPoolFreeList[MM_MAX_FREE_PAGE_LIST_HEADS];
 
 /* Array of lists for available System PTEs, separated by pool type */
 MMPTE MM::Pte::FirstSystemFreePte[MaximumPtePoolTypes];

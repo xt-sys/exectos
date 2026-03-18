@@ -1,8 +1,8 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/mm/i686/alloc.cc
- * DESCRIPTION:     Memory manager pool allocation
+ * FILE:            xtoskrnl/mm/amd64/pool.cc
+ * DESCRIPTION:     AMD64 Memory Manager pool manager
  * DEVELOPERS:      Aiken Harris <harraiken91@gmail.com>
  */
 
@@ -18,14 +18,17 @@
  */
 XTAPI
 VOID
-MM::Allocator::MapNonPagedPool(VOID)
+MM::Pool::MapNonPagedPool(VOID)
 {
     PMMMEMORY_LAYOUT MemoryLayout;
 
     /* Retrieve memory layout */
     MemoryLayout = MM::Manager::GetMemoryLayout();
 
-    /* Map PDE and PTE for the base of the non-paged pool */
-    MM::Pte::MapPDE(MemoryLayout->NonPagedPoolStart, (PCHAR)MemoryLayout->NonPagedPoolEnd - 1, MM::Pte::GetValidPte());
+    /* Map PPE and PDE for whole non-paged pool */
+    MM::Pte::MapPPE(MemoryLayout->NonPagedPoolStart, MemoryLayout->NonPagedExpansionPoolEnd, MM::Pte::GetValidPte());
+    MM::Pte::MapPDE(MemoryLayout->NonPagedPoolStart, MemoryLayout->NonPagedExpansionPoolEnd, MM::Pte::GetValidPte());
+
+    /* Map PTE only for the base of the non-paged pool */
     MM::Pte::MapPTE(MemoryLayout->NonPagedPoolStart, (PCHAR)MemoryLayout->NonPagedPoolEnd - 1, MM::Pte::GetValidPte());
 }

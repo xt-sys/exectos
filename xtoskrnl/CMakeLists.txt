@@ -51,12 +51,12 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/ke/spinlock.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/sysres.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/timer.cc
-    ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/alloc.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/mmgr.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/pagemap.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/paging.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/pfault.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/pfn.cc
+    ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/pool.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/pte.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/alloc.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/colors.cc
@@ -66,6 +66,7 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/mm/mmgr.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/paging.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/pfn.cc
+    ${XTOSKRNL_SOURCE_DIR}/mm/pool.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/pte.cc
     ${XTOSKRNL_SOURCE_DIR}/po/idle.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/${ARCH}/dispatch.cc
