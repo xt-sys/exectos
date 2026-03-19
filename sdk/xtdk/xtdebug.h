@@ -9,6 +9,8 @@
 #ifndef __XTDK_XTDEBUG_H
 #define __XTDK_XTDEBUG_H
 
+#include <xtcompat.h>
+
 
 /* Debugging macros */
 #define CHECKPOINT                      DebugPrint(L"Checkpoint reached at %s:%d\n", __RELFILE__, __LINE__);
@@ -23,7 +25,7 @@
     #define DebugPrint(Format, ...)     DbgPrint(Format, __VA_ARGS__);
 #else
     #define DEBUG                       0
-    #define DebugPrint(Format, ...)     ((VOID)NULLPTR)
+    #define DebugPrint(Format, ...)     ((VOID)NULL)
 #endif
 
 #endif /* __XTDK_XTDEBUG_H */
