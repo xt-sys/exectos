@@ -23,7 +23,7 @@
     #define DebugPrint(Format, ...)     DbgPrint(Format, __VA_ARGS__);
 #else
     #define DEBUG                       0
-    #define DebugPrint(Format, ...)     ((VOID)NULL)
+    #define DebugPrint(Format, ...)     ((VOID)NULLPTR)
 #endif
 
 #endif /* __XTDK_XTDEBUG_H */
