@@ -17,6 +17,7 @@
 
 #include <mm/alloc.hh>
 #include <mm/colors.hh>
+#include <mm/guard.hh>
 #include <mm/hlpool.hh>
 #include <mm/kpool.hh>
 #include <mm/mmgr.hh>
