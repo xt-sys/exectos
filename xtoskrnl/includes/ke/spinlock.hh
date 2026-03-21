@@ -69,17 +69,18 @@ namespace KE
     class SpinLockGuard
     {
         private:
-            PKSPIN_LOCK SpinLock;
+            PKSPIN_LOCK Lock;
 
         public:
             SpinLockGuard(IN OUT PKSPIN_LOCK SpinLock)
             {
-                KE::SpinLock::AcquireSpinLock(SpinLock);
+                Lock = SpinLock;
+                KE::SpinLock::AcquireSpinLock(Lock);
             }
 
             ~SpinLockGuard()
             {
-                KE::SpinLock::ReleaseSpinLock(SpinLock);
+                KE::SpinLock::ReleaseSpinLock(Lock);
             }
 
             SpinLockGuard(const SpinLockGuard&) = delete;
