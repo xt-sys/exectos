@@ -44,7 +44,7 @@ MM::Allocator::AllocateNonPagedPoolPages(IN PFN_COUNT Pages,
 
     /* Start a guarded code block */
     {
-        /* Acquire the Non-Paged pool lock and raise runlevel to DISPATCH_LEVEL */
+        /* Acquire the Non-Paged pool lock and raise runlevel to DISPATCH level */
         KE::RaiseRunLevel RunLevel(DISPATCH_LEVEL);
         KE::QueuedSpinLockGuard NonPagedPoolSpinLock(NonPagedPoolLock);
 
@@ -80,10 +80,10 @@ MM::Allocator::AllocateNonPagedPoolPages(IN PFN_COUNT Pages,
                         RTL::LinkedList::InsertTailList(&NonPagedPoolFreeList[Index], &FreePage->List);
                     }
 
-                    /* Get the Page Table Entry (PTE) for the allocated address */
+                    /* Get the PTE for the allocated address */
                     PointerPte = MM::Paging::GetPteAddress(BaseAddress);
 
-                    /* Get the Page Frame Number (PFN) database entry for the corresponding physical page */
+                    /* Get the PFN database entry for the corresponding physical page */
                     Pfn = MM::Pfn::GetPfnEntry(MM::Paging::GetPageFrameNumber(PointerPte));
 
                     /* Denote allocation boundaries */
@@ -122,7 +122,7 @@ MM::Allocator::AllocateNonPagedPoolPages(IN PFN_COUNT Pages,
         return STATUS_INSUFFICIENT_RESOURCES;
     }
 
-    /* Acquire the Non-Paged pool lock and raise runlevel to DISPATCH_LEVEL */
+    /* Acquire the Non-Paged pool lock and raise runlevel to DISPATCH level */
     KE::RaiseRunLevel RunLevel(DISPATCH_LEVEL);
     KE::QueuedSpinLockGuard NonPagedPoolSpinLock(NonPagedPoolLock);
 
@@ -310,7 +310,11 @@ MM::Allocator::AllocatePool(IN MMPOOL_TYPE PoolType,
                             OUT PVOID *Memory,
                             IN ULONG Tag)
 {
-    UNIMPLEMENTED;
+    PPOOL_HEADER PoolEntry, NextPoolEntry, PoolRemainder;
+    PPOOL_DESCRIPTOR PoolDescriptor;
+    USHORT BlockSize, Index;
+    PLIST_ENTRY ListHead;
+    XTSTATUS Status;
 
     /* Verify run level for the specified pool */
     VerifyRunLevel(PoolType, Bytes, NULLPTR);
@@ -322,8 +326,364 @@ MM::Allocator::AllocatePool(IN MMPOOL_TYPE PoolType,
         Bytes = 1;
     }
 
-    /* Allocate pages */
-    return AllocatePages(PoolType, Bytes, Memory);
+    /* Retrieve the specific pool descriptor based on the masked pool type */
+    PoolDescriptor = PoolVector[PoolType & MM_POOL_TYPE_MASK];
+
+    /* Determine if the requested size exceeds the maximum standard pool block capacity */
+    if(Bytes > (MM_PAGE_SIZE - (sizeof(POOL_HEADER) + MM_POOL_BLOCK_SIZE)))
+    {
+        /* Allocate new, raw pages directly to satisfy the large allocation request */
+        Status = AllocatePages(PoolType, Bytes, (PVOID*)&PoolEntry);
+        if(Status != STATUS_SUCCESS || !PoolEntry)
+        {
+            /* Allocation failed, clear the output pointer and return the error status */
+            *Memory = NULLPTR;
+            return Status;
+        }
+
+        /* Update the pool descriptor statistical counters */
+        RTL::Atomic::ExchangeAdd32((PLONG)&PoolDescriptor->TotalBigAllocations, (LONG)SIZE_TO_PAGES(Bytes));
+        RTL::Atomic::ExchangeAdd64((PLONG_PTR)&PoolDescriptor->TotalBytes, (LONG_PTR)Bytes);
+        RTL::Atomic::Increment32((PLONG)&PoolDescriptor->RunningAllocations);
+
+        /* Attempt to register the big allocation within the tracking table */
+        if(!RegisterBigAllocationTag(PoolEntry, Tag, (ULONG)SIZE_TO_PAGES(Bytes), PoolType))
+        {
+            /* Fallback to a default tag */
+            Tag = SIGNATURE32('B', 'i', 'g', 'A');
+        }
+
+        /* Supply the allocated address and return success */
+        *Memory = PoolEntry;
+        return STATUS_SUCCESS;
+    }
+
+    /* Calculate the required block index */
+    Index = (USHORT)((Bytes + sizeof(POOL_HEADER) + (MM_POOL_BLOCK_SIZE - 1)) / MM_POOL_BLOCK_SIZE);
+
+    /* Resolve the appropriate list head for the calculated block index */
+    ListHead = &PoolDescriptor->ListHeads[Index];
+    while(ListHead != &PoolDescriptor->ListHeads[MM_POOL_LISTS_PER_PAGE])
+    {
+        /* Check whether the target free list contains available blocks */
+        if(!PoolListEmpty(ListHead))
+        {
+            /* Start a guarded code block */
+            {
+                /* Acquire the pool lock */
+                PoolLockGuard PoolLock((MMPOOL_TYPE)(PoolDescriptor->PoolType & MM_POOL_TYPE_MASK));
+
+                /* Re-evaluate the list emptiness to prevent race conditions */
+                if(PoolListEmpty(ListHead))
+                {
+                    /* Proceed to evaluate the next list head */
+                    continue;
+                }
+
+                /* Validate the structural integrity of the pool list */
+                VerifyPoolLinks(ListHead);
+
+                /* Extract the first available free block from the list and resolve its header */
+                PoolEntry = GetPoolEntry(RemovePoolHeadList(ListHead));
+
+                /* Re-validate the pool list and verify integrity of the extracted block */
+                VerifyPoolLinks(ListHead);
+                VerifyPoolBlocks(PoolEntry);
+
+                /* Check whether the extracted block requires splitting */
+                if(PoolEntry->BlockSize != Index)
+                {
+                    /* Check if the block is located at the absolute beginning of a page */
+                    if(PoolEntry->PreviousSize == 0)
+                    {
+                        /* Split the block and initialize the remainder */
+                        PoolRemainder = GetPoolBlock(PoolEntry, Index);
+                        PoolRemainder->BlockSize = PoolEntry->BlockSize - Index;
+                        PoolRemainder->PreviousSize = Index;
+
+                        /* Resolve the subsequent block and update its previous size field */
+                        NextPoolEntry = GetPoolNextBlock(PoolRemainder);
+                        if(PAGE_ALIGN(NextPoolEntry) != NextPoolEntry)
+                        {
+                            /* Adjust the adjacent block to reflect the new size of the remainder */
+                            NextPoolEntry->PreviousSize = PoolRemainder->BlockSize;
+                        }
+                    }
+                    else
+                    {
+                        /* Split the extracted block */
+                        PoolRemainder = PoolEntry;
+                        PoolEntry->BlockSize -= Index;
+
+                        /* Advance the pointer to the new block and update its previous size */
+                        PoolEntry = GetPoolNextBlock(PoolEntry);
+                        PoolEntry->PreviousSize = PoolRemainder->BlockSize;
+
+                        /* Resolve the adjacent next block and adjust its previous size */
+                        NextPoolEntry = GetPoolBlock(PoolEntry, Index);
+                        if(PAGE_ALIGN(NextPoolEntry) != NextPoolEntry)
+                        {
+                            /* Adjust the adjacent block */
+                            NextPoolEntry->PreviousSize = Index;
+                        }
+                    }
+
+                    /* Finalize the structural sizing fields */
+                    BlockSize = PoolRemainder->BlockSize;
+                    PoolEntry->BlockSize = Index;
+                    PoolRemainder->PoolType = 0;
+
+                    /* Validate the target free list */
+                    VerifyPoolLinks(&PoolDescriptor->ListHeads[BlockSize - 1]);
+
+                    /* Ensure the remainder block is large enough to contain valid list */
+                    if(BlockSize != 1)
+                    {
+                        /* Insert the new remainder block into the appropriate free list and verify links */
+                        InsertPoolTailList(&PoolDescriptor->ListHeads[BlockSize - 1], GetPoolFreeBlock(PoolRemainder));
+                        VerifyPoolLinks(GetPoolFreeBlock(PoolRemainder));
+                    }
+                }
+
+                /* Update the active pool type and verify structural invariants */
+                PoolEntry->PoolType = PoolType + 1;
+                VerifyPoolBlocks(PoolEntry);
+            }
+
+            /* Update the pool descriptor statistical counters */
+            RTL::Atomic::ExchangeAdd64((PLONG_PTR)&PoolDescriptor->TotalBytes, (LONG_PTR)(PoolEntry->BlockSize * MM_POOL_BLOCK_SIZE));
+            RTL::Atomic::Increment32((PLONG)&PoolDescriptor->RunningAllocations);
+
+            /* Assign the specified identification tag */
+            PoolEntry->PoolTag = Tag;
+
+            /* Clear the internal list links */
+            (GetPoolFreeBlock(PoolEntry))->Flink = NULLPTR;
+            (GetPoolFreeBlock(PoolEntry))->Blink = NULLPTR;
+
+            /* Supply the allocated address and return success */
+            *Memory = GetPoolFreeBlock(PoolEntry);
+            return STATUS_SUCCESS;
+        }
+
+        /* Advance to the next list head */
+        ListHead++;
+    }
+
+    /* Allocate a new page to fulfill the request */
+    Status = AllocatePages(PoolType, MM_PAGE_SIZE, (PVOID *)&PoolEntry);
+    if(Status != STATUS_SUCCESS || !PoolEntry)
+    {
+        /* Allocation failed, clear the output pointer and return the error status */
+        *Memory = NULLPTR;
+        return Status;
+    }
+
+    /* Initialize the structural header */
+    PoolEntry->Long = 0;
+    PoolEntry->BlockSize = Index;
+    PoolEntry->PoolType = PoolType + 1;
+
+    /* Calculate the block size of the remaining unused space */
+    BlockSize = (MM_PAGE_SIZE / MM_POOL_BLOCK_SIZE) - Index;
+
+    /* Initialize the remainder entry representing the free space */
+    PoolRemainder = GetPoolBlock(PoolEntry, Index);
+    PoolRemainder->Long = 0;
+    PoolRemainder->BlockSize = BlockSize;
+    PoolRemainder->PreviousSize = Index;
+
+    /* Update the pool descriptor statistical counters */
+    RTL::Atomic::Increment32((PLONG)&PoolDescriptor->TotalPages);
+    RTL::Atomic::ExchangeAdd64((PLONG_PTR)&PoolDescriptor->TotalBytes, (LONG_PTR)(PoolEntry->BlockSize * MM_POOL_BLOCK_SIZE));
+
+    /* Check if the remainder block is large enough */
+    if(PoolRemainder->BlockSize != 1)
+    {
+        /* Acquire the pool lock */
+        PoolLockGuard PoolLock((MMPOOL_TYPE)(PoolDescriptor->PoolType & MM_POOL_TYPE_MASK));
+
+        /* Validate the target free list structure */
+        VerifyPoolLinks(&PoolDescriptor->ListHeads[BlockSize - 1]);
+
+        /* Insert the remainder block into the free list */
+        InsertPoolTailList(&PoolDescriptor->ListHeads[BlockSize - 1], GetPoolFreeBlock(PoolRemainder));
+
+        /* Verify the structural integrity of the remainder and the allocated blocks */
+        VerifyPoolLinks(GetPoolFreeBlock(PoolRemainder));
+        VerifyPoolBlocks(PoolEntry);
+    }
+    else
+    {
+        /* Verify the allocated block invariants */
+        VerifyPoolBlocks(PoolEntry);
+    }
+
+    /* Increment the running allocation counter for the pool descriptor */
+    RTL::Atomic::Increment32((PLONG)&PoolDescriptor->RunningAllocations);
+
+    /* Perform a final structural validation of the pool block */
+    VerifyPoolBlocks(PoolEntry);
+
+    /* Apply the requested identification tag */
+    PoolEntry->PoolTag = Tag;
+
+    /* Supply the allocated address and return success */
+    *Memory = GetPoolFreeBlock(PoolEntry);
+    return STATUS_SUCCESS;
+}
+
+/**
+ * Computes a hash for a given virtual address to be used in the big allocation tracker.
+ *
+ * @param VirtualAddress
+ *        Supplies the base virtual address to be hashed.
+ *
+ * @return This routine returns the computed partial hash value.
+ *
+ * @since XT 1.0
+ */
+XTINLINE
+ULONG
+MM::Allocator::ComputeHash(IN PVOID VirtualAddress)
+{
+    ULONG Result;
+
+    /* Transform the virtual address into a page frame number representation */
+    Result = (ULONG)((ULONG_PTR)VirtualAddress >> MM_PAGE_SHIFT);
+
+    /* Fold the page number bits using XOR to distribute the entropy across the lower bits */
+    return (Result >> 24) ^ (Result >> 16) ^ (Result >> 8) ^ Result;
+}
+
+/**
+ * Expands the big allocation tracking table to accommodate additional large allocations.
+ *
+ * @return This routine returns TRUE if the table was successfully expanded, FALSE otherwise.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+BOOLEAN
+MM::Allocator::ExpandBigAllocationsTable(VOID)
+{
+    PPOOL_TRACKER_BIG_ALLOCATIONS NewTable, OldTable;
+    SIZE_T AllocationBytes, OldSize, NewSize;
+    ULONG Hash, HashMask, Index;
+    XTSTATUS Status;
+    BOOLEAN Abort;
+
+    /* Initialize the abort flag and snapshot current table capacity */
+    Abort = FALSE;
+    OldSize = BigAllocationsTableSize;
+
+    /* Check if doubling the size would cause an integer overflow */
+    if(OldSize > ((~(SIZE_T)0) / 2))
+    {
+        /* Abort expansion to prevent integer wrap-around */
+        return FALSE;
+    }
+
+    /* Calculate the target capacity by safely doubling table capacity */
+    NewSize = OldSize * 2;
+
+    /* Ensure the new capacity does not result in fractional memory pages */
+    NewSize = ROUND_DOWN(NewSize, MM_PAGE_SIZE / sizeof(POOL_TRACKER_BIG_ALLOCATIONS));
+
+    /* Check if calculating the total byte size would cause an integer overflow */
+    if(NewSize > ((~(SIZE_T)0) / sizeof(POOL_TRACKER_BIG_ALLOCATIONS)))
+    {
+        /* Abort expansion to prevent allocating a truncated memory block */
+        return FALSE;
+    }
+
+    /* Compute the size required for the newly expanded tracking table */
+    AllocationBytes = NewSize * sizeof(POOL_TRACKER_BIG_ALLOCATIONS);
+
+    /* Allocate the required memory */
+    Status = AllocatePages(NonPagedPool, AllocationBytes, (PVOID*)&NewTable);
+    if(Status != STATUS_SUCCESS || !NewTable)
+    {
+        /* Memory allocation failed, abort the table expansion */
+        return FALSE;
+    }
+
+    /* Zero the newly allocated table */
+    RTL::Memory::ZeroMemory(NewTable, AllocationBytes);
+
+    /* Iterate through the allocated memory block */
+    for(Index = 0; Index < NewSize; Index++)
+    {
+        /* Mark the tracking entry as free and available */
+        NewTable[Index].VirtualAddress = (PVOID)MM_POOL_BIG_ALLOCATIONS_ENTRY_FREE;
+    }
+
+    /* Start a guarded code block */
+    {
+        /* Acquire the table lock and raise runlevel to DISPATCH level */
+        KE::RaiseRunLevel RunLevel(DISPATCH_LEVEL);
+        KE::SpinLockGuard BigAllocationsLock(&BigAllocationsTableLock);
+
+        /* Verify if another thread has already expanded the table concurrently */
+        if(BigAllocationsTableSize >= NewSize)
+        {
+            /* Another thread has already expanded the table, discard changes */
+            Abort = TRUE;
+        }
+        else
+        {
+            /* Cache the legacy table pointer and calculate new hash mask */
+            HashMask = NewSize - 1;
+            OldTable = BigAllocationsTable;
+
+            /* Rehash and migrate all active entries from the old table */
+            for(Index = 0; Index < OldSize; Index++)
+            {
+                /* Bypass unallocated entries in the legacy table */
+                if((ULONG_PTR)OldTable[Index].VirtualAddress & MM_POOL_BIG_ALLOCATIONS_ENTRY_FREE)
+                {
+                    /* Skip to the next entry */
+                    continue;
+                }
+
+                /* Compute the updated hash index */
+                Hash = ComputeHash(OldTable[Index].VirtualAddress) & HashMask;
+
+                /* Resolve hash collisions using linear probing */
+                while(!((ULONG_PTR)NewTable[Hash].VirtualAddress & MM_POOL_BIG_ALLOCATIONS_ENTRY_FREE))
+                {
+                    /* Advance the bucket index and check for table boundary overflow */
+                    if(++Hash == NewSize)
+                    {
+                        /* Wrap the probing index back to the beginning */
+                        Hash = 0;
+                    }
+                }
+
+                /* Migrate the active entry to its new hash bucket */
+                NewTable[Hash] = OldTable[Index];
+            }
+
+            /* Activate the newly populated table globally */
+            BigAllocationsTable = NewTable;
+            BigAllocationsTableHash = NewSize - 1;
+            BigAllocationsTableSize = NewSize;
+        }
+    }
+
+    /* Check if another thread has already expanded the table concurrently */
+    if(Abort)
+    {
+        /* Free memory allocated for the new table and return */
+        FreePages(NewTable);
+        return TRUE;
+    }
+
+    /* Free memory allocated for the legacy table */
+    FreePages(OldTable);
+
+    /* Return success */
+    return TRUE;
 }
 
 /**
@@ -383,7 +743,7 @@ MM::Allocator::FreeNonPagedPoolPages(IN PVOID VirtualAddress,
     /* Save the total free page count */
     FreePages = Pages;
 
-    /* Acquire the Non-Paged pool lock and raise runlevel to DISPATCH_LEVEL */
+    /* Acquire the Non-Paged pool lock and raise runlevel to DISPATCH level */
     KE::RaiseRunLevel RunLevel(DISPATCH_LEVEL);
     KE::QueuedSpinLockGuard NonPagedPoolSpinLock(NonPagedPoolLock);
 
@@ -633,8 +993,505 @@ XTSTATUS
 MM::Allocator::FreePool(IN PVOID VirtualAddress,
                         IN ULONG Tag)
 {
+    PPOOL_HEADER PoolEntry, NextPoolEntry;
+    PFN_NUMBER PageCount, RealPageCount;
+    PPOOL_DESCRIPTOR PoolDescriptor;
+    MMPOOL_TYPE PoolType;
+    USHORT BlockSize;
+    BOOLEAN Combined;
+    XTSTATUS Status;
+
+    /* Determine if the allocation is page-aligned */
+    if(PAGE_ALIGN(VirtualAddress) == VirtualAddress)
+    {
+        /* Determine and the memory pool type from the VA mapping */
+        PoolType = DeterminePoolType(VirtualAddress);
+
+        /* Verify run level for the specified pool */
+        VerifyRunLevel(PoolType, 0, VirtualAddress);
+
+        /* Retrieve original metadata while removing the allocation from the tracking table */
+        Tag = UnregisterBigAllocationTag(VirtualAddress, &PageCount, PoolType);
+        if(!Tag)
+        {
+            /* Fallback to a default tag */
+            Tag = SIGNATURE32('B', 'i', 'g', 'A');
+            PageCount = 1;
+        }
+
+        /* Retrieve the specific pool descriptor based on the masked pool type */
+        PoolDescriptor = PoolVector[PoolType];
+
+        /* Update the pool descriptor statistical counters */
+        RTL::Atomic::Increment32((PLONG)&PoolDescriptor->RunningFrees);
+        RTL::Atomic::ExchangeAdd64((PLONG_PTR)&PoolDescriptor->TotalBytes, -(LONG_PTR)(PageCount << MM_PAGE_SHIFT));
+
+        /* Release the underlying physical pages */
+        Status = FreePages(VirtualAddress, &RealPageCount);
+        if(Status == STATUS_SUCCESS)
+        {
+            /* Adjust the big allocation counter */
+            RTL::Atomic::ExchangeAdd32((PLONG)&PoolDescriptor->TotalBigAllocations, -(LONG)RealPageCount);
+        }
+
+        /* Return status code */
+        return Status;
+    }
+
+    /* Resolve the pool header */
+    PoolEntry = (PPOOL_HEADER)VirtualAddress;
+    PoolEntry--;
+
+    /* Extract the structural block size from the pool header */
+    BlockSize = PoolEntry->BlockSize;
+
+    /* Determine the underlying pool type and resolve its corresponding pool descriptor */
+    PoolType = (MMPOOL_TYPE)((PoolEntry->PoolType - 1) & MM_POOL_TYPE_MASK);
+    PoolDescriptor = PoolVector[PoolType];
+
+    /* Verify run level for the specified pool */
+    VerifyRunLevel(PoolType, 0, VirtualAddress);
+
+    /* Extract the allocation identifying tag and initialize the consolidation flag */
+    Tag = PoolEntry->PoolTag;
+    Combined = FALSE;
+
+    /* Locate the adjacent forward pool block */
+    NextPoolEntry = GetPoolBlock(PoolEntry, BlockSize);
+
+    /* Update the pool descriptor statistical counters */
+    RTL::Atomic::Increment32((PLONG)&PoolDescriptor->RunningFrees);
+    RTL::Atomic::ExchangeAdd64((PLONG_PTR)&PoolDescriptor->TotalBytes, (LONG_PTR)(-BlockSize * MM_POOL_BLOCK_SIZE));
+
+    /* Acquire the pool lock */
+    PoolLockGuard PoolLock((MMPOOL_TYPE)(PoolDescriptor->PoolType & MM_POOL_TYPE_MASK));
+
+    /* Validate the structural integrity of the base block */
+    VerifyPoolBlocks(PoolEntry);
+
+    /* Ensure the adjacent forward block does not cross a page boundary */
+    if(PAGE_ALIGN(NextPoolEntry) != NextPoolEntry)
+    {
+        /* Check if the adjacent forward block is currently marked as free */
+        if(NextPoolEntry->PoolType == 0)
+        {
+            /* Flag the deallocation as having triggered a forward block merge */
+            Combined = TRUE;
+
+            /* Check if the forward block is large enough */
+            if(NextPoolEntry->BlockSize != 1)
+            {
+                /* Validate the list links */
+                VerifyPoolLinks(GetPoolFreeBlock(NextPoolEntry));
+
+                /* Unlink the forward block from its respective free list */
+                RemovePoolEntryList(GetPoolFreeBlock(NextPoolEntry));
+
+                /* Re-validate the surrounding list links */
+                VerifyPoolLinks(DecodePoolLink((GetPoolFreeBlock(NextPoolEntry))->Flink));
+                VerifyPoolLinks(DecodePoolLink((GetPoolFreeBlock(NextPoolEntry))->Blink));
+            }
+
+            /* Expand the size of the current block to include the forward free block */
+            PoolEntry->BlockSize += NextPoolEntry->BlockSize;
+        }
+    }
+
+    /* Check if a valid adjacent backward block exists */
+    if(PoolEntry->PreviousSize)
+    {
+        /* Resolve the adjacent backward block and check if it is free */
+        NextPoolEntry = GetPoolPreviousBlock(PoolEntry);
+        if(NextPoolEntry->PoolType == 0)
+        {
+            /* Flag the deallocation as having triggered a backward block merge */
+            Combined = TRUE;
+
+            /* Check if the backward free block contains embedded list links */
+            if(NextPoolEntry->BlockSize != 1)
+            {
+                /* Validate the backward block list links */
+                VerifyPoolLinks(GetPoolFreeBlock(NextPoolEntry));
+
+                /* Extract the backward block from the free list */
+                RemovePoolEntryList(GetPoolFreeBlock(NextPoolEntry));
+
+                /* Re-validate the adjacent free list */
+                VerifyPoolLinks(DecodePoolLink((GetPoolFreeBlock(NextPoolEntry))->Flink));
+                VerifyPoolLinks(DecodePoolLink((GetPoolFreeBlock(NextPoolEntry))->Blink));
+            }
+
+            /* Expand the backward block to include the freed base block */
+            NextPoolEntry->BlockSize += PoolEntry->BlockSize;
+
+            /* Shift the base entry pointer */
+            PoolEntry = NextPoolEntry;
+        }
+    }
+
+    /* Check whether the consolidated block spans an entire page */
+    if((PAGE_ALIGN(PoolEntry) == PoolEntry) &&
+       (PAGE_ALIGN(GetPoolNextBlock(PoolEntry)) == GetPoolNextBlock(PoolEntry)))
+    {
+        /* Release the pool lock */
+        PoolLock.Release();
+
+        /* Decrement the total page count and return the entire page back */
+        RTL::Atomic::ExchangeAdd32((PLONG)&PoolDescriptor->TotalPages, -1);
+        return FreePages(PoolEntry);
+    }
+
+    /* Finalize the consolidated block size and mark the primary header as free */
+    BlockSize = PoolEntry->BlockSize;
+    PoolEntry->PoolType = 0;
+
+    /* Check if any coalescing occurred */
+    if(Combined)
+    {
+        /* Resolve the new adjacent forward block and verify it resides on the same page */
+        NextPoolEntry = GetPoolNextBlock(PoolEntry);
+        if(PAGE_ALIGN(NextPoolEntry) != NextPoolEntry)
+        {
+            /* Adjust the backward reference of the forward block */
+            NextPoolEntry->PreviousSize = BlockSize;
+        }
+    }
+
+    /* Insert the freed and consolidated block into the pool free list */
+    InsertPoolHeadList(&PoolDescriptor->ListHeads[BlockSize - 1], GetPoolFreeBlock(PoolEntry));
+
+    /* Perform a final linkvalidation and return success */
+    VerifyPoolLinks(GetPoolFreeBlock(PoolEntry));
+    return STATUS_SUCCESS;
+}
+
+/**
+ * Initializes the big allocations tracking table during early system boot.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::Allocator::InitializeBigAllocationsTable(VOID)
+{
+    SIZE_T TableSize;
+    ULONG Index;
+    XTSTATUS Status;
+    PMMMEMORY_LAYOUT MemoryLayout;
+
+    /* Not fully implemented yet, HIVE support needed */
     UNIMPLEMENTED;
 
-    /* Free pages */
-    return FreePages(VirtualAddress);
+    /* Retrieve memory layout */
+    MemoryLayout = MM::Manager::GetMemoryLayout();
+
+    /* TODO: Retrieve initial big allocation table size from the HIVE */
+    BigAllocationsTableSize = 0;
+
+    /* Calculate the target table size */
+    TableSize = MIN(BigAllocationsTableSize, (MemoryLayout->NonPagedPoolSize * MM_PAGE_SIZE) >> 12);
+
+    /* Perform a bit-scan to determine the highest set bit */
+    for(Index = 0; Index < 32; Index++)
+    {
+        /* Check if the lowest bit is currently set */
+        if(TableSize & 1)
+        {
+            /* Verify if this is the only remaining set bit */
+            if(!(TableSize & ~1))
+            {
+                /* Exit the loop as the highest bit has been found */
+                break;
+            }
+        }
+
+        /* Shift the size down by one bit to evaluate higher bits */
+        TableSize >>= 1;
+    }
+
+    /* Check if the bit-scan completed without finding any set bits */
+    if(Index == 32)
+    {
+        /* Apply the default size of 4096 entries */
+        BigAllocationsTableSize = 4096;
+    }
+    else
+    {
+        /* Calculate the aligned power of two size, enforcing a minimum of 64 entries */
+        BigAllocationsTableSize = MAX(1 << Index, 64);
+    }
+
+    /* Iteratively attempt to allocate the tracking table */
+    while(TRUE)
+    {
+        /* Prevent integer overflow when calculating the required byte size for the table */
+        if((BigAllocationsTableSize + 1) > (MAXULONG_PTR / sizeof(POOL_TRACKER_BIG_ALLOCATIONS)))
+        {
+            /* Halve the requested entry count and restart the evaluation */
+            BigAllocationsTableSize >>= 1;
+            continue;
+        }
+
+        /* Attempt to allocate physical memory for the table */
+        Status = AllocatePages(NonPagedPool,
+                               BigAllocationsTableSize * sizeof(POOL_TRACKER_BIG_ALLOCATIONS),
+                               (PVOID*)&BigAllocationsTable);
+
+        /* Check if the allocation succeeded */
+        if(Status != STATUS_SUCCESS || !BigAllocationsTable)
+        {
+            /* Check if the allocation failed duefor a single entry */
+            if(BigAllocationsTableSize == 1)
+            {
+                /* Failed to initialize the pool tracker, kernel panic */
+                KE::Crash::Panic(0x41, TableSize, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF);
+            }
+
+            /* Halve the requested entry count */
+            BigAllocationsTableSize >>= 1;
+        }
+        else
+        {
+            /* Allocation succeeded */
+            break;
+        }
+    }
+
+    /* Zero the entire memory used by the table */
+    RtlZeroMemory(BigAllocationsTable, BigAllocationsTableSize * sizeof(POOL_TRACKER_BIG_ALLOCATIONS));
+
+    /* Iterate through the newly allocated table */
+    for(Index = 0; Index < BigAllocationsTableSize; Index++)
+    {
+        /* Mark the individual pool tracker entry as free and available */
+        BigAllocationsTable[Index].VirtualAddress = (PVOID)MM_POOL_BIG_ALLOCATIONS_ENTRY_FREE;
+    }
+
+    /* Calculate and store the hash mask */
+    BigAllocationsTableHash = BigAllocationsTableSize - 1;
+
+    /* Initialize the spinlock used to synchronize concurrent modifications to the tracking table */
+    KE::SpinLock::InitializeSpinLock(&BigAllocationsTableLock);
+}
+
+/**
+ * Registers a big allocation within the tracking table.
+ *
+ * @param VirtualAddress
+ *        Supplies the virtual address of the big allocation.
+ *
+ * @param Key
+ *        Supplies the key used to identify the allocation.
+ *
+ * @param NumberOfPages
+ *        Supplies the number of physical pages backing the allocation.
+ *
+ * @param PoolType
+ *        Specifies the type of pool from which the memory was allocated.
+ *
+ * @return This routine returns TRUE on successful insertion, FALSE otherwise.
+ *
+ * @since XT 1.0
+ */
+BOOLEAN
+XTAPI
+MM::Allocator::RegisterBigAllocationTag(IN PVOID VirtualAddress,
+                                        IN ULONG Key,
+                                        IN ULONG NumberOfPages,
+                                        IN MMPOOL_TYPE PoolType)
+{
+    PPOOL_TRACKER_BIG_ALLOCATIONS Entry;
+    BOOLEAN Inserted, RequiresExpansion;
+    ULONG Hash, StartHash;
+
+    /* Wrap the insertion logic in a retry loop */
+    while(TRUE)
+    {
+        /* Initialize local variables */
+        Inserted = FALSE;
+        RequiresExpansion = FALSE;
+
+        /* Calculate the initial hash bucket index */
+        Hash = ComputeHash(VirtualAddress);
+
+        /* Start a guarded code block */
+        {
+            /* Acquire the table lock and raise runlevel to DISPATCH level */
+            KE::RaiseRunLevel RunLevel(DISPATCH_LEVEL);
+            KE::SpinLockGuard BigAllocationsLock(&BigAllocationsTableLock);
+
+            /* Retrieve the tracker entry */
+            Hash &= BigAllocationsTableHash;
+            StartHash = Hash;
+
+            /* Traverse the hash table */
+            do
+            {
+                /* Retrieve the tracker entry */
+                Entry = &BigAllocationsTable[Hash];
+
+                /* Check if the current bucket is marked as free */
+                if((ULONG_PTR)Entry->VirtualAddress & MM_POOL_BIG_ALLOCATIONS_ENTRY_FREE)
+                {
+                    /* Populate the available bucket with the allocation metadata */
+                    Entry->Key = Key;
+                    Entry->NumberOfPages = NumberOfPages;
+                    Entry->VirtualAddress = VirtualAddress;
+
+                    /* Increment the global usage counter */
+                    BigAllocationsInUse++;
+
+                    /* Determine if the table capacity has reached the critical 75% threshold */
+                    if(BigAllocationsInUse > (BigAllocationsTableSize * 3 / 4))
+                    {
+                        /* Flag the table for expansion */
+                        RequiresExpansion = TRUE;
+                    }
+
+                    /* Mark insertion as successful and break out of the probing loop */
+                    Inserted = TRUE;
+                    break;
+                }
+
+                /* Advance to the next bucket */
+                if(++Hash >= BigAllocationsTableSize)
+                {
+                    /* Wrap the index back to the beginning of the table */
+                    Hash = 0;
+                }
+
+                /* If the traversal has wrapped entirely back to the starting index, the table is saturated */
+                if(Hash == StartHash)
+                {
+                    /* Break out of the probing loop */
+                    break;
+                }
+            }
+            while(Hash != StartHash);
+        }
+
+        /* Check if the insertion succeeded */
+        if(Inserted)
+        {
+            /* Check if a table expansion is required */
+            if(RequiresExpansion)
+            {
+                /* Trigger a table expansion asynchronously */
+                ExpandBigAllocationsTable();
+            }
+
+            /* Return success */
+            return TRUE;
+        }
+
+        /* The table is completely saturated, attempt to expand the table */
+        if(ExpandBigAllocationsTable())
+        {
+            /* The table was successfully expanded, retry the insertion */
+            continue;
+        }
+
+        /* Table expansion failed, break out of the retry loop */
+        break;
+    }
+
+    /* Return failure */
+    return FALSE;
+}
+
+/**
+ * Unregisters a big allocation from the tracking table and retrieves its metadata.
+ *
+ * @param VirtualAddress
+ *        Supplies the virtual address of the big allocation to be removed.
+ *
+ * @param NumberOfPages
+ *        Supplies the number of physical pages backing the allocation.
+ *
+ * @param PoolType
+ *        Specifies the pool type of the allocation.
+ *
+ * @return This routine returns the allocation pool tag if found, or a default signature otherwise.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG
+MM::Allocator::UnregisterBigAllocationTag(IN PVOID VirtualAddress,
+                                          OUT PULONG_PTR NumberOfPages,
+                                          IN MMPOOL_TYPE PoolType)
+{
+    ULONG Hash, StartHash;
+    ULONG PoolTag;
+    BOOLEAN Found;
+    PPOOL_TRACKER_BIG_ALLOCATIONS Entry;
+
+    /* Initialize default state */
+    Found = FALSE;
+
+    /* Calculate the initial hash bucket index */
+    Hash = ComputeHash(VirtualAddress);
+
+    /* Start a guarded code block */
+    {
+        /* Acquire the table lock and raise runlevel to DISPATCH level */
+        KE::RaiseRunLevel RunLevel(DISPATCH_LEVEL);
+        KE::SpinLockGuard BigAllocationsLock(&BigAllocationsTableLock);
+
+        /* Mask the computed hash and record the starting bucket */
+        Hash &= BigAllocationsTableHash;
+        StartHash = Hash;
+
+        /* Traverse the hash table using linear probing to pinpoint the exact allocation address */
+        while(TRUE)
+        {
+            /* Retrieve the tracker entry */
+            Entry = &BigAllocationsTable[Hash];
+
+            /* Check if the bucket contains the target virtual address */
+            if(Entry->VirtualAddress == VirtualAddress)
+            {
+                /* Capture the allocation metadata */
+                *NumberOfPages = Entry->NumberOfPages;
+                PoolTag = Entry->Key;
+
+                /* Invalidate the entry */
+                Entry->VirtualAddress = (PVOID)MM_POOL_BIG_ALLOCATIONS_ENTRY_FREE;
+
+                /* Decrement the global usage counter */
+                BigAllocationsInUse--;
+
+                /* Update the found flag and break out of the probing loop */
+                Found = TRUE;
+                break;
+            }
+
+            /* Advance to the next bucket */
+            if(++Hash >= BigAllocationsTableSize)
+            {
+                /* Wrap the hash index back to zero */
+                Hash = 0;
+            }
+
+            /* Check if the traversal has wrapped entirely back to the starting index */
+            if(Hash == StartHash)
+            {
+                /* Abort the search */
+                break;
+            }
+        }
+    }
+
+    /* Evaluate the result of the table traversal */
+    if(Found)
+    {
+        /* Return the original tag captured from the tracker */
+        return PoolTag;
+    }
+
+    /* Return an empty page count and a fallback tag */
+    *NumberOfPages = 0;
+    return SIGNATURE32('B', 'i', 'g', 'A');
 }

@@ -9,6 +9,21 @@
 #include <xtos.hh>
 
 
+/* Active number of big allocations to trigger table expansion */
+ULONG MM::Allocator::BigAllocationsInUse;
+
+/* Pointer to the hash table for tracking page-aligned memory */
+PPOOL_TRACKER_BIG_ALLOCATIONS MM::Allocator::BigAllocationsTable;
+
+/* Bitmask used for fast modulo arithmetic during hash bucket lookups */
+SIZE_T MM::Allocator::BigAllocationsTableHash;
+
+/* Spinlock protecting the big allocations table */
+KSPIN_LOCK MM::Allocator::BigAllocationsTableLock;
+
+/* Maximum capacity of the tracking hash table */
+SIZE_T MM::Allocator::BigAllocationsTableSize;
+
 /* Array of free page lists segregated by cache color */
 PMMCOLOR_TABLES MM::Colors::FreePages[FreePageList + 1];
 
@@ -97,6 +112,9 @@ MMPFNLIST MM::Pfn::StandbyPagesList = {0, StandbyPageList, MAXULONG_PTR, MAXULON
 /* List containing free physical pages that have been zeroed out */
 MMPFNLIST MM::Pfn::ZeroedPagesList = {0, ZeroedPageList, MAXULONG_PTR, MAXULONG_PTR};
 
+/* Non-paged pool descriptor */
+POOL_DESCRIPTOR MM::Pool::NonPagedPoolDescriptor;
+
 /* PFN marking the initial non-paged pool end boundary */
 PFN_NUMBER MM::Pool::NonPagedPoolFrameEnd;
 
@@ -105,6 +123,12 @@ PFN_NUMBER MM::Pool::NonPagedPoolFrameStart;
 
 /* Array of non-paged pool free list heads */
 LIST_ENTRY MM::Pool::NonPagedPoolFreeList[MM_MAX_FREE_PAGE_LIST_HEADS];
+
+/* Random cookie used to obfuscate pool links */
+ULONG MM::Pool::PoolSecureCookie;
+
+/* Array of pool descriptors */
+PPOOL_DESCRIPTOR MM::Pool::PoolVector[2];
 
 /* Array of lists for available System PTEs, separated by pool type */
 MMPTE MM::Pte::FirstSystemFreePte[MaximumPtePoolTypes];

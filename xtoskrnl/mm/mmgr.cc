@@ -259,11 +259,17 @@ MM::Manager::InitializeMemoryManager(VOID)
     /* Initialize system PTE space */
     MM::Pte::InitializeSystemPteSpace();
 
+    /* Initialize memory pool security */
+    MM::Pool::InitializePoolSecurity();
+
     /* Initialize non-paged pool */
     MM::Pool::InitializeNonPagedPool();
 
     /* Initialize PFN database */
     MM::Pfn::InitializePfnDatabase();
+
+    /* Initialize big allocations table */
+    MM::Allocator::InitializeBigAllocationsTable();
 
     /* Initialize PFN bitmap */
     MM::Pfn::InitializePfnBitmap();
