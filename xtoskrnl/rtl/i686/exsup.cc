@@ -74,7 +74,7 @@ __CxxFrameHandler3(IN PEXCEPTION_RECORD ExceptionRecord,
 
     /* Disable interrupts and hang */
     AR::CpuFunc::ClearInterruptFlag();
-    KE::Crash::Panic(0); // CXX_FRAME_HANDLER_CALLED
+    KE::Crash::Panic(0);
 
     /* Continue search */
     return ExceptionContinueSearch;
@@ -129,5 +129,5 @@ _purecall(VOID)
 
     /* Disable interrupts and hang */
     AR::CpuFunc::ClearInterruptFlag();
-    KE::Crash::Panic(0); // PURE_VIRTUAL_FUNCTION_CALL
+    KE::Crash::Panic(0);
 }

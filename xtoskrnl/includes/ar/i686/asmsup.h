@@ -24,9 +24,11 @@
 #define TrapSegEs                               38
 #define TrapSegFs                               40
 #define TrapSegGs                               42
+#define TrapEsp                                 92
+#define TrapSegSs                               96
 
 /* KTRAP_FRAME length related definitions */
 #define TRAP_FRAME_SIZE                         100
 #define TRAP_REGISTERS_SIZE                     56
 
-#endif /* __XTOSKRNL_AMD64_ASMSUP_H */
+#endif /* __XTOSKRNL_I686_ASMSUP_H */

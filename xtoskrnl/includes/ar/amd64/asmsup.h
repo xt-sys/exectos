@@ -56,6 +56,8 @@
 #define TrapSegEs                               330
 #define TrapSegFs                               332
 #define TrapSegGs                               334
+#define TrapRsp                                 496
+#define TrapSegSs                               504
 
 /* KTRAP_FRAME length related definitions */
 #define TRAP_FRAME_SIZE                         512
