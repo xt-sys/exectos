@@ -108,6 +108,12 @@
 /* Trampoline code address */
 #define MM_TRAMPOLINE_ADDRESS                      0x80000
 
+/* Pool block size */
+#define MM_POOL_BLOCK_SIZE                         8
+
+/* Number of pool lists per page */
+#define MM_POOL_LISTS_PER_PAGE                     (MM_PAGE_SIZE / MM_POOL_BLOCK_SIZE)
+
 /* Page size enumeration list */
 typedef enum _PAGE_SIZE
 {
@@ -409,5 +415,23 @@ typedef struct _MMPFN
         };
     } u4;
 } MMPFN, *PMMPFN;
+
+/* Pool descriptor structure definition */
+typedef struct _POOL_DESCRIPTOR
+{
+    LIST_ENTRY ListHeads[MM_POOL_LISTS_PER_PAGE];
+    PVOID LockAddress;
+    ULONG PoolIndex;
+    LONG PendingFreeDepth;
+    PVOID PendingFrees;
+    MMPOOL_TYPE PoolType;
+    ULONG RunningFrees;
+    ULONG RunningAllocations;
+    ULONG Threshold;
+    ULONG TotalPages;
+    ULONG TotalBigAllocations;
+    SIZE_T TotalBytes;
+    SIZE_T Reserved;
+} POOL_DESCRIPTOR, *PPOOL_DESCRIPTOR;
 
 #endif /* __XTDK_I686_MMTYPES_H */

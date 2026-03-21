@@ -33,8 +33,12 @@
 #define MM_POOL_INVALID_ALLOC_RUNLEVEL             8
 #define MM_POOL_INVALID_FREE_RUNLEVEL              9
 
+/* Big allocations entry flags */
+#define MM_POOL_BIG_ALLOCATIONS_ENTRY_FREE         0x1
+
 /* Number of reserved zeroed PTEs */
 #define MM_RESERVED_ZERO_PTES                      32
+
 
 /* Memory manager page lists */
 typedef enum _MMPAGELISTS
@@ -66,14 +70,14 @@ typedef enum _MMPOOL_TYPE
     NonPagedPoolMustSucceed = 2,
     NonPagedPoolCacheAligned = 4,
     PagedPoolCacheAligned = 5,
-    NonPagedPoolCacheAlignedMustS = 6,
+    NonPagedPoolCacheAlignedMustSucceed = 6,
     MaxPoolType = 7,
     NonPagedPoolSession = 32,
     PagedPoolSession = 33,
     NonPagedPoolMustSucceedSession = 34,
     NonPagedPoolCacheAlignedSession = 36,
     PagedPoolCacheAlignedSession = 37,
-    NonPagedPoolCacheAlignedMustSSession = 38
+    NonPagedPoolCacheAlignedMustSucceedSession = 38
 } MMPOOL_TYPE, *PMMPOOL_TYPE;
 
 /* Page table pool types */
@@ -191,5 +195,40 @@ typedef struct _PHYSICAL_MEMORY_DESCRIPTOR
     PFN_NUMBER NumberOfPages;
     PHYSICAL_MEMORY_RUN Run[1];
 } PHYSICAL_MEMORY_DESCRIPTOR, *PPHYSICAL_MEMORY_DESCRIPTOR;
+
+/* Pool header structure definition */
+typedef struct _POOL_HEADER
+{
+    union
+    {
+        struct
+        {
+            USHORT PreviousSize:9;
+            USHORT PoolIndex:7;
+            USHORT BlockSize:9;
+            USHORT PoolType:7;
+        };
+        ULONG Long;
+    };
+    union
+    {
+        ULONG PoolTag;
+        PEPROCESS ProcessBilled;
+        struct
+        {
+            USHORT AllocatorBackTraceIndex;
+            USHORT PoolTagHash;
+        };
+    };
+} POOL_HEADER, *PPOOL_HEADER;
+
+/* Pool descriptor structure definition */
+typedef struct _POOL_TRACKER_BIG_ALLOCATIONS
+{
+    PVOID VirtualAddress;
+    ULONG Key;
+    ULONG NumberOfPages;
+    PVOID QuotaObject;
+} POOL_TRACKER_BIG_ALLOCATIONS, *PPOOL_TRACKER_BIG_ALLOCATIONS;
 
 #endif /* __XTDK_MMTYPES_H */
