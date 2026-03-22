@@ -45,9 +45,6 @@ PVOID MM::HardwarePool::HardwareHeapStart = MM_HARDWARE_HEAP_START_ADDRESS;
 /* Number of used hardware allocation descriptors */
 ULONG MM::HardwarePool::UsedHardwareAllocationDescriptors = 0;
 
-/* Processor structures data (THIS IS A TEMPORARY HACK) */
-UCHAR MM::KernelPool::ProcessorStructuresData[MAXIMUM_PROCESSORS][KPROCESSOR_STRUCTURES_SIZE] = {{0}};
-
 /* Global structure describing the virtual memory layout of the system */
 MMMEMORY_LAYOUT MM::Manager::MemoryLayout;
 

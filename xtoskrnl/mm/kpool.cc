@@ -113,12 +113,15 @@ MM::KernelPool::AllocateProcessorStructures(IN ULONG CpuNumber,
     PKPROCESSOR_BLOCK ProcessorBlock;
     PVOID ProcessorStructures;
     UINT_PTR Address;
+    XTSTATUS Status;
 
-    /* Not implemented yet, this is just a hack */
-    UNIMPLEMENTED;
-
-    /* Assign memory for processor structures from preallocated buffer */
-    ProcessorStructures = &ProcessorStructuresData[CpuNumber - 1];
+    /* Assign memory for processor structures */
+    Status = MM::Allocator::AllocatePool(NonPagedPool, KPROCESSOR_STRUCTURES_SIZE, &ProcessorStructures);
+    if(Status != STATUS_SUCCESS)
+    {
+        /* Failed to allocate memory, return status code */
+        return Status;
+    }
 
     /* Make sure all structures are zeroed */
     RTL::Memory::ZeroMemory(ProcessorStructures, KPROCESSOR_STRUCTURES_SIZE);
