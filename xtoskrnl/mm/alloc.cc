@@ -1282,8 +1282,8 @@ MM::Allocator::InitializeBigAllocationsTable(VOID)
  * @param VirtualAddress
  *        Supplies the virtual address of the big allocation.
  *
- * @param Key
- *        Supplies the key used to identify the allocation.
+ * @param Tag
+ *        Supplies the tag used to identify the allocation.
  *
  * @param NumberOfPages
  *        Supplies the number of physical pages backing the allocation.
@@ -1298,7 +1298,7 @@ MM::Allocator::InitializeBigAllocationsTable(VOID)
 BOOLEAN
 XTAPI
 MM::Allocator::RegisterBigAllocationTag(IN PVOID VirtualAddress,
-                                        IN ULONG Key,
+                                        IN ULONG Tag,
                                         IN ULONG NumberOfPages,
                                         IN MMPOOL_TYPE PoolType)
 {
@@ -1336,8 +1336,8 @@ MM::Allocator::RegisterBigAllocationTag(IN PVOID VirtualAddress,
                 if((ULONG_PTR)Entry->VirtualAddress & MM_POOL_BIG_ALLOCATIONS_ENTRY_FREE)
                 {
                     /* Populate the available bucket with the allocation metadata */
-                    Entry->Key = Key;
                     Entry->NumberOfPages = NumberOfPages;
+                    Entry->Tag = Tag;
                     Entry->VirtualAddress = VirtualAddress;
 
                     /* Increment the global usage counter */
@@ -1455,7 +1455,7 @@ MM::Allocator::UnregisterBigAllocationTag(IN PVOID VirtualAddress,
             {
                 /* Capture the allocation metadata */
                 *NumberOfPages = Entry->NumberOfPages;
-                PoolTag = Entry->Key;
+                PoolTag = Entry->Tag;
 
                 /* Invalidate the entry */
                 Entry->VirtualAddress = (PVOID)MM_POOL_BIG_ALLOCATIONS_ENTRY_FREE;

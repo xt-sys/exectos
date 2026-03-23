@@ -33,8 +33,9 @@
 #define MM_POOL_INVALID_ALLOC_RUNLEVEL             8
 #define MM_POOL_INVALID_FREE_RUNLEVEL              9
 
-/* Big allocations entry flags */
+/* Pool flags */
 #define MM_POOL_BIG_ALLOCATIONS_ENTRY_FREE         0x1
+#define MM_POOL_RAISE_EXCEPTION                    0x10
 
 /* Number of reserved zeroed PTEs */
 #define MM_RESERVED_ZERO_PTES                      32
@@ -225,10 +226,10 @@ typedef struct _POOL_HEADER
 /* Pool descriptor structure definition */
 typedef struct _POOL_TRACKER_BIG_ALLOCATIONS
 {
-    PVOID VirtualAddress;
-    ULONG Key;
     ULONG NumberOfPages;
     PVOID QuotaObject;
+    ULONG Tag;
+    PVOID VirtualAddress;
 } POOL_TRACKER_BIG_ALLOCATIONS, *PPOOL_TRACKER_BIG_ALLOCATIONS;
 
 #endif /* __XTDK_MMTYPES_H */
