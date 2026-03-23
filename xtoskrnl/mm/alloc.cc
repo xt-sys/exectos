@@ -606,6 +606,7 @@ MM::Allocator::ExpandBigAllocationsTable(VOID)
     PPOOL_TRACKING_BIG_ALLOCATIONS NewTable, OldTable;
     SIZE_T AllocationBytes, OldSize, NewSize;
     ULONG Hash, HashMask, Index;
+    PFN_NUMBER PagesFreed;
     XTSTATUS Status;
     BOOLEAN Abort;
 
@@ -716,7 +717,11 @@ MM::Allocator::ExpandBigAllocationsTable(VOID)
     }
 
     /* Free memory allocated for the legacy table */
-    FreePages(OldTable);
+    FreePages(OldTable, &PagesFreed);
+
+    /* Update the pool tracking statistics */
+    UnregisterAllocationTag(SIGNATURE32('M', 'M', 'g', 'r'), PagesFreed << MM_PAGE_SHIFT, (MMPOOL_TYPE)0);
+    RegisterAllocationTag(SIGNATURE32('M', 'M', 'g', 'r'), ROUND_UP(NewSize, MM_PAGE_SIZE), (MMPOOL_TYPE)0);
 
     /* Return success */
     return TRUE;
@@ -1553,8 +1558,8 @@ MM::Allocator::RegisterAllocationTag(IN ULONG Tag,
  *
  * @since XT 1.0
  */
-BOOLEAN
 XTAPI
+BOOLEAN
 MM::Allocator::RegisterBigAllocationTag(IN PVOID VirtualAddress,
                                         IN ULONG Tag,
                                         IN ULONG Pages,
