@@ -116,6 +116,9 @@
 /* Number of pool lists per page */
 #define MM_POOL_LISTS_PER_PAGE                     (MM_PAGE_SIZE / MM_POOL_BLOCK_SIZE)
 
+/* Number of pool tracking tables */
+#define MM_POOL_TRACKING_TABLES                    64
+
 /* Page size enumeration list */
 typedef enum _PAGE_SIZE
 {

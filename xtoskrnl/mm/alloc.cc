@@ -353,6 +353,9 @@ MM::Allocator::AllocatePool(IN MMPOOL_TYPE PoolType,
             Tag = SIGNATURE32('B', 'i', 'g', 'A');
         }
 
+        /* Register the allocation in the tracking table */
+        RegisterAllocationTag(Tag, SIZE_TO_PAGES(Bytes), PoolType);
+
         /* Supply the allocated address and return success */
         *Memory = PoolEntry;
         return STATUS_SUCCESS;
@@ -454,6 +457,9 @@ MM::Allocator::AllocatePool(IN MMPOOL_TYPE PoolType,
             RTL::Atomic::ExchangeAdd64((PLONG_PTR)&PoolDescriptor->TotalBytes, (LONG_PTR)(PoolEntry->BlockSize * MM_POOL_BLOCK_SIZE));
             RTL::Atomic::Increment32((PLONG)&PoolDescriptor->RunningAllocations);
 
+            /* Register the allocation in the tracking table */
+            RegisterAllocationTag(Tag, PoolEntry->BlockSize * MM_POOL_BLOCK_SIZE, PoolType);
+
             /* Assign the specified identification tag */
             PoolEntry->PoolTag = Tag;
 
@@ -522,6 +528,9 @@ MM::Allocator::AllocatePool(IN MMPOOL_TYPE PoolType,
     /* Increment the running allocation counter for the pool descriptor */
     RTL::Atomic::Increment32((PLONG)&PoolDescriptor->RunningAllocations);
 
+    /* Register the allocation in the tracking table */
+    RegisterAllocationTag(Tag, PoolEntry->BlockSize * MM_POOL_BLOCK_SIZE, PoolType);
+
     /* Perform a final structural validation of the pool block */
     VerifyPoolBlocks(PoolEntry);
 
@@ -539,7 +548,7 @@ MM::Allocator::AllocatePool(IN MMPOOL_TYPE PoolType,
  * @param VirtualAddress
  *        Supplies the base virtual address to be hashed.
  *
- * @return This routine returns the computed partial hash value.
+ * @return This routine returns the computed hash value.
  *
  * @since XT 1.0
  */
@@ -554,6 +563,33 @@ MM::Allocator::ComputeHash(IN PVOID VirtualAddress)
 
     /* Fold the page number bits using XOR to distribute the entropy across the lower bits */
     return (Result >> 24) ^ (Result >> 16) ^ (Result >> 8) ^ Result;
+}
+
+/**
+ * Computes a hash for a given pool tag to be used in the allocation tracker.
+ *
+ * @param Tag
+ *        Supplies the 32-bit pool tag to be hashed.
+ *
+ * @param TableMask
+ *        Supplies the bitmask used to bound the resulting hash index to the table size.
+ *
+ * @return This routine returns the computed hash value.
+ *
+ * @since XT 1.0
+ */
+XTINLINE
+ULONG
+MM::Allocator::ComputeHash(IN ULONG Tag,
+                           IN ULONG TableMask)
+{
+    ULONG Result;
+
+    /* Fold the bytes using arithmetic shifts and XORs */
+    Result = ((((((Tag & 0xFF) << 2) ^ ((Tag >> 8)  & 0xFF)) << 2) ^ ((Tag >> 16) & 0xFF)) << 2) ^ ((Tag >> 24) & 0xFF);
+
+    /* Multiply by the NT magic prime-like constant and shift down */
+    return ((40543 * Result) >> 2) & TableMask;
 }
 
 /**
@@ -575,7 +611,7 @@ MM::Allocator::ExpandBigAllocationsTable(VOID)
 
     /* Initialize the abort flag and snapshot current table capacity */
     Abort = FALSE;
-    OldSize = BigAllocationsTableSize;
+    OldSize = BigAllocationsTrackingTableSize;
 
     /* Check if doubling the size would cause an integer overflow */
     if(OldSize > ((~(SIZE_T)0) / 2))
@@ -620,12 +656,12 @@ MM::Allocator::ExpandBigAllocationsTable(VOID)
 
     /* Start a guarded code block */
     {
-        /* Acquire the table lock and raise runlevel to DISPATCH level */
+        /* Acquire the tracking table lock and raise runlevel to DISPATCH level */
         KE::RaiseRunLevel RunLevel(DISPATCH_LEVEL);
-        KE::SpinLockGuard BigAllocationsLock(&BigAllocationsTableLock);
+        KE::SpinLockGuard TrackingTableLock(&BigAllocationsTrackingTableLock);
 
         /* Verify if another thread has already expanded the table concurrently */
-        if(BigAllocationsTableSize >= NewSize)
+        if(BigAllocationsTrackingTableSize >= NewSize)
         {
             /* Another thread has already expanded the table, discard changes */
             Abort = TRUE;
@@ -634,7 +670,7 @@ MM::Allocator::ExpandBigAllocationsTable(VOID)
         {
             /* Cache the legacy table pointer and calculate new hash mask */
             HashMask = NewSize - 1;
-            OldTable = BigAllocationsTable;
+            OldTable = BigAllocationsTrackingTable;
 
             /* Rehash and migrate all active entries from the old table */
             for(Index = 0; Index < OldSize; Index++)
@@ -665,9 +701,9 @@ MM::Allocator::ExpandBigAllocationsTable(VOID)
             }
 
             /* Activate the newly populated table globally */
-            BigAllocationsTable = NewTable;
-            BigAllocationsTableHash = NewSize - 1;
-            BigAllocationsTableSize = NewSize;
+            BigAllocationsTrackingTable = NewTable;
+            BigAllocationsTrackingTableHash = NewSize - 1;
+            BigAllocationsTrackingTableSize = NewSize;
         }
     }
 
@@ -1019,6 +1055,9 @@ MM::Allocator::FreePool(IN PVOID VirtualAddress,
             PageCount = 1;
         }
 
+        /* Remove the allocation from the tracking table */
+        UnregisterAllocationTag(Tag, PageCount << MM_PAGE_SHIFT, PoolType);
+
         /* Retrieve the specific pool descriptor based on the masked pool type */
         PoolDescriptor = PoolVector[PoolType];
 
@@ -1055,6 +1094,9 @@ MM::Allocator::FreePool(IN PVOID VirtualAddress,
     /* Extract the allocation identifying tag and initialize the consolidation flag */
     Tag = PoolEntry->PoolTag;
     Combined = FALSE;
+
+    /* Remove the allocation from the tracking table */
+    UnregisterAllocationTag(Tag, BlockSize * MM_POOL_BLOCK_SIZE, (MMPOOL_TYPE)(PoolEntry->PoolType - 1));
 
     /* Locate the adjacent forward pool block */
     NextPoolEntry = GetPoolBlock(PoolEntry, BlockSize);
@@ -1166,6 +1208,116 @@ MM::Allocator::FreePool(IN PVOID VirtualAddress,
 }
 
 /**
+ * Initializes the allocations tracking table during early system boot.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::Allocator::InitializeAllocationsTracking(VOID)
+{
+    SIZE_T TableSize;
+    ULONG Index;
+    XTSTATUS Status;
+    PMMMEMORY_LAYOUT MemoryLayout;
+
+    /* Not fully implemented yet, HIVE support needed */
+    UNIMPLEMENTED;
+
+    /* Retrieve memory layout */
+    MemoryLayout = MM::Manager::GetMemoryLayout();
+
+    /* TODO: Retrieve tracking table size from the HIVE */
+    AllocationsTrackingTableSize = 0;
+
+    /* Calculate the target table size */
+    TableSize = MIN(AllocationsTrackingTableSize, (MemoryLayout->NonPagedPoolSize * MM_PAGE_SIZE) >> 8);
+
+    /* Perform a bit-scan to determine the highest set bit */
+    for(Index = 0; Index < 32; Index++)
+    {
+        /* Check if the lowest bit is currently set */
+        if(TableSize & 1)
+        {
+            /* Verify if this is the only remaining set bit */
+            if(!(TableSize & ~1))
+            {
+                /* Exit the loop as the highest bit has been found */
+                break;
+            }
+        }
+
+        /* Shift the size down by one bit to evaluate higher bits */
+        TableSize >>= 1;
+    }
+
+    /* Check if the bit-scan completed without finding any set bits */
+    if(Index == 32)
+    {
+        /* Apply the default size of 1024 entries */
+        AllocationsTrackingTableSize = 1024;
+    }
+    else
+    {
+        /* Calculate the aligned power of two size, enforcing a minimum of 64 entries */
+        AllocationsTrackingTableSize = MAX(1 << Index, 64);
+    }
+
+    /* Iteratively attempt to allocate the tracking table */
+    while(TRUE)
+    {
+        /* Prevent integer overflow when calculating the required byte size for the table */
+        if(AllocationsTrackingTableSize + 1 > (MAXULONG_PTR / sizeof(POOL_TRACKING_TABLE)))
+        {
+            /* Halve the requested entry count and restart the evaluation */
+            AllocationsTrackingTableSize >>= 1;
+            continue;
+        }
+
+        /* Attempt to allocate physical memory for the table */
+        Status = MM::Allocator::AllocatePages(NonPagedPool,
+                                              (AllocationsTrackingTableSize + 1) *
+                                              sizeof(POOL_TRACKING_TABLE), (PVOID *)&AllocationsTrackingTable);
+
+        /* Check if the allocation succeeded */
+        if(Status != STATUS_SUCCESS || !AllocationsTrackingTable)
+        {
+            /* Check if the allocation failed duefor a single entry */
+            if(AllocationsTrackingTableSize == 1)
+            {
+                /* Failed to initialize the pool tracker, kernel panic */
+                KE::Crash::Panic(0x41, TableSize, (ULONG_PTR)~0, (ULONG_PTR)~0, (ULONG_PTR)~0);
+            }
+
+            /* Halve the requested entry count */
+            AllocationsTrackingTableSize >>= 1;
+        }
+        else
+        {
+            /* Allocation succeeded */
+            break;
+        }
+    }
+
+    /* Increment the table size to account for the overflow bucket entry */
+    AllocationsTrackingTableSize += 1;
+
+    /* Zero the entire memory used by the table */
+    RtlZeroMemory(AllocationsTrackingTable, AllocationsTrackingTableSize * sizeof(POOL_TRACKING_TABLE));
+
+    /* Assign the global tracking table as the local table for the bootstrap processor */
+    TagTables[0] = AllocationsTrackingTable;
+
+    /* Calculate and store the hash mask */
+    AllocationsTrackingTableMask = AllocationsTrackingTableSize - 2;
+
+    /* Initialize the spinlock used to synchronize concurrent modifications to the tracking table */
+    KE::SpinLock::InitializeSpinLock(&AllocationsTrackingTableLock);
+}
+
+/**
  * Initializes the big allocations tracking table during early system boot.
  *
  * @return This routine does not return any value.
@@ -1174,7 +1326,7 @@ MM::Allocator::FreePool(IN PVOID VirtualAddress,
  */
 XTAPI
 VOID
-MM::Allocator::InitializeBigAllocationsTable(VOID)
+MM::Allocator::InitializeBigAllocationsTracking(VOID)
 {
     SIZE_T TableSize;
     ULONG Index;
@@ -1188,10 +1340,10 @@ MM::Allocator::InitializeBigAllocationsTable(VOID)
     MemoryLayout = MM::Manager::GetMemoryLayout();
 
     /* TODO: Retrieve initial big allocation table size from the HIVE */
-    BigAllocationsTableSize = 0;
+    BigAllocationsTrackingTableSize = 0;
 
     /* Calculate the target table size */
-    TableSize = MIN(BigAllocationsTableSize, (MemoryLayout->NonPagedPoolSize * MM_PAGE_SIZE) >> 12);
+    TableSize = MIN(BigAllocationsTrackingTableSize, (MemoryLayout->NonPagedPoolSize * MM_PAGE_SIZE) >> 12);
 
     /* Perform a bit-scan to determine the highest set bit */
     for(Index = 0; Index < 32; Index++)
@@ -1215,42 +1367,42 @@ MM::Allocator::InitializeBigAllocationsTable(VOID)
     if(Index == 32)
     {
         /* Apply the default size of 4096 entries */
-        BigAllocationsTableSize = 4096;
+        BigAllocationsTrackingTableSize = 4096;
     }
     else
     {
         /* Calculate the aligned power of two size, enforcing a minimum of 64 entries */
-        BigAllocationsTableSize = MAX(1 << Index, 64);
+        BigAllocationsTrackingTableSize = MAX(1 << Index, 64);
     }
 
     /* Iteratively attempt to allocate the tracking table */
     while(TRUE)
     {
         /* Prevent integer overflow when calculating the required byte size for the table */
-        if((BigAllocationsTableSize + 1) > (MAXULONG_PTR / sizeof(POOL_TRACKER_BIG_ALLOCATIONS)))
+        if((BigAllocationsTrackingTableSize + 1) > (MAXULONG_PTR / sizeof(POOL_TRACKER_BIG_ALLOCATIONS)))
         {
             /* Halve the requested entry count and restart the evaluation */
-            BigAllocationsTableSize >>= 1;
+            BigAllocationsTrackingTableSize >>= 1;
             continue;
         }
 
         /* Attempt to allocate physical memory for the table */
         Status = AllocatePages(NonPagedPool,
-                               BigAllocationsTableSize * sizeof(POOL_TRACKER_BIG_ALLOCATIONS),
-                               (PVOID*)&BigAllocationsTable);
+                               BigAllocationsTrackingTableSize * sizeof(POOL_TRACKER_BIG_ALLOCATIONS),
+                               (PVOID*)&BigAllocationsTrackingTable);
 
         /* Check if the allocation succeeded */
-        if(Status != STATUS_SUCCESS || !BigAllocationsTable)
+        if(Status != STATUS_SUCCESS || !BigAllocationsTrackingTable)
         {
             /* Check if the allocation failed duefor a single entry */
-            if(BigAllocationsTableSize == 1)
+            if(BigAllocationsTrackingTableSize == 1)
             {
                 /* Failed to initialize the pool tracker, kernel panic */
-                KE::Crash::Panic(0x41, TableSize, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF);
+                KE::Crash::Panic(0x41, TableSize, (ULONG_PTR)~0, (ULONG_PTR)~0, (ULONG_PTR)~0);
             }
 
             /* Halve the requested entry count */
-            BigAllocationsTableSize >>= 1;
+            BigAllocationsTrackingTableSize >>= 1;
         }
         else
         {
@@ -1260,20 +1412,126 @@ MM::Allocator::InitializeBigAllocationsTable(VOID)
     }
 
     /* Zero the entire memory used by the table */
-    RtlZeroMemory(BigAllocationsTable, BigAllocationsTableSize * sizeof(POOL_TRACKER_BIG_ALLOCATIONS));
+    RtlZeroMemory(BigAllocationsTrackingTable, BigAllocationsTrackingTableSize * sizeof(POOL_TRACKER_BIG_ALLOCATIONS));
 
     /* Iterate through the newly allocated table */
-    for(Index = 0; Index < BigAllocationsTableSize; Index++)
+    for(Index = 0; Index < BigAllocationsTrackingTableSize; Index++)
     {
         /* Mark the individual pool tracker entry as free and available */
-        BigAllocationsTable[Index].VirtualAddress = (PVOID)MM_POOL_BIG_ALLOCATIONS_ENTRY_FREE;
+        BigAllocationsTrackingTable[Index].VirtualAddress = (PVOID)MM_POOL_BIG_ALLOCATIONS_ENTRY_FREE;
     }
 
     /* Calculate and store the hash mask */
-    BigAllocationsTableHash = BigAllocationsTableSize - 1;
+    BigAllocationsTrackingTableHash = BigAllocationsTrackingTableSize - 1;
 
     /* Initialize the spinlock used to synchronize concurrent modifications to the tracking table */
-    KE::SpinLock::InitializeSpinLock(&BigAllocationsTableLock);
+    KE::SpinLock::InitializeSpinLock(&BigAllocationsTrackingTableLock);
+
+    /* Register the allocation in the tracking table */
+    RegisterAllocationTag(SIGNATURE32('M', 'M', 'g', 'r'),
+                          SIZE_TO_PAGES(BigAllocationsTrackingTableSize * sizeof(POOL_TRACKER_BIG_ALLOCATIONS)),
+                          NonPagedPool);
+}
+
+/**
+ * Registers a pool memory allocation in the tracking table.
+ *
+ * @param Tag
+ *        Supplies the tag used to identify the allocation.
+ *
+ * @param Bytes
+ *        Supplies the size of the allocation.
+ *
+ * @param PoolType
+ *        Specifies the type of pool from which the memory was allocated.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::Allocator::RegisterAllocationTag(IN ULONG Tag,
+                                     IN SIZE_T Bytes,
+                                     IN MMPOOL_TYPE PoolType)
+{
+    PPOOL_TRACKING_TABLE CpuTable, TableEntry;
+    ULONG Hash, Index, Processor;
+
+    /* Retrieve the local tracking table for the current processor */
+    Processor = KE::Processor::GetCurrentProcessorNumber();
+    CpuTable = TagTables[Processor];
+
+    /* Compute the initial hash index */
+    Hash = ComputeHash(Tag, AllocationsTrackingTableMask);
+    Index = Hash;
+
+    /* Probe the tracking table until a match or an empty slot is found */
+    do
+    {
+        /* Fetch the tracker entry from the CPU table */
+        TableEntry = &CpuTable[Hash];
+
+        /* Check if the current entry tracks the requested pool tag */
+        if(TableEntry->Tag == Tag)
+        {
+            /* Update the appropriate statistics based on the pool type */
+            if((PoolType & MM_POOL_TYPE_MASK) == NonPagedPool)
+            {
+                /* Update the non-paged allocation statistics */
+                RTL::Atomic::Increment32(&TableEntry->NonPagedAllocations);
+                RTL::Atomic::ExchangeAdd64((PLONG_PTR)&TableEntry->NonPagedBytes, Bytes);
+            }
+            else
+            {
+                /* Update the paged allocation statistics */
+                RTL::Atomic::Increment32(&TableEntry->PagedAllocations);
+                RTL::Atomic::ExchangeAdd64((PLONG_PTR)&TableEntry->PagedBytes, Bytes);
+            }
+
+            /* The allocation has been successfully tracked, return */
+            return;
+        }
+
+        /* Check if the CPU table is entirely empty */
+        if(TableEntry->Tag == 0)
+        {
+            /* Check if another processor has claimed this slot in the global table */
+            if(AllocationsTrackingTable[Hash].Tag != 0)
+            {
+                /* Synchronize the local table with the global table */
+                TableEntry->Tag = AllocationsTrackingTable[Hash].Tag;
+
+                /* Restart the loop to evaluation */
+                continue;
+            }
+
+            /* Check if this is not the designated overflow bucket */
+            if(Hash != (AllocationsTrackingTableSize - 1))
+            {
+                /* Start a guarded code block */
+                {
+                    /* Acquire the tracking table lock */
+                    KE::SpinLockGuard TrackingTableLock(&AllocationsTrackingTableLock);
+
+                    /* Perform a double-checked lock */
+                    if(AllocationsTrackingTable[Hash].Tag == 0)
+                    {
+                        /* Claim the slot in both, local and global tracking tables */
+                        AllocationsTrackingTable[Hash].Tag = Tag;
+                        TableEntry->Tag = Tag;
+                    }
+                }
+
+                /* Restart the loop */
+                continue;
+            }
+        }
+
+        /* Advance to the next index as hash collision occurred */
+        Hash = (Hash + 1) & AllocationsTrackingTableMask;
+    }
+    while(Hash != Index);
 }
 
 /**
@@ -1285,7 +1543,7 @@ MM::Allocator::InitializeBigAllocationsTable(VOID)
  * @param Tag
  *        Supplies the tag used to identify the allocation.
  *
- * @param NumberOfPages
+ * @param Pages
  *        Supplies the number of physical pages backing the allocation.
  *
  * @param PoolType
@@ -1299,7 +1557,7 @@ BOOLEAN
 XTAPI
 MM::Allocator::RegisterBigAllocationTag(IN PVOID VirtualAddress,
                                         IN ULONG Tag,
-                                        IN ULONG NumberOfPages,
+                                        IN ULONG Pages,
                                         IN MMPOOL_TYPE PoolType)
 {
     PPOOL_TRACKER_BIG_ALLOCATIONS Entry;
@@ -1318,25 +1576,25 @@ MM::Allocator::RegisterBigAllocationTag(IN PVOID VirtualAddress,
 
         /* Start a guarded code block */
         {
-            /* Acquire the table lock and raise runlevel to DISPATCH level */
+            /* Acquire the tracking table lock and raise runlevel to DISPATCH level */
             KE::RaiseRunLevel RunLevel(DISPATCH_LEVEL);
-            KE::SpinLockGuard BigAllocationsLock(&BigAllocationsTableLock);
+            KE::SpinLockGuard TrackingTableLock(&BigAllocationsTrackingTableLock);
 
             /* Retrieve the tracker entry */
-            Hash &= BigAllocationsTableHash;
+            Hash &= BigAllocationsTrackingTableHash;
             StartHash = Hash;
 
             /* Traverse the hash table */
             do
             {
                 /* Retrieve the tracker entry */
-                Entry = &BigAllocationsTable[Hash];
+                Entry = &BigAllocationsTrackingTable[Hash];
 
                 /* Check if the current bucket is marked as free */
                 if((ULONG_PTR)Entry->VirtualAddress & MM_POOL_BIG_ALLOCATIONS_ENTRY_FREE)
                 {
                     /* Populate the available bucket with the allocation metadata */
-                    Entry->NumberOfPages = NumberOfPages;
+                    Entry->NumberOfPages = Pages;
                     Entry->Tag = Tag;
                     Entry->VirtualAddress = VirtualAddress;
 
@@ -1344,7 +1602,7 @@ MM::Allocator::RegisterBigAllocationTag(IN PVOID VirtualAddress,
                     BigAllocationsInUse++;
 
                     /* Determine if the table capacity has reached the critical 75% threshold */
-                    if(BigAllocationsInUse > (BigAllocationsTableSize * 3 / 4))
+                    if(BigAllocationsInUse > (BigAllocationsTrackingTableSize * 3 / 4))
                     {
                         /* Flag the table for expansion */
                         RequiresExpansion = TRUE;
@@ -1356,7 +1614,7 @@ MM::Allocator::RegisterBigAllocationTag(IN PVOID VirtualAddress,
                 }
 
                 /* Advance to the next bucket */
-                if(++Hash >= BigAllocationsTableSize)
+                if(++Hash >= BigAllocationsTrackingTableSize)
                 {
                     /* Wrap the index back to the beginning of the table */
                     Hash = 0;
@@ -1402,12 +1660,94 @@ MM::Allocator::RegisterBigAllocationTag(IN PVOID VirtualAddress,
 }
 
 /**
+ * Unregisters a pool memory allocation in the tracking table.
+ *
+ * @param Tag
+ *        Supplies the tag used to identify the allocation.
+ *
+ * @param Bytes
+ *        Supplies the size of the allocation.
+ *
+ * @param PoolType
+ *        Specifies the type of pool from which the memory was allocated.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::Allocator::UnregisterAllocationTag(IN ULONG Tag,
+                                       IN SIZE_T Bytes,
+                                       IN MMPOOL_TYPE PoolType)
+{
+    ULONG Hash, Index;
+    PPOOL_TRACKING_TABLE CpuTable;
+    PPOOL_TRACKING_TABLE TableEntry;
+    ULONG Processor;
+
+    /* Retrieve the local tracking table for the current processor */
+    Processor = KE::Processor::GetCurrentProcessorNumber();
+    CpuTable = TagTables[Processor];
+
+    /* Compute the initial hash index */
+    Hash = ComputeHash(Tag, AllocationsTrackingTableMask);
+    Index = Hash;
+
+    /* Probe the tracking table until a match or an empty slot is found */
+    do
+    {
+        /* Fetch the tracker entry from the CPU table */
+        TableEntry = &CpuTable[Hash];
+
+        /* Check if the current entry tracks the requested pool tag */
+        if(TableEntry->Tag == Tag)
+        {
+            /* Update the appropriate statistics based on the pool type */
+            if((PoolType & MM_POOL_TYPE_MASK) == NonPagedPool)
+            {
+                /* Update the non-paged allocation statistics */
+                RTL::Atomic::Increment32(&TableEntry->NonPagedFrees);
+                RTL::Atomic::ExchangeAdd64((PLONG_PTR)&TableEntry->NonPagedBytes, 0 - Bytes);
+            }
+            else
+            {
+                /* Update the paged allocation statistics */
+                RTL::Atomic::Increment32(&TableEntry->PagedFrees);
+                RTL::Atomic::ExchangeAdd64((PLONG_PTR)&TableEntry->PagedBytes, 0 - Bytes);
+            }
+
+            /* The allocation has been successfully tracked, return */
+            return;
+        }
+
+        /* Check if the CPU table is entirely empty */
+        if(TableEntry->Tag == 0)
+        {
+            /* Check if another processor has claimed this slot in the global table */
+            if(AllocationsTrackingTable[Hash].Tag != 0)
+            {
+                /* Synchronize the local table with the global table */
+                TableEntry->Tag = AllocationsTrackingTable[Hash].Tag;
+
+                /* Restart the loop to evaluation */
+                continue;
+            }
+        }
+
+        /* Advance to the next index as hash collision occurred */
+        Hash = (Hash + 1) & AllocationsTrackingTableMask;
+    }
+    while(Hash != Index);
+}
+
+/**
  * Unregisters a big allocation from the tracking table and retrieves its metadata.
  *
  * @param VirtualAddress
  *        Supplies the virtual address of the big allocation to be removed.
  *
- * @param NumberOfPages
+ * @param Pages
  *        Supplies the number of physical pages backing the allocation.
  *
  * @param PoolType
@@ -1420,7 +1760,7 @@ MM::Allocator::RegisterBigAllocationTag(IN PVOID VirtualAddress,
 XTAPI
 ULONG
 MM::Allocator::UnregisterBigAllocationTag(IN PVOID VirtualAddress,
-                                          OUT PULONG_PTR NumberOfPages,
+                                          OUT PULONG_PTR Pages,
                                           IN MMPOOL_TYPE PoolType)
 {
     ULONG Hash, StartHash;
@@ -1436,25 +1776,25 @@ MM::Allocator::UnregisterBigAllocationTag(IN PVOID VirtualAddress,
 
     /* Start a guarded code block */
     {
-        /* Acquire the table lock and raise runlevel to DISPATCH level */
+        /* Acquire the tracking table lock and raise runlevel to DISPATCH level */
         KE::RaiseRunLevel RunLevel(DISPATCH_LEVEL);
-        KE::SpinLockGuard BigAllocationsLock(&BigAllocationsTableLock);
+        KE::SpinLockGuard TrackingTableLock(&BigAllocationsTrackingTableLock);
 
         /* Mask the computed hash and record the starting bucket */
-        Hash &= BigAllocationsTableHash;
+        Hash &= BigAllocationsTrackingTableHash;
         StartHash = Hash;
 
         /* Traverse the hash table using linear probing to pinpoint the exact allocation address */
         while(TRUE)
         {
             /* Retrieve the tracker entry */
-            Entry = &BigAllocationsTable[Hash];
+            Entry = &BigAllocationsTrackingTable[Hash];
 
             /* Check if the bucket contains the target virtual address */
             if(Entry->VirtualAddress == VirtualAddress)
             {
                 /* Capture the allocation metadata */
-                *NumberOfPages = Entry->NumberOfPages;
+                *Pages = Entry->NumberOfPages;
                 PoolTag = Entry->Tag;
 
                 /* Invalidate the entry */
@@ -1469,7 +1809,7 @@ MM::Allocator::UnregisterBigAllocationTag(IN PVOID VirtualAddress,
             }
 
             /* Advance to the next bucket */
-            if(++Hash >= BigAllocationsTableSize)
+            if(++Hash >= BigAllocationsTrackingTableSize)
             {
                 /* Wrap the hash index back to zero */
                 Hash = 0;
@@ -1492,6 +1832,6 @@ MM::Allocator::UnregisterBigAllocationTag(IN PVOID VirtualAddress,
     }
 
     /* Return an empty page count and a fallback tag */
-    *NumberOfPages = 0;
+    *Pages = 0;
     return SIGNATURE32('B', 'i', 'g', 'A');
 }

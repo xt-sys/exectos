@@ -9,20 +9,35 @@
 #include <xtos.hh>
 
 
+/* Global table used to track pool memory allocations */
+PPOOL_TRACKING_TABLE MM::Allocator::AllocationsTrackingTable;
+
+/* Spinlock protecting the allocations table */
+KSPIN_LOCK MM::Allocator::AllocationsTrackingTableLock;
+
+/* Bitmask used during the hashing process */
+SIZE_T MM::Allocator::AllocationsTrackingTableMask;
+
+/* Total number of entries in the global allocations tracking table */
+SIZE_T MM::Allocator::AllocationsTrackingTableSize;
+
 /* Active number of big allocations to trigger table expansion */
 ULONG MM::Allocator::BigAllocationsInUse;
 
 /* Pointer to the hash table for tracking page-aligned memory */
-PPOOL_TRACKER_BIG_ALLOCATIONS MM::Allocator::BigAllocationsTable;
+PPOOL_TRACKER_BIG_ALLOCATIONS MM::Allocator::BigAllocationsTrackingTable;
 
 /* Bitmask used for fast modulo arithmetic during hash bucket lookups */
-SIZE_T MM::Allocator::BigAllocationsTableHash;
+SIZE_T MM::Allocator::BigAllocationsTrackingTableHash;
 
 /* Spinlock protecting the big allocations table */
-KSPIN_LOCK MM::Allocator::BigAllocationsTableLock;
+KSPIN_LOCK MM::Allocator::BigAllocationsTrackingTableLock;
 
 /* Maximum capacity of the tracking hash table */
-SIZE_T MM::Allocator::BigAllocationsTableSize;
+SIZE_T MM::Allocator::BigAllocationsTrackingTableSize;
+
+/* Array of CPU-local tracking tables */
+PPOOL_TRACKING_TABLE MM::Allocator::TagTables[MM_POOL_TRACKING_TABLES];
 
 /* Array of free page lists segregated by cache color */
 PMMCOLOR_TABLES MM::Colors::FreePages[FreePageList + 1];

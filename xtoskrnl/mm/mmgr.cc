@@ -268,8 +268,9 @@ MM::Manager::InitializeMemoryManager(VOID)
     /* Initialize PFN database */
     MM::Pfn::InitializePfnDatabase();
 
-    /* Initialize big allocations table */
-    MM::Allocator::InitializeBigAllocationsTable();
+    /* Initialize allocations tracking tables */
+    MM::Allocator::InitializeAllocationsTracking();
+    MM::Allocator::InitializeBigAllocationsTracking();
 
     /* Initialize PFN bitmap */
     MM::Pfn::InitializePfnBitmap();

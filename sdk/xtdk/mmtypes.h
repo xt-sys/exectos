@@ -232,4 +232,16 @@ typedef struct _POOL_TRACKER_BIG_ALLOCATIONS
     PVOID VirtualAddress;
 } POOL_TRACKER_BIG_ALLOCATIONS, *PPOOL_TRACKER_BIG_ALLOCATIONS;
 
+/* Pool tracking table structure definition */
+typedef struct _POOL_TRACKING_TABLE
+{
+    LONG NonPagedAllocations;
+    SIZE_T NonPagedBytes;
+    LONG NonPagedFrees;
+    LONG PagedAllocations;
+    SIZE_T PagedBytes;
+    LONG PagedFrees;
+    ULONG Tag;
+} POOL_TRACKING_TABLE, *PPOOL_TRACKING_TABLE;
+
 #endif /* __XTDK_MMTYPES_H */
