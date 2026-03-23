@@ -25,7 +25,7 @@ SIZE_T MM::Allocator::AllocationsTrackingTableSize;
 ULONG MM::Allocator::BigAllocationsInUse;
 
 /* Pointer to the hash table for tracking page-aligned memory */
-PPOOL_TRACKER_BIG_ALLOCATIONS MM::Allocator::BigAllocationsTrackingTable;
+PPOOL_TRACKING_BIG_ALLOCATIONS MM::Allocator::BigAllocationsTrackingTable;
 
 /* Bitmask used for fast modulo arithmetic during hash bucket lookups */
 SIZE_T MM::Allocator::BigAllocationsTrackingTableHash;

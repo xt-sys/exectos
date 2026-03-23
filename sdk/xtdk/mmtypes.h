@@ -224,13 +224,13 @@ typedef struct _POOL_HEADER
 } POOL_HEADER, *PPOOL_HEADER;
 
 /* Pool descriptor structure definition */
-typedef struct _POOL_TRACKER_BIG_ALLOCATIONS
+typedef struct _POOL_TRACKING_BIG_ALLOCATIONS
 {
     ULONG NumberOfPages;
     PVOID QuotaObject;
     ULONG Tag;
     PVOID VirtualAddress;
-} POOL_TRACKER_BIG_ALLOCATIONS, *PPOOL_TRACKER_BIG_ALLOCATIONS;
+} POOL_TRACKING_BIG_ALLOCATIONS, *PPOOL_TRACKING_BIG_ALLOCATIONS;
 
 /* Pool tracking table structure definition */
 typedef struct _POOL_TRACKING_TABLE

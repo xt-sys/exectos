@@ -24,7 +24,7 @@ namespace MM
             STATIC SIZE_T AllocationsTrackingTableMask;
             STATIC SIZE_T AllocationsTrackingTableSize;
             STATIC ULONG BigAllocationsInUse;
-            STATIC PPOOL_TRACKER_BIG_ALLOCATIONS BigAllocationsTrackingTable;
+            STATIC PPOOL_TRACKING_BIG_ALLOCATIONS BigAllocationsTrackingTable;
             STATIC SIZE_T BigAllocationsTrackingTableHash;
             STATIC KSPIN_LOCK BigAllocationsTrackingTableLock;
             STATIC SIZE_T BigAllocationsTrackingTableSize;

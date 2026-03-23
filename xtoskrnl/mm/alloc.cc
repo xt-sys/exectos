@@ -603,7 +603,7 @@ XTAPI
 BOOLEAN
 MM::Allocator::ExpandBigAllocationsTable(VOID)
 {
-    PPOOL_TRACKER_BIG_ALLOCATIONS NewTable, OldTable;
+    PPOOL_TRACKING_BIG_ALLOCATIONS NewTable, OldTable;
     SIZE_T AllocationBytes, OldSize, NewSize;
     ULONG Hash, HashMask, Index;
     XTSTATUS Status;
@@ -624,17 +624,17 @@ MM::Allocator::ExpandBigAllocationsTable(VOID)
     NewSize = OldSize * 2;
 
     /* Ensure the new capacity does not result in fractional memory pages */
-    NewSize = ROUND_DOWN(NewSize, MM_PAGE_SIZE / sizeof(POOL_TRACKER_BIG_ALLOCATIONS));
+    NewSize = ROUND_DOWN(NewSize, MM_PAGE_SIZE / sizeof(POOL_TRACKING_BIG_ALLOCATIONS));
 
     /* Check if calculating the total byte size would cause an integer overflow */
-    if(NewSize > ((~(SIZE_T)0) / sizeof(POOL_TRACKER_BIG_ALLOCATIONS)))
+    if(NewSize > ((~(SIZE_T)0) / sizeof(POOL_TRACKING_BIG_ALLOCATIONS)))
     {
         /* Abort expansion to prevent allocating a truncated memory block */
         return FALSE;
     }
 
     /* Compute the size required for the newly expanded tracking table */
-    AllocationBytes = NewSize * sizeof(POOL_TRACKER_BIG_ALLOCATIONS);
+    AllocationBytes = NewSize * sizeof(POOL_TRACKING_BIG_ALLOCATIONS);
 
     /* Allocate the required memory */
     Status = AllocatePages(NonPagedPool, AllocationBytes, (PVOID*)&NewTable);
@@ -1379,7 +1379,7 @@ MM::Allocator::InitializeBigAllocationsTracking(VOID)
     while(TRUE)
     {
         /* Prevent integer overflow when calculating the required byte size for the table */
-        if((BigAllocationsTrackingTableSize + 1) > (MAXULONG_PTR / sizeof(POOL_TRACKER_BIG_ALLOCATIONS)))
+        if((BigAllocationsTrackingTableSize + 1) > (MAXULONG_PTR / sizeof(POOL_TRACKING_BIG_ALLOCATIONS)))
         {
             /* Halve the requested entry count and restart the evaluation */
             BigAllocationsTrackingTableSize >>= 1;
@@ -1388,7 +1388,7 @@ MM::Allocator::InitializeBigAllocationsTracking(VOID)
 
         /* Attempt to allocate physical memory for the table */
         Status = AllocatePages(NonPagedPool,
-                               BigAllocationsTrackingTableSize * sizeof(POOL_TRACKER_BIG_ALLOCATIONS),
+                               BigAllocationsTrackingTableSize * sizeof(POOL_TRACKING_BIG_ALLOCATIONS),
                                (PVOID*)&BigAllocationsTrackingTable);
 
         /* Check if the allocation succeeded */
@@ -1412,7 +1412,7 @@ MM::Allocator::InitializeBigAllocationsTracking(VOID)
     }
 
     /* Zero the entire memory used by the table */
-    RtlZeroMemory(BigAllocationsTrackingTable, BigAllocationsTrackingTableSize * sizeof(POOL_TRACKER_BIG_ALLOCATIONS));
+    RtlZeroMemory(BigAllocationsTrackingTable, BigAllocationsTrackingTableSize * sizeof(POOL_TRACKING_BIG_ALLOCATIONS));
 
     /* Iterate through the newly allocated table */
     for(Index = 0; Index < BigAllocationsTrackingTableSize; Index++)
@@ -1429,7 +1429,7 @@ MM::Allocator::InitializeBigAllocationsTracking(VOID)
 
     /* Register the allocation in the tracking table */
     RegisterAllocationTag(SIGNATURE32('M', 'M', 'g', 'r'),
-                          SIZE_TO_PAGES(BigAllocationsTrackingTableSize * sizeof(POOL_TRACKER_BIG_ALLOCATIONS)),
+                          SIZE_TO_PAGES(BigAllocationsTrackingTableSize * sizeof(POOL_TRACKING_BIG_ALLOCATIONS)),
                           NonPagedPool);
 }
 
@@ -1560,7 +1560,7 @@ MM::Allocator::RegisterBigAllocationTag(IN PVOID VirtualAddress,
                                         IN ULONG Pages,
                                         IN MMPOOL_TYPE PoolType)
 {
-    PPOOL_TRACKER_BIG_ALLOCATIONS Entry;
+    PPOOL_TRACKING_BIG_ALLOCATIONS Entry;
     BOOLEAN Inserted, RequiresExpansion;
     ULONG Hash, StartHash;
 
@@ -1766,7 +1766,7 @@ MM::Allocator::UnregisterBigAllocationTag(IN PVOID VirtualAddress,
     ULONG Hash, StartHash;
     ULONG PoolTag;
     BOOLEAN Found;
-    PPOOL_TRACKER_BIG_ALLOCATIONS Entry;
+    PPOOL_TRACKING_BIG_ALLOCATIONS Entry;
 
     /* Initialize default state */
     Found = FALSE;
