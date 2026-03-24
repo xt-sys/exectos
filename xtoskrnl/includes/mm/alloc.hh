@@ -19,6 +19,8 @@ namespace MM
     class Allocator final : private Pool
     {
         private:
+            STATIC PPOOL_TRACKING_TABLE AllocationsTrackingExpansionTable;
+            STATIC SIZE_T AllocationsTrackingExpansionTableSize;
             STATIC PPOOL_TRACKING_TABLE AllocationsTrackingTable;
             STATIC KSPIN_LOCK AllocationsTrackingTableLock;
             STATIC SIZE_T AllocationsTrackingTableMask;
@@ -66,6 +68,9 @@ namespace MM
             STATIC XTAPI VOID RegisterAllocationTag(IN ULONG Tag,
                                                     IN SIZE_T Bytes,
                                                     IN MMPOOL_TYPE PoolType);
+            STATIC XTAPI VOID RegisterAllocationTagExpansion(IN ULONG Tag,
+                                                             IN SIZE_T Bytes,
+                                                             IN MMPOOL_TYPE PoolType);
             STATIC XTAPI BOOLEAN RegisterBigAllocationTag(IN PVOID VirtualAddress,
                                                           IN ULONG Tag,
                                                           IN ULONG Pages,
@@ -73,6 +78,9 @@ namespace MM
             STATIC XTAPI VOID UnregisterAllocationTag(IN ULONG Tag,
                                                       IN SIZE_T Bytes,
                                                       IN MMPOOL_TYPE PoolType);
+            STATIC XTAPI VOID UnregisterAllocationTagExpansion(IN ULONG Tag,
+                                                               IN SIZE_T Bytes,
+                                                               IN MMPOOL_TYPE PoolType);
             STATIC XTAPI ULONG UnregisterBigAllocationTag(IN PVOID VirtualAddress,
                                                           OUT PULONG_PTR Pages,
                                                           IN MMPOOL_TYPE PoolType);

@@ -1307,7 +1307,7 @@ MM::Allocator::InitializeAllocationsTracking(VOID)
     }
 
     /* Increment the table size to account for the overflow bucket entry */
-    AllocationsTrackingTableSize += 1;
+    AllocationsTrackingTableSize++;
 
     /* Zero the entire memory used by the table */
     RtlZeroMemory(AllocationsTrackingTable, AllocationsTrackingTableSize * sizeof(POOL_TRACKING_TABLE));
@@ -1537,6 +1537,172 @@ MM::Allocator::RegisterAllocationTag(IN ULONG Tag,
         Hash = (Hash + 1) & AllocationsTrackingTableMask;
     }
     while(Hash != Index);
+
+    /* Fallback to the expansion path */
+    RegisterAllocationTagExpansion(Tag, Bytes, PoolType);
+}
+
+/**
+ * Registers a pool memory allocation in the tracking expansion table.
+ *
+ * @param Tag
+ *        Supplies the tag used to identify the allocation.
+ *
+ * @param Bytes
+ *        Supplies the size of the allocation.
+ *
+ * @param PoolType
+ *        Specifies the type of pool from which the memory was allocated.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::Allocator::RegisterAllocationTagExpansion(IN ULONG Tag,
+                                              IN SIZE_T Bytes,
+                                              IN MMPOOL_TYPE PoolType)
+{
+    PPOOL_TRACKING_TABLE NewTrackingTable, OldTrackingTable;
+    SIZE_T Footprint, NewSize, Size;
+    BOOLEAN UseOverflowBucket;
+    PFN_NUMBER FreedPages;
+    XTSTATUS Status;
+    ULONG Hash;
+
+    /* Initialize local state */
+    NewTrackingTable = NULLPTR;
+    OldTrackingTable = NULLPTR;
+    UseOverflowBucket = FALSE;
+
+    /* Start a guarded code block */
+    {
+        /* Acquire the tracking table lock */
+        KE::SpinLockGuard TrackingTableLock(&AllocationsTrackingTableLock);
+
+        /* Scan the expansion table to locate the requested tag */
+        for(Hash = 0; Hash < AllocationsTrackingExpansionTableSize; Hash++)
+        {
+            /* Check if the current entry already tracks the requested pool tag */
+            if(AllocationsTrackingExpansionTable[Hash].Tag == Tag)
+            {
+                /* Target entry found, break out */
+                break;
+            }
+
+            /* Check if an unassigned slot has been reached */
+            if(AllocationsTrackingExpansionTable[Hash].Tag == 0)
+            {
+                /* Claim the empty slot for the new pool tag and stop searching */
+                AllocationsTrackingExpansionTable[Hash].Tag = Tag;
+                break;
+            }
+        }
+
+        /* Check if the tag was successfully located or a new slot was successfully claimed */
+        if(Hash != AllocationsTrackingExpansionTableSize)
+        {
+            /* Update the appropriate statistics based on the pool type */
+            if((PoolType & MM_POOL_TYPE_MASK) == NonPagedPool)
+            {
+                /* Update the non-paged allocation statistics */
+                AllocationsTrackingExpansionTable[Hash].NonPagedAllocations++;
+                AllocationsTrackingExpansionTable[Hash].NonPagedBytes += Bytes;
+            }
+            else
+            {
+                /* Update the paged allocation statistics */
+                AllocationsTrackingExpansionTable[Hash].PagedAllocations++;
+                AllocationsTrackingExpansionTable[Hash].PagedBytes += Bytes;
+            }
+
+            /* Nothing more to do */
+            return;
+        }
+
+        /* Check if the global overflow bucket has been activated */
+        if(AllocationsTrackingTable[AllocationsTrackingTableSize - 1].Tag != 0)
+        {
+            /* Use the overflow bucket */
+            UseOverflowBucket = TRUE;
+        }
+        else
+        {
+            /* Calculate the exact bytes of the expansion table */
+            Size = AllocationsTrackingExpansionTableSize * sizeof(POOL_TRACKING_TABLE);
+
+            /* Determine the required physical memory */
+            Footprint = ROUND_UP(Size, MM_PAGE_SIZE) + MM_PAGE_SIZE;
+
+            /* Calculate the usable byte size */
+            NewSize = ((Footprint / sizeof(POOL_TRACKING_TABLE)) * sizeof(POOL_TRACKING_TABLE));
+
+            /* Allocate memory for the expanded tracking table */
+            Status = AllocatePages(NonPagedPool, NewSize, (PVOID *)&NewTrackingTable);
+            if(Status != STATUS_SUCCESS || !NewTrackingTable)
+            {
+                /* Activate the global overflow bucket */
+                AllocationsTrackingTable[AllocationsTrackingTableSize - 1].Tag = SIGNATURE32('O', 'v', 'f', 'l');
+                UseOverflowBucket = TRUE;
+            }
+            else
+            {
+                /* Check if a previous expansion table exists */
+                if(AllocationsTrackingExpansionTable != NULLPTR)
+                {
+                    /* Migrate the existing tracking entries into the new expansion table */
+                    RtlCopyMemory(NewTrackingTable, AllocationsTrackingExpansionTable, Size);
+                }
+
+                /* Zero out the added usable space */
+                RtlZeroMemory((PVOID)(NewTrackingTable + AllocationsTrackingExpansionTableSize), NewSize - Size);
+
+                /* Swap the active expansion table pointers and update the entry count */
+                OldTrackingTable = AllocationsTrackingExpansionTable;
+                AllocationsTrackingExpansionTable = NewTrackingTable;
+                AllocationsTrackingExpansionTableSize = Footprint / sizeof(POOL_TRACKING_TABLE);;
+
+                /* Register the new allocation tag */
+                RegisterAllocationTag(SIGNATURE32('M', 'M', 'g', 'r'), Footprint, NonPagedPool);
+            }
+        }
+    }
+
+    /* Handle the fallback scenario */
+    if(UseOverflowBucket)
+    {
+        /* Target the overflow bucket at the end of the tracking table */
+        Hash = (ULONG)AllocationsTrackingTableSize - 1;
+
+        /* Update the appropriate statistics based on the pool type */
+        if((PoolType & MM_POOL_TYPE_MASK) == NonPagedPool)
+        {
+            /* Update the non-paged allocation statistics */
+            RTL::Atomic::Increment32((PLONG)&AllocationsTrackingTable[Hash].NonPagedAllocations);
+            RTL::Atomic::ExchangeAdd64((PLONG_PTR)&AllocationsTrackingTable[Hash].NonPagedBytes, Bytes);
+        }
+        else
+        {
+            /* Update the paged allocation statistics */
+            RTL::Atomic::Increment32((PLONG)&AllocationsTrackingTable[Hash].PagedAllocations);
+            RTL::Atomic::ExchangeAdd64((PLONG_PTR)&AllocationsTrackingTable[Hash].PagedBytes, Bytes);
+        }
+
+        /* Nothing more to do */
+        return;
+    }
+
+    /* Check if an older expansion table needs to be freed */
+    if(OldTrackingTable != NULLPTR)
+    {
+        /* Free the old tracking table and unregister the allocation tag */
+        FreePages(OldTrackingTable, &FreedPages);
+        UnregisterAllocationTag(SIGNATURE32('M', 'M', 'g', 'r'), (SIZE_T)FreedPages * MM_PAGE_SIZE, NonPagedPool);
+    }
+
+    /* Register the caller's original allocation */
+    RegisterAllocationTagExpansion(Tag, Bytes, PoolType);
 }
 
 /**
@@ -1744,6 +1910,95 @@ MM::Allocator::UnregisterAllocationTag(IN ULONG Tag,
         Hash = (Hash + 1) & AllocationsTrackingTableMask;
     }
     while(Hash != Index);
+
+    /* Fallback to the expansion path */
+    UnregisterAllocationTagExpansion(Tag, Bytes, PoolType);
+}
+
+/**
+ * Unregisters a pool memory allocation in the tracking expansion table.
+ *
+ * @param Tag
+ *        Supplies the tag used to identify the allocation.
+ *
+ * @param Bytes
+ *        Supplies the size of the allocation.
+ *
+ * @param PoolType
+ *        Specifies the type of pool from which the memory was allocated.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::Allocator::UnregisterAllocationTagExpansion(IN ULONG Tag,
+                                                IN SIZE_T Bytes,
+                                                IN MMPOOL_TYPE PoolType)
+{
+    PPOOL_TRACKING_TABLE CpuTable;
+    ULONG Hash;
+    ULONG Processor;
+
+    /* Start a guarded code block */
+    {
+        /* Acquire the tracking table lock */
+        KE::SpinLockGuard TrackingTableLock(&AllocationsTrackingTableLock);
+
+        /* Scan the expansion table */
+        for(Hash = 0; Hash < AllocationsTrackingExpansionTableSize; Hash++)
+        {
+            /* Check if the current entry matches the tag */
+            if(AllocationsTrackingExpansionTable[Hash].Tag == Tag)
+            {
+                /* Update the appropriate statistics based on the pool type */
+                if((PoolType & MM_POOL_TYPE_MASK) == NonPagedPool)
+                {
+                    /* Update the non-paged allocation statistics */
+                    AllocationsTrackingExpansionTable[Hash].NonPagedFrees++;
+                    AllocationsTrackingExpansionTable[Hash].NonPagedBytes -= Bytes;
+                }
+                else
+                {
+                    /* Update the paged allocation statistics */
+                    AllocationsTrackingExpansionTable[Hash].PagedFrees++;
+                    AllocationsTrackingExpansionTable[Hash].PagedBytes -= Bytes;
+                }
+
+                /* Nothing more to do */
+                return;
+            }
+
+            /* Check if an empty slot is encountered */
+            if(AllocationsTrackingExpansionTable[Hash].Tag == 0)
+            {
+                /* Stop scanning as all active tags are contiguous */
+                break;
+            }
+        }
+    }
+
+    /* Target the index of the overflow bucket */
+    Hash = (ULONG)AllocationsTrackingTableSize - 1;
+
+    /* Retrieve the local tracking table for the current processor */
+    Processor = KE::Processor::GetCurrentProcessorNumber();
+    CpuTable = TagTables[Processor];
+
+    /* Update the appropriate statistics based on the pool type */
+    if((PoolType & MM_POOL_TYPE_MASK) == NonPagedPool)
+    {
+        /* Update the non-paged allocation statistics */
+        RTL::Atomic::Increment32((PLONG)&CpuTable[Hash].NonPagedFrees);
+        RTL::Atomic::ExchangeAdd64((PLONG_PTR)&CpuTable[Hash].NonPagedBytes, 0 - Bytes);
+    }
+    else
+    {
+        /* Update the paged allocation statistics */
+        RTL::Atomic::Increment32((PLONG)&CpuTable[Hash].PagedFrees);
+        RTL::Atomic::ExchangeAdd64((PLONG_PTR)&CpuTable[Hash].PagedBytes, 0 - Bytes);
+    }
 }
 
 /**

@@ -9,6 +9,12 @@
 #include <xtos.hh>
 
 
+/* Expansion table used to track pool memory allocations */
+PPOOL_TRACKING_TABLE MM::Allocator::AllocationsTrackingExpansionTable;
+
+/* Total number of entries in the expansion allocations tracking table */
+SIZE_T MM::Allocator::AllocationsTrackingExpansionTableSize;
+
 /* Global table used to track pool memory allocations */
 PPOOL_TRACKING_TABLE MM::Allocator::AllocationsTrackingTable;
 
