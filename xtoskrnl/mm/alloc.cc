@@ -1359,7 +1359,7 @@ MM::Allocator::InitializeAllocationsTracking(VOID)
             /* Check if the allocation failed duefor a single entry */
             if(AllocationsTrackingTableSize == 1)
             {
-                /* Failed to initialize the pool tracker, kernel panic */
+                /* Failed to initialize the pool tracker, raise kernel panic */
                 KE::Crash::Panic(0x41, TableSize, (ULONG_PTR)~0, (ULONG_PTR)~0, (ULONG_PTR)~0);
             }
 
@@ -1469,7 +1469,7 @@ MM::Allocator::InitializeBigAllocationsTracking(VOID)
             /* Check if the allocation failed duefor a single entry */
             if(BigAllocationsTrackingTableSize == 1)
             {
-                /* Failed to initialize the pool tracker, kernel panic */
+                /* Failed to initialize the pool tracker, raise kernel panic */
                 KE::Crash::Panic(0x41, TableSize, (ULONG_PTR)~0, (ULONG_PTR)~0, (ULONG_PTR)~0);
             }
 
