@@ -410,7 +410,7 @@ Xtos::InitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
     FbPages = EFI_SIZE_TO_PAGES(FbSize);
 
     /* Calculate number of pages needed for memory descriptor list */
-    DescriptorPages = EFI_SIZE_TO_PAGES(PageMap->MapSize * sizeof(LOADER_MEMORY_DESCRIPTOR));
+    DescriptorPages = EFI_SIZE_TO_PAGES(PageMap->MapSize * sizeof(LOADER_MEMORY_DESCRIPTOR) * 2);
 
     /* Allocate memory for the kernel initialization block and boot parameters */
     Status = XtLdrProtocol->Memory.AllocatePages(AllocateAnyPages, BlockPages, &PhysicalBlock);
