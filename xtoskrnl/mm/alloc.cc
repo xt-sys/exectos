@@ -747,8 +747,9 @@ MM::Allocator::FreeNonPagedPoolPages(IN PVOID VirtualAddress,
                                      OUT PPFN_NUMBER PagesFreed)
 {
     PMMFREE_POOL_ENTRY FreePage, NextPage, LastPage;
-    PFN_COUNT FreePages, Pages;
     PMMMEMORY_LAYOUT MemoryLayout;
+    PFN_COUNT FreePages, Pages;
+    PFN_NUMBER PageFrameNumber;
     PMMPFN Pfn, FirstPfn;
     PMMPTE PointerPte;
     ULONG Index;
@@ -760,11 +761,21 @@ MM::Allocator::FreeNonPagedPoolPages(IN PVOID VirtualAddress,
     PointerPte = MM::Paging::GetPteAddress(VirtualAddress);
     Pfn = MM::Pfn::GetPfnEntry(MM::Paging::GetPageFrameNumber(PointerPte));
 
+    /* Verify that the address is within the non-paged pool */
+    if((VirtualAddress < MemoryLayout->NonPagedPoolStart ||
+        VirtualAddress >= MemoryLayout->NonPagedPoolEnd) &&
+       (VirtualAddress < MemoryLayout->NonPagedExpansionPoolStart ||
+        VirtualAddress >= MemoryLayout->NonPagedExpansionPoolEnd))
+    {
+        /* Address does not belong to the non-paged pool, raise kernel panic */
+        KE::Crash::Panic(0xC2, 0x43, (ULONG_PTR)VirtualAddress, 0, 0);
+    }
+
     /* Basic sanity check to prevent double-frees or freeing unallocated memory */
     if(Pfn->u3.e1.ReadInProgress == 0)
     {
-        /* Memory is not marked as the start of an allocation, return error */
-        return STATUS_INVALID_PARAMETER;
+        /* Address is not an allocation head, raise kernel panic */
+        KE::Crash::Panic(0xC2, 0x41, (ULONG_PTR)VirtualAddress, (ULONG_PTR)Pfn, 0);
     }
 
     /* Save the first PFN entry and initialize the allocation page counter */
@@ -793,6 +804,49 @@ MM::Allocator::FreeNonPagedPoolPages(IN PVOID VirtualAddress,
     FirstPfn->u3.e1.ReadInProgress = 0;
     Pfn->u3.e1.WriteInProgress = 0;
 
+    /* Check if the address belongs to the non-paged expansion pool */
+    if(VirtualAddress >= MemoryLayout->NonPagedExpansionPoolStart)
+    {
+        /* Check if the allocation spans more than 3 pages and should be reclaimed */
+        if(Pages > 3)
+        {
+            /* Get the first PTE of the allocation and iterate over all pages */
+            PointerPte = MM::Paging::GetPteAddress(VirtualAddress);
+            for(Index = 0; Index < Pages; Index++)
+            {
+                /* Get the page frame number from the PTE */
+                PageFrameNumber = MM::Paging::GetPageFrameNumber(PointerPte);
+                Pfn = MM::Pfn::GetPfnEntry(PageFrameNumber);
+
+                /* Clear PFN shared count */
+                Pfn->u2.ShareCount = 0;
+
+                /* Decrement the reference count of the page table */
+                MM::Pfn::DecrementReferenceCount(Pfn, PageFrameNumber, FALSE);
+
+                /* Clear the PTE address and invalidate the PTE */
+                Pfn->PteAddress = NULLPTR;
+                MM::Paging::ClearPte(PointerPte);
+
+                /* Get the next PTE */
+                PointerPte = MM::Paging::GetNextPte(PointerPte);
+            }
+
+            /* Release reserved system PTEs back to the pool */
+            MM::Pte::ReleaseSystemPtes(MM::Paging::GetPteAddress(VirtualAddress), Pages, NonPagedPoolExpansion);
+
+            /* Check if a page count was requested */
+            if(PagesFreed != NULLPTR)
+            {
+                /* Return the number of pages freed */
+                *PagesFreed = FreePages;
+            }
+
+            /* Return success */
+            return STATUS_SUCCESS;
+        }
+    }
+
     /* Get the next PTE */
     PointerPte = MM::Paging::GetNextPte(PointerPte);
 
@@ -807,12 +861,12 @@ MM::Allocator::FreeNonPagedPoolPages(IN PVOID VirtualAddress,
         /* Check if the PTE is valid */
         if(MM::Paging::PteValid(PointerPte))
         {
-            /* Get the PFN entry for the page laying in either the expansion or initial nonpaged pool */
+            /* Get the PFN entry for the page laying in either the expansion or initial non-paged pool */
             Pfn = MM::Pfn::GetPfnEntry(MM::Paging::GetPageFrameNumber(PointerPte));
         }
         else
         {
-            /* Ignore the last page of the expansion nonpaged pool */
+            /* Ignore the last page of the non-paged expansion pool */
             Pfn = NULLPTR;
         }
     }
