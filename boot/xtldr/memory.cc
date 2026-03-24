@@ -547,7 +547,8 @@ Memory::MapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
             /* Make sure it's memory type is the same */
             if(Mapping1->MemoryType == Mapping2->MemoryType)
             {
-                /* It is already mapped */
+                /* Free the unused mapping structure and return success */
+                FreePool(Mapping1);
                 return STATUS_EFI_SUCCESS;
             }
         }
@@ -574,12 +575,15 @@ Memory::MapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
                     return Status;
                 }
 
-                /* Set mapping fields and insert it on the top */
+                /* Set mapping fields */
                 Mapping3->PhysicalAddress = PhysicalAddressEnd + 1;
                 Mapping3->VirtualAddress = (ULONGLONG)NULLPTR;
                 Mapping3->NumberOfPages = NumberOfMappedPages;
                 Mapping3->MemoryType = Mapping2->MemoryType;
+
+                /* Insert new mapping in front of the list and increase page map size */
                 RTL::LinkedList::InsertHeadList(&Mapping2->ListEntry, &Mapping3->ListEntry);
+                PageMap->MapSize++;
             }
 
             /* Calculate number of pages and the end of the physical address */
@@ -610,12 +614,15 @@ Memory::MapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
                     return Status;
                 }
 
-                /* Set mapping fields and insert it on the top */
+                /* Set mapping fields */
                 Mapping3->PhysicalAddress = Mapping1->PhysicalAddress;
                 Mapping3->VirtualAddress = (ULONGLONG)NULLPTR;
                 Mapping3->NumberOfPages = NumberOfMappedPages;
                 Mapping3->MemoryType = Mapping2->MemoryType;
+
+                /* Insert new mapping in front of the list and increase page map size */
                 RTL::LinkedList::InsertHeadList(&Mapping2->ListEntry, &Mapping3->ListEntry);
+                PageMap->MapSize++;
             }
 
             /* Calculate number of pages and the end of the physical address */
@@ -643,15 +650,19 @@ Memory::MapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
             Status = FreePool(Mapping2);
             ListEntry = MappingListEntry;
 
-            /* Go to the next mapping */
+            /* Decrease page map size and go to the next mapping */
+            PageMap->MapSize--;
             continue;
         }
 
         /* Determine physical address order */
         if(Mapping2->PhysicalAddress > Mapping1->PhysicalAddress)
         {
-            /* Insert new mapping in front */
+            /* Insert new mapping in front of the list and increase page map size */
             RTL::LinkedList::InsertHeadList(Mapping2->ListEntry.Blink, &Mapping1->ListEntry);
+            PageMap->MapSize++;
+
+            /* Return success */
             return STATUS_EFI_SUCCESS;
         }
 
@@ -659,7 +670,7 @@ Memory::MapVirtualMemory(IN OUT PXTBL_PAGE_MAPPING PageMap,
         ListEntry = ListEntry->Flink;
     }
 
-    /* Insert new mapping to the list and increase page map size */
+    /* Insert new mapping to the tail of the list and increase page map size */
     RTL::LinkedList::InsertTailList(&PageMap->MemoryMap, &Mapping1->ListEntry);
     PageMap->MapSize++;
 
