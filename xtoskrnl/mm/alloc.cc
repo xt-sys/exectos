@@ -1053,7 +1053,12 @@ MM::Allocator::FreePool(IN PVOID VirtualAddress,
 
         /* Retrieve original metadata while removing the allocation from the tracking table */
         Tag = UnregisterBigAllocationTag(VirtualAddress, &PageCount, PoolType);
-        if(!Tag)
+        if(Tag & MM_POOL_PROTECTED)
+        {
+            /* Strip the protected pool bit */
+            Tag &= ~MM_POOL_PROTECTED;
+        }
+        else if(!Tag)
         {
             /* Fallback to a default tag */
             Tag = SIGNATURE32('B', 'i', 'g', 'A');
@@ -1099,6 +1104,13 @@ MM::Allocator::FreePool(IN PVOID VirtualAddress,
     /* Extract the allocation identifying tag and initialize the consolidation flag */
     Tag = PoolEntry->PoolTag;
     Combined = FALSE;
+
+    /* Check if the allocation tag carries the protected pool modifier */
+    if(Tag & MM_POOL_PROTECTED)
+    {
+        /* Strip the protected pool bit */
+        Tag &= ~MM_POOL_PROTECTED;
+    }
 
     /* Remove the allocation from the tracking table */
     UnregisterAllocationTag(Tag, BlockSize * MM_POOL_BLOCK_SIZE, (MMPOOL_TYPE)(PoolEntry->PoolType - 1));
@@ -1466,6 +1478,9 @@ MM::Allocator::RegisterAllocationTag(IN ULONG Tag,
     /* Retrieve the local tracking table for the current processor */
     Processor = KE::Processor::GetCurrentProcessorNumber();
     CpuTable = TagTables[Processor];
+
+    /* Strip the protected pool bit */
+    Tag &= ~MM_POOL_PROTECTED;
 
     /* Compute the initial hash index */
     Hash = ComputeHash(Tag, AllocationsTrackingTableMask);
@@ -1860,6 +1875,9 @@ MM::Allocator::UnregisterAllocationTag(IN ULONG Tag,
     /* Retrieve the local tracking table for the current processor */
     Processor = KE::Processor::GetCurrentProcessorNumber();
     CpuTable = TagTables[Processor];
+
+    /* Strip the protected pool bit */
+    Tag &= ~MM_POOL_PROTECTED;
 
     /* Compute the initial hash index */
     Hash = ComputeHash(Tag, AllocationsTrackingTableMask);

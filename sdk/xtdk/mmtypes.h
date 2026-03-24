@@ -35,6 +35,7 @@
 
 /* Pool flags */
 #define MM_POOL_BIG_ALLOCATIONS_ENTRY_FREE         0x1
+#define MM_POOL_PROTECTED                          0x80000000
 #define MM_POOL_RAISE_EXCEPTION                    0x10
 
 /* Number of reserved zeroed PTEs */
