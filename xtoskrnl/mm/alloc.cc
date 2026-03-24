@@ -151,11 +151,12 @@ MM::Allocator::AllocateNonPagedPoolPages(IN PFN_COUNT Pages,
 
         /* Initialize the PFN entry for the allocated physical page */
         Pfn = MM::Pfn::GetPfnEntry(PageFrameNumber);
+        MM::Paging::SetPte(&Pfn->OriginalPte, 0, MM_READWRITE << MM_PROTECT_FIELD_SHIFT);
         Pfn->PteAddress = CurrentPte;
         Pfn->u2.ShareCount = 1;
         Pfn->u3.e1.PageLocation = ActiveAndValid;
         Pfn->u3.e2.ReferenceCount = 1;
-        Pfn->u4.VerifierAllocation = 0;
+        Pfn->u4.PteFrame = MM::Paging::GetPageFrameNumber(MM::Paging::GetPteAddress(CurrentPte));
 
         /* Build a valid PTE pointing to the allocated page frame */
         MM::Paging::SetPte(ValidPte, PageFrameNumber, 0);

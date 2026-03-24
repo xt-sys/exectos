@@ -41,6 +41,19 @@
 /* Number of reserved zeroed PTEs */
 #define MM_RESERVED_ZERO_PTES                      32
 
+/* Memory Manager Protection Bits */
+#define MM_ZERO_ACCESS                             0
+#define MM_READONLY                                1
+#define MM_EXECUTE                                 2
+#define MM_EXECUTE_READ                            3
+#define MM_READWRITE                               4
+#define MM_WRITECOPY                               5
+#define MM_EXECUTE_READWRITE                       6
+#define MM_EXECUTE_WRITECOPY                       7
+#define MM_PROTECT_ACCESS                          7
+
+/* Protection field shift */
+#define MM_PROTECT_FIELD_SHIFT                     5
 
 /* Memory manager page lists */
 typedef enum _MMPAGELISTS
