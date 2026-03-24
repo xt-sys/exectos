@@ -409,6 +409,9 @@ Xtos::InitializeLoaderBlock(IN PXTBL_PAGE_MAPPING PageMap,
     }
     FbPages = EFI_SIZE_TO_PAGES(FbSize);
 
+    /* Precommit page map to allocate memory */
+    XtLdrProtocol->Memory.CommitPageMap(PageMap);
+
     /* Calculate number of pages needed for memory descriptor list */
     DescriptorPages = EFI_SIZE_TO_PAGES(PageMap->MapSize * sizeof(LOADER_MEMORY_DESCRIPTOR) * 2);
 
