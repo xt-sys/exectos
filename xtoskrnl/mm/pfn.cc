@@ -185,7 +185,7 @@ MM::Pfn::DecrementReferenceCount(IN PMMPFN PageFrameNumber,
     }
 
     /* Check if the PTE is marked as being ready for removal */
-    if(MM::Paging::GetPte(PageFrameNumber->PteAddress) & 0x1)
+    if((ULONG_PTR)PageFrameNumber->PteAddress & 0x1)
     {
         /* Check the page's cache attribute */
         if((PageFrameNumber->u3.e1.CacheAttribute != PfnCached) &&
