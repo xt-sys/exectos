@@ -206,5 +206,10 @@ XTAPI
 VOID
 MM::KernelPool::FreeProcessorStructures(IN PVOID StructuresData)
 {
-    UNIMPLEMENTED;
+    /* Check if the provided pointer is valid */
+    if(StructuresData != NULLPTR)
+    {
+        /* Release the contiguous memory block back */
+        MM::Allocator::FreePool(StructuresData, 0);
+    }
 }
