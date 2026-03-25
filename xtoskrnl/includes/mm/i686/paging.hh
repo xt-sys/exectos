@@ -25,6 +25,7 @@ namespace MM
                                            IN LONG Count);
             STATIC XTAPI BOOLEAN CanonicalAddress(IN PVOID VirtualAddress);
             STATIC XTAPI VOID ClearPte(IN PMMPTE PtePointer);
+            STATIC XTAPI VOID FlushEntireTlb(VOID);
             STATIC XTAPI VOID FlushTlb(VOID);
             STATIC XTAPI ULONG_PTR GetNextEntry(IN PMMPTE Pte);
             STATIC XTAPI PMMPTE GetNextPte(IN PMMPTE Pte);

@@ -191,7 +191,8 @@ MM::Pfn::DecrementReferenceCount(IN PMMPFN PageFrameNumber,
         if((PageFrameNumber->u3.e1.CacheAttribute != PfnCached) &&
            (PageFrameNumber->u3.e1.CacheAttribute != PfnNotMapped))
         {
-            UNIMPLEMENTED;
+            /* Flush the TLB to prevent cache attribute conflicts from stale non-cached mappings */
+            MM::Paging::FlushEntireTlb();
         }
 
         /* The page is no longer needed, free it by linking it to the free list */
@@ -288,7 +289,7 @@ MM::Pfn::DecrementShareCount(IN PMMPFN PageFrameNumber,
         if(PageFrameNumber->u3.e2.ReferenceCount == 1)
         {
             /* Check if the PTE is marked as being ready for removal */
-            if(MM::Paging::GetPte(PageFrameNumber->PteAddress) & 0x1)
+            if((ULONG_PTR)PageFrameNumber->PteAddress & 0x1)
             {
                 /* Reset the reference count */
                 PageFrameNumber->u3.e2.ReferenceCount = 0;
@@ -297,7 +298,8 @@ MM::Pfn::DecrementShareCount(IN PMMPFN PageFrameNumber,
                 if((PageFrameNumber->u3.e1.CacheAttribute != PfnCached) &&
                    (PageFrameNumber->u3.e1.CacheAttribute != PfnNotMapped))
                 {
-                    UNIMPLEMENTED;
+                    /* Flush the TLB to prevent cache attribute conflicts from stale non-cached mappings */
+                    MM::Paging::FlushEntireTlb();
                 }
 
                 /* Mark the page as active and valid again */

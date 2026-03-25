@@ -68,7 +68,22 @@ MM::Paging::ClearPte(IN PMMPTE PtePointer)
 }
 
 /**
- * Flushes current Translation Lookaside Buffer (TLB)
+ * Flushes the entire Translation Lookaside Buffer (TLB) on all processors.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::Paging::FlushEntireTlb(VOID)
+{
+    /* Temporarily fallback to FlushTlb() as SMP is not supported yet */
+    FlushTlb();
+}
+
+/**
+ * Flushes current Translation Lookaside Buffer (TLB).
  *
  * @return This routine does not return any value.
  *
