@@ -76,6 +76,7 @@ KE::Crash::Panic(IN ULONG Code,
                  IN ULONG_PTR Parameter3,
                  IN ULONG_PTR Parameter4)
 {
-    KD::DebugIo::KdPrint(L"Fatal System Error: 0x%08lx\nKernel Panic!\n\n", Code);
+    KD::DebugIo::KdPrint(L"Fatal System Error: 0x%08lx (0x%zx 0x%zx 0x%zx 0x%zx)\nKernel Panic!\n\n",
+                         Code, Parameter1, Parameter2, Parameter3, Parameter4);
     HaltSystem();
 }
