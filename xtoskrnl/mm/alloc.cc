@@ -357,10 +357,6 @@ MM::Allocator::AllocatePool(IN MMPOOL_TYPE PoolType,
         /* Register the allocation in the tracking table */
         RegisterAllocationTag(Tag, SIZE_TO_PAGES(Bytes), PoolType);
 
-        /* Clear the internal list links to prevent corruption */
-        ((PLIST_ENTRY)PoolEntry)->Flink = NULLPTR;
-        ((PLIST_ENTRY)PoolEntry)->Blink = NULLPTR;
-
         /* Supply the allocated address and return success */
         *Memory = PoolEntry;
         return STATUS_SUCCESS;
@@ -468,7 +464,7 @@ MM::Allocator::AllocatePool(IN MMPOOL_TYPE PoolType,
             /* Assign the specified identification tag */
             PoolEntry->PoolTag = Tag;
 
-            /* Clear the internal list links to prevent corruption */
+            /* Clear the internal list links */
             (GetPoolFreeBlock(PoolEntry))->Flink = NULLPTR;
             (GetPoolFreeBlock(PoolEntry))->Blink = NULLPTR;
 
@@ -541,10 +537,6 @@ MM::Allocator::AllocatePool(IN MMPOOL_TYPE PoolType,
 
     /* Apply the requested identification tag */
     PoolEntry->PoolTag = Tag;
-
-    /* Clear the internal list links to prevent corruption */
-    (GetPoolFreeBlock(PoolEntry))->Flink = NULLPTR;
-    (GetPoolFreeBlock(PoolEntry))->Blink = NULLPTR;
 
     /* Supply the allocated address and return success */
     *Memory = GetPoolFreeBlock(PoolEntry);
