@@ -818,14 +818,14 @@ MM::Allocator::FreeNonPagedPoolPages(IN PVOID VirtualAddress,
                 PageFrameNumber = MM::Paging::GetPageFrameNumber(PointerPte);
                 Pfn = MM::Pfn::GetPfnEntry(PageFrameNumber);
 
-                /* Clear PFN shared count */
+                /* Clear PFN shared count and mark the PFN as deleted */
                 Pfn->u2.ShareCount = 0;
+                Pfn->PteAddress = (PMMPTE)((ULONG_PTR)Pfn->PteAddress | 0x1);
 
                 /* Decrement the reference count of the page table */
                 MM::Pfn::DecrementReferenceCount(Pfn, PageFrameNumber, FALSE);
 
-                /* Clear the PTE address and invalidate the PTE */
-                Pfn->PteAddress = NULLPTR;
+                /* Invalidate the PTE */
                 MM::Paging::ClearPte(PointerPte);
 
                 /* Get the next PTE */
