@@ -10,6 +10,41 @@
 
 
 /**
+ * Checks whether the APIC is supported by the processor.
+ *
+ * @return This routine returns TRUE if APIC is supported, or FALSE otherwise.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+BOOLEAN
+HL::Pic::CheckApicSupport(VOID)
+{
+    CPUID_REGISTERS CpuRegisters;
+
+    /* Prepare CPUID registers */
+    CpuRegisters.Leaf = CPUID_GET_STANDARD1_FEATURES;
+    CpuRegisters.SubLeaf = 0;
+    CpuRegisters.Eax = 0;
+    CpuRegisters.Ebx = 0;
+    CpuRegisters.Ecx = 0;
+    CpuRegisters.Edx = 0;
+
+    /* Get CPUID */
+    AR::CpuFunc::CpuId(&CpuRegisters);
+
+    /* Check APIC status from the CPUID results */
+    if(!(CpuRegisters.Edx & CPUID_FEATURES_EDX_APIC))
+    {
+        /* APIC is not supported */
+        return FALSE;
+    }
+
+    /* APIC is supported */
+    return TRUE;
+}
+
+/**
  * Checks whether the x2APIC extension is supported by the processor.
  *
  * @return This routine returns TRUE if x2APIC is supported, or FALSE otherwise.
@@ -123,6 +158,14 @@ HL::Pic::InitializeApic(VOID)
     APIC_BASE_REGISTER BaseRegister;
     APIC_LVT_REGISTER LvtRegister;
     ULONG CpuNumber;
+
+    /* Check APIC support */
+    if(!CheckApicSupport())
+    {
+        /* APIC is not supported, raise kernel panic */
+        DebugPrint(L"FATAL ERROR: Local APIC not present.\n");
+        KE::Crash::Panic(0x5D, CPUID_GET_STANDARD1_FEATURES, 0x0, 0x0, CPUID_FEATURES_EDX_APIC);
+    }
 
     /* Determine APIC mode (xAPIC compatibility or x2APIC) */
     if(CheckX2ApicSupport())

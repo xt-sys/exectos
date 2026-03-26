@@ -34,6 +34,13 @@ namespace AR
                                                        OUT PVOID *TrampolineCode,
                                                        OUT PULONG_PTR TrampolineSize);
             STATIC XTAPI VOID InitializeProcessor(IN PVOID ProcessorStructures);
+            STATIC XTAPI VOID SetIdtGate(IN PKIDTENTRY Idt,
+                                         IN USHORT Vector,
+                                         IN PVOID Handler,
+                                         IN USHORT Selector,
+                                         IN USHORT Ist,
+                                         IN USHORT Dpl,
+                                         IN USHORT Type);
 
         private:
             STATIC XTAPI VOID IdentifyProcessor(VOID);
@@ -67,13 +74,6 @@ namespace AR
             STATIC XTAPI VOID SetGdtEntryBase(IN PKGDTENTRY Gdt,
                                               IN USHORT Selector,
                                               IN ULONG_PTR Base);
-            STATIC XTAPI VOID SetIdtGate(IN PKIDTENTRY Idt,
-                                         IN USHORT Vector,
-                                         IN PVOID Handler,
-                                         IN USHORT Selector,
-                                         IN USHORT Ist,
-                                         IN USHORT Dpl,
-                                         IN USHORT Type);
             STATIC XTAPI VOID SetNonMaskableInterruptTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock,
                                                               IN PVOID KernelFaultStack);
 
