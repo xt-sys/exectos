@@ -50,6 +50,7 @@
 #include <hlfuncs.h>
 #include <kdfuncs.h>
 #include <kefuncs.h>
+#include <mmfuncs.h>
 #include <rtlfuncs.h>
 
 /* Architecture specific XT routines */

@@ -61,6 +61,7 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/mm/alloc.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/colors.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/data.cc
+    ${XTOSKRNL_SOURCE_DIR}/mm/exports.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/hlpool.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/kpool.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/mmgr.cc
