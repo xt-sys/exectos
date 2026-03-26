@@ -33,6 +33,11 @@ KE::Irq::SetInterruptHandler(IN ULONG Vector,
     ProcessorBlock = KE::Processor::GetCurrentProcessorBlock();
 
     /* Update interrupt handler */
-    ProcessorBlock->IdtBase[(UCHAR) Vector].Offset = (USHORT)((ULONG)Handler & 0xFFFF);
-    ProcessorBlock->IdtBase[(UCHAR) Vector].ExtendedOffset = (USHORT)((ULONG)Handler >> 16);
+    AR::ProcSup::SetIdtGate(ProcessorBlock->IdtBase,
+                            Vector,
+                            Handler,
+                            KGDT_R0_CODE,
+                            0,
+                            KIDT_ACCESS_RING0,
+                            I686_INTERRUPT_GATE);
 }
