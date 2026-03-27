@@ -242,7 +242,7 @@ AR::ProcSup::InitializeIdt(IN PKPROCESSOR_BLOCK ProcessorBlock)
     for(Vector = 0; Vector < IDT_ENTRIES; Vector++)
     {
         /* Set the IDT to handle unexpected interrupts */
-        SetIdtGate(ProcessorBlock->IdtBase, Vector, (PVOID)ArTrap0xFF, KGDT_R0_CODE, 0, KIDT_ACCESS_RING0, I686_INTERRUPT_GATE);
+        SetIdtGate(ProcessorBlock->IdtBase, Vector, (PVOID)ArTrapEntry[Vector], KGDT_R0_CODE, 0, KIDT_ACCESS_RING0, I686_INTERRUPT_GATE);
     }
 
     /* Setup IDT handlers for known interrupts and traps */

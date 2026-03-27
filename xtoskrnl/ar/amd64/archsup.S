@@ -187,3 +187,12 @@ KernelModeReturn$\Vector:
         ArCreateTrapHandler 0x\i\j
     .endr
 .endr
+
+/* Define array of pointers to the trap handlers */
+.global ArTrapEntry
+ArTrapEntry:
+.irp i,0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F
+    .irp j,0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F
+        .quad ArTrap0x\i\j
+    .endr
+.endr

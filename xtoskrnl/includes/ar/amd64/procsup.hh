@@ -12,6 +12,9 @@
 #include <xtos.hh>
 
 
+/* External array of pointers to the trap handlers */
+XTCLINK ULONG_PTR ArTrapEntry[256];
+
 /* Architecture-specific Library */
 namespace AR
 {

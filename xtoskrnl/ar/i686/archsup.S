@@ -82,7 +82,7 @@ _ArTrap\Vector:
     jmp UserMode$\Vector
 
 KernelMode$\Vector:
-    /* Save kernel stack pointer (SS:ESP) as CPU did not push them */
+    /* Save kernel stack pointer (SS:ESP) */
     movl %ss, %eax
     mov %eax, TrapSegSs(%ebp)
     lea TrapEsp(%ebp), %eax
@@ -131,5 +131,14 @@ KernelModeReturn$\Vector:
 .irp i,0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F
     .irp j,0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F
         ArCreateTrapHandler 0x\i\j
+    .endr
+.endr
+
+/* Define array of pointers to the trap handlers */
+.global ArTrapEntry
+ArTrapEntry:
+.irp i,0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F
+    .irp j,0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F
+        .long ArTrap0x\i\j
     .endr
 .endr
