@@ -18,6 +18,7 @@
 #include <hl/init.hh>
 #include <hl/ioport.hh>
 #include <hl/ioreg.hh>
+#include <hl/irq.hh>
 #include <hl/pic.hh>
 #include <hl/runlevel.hh>
 

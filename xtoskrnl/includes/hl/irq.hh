@@ -1,19 +1,19 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/includes/ke/irq.hh
- * DESCRIPTION:     Kernel interrupts support
+ * FILE:            xtoskrnl/includes/hl/irq.hh
+ * DESCRIPTION:     Interrupts support
  * DEVELOPERS:      Aiken Harris <harraiken91@gmail.com>
  */
 
-#ifndef __XTOSKRNL_KE_IRQ_HH
-#define __XTOSKRNL_KE_IRQ_HH
+#ifndef __XTOSKRNL_HL_IRQ_HH
+#define __XTOSKRNL_HL_IRQ_HH
 
 #include <xtos.hh>
 
 
-/* Kernel Library */
-namespace KE
+/* Hardware Layer */
+namespace HL
 {
     class Irq
     {
@@ -23,4 +23,4 @@ namespace KE
     };
 }
 
-#endif /* __XTOSKRNL_KE_IRQ_HH */
+#endif /* __XTOSKRNL_HL_IRQ_HH */
