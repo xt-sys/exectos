@@ -135,10 +135,10 @@ KernelModeReturn$\Vector:
 .endr
 
 /* Define array of pointers to the trap handlers */
-.global ArTrapEntry
-ArTrapEntry:
+.global _ArTrapEntry
+_ArTrapEntry:
 .irp i,0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F
     .irp j,0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F
-        .long ArTrap0x\i\j
+        .long _ArTrap0x\i\j
     .endr
 .endr
