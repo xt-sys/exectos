@@ -136,8 +136,8 @@ XTAPI
 VOID
 AR::ProcSup::InitializeProcessor(IN PVOID ProcessorStructures)
 {
+    PVOID KernelBootStack, KernelFaultStack, KernelNmiStack;
     KDESCRIPTOR GdtDescriptor, IdtDescriptor;
-    PVOID KernelBootStack, KernelFaultStack;
     PKPROCESSOR_BLOCK ProcessorBlock;
     PKGDTENTRY Gdt;
     PKIDTENTRY Idt;
@@ -148,7 +148,7 @@ AR::ProcSup::InitializeProcessor(IN PVOID ProcessorStructures)
     {
         /* Assign CPU structures from provided buffer */
         InitializeProcessorStructures(ProcessorStructures, &Gdt, &Tss, &ProcessorBlock,
-                                      &KernelBootStack, &KernelFaultStack);
+                                      &KernelBootStack, &KernelFaultStack, &KernelNmiStack);
 
         /* Use global IDT */
         Idt = InitialIdt;
@@ -161,6 +161,7 @@ AR::ProcSup::InitializeProcessor(IN PVOID ProcessorStructures)
         Tss = &InitialTss;
         KernelBootStack = &BootStack;
         KernelFaultStack = &FaultStack;
+        KernelNmiStack = &NmiStack;
         ProcessorBlock = &InitialProcessorBlock;
     }
 
@@ -170,7 +171,7 @@ AR::ProcSup::InitializeProcessor(IN PVOID ProcessorStructures)
     /* Initialize GDT, IDT and TSS */
     InitializeGdt(ProcessorBlock);
     InitializeIdt(ProcessorBlock);
-    InitializeTss(ProcessorBlock, KernelBootStack, KernelFaultStack);
+    InitializeTss(ProcessorBlock, KernelBootStack, KernelFaultStack, KernelNmiStack);
 
     /* Set GDT and IDT descriptors */
     GdtDescriptor.Base = Gdt;
@@ -256,7 +257,7 @@ AR::ProcSup::InitializeIdt(IN PKPROCESSOR_BLOCK ProcessorBlock)
     /* Setup IDT handlers for known interrupts and traps */
     SetIdtGate(ProcessorBlock->IdtBase, 0x00, (PVOID)ArTrapEntry[0x00], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_TRAP_GATE);
     SetIdtGate(ProcessorBlock->IdtBase, 0x01, (PVOID)ArTrapEntry[0x01], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_TRAP_GATE);
-    SetIdtGate(ProcessorBlock->IdtBase, 0x02, (PVOID)ArTrapEntry[0x02], KGDT_R0_CODE, KIDT_IST_PANIC, KIDT_ACCESS_RING0, AMD64_INTERRUPT_GATE);
+    SetIdtGate(ProcessorBlock->IdtBase, 0x02, (PVOID)ArTrapEntry[0x02], KGDT_R0_CODE, KIDT_IST_NMI, KIDT_ACCESS_RING0, AMD64_INTERRUPT_GATE);
     SetIdtGate(ProcessorBlock->IdtBase, 0x03, (PVOID)ArTrapEntry[0x03], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING3, AMD64_TRAP_GATE);
     SetIdtGate(ProcessorBlock->IdtBase, 0x04, (PVOID)ArTrapEntry[0x04], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING3, AMD64_TRAP_GATE);
     SetIdtGate(ProcessorBlock->IdtBase, 0x05, (PVOID)ArTrapEntry[0x05], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_TRAP_GATE);
@@ -277,7 +278,7 @@ AR::ProcSup::InitializeIdt(IN PKPROCESSOR_BLOCK ProcessorBlock)
     SetIdtGate(ProcessorBlock->IdtBase, 0x2C, (PVOID)ArTrapEntry[0x2C], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING3, AMD64_TRAP_GATE);
     SetIdtGate(ProcessorBlock->IdtBase, 0x2D, (PVOID)ArTrapEntry[0x2D], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING3, AMD64_TRAP_GATE);
     SetIdtGate(ProcessorBlock->IdtBase, 0x2F, (PVOID)ArTrapEntry[0x2F], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_INTERRUPT_GATE);
-    SetIdtGate(ProcessorBlock->IdtBase, 0xE1, (PVOID)ArTrapEntry[0xE1], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_INTERRUPT_GATE);
+    SetIdtGate(ProcessorBlock->IdtBase, 0xE1, (PVOID)ArInterruptEntry[0xE1], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_INTERRUPT_GATE);
 }
 
 /**
@@ -429,7 +430,8 @@ AR::ProcSup::InitializeProcessorStructures(IN PVOID ProcessorStructures,
                                            OUT PKTSS *Tss,
                                            OUT PKPROCESSOR_BLOCK *ProcessorBlock,
                                            OUT PVOID *KernelBootStack,
-                                           OUT PVOID *KernelFaultStack)
+                                           OUT PVOID *KernelFaultStack,
+                                           OUT PVOID *KernelNmiStack)
 {
     UINT_PTR Address;
 
@@ -440,8 +442,12 @@ AR::ProcSup::InitializeProcessorStructures(IN PVOID ProcessorStructures,
     *KernelBootStack = (PVOID)Address;
     Address += KERNEL_STACK_SIZE;
 
-    /* Assign a space for kernel fault stack, no advance needed as stack grows down */
+    /* Assign a space for kernel fault stack and advance */
     *KernelFaultStack = (PVOID)Address;
+    Address += KERNEL_STACK_SIZE;
+
+    /* Assign a space for kernel NMI stack, no advance needed as stack grows down */
+    *KernelNmiStack = (PVOID)Address;
 
     /* Assign a space for GDT and advance */
     *Gdt = (PKGDTENTRY)(PVOID)Address;
@@ -492,7 +498,8 @@ XTAPI
 VOID
 AR::ProcSup::InitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock,
                            IN PVOID KernelBootStack,
-                           IN PVOID KernelFaultStack)
+                           IN PVOID KernelFaultStack,
+                           IN PVOID KernelNmiStack)
 {
     /* Fill TSS with zeroes */
     RtlZeroMemory(ProcessorBlock->TssBase, sizeof(KTSS));
@@ -502,6 +509,8 @@ AR::ProcSup::InitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock,
     ProcessorBlock->TssBase->Rsp0 = (ULONG_PTR)KernelBootStack;
     ProcessorBlock->TssBase->Ist[KIDT_IST_PANIC] = (ULONG_PTR)KernelFaultStack;
     ProcessorBlock->TssBase->Ist[KIDT_IST_MCA] = (ULONG_PTR)KernelFaultStack;
+    ProcessorBlock->TssBase->Ist[KIDT_IST_NMI] = (ULONG_PTR)KernelNmiStack;
+
 }
 
 /**

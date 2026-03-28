@@ -58,6 +58,7 @@
 #define KIDT_IST_RESERVED                         0
 #define KIDT_IST_PANIC                            1
 #define KIDT_IST_MCA                              2
+#define KIDT_IST_NMI                              3
 
 /* AMD64 Segment Types */
 #define AMD64_TASK_GATE                           0x5

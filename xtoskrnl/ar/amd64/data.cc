@@ -26,3 +26,6 @@ KPROCESSOR_BLOCK AR::ProcSup::InitialProcessorBlock;
 
 /* Initial TSS */
 KTSS AR::ProcSup::InitialTss;
+
+/* Initial kernel NMI stack */
+UCHAR AR::ProcSup::NmiStack[KERNEL_STACK_SIZE] = {};

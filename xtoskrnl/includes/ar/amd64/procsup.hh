@@ -24,6 +24,7 @@ namespace AR
             STATIC KIDTENTRY InitialIdt[IDT_ENTRIES];
             STATIC KPROCESSOR_BLOCK InitialProcessorBlock;
             STATIC KTSS InitialTss;
+            STATIC UCHAR NmiStack[KERNEL_STACK_SIZE];
 
         public:
             STATIC XTAPI PVOID GetBootStack(VOID);
@@ -54,11 +55,13 @@ namespace AR
                                                             OUT PKTSS *Tss,
                                                             OUT PKPROCESSOR_BLOCK *ProcessorBlock,
                                                             OUT PVOID *KernelBootStack,
-                                                            OUT PVOID *KernelFaultStack);
+                                                            OUT PVOID *KernelFaultStack,
+                                                            OUT PVOID *KernelNmiStack);
             STATIC XTAPI VOID InitializeSegments(VOID);
             STATIC XTAPI VOID InitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock,
                                             IN PVOID KernelBootStack,
-                                            IN PVOID KernelFaultStack);
+                                            IN PVOID KernelFaultStack,
+                                            IN PVOID KernelNmiStack);
             STATIC XTAPI VOID SetGdtEntry(IN PKGDTENTRY Gdt,
                                           IN USHORT Selector,
                                           IN ULONG_PTR Base,
