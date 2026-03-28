@@ -20,6 +20,7 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/cpu.cc
     ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/pic.cc
     ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/ioport.cc
+    ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/irq.cc
     ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/runlevel.cc
     ${XTOSKRNL_SOURCE_DIR}/hl/acpi.cc
     ${XTOSKRNL_SOURCE_DIR}/hl/cport.cc
@@ -31,7 +32,6 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/kd/data.cc
     ${XTOSKRNL_SOURCE_DIR}/kd/dbgio.cc
     ${XTOSKRNL_SOURCE_DIR}/kd/exports.cc
-    ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/irq.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/krnlinit.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/kthread.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/proc.cc

@@ -13,20 +13,29 @@
 
 
 /**
- * Creates a trap handler for the specified vector.
+ * Creates a trap or interrupt handler for the specified vector.
  *
  * @param Vector
- *        Supplies a trap vector number.
+ *        Supplies a trap/interrupt vector number.
+ *
+ * @param Type
+ *        Specifies whether the handler is designed to handle an interrupt or a trap.
  *
  * @return This macro does not return any value.
  *
  * @since XT 1.0
  */
-.macro ArCreateTrapHandler Vector
-.global ArTrap\Vector
-ArTrap\Vector:
-    /* Push fake error code for non-error vectors */
-    .if \Vector != 8 && \Vector != 10 && \Vector != 11 && \Vector != 12 && \Vector != 13 && \Vector != 14 && \Vector != 17 && \Vector != 30
+.macro ArCreateTrapHandler Vector Type
+.global Ar\Type\Vector
+Ar\Type\Vector:
+    /* Check handler type */
+    .ifc \Type,Trap
+        /* Push fake error code for non-error vector traps */
+        .if \Vector != 8 && \Vector != 10 && \Vector != 11 && \Vector != 12 && \Vector != 13 && \Vector != 14 && \Vector != 17 && \Vector != 30
+            push $0
+        .endif
+    .else
+        /* Push fake error code for interrupts */
         push $0
     .endif
 
@@ -106,30 +115,37 @@ ArTrap\Vector:
     mov %cs, %ax
     and $3, %al
     mov %al, TrapPreviousMode(%rbp)
-    jz KernelMode$\Vector
+    jz KernelMode\Type\Vector
     swapgs
-    jmp UserMode$\Vector
+    jmp UserMode\Type\Vector
 
-KernelMode$\Vector:
+KernelMode\Type\Vector:
     /* Save kernel stack pointer (SS:RSP) */
     movl %ss, %eax
     mov %eax, TrapSegSs(%rbp)
     lea TRAP_FRAME_SIZE(%rbp), %rax
     mov %rax, TrapRsp(%rbp)
 
-UserMode$\Vector:
-    /* Push Frame Pointer, clear direction flag and pass to trap dispatcher */
+UserMode\Type\Vector:
+    /* Push Frame Pointer and clear direction flag */
     mov %rsp, %rcx
     cld
-    call ArDispatchTrap
+
+    .ifc \Type,Trap
+        /* Pass to the trap dispatcher */
+        call ArDispatchTrap
+    .else
+        /* Pass to the interrupt dispatcher */
+        call ArDispatchTrap
+    .endif
 
     /* Test previous mode and swapgs if needed */
     testb $1, TrapPreviousMode(%rbp)
-    jz KernelModeReturn$\Vector
+    jz KernelModeReturn\Type\Vector
     cli
     swapgs
 
-KernelModeReturn$\Vector:
+KernelModeReturn\Type\Vector:
     /* Restore XMM registers */
     movdqa TrapXmm0(%rbp), %xmm0
     movdqa TrapXmm1(%rbp), %xmm1
@@ -181,9 +197,28 @@ KernelModeReturn$\Vector:
     iretq
 .endm
 
-/* Populate common trap handlers */
+/* Populate common interrupt and trap handlers */
 .irp i,0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F
     .irp j,0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F
-        ArCreateTrapHandler 0x\i\j
+        ArCreateTrapHandler 0x\i\j Interrupt
+        ArCreateTrapHandler 0x\i\j Trap
+    .endr
+.endr
+
+/* Define array of pointers to the interrupt handlers */
+.global ArInterruptEntry
+ArInterruptEntry:
+.irp i,0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F
+    .irp j,0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F
+        .quad ArInterrupt0x\i\j
+    .endr
+.endr
+
+/* Define array of pointers to the trap handlers */
+.global ArTrapEntry
+ArTrapEntry:
+.irp i,0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F
+    .irp j,0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F
+        .quad ArTrap0x\i\j
     .endr
 .endr

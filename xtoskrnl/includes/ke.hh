@@ -17,7 +17,6 @@
 #include <ke/dpc.hh>
 #include <ke/event.hh>
 #include <ke/guard.hh>
-#include <ke/irq.hh>
 #include <ke/kprocess.hh>
 #include <ke/krnlinit.hh>
 #include <ke/kthread.hh>

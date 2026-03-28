@@ -249,8 +249,8 @@ HL::Pic::InitializeApic(VOID)
     WriteApicRegister(APIC_LINT1, LvtRegister.Long);
 
     /* Register interrupt handlers */
-    KE::Irq::SetInterruptHandler(APIC_VECTOR_SPURIOUS, (PVOID)HandleApicSpuriousService);
-    KE::Irq::SetInterruptHandler(PIC1_VECTOR_SPURIOUS, (PVOID)HandlePicSpuriousService);
+    HL::Irq::SetInterruptHandler(APIC_VECTOR_SPURIOUS, (PVOID)HandleApicSpuriousService);
+    HL::Irq::SetInterruptHandler(PIC1_VECTOR_SPURIOUS, (PVOID)HandlePicSpuriousService);
 
     /* Clear any pre-existing errors */
     WriteApicRegister(APIC_ESR, 0);

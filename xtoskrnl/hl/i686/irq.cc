@@ -1,9 +1,10 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/ke/i686/irq.cc
- * DESCRIPTION:     Kernel interrupts support for i686 architecture
+ * FILE:            xtoskrnl/hl/i686/irq.cc
+ * DESCRIPTION:     Interrupts support for i686 architecture
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ *                  Aiken Harris <harraiken91@gmail.com>
  */
 
 #include <xtos.hh>
@@ -24,7 +25,7 @@
  */
 XTAPI
 VOID
-KE::Irq::SetInterruptHandler(IN ULONG Vector,
+HL::Irq::SetInterruptHandler(IN ULONG Vector,
                              IN PVOID Handler)
 {
     PKPROCESSOR_BLOCK ProcessorBlock;
