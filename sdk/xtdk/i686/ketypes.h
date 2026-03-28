@@ -130,6 +130,7 @@
 
 /* XTOS Kernel stack size */
 #define KERNEL_STACK_SIZE                 0x4000
+#define KERNEL_STACKS                     2
 
 /* XTOS Kernel stack guard pages */
 #define KERNEL_STACK_GUARD_PAGES          1
