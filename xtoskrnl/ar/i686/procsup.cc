@@ -450,6 +450,16 @@ AR::ProcSup::InitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock,
                            IN PVOID KernelFaultStack,
                            IN PVOID KernelNmiStack)
 {
+    PKGDTENTRY TssEntry;
+
+    /* Setup System TSS entry in Global Descriptor Table */
+    TssEntry = (PKGDTENTRY)(&(ProcessorBlock->GdtBase[KGDT_SYS_TSS / sizeof(KGDTENTRY)]));
+    TssEntry->LimitLow = sizeof(KTSS) - 1;
+    TssEntry->Bits.LimitHigh = 0;
+    TssEntry->Bits.Dpl = 0;
+    TssEntry->Bits.Present = 1;
+    TssEntry->Bits.Type = I686_TSS;
+
     /* Clear I/O map */
     RtlSetMemory(ProcessorBlock->TssBase->IoMaps[0].IoMap, 0xFF, IOPM_FULL_SIZE);
 
@@ -471,12 +481,11 @@ AR::ProcSup::InitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock,
 
     /* Set I/O map base and disable traps */
     ProcessorBlock->TssBase->IoMapBase = sizeof(KTSS);
-    ProcessorBlock->TssBase->Esp0 = (ULONG_PTR)KernelBootStack;
     ProcessorBlock->TssBase->Flags = 0;
 
     /* Set CR3, LDT and SS */
     ProcessorBlock->TssBase->CR3 = CpuFunc::ReadControlRegister(3);
-    ProcessorBlock->TssBase->LDT = KGDT_R0_LDT;
+    ProcessorBlock->TssBase->LDT = 0;
     ProcessorBlock->TssBase->Ss0 = KGDT_R0_DATA;
 
     /* Initialize task gates for DoubleFault and NMI traps */
@@ -511,26 +520,24 @@ AR::ProcSup::SetDoubleFaultTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock,
 
     /* Initialize DoubleFault TSS and set initial state */
     Tss = (PKTSS)DoubleFaultTss;
-    Tss->IoMapBase = sizeof(KTSS);
     Tss->Flags = 0;
-    Tss->LDT = KGDT_R0_LDT;
+    Tss->LDT = 0;
     Tss->CR3 = CpuFunc::ReadControlRegister(3);
     Tss->Esp = (ULONG_PTR)KernelFaultStack;
     Tss->Esp0 = (ULONG_PTR)KernelFaultStack;
-    Tss->Eip = PtrToUlong(ArTrapEntry[0x08]);
+    Tss->Eip = (ULONG)(ULONG_PTR)ArTrapEntry[0x08];
     Tss->Cs = KGDT_R0_CODE;
     Tss->Ds = KGDT_R3_DATA | RPL_MASK;
     Tss->Es = KGDT_R3_DATA | RPL_MASK;
     Tss->Fs = KGDT_R0_PB;
-    Tss->Ss0 = KGDT_R0_DATA;
-    CpuFunc::StoreSegment(SEGMENT_SS, (PVOID)&Tss->Ss);
+    Tss->Ss = KGDT_R0_DATA;
 
     /* Setup DoubleFault TSS entry in Global Descriptor Table */
     TssEntry = (PKGDTENTRY)(&(ProcessorBlock->GdtBase[KGDT_DF_TSS / sizeof(KGDTENTRY)]));
     TssEntry->BaseLow = ((ULONG_PTR)Tss & 0xFFFF);
     TssEntry->Bytes.BaseMiddle = ((ULONG_PTR)Tss >> 16);
     TssEntry->Bytes.BaseHigh = ((ULONG_PTR)Tss >> 24);
-    TssEntry->LimitLow = sizeof(KTSS) - 1;
+    TssEntry->LimitLow = 0x68;
     TssEntry->Bits.LimitHigh = 0;
     TssEntry->Bits.Dpl = 0;
     TssEntry->Bits.Present = 1;
@@ -725,25 +732,24 @@ AR::ProcSup::SetNonMaskableInterruptTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock
 
     /* Initialize NMI TSS and set initial state */
     Tss = (PKTSS)NonMaskableInterruptTss;
-    Tss->IoMapBase = sizeof(KTSS);
     Tss->Flags = 0;
-    Tss->LDT = KGDT_R0_LDT;
+    Tss->LDT = 0;
     Tss->CR3 = CpuFunc::ReadControlRegister(3);
     Tss->Esp = (ULONG_PTR)KernelNmiStack;
     Tss->Esp0 = (ULONG_PTR)KernelNmiStack;
-    Tss->Eip = PtrToUlong(ArTrapEntry[0x02]);
+    Tss->Eip = (ULONG)(ULONG_PTR)ArTrapEntry[0x02];
     Tss->Cs = KGDT_R0_CODE;
     Tss->Ds = KGDT_R3_DATA | RPL_MASK;
     Tss->Es = KGDT_R3_DATA | RPL_MASK;
     Tss->Fs = KGDT_R0_PB;
-    CpuFunc::StoreSegment(SEGMENT_SS, (PVOID)&Tss->Ss);
+    Tss->Ss = KGDT_R0_DATA;
 
     /* Setup NMI TSS entry in Global Descriptor Table */
     TssEntry = (PKGDTENTRY)(&(ProcessorBlock->GdtBase[KGDT_NMI_TSS / sizeof(KGDTENTRY)]));
     TssEntry->BaseLow = ((ULONG_PTR)Tss & 0xFFFF);
     TssEntry->Bytes.BaseMiddle = ((ULONG_PTR)Tss >> 16);
     TssEntry->Bytes.BaseHigh = ((ULONG_PTR)Tss >> 24);
-    TssEntry->LimitLow = sizeof(KTSS) - 1;
+    TssEntry->LimitLow = 0x68;
     TssEntry->Bits.LimitHigh = 0;
     TssEntry->Bits.Dpl = 0;
     TssEntry->Bits.Present = 1;
