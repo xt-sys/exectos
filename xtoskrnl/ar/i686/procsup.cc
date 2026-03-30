@@ -429,6 +429,8 @@ AR::ProcSup::InitializeSegments(VOID)
     CpuFunc::LoadSegment(SEGMENT_DS, KGDT_R3_DATA | RPL_MASK);
     CpuFunc::LoadSegment(SEGMENT_ES, KGDT_R3_DATA | RPL_MASK);
     CpuFunc::LoadSegment(SEGMENT_FS, KGDT_R0_PB);
+    CpuFunc::LoadSegment(SEGMENT_GS, 0);
+    CpuFunc::LoadSegment(SEGMENT_SS, KGDT_R0_DATA);
 }
 
 /**
