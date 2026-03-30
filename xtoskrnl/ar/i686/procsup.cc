@@ -218,7 +218,7 @@ AR::ProcSup::InitializeGdt(IN PKPROCESSOR_BLOCK ProcessorBlock)
     SetGdtEntry(ProcessorBlock->GdtBase, KGDT_VDM_TILE, 0x0400, 0xFFFF, KGDT_TYPE_DATA, KGDT_DPL_USER, 0);
     SetGdtEntry(ProcessorBlock->GdtBase, KGDT_R0_LDT, 0x0, 0x0, I686_LDT, KGDT_DPL_SYSTEM, 0);
     SetGdtEntry(ProcessorBlock->GdtBase, KGDT_DF_TSS, 0x20000, 0xFFFF, I686_TSS, KGDT_DPL_SYSTEM, 0);
-    SetGdtEntry(ProcessorBlock->GdtBase, KGDT_NMI_TSS, 0x20000, 0xFFFF, KGDT_TYPE_CODE, KGDT_DPL_SYSTEM, 0);
+    SetGdtEntry(ProcessorBlock->GdtBase, KGDT_NMI_TSS, 0x20000, 0xFFFF, I686_TSS, KGDT_DPL_SYSTEM, 0);
     SetGdtEntry(ProcessorBlock->GdtBase, KGDT_VDBS, 0xB8000, 0x3FFF, KGDT_TYPE_DATA, KGDT_DPL_SYSTEM, 0);
     SetGdtEntry(ProcessorBlock->GdtBase, KGDT_ALIAS, (ULONG_PTR)ProcessorBlock->GdtBase, (GDT_ENTRIES * sizeof(KGDTENTRY)) - 1, KGDT_TYPE_DATA, KGDT_DPL_SYSTEM, 0);
 }
