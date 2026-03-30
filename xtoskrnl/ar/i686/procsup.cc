@@ -472,7 +472,8 @@ AR::ProcSup::InitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock,
     ProcessorBlock->TssBase->Esp0 = (ULONG_PTR)KernelBootStack;
     ProcessorBlock->TssBase->Flags = 0;
 
-    /* Set LDT and SS */
+    /* Set CR3, LDT and SS */
+    ProcessorBlock->TssBase->CR3 = CpuFunc::ReadControlRegister(3);
     ProcessorBlock->TssBase->LDT = KGDT_R0_LDT;
     ProcessorBlock->TssBase->Ss0 = KGDT_R0_DATA;
 
