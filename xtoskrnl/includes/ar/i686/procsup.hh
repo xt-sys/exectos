@@ -25,6 +25,7 @@ namespace AR
             STATIC KIDTENTRY InitialIdt[IDT_ENTRIES];
             STATIC KPROCESSOR_BLOCK InitialProcessorBlock;
             STATIC KTSS InitialTss;
+            STATIC UCHAR NmiStack[KERNEL_STACK_SIZE];
             STATIC UCHAR NonMaskableInterruptTss[KTSS_IO_MAPS];
 
 
@@ -57,11 +58,13 @@ namespace AR
                                                             OUT PKTSS *Tss,
                                                             OUT PKPROCESSOR_BLOCK *ProcessorBlock,
                                                             OUT PVOID *KernelBootStack,
-                                                            OUT PVOID *KernelFaultStack);
+                                                            OUT PVOID *KernelFaultStack,
+                                                            OUT PVOID *KernelNmiStack);
             STATIC XTAPI VOID InitializeSegments(VOID);
             STATIC XTAPI VOID InitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock,
                                             IN PVOID KernelBootStack,
-                                            IN PVOID KernelFaultStack);
+                                            IN PVOID KernelFaultStack,
+                                            IN PVOID KernelNmiStack);
             STATIC XTAPI VOID SetDoubleFaultTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock,
                                                      IN PVOID KernelFaultStack);
             STATIC XTAPI VOID SetGdtEntry(IN PKGDTENTRY Gdt,
@@ -75,7 +78,7 @@ namespace AR
                                               IN USHORT Selector,
                                               IN ULONG_PTR Base);
             STATIC XTAPI VOID SetNonMaskableInterruptTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock,
-                                                              IN PVOID KernelFaultStack);
+                                                              IN PVOID KernelNmiStack);
 
     };
 }

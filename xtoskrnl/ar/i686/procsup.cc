@@ -132,7 +132,7 @@ VOID
 AR::ProcSup::InitializeProcessor(IN PVOID ProcessorStructures)
 {
     KDESCRIPTOR GdtDescriptor, IdtDescriptor;
-    PVOID KernelBootStack, KernelFaultStack;
+    PVOID KernelBootStack, KernelFaultStack, KernelNmiStack;
     PKPROCESSOR_BLOCK ProcessorBlock;
     PKGDTENTRY Gdt;
     PKIDTENTRY Idt;
@@ -143,7 +143,7 @@ AR::ProcSup::InitializeProcessor(IN PVOID ProcessorStructures)
     {
         /* Assign CPU structures from provided buffer */
         InitializeProcessorStructures(ProcessorStructures, &Gdt, &Tss, &ProcessorBlock,
-                                      &KernelBootStack, &KernelFaultStack);
+                                      &KernelBootStack, &KernelFaultStack, &KernelNmiStack);
 
         /* Use global IDT */
         Idt = InitialIdt;
@@ -156,6 +156,7 @@ AR::ProcSup::InitializeProcessor(IN PVOID ProcessorStructures)
         Tss = &InitialTss;
         KernelBootStack = &BootStack;
         KernelFaultStack = &FaultStack;
+        KernelNmiStack = &NmiStack;
         ProcessorBlock = &InitialProcessorBlock;
     }
 
@@ -165,7 +166,7 @@ AR::ProcSup::InitializeProcessor(IN PVOID ProcessorStructures)
     /* Initialize GDT, IDT and TSS */
     InitializeGdt(ProcessorBlock);
     InitializeIdt(ProcessorBlock);
-    InitializeTss(ProcessorBlock, KernelBootStack, KernelFaultStack);
+    InitializeTss(ProcessorBlock, KernelBootStack, KernelFaultStack, KernelNmiStack);
 
     /* Set GDT and IDT descriptors */
     GdtDescriptor.Base = Gdt;
@@ -381,7 +382,8 @@ AR::ProcSup::InitializeProcessorStructures(IN PVOID ProcessorStructures,
                                            OUT PKTSS *Tss,
                                            OUT PKPROCESSOR_BLOCK *ProcessorBlock,
                                            OUT PVOID *KernelBootStack,
-                                           OUT PVOID *KernelFaultStack)
+                                           OUT PVOID *KernelFaultStack,
+                                           OUT PVOID *KernelNmiStack)
 {
     UINT_PTR Address;
 
@@ -392,8 +394,12 @@ AR::ProcSup::InitializeProcessorStructures(IN PVOID ProcessorStructures,
     *KernelBootStack = (PVOID)Address;
     Address += KERNEL_STACK_SIZE;
 
-    /* Assign a space for kernel fault stack, no advance needed as stack grows down */
+    /* Assign a space for kernel fault stack and advance */
     *KernelFaultStack = (PVOID)Address;
+    Address += KERNEL_STACK_SIZE;
+
+    /* Assign a space for kernel NMI stack, no advance needed as stack grows down */
+    *KernelNmiStack = (PVOID)Address;
 
     /* Assign a space for GDT and advance */
     *Gdt = (PKGDTENTRY)(PVOID)Address;
@@ -439,7 +445,8 @@ XTAPI
 VOID
 AR::ProcSup::InitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock,
                            IN PVOID KernelBootStack,
-                           IN PVOID KernelFaultStack)
+                           IN PVOID KernelFaultStack,
+                           IN PVOID KernelNmiStack)
 {
     /* Clear I/O map */
     RtlSetMemory(ProcessorBlock->TssBase->IoMaps[0].IoMap, 0xFF, IOPM_FULL_SIZE);
@@ -471,7 +478,7 @@ AR::ProcSup::InitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock,
 
     /* Initialize task gates for DoubleFault and NMI traps */
     SetDoubleFaultTssEntry(ProcessorBlock, KernelFaultStack);
-    SetNonMaskableInterruptTssEntry(ProcessorBlock, KernelFaultStack);
+    SetNonMaskableInterruptTssEntry(ProcessorBlock, KernelNmiStack);
 }
 
 /**
@@ -701,7 +708,7 @@ AR::ProcSup::SetIdtGate(IN PKIDTENTRY Idt,
 XTAPI
 VOID
 AR::ProcSup::SetNonMaskableInterruptTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock,
-                                             IN PVOID KernelFaultStack)
+                                             IN PVOID KernelNmiStack)
 {
     PKGDTENTRY TaskGateEntry, TssEntry;
     PKTSS Tss;
@@ -719,8 +726,8 @@ AR::ProcSup::SetNonMaskableInterruptTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock
     Tss->Flags = 0;
     Tss->LDT = KGDT_R0_LDT;
     Tss->CR3 = CpuFunc::ReadControlRegister(3);
-    Tss->Esp = (ULONG_PTR)KernelFaultStack;
-    Tss->Esp0 = (ULONG_PTR)KernelFaultStack;
+    Tss->Esp = (ULONG_PTR)KernelNmiStack;
+    Tss->Esp0 = (ULONG_PTR)KernelNmiStack;
     Tss->Eip = PtrToUlong(ArTrapEntry[0x02]);
     Tss->Cs = KGDT_R0_CODE;
     Tss->Ds = KGDT_R3_DATA | RPL_MASK;
