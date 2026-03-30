@@ -216,7 +216,7 @@ AR::ProcSup::InitializeGdt(IN PKPROCESSOR_BLOCK ProcessorBlock)
     SetGdtEntry(ProcessorBlock->GdtBase, KGDT_R0_PB, (ULONG_PTR)ProcessorBlock, sizeof(KPROCESSOR_BLOCK), KGDT_TYPE_DATA, KGDT_DPL_SYSTEM, 2);
     SetGdtEntry(ProcessorBlock->GdtBase, KGDT_R3_TEB, 0x0, 0xFFF, KGDT_TYPE_DATA | KGDT_DESCRIPTOR_ACCESSED, KGDT_DPL_USER, 2);
     SetGdtEntry(ProcessorBlock->GdtBase, KGDT_VDM_TILE, 0x0400, 0xFFFF, KGDT_TYPE_DATA, KGDT_DPL_USER, 0);
-    SetGdtEntry(ProcessorBlock->GdtBase, KGDT_R0_LDT, 0x0, 0x0, KGDT_TYPE_NONE, KGDT_DPL_SYSTEM, 0);
+    SetGdtEntry(ProcessorBlock->GdtBase, KGDT_R0_LDT, 0x0, 0x0, I686_LDT, KGDT_DPL_SYSTEM, 0);
     SetGdtEntry(ProcessorBlock->GdtBase, KGDT_DF_TSS, 0x20000, 0xFFFF, I686_TSS, KGDT_DPL_SYSTEM, 0);
     SetGdtEntry(ProcessorBlock->GdtBase, KGDT_NMI_TSS, 0x20000, 0xFFFF, KGDT_TYPE_CODE, KGDT_DPL_SYSTEM, 0);
     SetGdtEntry(ProcessorBlock->GdtBase, KGDT_VDBS, 0xB8000, 0x3FFF, KGDT_TYPE_DATA, KGDT_DPL_SYSTEM, 0);
@@ -520,6 +520,7 @@ AR::ProcSup::SetDoubleFaultTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock,
 
     /* Initialize DoubleFault TSS and set initial state */
     Tss = (PKTSS)DoubleFaultTss;
+    Tss->IoMapBase = sizeof(KTSS);
     Tss->Flags = 0;
     Tss->LDT = 0;
     Tss->CR3 = CpuFunc::ReadControlRegister(3);
@@ -531,6 +532,7 @@ AR::ProcSup::SetDoubleFaultTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock,
     Tss->Es = KGDT_R3_DATA | RPL_MASK;
     Tss->Fs = KGDT_R0_PB;
     Tss->Ss = KGDT_R0_DATA;
+    Tss->Ss0 = KGDT_R0_DATA;
 
     /* Setup DoubleFault TSS entry in Global Descriptor Table */
     TssEntry = (PKGDTENTRY)(&(ProcessorBlock->GdtBase[KGDT_DF_TSS / sizeof(KGDTENTRY)]));
@@ -732,6 +734,7 @@ AR::ProcSup::SetNonMaskableInterruptTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock
 
     /* Initialize NMI TSS and set initial state */
     Tss = (PKTSS)NonMaskableInterruptTss;
+    Tss->IoMapBase = sizeof(KTSS);
     Tss->Flags = 0;
     Tss->LDT = 0;
     Tss->CR3 = CpuFunc::ReadControlRegister(3);
@@ -743,6 +746,7 @@ AR::ProcSup::SetNonMaskableInterruptTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock
     Tss->Es = KGDT_R3_DATA | RPL_MASK;
     Tss->Fs = KGDT_R0_PB;
     Tss->Ss = KGDT_R0_DATA;
+    Tss->Ss0 = KGDT_R0_DATA;
 
     /* Setup NMI TSS entry in Global Descriptor Table */
     TssEntry = (PKGDTENTRY)(&(ProcessorBlock->GdtBase[KGDT_NMI_TSS / sizeof(KGDTENTRY)]));

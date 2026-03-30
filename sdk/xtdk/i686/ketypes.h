@@ -50,7 +50,7 @@
 #define KGDT_DESCRIPTOR_CODE              0x08
 
 /* GDT descriptor type codes */
-#define KGDT_TYPE_NONE                    0x0
+#define KGDT_TYPE_NONE                    0x00
 #define KGDT_TYPE_CODE                    (0x10 | KGDT_DESCRIPTOR_CODE | KGDT_DESCRIPTOR_EXECUTE_READ)
 #define KGDT_TYPE_DATA                    (0x10 | KGDT_DESCRIPTOR_READ_WRITE)
 
@@ -82,6 +82,7 @@
 #define KTSS_IO_MAPS                      0x68
 
 /* I686 Segment Types */
+#define I686_LDT                          0x2
 #define I686_TASK_GATE                    0x5
 #define I686_TSS                          0x9
 #define I686_ACTIVE_TSS                   0xB
