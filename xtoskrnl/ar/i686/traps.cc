@@ -195,7 +195,6 @@ VOID
 AR::Traps::HandleTrap02(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Non-Maskable-Interrupt (0x02)!\n");
-    KE::Crash::Panic(0x02);
 }
 
 /**
