@@ -115,21 +115,25 @@ Ar\Type\Vector:
     mov %cs, %ax
     and $3, %al
     mov %al, TrapPreviousMode(%rbp)
-    jz KernelMode\Type\Vector
-    swapgs
-    jmp UserMode\Type\Vector
 
-KernelMode\Type\Vector:
-    /* Save kernel stack pointer (SS:RSP) */
-    movl %ss, %eax
-    mov %eax, TrapSegSs(%rbp)
-    lea TRAP_FRAME_SIZE(%rbp), %rax
-    mov %rax, TrapRsp(%rbp)
+    /* Skip swapgs as the interrupt originated from kernel mode */
+    jz UserMode\Type\Vector
+
+    swapgs
 
 UserMode\Type\Vector:
-    /* Push Frame Pointer and clear direction flag */
+    /* Set up trap frame pointer for the dispatcher and clear the direction flag */
     mov %rsp, %rcx
     cld
+
+    /* Preserve the original stack pointer */
+    mov %rsp, %rbx
+
+    /* Force stack alignment */
+    and $-16, %rsp
+
+    /* Allocate 32 bytes of shadow space */
+    sub $32, %rsp
 
     .ifc \Type,Trap
         /* Pass to the trap dispatcher */
@@ -138,6 +142,9 @@ UserMode\Type\Vector:
         /* Pass to the interrupt dispatcher */
         call ArDispatchTrap
     .endif
+
+    /* Restore the original trap frame stack pointer */
+    mov %rbx, %rsp
 
     /* Test previous mode and swapgs if needed */
     testb $1, TrapPreviousMode(%rbp)
