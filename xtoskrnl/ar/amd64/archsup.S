@@ -112,7 +112,7 @@ Ar\Type\Vector:
 
     /* Test previous mode and swap GS if needed */
     movl $0, TrapPreviousMode(%rbp)
-    mov %cs, %ax
+    mov TrapSegCs(%rbp), %ax
     and $3, %al
     mov %al, TrapPreviousMode(%rbp)
 
@@ -173,11 +173,6 @@ KernelModeReturn\Type\Vector:
 
     /* Load MxCsr register */
     ldmxcsr TrapMxCsr(%rbp)
-
-    /* Restore segment selectors */
-    mov TrapSegDs(%rbp), %ds
-    mov TrapSegEs(%rbp), %es
-    mov TrapSegFs(%rbp), %fs
 
     /* Free stack space */
     add $(TRAP_FRAME_SIZE - TRAP_REGISTERS_SIZE), %rsp

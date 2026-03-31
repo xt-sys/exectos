@@ -56,6 +56,7 @@
 #define TrapSegEs                               330
 #define TrapSegFs                               332
 #define TrapSegGs                               334
+#define TrapSegCs                               480
 #define TrapRsp                                 496
 #define TrapSegSs                               504
 
