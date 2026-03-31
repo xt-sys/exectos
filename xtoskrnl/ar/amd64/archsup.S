@@ -25,7 +25,7 @@
  *
  * @since XT 1.0
  */
-.macro ArCreateTrapHandler Vector Type
+.macro ArCreateHandler Vector Type
 .global Ar\Type\Vector
 Ar\Type\Vector:
     /* Check handler type */
@@ -200,8 +200,8 @@ KernelModeReturn\Type\Vector:
 /* Populate common interrupt and trap handlers */
 .irp i,0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F
     .irp j,0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F
-        ArCreateTrapHandler 0x\i\j Interrupt
-        ArCreateTrapHandler 0x\i\j Trap
+        ArCreateHandler 0x\i\j Interrupt
+        ArCreateHandler 0x\i\j Trap
     .endr
 .endr
 
