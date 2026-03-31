@@ -111,7 +111,7 @@ _Ar\Type\Vector\()Start:
 
         /* Test previous mode and swap GS if needed */
         movl $0, TrapPreviousMode(%ebp)
-        mov %cs, %ax
+        mov TrapSegCs(%ebp), %ax
         and $3, %al
         mov %al, TrapPreviousMode(%ebp)
         jz KernelMode\Type\Vector
