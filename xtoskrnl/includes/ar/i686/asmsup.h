@@ -24,6 +24,7 @@
 #define TrapSegEs                               38
 #define TrapSegFs                               40
 #define TrapSegGs                               42
+#define TrapVector                              72
 #define TrapEsp                                 92
 #define TrapSegSs                               96
 
