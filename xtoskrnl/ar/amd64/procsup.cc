@@ -159,9 +159,9 @@ AR::ProcSup::InitializeProcessor(IN PVOID ProcessorStructures)
         Gdt = InitialGdt;
         Idt = InitialIdt;
         Tss = &InitialTss;
-        KernelBootStack = &BootStack;
-        KernelFaultStack = &FaultStack;
-        KernelNmiStack = &NmiStack;
+        KernelBootStack = (PVOID)((ULONG_PTR)&BootStack + KERNEL_STACK_SIZE);
+        KernelFaultStack = (PVOID)((ULONG_PTR)&FaultStack + KERNEL_STACK_SIZE);
+        KernelNmiStack = (PVOID)((ULONG_PTR)&NmiStack + KERNEL_STACK_SIZE);
         ProcessorBlock = &InitialProcessorBlock;
     }
 
@@ -510,7 +510,6 @@ AR::ProcSup::InitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock,
     ProcessorBlock->TssBase->Ist[KIDT_IST_PANIC] = (ULONG_PTR)KernelFaultStack;
     ProcessorBlock->TssBase->Ist[KIDT_IST_MCA] = (ULONG_PTR)KernelFaultStack;
     ProcessorBlock->TssBase->Ist[KIDT_IST_NMI] = (ULONG_PTR)KernelNmiStack;
-
 }
 
 /**
