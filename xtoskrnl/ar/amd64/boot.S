@@ -46,7 +46,7 @@ ArEnableExtendedPhysicalAddressing:
     leaq XpaEnterLongMode(%rip), %rbx
 
     /* Push the 32-bit code segment selector and the target address for a far jump */
-    pushq $GDT_R0_CMCODE
+    pushq $KGDT_R0_CMCODE
     pushq %rax
 
     /* Perform a far return to switch to 32-bit compatibility mode */
@@ -60,7 +60,7 @@ XpaEnterCompatMode:
     pushl %ecx
 
     /* Set the stack segment to the 32-bit data segment selector */
-    movl $GDT_R0_DATA, %eax
+    movl $KGDT_R0_DATA, %eax
     movl %eax, %ss
 
     /* Disable PGE and PCIDE to ensure all TLB entries will be flushed */
@@ -100,7 +100,7 @@ XpaEnterCompatMode:
 
 XpaFlushInstructions:
     /* Push the 64-bit code segment selector and the target address for a far jump */
-    pushl $GDT_R0_CODE
+    pushl $KGDT_R0_CODE
     pushl %ebx
 
     /* Perform a far return to switch to 64-bit long mode */

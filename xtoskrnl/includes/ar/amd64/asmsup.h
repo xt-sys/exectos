@@ -17,9 +17,9 @@
 #define CR4_PCIDE                               0x00020000
 
 /* GDT selectors */
-#define GDT_R0_CMCODE                           0x08
-#define GDT_R0_CODE                             0x10
-#define GDT_R0_DATA                             0x18
+#define KGDT_R0_CMCODE                          0x08
+#define KGDT_R0_CODE                            0x10
+#define KGDT_R0_DATA                            0x18
 
 /* MSR registers */
 #define X86_MSR_EFER                            0xC0000080
