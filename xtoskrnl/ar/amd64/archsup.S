@@ -4,6 +4,7 @@
  * FILE:            xtoskrnl/ar/amd64/archsup.S
  * DESCRIPTION:     Provides AMD64 architecture features not implementable in C
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ *                  Aiken Harris <harraiken91@gmail.com>
  */
 
 #include <ar/amd64/asmsup.h>
@@ -224,3 +225,14 @@ ArTrapEntry:
         .quad ArTrap0x\i\j
     .endr
 .endr
+
+/**
+ * Handles a spurious interrupt allowing it to end up.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+.global ArHandleSpuriousInterrupt
+ArHandleSpuriousInterrupt:
+    iretq

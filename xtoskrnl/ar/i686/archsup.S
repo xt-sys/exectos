@@ -213,3 +213,14 @@ _ArTrapEntry:
         .endif
     .endr
 .endr
+
+/**
+ * Handles a spurious interrupt allowing it to end up.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+.global _ArHandleSpuriousInterrupt
+_ArHandleSpuriousInterrupt:
+    iret

@@ -25,6 +25,11 @@ XTCLINK ULONG_PTR ArTrapEntry[256];
 XTCLINK
 XTCDECL
 VOID
+ArHandleSpuriousInterrupt(VOID);
+
+XTCLINK
+XTCDECL
+VOID
 ArStartApplicationProcessor(VOID);
 
 #endif /* __XTOSKRNL_AR_ASSEMBLY_HH */
