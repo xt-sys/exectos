@@ -23,6 +23,7 @@
 
 /* GDT selector names */
 #define KGDT_NULL                                 0x0000
+#define KGDT_R0_CMCODE                            0x0008
 #define KGDT_R0_CODE                              0x0010
 #define KGDT_R0_DATA                              0x0018
 #define KGDT_R3_CMCODE                            0x0020
@@ -46,7 +47,7 @@
 #define KGDT_DESCRIPTOR_CODE                      0x08
 
 /* GDT descriptor type codes */
-#define KGDT_TYPE_NONE                            0x0
+#define KGDT_TYPE_NONE                            0x00
 #define KGDT_TYPE_CODE                            (0x10 | KGDT_DESCRIPTOR_CODE | KGDT_DESCRIPTOR_EXECUTE_READ)
 #define KGDT_TYPE_DATA                            (0x10 | KGDT_DESCRIPTOR_READ_WRITE)
 
