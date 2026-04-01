@@ -109,13 +109,22 @@ _Ar\Type\Vector\()Start:
         mov %cr2, %eax
         mov %eax, TrapCr2(%ebp)
 
-        /* Test previous mode and swap GS if needed */
+        /* Test previous mode */
         movl $0, TrapPreviousMode(%ebp)
         mov TrapSegCs(%ebp), %ax
         and $3, %al
         mov %al, TrapPreviousMode(%ebp)
         jz KernelMode\Type\Vector
-        swapgs
+
+        /* Load Kernel PB selector into FS */
+        mov $KGDT_R0_PB, %ax
+        mov %ax, %fs
+
+        /* Set sane data segment selectors */
+        mov $(KGDT_R3_DATA | RPL_MASK), %ax
+        mov %ax, %ds
+        mov %ax, %es
+
         jmp UserMode\Type\Vector
 
 KernelMode\Type\Vector:
@@ -141,11 +150,10 @@ UserMode\Type\Vector:
         /* Clean up the stack */
         add $4, %esp
 
-        /* Test previous mode and swapgs if needed */
+        /* Test previous mode and disable interrupts before user mode return */
         testb $1, TrapPreviousMode(%ebp)
         jz KernelModeReturn\Type\Vector
         cli
-        swapgs
 
 KernelModeReturn\Type\Vector:
         /* Restore segment selectors */
