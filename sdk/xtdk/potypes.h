@@ -14,6 +14,9 @@
 #include <ketypes.h>
 
 
+/* C/C++ specific code */
+#ifndef __XTOS_ASSEMBLER__
+
 /* Power Manager routine callbacks */
 typedef VOID (XTFASTCALL *PPROCESSOR_IDLE_FUNCTION)(IN PPROCESSOR_POWER_STATE PowerState);
 typedef XTSTATUS (XTFASTCALL *PSET_PROCESSOR_THROTTLE)(IN UCHAR Throttle);
@@ -88,4 +91,5 @@ typedef struct _PROCESSOR_POWER_STATE
     ULONG LastC3UserTime;
 } PROCESSOR_POWER_STATE, *PPROCESSOR_POWER_STATE;
 
+#endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_POTYPES_H */

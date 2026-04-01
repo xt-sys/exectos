@@ -15,6 +15,9 @@
 #include <amd64/xtstruct.h>
 
 
+/* C/C++ specific code */
+#ifndef __XTOS_ASSEMBLER__
+
 /* Hardware layer routines forward references */
 XTCLINK
 XTCDECL
@@ -49,4 +52,5 @@ VOID
 HlWritePort32(IN USHORT Port,
               IN ULONG Value);
 
+#endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_AMD64_HLFUNCS_H */

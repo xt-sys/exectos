@@ -13,6 +13,9 @@
 #include <xtuefi.h>
 
 
+/* C/C++ specific code */
+#ifndef D__XTOS_ASSEMBLER__
+
 /* XT BootLoader routines forward references */
 XTCLINK
 XTCDECL
@@ -21,4 +24,5 @@ BlGetXtLdrProtocol(IN PEFI_SYSTEM_TABLE SystemTable,
                    IN EFI_HANDLE ImageHandle,
                    OUT PXTBL_LOADER_PROTOCOL *ProtocolHandler);
 
+#endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_BLFUNCS_H */

@@ -138,6 +138,10 @@
 #define NPX_STATE_SCRUB                   0x1
 #define NPX_STATE_SWITCH                  0x2
 
+
+/* C/C++ specific code */
+#ifndef __XTOS_ASSEMBLER__
+
 /* Floating point state storing structure */
 typedef struct _FLOATING_SAVE_AREA
 {
@@ -527,4 +531,5 @@ typedef struct _THREAD_ENVIRONMENT_BLOCK
     THREAD_INFORMATION_BLOCK InformationBlock;
 } THREAD_ENVIRONMENT_BLOCK, *PTHREAD_ENVIRONMENT_BLOCK;
 
+#endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_AMD64_KETYPES_H */

@@ -111,7 +111,6 @@
 #define UNIQUE(Prefix)                         CONCATENATE(CONCATENATE(__UNIQUE_ID_, Prefix), __COUNTER__)
 
 /* Variadic ABI functions */
-typedef __builtin_va_list VA_LIST, *PVA_LIST;
 #define VA_ARG(Marker, Type)                   ((sizeof(Type) < sizeof(UINT_PTR)) ? \
                                                (Type)(__builtin_va_arg(Marker, UINT_PTR)) : \
                                                (Type)(__builtin_va_arg(Marker, Type)))

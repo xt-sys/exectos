@@ -10,13 +10,6 @@
 #define __XTOSKRNL_I686_ASMSUP_H
 
 
-/* Selector masks */
-#define RPL_MASK                                0x0003
-
-/* GDT selectors */
-#define KGDT_R3_DATA                            0x0020
-#define KGDT_R0_PB                              0x0030
-
 /* KTRAP_FRAME structure offsets */
 #define TrapPreviousMode                        0
 #define TrapCr2                                 4

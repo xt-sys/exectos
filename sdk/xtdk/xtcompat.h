@@ -10,6 +10,9 @@
 #define __XTDK_XTCOMPAT_H
 
 
+/* C/C++ specific code */
+#ifndef __XTOS_ASSEMBLER__
+
 #ifdef __cplusplus
     /* C++ definitions */
     #define NULLPTR         nullptr
@@ -40,4 +43,5 @@
     typedef unsigned short wchar;
 #endif
 
+#endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_XTCOMPAT_H */

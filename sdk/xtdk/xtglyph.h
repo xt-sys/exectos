@@ -12,6 +12,9 @@
 #include <xttypes.h>
 
 
+/* C/C++ specific code */
+#ifndef D__XTOS_ASSEMBLER__
+
 CHAR XTGLYPH_EXECTOS_LOGO[] =
 {
   0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x25, 0x23,
@@ -61,4 +64,5 @@ CHAR XTGLYPH_EXECTOS_LOGO[] =
   0x28, 0x0d, 0x0a
 };
 
+#endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_XTGLYPH_H */

@@ -58,6 +58,10 @@
 #define PCI_STATUS_SIGNALED_SYSTEM_ERROR        0x4000
 #define PCI_STATUS_DETECTED_PARITY_ERROR        0x8000
 
+
+/* C/C++ specific code */
+#ifndef __XTOS_ASSEMBLER__
+
 /* PCI bridge control registers */
 typedef struct _PCI_BRIDGE_CONTROL_REGISTER
 {
@@ -214,4 +218,5 @@ typedef struct _PCI_TYPE1_DEVICE
     PCI_BRIDGE_CONTROL_REGISTER Bridge;
 } PCI_TYPE1_DEVICE, *PPCI_TYPE1_DEVICE;
 
+#endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_IOTYPES_H */

@@ -76,6 +76,10 @@
 /* Initial stall factor */
 #define INITIAL_STALL_FACTOR                            100
 
+
+/* C/C++ specific code */
+#ifndef __XTOS_ASSEMBLER__
+
 /* APIC delivery mode enumeration list */
 typedef enum _APIC_DM
 {
@@ -324,4 +328,5 @@ typedef union _PIC_I8259_ICW4
     UCHAR Bits;
 } PIC_I8259_ICW4, *PPIC_I8259_ICW4;
 
+#endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_I686_HLTYPES_H */

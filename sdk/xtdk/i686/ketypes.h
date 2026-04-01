@@ -159,6 +159,10 @@
 #define NPX_STATE_LOADED                  0x0
 #define NPX_STATE_UNLOADED                0xA
 
+
+/* C/C++ specific code */
+#ifndef __XTOS_ASSEMBLER__
+
 /* Floating point state storing structure */
 typedef struct _FN_SAVE_FORMAT
 {
@@ -482,4 +486,5 @@ typedef struct _THREAD_ENVIRONMENT_BLOCK
     THREAD_INFORMATION_BLOCK InformationBlock;
 } THREAD_ENVIRONMENT_BLOCK, *PTHREAD_ENVIRONMENT_BLOCK;
 
+#endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_I686_KETYPES_H */

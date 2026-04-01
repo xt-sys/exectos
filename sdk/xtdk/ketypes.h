@@ -49,6 +49,10 @@
 #define THREAD_HIGH_PRIORITY                        31
 #define THREAD_MAXIMUM_PRIORITY                     32
 
+
+/* C/C++ specific code */
+#ifndef __XTOS_ASSEMBLER__
+
 /* Adjust reason */
 typedef enum _ADJUST_REASON
 {
@@ -647,4 +651,5 @@ typedef struct _KUBSAN_TYPE_MISMATCH_DATA_V1
     UCHAR TypeCheckKind;
 } KUBSAN_TYPE_MISMATCH_DATA_V1, *PKUBSAN_TYPE_MISMATCH_DATA_V1;
 
+#endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_KEFUNCS_H */

@@ -55,6 +55,10 @@
 /* Protection field shift */
 #define MM_PROTECT_FIELD_SHIFT                     5
 
+
+/* C/C++ specific code */
+#ifndef __XTOS_ASSEMBLER__
+
 /* Memory manager page lists */
 typedef enum _MMPAGELISTS
 {
@@ -258,4 +262,5 @@ typedef struct _POOL_TRACKING_TABLE
     ULONG Tag;
 } POOL_TRACKING_TABLE, *PPOOL_TRACKING_TABLE;
 
+#endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_MMTYPES_H */

@@ -13,6 +13,9 @@
 #include <xttypes.h>
 
 
+/* C/C++ specific code */
+#ifndef __XTOS_ASSEMBLER__
+
 /* Kernel debugger routines forward references */
 XTCLINK
 XTCDECL
@@ -20,4 +23,5 @@ VOID
 DbgPrint(PCWSTR Format,
          ...);
 
+#endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_KDFUNCS_H */

@@ -53,6 +53,10 @@
 #define SHA1_BLOCK_SIZE                 64
 #define SHA1_DIGEST_SIZE                20
 
+
+/* C/C++ specific code */
+#ifndef __XTOS_ASSEMBLER__
+
 /* Runtime Library routine callbacks */
 typedef XTSTATUS (*PWRITE_CHARACTER)(IN CHAR Character);
 typedef XTSTATUS (*PWRITE_WIDE_CHARACTER)(IN WCHAR Character);
@@ -107,4 +111,5 @@ typedef struct _RTL_SHA1_CONTEXT
     UCHAR   Buffer[SHA1_BLOCK_SIZE];
 } RTL_SHA1_CONTEXT, *PRTL_SHA1_CONTEXT;
 
+#endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_RTLTYPES_H */

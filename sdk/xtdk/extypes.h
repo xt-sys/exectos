@@ -17,6 +17,10 @@
 /* Rundown protection flags */
 #define EX_RUNDOWN_ACTIVE                               0x1
 
+
+/* C/C++ specific code */
+#ifndef __XTOS_ASSEMBLER__
+
 /* Executive rundown protection structure definition */
 typedef struct _EX_RUNDOWN_REFERENCE
 {
@@ -34,4 +38,5 @@ typedef struct _EX_RUNDOWN_WAIT_BLOCK
     KEVENT WakeEvent;
 } EX_RUNDOWN_WAIT_BLOCK, *PEX_RUNDOWN_WAIT_BLOCK;
 
+#endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_EXTYPES_H */

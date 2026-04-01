@@ -41,6 +41,10 @@
 /* TUI dialog box maximum width */
 #define XTBL_TUI_MAX_DIALOG_WIDTH                                   100
 
+
+/* C/C++ specific code */
+#ifndef D__XTOS_ASSEMBLER__
+
 /* XTLDR Routine pointers */
 typedef LOADER_MEMORY_TYPE (XTCDECL *PBL_GET_MEMTYPE_ROUTINE)(IN EFI_MEMORY_TYPE EfiMemoryType);
 
@@ -520,4 +524,5 @@ typedef struct _XTBL_LOADER_PROTOCOL
     } WideString;
 } XTBL_LOADER_PROTOCOL, *PXTBL_LOADER_PROTOCOL;
 
+#endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_BLTYPES_H */

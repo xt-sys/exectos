@@ -179,6 +179,10 @@
 #define COMPORT_REG_MSR                             0x06 /* Modem Status Register */
 #define COMPORT_REG_SR                              0x07 /* Scratch Register */
 
+
+/* C/C++ specific code */
+#ifndef __XTOS_ASSEMBLER__
+
 /* Generic Address structure */
 typedef struct _GENERIC_ADDRESS
 {
@@ -450,4 +454,5 @@ typedef struct _SMBIOS3_TABLE_HEADER
     ULONGLONG TableAddress;
 } SMBIOS3_TABLE_HEADER, *PSMBIOS3_TABLE_HEADER;
 
+#endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_HLTYPES_H */

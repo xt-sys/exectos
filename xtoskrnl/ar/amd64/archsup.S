@@ -7,6 +7,7 @@
  *                  Aiken Harris <harraiken91@gmail.com>
  */
 
+#include <xtkmapi.h>
 #include <ar/amd64/asmsup.h>
 
 .altmacro

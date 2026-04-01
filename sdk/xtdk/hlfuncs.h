@@ -14,6 +14,9 @@
 #include <xttypes.h>
 
 
+/* C/C++ specific code */
+#ifndef __XTOS_ASSEMBLER__
+
 /* Hardware layer routines forward references */
 XTCLINK
 XTAPI
@@ -48,4 +51,5 @@ VOID
 HlWriteRegister32(IN PVOID Register,
                   IN ULONG Value);
 
+#endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_HLFUNCS_H */

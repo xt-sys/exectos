@@ -119,6 +119,10 @@
 /* Number of pool tracking tables */
 #define MM_POOL_TRACKING_TABLES                    64
 
+
+/* C/C++ specific code */
+#ifndef __XTOS_ASSEMBLER__
+
 /* Page size enumeration list */
 typedef enum _PAGE_SIZE
 {
@@ -344,4 +348,5 @@ typedef struct _POOL_DESCRIPTOR
     SIZE_T Reserved;
 } POOL_DESCRIPTOR, *PPOOL_DESCRIPTOR;
 
+#endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_AMD64_MMTYPES_H */

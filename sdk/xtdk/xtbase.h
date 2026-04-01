@@ -14,6 +14,9 @@
 #include <xttypes.h>
 
 
+/* C/C++ specific code */
+#ifndef __XTOS_ASSEMBLER__
+
 /* Kernel affinity */
 typedef ULONG_PTR KAFFINITY, *PKAFFINITY;
 
@@ -108,4 +111,5 @@ typedef struct _DISPATCHER_HEADER
     LIST_ENTRY WaitListHead;
 } DISPATCHER_HEADER, *PDISPATCHER_HEADER;
 
+#endif /* __XTOS_ASSEMBLER_ */
 #endif /* __XTDK_XTBASE_H */

@@ -21,6 +21,10 @@
 #define DEBUG_PROVIDER_COMPORT                              0x00000001
 #define DEBUG_PROVIDER_FRAMEBUFFER                          0x00000002
 
+
+/* C/C++ specific code */
+#ifndef __XTOS_ASSEMBLER__
+
 /* Kernel routine callbacks */
 typedef XTSTATUS (XTAPI *PKD_INIT_ROUTINE)();
 typedef VOID (*PKD_PRINT_ROUTINE)(IN PCWSTR Format, IN ...);
@@ -42,4 +46,5 @@ typedef struct _KD_DISPATCH_TABLE
     RTL_PRINT_CONTEXT PrintContext;
 } KD_DISPATCH_TABLE, *PKD_DISPATCH_TABLE;
 
+#endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_KDTYPES_H */

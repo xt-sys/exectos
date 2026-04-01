@@ -15,6 +15,9 @@
 #include <ketypes.h>
 
 
+/* C/C++ specific code */
+#ifndef __XTOS_ASSEMBLER__
+
 /* Kernel services routines forward references */
 XTCLINK
 XTFASTCALL
@@ -159,4 +162,5 @@ XTAPI
 BOOLEAN
 KeSignalCallDpcSynchronize(IN PVOID SystemArgument);
 
+#endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_KEFUNCS_H */

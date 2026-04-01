@@ -12,6 +12,9 @@
 #include <xtdefs.h>
 
 
+/* C/C++ specific code */
+#ifndef __XTOS_ASSEMBLER__
+
 /* Enumeration lists forward references */
 typedef enum _ADJUST_REASON ADJUST_REASON, *PADJUST_REASON;
 typedef enum _EXCEPTION_DISPOSITION EXCEPTION_DISPOSITION, *PEXCEPTION_DISPOSITION;
@@ -363,4 +366,5 @@ typedef union _LARGE_INTEGER LARGE_INTEGER, *PLARGE_INTEGER;
 typedef union _SINGLE_LIST_HEADER SINGLE_LIST_HEADER, *PSINGLE_LIST_HEADER;
 typedef union _ULARGE_INTEGER ULARGE_INTEGER, *PULARGE_INTEGER;
 
+#endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_XTSTRUCT_H */

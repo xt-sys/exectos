@@ -13,6 +13,9 @@
 #include <ketypes.h>
 
 
+/* C/C++ specific code */
+#ifndef __XTOS_ASSEMBLER__
+
 /* Kernel's representation of a process object */
 typedef struct _EPROCESS
 {
@@ -27,4 +30,5 @@ typedef struct _ETHREAD
     UINT Reserved0;
 } ETHREAD, *PETHREAD;
 
+#endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_PSTYPES_H */

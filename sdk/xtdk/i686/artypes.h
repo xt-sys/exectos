@@ -92,6 +92,10 @@
 #define X86_EFLAGS_VIP_MASK                             0x00100000 /* Virtual Interrupt Pending */
 #define X86_EFLAGS_ID_MASK                              0x00200000 /* Identification */
 
+
+/* C/C++ specific code */
+#ifndef __XTOS_ASSEMBLER__
+
 /* CPU vendor enumeration list */
 typedef enum _CPU_VENDOR
 {
@@ -390,4 +394,5 @@ typedef enum _TRAMPOLINE_TYPE
     TrampolineApStartup
 } TRAMPOLINE_TYPE, *PTRAMPOLINE_TYPE;
 
+#endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_I686_ARTYPES_H */

@@ -15,6 +15,9 @@
 #include <rtltypes.h>
 
 
+/* C/C++ specific code */
+#ifndef __XTOS_ASSEMBLER__
+
 /* Runtime Library routines forward references */
 XTCLINK
 XTAPI
@@ -370,4 +373,5 @@ VOID
 RtlZeroMemory(OUT PVOID Destination,
               IN SIZE_T Length);
 
+#endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_RTLFUNCS_H */

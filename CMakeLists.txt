@@ -55,6 +55,9 @@ add_definitions(-D__XTOS__)
 add_definitions(-DXTOS_SOURCE_DIR="${EXECTOS_SOURCE_DIR}")
 add_definitions(-DXTOS_BINARY_DIR="${EXECTOS_BINARY_DIR}")
 
+# Add assembler flags
+add_compiler_asmflags(-D__XTOS_ASSEMBLER__)
+
 # Compute __FILE__ definition
 file(RELATIVE_PATH _PATH_PREFIX ${EXECTOS_BINARY_DIR} ${EXECTOS_SOURCE_DIR})
 add_compiler_flags(-D__RELFILE__="&__FILE__[__FILE__[0] == '.' ? sizeof \\\"${_PATH_PREFIX}\\\" - 1 : sizeof XTOS_SOURCE_DIR]")

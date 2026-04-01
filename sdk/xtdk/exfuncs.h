@@ -13,6 +13,9 @@
 #include <xttypes.h>
 
 
+/* C/C++ specific code */
+#ifndef __XTOS_ASSEMBLER__
+
 /* Kernel Executive routines forward references */
 XTCLINK
 XTFASTCALL
@@ -44,4 +47,5 @@ XTFASTCALL
 VOID
 ExWaitForRundownProtectionRelease(IN PEX_RUNDOWN_REFERENCE Descriptor);
 
+#endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_EXFUNCS_H */

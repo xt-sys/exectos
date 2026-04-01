@@ -12,6 +12,9 @@
 #include <xtdefs.h>
 
 
+/* C/C++ specific code */
+#ifndef __XTOS_ASSEMBLER__
+
 /* Architecture-specific enumeration lists forward references */
 typedef enum _APIC_DM APIC_DM, *PAPIC_DM;
 typedef enum _APIC_DSH APIC_DSH, *PAPIC_DSH;
@@ -79,4 +82,5 @@ typedef union _PIC_I8259_ICW2 PIC_I8259_ICW2, *PPIC_I8259_ICW2;
 typedef union _PIC_I8259_ICW3 PIC_I8259_ICW3, *PPIC_I8259_ICW3;
 typedef union _PIC_I8259_ICW4 PIC_I8259_ICW4, *PPIC_I8259_ICW4;
 
+#endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_AMD64_XTSTRUCT_H */

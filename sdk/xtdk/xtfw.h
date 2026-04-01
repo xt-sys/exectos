@@ -19,6 +19,10 @@
 /* Version number of the current XTOS loader protocol */
 #define BOOT_PROTOCOL_VERSION                                   1
 
+
+/* C/C++ specific code */
+#ifndef __XTOS_ASSEMBLER__
+
 /* Memory allocation structures */
 typedef enum _LOADER_MEMORY_TYPE
 {
@@ -116,4 +120,5 @@ typedef struct _KERNEL_INITIALIZATION_BLOCK
     FIRMWARE_INFORMATION_BLOCK FirmwareInformation;
 } KERNEL_INITIALIZATION_BLOCK, *PKERNEL_INITIALIZATION_BLOCK;
 
+#endif /* __XTOS_ASSEMBLER_ */
 #endif /* __XTDK_XTFW_H */

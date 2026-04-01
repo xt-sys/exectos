@@ -202,6 +202,10 @@
 #define PECOFF_IMAGE_SCN_MEM_READ                          0x40000000
 #define PECOFF_IMAGE_SCN_MEM_WRITE                         0x80000000
 
+
+/* C/C++ specific code */
+#ifndef __XTOS_ASSEMBLER__
+
 /* PE/COFF image representation structure */
 typedef struct _PECOFF_IMAGE_CONTEXT
 {
@@ -638,4 +642,5 @@ typedef struct _PECOFF_IMAGE_RESOURCE_DATA_ENTRY
     ULONG Reserved;
 } PECOFF_IMAGE_RESOURCE_DATA_ENTRY, *PPECOFF_IMAGE_RESOURCE_DATA_ENTRY;
 
+#endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_XTIMAGE_H */

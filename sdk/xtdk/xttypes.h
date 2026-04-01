@@ -13,6 +13,9 @@
 #include <xtcompat.h>
 
 
+/* C/C++ specific code */
+#ifndef __XTOS_ASSEMBLER__
+
 /* Standard C types */
 typedef unsigned char BYTE, *PBYTE, *LPBYTE;
 typedef char CHAR, *PCHAR, *LPCHAR;
@@ -149,6 +152,9 @@ typedef LPWSTR PTSTR, LPTSTR;
 typedef LPCWSTR PCTSTR, LPCTSTR;
 typedef LPUWSTR PUTSTR, LPUTSTR;
 typedef LPCUWSTR PCUTSTR, LPCUTSTR;
+
+/* Variadic ABI types */
+typedef __builtin_va_list VA_LIST, *PVA_LIST;
 
 /* 128-bit floats structure */
 typedef struct _FLOAT128
@@ -287,4 +293,5 @@ typedef struct _UNICODE_STRING64
 } UNICODE_STRING64, *PUNICODE_STRING64;
 typedef const UNICODE_STRING64 *PCUNICODE_STRING64;
 
+#endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_XTTYPES_H */

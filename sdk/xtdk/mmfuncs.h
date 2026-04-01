@@ -14,6 +14,9 @@
 #include <xttypes.h>
 
 
+/* C/C++ specific code */
+#ifndef __XTOS_ASSEMBLER__
+
 /* Memory manager routines forward references */
 XTAPI
 XTSTATUS
@@ -37,4 +40,5 @@ XTSTATUS
 MmFreePoolWithTag(IN PVOID VirtualAddress,
                   IN ULONG Tag);
 
+#endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_MMFUNCS_H */

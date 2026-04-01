@@ -38,6 +38,10 @@
 #define LDR_DTE_MM_LOADED                          0x40000000
 #define LDR_DTE_COMPAT_DATABASE_PROCESSED          0x80000000
 
+
+/* C/C++ specific code */
+#ifndef __XTOS_ASSEMBLER__
+
 /* Loader data table entry */
 typedef struct _LDR_DATA_TABLE_ENTRY
 {
@@ -70,4 +74,5 @@ typedef struct _LDR_DATA_TABLE_ENTRY
     PVOID PatchInformation;
 } LDR_DATA_TABLE_ENTRY, *PLDR_DATA_TABLE_ENTRY;
 
+#endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_LDRTYPES_H */
