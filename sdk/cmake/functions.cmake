@@ -114,7 +114,7 @@ function(generate_xtadk TARGET_NAME SOURCE_FILES)
             COMMAND ${CMAKE_CXX_COMPILER}
                 ${COMPILER_ARGUMENTS}
                 /c /FAs /Fa${CURRENT_ASSEMBLY_OUTPUT}
-                ${SOURCE_FILE_PATH}
+                -- ${SOURCE_FILE_PATH}
             DEPENDS "${SOURCE_FILE_PATH}"
             COMMENT "Generating XTADK Assembly: ${FILENAME_WITHOUT_EXTENSION}"
             VERBATIM
