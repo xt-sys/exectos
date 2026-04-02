@@ -28,12 +28,12 @@ XTCLINK ULONG_PTR ArTrapEntry[256];
 XTCLINK
 XTCDECL
 VOID
-ArHandleSpuriousInterrupt(VOID);
+ArEnableExtendedPhysicalAddressing(IN ULONG_PTR PageMap);
 
 XTCLINK
 XTCDECL
 VOID
-ArEnableExtendedPhysicalAddressing(IN ULONG_PTR PageMap);
+ArHandleSpuriousInterrupt(VOID);
 
 XTCLINK
 XTCDECL

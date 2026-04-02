@@ -12,6 +12,9 @@
 #include <xtos.hh>
 
 
+/* TrampolineEnableXpa end address to calculate trampoline size */
+XTCLINK PVOID ArEnableExtendedPhysicalAddressingEnd[];
+
 /* External array of pointers to the interrupt handlers */
 XTCLINK ULONG_PTR ArInterruptEntry[256];
 
@@ -22,6 +25,11 @@ XTCLINK PVOID ArStartApplicationProcessorEnd[];
 XTCLINK ULONG_PTR ArTrapEntry[256];
 
 /* Forward reference for assembler code */
+XTCLINK
+XTCDECL
+VOID
+ArEnableExtendedPhysicalAddressing(IN ULONG_PTR PageMap);
+
 XTCLINK
 XTCDECL
 VOID
