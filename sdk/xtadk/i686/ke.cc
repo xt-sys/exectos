@@ -53,5 +53,5 @@ GenerateAssemblyDefinitions(VOID)
 
     /* Generate KTRAP_FRAME size and REGISTERS_SIZE */
     ADK_SIZE(KTRAP_FRAME);
-    ADK_SIZE_FROM(REGISTERS_SIZE, KTRAP_FRAME, Rax);
+    ADK_SIZE_FROM(REGISTERS_SIZE, KTRAP_FRAME, Eax);
 }
