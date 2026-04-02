@@ -118,32 +118,6 @@ HL::Pic::GetCpuApicId(VOID)
 }
 
 /**
- * Allows an APIC spurious interrupts to end up.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTCDECL
-VOID
-HL::Pic::HandleApicSpuriousService(VOID)
-{
-}
-
-/**
- * Allows a PIC spurious interrupts to end up.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTCDECL
-VOID
-HL::Pic::HandlePicSpuriousService(VOID)
-{
-}
-
-/**
  * Initializes the APIC interrupt controller.
  *
  * @return This routine does not return any value.
@@ -249,8 +223,7 @@ HL::Pic::InitializeApic(VOID)
     WriteApicRegister(APIC_LINT1, LvtRegister.Long);
 
     /* Register interrupt handlers */
-    HL::Irq::SetInterruptHandler(APIC_VECTOR_SPURIOUS, (PVOID)HandleApicSpuriousService);
-    HL::Irq::SetInterruptHandler(PIC1_VECTOR_SPURIOUS, (PVOID)HandlePicSpuriousService);
+    HL::Irq::SetInterruptHandler(APIC_VECTOR_SPURIOUS, (PVOID)ArHandleSpuriousInterrupt);
 
     /* Clear any pre-existing errors */
     WriteApicRegister(APIC_ESR, 0);
@@ -332,6 +305,9 @@ HL::Pic::InitializeLegacyPic(VOID)
 
     /* Mask all interrupts on PIC2 port */
     HL::IoPort::WritePort8(PIC2_DATA_PORT, 0xFF);
+
+    /* Register interrupt handler */
+    HL::Irq::SetInterruptHandler(PIC1_VECTOR_SPURIOUS, (PVOID)ArHandleSpuriousInterrupt);
 }
 
 /**

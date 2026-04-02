@@ -34,8 +34,6 @@ namespace HL
         private:
             STATIC XTAPI BOOLEAN CheckApicSupport(VOID);
             STATIC XTAPI BOOLEAN CheckX2ApicSupport(VOID);
-            STATIC XTCDECL VOID HandleApicSpuriousService(VOID);
-            STATIC XTCDECL VOID HandlePicSpuriousService(VOID);
             STATIC XTAPI VOID InitializeApic(VOID);
             STATIC XTAPI VOID InitializeLegacyPic(VOID);
     };
