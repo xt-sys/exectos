@@ -1,0 +1,83 @@
+/**
+ * PROJECT:         ExectOS
+ * COPYRIGHT:       See COPYING.md in the top level directory
+ * FILE:            sdk/xtadk/amd64/ke.cc
+ * DESCRIPTION:     ADK generator for AMD64 version of Kernel Library
+ * DEVELOPERS:      Aiken Harris <harraiken91@gmail.com>
+ */
+
+#include <xtkmapi.h>
+#include <adkdefs.h>
+
+
+/**
+ * Generates a definitions file for the Kernel Library used by the XTOS kernel assembly code
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCLINK
+XTAPI
+VOID
+GenerateAssemblyDefinitions(VOID)
+{
+    /* Generate KTRAP_FRAME offsets */
+    ADK_OFFSET(KTRAP_FRAME, Xmm0);
+    ADK_OFFSET(KTRAP_FRAME, Xmm1);
+    ADK_OFFSET(KTRAP_FRAME, Xmm2);
+    ADK_OFFSET(KTRAP_FRAME, Xmm3);
+    ADK_OFFSET(KTRAP_FRAME, Xmm4);
+    ADK_OFFSET(KTRAP_FRAME, Xmm5);
+    ADK_OFFSET(KTRAP_FRAME, Xmm6);
+    ADK_OFFSET(KTRAP_FRAME, Xmm7);
+    ADK_OFFSET(KTRAP_FRAME, Xmm8);
+    ADK_OFFSET(KTRAP_FRAME, Xmm9);
+    ADK_OFFSET(KTRAP_FRAME, Xmm10);
+    ADK_OFFSET(KTRAP_FRAME, Xmm11);
+    ADK_OFFSET(KTRAP_FRAME, Xmm12);
+    ADK_OFFSET(KTRAP_FRAME, Xmm13);
+    ADK_OFFSET(KTRAP_FRAME, Xmm14);
+    ADK_OFFSET(KTRAP_FRAME, Xmm15);
+    ADK_OFFSET(KTRAP_FRAME, MxCsr);
+    ADK_OFFSET(KTRAP_FRAME, PreviousMode);
+    ADK_OFFSET(KTRAP_FRAME, Cr2);
+    ADK_OFFSET(KTRAP_FRAME, Cr3);
+    ADK_OFFSET(KTRAP_FRAME, Dr0);
+    ADK_OFFSET(KTRAP_FRAME, Dr1);
+    ADK_OFFSET(KTRAP_FRAME, Dr2);
+    ADK_OFFSET(KTRAP_FRAME, Dr3);
+    ADK_OFFSET(KTRAP_FRAME, Dr6);
+    ADK_OFFSET(KTRAP_FRAME, Dr7);
+    ADK_OFFSET(KTRAP_FRAME, SegDs);
+    ADK_OFFSET(KTRAP_FRAME, SegEs);
+    ADK_OFFSET(KTRAP_FRAME, SegFs);
+    ADK_OFFSET(KTRAP_FRAME, SegGs);
+    ADK_OFFSET(KTRAP_FRAME, Rax);
+    ADK_OFFSET(KTRAP_FRAME, Rbx);
+    ADK_OFFSET(KTRAP_FRAME, Rcx);
+    ADK_OFFSET(KTRAP_FRAME, Rdx);
+    ADK_OFFSET(KTRAP_FRAME, R8);
+    ADK_OFFSET(KTRAP_FRAME, R9);
+    ADK_OFFSET(KTRAP_FRAME, R10);
+    ADK_OFFSET(KTRAP_FRAME, R11);
+    ADK_OFFSET(KTRAP_FRAME, R12);
+    ADK_OFFSET(KTRAP_FRAME, R13);
+    ADK_OFFSET(KTRAP_FRAME, R14);
+    ADK_OFFSET(KTRAP_FRAME, R15);
+    ADK_OFFSET(KTRAP_FRAME, Rsi);
+    ADK_OFFSET(KTRAP_FRAME, Rdi);
+    ADK_OFFSET(KTRAP_FRAME, Rbp);
+    ADK_OFFSET(KTRAP_FRAME, Vector);
+    ADK_OFFSET(KTRAP_FRAME, ErrorCode);
+    ADK_OFFSET(KTRAP_FRAME, ExceptionFrame);
+    ADK_OFFSET(KTRAP_FRAME, Rip);
+    ADK_OFFSET(KTRAP_FRAME, SegCs);
+    ADK_OFFSET(KTRAP_FRAME, Flags);
+    ADK_OFFSET(KTRAP_FRAME, Rsp);
+    ADK_OFFSET(KTRAP_FRAME, SegSs);
+
+    /* Generate KTRAP_FRAME size and REGISTERS_SIZE */
+    ADK_SIZE(KTRAP_FRAME);
+    ADK_SIZE_FROM(REGISTERS_SIZE, KTRAP_FRAME, Rax);
+}

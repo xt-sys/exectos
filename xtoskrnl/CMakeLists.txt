@@ -91,15 +91,13 @@ set_specfile(xtoskrnl.spec xtoskrnl.exe)
 
 # Link static XTOS library
 add_library(libxtos ${XTOSKRNL_SOURCE})
+target_link_libraries(libxtos PRIVATE xtadk)
 
 # Link kernel executable
-add_executable(xtoskrnl
-               ${CMAKE_CURRENT_BINARY_DIR}/xtoskrnl.def)
+add_executable(xtoskrnl ${CMAKE_CURRENT_BINARY_DIR}/xtoskrnl.def)
 
 # Add linker libraries
-target_link_libraries(xtoskrnl
-                      PRIVATE
-                      libxtos)
+target_link_libraries(xtoskrnl PRIVATE libxtos)
 
 # Set proper binary name and install target
 set_target_properties(xtoskrnl PROPERTIES SUFFIX .exe)
