@@ -216,6 +216,22 @@ _ArTrapEntry:
 .endr
 
 /**
+ * Enables eXtended Physical Addressing (XPA). On i386, this is just a stub.
+ *
+ * @param PageMap
+ *        Supplies a pointer to the page map to be used.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+.global ArEnableExtendedPhysicalAddressing
+ArEnableExtendedPhysicalAddressing:
+
+.global ArEnableExtendedPhysicalAddressingEnd
+ArEnableExtendedPhysicalAddressingEnd:
+
+/**
  * Handles a spurious interrupt allowing it to end up.
  *
  * @return This routine does not return any value.
@@ -225,3 +241,16 @@ _ArTrapEntry:
 .global _ArHandleSpuriousInterrupt
 _ArHandleSpuriousInterrupt:
     iret
+
+/**
+ * Starts an application processor (AP). This is just a stub.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+.global _ArStartApplicationProcessor
+_ArStartApplicationProcessor:
+
+.global _ArStartApplicationProcessorEnd
+_ArStartApplicationProcessorEnd:

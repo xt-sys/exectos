@@ -10,7 +10,6 @@ include_directories(
 # Specify list of kernel source code files
 list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/archsup.S
-    ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/boot.S
     ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/cpufunc.cc
     ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/data.cc
     ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/procsup.cc
