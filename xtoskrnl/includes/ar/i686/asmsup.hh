@@ -1,13 +1,13 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/includes/ar/i686/assembly.hh
+ * FILE:            xtoskrnl/includes/ar/i686/asmsup.hh
  * DESCRIPTION:     Architecture-specific assembler prototypes
  * DEVELOPERS:      Aiken Harris <harraiken91@gmail.com>
  */
 
-#ifndef __XTOSKRNL_AR_ASSEMBLY_HH
-#define __XTOSKRNL_AR_ASSEMBLY_HH
+#ifndef __XTOSKRNL_AR_ASMSUP_HH
+#define __XTOSKRNL_AR_ASMSUP_HH
 
 #include <xtos.hh>
 
@@ -32,4 +32,4 @@ XTCDECL
 VOID
 ArStartApplicationProcessor(VOID);
 
-#endif /* __XTOSKRNL_AR_ASSEMBLY_HH */
+#endif /* __XTOSKRNL_AR_ASMSUP_HH */

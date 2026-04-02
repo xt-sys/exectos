@@ -8,7 +8,7 @@
  */
 
 #include <xtkmapi.h>
-#include <ar/amd64/asmsup.h>
+#include <xtadk.h>
 
 .altmacro
 .text
@@ -62,61 +62,61 @@ Ar\Type\Vector:
     push %rax
 
     /* Reserve space for other registers and point RBP to the trap frame */
-    sub $(TRAP_FRAME_SIZE - TRAP_REGISTERS_SIZE), %rsp
+    sub $(KTRAP_FRAME_SIZE - KTRAP_FRAME_REGISTERS_SIZE), %rsp
     lea (%rsp), %rbp
 
     /* Store segment selectors */
-    mov %gs, TrapSegGs(%rbp)
-    mov %fs, TrapSegFs(%rbp)
-    mov %es, TrapSegEs(%rbp)
-    mov %ds, TrapSegDs(%rbp)
+    mov %gs, KTRAP_FRAME_SegGs(%rbp)
+    mov %fs, KTRAP_FRAME_SegFs(%rbp)
+    mov %es, KTRAP_FRAME_SegEs(%rbp)
+    mov %ds, KTRAP_FRAME_SegDs(%rbp)
 
     /* Store debug registers */
     mov %dr7, %rax
-    mov %rax, TrapDr7(%rbp)
+    mov %rax, KTRAP_FRAME_Dr7(%rbp)
     mov %dr6, %rax
-    mov %rax, TrapDr6(%rbp)
+    mov %rax, KTRAP_FRAME_Dr6(%rbp)
     mov %dr3, %rax
-    mov %rax, TrapDr3(%rbp)
+    mov %rax, KTRAP_FRAME_Dr3(%rbp)
     mov %dr2, %rax
-    mov %rax, TrapDr2(%rbp)
+    mov %rax, KTRAP_FRAME_Dr2(%rbp)
     mov %dr1, %rax
-    mov %rax, TrapDr1(%rbp)
+    mov %rax, KTRAP_FRAME_Dr1(%rbp)
     mov %dr0, %rax
-    mov %rax, TrapDr0(%rbp)
+    mov %rax, KTRAP_FRAME_Dr0(%rbp)
 
     /* Store CR2 and CR3 */
     mov %cr3, %rax
-    mov %rax, TrapCr3(%rbp)
+    mov %rax, KTRAP_FRAME_Cr3(%rbp)
     mov %cr2, %rax
-    mov %rax, TrapCr2(%rbp)
+    mov %rax, KTRAP_FRAME_Cr2(%rbp)
 
     /* Store MxCsr register */
-    stmxcsr TrapMxCsr(%rbp)
+    stmxcsr KTRAP_FRAME_MxCsr(%rbp)
 
     /* Store XMM registers */
-    movdqa %xmm15, TrapXmm15(%rbp)
-    movdqa %xmm14, TrapXmm14(%rbp)
-    movdqa %xmm13, TrapXmm13(%rbp)
-    movdqa %xmm12, TrapXmm12(%rbp)
-    movdqa %xmm11, TrapXmm11(%rbp)
-    movdqa %xmm10, TrapXmm10(%rbp)
-    movdqa %xmm9, TrapXmm9(%rbp)
-    movdqa %xmm8, TrapXmm8(%rbp)
-    movdqa %xmm7, TrapXmm7(%rbp)
-    movdqa %xmm6, TrapXmm6(%rbp)
-    movdqa %xmm5, TrapXmm5(%rbp)
-    movdqa %xmm4, TrapXmm4(%rbp)
-    movdqa %xmm3, TrapXmm3(%rbp)
-    movdqa %xmm2, TrapXmm2(%rbp)
-    movdqa %xmm1, TrapXmm1(%rbp)
-    movdqa %xmm0, TrapXmm0(%rbp)
+    movdqa %xmm15, KTRAP_FRAME_Xmm15(%rbp)
+    movdqa %xmm14, KTRAP_FRAME_Xmm14(%rbp)
+    movdqa %xmm13, KTRAP_FRAME_Xmm13(%rbp)
+    movdqa %xmm12, KTRAP_FRAME_Xmm12(%rbp)
+    movdqa %xmm11, KTRAP_FRAME_Xmm11(%rbp)
+    movdqa %xmm10, KTRAP_FRAME_Xmm10(%rbp)
+    movdqa %xmm9, KTRAP_FRAME_Xmm9(%rbp)
+    movdqa %xmm8, KTRAP_FRAME_Xmm8(%rbp)
+    movdqa %xmm7, KTRAP_FRAME_Xmm7(%rbp)
+    movdqa %xmm6, KTRAP_FRAME_Xmm6(%rbp)
+    movdqa %xmm5, KTRAP_FRAME_Xmm5(%rbp)
+    movdqa %xmm4, KTRAP_FRAME_Xmm4(%rbp)
+    movdqa %xmm3, KTRAP_FRAME_Xmm3(%rbp)
+    movdqa %xmm2, KTRAP_FRAME_Xmm2(%rbp)
+    movdqa %xmm1, KTRAP_FRAME_Xmm1(%rbp)
+    movdqa %xmm0, KTRAP_FRAME_Xmm0(%rbp)
 
     /* Test previous mode and swap GS if needed */
-    movl $0, TrapPreviousMode(%rbp)
-    mov TrapSegCs(%rbp), %ax
+    movl $0, KTRAP_FRAME_PreviousMode(%rbp)
+    mov KTRAP_FRAME_SegCs(%rbp), %ax
     and $3, %al
-    mov %al, TrapPreviousMode(%rbp)
+    mov %al, KTRAP_FRAME_PreviousMode(%rbp)
 
     /* Skip swapgs as the interrupt originated from kernel mode */
     jz UserMode\Type\Vector
@@ -149,35 +149,35 @@ UserMode\Type\Vector:
     mov %rbx, %rsp
 
     /* Test previous mode and swapgs if needed */
-    testb $1, TrapPreviousMode(%rbp)
+    testb $1, KTRAP_FRAME_PreviousMode(%rbp)
     jz KernelModeReturn\Type\Vector
     cli
     swapgs
 
 KernelModeReturn\Type\Vector:
     /* Restore XMM registers */
-    movdqa TrapXmm0(%rbp), %xmm0
-    movdqa TrapXmm1(%rbp), %xmm1
-    movdqa TrapXmm2(%rbp), %xmm2
-    movdqa TrapXmm3(%rbp), %xmm3
-    movdqa TrapXmm4(%rbp), %xmm4
-    movdqa TrapXmm5(%rbp), %xmm5
-    movdqa TrapXmm6(%rbp), %xmm6
-    movdqa TrapXmm7(%rbp), %xmm7
-    movdqa TrapXmm8(%rbp), %xmm8
-    movdqa TrapXmm9(%rbp), %xmm9
-    movdqa TrapXmm10(%rbp), %xmm10
-    movdqa TrapXmm11(%rbp), %xmm11
-    movdqa TrapXmm12(%rbp), %xmm12
-    movdqa TrapXmm13(%rbp), %xmm13
-    movdqa TrapXmm14(%rbp), %xmm14
-    movdqa TrapXmm15(%rbp), %xmm15
+    movdqa KTRAP_FRAME_Xmm0(%rbp), %xmm0
+    movdqa KTRAP_FRAME_Xmm1(%rbp), %xmm1
+    movdqa KTRAP_FRAME_Xmm2(%rbp), %xmm2
+    movdqa KTRAP_FRAME_Xmm3(%rbp), %xmm3
+    movdqa KTRAP_FRAME_Xmm4(%rbp), %xmm4
+    movdqa KTRAP_FRAME_Xmm5(%rbp), %xmm5
+    movdqa KTRAP_FRAME_Xmm6(%rbp), %xmm6
+    movdqa KTRAP_FRAME_Xmm7(%rbp), %xmm7
+    movdqa KTRAP_FRAME_Xmm8(%rbp), %xmm8
+    movdqa KTRAP_FRAME_Xmm9(%rbp), %xmm9
+    movdqa KTRAP_FRAME_Xmm10(%rbp), %xmm10
+    movdqa KTRAP_FRAME_Xmm11(%rbp), %xmm11
+    movdqa KTRAP_FRAME_Xmm12(%rbp), %xmm12
+    movdqa KTRAP_FRAME_Xmm13(%rbp), %xmm13
+    movdqa KTRAP_FRAME_Xmm14(%rbp), %xmm14
+    movdqa KTRAP_FRAME_Xmm15(%rbp), %xmm15
 
     /* Load MxCsr register */
-    ldmxcsr TrapMxCsr(%rbp)
+    ldmxcsr KTRAP_FRAME_MxCsr(%rbp)
 
     /* Free stack space */
-    add $(TRAP_FRAME_SIZE - TRAP_REGISTERS_SIZE), %rsp
+    add $(KTRAP_FRAME_SIZE - KTRAP_FRAME_REGISTERS_SIZE), %rsp
 
     /* Pop General Purpose Registers */
     pop %rax

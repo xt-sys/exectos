@@ -7,7 +7,6 @@
  */
 
 #include <xtkmapi.h>
-#include <ar/amd64/asmsup.h>
 
 .altmacro
 .text

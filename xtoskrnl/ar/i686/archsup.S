@@ -8,7 +8,7 @@
  */
 
 #include <xtkmapi.h>
-#include <ar/i686/asmsup.h>
+#include <xtadk.h>
 
 .altmacro
 .text
@@ -37,8 +37,8 @@ _Ar\Type\Vector\()Start:
         clts
 
         /* Allocate the trap frame and inject the hardware vector for the dispatcher */
-        sub $TRAP_FRAME_SIZE, %esp
-        movl $\Vector, TrapVector(%esp)
+        sub $KTRAP_FRAME_SIZE, %esp
+        movl $\Vector, KTRAP_FRAME_Vector(%esp)
 
         /* Pass the trap frame pointer as an argument and clear the direction flag */
         push %esp
@@ -49,7 +49,7 @@ _Ar\Type\Vector\()Start:
 
         /* Discard the argument and deallocate the trap frame */
         add $4, %esp
-        add $TRAP_FRAME_SIZE, %esp
+        add $KTRAP_FRAME_SIZE, %esp
 
         /* Hardware task return */
         iretl
@@ -81,40 +81,40 @@ _Ar\Type\Vector\()Start:
         push %eax
 
         /* Reserve space for other registers and point RBP to the trap frame */
-        sub $(TRAP_FRAME_SIZE - TRAP_REGISTERS_SIZE), %esp
+        sub $(KTRAP_FRAME_SIZE - KTRAP_FRAME_REGISTERS_SIZE), %esp
         lea (%esp), %ebp
 
         /* Store segment selectors */
-        mov %gs, TrapSegGs(%ebp)
-        mov %fs, TrapSegFs(%ebp)
-        mov %es, TrapSegEs(%ebp)
-        mov %ds, TrapSegDs(%ebp)
+        mov %gs, KTRAP_FRAME_SegGs(%ebp)
+        mov %fs, KTRAP_FRAME_SegFs(%ebp)
+        mov %es, KTRAP_FRAME_SegEs(%ebp)
+        mov %ds, KTRAP_FRAME_SegDs(%ebp)
 
         /* Store debug registers */
         mov %dr7, %eax
-        mov %eax, TrapDr7(%ebp)
+        mov %eax, KTRAP_FRAME_Dr7(%ebp)
         mov %dr6, %eax
-        mov %eax, TrapDr6(%ebp)
+        mov %eax, KTRAP_FRAME_Dr6(%ebp)
         mov %dr3, %eax
-        mov %eax, TrapDr3(%ebp)
+        mov %eax, KTRAP_FRAME_Dr3(%ebp)
         mov %dr2, %eax
-        mov %eax, TrapDr2(%ebp)
+        mov %eax, KTRAP_FRAME_Dr2(%ebp)
         mov %dr1, %eax
-        mov %eax, TrapDr1(%ebp)
+        mov %eax, KTRAP_FRAME_Dr1(%ebp)
         mov %dr0, %eax
-        mov %eax, TrapDr0(%ebp)
+        mov %eax, KTRAP_FRAME_Dr0(%ebp)
 
         /* Store CR2 and CR3 */
         mov %cr3, %eax
-        mov %eax, TrapCr3(%ebp)
+        mov %eax, KTRAP_FRAME_Cr3(%ebp)
         mov %cr2, %eax
-        mov %eax, TrapCr2(%ebp)
+        mov %eax, KTRAP_FRAME_Cr2(%ebp)
 
         /* Test previous mode */
-        movl $0, TrapPreviousMode(%ebp)
-        mov TrapSegCs(%ebp), %ax
+        movl $0, KTRAP_FRAME_PreviousMode(%ebp)
+        mov KTRAP_FRAME_SegCs(%ebp), %ax
         and $3, %al
-        mov %al, TrapPreviousMode(%ebp)
+        mov %al, KTRAP_FRAME_PreviousMode(%ebp)
         jz KernelMode\Type\Vector
 
         /* Load Kernel PB selector into FS */
@@ -131,9 +131,9 @@ _Ar\Type\Vector\()Start:
 KernelMode\Type\Vector:
         /* Save kernel stack pointer (SS:ESP) */
         movl %ss, %eax
-        mov %eax, TrapSegSs(%ebp)
-        lea TrapEsp(%ebp), %eax
-        mov %eax, TrapEsp(%ebp)
+        mov %eax, KTRAP_FRAME_SegSs(%ebp)
+        lea KTRAP_FRAME_Esp(%ebp), %eax
+        mov %eax, KTRAP_FRAME_Esp(%ebp)
 
 UserMode\Type\Vector:
         /* Push Frame Pointer and clear direction flag */
@@ -152,19 +152,19 @@ UserMode\Type\Vector:
         add $4, %esp
 
         /* Test previous mode and disable interrupts before user mode return */
-        testb $1, TrapPreviousMode(%ebp)
+        testb $1, KTRAP_FRAME_PreviousMode(%ebp)
         jz KernelModeReturn\Type\Vector
         cli
 
 KernelModeReturn\Type\Vector:
         /* Restore segment selectors */
-        mov TrapSegDs(%ebp), %ds
-        mov TrapSegEs(%ebp), %es
-        mov TrapSegFs(%ebp), %fs
-        mov TrapSegGs(%ebp), %gs
+        mov KTRAP_FRAME_SegDs(%ebp), %ds
+        mov KTRAP_FRAME_SegEs(%ebp), %es
+        mov KTRAP_FRAME_SegFs(%ebp), %fs
+        mov KTRAP_FRAME_SegGs(%ebp), %gs
 
         /* Free stack space */
-        add $(TRAP_FRAME_SIZE - TRAP_REGISTERS_SIZE), %esp
+        add $(KTRAP_FRAME_SIZE - KTRAP_FRAME_REGISTERS_SIZE), %esp
 
         /* Pop General Purpose Registers */
         pop %eax
