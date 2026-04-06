@@ -92,23 +92,23 @@ AR::ProcSup::IdentifyProcessor(VOID)
     if(Prcb->CpuId.Vendor == CPU_VENDOR_AMD)
     {
         /* AMD CPU */
-        if(Prcb->CpuId.Family >= 0xF)
+        if(CpuSignature.Family == 0xF)
         {
-            Prcb->CpuId.Family = Prcb->CpuId.Family + CpuSignature.ExtendedFamily;
-            Prcb->CpuId.Model = Prcb->CpuId.Model + (CpuSignature.ExtendedModel << 4);
+            Prcb->CpuId.Family += CpuSignature.ExtendedFamily;
+            Prcb->CpuId.Model += (CpuSignature.ExtendedModel << 4);
         }
     }
     else if(Prcb->CpuId.Vendor == CPU_VENDOR_INTEL)
     {
         /* Intel CPU */
-        if(Prcb->CpuId.Family == 0xF)
+        if(CpuSignature.Family == 0xF)
         {
-            Prcb->CpuId.Family = Prcb->CpuId.Family + CpuSignature.ExtendedFamily;
+            Prcb->CpuId.Family += CpuSignature.ExtendedFamily;
         }
 
-        if((Prcb->CpuId.Family == 0x6) || (Prcb->CpuId.Family == 0xF))
+        if((CpuSignature.Family == 0x6) || (CpuSignature.Family == 0xF))
         {
-            Prcb->CpuId.Model = Prcb->CpuId.Model + (CpuSignature.ExtendedModel << 4);
+            Prcb->CpuId.Model += (CpuSignature.ExtendedModel << 4);
         }
     }
     else
