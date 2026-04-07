@@ -21,6 +21,7 @@
 #include <hl/irq.hh>
 #include <hl/pic.hh>
 #include <hl/runlevel.hh>
+#include <hl/timer.hh>
 
 
 #endif /* __XTOSKRNL_HL_HH */

@@ -179,6 +179,10 @@
 #define COMPORT_REG_MSR                             0x06 /* Modem Status Register */
 #define COMPORT_REG_SR                              0x07 /* Scratch Register */
 
+/* Minimum and maximum profile intervals */
+#define MIN_PROFILE_INTERVAL 1000
+#define MAX_PROFILE_INTERVAL 10000000
+
 
 /* C/C++ specific code */
 #ifndef __XTOS_ASSEMBLER__

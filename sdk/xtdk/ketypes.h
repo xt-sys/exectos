@@ -137,6 +137,37 @@ typedef enum _KPROCESS_STATE
     ProcessOutSwap
 } KPROCESS_STATE, *PKPROCESS_STATE;
 
+/* Kernel profiling sources */
+typedef enum _KPROFILE_SOURCE
+{
+    ProfileTime,
+    ProfileAlignmentFixup,
+    ProfileTotalIssues,
+    ProfilePipelineDry,
+    ProfileLoadInstructions,
+    ProfilePipelineFrozen,
+    ProfileBranchInstructions,
+    ProfileTotalNonissues,
+    ProfileDcacheMisses,
+    ProfileIcacheMisses,
+    ProfileCacheMisses,
+    ProfileBranchMispredictions,
+    ProfileStoreInstructions,
+    ProfileFpInstructions,
+    ProfileIntegerInstructions,
+    Profile2Issue,
+    Profile3Issue,
+    Profile4Issue,
+    ProfileSpecialInstructions,
+    ProfileTotalCycles,
+    ProfileIcacheIssues,
+    ProfileDcacheAccesses,
+    ProfileMemoryBarrierCycles,
+    ProfileLoadLinkedIssues,
+    ProfileXtKernel,
+    ProfileMaximum
+} KPROFILE_SOURCE, *PKPROFILE_SOURCE;
+
 /* Thread state */
 typedef enum _KTHREAD_STATE
 {
