@@ -13,6 +13,10 @@ The ovmf_vars files, store UEFI variables, which are used to store and retrieve 
 boot options, device settings, and system preferences. The ovmf_vars file contains the persistent variables specific to
 a virtual machine, allowing it to maintain its configuration across multiple boot sessions.
 
+## BOCHS ROM BIOS
+The rombios.bin file contains the ROM BIOS image for Bochs. This image is distributed under the GNU Lesser General Public
+License (LGPL).
+
 ## Video BIOS (LGPL'd VGABios)
 The vgabios.bin file contains the Video Bios for Bochs and QEMU. This VGA Bios is very specific to the emulated VGA card.
 It is NOT meant to drive a physical vga card. It also implements support for VBE version 2.0.
