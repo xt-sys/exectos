@@ -589,21 +589,3 @@ AR::Traps::HandleTrapFF(IN PKTRAP_FRAME TrapFrame)
     DebugPrint(L"Handled Unexpected-Interrupt (0xFF)!\n");
     KE::Crash::Panic(0xFF);
 }
-
-/**
- * C-linkage wrapper for dispatching the trap provided by common trap handler.
- *
- * @param TrapFrame
- *        Supplies a kernel trap frame pushed by common trap handler on the stack.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTCLINK
-XTCDECL
-VOID
-ArDispatchTrap(IN PKTRAP_FRAME TrapFrame)
-{
-    AR::Traps::DispatchTrap(TrapFrame);
-}

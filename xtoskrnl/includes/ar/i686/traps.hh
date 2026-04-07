@@ -1,4 +1,4 @@
-/**@s
+/**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
  * FILE:            xtoskrnl/includes/ar/i686/traps.hh
@@ -18,7 +18,7 @@ namespace AR
     class Traps
     {
         public:
-            STATIC XTCDECL VOID DispatchTrap(IN PKTRAP_FRAME TrapFrame);
+            STATIC XTCDECL VOID DispatchTrap(IN PKTRAP_FRAME TrapFrame) XTSYMBOL("_ArDispatchTrap");
 
         private:
             STATIC XTCDECL VOID HandleTrap00(IN PKTRAP_FRAME TrapFrame);

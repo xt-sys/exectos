@@ -18,6 +18,7 @@
     #define NULLPTR         nullptr
     #define VIRTUAL         virtual
     #define XTCLINK         extern "C"
+    #define XTSYMBOL(Name)  __asm__(Name)
 
     /* C++ boolean type */
     typedef bool BOOLEAN, *PBOOLEAN;
@@ -31,6 +32,7 @@
     #define NULLPTR         ((void *)0)
     #define VIRTUAL
     #define XTCLINK
+    #define XTSYMBOL(Name)
 
     /* C boolean type */
     typedef enum _BOOLEAN

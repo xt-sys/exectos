@@ -18,7 +18,7 @@ namespace AR
     class Traps
     {
         public:
-            STATIC XTCDECL VOID DispatchTrap(IN PKTRAP_FRAME TrapFrame);
+            STATIC XTCDECL VOID DispatchTrap(IN PKTRAP_FRAME TrapFrame) XTSYMBOL("ArDispatchTrap");
             STATIC XTCDECL VOID InitializeSystemCallMsrs(VOID);
 
         private:

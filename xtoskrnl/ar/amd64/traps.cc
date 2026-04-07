@@ -227,7 +227,6 @@ VOID
 AR::Traps::HandleTrap02(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Non-Maskable-Interrupt (0x02)!\n");
-    KE::Crash::Panic(0x02);
 }
 
 /**
@@ -642,22 +641,4 @@ AR::Traps::InitializeSystemCallMsrs(VOID)
 
     /* Enable system call extensions (SCE) in EFER MSR */
     CpuFunc::WriteModelSpecificRegister(X86_MSR_EFER, CpuFunc::ReadModelSpecificRegister(X86_MSR_EFER) | X86_MSR_EFER_SCE);
-}
-
-/**
- * C-linkage wrapper for dispatching the trap provided by common trap handler.
- *
- * @param TrapFrame
- *        Supplies a kernel trap frame pushed by common trap handler on the stack.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTCLINK
-XTCDECL
-VOID
-ArDispatchTrap(IN PKTRAP_FRAME TrapFrame)
-{
-    AR::Traps::DispatchTrap(TrapFrame);
 }
