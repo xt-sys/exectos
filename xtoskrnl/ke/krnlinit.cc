@@ -46,8 +46,9 @@ KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
         DebugPrint(L"Initializing ExectOS v%d.%d for %s\n", XTOS_VERSION_MAJOR, XTOS_VERSION_MINOR, _ARCH_NAME);
     }
 
-    /* Initialize boot CPU */
+    /* Initialize boot CPU and set the unhandled interrupt routine */
     AR::ProcSup::InitializeProcessor(NULLPTR);
+    AR::Traps::SetUnhandledInterruptRoutine(HL::Irq::HandleUnexpectedInterrupt);
 
     /* Initialize system resources */
     SystemResources::InitializeResources();
