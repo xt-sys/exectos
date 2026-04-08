@@ -69,6 +69,10 @@
 /* PIC vector definitions */
 #define PIC1_VECTOR_SPURIOUS                            0x37
 
+/* PIT ports definitions */
+#define PIT_COMMAND_PORT                                0x43
+#define PIT_DATA_PORT0                                  0x40
+
 /* Serial ports information */
 #define COMPORT_ADDRESS                                 {0x3F8, 0x2F8, 0x3E8, 0x2E8, 0x5F8, 0x4F8, 0x5E8, 0x4E8}
 #define COMPORT_COUNT                                   8
@@ -145,6 +149,19 @@ typedef enum _APIC_REGISTER
     APIC_EXT2LVTR = 0x52, /* Extended Interrupt 2 Local Vector Table */
     APIC_EXT3LVTR = 0x53  /* Extended Interrupt 3 Local Vector Table */
 } APIC_REGISTER, *PAPIC_REGISTER;
+
+/* APIC Timer Divide enumeration list */
+typedef enum _APIC_TIMER_DIVISOR
+{
+    TIMER_DivideBy2   = 0,
+    TIMER_DivideBy4   = 1,
+    TIMER_DivideBy8   = 2,
+    TIMER_DivideBy16  = 3,
+    TIMER_DivideBy32  = 8,
+    TIMER_DivideBy64  = 9,
+    TIMER_DivideBy128 = 10,
+    TIMER_DivideBy1   = 11,
+} APIC_TIMER_DIVISOR, *PAPIC_TIMER_DIVISOR;
 
 /* I8259 PIC interrupt mode enumeration list */
 typedef enum _PIC_I8259_ICW1_INTERRUPT_MODE

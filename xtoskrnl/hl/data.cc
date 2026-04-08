@@ -32,3 +32,9 @@ HL_SCROLL_REGION_DATA HL::FrameBuffer::ScrollRegionData;
 
 /* APIC mode */
 APIC_MODE HL::Pic::ApicMode;
+
+/* Kernel profiling interval */
+ULONG HL::Timer::ProfilingInterval;
+
+/* APIC timer frequency */
+ULONG HL::Timer::TimerFrequency;
