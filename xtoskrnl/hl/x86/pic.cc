@@ -224,6 +224,7 @@ HL::Pic::InitializeApic(VOID)
 
     /* Register interrupt handlers */
     HL::Irq::RegisterInterruptHandler(APIC_VECTOR_SPURIOUS, (PVOID)ArHandleSpuriousInterrupt);
+    HL::Irq::RegisterSystemInterruptHandler(APIC_VECTOR_PROFILE, HL::Irq::HandleProfileInterrupt);
 
     /* Clear any pre-existing errors */
     WriteApicRegister(APIC_ESR, 0);

@@ -11,6 +11,48 @@
 
 
 /**
+ * Handles profiling interrupt.
+ *
+ * @param TrapFrame
+ *        Supplies a kernel trap frame pushed by common interrupt handler.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+HL::Irq::HandleProfileInterrupt(IN PKTRAP_FRAME TrapFrame)
+{
+    /* Send EOI*/
+    HL::Pic::SendEoi();
+}
+
+/**
+ * Handles unexpected or unmapped system interrupts.
+ *
+ * @param TrapFrame
+ *        Supplies a kernel trap frame pushed by common interrupt handler.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+HL::Irq::HandleUnexpectedInterrupt(IN PKTRAP_FRAME TrapFrame)
+{
+    UNIMPLEMENTED;
+
+    /* Disable interrupts */
+    AR::CpuFunc::ClearInterruptFlag();
+
+    /* Print debug message and raise kernel panic */
+    DebugPrint(L"ERROR: Caught unexpected interrupt (0x%.2lX)!\n", TrapFrame->Vector);
+    KE::Crash::Panic(0x47, TrapFrame->Vector, 0, 0, 0);
+}
+
+/**
  * Returns the registered interrupt handler for the specified IDT vector.
  *
  * @param Vector
@@ -115,28 +157,4 @@ HL::Irq::RegisterSystemInterruptHandler(IN ULONG Vector,
 
     /* Update interrupt handler in the processor's interrupt dispatch table */
     ProcessorBlock->InterruptDispatchTable[Vector] = Handler;
-}
-
-/**
- * Handles unexpected or unmapped system interrupts.
- *
- * @param TrapFrame
- *        Supplies a kernel trap frame pushed by common interrupt handler.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTCDECL
-VOID
-HL::Irq::HandleUnexpectedInterrupt(IN PKTRAP_FRAME TrapFrame)
-{
-    UNIMPLEMENTED;
-
-    /* Disable interrupts */
-    AR::CpuFunc::ClearInterruptFlag();
-
-    /* Print debug message and raise kernel panic */
-    DebugPrint(L"ERROR: Caught unexpected interrupt (0x%.2lX)!\n", TrapFrame->Vector);
-    KE::Crash::Panic(0x47, TrapFrame->Vector, 0, 0, 0);
 }
