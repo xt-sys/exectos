@@ -158,9 +158,6 @@ HL::Timer::InitializeApicTimer(VOID)
 
     /* Program the APIC timer for periodic mode */
     StopProfileInterrupt(ProfileXtKernel);
-
-    // StartProfileInterrupt(ProfileXtKernel);
-    // AR::CpuFunc::SetInterruptFlag();
 }
 
 /**

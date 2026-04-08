@@ -30,7 +30,7 @@ namespace HL
         private:
             STATIC XTAPI XTSTATUS CalibrateApicTimer();
             STATIC XTAPI XTSTATUS GetApicTimerFrequency(OUT PULONG Frequency);
-            STATIC XTAPI VOID PitStallExecution(IN ULONG Us);
+            STATIC XTAPI VOID PitStallExecution(IN ULONG MicroSeconds);
             STATIC XTAPI VOID StallExecution(IN ULONG MicroSeconds);
     };
 }
