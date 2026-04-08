@@ -115,7 +115,7 @@ _Ar\Type\Vector\()Start:
         mov KTRAP_FRAME_SegCs(%ebp), %ax
         and $3, %al
         mov %al, KTRAP_FRAME_PreviousMode(%ebp)
-        jz KernelMode\Type\Vector
+        jz Dispatch\Type\Vector
 
         /* Load Kernel PB selector into FS */
         mov $KGDT_R0_PB, %ax
@@ -126,16 +126,7 @@ _Ar\Type\Vector\()Start:
         mov %ax, %ds
         mov %ax, %es
 
-        jmp UserMode\Type\Vector
-
-KernelMode\Type\Vector:
-        /* Save kernel stack pointer (SS:ESP) */
-        movl %ss, %eax
-        mov %eax, KTRAP_FRAME_SegSs(%ebp)
-        lea KTRAP_FRAME_Esp(%ebp), %eax
-        mov %eax, KTRAP_FRAME_Esp(%ebp)
-
-UserMode\Type\Vector:
+Dispatch\Type\Vector:
         /* Push Frame Pointer and clear direction flag */
         push %esp
         cld
@@ -153,10 +144,10 @@ UserMode\Type\Vector:
 
         /* Test previous mode and disable interrupts before user mode return */
         testb $1, KTRAP_FRAME_PreviousMode(%ebp)
-        jz KernelModeReturn\Type\Vector
+        jz RestoreState\Type\Vector
         cli
 
-KernelModeReturn\Type\Vector:
+RestoreState\Type\Vector:
         /* Restore segment selectors */
         mov KTRAP_FRAME_SegDs(%ebp), %ds
         mov KTRAP_FRAME_SegEs(%ebp), %es

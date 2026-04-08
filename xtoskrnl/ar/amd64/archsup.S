@@ -119,11 +119,11 @@ Ar\Type\Vector:
     mov %al, KTRAP_FRAME_PreviousMode(%rbp)
 
     /* Skip swapgs as the interrupt originated from kernel mode */
-    jz UserMode\Type\Vector
+    jz Dispatch\Type\Vector
 
     swapgs
 
-UserMode\Type\Vector:
+Dispatch\Type\Vector:
     /* Set up trap frame pointer for the dispatcher and clear the direction flag */
     mov %rsp, %rcx
     cld
@@ -150,11 +150,11 @@ UserMode\Type\Vector:
 
     /* Test previous mode and swapgs if needed */
     testb $1, KTRAP_FRAME_PreviousMode(%rbp)
-    jz KernelModeReturn\Type\Vector
+    jz RestoreState\Type\Vector
     cli
     swapgs
 
-KernelModeReturn\Type\Vector:
+RestoreState\Type\Vector:
     /* Restore XMM registers */
     movdqa KTRAP_FRAME_Xmm0(%rbp), %xmm0
     movdqa KTRAP_FRAME_Xmm1(%rbp), %xmm1
