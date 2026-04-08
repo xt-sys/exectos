@@ -12,6 +12,7 @@
 #include <xtdefs.h>
 #include <xtstruct.h>
 #include <xttypes.h>
+#include ARCH_HEADER(xtstruct.h)
 
 
 /* Control Register 0 constants */
@@ -354,6 +355,9 @@ typedef enum _CPUID_REQUESTS
     CPUID_GET_POWER_MANAGEMENT,
     CPUID_GET_STANDARD7_FEATURES
 } CPUID_REQUESTS, *PCPUID_REQUESTS;
+
+/* Interrupt handler */
+typedef VOID (*PINTERRUPT_HANDLER)(PKTRAP_FRAME TrapFrame);
 
 /* Processor identification information */
 typedef struct _CPU_IDENTIFICATION

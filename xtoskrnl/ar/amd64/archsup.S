@@ -142,7 +142,7 @@ Dispatch\Type\Vector:
         call ArDispatchTrap
     .else
         /* Pass to the interrupt dispatcher */
-        call ArDispatchTrap
+        call ArDispatchInterrupt
     .endif
 
     /* Restore the original trap frame stack pointer */

@@ -29,3 +29,6 @@ KTSS AR::ProcSup::InitialTss;
 
 /* Initial kernel NMI stack */
 UCHAR AR::ProcSup::NmiStack[KERNEL_STACK_SIZE] = {};
+
+/* Unhandled interrupt routine */
+PINTERRUPT_HANDLER AR::Traps::UnhandledInterruptRoutine = NULLPTR;

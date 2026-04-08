@@ -17,8 +17,13 @@ namespace AR
 {
     class Traps
     {
+        private:
+            STATIC PINTERRUPT_HANDLER UnhandledInterruptRoutine;
+
         public:
+            STATIC XTCDECL VOID DispatchInterrupt(IN PKTRAP_FRAME TrapFrame) XTSYMBOL("_ArDispatchInterrupt");
             STATIC XTCDECL VOID DispatchTrap(IN PKTRAP_FRAME TrapFrame) XTSYMBOL("_ArDispatchTrap");
+            STATIC XTCDECL VOID SetUnhandledInterruptRoutine(PINTERRUPT_HANDLER Handler);
 
         private:
             STATIC XTCDECL VOID HandleTrap00(IN PKTRAP_FRAME TrapFrame);

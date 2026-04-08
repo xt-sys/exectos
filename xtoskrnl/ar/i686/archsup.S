@@ -136,7 +136,7 @@ Dispatch\Type\Vector:
             call _ArDispatchTrap
         .else
             /* Pass to the interrupt dispatcher */
-            call _ArDispatchTrap
+            call _ArDispatchInterrupt
         .endif
 
         /* Clean up the stack */

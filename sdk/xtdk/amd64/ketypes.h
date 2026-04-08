@@ -523,6 +523,7 @@ typedef struct _KPROCESSOR_BLOCK
     KAFFINITY SetMember;
     ULONG StallScaleFactor;
     UCHAR CpuNumber;
+    PINTERRUPT_HANDLER InterruptDispatchTable[256];
 } KPROCESSOR_BLOCK, *PKPROCESSOR_BLOCK;
 
 /* Thread Environment Block (TEB) structure definition */

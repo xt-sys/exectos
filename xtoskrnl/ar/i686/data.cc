@@ -35,3 +35,6 @@ UCHAR AR::ProcSup::NmiStack[KERNEL_STACK_SIZE] = {};
 
 /* NMI task gate */
 UCHAR AR::ProcSup::NonMaskableInterruptTss[KTSS_IO_MAPS];
+
+/* Unhandled interrupt routine */
+PINTERRUPT_HANDLER AR::Traps::UnhandledInterruptRoutine = NULLPTR;

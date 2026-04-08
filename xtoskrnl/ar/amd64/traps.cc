@@ -10,6 +10,44 @@
 
 
 /**
+ * Dispatches the interrupt provided by common interrupt handler.
+ *
+ * @param TrapFrame
+ *        Supplies a kernel trap frame pushed by common interrupt handler on the stack.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+AR::Traps::DispatchInterrupt(IN PKTRAP_FRAME TrapFrame)
+{
+    PINTERRUPT_HANDLER Handler;
+
+    /* Read the handler pointer from the CPU's interrupt dispatch table */
+    Handler = (PINTERRUPT_HANDLER)AR::CpuFunc::ReadGSQuadWord(FIELD_OFFSET(KPROCESSOR_BLOCK, InterruptDispatchTable) +
+                                                              (TrapFrame->Vector * sizeof(PINTERRUPT_HANDLER)));
+
+    /* Check if the interrupt has a handler registered */
+    if(Handler != NULLPTR)
+    {
+        /* Call the handler */
+        Handler(TrapFrame);
+    }
+    else if(UnhandledInterruptRoutine != NULLPTR)
+    {
+        /* Call the unhandled interrupt routine */
+        UnhandledInterruptRoutine(TrapFrame);
+    }
+    else
+    {
+        /* Dispatcher not initialized, print a debug message */
+        DebugPrint(L"ERROR: Caught unhandled interrupt: 0x%.2llX\n", TrapFrame->Vector);
+    }
+}
+
+/**
  * Dispatches the trap provided by common trap handler.
  *
  * @param TrapFrame
@@ -641,4 +679,22 @@ AR::Traps::InitializeSystemCallMsrs(VOID)
 
     /* Enable system call extensions (SCE) in EFER MSR */
     CpuFunc::WriteModelSpecificRegister(X86_MSR_EFER, CpuFunc::ReadModelSpecificRegister(X86_MSR_EFER) | X86_MSR_EFER_SCE);
+}
+
+/**
+ * Sets the unhandled interrupt routine used for vectors that have no handler registered.
+ *
+ * @param Handler
+ *        Supplies the pointer to the interrupt handler routine.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+AR::Traps::SetUnhandledInterruptRoutine(PINTERRUPT_HANDLER Handler)
+{
+    /* Set the unhandled interrupt routine */
+    UnhandledInterruptRoutine = Handler;
 }

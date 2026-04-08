@@ -223,7 +223,7 @@ HL::Pic::InitializeApic(VOID)
     WriteApicRegister(APIC_LINT1, LvtRegister.Long);
 
     /* Register interrupt handlers */
-    HL::Irq::SetInterruptHandler(APIC_VECTOR_SPURIOUS, (PVOID)ArHandleSpuriousInterrupt);
+    HL::Irq::RegisterInterruptHandler(APIC_VECTOR_SPURIOUS, (PVOID)ArHandleSpuriousInterrupt);
 
     /* Clear any pre-existing errors */
     WriteApicRegister(APIC_ESR, 0);
@@ -307,7 +307,7 @@ HL::Pic::InitializeLegacyPic(VOID)
     HL::IoPort::WritePort8(PIC2_DATA_PORT, 0xFF);
 
     /* Register interrupt handler */
-    HL::Irq::SetInterruptHandler(PIC1_VECTOR_SPURIOUS, (PVOID)ArHandleSpuriousInterrupt);
+    HL::Irq::RegisterInterruptHandler(PIC1_VECTOR_SPURIOUS, (PVOID)ArHandleSpuriousInterrupt);
 }
 
 /**

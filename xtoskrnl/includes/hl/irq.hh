@@ -18,8 +18,13 @@ namespace HL
     class Irq
     {
         public:
-            STATIC XTAPI VOID SetInterruptHandler(IN ULONG Vector,
-                                                  IN PVOID Handler);
+            STATIC XTAPI PVOID QueryInterruptHandler(IN ULONG Vector);
+            STATIC XTAPI PVOID QuerySystemInterruptHandler(IN ULONG Vector);
+            STATIC XTCDECL VOID HandleUnexpectedInterrupt(IN PKTRAP_FRAME TrapFrame);
+            STATIC XTAPI VOID RegisterInterruptHandler(IN ULONG Vector,
+                                                       IN PVOID Handler);
+            STATIC XTAPI VOID RegisterSystemInterruptHandler(IN ULONG Vector,
+                                                             IN PINTERRUPT_HANDLER Handler);
     };
 }
 
