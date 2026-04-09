@@ -418,6 +418,14 @@ XTAPI
 VOID
 HL::Pic::SendSelfIpi(ULONG Vector)
 {
+    BOOLEAN Interrupts;
+
+    /* Check whether interrupts are enabled */
+    Interrupts = AR::CpuFunc::InterruptsEnabled();
+
+    /* Disable interrupts */
+    AR::CpuFunc::ClearInterruptFlag();
+
     /* Check current APIC mode */
     if(ApicMode == APIC_MODE_X2APIC)
     {
@@ -426,8 +434,29 @@ HL::Pic::SendSelfIpi(ULONG Vector)
     }
     else
     {
+        /* Wait for the APIC to clear the delivery status */
+        while((ReadApicRegister(APIC_ICR0) & 0x1000) != 0)
+        {
+            /* Yield the processor */
+            AR::CpuFunc::YieldProcessor();
+        }
+
         /* In xAPIC compatibility mode, ICR0 is used */
         WriteApicRegister(APIC_ICR0, Vector | (1 << 18));
+    }
+
+    /* Wait for the APIC to complete delivery of the IPI */
+    while((ReadApicRegister(APIC_ICR0) & 0x1000) != 0)
+    {
+        /* Yield the processor */
+        AR::CpuFunc::YieldProcessor();
+    }
+
+    /* Check whether interrupts need to be re-enabled */
+    if(Interrupts)
+    {
+        /* Re-enable interrupts */
+        AR::CpuFunc::SetInterruptFlag();
     }
 }
 
