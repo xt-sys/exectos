@@ -23,14 +23,14 @@ HL::Init::InitializeSystem(VOID)
     XTSTATUS Status;
 
     /* Initialize ACPI */
-    Status = Acpi::InitializeAcpi();
+    Status = HL::Acpi::InitializeAcpi();
     if(Status != STATUS_SUCCESS)
     {
         return Status;
     }
 
     /* Get system information from ACPI */
-    Status = Acpi::InitializeAcpiSystemInformation();
+    Status = HL::Acpi::InitializeAcpiSystemInformation();
     if(Status != STATUS_SUCCESS)
     {
         return Status;

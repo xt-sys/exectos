@@ -353,7 +353,7 @@ HL::Pic::ReadApicRegister(IN APIC_REGISTER Register)
     else
     {
         /* Read from xAPIC */
-        return IoRegister::ReadRegister32((PULONG)(APIC_BASE + (Register << 4)));
+        return HL::IoRegister::ReadRegister32((PULONG)(APIC_BASE + (Register << 4)));
     }
 }
 
@@ -430,6 +430,6 @@ HL::Pic::WriteApicRegister(IN APIC_REGISTER Register,
     else
     {
         /* Write to xAPIC */
-        IoRegister::WriteRegister32((PULONG)(APIC_BASE + (Register << 4)), Value);
+        HL::IoRegister::WriteRegister32((PULONG)(APIC_BASE + (Register << 4)), Value);
     }
 }

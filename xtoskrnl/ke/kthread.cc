@@ -92,10 +92,10 @@ KE::KThread::InitializeThread(IN PKPROCESS Process,
     Thread->Header.SignalState = 0;
 
     /* Initialize thread wait list */
-    RtlInitializeListHead(&Thread->Header.WaitListHead);
+    RTL::LinkedList::InitializeListHead(&Thread->Header.WaitListHead);
 
     /* Initialize thread mutant list head */
-    RtlInitializeListHead(&Thread->MutantListHead);
+    RTL::LinkedList::InitializeListHead(&Thread->MutantListHead);
 
     /* Initialize the builtin wait blocks */
     for(Index = 0; Index <= KTHREAD_WAIT_BLOCK; Index++)
@@ -113,7 +113,7 @@ KE::KThread::InitializeThread(IN PKPROCESS Process,
     Thread->AdjustReason = AdjustNone;
 
     /* Initialize thread lock */
-    SpinLock::InitializeSpinLock(&Thread->ThreadLock);
+    KE::SpinLock::InitializeSpinLock(&Thread->ThreadLock);
 
     /* Initialize thread APC */
     Thread->ApcStatePointer[0] = &Thread->ApcState;
@@ -123,21 +123,21 @@ KE::KThread::InitializeThread(IN PKPROCESS Process,
     Thread->Process = Process;
 
     /* Initialize APC list heads */
-    RtlInitializeListHead(&Thread->ApcState.ApcListHead[KernelMode]);
-    RtlInitializeListHead(&Thread->ApcState.ApcListHead[UserMode]);
+    RTL::LinkedList::InitializeListHead(&Thread->ApcState.ApcListHead[KernelMode]);
+    RTL::LinkedList::InitializeListHead(&Thread->ApcState.ApcListHead[UserMode]);
 
     /* Initialize APC queue lock */
-    SpinLock::InitializeSpinLock(&Thread->ApcQueueLock);
+    KE::SpinLock::InitializeSpinLock(&Thread->ApcQueueLock);
 
     /* Initialize kernel-mode suspend APC */
-    Apc::InitializeApc(&Thread->SuspendApc, Thread, OriginalApcEnvironment, SuspendNop,
-                       SuspendRundown, SuspendThread, KernelMode, NULLPTR);
+    KE::Apc::InitializeApc(&Thread->SuspendApc, Thread, OriginalApcEnvironment, SuspendNop,
+                           SuspendRundown, SuspendThread, KernelMode, NULLPTR);
 
     /* Initialize suspend semaphore */
-    Semaphore::InitializeSemaphore(&Thread->SuspendSemaphore, 0, 2);
+    KE::Semaphore::InitializeSemaphore(&Thread->SuspendSemaphore, 0, 2);
 
     /* Initialize the builtin timer */
-    Timer::InitializeTimer(&Thread->Timer, NotificationTimer);
+    KE::Timer::InitializeTimer(&Thread->Timer, NotificationTimer);
     TimerWaitBlock = &Thread->WaitBlock[KTIMER_WAIT_BLOCK];
     TimerWaitBlock->Object = &Thread->Timer;
     TimerWaitBlock->WaitKey = STATUS_TIMEOUT;

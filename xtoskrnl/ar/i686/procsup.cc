@@ -68,7 +68,7 @@ AR::ProcSup::IdentifyProcessor(VOID)
     /* Get CPU vendor by issueing CPUID instruction */
     RtlZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
     CpuRegisters.Leaf = CPUID_GET_VENDOR_STRING;
-    CpuFunc::CpuId(&CpuRegisters);
+    AR::CpuFunc::CpuId(&CpuRegisters);
 
     /* Store CPU vendor in processor control block */
     Prcb->CpuId.Vendor = (CPU_VENDOR)CpuRegisters.Ebx;
@@ -80,7 +80,7 @@ AR::ProcSup::IdentifyProcessor(VOID)
     /* Get CPU standard features */
     RtlZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
     CpuRegisters.Leaf = CPUID_GET_STANDARD1_FEATURES;
-    CpuFunc::CpuId(&CpuRegisters);
+    AR::CpuFunc::CpuId(&CpuRegisters);
 
     /* Store CPU signature in processor control block */
     CpuSignature = *(PCPUID_SIGNATURE)&CpuRegisters.Eax;
@@ -175,9 +175,9 @@ AR::ProcSup::InitializeProcessor(IN PVOID ProcessorStructures)
     IdtDescriptor.Limit = (IDT_ENTRIES * sizeof(KIDTENTRY)) - 1;
 
     /* Load GDT, IDT and TSS */
-    CpuFunc::LoadGlobalDescriptorTable(&GdtDescriptor.Limit);
-    CpuFunc::LoadInterruptDescriptorTable(&IdtDescriptor.Limit);
-    CpuFunc::LoadTaskRegister((UINT)KGDT_SYS_TSS);
+    AR::CpuFunc::LoadGlobalDescriptorTable(&GdtDescriptor.Limit);
+    AR::CpuFunc::LoadInterruptDescriptorTable(&IdtDescriptor.Limit);
+    AR::CpuFunc::LoadTaskRegister((UINT)KGDT_SYS_TSS);
 
     /* Enter passive IRQ level */
     HL::RunLevel::SetRunLevel(PASSIVE_LEVEL);
@@ -344,10 +344,10 @@ VOID
 AR::ProcSup::InitializeProcessorRegisters(VOID)
 {
     /* Clear EFLAGS register */
-    CpuFunc::WriteEflagsRegister(0);
+    AR::CpuFunc::WriteEflagsRegister(0);
 
     /* Enable write-protection */
-    CpuFunc::WriteControlRegister(0, CpuFunc::ReadControlRegister(0) | CR0_WP);
+    AR::CpuFunc::WriteControlRegister(0, AR::CpuFunc::ReadControlRegister(0) | CR0_WP);
 }
 
 /**
@@ -425,12 +425,12 @@ VOID
 AR::ProcSup::InitializeSegments(VOID)
 {
     /* Initialize segments */
-    CpuFunc::LoadSegment(SEGMENT_CS, KGDT_R0_CODE);
-    CpuFunc::LoadSegment(SEGMENT_DS, KGDT_R3_DATA | RPL_MASK);
-    CpuFunc::LoadSegment(SEGMENT_ES, KGDT_R3_DATA | RPL_MASK);
-    CpuFunc::LoadSegment(SEGMENT_FS, KGDT_R0_PB);
-    CpuFunc::LoadSegment(SEGMENT_GS, 0);
-    CpuFunc::LoadSegment(SEGMENT_SS, KGDT_R0_DATA);
+    AR::CpuFunc::LoadSegment(SEGMENT_CS, KGDT_R0_CODE);
+    AR::CpuFunc::LoadSegment(SEGMENT_DS, KGDT_R3_DATA | RPL_MASK);
+    AR::CpuFunc::LoadSegment(SEGMENT_ES, KGDT_R3_DATA | RPL_MASK);
+    AR::CpuFunc::LoadSegment(SEGMENT_FS, KGDT_R0_PB);
+    AR::CpuFunc::LoadSegment(SEGMENT_GS, 0);
+    AR::CpuFunc::LoadSegment(SEGMENT_SS, KGDT_R0_DATA);
 }
 
 /**
@@ -484,7 +484,7 @@ AR::ProcSup::InitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock,
     ProcessorBlock->TssBase->Flags = 0;
 
     /* Set CR3, LDT and SS */
-    ProcessorBlock->TssBase->CR3 = CpuFunc::ReadControlRegister(3);
+    ProcessorBlock->TssBase->CR3 = AR::CpuFunc::ReadControlRegister(3);
     ProcessorBlock->TssBase->LDT = 0;
     ProcessorBlock->TssBase->Ss0 = KGDT_R0_DATA;
 
@@ -523,7 +523,7 @@ AR::ProcSup::SetDoubleFaultTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock,
     Tss->IoMapBase = sizeof(KTSS);
     Tss->Flags = 0;
     Tss->LDT = 0;
-    Tss->CR3 = CpuFunc::ReadControlRegister(3);
+    Tss->CR3 = AR::CpuFunc::ReadControlRegister(3);
     Tss->Esp = (ULONG_PTR)KernelFaultStack;
     Tss->Esp0 = (ULONG_PTR)KernelFaultStack;
     Tss->Eip = (ULONG)(ULONG_PTR)ArTrapEntry[0x08];
@@ -737,7 +737,7 @@ AR::ProcSup::SetNonMaskableInterruptTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock
     Tss->IoMapBase = sizeof(KTSS);
     Tss->Flags = 0;
     Tss->LDT = 0;
-    Tss->CR3 = CpuFunc::ReadControlRegister(3);
+    Tss->CR3 = AR::CpuFunc::ReadControlRegister(3);
     Tss->Esp = (ULONG_PTR)KernelNmiStack;
     Tss->Esp0 = (ULONG_PTR)KernelNmiStack;
     Tss->Eip = (ULONG)(ULONG_PTR)ArTrapEntry[0x02];

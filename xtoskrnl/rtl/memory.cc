@@ -132,7 +132,7 @@ RTL::Memory::MoveMemory(OUT PVOID Destination,
     else
     {
         /* Forward buffer copy */
-        RtlCopyMemory(Destination, Source, Length);
+        CopyMemory(Destination, Source, Length);
     }
 }
 

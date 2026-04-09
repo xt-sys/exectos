@@ -28,7 +28,7 @@ KE::KernelInit::InitializeKernel(VOID)
     {
         /* Hardware layer initialization failed, kernel panic */
         DebugPrint(L"Failed to initialize hardware layer subsystem!\n");
-        Crash::Panic(0);
+        KE::Crash::Panic(0);
     }
 }
 
@@ -74,8 +74,8 @@ KE::KernelInit::StartKernel(VOID)
     PKTHREAD CurrentThread;
 
     /* Get processor control block and current thread */
-    Prcb = Processor::GetCurrentProcessorControlBlock();
-    CurrentThread = Processor::GetCurrentThread();
+    Prcb = KE::Processor::GetCurrentProcessorControlBlock();
+    CurrentThread = KE::Processor::GetCurrentThread();
 
     /* Get current process */
     CurrentProcess = CurrentThread->ApcState.Process;
@@ -84,14 +84,14 @@ KE::KernelInit::StartKernel(VOID)
     PO::Idle::InitializeProcessorIdleState(Prcb);
 
     /* Save processor state */
-    Processor::SaveProcessorState(&Prcb->ProcessorState);
+    KE::Processor::SaveProcessorState(&Prcb->ProcessorState);
 
     /* Initialize spin locks */
-    SpinLock::InitializeAllLocks();
-    SpinLock::InitializeLockQueues();
+    KE::SpinLock::InitializeAllLocks();
+    KE::SpinLock::InitializeLockQueues();
 
     /* Lower to APC runlevel */
-    RunLevel::LowerRunLevel(APC_LEVEL);
+    KE::RunLevel::LowerRunLevel(APC_LEVEL);
 
     /* Initialize XTOS kernel */
     InitializeKernel();
@@ -99,12 +99,12 @@ KE::KernelInit::StartKernel(VOID)
     /* Initialize Idle process */
     PageDirectory[0] = 0;
     PageDirectory[1] = 0;
-    KProcess::InitializeProcess(CurrentProcess, 0, MAXULONG_PTR, PageDirectory, FALSE);
+    KE::KProcess::InitializeProcess(CurrentProcess, 0, MAXULONG_PTR, PageDirectory, FALSE);
     CurrentProcess->Quantum = MAXCHAR;
 
     /* Initialize Idle thread */
-    KThread::InitializeThread(CurrentProcess, CurrentThread, NULLPTR, NULLPTR, NULLPTR,
-                              NULLPTR, NULLPTR, AR::ProcSup::GetBootStack(), TRUE);
+    KE::KThread::InitializeThread(CurrentProcess, CurrentThread, NULLPTR, NULLPTR, NULLPTR,
+                                  NULLPTR, NULLPTR, AR::ProcSup::GetBootStack(), TRUE);
     CurrentThread->NextProcessor = Prcb->CpuNumber;
     CurrentThread->Priority = THREAD_HIGH_PRIORITY;
     CurrentThread->State = Running;
@@ -117,7 +117,7 @@ KE::KernelInit::StartKernel(VOID)
 
     /* Enter infinite loop */
     DebugPrint(L"KernelInit::StartKernel() finished. Entering infinite loop.\n");
-    Crash::HaltSystem();
+    KE::Crash::HaltSystem();
 }
 
 /**
@@ -138,7 +138,7 @@ KE::KernelInit::SwitchBootStack(VOID)
     Stack = ((ULONG_PTR)AR::ProcSup::GetBootStack() + KERNEL_STACK_SIZE) & ~(STACK_ALIGNMENT - 1);
 
     /* Get address of KernelInit::StartKernel() */
-    StartKernel = (PVOID)KernelInit::StartKernel;
+    StartKernel = (PVOID)KE::KernelInit::StartKernel;
 
     /* Discard old stack frame, switch stack and jump to KernelInit::StartKernel() */
     __asm__ volatile("mov %0, %%rdx\n"

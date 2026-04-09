@@ -32,17 +32,17 @@ KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
        Parameters->ProtocolVersion != BOOT_PROTOCOL_VERSION)
     {
         /* Kernel and boot loader version mismatch */
-        Crash::HaltSystem();
+        KE::Crash::HaltSystem();
     }
 
     /* Save the kernel initialization block */
-    BootInformation::InitializeInitializationBlock(Parameters);
+    KE::BootInformation::InitializeInitializationBlock(Parameters);
 
     /* Check if debugging enabled and if boot loader provided routine for debug printing */
-    if(DEBUG && BootInformation::GetDebugPrint())
+    if(DEBUG && KE::BootInformation::GetDebugPrint())
     {
         /* Use loader's provided DbgPrint() routine for early printing to serial console */
-        KD::DebugIo::SetPrintRoutine(BootInformation::GetDebugPrint());
+        KD::DebugIo::SetPrintRoutine(KE::BootInformation::GetDebugPrint());
         DebugPrint(L"Initializing ExectOS v%d.%d for %s\n", XTOS_VERSION_MAJOR, XTOS_VERSION_MINOR, _ARCH_NAME);
     }
 
@@ -51,7 +51,7 @@ KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
     AR::Traps::SetUnhandledInterruptRoutine(HL::Irq::HandleUnexpectedInterrupt);
 
     /* Initialize system resources */
-    SystemResources::InitializeResources();
+    KE::SystemResources::InitializeResources();
 
     /* Check if debugging enabled */
     if(DEBUG)
@@ -67,11 +67,11 @@ KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
                XTOS_COMPILER_NAME, XTOS_COMPILER_VERSION);
 
     /* Architecture specific kernel initialization */
-    KernelInit::InitializeMachine();
+    KE::KernelInit::InitializeMachine();
 
     /* Raise to HIGH runlevel */
-    RunLevel::RaiseRunLevel(HIGH_LEVEL);
+    KE::RunLevel::RaiseRunLevel(HIGH_LEVEL);
 
     /* Switch the boot stack and transfer control to the KepStartKernel() routine */
-    KernelInit::SwitchBootStack();
+    KE::KernelInit::SwitchBootStack();
 }

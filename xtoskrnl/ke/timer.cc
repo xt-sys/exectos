@@ -31,7 +31,7 @@ KE::Timer::CancelTimer(IN PKTIMER Timer)
 
     /* Raise run level and acquire dispatcher lock */
     RunLevel = KE::RunLevel::RaiseRunLevel(SYNC_LEVEL);
-    SpinLock::AcquireQueuedSpinLock(DispatcherLock);
+    KE::SpinLock::AcquireQueuedSpinLock(DispatcherLock);
 
     /* Check timer status */
     if(Timer->Header.Inserted)
@@ -42,8 +42,8 @@ KE::Timer::CancelTimer(IN PKTIMER Timer)
     }
 
     /* Release dispatcher lock and process the deferred ready list */
-    SpinLock::ReleaseQueuedSpinLock(DispatcherLock);
-    KThread::ExitDispatcher(RunLevel);
+    KE::SpinLock::ReleaseQueuedSpinLock(DispatcherLock);
+    KE::KThread::ExitDispatcher(RunLevel);
 
     /* Return result */
     return Result;
@@ -139,7 +139,7 @@ KE::Timer::QueryTimer(IN PKTIMER Timer)
 
     /* Raise run level and acquire dispatcher lock */
     RunLevel = KE::RunLevel::RaiseRunLevel(SYNC_LEVEL);
-    SpinLock::AcquireQueuedSpinLock(DispatcherLock);
+    KE::SpinLock::AcquireQueuedSpinLock(DispatcherLock);
 
     /* Check timer status */
     if(Timer->Header.Inserted)
@@ -149,8 +149,8 @@ KE::Timer::QueryTimer(IN PKTIMER Timer)
     }
 
     /* Release dispatcher lock and process the deferred ready list */
-    SpinLock::ReleaseQueuedSpinLock(DispatcherLock);
-    KThread::ExitDispatcher(RunLevel);
+    KE::SpinLock::ReleaseQueuedSpinLock(DispatcherLock);
+    KE::KThread::ExitDispatcher(RunLevel);
 
     /* Return timer's due time */
     return DueTime;

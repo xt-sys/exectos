@@ -24,7 +24,7 @@ VOID
 PO::Idle::InitializeProcessorIdleState(IN OUT PKPROCESSOR_CONTROL_BLOCK Prcb)
 {
     /* Zero memory */
-    RtlZeroMemory(&Prcb->PowerState, sizeof(Prcb->PowerState));
+    RTL::Memory::ZeroMemory(&Prcb->PowerState, sizeof(Prcb->PowerState));
 
     /* Initialize default power state */
     Prcb->PowerState.Idle0TimeLimit = 0xFFFFFFFF;
@@ -33,9 +33,9 @@ PO::Idle::InitializeProcessorIdleState(IN OUT PKPROCESSOR_CONTROL_BLOCK Prcb)
     Prcb->PowerState.IdleFunction = Idle0Function;
 
     /* Initialize DPC and Timer */
-    KeInitializeDpc(&Prcb->PowerState.PerfDpc, PerfIdleDpc, Prcb);
-    KeSetTargetProcessorDpc(&Prcb->PowerState.PerfDpc, Prcb->CpuNumber);
-    KeInitializeTimer(&Prcb->PowerState.PerfTimer, SynchronizationTimer);
+    KE::Dpc::InitializeDpc(&Prcb->PowerState.PerfDpc, PerfIdleDpc, Prcb);
+    KE::Dpc::SetTargetProcessor(&Prcb->PowerState.PerfDpc, Prcb->CpuNumber);
+    KE::Timer::InitializeTimer(&Prcb->PowerState.PerfTimer, SynchronizationTimer);
 }
 
 /**

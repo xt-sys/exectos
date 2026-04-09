@@ -73,7 +73,7 @@ AR::ProcSup::IdentifyProcessor(VOID)
     /* Get CPU vendor by issueing CPUID instruction */
     RtlZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
     CpuRegisters.Leaf = CPUID_GET_VENDOR_STRING;
-    CpuFunc::CpuId(&CpuRegisters);
+    AR::CpuFunc::CpuId(&CpuRegisters);
 
     /* Store CPU vendor in processor control block */
     Prcb->CpuId.Vendor = (CPU_VENDOR)CpuRegisters.Ebx;
@@ -85,7 +85,7 @@ AR::ProcSup::IdentifyProcessor(VOID)
     /* Get CPU standard features */
     RtlZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
     CpuRegisters.Leaf = CPUID_GET_STANDARD1_FEATURES;
-    CpuFunc::CpuId(&CpuRegisters);
+    AR::CpuFunc::CpuId(&CpuRegisters);
 
     /* Store CPU signature in processor control block */
     CpuSignature = *(PCPUID_SIGNATURE)&CpuRegisters.Eax;
@@ -180,9 +180,9 @@ AR::ProcSup::InitializeProcessor(IN PVOID ProcessorStructures)
     IdtDescriptor.Limit = (IDT_ENTRIES * sizeof(KIDTENTRY)) - 1;
 
     /* Load GDT, IDT and TSS */
-    CpuFunc::LoadGlobalDescriptorTable(&GdtDescriptor.Limit);
-    CpuFunc::LoadInterruptDescriptorTable(&IdtDescriptor.Limit);
-    CpuFunc::LoadTaskRegister((UINT)KGDT_SYS_TSS);
+    AR::CpuFunc::LoadGlobalDescriptorTable(&GdtDescriptor.Limit);
+    AR::CpuFunc::LoadInterruptDescriptorTable(&IdtDescriptor.Limit);
+    AR::CpuFunc::LoadTaskRegister((UINT)KGDT_SYS_TSS);
 
     /* Enter passive IRQ level */
     HL::RunLevel::SetRunLevel(PASSIVE_LEVEL);
@@ -191,8 +191,8 @@ AR::ProcSup::InitializeProcessor(IN PVOID ProcessorStructures)
     InitializeSegments();
 
     /* Set GS base */
-    CpuFunc::WriteModelSpecificRegister(X86_MSR_GSBASE, (ULONGLONG)ProcessorBlock);
-    CpuFunc::WriteModelSpecificRegister(X86_MSR_KERNEL_GSBASE, (ULONGLONG)ProcessorBlock);
+    AR::CpuFunc::WriteModelSpecificRegister(X86_MSR_GSBASE, (ULONGLONG)ProcessorBlock);
+    AR::CpuFunc::WriteModelSpecificRegister(X86_MSR_KERNEL_GSBASE, (ULONGLONG)ProcessorBlock);
 
     /* Initialize processor registers */
     InitializeProcessorRegisters();
@@ -357,45 +357,45 @@ AR::ProcSup::InitializeProcessorRegisters(VOID)
     ULONGLONG PatAttributes;
 
     /* Enable FXSAVE restore */
-    CpuFunc::WriteControlRegister(4, CpuFunc::ReadControlRegister(4) | CR4_FXSR);
+    AR::CpuFunc::WriteControlRegister(4, AR::CpuFunc::ReadControlRegister(4) | CR4_FXSR);
 
     /* Enable XMMI exceptions */
-    CpuFunc::WriteControlRegister(4, CpuFunc::ReadControlRegister(4) | CR4_XMMEXCPT);
+    AR::CpuFunc::WriteControlRegister(4, AR::CpuFunc::ReadControlRegister(4) | CR4_XMMEXCPT);
 
     /* Set debugger extension */
-    CpuFunc::WriteControlRegister(4, CpuFunc::ReadControlRegister(4) | CR4_DE);
+    AR::CpuFunc::WriteControlRegister(4, AR::CpuFunc::ReadControlRegister(4) | CR4_DE);
 
     /* Enable large pages */
-    CpuFunc::WriteControlRegister(4, CpuFunc::ReadControlRegister(4) | CR4_PSE);
+    AR::CpuFunc::WriteControlRegister(4, AR::CpuFunc::ReadControlRegister(4) | CR4_PSE);
 
     /* Enable write-protection */
-    CpuFunc::WriteControlRegister(0, CpuFunc::ReadControlRegister(0) | CR0_WP);
+    AR::CpuFunc::WriteControlRegister(0, AR::CpuFunc::ReadControlRegister(0) | CR0_WP);
 
     /* Set alignment mask */
-    CpuFunc::WriteControlRegister(0, CpuFunc::ReadControlRegister(0) | CR0_AM);
+    AR::CpuFunc::WriteControlRegister(0, AR::CpuFunc::ReadControlRegister(0) | CR0_AM);
 
     /* Disable FPU monitoring */
-    CpuFunc::WriteControlRegister(0, CpuFunc::ReadControlRegister(0) & ~CR0_MP);
+    AR::CpuFunc::WriteControlRegister(0, AR::CpuFunc::ReadControlRegister(0) & ~CR0_MP);
 
     /* Disable x87 FPU exceptions */
-    CpuFunc::WriteControlRegister(0, CpuFunc::ReadControlRegister(0) & ~CR0_NE);
+    AR::CpuFunc::WriteControlRegister(0, AR::CpuFunc::ReadControlRegister(0) & ~CR0_NE);
 
     /* Flush the TLB */
-    CpuFunc::FlushTlb();
+    AR::CpuFunc::FlushTlb();
 
     /* Initialize system call MSRs */
-    Traps::InitializeSystemCallMsrs();
+    AR::Traps::InitializeSystemCallMsrs();
     
     /* Enable No-Execute (NXE) in EFER MSR */
-    CpuFunc::WriteModelSpecificRegister(X86_MSR_EFER, CpuFunc::ReadModelSpecificRegister(X86_MSR_EFER) | X86_MSR_EFER_NXE);
+    AR::CpuFunc::WriteModelSpecificRegister(X86_MSR_EFER, CpuFunc::ReadModelSpecificRegister(X86_MSR_EFER) | X86_MSR_EFER_NXE);
 
     /* Initialize Page Attribute Table */
     PatAttributes = (PAT_TYPE_WB << 0) | (PAT_TYPE_USWC << 8) | (PAT_TYPE_WEAK_UC << 16) | (PAT_TYPE_STRONG_UC << 24) |
                     (PAT_TYPE_WB << 32) | (PAT_TYPE_USWC << 40) | (PAT_TYPE_WEAK_UC << 48) | (PAT_TYPE_STRONG_UC << 56);
-    CpuFunc::WriteModelSpecificRegister(X86_MSR_PAT, PatAttributes);
+    AR::CpuFunc::WriteModelSpecificRegister(X86_MSR_PAT, PatAttributes);
 
     /* Initialize MXCSR register */
-    CpuFunc::LoadMxcsrRegister(INITIAL_MXCSR);
+    AR::CpuFunc::LoadMxcsrRegister(INITIAL_MXCSR);
 }
 
 /**
@@ -473,12 +473,12 @@ VOID
 AR::ProcSup::InitializeSegments(VOID)
 {
     /* Initialize segments */
-    CpuFunc::LoadSegment(SEGMENT_CS, KGDT_R0_CODE);
-    CpuFunc::LoadSegment(SEGMENT_DS, KGDT_R3_DATA | RPL_MASK);
-    CpuFunc::LoadSegment(SEGMENT_ES, KGDT_R3_DATA | RPL_MASK);
-    CpuFunc::LoadSegment(SEGMENT_FS, KGDT_R3_CMTEB | RPL_MASK);
-    CpuFunc::LoadSegment(SEGMENT_GS, KGDT_R3_DATA | RPL_MASK);
-    CpuFunc::LoadSegment(SEGMENT_SS, KGDT_R0_DATA);
+    AR::CpuFunc::LoadSegment(SEGMENT_CS, KGDT_R0_CODE);
+    AR::CpuFunc::LoadSegment(SEGMENT_DS, KGDT_R3_DATA | RPL_MASK);
+    AR::CpuFunc::LoadSegment(SEGMENT_ES, KGDT_R3_DATA | RPL_MASK);
+    AR::CpuFunc::LoadSegment(SEGMENT_FS, KGDT_R3_CMTEB | RPL_MASK);
+    AR::CpuFunc::LoadSegment(SEGMENT_GS, KGDT_R3_DATA | RPL_MASK);
+    AR::CpuFunc::LoadSegment(SEGMENT_SS, KGDT_R0_DATA);
 }
 
 /**

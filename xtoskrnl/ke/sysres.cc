@@ -66,7 +66,7 @@ KE::SystemResources::GetSystemResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
 
     /* Disable interrupts and acquire a spinlock */
     AR::CpuFunc::ClearInterruptFlag();
-    SpinLock::AcquireSpinLock(&ResourcesLock);
+    KE::SpinLock::AcquireSpinLock(&ResourcesLock);
 
     /* Iterate through system resources list */
     ListEntry = ResourcesListHead.Flink;
@@ -110,7 +110,7 @@ KE::SystemResources::GetSystemResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
     }
 
     /* Release spinlock and re-enable interrupts if necessary */
-    SpinLock::ReleaseSpinLock(&ResourcesLock);
+    KE::SpinLock::ReleaseSpinLock(&ResourcesLock);
     if(Interrupts)
     {
         /* Re-enable interrupts */
@@ -160,15 +160,15 @@ KE::SystemResources::InitializeResources(VOID)
     ULONG ResourceSize;
 
     /* Initialize system resources spin lock and resource list */
-    SpinLock::InitializeSpinLock(&ResourcesLock);
+    KE::SpinLock::InitializeSpinLock(&ResourcesLock);
     RTL::LinkedList::InitializeListHead(&ResourcesListHead);
 
     /* Make sure there are some system resources available */
-    if(!RTL::LinkedList::ListEmpty(BootInformation::GetSystemResources()))
+    if(!RTL::LinkedList::ListEmpty(KE::BootInformation::GetSystemResources()))
     {
         /* Iterate through system resources list */
-        ListEntry = BootInformation::GetSystemResources()->Flink;
-        while(ListEntry != BootInformation::GetSystemResources())
+        ListEntry = KE::BootInformation::GetSystemResources()->Flink;
+        while(ListEntry != KE::BootInformation::GetSystemResources())
         {
             /* Get resource header and next list entry */
             ResourceHeader = CONTAIN_RECORD(ListEntry, SYSTEM_RESOURCE_HEADER, ListEntry);
@@ -221,12 +221,12 @@ KE::SystemResources::ReleaseResource(IN PSYSTEM_RESOURCE_HEADER ResourceHeader)
 {
     /* Disable interrupts and acquire a spinlock */
     AR::CpuFunc::ClearInterruptFlag();
-    SpinLock::AcquireSpinLock(&ResourcesLock);
+    KE::SpinLock::AcquireSpinLock(&ResourcesLock);
 
     /* Release resource lock */
     ResourceHeader->ResourceLocked = FALSE;
 
     /* Release spinlock and enable interrupts */
-    SpinLock::ReleaseSpinLock(&ResourcesLock);
+    KE::SpinLock::ReleaseSpinLock(&ResourcesLock);
     AR::CpuFunc::SetInterruptFlag();
 }

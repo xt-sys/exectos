@@ -40,7 +40,7 @@ HL::Cpu::InitializeProcessor(VOID)
     ActiveProcessors |= Affinity;
 
     /* Initialize APIC for this processor */
-    Pic::InitializePic();
+    HL::Pic::InitializePic();
 
     /* Set the APIC running level */
     HL::RunLevel::SetRunLevel(KE::Processor::GetCurrentProcessorBlock()->RunLevel);
