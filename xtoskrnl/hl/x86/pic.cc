@@ -405,6 +405,33 @@ HL::Pic::SendIpi(ULONG ApicId,
 }
 
 /**
+ * Sends a Self-IPI (Inter-Processor Interrupt) to the current CPU.
+ *
+ * @param Vector
+ *        Supplies the IPI vector to send.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+HL::Pic::SendSelfIpi(ULONG Vector)
+{
+    /* Check current APIC mode */
+    if(ApicMode == APIC_MODE_X2APIC)
+    {
+        /* In x2APIC mode, a dedicated Self-IPI register is used */
+        WriteApicRegister(APIC_SIPI, Vector);
+    }
+    else
+    {
+        /* In xAPIC compatibility mode, ICR0 is used */
+        WriteApicRegister(APIC_ICR0, Vector | (1 << 18));
+    }
+}
+
+/**
  * Writes to the APIC register.
  *
  * @param Register

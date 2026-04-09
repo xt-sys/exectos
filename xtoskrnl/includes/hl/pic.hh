@@ -28,6 +28,7 @@ namespace HL
             STATIC XTAPI VOID SendEoi(VOID);
             STATIC XTAPI VOID SendIpi(ULONG ApicId,
                                       ULONG Vector);
+            STATIC XTAPI VOID SendSelfIpi(ULONG Vector);
             STATIC XTFASTCALL VOID WriteApicRegister(IN APIC_REGISTER Register,
                                                      IN ULONGLONG Value);
 

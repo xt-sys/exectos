@@ -134,6 +134,7 @@ typedef enum _APIC_REGISTER
     APIC_TICR     = 0x38, /* Initial Count Register for Timer */
     APIC_TCCR     = 0x39, /* Current Count Register for Timer */
     APIC_TDCR     = 0x3E, /* Timer Divide Configuration Register */
+    APIC_SIPI     = 0x3F, /* Self-IPI Register */
     APIC_EAFR     = 0x40, /* extended APIC Feature register */
     APIC_EACR     = 0x41, /* Extended APIC Control Register */
     APIC_SEOI     = 0x42, /* Specific End Of Interrupt Register */
