@@ -21,11 +21,14 @@ XTSTATUS
 HL::Timer::CalibrateApicTimer()
 {
     ULONG CurrentCount, Frequency, InitialCount;
-    XTSTATUS Status;
 
     /* Get APIC timer frequency from the Core Crystal Clock */
-    Status = GetApicTimerFrequency(&Frequency);
-    if(Status != STATUS_SUCCESS || !Frequency)
+    if(TimerCapabilities.Art && TimerCapabilities.TimerFrequency != 0)
+    {
+        /* CCC available, use it as the source of APIC timer frequency */
+        Frequency = TimerCapabilities.TimerFrequency;
+    }
+    else
     {
         /* CCC unavailable, fallback to PIT calibration */
         InitialCount = 0xFFFFFFFF;
@@ -60,76 +63,6 @@ HL::Timer::CalibrateApicTimer()
 }
 
 /**
- * Retrieves the APIC timer frequency from the Core Crystal Clock.
- *
- * @param Frequency
- *        Supplies a pointer to a variable that will receive the nominal APIC timer frequency in Hz.
- *
- * @return This routine returns a status code.
- *
- * @since XT 1.0
- */
-XTAPI
-XTSTATUS
-HL::Timer::GetApicTimerFrequency(OUT PULONG Frequency)
-{
-    CPUID_REGISTERS CpuRegisters;
-
-    /* Verify input parameter */
-    if(!Frequency)
-    {
-        /* Invalid parameter passed */
-        return STATUS_INVALID_PARAMETER;
-    }
-
-    /* Initialize output parameter to 0 */
-    *Frequency = 0;
-
-    /* Get maximum supported standard CPUID leaf */
-    CpuRegisters.Leaf = 0;
-    CpuRegisters.SubLeaf = 0;
-    CpuRegisters.Eax = 0;
-    CpuRegisters.Ebx = 0;
-    CpuRegisters.Ecx = 0;
-    CpuRegisters.Edx = 0;
-    AR::CpuFunc::CpuId(&CpuRegisters);
-
-    /* Check if leaf 0x15 is supported by the CPU */
-    if(CpuRegisters.Eax < 0x15)
-    {
-        /* Processor is too old, return error */
-        return STATUS_NOT_SUPPORTED;
-    }
-
-    /* Query Time Stamp Counter and Core Crystal Clock information */
-    CpuRegisters.Leaf = 0x15;
-    CpuRegisters.SubLeaf = 0;
-    CpuRegisters.Eax = 0;
-    CpuRegisters.Ebx = 0;
-    CpuRegisters.Ecx = 0;
-    CpuRegisters.Edx = 0;
-    AR::CpuFunc::CpuId(&CpuRegisters);
-
-    /* Check if the leaf is properly enumerated */
-    if(CpuRegisters.Eax == 0 || CpuRegisters.Ebx == 0)
-    {
-        /* Intel SDM: EAX or EBX is 0, the leaf is not properly enumerated, return error */
-        return STATUS_NOT_SUPPORTED;
-    }
-
-    /* Check if ECX contains the nominal frequency of the core crystal clock */
-    if(CpuRegisters.Ecx == 0)
-    {
-        /* Hardware did not provide the exact frequency, return error */
-        return STATUS_NOT_FOUND;
-    }
-
-    /* Save the base frequency for the APIC Timer and return success */
-    *Frequency = CpuRegisters.Ecx;
-    return STATUS_SUCCESS;
-}
-
-/**
  * Initializes and calibrates the Local APIC Timer.
  *
  * @return This routine does not return any value.
@@ -158,6 +91,24 @@ HL::Timer::InitializeApicTimer(VOID)
 
     /* Program the APIC timer for periodic mode */
     StopProfileInterrupt(ProfileXtKernel);
+}
+
+/**
+ * Performs a basic Timer initialization.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+HL::Timer::InitializeTimer(VOID)
+{
+    /* Query timer capabilities */
+    QueryTimerCapabilities();
+
+    /* Initialize the APIC timer */
+    InitializeApicTimer();
 }
 
 /**
@@ -218,6 +169,147 @@ HL::Timer::PitStallExecution(IN ULONG MicroSeconds)
 
         /* Update the tracking variable */
         PreviousCount = CurrentCount;
+    }
+}
+
+/**
+ * Probes the processor via CPUID to detect available modern timing and clock generation features.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+HL::Timer::QueryTimerCapabilities(VOID)
+{
+    CPUID_REGISTERS CpuRegisters;
+    ULONG MaxStandardLeaf;
+    ULONG MaxExtendedLeaf;
+
+    /* Query maximum standard CPUID leaf */
+    CpuRegisters.Leaf = CPUID_GET_VENDOR_STRING;
+    CpuRegisters.SubLeaf = 0;
+    CpuRegisters.Eax = 0;
+    CpuRegisters.Ebx = 0;
+    CpuRegisters.Ecx = 0;
+    CpuRegisters.Edx = 0;
+    AR::CpuFunc::CpuId(&CpuRegisters);
+
+    /* Save maximum supported standard CPUID leaf */
+    MaxStandardLeaf = CpuRegisters.Eax;
+
+    /* Query maximum extended CPUID leaf */
+    CpuRegisters.Leaf = CPUID_GET_EXTENDED_MAX;
+    CpuRegisters.SubLeaf = 0;
+    CpuRegisters.Eax = 0;
+    CpuRegisters.Ebx = 0;
+    CpuRegisters.Ecx = 0;
+    CpuRegisters.Edx = 0;
+    AR::CpuFunc::CpuId(&CpuRegisters);
+
+    /* Save maximum supported extended CPUID leaf */
+    MaxExtendedLeaf = CpuRegisters.Eax;
+
+    /* Check TSC-Deadline mode if leaf supported */
+    if(MaxStandardLeaf >= CPUID_GET_STANDARD1_FEATURES)
+    {
+        CpuRegisters.Leaf = CPUID_GET_STANDARD1_FEATURES;
+        CpuRegisters.SubLeaf = 0;
+        CpuRegisters.Eax = 0;
+        CpuRegisters.Ebx = 0;
+        CpuRegisters.Ecx = 0;
+        CpuRegisters.Edx = 0;
+        AR::CpuFunc::CpuId(&CpuRegisters);
+
+        /* Verify TSC-Deadline support */
+        if(CpuRegisters.Ecx & CPUID_FEATURES_ECX_TSC_DEADLINE)
+        {
+            TimerCapabilities.TscDeadline = TRUE;
+        }
+    }
+
+    /* Check Always Running APIC Timer - ARAT if leaf supported */
+    if(MaxStandardLeaf >= CPUID_GET_POWER_MANAGEMENT)
+    {
+        CpuRegisters.Leaf = CPUID_GET_POWER_MANAGEMENT;
+        CpuRegisters.SubLeaf = 0;
+        CpuRegisters.Eax = 0;
+        CpuRegisters.Ebx = 0;
+        CpuRegisters.Ecx = 0;
+        CpuRegisters.Edx = 0;
+        AR::CpuFunc::CpuId(&CpuRegisters);
+
+        /* Verify ARAT support */
+        if(CpuRegisters.Eax & CPUID_FEATURES_EAX_ARAT)
+        {
+            TimerCapabilities.Arat = TRUE;
+        }
+    }
+
+    /* Check Always Running Timer - ART if leaf supported */
+    if(MaxStandardLeaf >= CPUID_GET_TSC_CRYSTAL_CLOCK)
+    {
+        CpuRegisters.Leaf = CPUID_GET_TSC_CRYSTAL_CLOCK;
+        CpuRegisters.SubLeaf = 0;
+        CpuRegisters.Eax = 0;
+        CpuRegisters.Ebx = 0;
+        CpuRegisters.Ecx = 0;
+        CpuRegisters.Edx = 0;
+        AR::CpuFunc::CpuId(&CpuRegisters);
+
+        /* Verify ART support */
+        if(CpuRegisters.Eax != 0 && CpuRegisters.Ebx != 0)
+        {
+            TimerCapabilities.Art = TRUE;
+
+            /* Save the TSC scaling ratios */
+            TimerCapabilities.TscDenominator = CpuRegisters.Eax;
+            TimerCapabilities.TscNumerator = CpuRegisters.Ebx;
+
+            /* Check if ECX contains the nominal frequency of the core crystal clock */
+            if(CpuRegisters.Ecx != 0)
+            {
+                /* Save the base frequency for the APIC Timer */
+                TimerCapabilities.TimerFrequency = CpuRegisters.Ecx;
+            }
+        }
+    }
+
+    /* Check RDTSCP instruction support if leaf supported */
+    if(MaxExtendedLeaf >= CPUID_GET_EXTENDED_FEATURES)
+    {
+        CpuRegisters.Leaf = CPUID_GET_EXTENDED_FEATURES;
+        CpuRegisters.SubLeaf = 0;
+        CpuRegisters.Eax = 0;
+        CpuRegisters.Ebx = 0;
+        CpuRegisters.Ecx = 0;
+        CpuRegisters.Edx = 0;
+        AR::CpuFunc::CpuId(&CpuRegisters);
+
+        /* Verify RDTSCP support */
+        if(CpuRegisters.Edx & CPUID_FEATURES_EDX_RDTSCP)
+        {
+            TimerCapabilities.RDTSCP = TRUE;
+        }
+    }
+
+    /* Check Invariant TSC if leaf supported */
+    if(MaxExtendedLeaf >= CPUID_GET_ADVANCED_POWER_MANAGEMENT)
+    {
+        CpuRegisters.Leaf = CPUID_GET_ADVANCED_POWER_MANAGEMENT;
+        CpuRegisters.SubLeaf = 0;
+        CpuRegisters.Eax = 0;
+        CpuRegisters.Ebx = 0;
+        CpuRegisters.Ecx = 0;
+        CpuRegisters.Edx = 0;
+        AR::CpuFunc::CpuId(&CpuRegisters);
+
+        /* Verify Invariant TSC support */
+        if(CpuRegisters.Edx & CPUID_FEATURES_EDX_TSCI)
+        {
+            TimerCapabilities.InvariantTsc = TRUE;
+        }
     }
 }
 

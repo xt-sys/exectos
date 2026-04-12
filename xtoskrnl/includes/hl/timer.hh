@@ -19,18 +19,20 @@ namespace HL
     {
         private:
             STATIC ULONG ProfilingInterval;
+            STATIC TIMER_CAPABILITIES TimerCapabilities;
             STATIC ULONG TimerFrequency;
 
         public:
-            STATIC XTAPI VOID InitializeApicTimer(VOID);
+            STATIC XTAPI VOID InitializeTimer(VOID);
             STATIC XTAPI ULONG_PTR SetProfileInterval(IN ULONG_PTR Interval);
             STATIC XTAPI VOID StartProfileInterrupt(IN KPROFILE_SOURCE ProfileSource);
             STATIC XTAPI VOID StopProfileInterrupt(IN KPROFILE_SOURCE ProfileSource);
 
         private:
             STATIC XTAPI XTSTATUS CalibrateApicTimer();
-            STATIC XTAPI XTSTATUS GetApicTimerFrequency(OUT PULONG Frequency);
+            STATIC XTAPI VOID InitializeApicTimer(VOID);
             STATIC XTAPI VOID PitStallExecution(IN ULONG MicroSeconds);
+            STATIC XTAPI VOID QueryTimerCapabilities(VOID);
             STATIC XTAPI VOID StallExecution(IN ULONG MicroSeconds);
     };
 }

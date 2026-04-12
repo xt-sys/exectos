@@ -105,6 +105,18 @@ typedef enum _CPU_VENDOR
     CPU_VENDOR_UNKNOWN = 0xFFFFFFFF
 } CPU_VENDOR, *PCPU_VENDOR;
 
+/* CPUID advanced power management features (0x80000007) enumeration list */
+typedef enum _CPUID_FEATURES_ADVANCED_POWER_MANAGEMENT
+{
+    CPUID_FEATURES_EDX_TS                     = 1 << 0, /* Temperature Sensor */
+    CPUID_FEATURES_EDX_FIS                    = 1 << 1, /* Frequency ID Selection */
+    CPUID_FEATURES_EDX_VIS                    = 1 << 2, /* Voltage ID Selection */
+    CPUID_FEATURES_EDX_TTS                    = 1 << 3, /* ThermaTrip Support */
+    CPUID_FEATURES_EDX_HTC                    = 1 << 4, /* Hardware Thermal Throttling */
+    CPUID_FEATURES_EDX_STC                    = 1 << 5, /* Software Thermal Throttling */
+    CPUID_FEATURES_EDX_TSCI                   = 1 << 8 /* TSC Invariant */
+} CPUID_FEATURES_ADVANCED_POWER_MANAGEMENT, *PCPUID_FEATURES_ADVANCED_POWER_MANAGEMENT;
+
 /* CPUID extended features (0x80000001) enumeration list */
 typedef enum _CPUID_FEATURES_EXTENDED
 {
@@ -146,6 +158,23 @@ typedef enum _CPUID_FEATURES_EXTENDED
     CPUID_FEATURES_EDX_3DNOW                  = 1 << 31
 } CPUID_FEATURES_EXTENDED, *PCPUID_FEATURES_EXTENDED;
 
+/* CPUID Thermal and Power Management features (0x00000006) enumeration list */
+typedef enum _CPUID_FEATURES_POWER_MANAGEMENT
+{
+    CPUID_FEATURES_EAX_DTHERM                  = 1 << 0,
+    CPUID_FEATURES_EAX_IDA                     = 1 << 1,
+    CPUID_FEATURES_EAX_ARAT                    = 1 << 2,
+    CPUID_FEATURES_EAX_PLN                     = 1 << 4,
+    CPUID_FEATURES_EAX_PTS                     = 1 << 6,
+    CPUID_FEATURES_EAX_HWP                     = 1 << 7,
+    CPUID_FEATURES_EAX_HWP_NOTIFY              = 1 << 8,
+    CPUID_FEATURES_EAX_HWP_ACT_WINDOW          = 1 << 9,
+    CPUID_FEATURES_EAX_HWP_EPP                 = 1 << 10,
+    CPUID_FEATURES_EAX_HWP_PKG_REQ             = 1 << 11,
+    CPUID_FEATURES_EAX_HWP_HIGHEST_PERF_CHANGE = 1 << 15,
+    CPUID_FEATURES_EAX_HFI                     = 1 << 19
+} CPUID_FEATURES_LEAF6, *PCPUID_FEATURES_LEAF6;
+
 /* CPUID STD1 features (0x00000001) enumeration list */
 typedef enum _CPUID_FEATURES_STANDARD1
 {
@@ -172,7 +201,7 @@ typedef enum _CPUID_FEATURES_STANDARD1
     CPUID_FEATURES_ECX_X2APIC                 = 1 << 21,
     CPUID_FEATURES_ECX_MOVBE                  = 1 << 22,
     CPUID_FEATURES_ECX_POPCNT                 = 1 << 23,
-    CPUID_FEATURES_ECX_TSC                    = 1 << 24,
+    CPUID_FEATURES_ECX_TSC_DEADLINE           = 1 << 24,
     CPUID_FEATURES_ECX_AES                    = 1 << 25,
     CPUID_FEATURES_ECX_XSAVE                  = 1 << 26,
     CPUID_FEATURES_ECX_OSXSAVE                = 1 << 27,
@@ -346,14 +375,18 @@ typedef enum _CPUID_FEATURES_STANDARD7_LEAF1
 /* CPUID requests */
 typedef enum _CPUID_REQUESTS
 {
-    CPUID_GET_VENDOR_STRING,
-    CPUID_GET_STANDARD1_FEATURES,
-    CPUID_GET_TLB_CACHE,
-    CPUID_GET_SERIAL,
-    CPUID_GET_CACHE_TOPOLOGY,
-    CPUID_GET_MONITOR_MWAIT,
-    CPUID_GET_POWER_MANAGEMENT,
-    CPUID_GET_STANDARD7_FEATURES
+    CPUID_GET_VENDOR_STRING                   = 0x00000000,
+    CPUID_GET_STANDARD1_FEATURES              = 0x00000001,
+    CPUID_GET_TLB_CACHE                       = 0x00000002,
+    CPUID_GET_SERIAL                          = 0x00000003,
+    CPUID_GET_CACHE_TOPOLOGY                  = 0x00000004,
+    CPUID_GET_MONITOR_MWAIT                   = 0x00000005,
+    CPUID_GET_POWER_MANAGEMENT                = 0x00000006,
+    CPUID_GET_STANDARD7_FEATURES              = 0x00000007,
+    CPUID_GET_TSC_CRYSTAL_CLOCK               = 0x00000015,
+    CPUID_GET_EXTENDED_MAX                    = 0x80000000,
+    CPUID_GET_EXTENDED_FEATURES               = 0x80000001,
+    CPUID_GET_ADVANCED_POWER_MANAGEMENT       = 0x80000007
 } CPUID_REQUESTS, *PCPUID_REQUESTS;
 
 /* Interrupt handler */

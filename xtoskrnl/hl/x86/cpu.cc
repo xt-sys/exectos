@@ -45,6 +45,6 @@ HL::Cpu::InitializeProcessor(VOID)
     /* Set the APIC running level */
     HL::RunLevel::SetRunLevel(KE::Processor::GetCurrentProcessorBlock()->RunLevel);
 
-    /* Initialize APIC timer */
-    HL::Timer::InitializeApicTimer();
+    /* Initialize timer */
+    HL::Timer::InitializeTimer();
 }

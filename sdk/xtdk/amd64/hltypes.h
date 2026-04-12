@@ -339,5 +339,17 @@ typedef union _PIC_I8259_ICW4
     UCHAR Bits;
 } PIC_I8259_ICW4, *PPIC_I8259_ICW4;
 
+typedef struct _TIMER_CAPABILITIES
+{
+    BOOLEAN Arat;
+    BOOLEAN Art;
+    BOOLEAN InvariantTsc;
+    BOOLEAN RDTSCP;
+    ULONG TimerFrequency;
+    BOOLEAN TscDeadline;
+    ULONG TscDenominator;
+    ULONG TscNumerator;
+} TIMER_CAPABILITIES, *PTIMER_CAPABILITIES;
+
 #endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_AMD64_HLTYPES_H */

@@ -42,5 +42,8 @@ APIC_MODE HL::Pic::ApicMode;
 /* Kernel profiling interval */
 ULONG HL::Timer::ProfilingInterval;
 
+/* Timer capabilities */
+TIMER_CAPABILITIES HL::Timer::TimerCapabilities = {0};
+
 /* APIC timer frequency */
 ULONG HL::Timer::TimerFrequency;
