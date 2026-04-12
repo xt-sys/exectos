@@ -4,6 +4,7 @@
  * FILE:            xtoskrnl/hl/x86/acpi.cc
  * DESCRIPTION:     Advanced Configuration and Power Interface (ACPI) support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ *                  Aiken Harris <harraiken91@gmail.com>
  */
 
 #include <xtos.hh>
@@ -196,14 +197,23 @@ HL::Acpi::InitializeAcpiSystemDescriptionTable(OUT PACPI_DESCRIPTION_HEADER *Acp
     AcpiResource = (PSYSTEM_RESOURCE_ACPI)ResourceHeader;
     RsdpAddress.QuadPart = (LONGLONG)AcpiResource->Header.PhysicalAddress;
 
-    /* Map RSDP and mark it as CD/WT to avoid delays in write-back cache */
+    /* Map RSDP using hardware memory pool */
     Status = MM::HardwarePool::MapHardwareMemory(RsdpAddress, 1, TRUE, (PVOID *)&RsdpStructure);
+    if(Status != STATUS_SUCCESS)
+    {
+        /* Failed to map RSDP, return error */
+        return Status;
+    }
+
+    /* Mark RSDP as CD/WT to avoid delays in write-back cache */
     MM::HardwarePool::MarkHardwareMemoryWriteThrough(RsdpStructure, 1);
 
     /* Validate RSDP signature */
-    if(Status != STATUS_SUCCESS || RsdpStructure->Signature != ACPI_RSDP_SIGNATURE)
+    if(RsdpStructure->Signature != ACPI_RSDP_SIGNATURE)
     {
-        /* Not mapped correctly or invalid RSDP signature, return error */
+        /* Invalid RSDP signature, unmap and return error */
+        MM::HardwarePool::UnmapHardwareMemory(RsdpStructure, 1, TRUE);
+        RsdpStructure = NULLPTR;
         return STATUS_INVALID_PARAMETER;
     }
 
@@ -219,34 +229,40 @@ HL::Acpi::InitializeAcpiSystemDescriptionTable(OUT PACPI_DESCRIPTION_HEADER *Acp
         RsdtAddress.QuadPart = (LONGLONG)RsdpStructure->RsdtAddress;
     }
 
-    /* Map RSDT/XSDT as CD/WT */
+    /* Map RSDT/XSDT using hardware memory pool */
     Status = MM::HardwarePool::MapHardwareMemory(RsdtAddress, 2, TRUE, (PVOID *)&Rsdt);
+    if(Status != STATUS_SUCCESS)
+    {
+        /* Failed to map RSDT/XSDT, return error */
+        return Status;
+    }
+
+    /* Mark RSDT/XSDT as CD/WT */
     MM::HardwarePool::MarkHardwareMemoryWriteThrough(Rsdt, 2);
 
     /* Validate RSDT/XSDT signature */
-    if((Status != STATUS_SUCCESS) ||
-       (Rsdt->Header.Signature != ACPI_RSDT_SIGNATURE &&
-        Rsdt->Header.Signature != ACPI_XSDT_SIGNATURE))
+    if(Rsdt->Header.Signature != ACPI_RSDT_SIGNATURE && Rsdt->Header.Signature != ACPI_XSDT_SIGNATURE)
     {
-        /* Not mapped correctly or invalid RSDT/XSDT signature, return error */
+        /* Not mapped correctly or invalid RSDT/XSDT signature, unmap and return error */
+        MM::HardwarePool::UnmapHardwareMemory(Rsdt, 2, TRUE);
         return STATUS_INVALID_PARAMETER;
     }
 
     /* Calculate the length of all available ACPI tables and remap it if needed */
-    RsdtPages = ((RsdtAddress.LowPart & (MM_PAGE_SIZE - 1)) + Rsdt->Header.Length + (MM_PAGE_SIZE - 1)) >> MM_PAGE_SHIFT;
+    RsdtPages = (((RsdtAddress.LowPart & (MM_PAGE_SIZE - 1)) + Rsdt->Header.Length + (MM_PAGE_SIZE - 1)) >> MM_PAGE_SHIFT);
     if(RsdtPages != 2)
     {
         /* RSDT/XSDT needs less or more than 2 pages, remap it */
         MM::HardwarePool::UnmapHardwareMemory(Rsdt, 2, TRUE);
         Status = MM::HardwarePool::MapHardwareMemory(RsdtAddress, RsdtPages, TRUE, (PVOID *)&Rsdt);
-        MM::HardwarePool::MarkHardwareMemoryWriteThrough(Rsdt, RsdtPages);
-
-        /* Make sure remapping was successful */
         if(Status != STATUS_SUCCESS)
         {
             /* Remapping failed, return error */
             return STATUS_INSUFFICIENT_RESOURCES;
         }
+
+        /* Mark remapped RSDT/XSDT as CD/WT */
+        MM::HardwarePool::MarkHardwareMemoryWriteThrough(Rsdt, RsdtPages);
     }
 
     /* Get ACPI table header and return success */
@@ -267,6 +283,7 @@ HL::Acpi::InitializeAcpiSystemInformation(VOID)
 {
     PACPI_MADT_LOCAL_X2APIC LocalX2Apic;
     PACPI_MADT_LOCAL_APIC LocalApic;
+    PACPI_SUBTABLE_HEADER SubTable;
     ULONG_PTR MadtTable;
     PACPI_MADT Madt;
     XTSTATUS Status;
@@ -293,11 +310,20 @@ HL::Acpi::InitializeAcpiSystemInformation(VOID)
     CpuCount = 0;
 
     /* Traverse all MADT tables to get system information */
-    while(MadtTable <= ((ULONG_PTR)Madt + Madt->Header.Length))
+    while(MadtTable < ((ULONG_PTR)Madt + Madt->Header.Length))
     {
+        /* Get current MADT subtable header */
+        SubTable = (PACPI_SUBTABLE_HEADER)MadtTable;
+
+        /* Prevent infinite loops if BIOS provides 0 length */
+        if(SubTable->Length == 0)
+        {
+            /* Broken ACPI table, abort traversal */
+            break;
+        }
+
         /* Check if this is a local APIC subtable */
-        if((((PACPI_SUBTABLE_HEADER)MadtTable)->Type == ACPI_MADT_TYPE_LOCAL_APIC) &&
-           (((PACPI_SUBTABLE_HEADER)MadtTable)->Length == sizeof(ACPI_MADT_LOCAL_APIC)))
+        if(SubTable->Type == ACPI_MADT_TYPE_LOCAL_APIC && SubTable->Length >= sizeof(ACPI_MADT_LOCAL_APIC))
         {
             /* Get local APIC subtable */
             LocalApic = (PACPI_MADT_LOCAL_APIC)MadtTable;
@@ -313,12 +339,8 @@ HL::Acpi::InitializeAcpiSystemInformation(VOID)
                 /* Increment number of CPUs */
                 CpuCount++;
             }
-
-            /* Go to the next MADT table */
-            MadtTable += ((PACPI_SUBTABLE_HEADER)MadtTable)->Length;
         }
-        else if((((PACPI_SUBTABLE_HEADER)MadtTable)->Type == ACPI_MADT_TYPE_LOCAL_X2APIC) &&
-                (((PACPI_SUBTABLE_HEADER)MadtTable)->Length == sizeof(ACPI_MADT_LOCAL_X2APIC)))
+        else if(SubTable->Type == ACPI_MADT_TYPE_LOCAL_X2APIC && SubTable->Length >= sizeof(ACPI_MADT_LOCAL_X2APIC))
         {
             /* Get local X2APIC subtable */
             LocalX2Apic = (PACPI_MADT_LOCAL_X2APIC)MadtTable;
@@ -334,15 +356,10 @@ HL::Acpi::InitializeAcpiSystemInformation(VOID)
                 /* Increment number of CPUs */
                 CpuCount++;
             }
+        }
 
-            /* Go to the next MADT table */
-            MadtTable += ((PACPI_SUBTABLE_HEADER)MadtTable)->Length;
-        }
-        else
-        {
-            /* Any other MADT table, try to go to the next one byte-by-byte */
-            MadtTable += 1;
-        }
+        /* Safely advance pointer using proper subtable length */
+        MadtTable += SubTable->Length;
     }
 
     /* Store number of CPUs */
@@ -596,17 +613,30 @@ HL::Acpi::QueryAcpiTables(IN ULONG Signature,
         /* Check if DSDT or FACS table requested */
         if(Signature == ACPI_DSDT_SIGNATURE)
         {
-            /* Get DSDT address */
-            TableAddress.LowPart = Fadt->Dsdt;
+            /* Prefer 64-bit address on ACPI 2.0+ */
+            if(Fadt->Header.Revision >= 2 && Fadt->XDsdt.QuadPart != 0)
+            {
+                TableAddress.QuadPart = Fadt->XDsdt.QuadPart;
+            }
+            else
+            {
+                TableAddress.LowPart = Fadt->Dsdt;
+                TableAddress.HighPart = 0;
+            }
         }
         else
         {
-            /* Get FACS address */
-            TableAddress.LowPart = Fadt->FirmwareCtrl;
+            /* Prefer 64-bit address on ACPI 2.0+ */
+            if(Fadt->Header.Revision >= 2 && Fadt->XFirmwareCtrl.QuadPart != 0)
+            {
+                TableAddress.QuadPart = Fadt->XFirmwareCtrl.QuadPart;
+            }
+            else
+            {
+                TableAddress.LowPart = Fadt->FirmwareCtrl;
+                TableAddress.HighPart = 0;
+            }
         }
-
-        /* Fill in high part of ACPI table address */
-        TableAddress.HighPart = 0;
 
         /* Map table using hardware memory pool */
         Status = MM::HardwarePool::MapHardwareMemory(TableAddress, 2, TRUE, (PVOID*)&TableHeader);
@@ -618,11 +648,12 @@ HL::Acpi::QueryAcpiTables(IN ULONG Signature,
     }
     else
     {
-        /* Query cache for XSDP table */
+        /* Query cache for XSDT table */
         Status = QueryAcpiCache(ACPI_XSDT_SIGNATURE, (PACPI_DESCRIPTION_HEADER*)&Xsdt);
         if(Status != STATUS_SUCCESS)
         {
-            /* XSDP not found, query cache for RSDP table */
+            /* XSDT not found, query cache for RSDT table */
+            Xsdt = NULLPTR;
             Status = QueryAcpiCache(ACPI_RSDT_SIGNATURE, (PACPI_DESCRIPTION_HEADER*)&Rsdt);
         }
 
@@ -633,22 +664,22 @@ HL::Acpi::QueryAcpiTables(IN ULONG Signature,
             return Status;
         }
 
-        /* Get table count depending on root table type */
+        /* Get table count depending on root table type securely */
         if(Xsdt != NULLPTR)
         {
-            /* Get table count from XSDT */
+            if(Xsdt->Header.Length < sizeof(ACPI_DESCRIPTION_HEADER)) return STATUS_INVALID_PARAMETER;
             TableCount = (Xsdt->Header.Length - sizeof(ACPI_DESCRIPTION_HEADER)) / 8;
         }
         else
         {
-            /* Get table count from RSDT */
+            if(Rsdt->Header.Length < sizeof(ACPI_DESCRIPTION_HEADER)) return STATUS_INVALID_PARAMETER;
             TableCount = (Rsdt->Header.Length - sizeof(ACPI_DESCRIPTION_HEADER)) / 4;
         }
 
         /* Iterate over all ACPI tables */
         for(TableIndex = 0; TableIndex < TableCount; TableIndex++)
         {
-            /* Check if XSDP or RSDT is used */
+            /* Check if XSDT or RSDT is used */
             if(Xsdt != NULLPTR)
             {
                 /* Get table header physical address from XSDT */
@@ -659,13 +690,6 @@ HL::Acpi::QueryAcpiTables(IN ULONG Signature,
                 /* Get table header physical address from RSDT */
                 TableAddress.LowPart = Rsdt->Tables[TableIndex];
                 TableAddress.HighPart = 0;
-            }
-
-            /* Check whether some table is already mapped */
-            if(TableHeader != NULLPTR)
-            {
-                /* Unmap previous table */
-                MM::HardwarePool::UnmapHardwareMemory(TableHeader, 2, TRUE);
             }
 
             /* Map table using hardware memory pool */
@@ -682,25 +706,31 @@ HL::Acpi::QueryAcpiTables(IN ULONG Signature,
                 /* Found requested ACPI table */
                 break;
             }
+
+            /* Unmap non-matching table and try next one */
+            MM::HardwarePool::UnmapHardwareMemory(TableHeader, 2, TRUE);
+            TableHeader = NULLPTR;
         }
     }
 
-    /* Make sure table was found */
-    if(TableHeader->Signature != Signature)
+    /* Ensure the table was actually found and mapped */
+    if(TableHeader == NULLPTR)
     {
-        /* ACPI table not found, check if cleanup is needed */
-        if(TableHeader != NULLPTR)
-        {
-            /* Unmap non-matching ACPI table */
-            MM::HardwarePool::UnmapHardwareMemory(TableHeader, 2, TRUE);
-        }
-
-        /* Return error */
+        /* ACPI table not found, return error */
         return STATUS_NOT_FOUND;
     }
 
-    /* Don't validate FADT on old, broken firmwares with ACPI 2.0 or older */
-    if(TableHeader->Signature != ACPI_FADT_SIGNATURE || TableHeader->Revision > 2)
+    /* Check if we broke out of the loop with the wrong table (safety check) */
+    if(TableHeader->Signature != Signature)
+    {
+        /* Unmap non-matching ACPI table and return error */
+        MM::HardwarePool::UnmapHardwareMemory(TableHeader, 2, TRUE);
+        return STATUS_NOT_FOUND;
+    }
+
+    /* Don't validate FACS and FADT on old, broken firmwares with ACPI 2.0 or older */
+    if((TableHeader->Signature != ACPI_FADT_SIGNATURE || TableHeader->Revision > 2) &&
+       (TableHeader->Signature != ACPI_FACS_SIGNATURE))
     {
         /* Validate table checksum */
         if(!ValidateAcpiTable(TableHeader, TableHeader->Length))
@@ -712,7 +742,7 @@ HL::Acpi::QueryAcpiTables(IN ULONG Signature,
     }
 
     /* Calculate the length of ACPI table and remap it if needed */
-    TablePages = (((ULONG_PTR)TableHeader & (MM_PAGE_SIZE - 1)) + TableHeader->Length + (MM_PAGE_SIZE - 1)) >> MM_PAGE_SHIFT;
+    TablePages = (((TableAddress.LowPart & (MM_PAGE_SIZE - 1)) + TableHeader->Length + (MM_PAGE_SIZE - 1)) >> MM_PAGE_SHIFT);
     if(TablePages != 2)
     {
         /* ACPI table needs less or more than 2 pages, remap it */
