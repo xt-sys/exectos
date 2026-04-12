@@ -9,6 +9,12 @@
 #include <xtos.hh>
 
 
+/* ACPI tables cache count */
+ULONG HL::Acpi::CacheCount = 0;
+
+/* ACPI tables cache entries */
+ACPI_CACHE_LIST HL::Acpi::CacheEntries[ACPI_MAX_CACHED_TABLES];
+
 /* ACPI tables cache list */
 LIST_ENTRY HL::Acpi::CacheList;
 

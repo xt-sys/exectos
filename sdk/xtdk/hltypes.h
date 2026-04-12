@@ -101,6 +101,12 @@
 #define ACPI_MADT_PLACE_ENABLED                     0 /* Processor Local APIC CPU Enabled */
 #define ACPI_MADT_PLAOC_ENABLED                     1 /* Processor Local APIC Online Capable */
 
+/* ACPI address space definitions */
+#define ACPI_ADDRESS_SPACE_MEMORY                   0x00
+
+/* Maximum number of cached ACPI tables */
+#define ACPI_MAX_CACHED_TABLES                      32
+
 /* Default serial port settings */
 #define COMPORT_CLOCK_RATE                          0x1C200
 #define COMPORT_WAIT_TIMEOUT                        204800
@@ -222,7 +228,7 @@ typedef struct _ACPI_SUBTABLE_HEADER
 typedef struct _ACPI_CACHE_LIST
 {
     LIST_ENTRY ListEntry;
-    ACPI_DESCRIPTION_HEADER Header;
+    PACPI_DESCRIPTION_HEADER Table;
 } ACPI_CACHE_LIST, *PACPI_CACHE_LIST;
 
 /* ACPI Root System Description Table Pointer (RSDP) structure */

@@ -26,8 +26,21 @@ HL::Acpi::CacheAcpiTable(IN PACPI_DESCRIPTION_HEADER AcpiTable)
 {
     PACPI_CACHE_LIST AcpiCache;
 
-    /* Create new ACPI table cache entry */
-    AcpiCache = CONTAIN_RECORD(AcpiTable, ACPI_CACHE_LIST, Header);
+    /* Check if there are free slots in static early-boot cache array */
+    if(CacheCount >= ACPI_MAX_CACHED_TABLES)
+    {
+        /* Cache is full, the table is mapped but not cached */
+        return;
+    }
+
+    /* Get the next available static cache entry */
+    AcpiCache = &CacheEntries[CacheCount];
+    CacheCount++;
+
+    /* Store the pointer to the mapped ACPI table */
+    AcpiCache->Table = AcpiTable;
+
+    /* Insert entry into the global ACPI cache list */
     RTL::LinkedList::InsertTailList(&CacheList, &AcpiCache->ListEntry);
 }
 
@@ -539,10 +552,10 @@ HL::Acpi::QueryAcpiCache(IN ULONG Signature,
         AcpiCache = CONTAIN_RECORD(ListEntry, ACPI_CACHE_LIST, ListEntry);
 
         /* Check if ACPI table signature matches */
-        if(AcpiCache->Header.Signature == Signature)
+        if(AcpiCache->Table->Signature == Signature)
         {
             /* ACPI table found in cache, return it */
-            TableHeader = &AcpiCache->Header;
+            TableHeader = AcpiCache->Table;
             break;
         }
 

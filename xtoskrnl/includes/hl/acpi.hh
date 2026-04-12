@@ -18,6 +18,8 @@ namespace HL
     class Acpi
     {
         private:
+            STATIC ULONG CacheCount;
+            STATIC ACPI_CACHE_LIST CacheEntries[ACPI_MAX_CACHED_TABLES];
             STATIC LIST_ENTRY CacheList;
             STATIC PACPI_RSDP RsdpStructure;
             STATIC ACPI_SYSTEM_INFO SystemInfo;
