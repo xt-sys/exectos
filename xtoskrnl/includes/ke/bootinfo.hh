@@ -25,6 +25,9 @@ namespace KE
             STATIC XTAPI SYSTEM_FIRMWARE_TYPE GetFirmwareType(VOID);
             STATIC XTAPI XTSTATUS GetKernelParameter(IN PCWSTR ParameterName,
                                                      OUT PCWSTR *Parameter);
+            STATIC XTAPI XTSTATUS GetKernelParameterValue(IN PCWSTR ParameterName,
+                                                          OUT PWSTR ValueBuffer,
+                                                          IN SIZE_T BufferSize);
             STATIC XTAPI PLIST_ENTRY GetMemoryDescriptors(VOID);
             STATIC XTAPI PLIST_ENTRY GetSystemResources(VOID);
             STATIC XTAPI VOID InitializeInitializationBlock(IN PKERNEL_INITIALIZATION_BLOCK Block);

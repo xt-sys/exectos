@@ -105,6 +105,78 @@ KE::BootInformation::GetKernelParameter(IN PCWSTR ParameterName,
 }
 
 /**
+ * Retrieves the value of a specified kernel parameter and copies it into a buffer.
+ *
+ * @param ParameterName
+ *        Supplies a pointer to a null-terminated wide string specifying the name of the parameter to search for.
+ *
+ * @param ValueBuffer
+ *        Supplies a pointer to a variable that receives the null-terminated value of the matching parameter.
+ *
+ * @param BufferSize
+ *        Supplies the size of the value buffer, in wide characters.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+KE::BootInformation::GetKernelParameterValue(IN PCWSTR ParameterName,
+                                             OUT PWSTR ValueBuffer,
+                                             IN SIZE_T BufferSize)
+{
+    PCWSTR Match;
+    SIZE_T NameLength, Index;
+    XTSTATUS Status;
+
+    /* Validate input parameters */
+    if(!ParameterName || !ValueBuffer || BufferSize == 0)
+    {
+        /* Invalid input parameters, return error */
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    /* Initialize the output buffer to an empty string */
+    ValueBuffer[0] = L'\0';
+
+    /* Find the parameter in the list using the base function */
+    Status = GetKernelParameter(ParameterName, &Match);
+    if(Status != STATUS_SUCCESS)
+    {
+        /* Parameter not found, return error */
+        return Status;
+    }
+
+    /* Move pointer past the parameter name */
+    NameLength = RTL::WideString::WideStringLength(ParameterName, 0);
+    Match += NameLength;
+
+    /* If the parameter has a value (indicated by '='), copy it */
+    if(*Match == L'=')
+    {
+        /* Skip the assignment operator */
+        Match++;
+
+        /* Copy the value to the caller's buffer until a space or end of string is reached */
+        Index = 0;
+        while(*Match != L'\0' && *Match != L' ' && Index < (BufferSize - 1))
+        {
+            /* Copy the character */
+            ValueBuffer[Index] = *Match;
+            Index++;
+            Match++;
+        }
+
+        /* Null-terminate the isolated value string */
+        ValueBuffer[Index] = L'\0';
+    }
+
+    /* Value successfully retrieved (or parameter exists without value) */
+    return STATUS_SUCCESS;
+}
+
+/**
  * Retrieves a pointer to the list of memory descriptors.
  *
  * @return This routine returns a pointer to the list of memory descriptors.
