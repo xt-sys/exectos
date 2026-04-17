@@ -319,6 +319,17 @@ typedef struct _ACPI_FADT
     GENERIC_ADDRESS SleepStatusReg;
 } PACKED ACPI_FADT, *PACPI_FADT;
 
+/* ACPI High Precision Event Timer (HPET) table structure */
+typedef struct _ACPI_HPET
+{
+    ACPI_DESCRIPTION_HEADER Header;
+    ULONG EventTimerBlockId;
+    GENERIC_ADDRESS BaseAddress;
+    UCHAR HpetNumber;
+    USHORT MinimumTick;
+    UCHAR PageProtectionAndOem;
+} PACKED ACPI_HPET, *PACPI_HPET;
+
 /* ACPI Multiple APIC Description Table (MADT) structure */
 typedef struct _ACPI_MADT
 {
@@ -327,6 +338,26 @@ typedef struct _ACPI_MADT
     ULONG Flags;
     ULONG ApicTables[];
 } PACKED ACPI_MADT, *PACPI_MADT;
+
+/* ACPI Interrupt Override MADT subtable structure */
+typedef struct _ACPI_MADT_INTERRUPT_OVERRIDE
+{
+    ACPI_SUBTABLE_HEADER Header;
+    UCHAR Bus;
+    UCHAR SourceIrq;
+    ULONG GlobalSystemInterrupt;
+    USHORT Flags;
+} PACKED ACPI_MADT_INTERRUPT_OVERRIDE, *PACPI_MADT_INTERRUPT_OVERRIDE;
+
+/* ACPI IO APIC MADT subtable structure */
+typedef struct _ACPI_MADT_IOAPIC
+{
+    ACPI_SUBTABLE_HEADER Header;
+    UCHAR IoApicId;
+    UCHAR Reserved;
+    ULONG IoApicAddress;
+    ULONG GlobalIrqBase;
+} PACKED ACPI_MADT_IOAPIC, *PACPI_MADT_IOAPIC;
 
 /* ACPI Local APIC MADT subtable structure */
 typedef struct _ACPI_MADT_LOCAL_APIC
