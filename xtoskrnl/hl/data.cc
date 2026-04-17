@@ -39,6 +39,21 @@ HL_SCROLL_REGION_DATA HL::FrameBuffer::ScrollRegionData;
 /* APIC mode */
 APIC_MODE HL::Pic::ApicMode;
 
+/* Number of I/O APIC controllers */
+ULONG HL::Pic::ControllerCount;
+
+/* I/O APIC controllers information */
+IOAPIC_DATA HL::Pic::Controllers[IOAPIC_MAX_CONTROLLERS];
+
+/* Number of I/O APIC overrides */
+ULONG HL::Pic::IrqOverrideCount;
+
+/* I/O APIC overrides information */
+ACPI_MADT_INTERRUPT_OVERRIDE HL::Pic::IrqOverrides[IOAPIC_MAX_OVERRIDES];
+
+/* Mapped interrupt vectors */
+UCHAR HL::Pic::MappedVectors[256];
+
 /* Kernel profiling interval */
 ULONG HL::Timer::ProfilingInterval;
 

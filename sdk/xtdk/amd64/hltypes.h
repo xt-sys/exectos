@@ -9,6 +9,7 @@
 #ifndef __XTDK_AMD64_HLTYPES_H
 #define __XTDK_AMD64_HLTYPES_H
 
+#include <xtbase.h>
 #include <xtdefs.h>
 #include <xtstruct.h>
 #include <xttypes.h>
@@ -53,6 +54,27 @@
 /* Maximum number of I/O APICs */
 #define APIC_MAX_IOAPICS                                64
 
+/* I/O APIC base address */
+#define IOAPIC_DEFAULT_BASE                             0xFEC00000
+
+/* I/O APIC definitions */
+#define IOAPIC_MAX_CONTROLLERS                          128
+#define IOAPIC_MAX_OVERRIDES                            16
+#define IOAPIC_RTE_MASKED                               0x100FF
+#define IOAPIC_RTE_SIZE                                 2
+#define IOAPIC_VECTOR_FREE                              0xFF
+#define IOAPIC_VECTOR_RESERVED                          0xFE
+
+/* IOAPIC offsets */
+#define IOAPIC_IOREGSEL                                 0x00
+#define IOAPIC_IOWIN                                    0x10
+
+/* IOAPIC registers */
+#define IOAPIC_ID                                       0x00
+#define IOAPIC_VER                                      0x01
+#define IOAPIC_ARB                                      0x02
+#define IOAPIC_REDTBL                                   0x10
+
 /* 8259/ISP PIC ports definitions */
 #define PIC1_CONTROL_PORT                               0x20
 #define PIC1_DATA_PORT                                  0x21
@@ -76,6 +98,13 @@
 
 /* C/C++ specific code */
 #ifndef __XTOS_ASSEMBLER__
+
+/* APIC destination mode enumeration list */
+typedef enum _APIC_DEST_MODE
+{
+    APIC_DM_Physical,
+    APIC_DM_Logical
+} APIC_DEST_MODE, *PAPIC_DEST_MODE;
 
 /* APIC delivery mode enumeration list */
 typedef enum _APIC_DM
@@ -273,6 +302,40 @@ typedef union _APIC_SPURIOUS_REGISTER
         ULONG Reserved:22;
     };
 } APIC_SPURIOUS_REGISTER, *PAPIC_SPURIOUS_REGISTER;
+
+/* I/O APIC Controller information */
+typedef struct _IOAPIC_DATA
+{
+    ULONG GsiBase;
+    ULONG Identifier;
+    ULONG LineCount;
+    PHYSICAL_ADDRESS PhysicalAddress;
+    ULONG_PTR VirtualAddress;
+} IOAPIC_DATA, *PIOAPIC_DATA;
+
+/* I/O APIC Redirection Register */
+typedef union _IOAPIC_REDIRECTION_REGISTER
+{
+    ULONGLONG LongLong;
+    struct
+    {
+        UINT Base;
+        UINT Extended;
+    };
+    struct
+    {
+        ULONGLONG Vector:8;
+        ULONGLONG DeliveryMode:3;
+        ULONGLONG DestinationMode:1;
+        ULONGLONG DeliveryStatus:1;
+        ULONGLONG PinPolarity:1;
+        ULONGLONG RemoteIRR:1;
+        ULONGLONG TriggerMode:1;
+        ULONGLONG Mask:1;
+        ULONGLONG Reserved:39;
+        ULONGLONG Destination:8;
+    };
+} IOAPIC_REDIRECTION_REGISTER, *PIOAPIC_REDIRECTION_REGISTER;
 
 /* I8259 PIC register structure */
 typedef union _PIC_I8259_ICW1
