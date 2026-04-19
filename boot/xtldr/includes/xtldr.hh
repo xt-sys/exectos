@@ -253,11 +253,34 @@ class Protocol
 
 class Shell
 {
+    private:
+        STATIC BOOLEAN ExitRequest;
+        STATIC LIST_ENTRY ShellCommands;
+
     public:
+        STATIC XTCDECL EFI_STATUS RegisterCommand(IN PCWSTR Command,
+                                                  IN PCWSTR Description,
+                                                  IN PBL_SHELL_COMMAND Handler);
         STATIC XTCDECL VOID StartLoaderShell();
 
     private:
+        STATIC XTCDECL VOID CommandExit(IN ULONG Argc,
+                                        IN PWCHAR *Argv);
+        STATIC XTCDECL VOID CommandHelp(IN ULONG Argc,
+                                        IN PWCHAR *Argv);
+        STATIC XTCDECL VOID CommandReboot(IN ULONG Argc,
+                                          IN PWCHAR *Argv);
+        STATIC XTCDECL VOID CommandVersion(IN ULONG Argc,
+                                           IN PWCHAR *Argv);
+        STATIC XTCDECL VOID ExecuteCommand(IN ULONG Argc,
+                                           IN PWCHAR *Argv);
+        STATIC XTCDECL EFI_STATUS ParseCommand(IN PWCHAR CommandLine,
+                                               OUT PULONG Argc,
+                                               OUT PWCHAR **Argv);
         STATIC XTCDECL VOID PrintPrompt();
+        STATIC XTCDECL VOID ReadCommand(OUT PWCHAR Buffer,
+                                        IN ULONG BufferSize);
+        STATIC XTCDECL VOID RegisterBuiltinCommands();
 };
 
 class TextUi

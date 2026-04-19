@@ -1077,6 +1077,7 @@ Protocol::InstallXtLoaderProtocol()
     LoaderProtocol.Protocol.LocateHandles = LocateProtocolHandles;
     LoaderProtocol.Protocol.Open = OpenProtocol;
     LoaderProtocol.Protocol.OpenHandle = OpenProtocolHandle;
+    LoaderProtocol.Shell.RegisterCommand = Shell::RegisterCommand;
     LoaderProtocol.String.Compare = RTL::String::CompareString;
     LoaderProtocol.String.Length = RTL::String::StringLength;
     LoaderProtocol.String.ToWideString = RTL::String::StringToWideString;

@@ -41,6 +41,9 @@
 /* TUI dialog box maximum width */
 #define XTBL_TUI_MAX_DIALOG_WIDTH                                   100
 
+/* Maximum length of a single shell command line, in wide characters */
+#define XTBL_SHELL_MAX_LINE_LENGTH                                  256
+
 
 /* C/C++ specific code */
 #ifndef D__XTOS_ASSEMBLER__
@@ -143,6 +146,8 @@ typedef XTSTATUS (XTAPI *PBL_WIDESTRING_FORMAT)(IN PRTL_PRINT_CONTEXT Context, I
 typedef SIZE_T (XTAPI *PBL_WIDESTRING_LENGTH)(IN PCWSTR String, IN SIZE_T MaxLength);
 typedef PWCHAR (XTAPI *PBL_WIDESTRING_TOKENIZE)(IN PWCHAR String, IN PCWSTR Delimiter, IN OUT PWCHAR *SavePtr);
 typedef EFI_STATUS (XTCDECL *PBL_WAIT_FOR_EFI_EVENT)(IN UINT_PTR NumberOfEvents, IN PEFI_EVENT Event, OUT PUINT_PTR Index);
+typedef VOID (XTCDECL *PBL_SHELL_COMMAND)(IN ULONG Argc, IN PWCHAR *Argv);
+typedef EFI_STATUS (XTCDECL *PBL_REGISTER_SHELL_COMMAND)(IN PCWSTR Command, IN PCWSTR Description, IN PBL_SHELL_COMMAND Handler);
 typedef VOID (XTCDECL *PBL_XT_BOOT_MENU)();
 typedef VOID (XTAPI *PBL_ZERO_MEMORY)(OUT PVOID Destination, IN SIZE_T Length);
 
@@ -232,6 +237,15 @@ typedef struct _XTBL_KNOWN_BOOT_PROTOCOL
     PWCHAR SystemType;
     EFI_GUID Guid;
 } XTBL_KNOWN_BOOT_PROTOCOL, *PXTBL_KNOWN_BOOT_PROTOCOL;
+
+/* XTLDR Shell command entry */
+typedef struct _XTBL_SHELL_COMMAND
+{
+    LIST_ENTRY Flink;
+    PWCHAR Command;
+    PWCHAR Description;
+    PBL_SHELL_COMMAND Handler;
+} XTBL_SHELL_COMMAND, *PXTBL_SHELL_COMMAND;
 
 /* Boot Loader memory mapping information */
 typedef struct _XTBL_MEMORY_MAPPING
@@ -481,6 +495,10 @@ typedef struct _XTBL_LOADER_PROTOCOL
         PBL_OPEN_PROTOCOL Open;
         PBL_OPEN_PROTOCOL_HANDLE OpenHandle;
     } Protocol;
+    struct
+    {
+        PBL_REGISTER_SHELL_COMMAND RegisterCommand;
+    } Shell;
     struct
     {
         PBL_STRING_COMPARE Compare;

@@ -56,6 +56,12 @@ XTBL_LOADER_PROTOCOL Protocol::LoaderProtocol;
 /* XT Boot Loader loaded modules list */
 LIST_ENTRY Protocol::LoadedModules;
 
+/* XT Boot Loader shell exit flag */
+BOOLEAN Shell::ExitRequest;
+
+/* XT Boot Loader shell commands list */
+LIST_ENTRY Shell::ShellCommands;
+
 /* List of available block devices */
 LIST_ENTRY Volume::EfiBlockDevices;
 
