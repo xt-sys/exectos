@@ -59,6 +59,15 @@ LIST_ENTRY Protocol::LoadedModules;
 /* XT Boot Loader shell exit flag */
 BOOLEAN Shell::ExitRequest;
 
+/* XT Boot Loader shell history buffer */
+WCHAR Shell::History[XTBL_SH_HISTORY_ENTRIES][XTBL_SH_MAX_LINE_LENGTH];
+
+/* XT Boot Loader shell history count */
+ULONG Shell::HistoryCount = 0;
+
+/* XT Boot Loader shell history index */
+ULONG Shell::HistoryIndex = 0;
+
 /* XT Boot Loader shell commands list */
 LIST_ENTRY Shell::ShellCommands;
 

@@ -29,6 +29,10 @@
 #define XTBL_DEBUGPORT_SCREEN                                       1
 #define XTBL_DEBUGPORT_SERIAL                                       2
 
+/* XTLDR Shell definitions */
+#define XTBL_SH_MAX_LINE_LENGTH                                     256
+#define XTBL_SH_HISTORY_ENTRIES                                     20
+
 /* TUI dialog box attributes */
 #define XTBL_TUI_DIALOG_GENERIC_BOX                                 1
 #define XTBL_TUI_DIALOG_ERROR_BOX                                   2
@@ -40,9 +44,6 @@
 
 /* TUI dialog box maximum width */
 #define XTBL_TUI_MAX_DIALOG_WIDTH                                   100
-
-/* Maximum length of a single shell command line, in wide characters */
-#define XTBL_SHELL_MAX_LINE_LENGTH                                  256
 
 
 /* C/C++ specific code */

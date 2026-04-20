@@ -206,11 +206,8 @@ Shell::ExecuteCommand(IN ULONG Argc,
         /* Perform a case-insensitive comparison against the command name */
         if(RTL::WideString::CompareWideStringInsensitive(CommandEntry->Command, Argv[0], 0) == 0)
         {
-            /* Command matches, invoke its handler */
+            /* Command matches, invoke its handler and return */
             CommandEntry->Handler(Argc, Argv);
-
-            /* Print a trailing blank line for visual separation and return */
-            Console::Print(L"\n");
             return;
         }
 
@@ -219,7 +216,7 @@ Shell::ExecuteCommand(IN ULONG Argc,
     }
 
     /* No matching command was found, print error message */
-    Console::Print(L"ERROR: '%S' is not recognized as a valid command.\n\n", Argv[0]);
+    Console::Print(L"ERROR: '%S' is not recognized as a valid command.\n", Argv[0]);
 }
 
 /**
@@ -361,11 +358,74 @@ Shell::PrintPrompt()
     /* Set prompt color */
     Console::SetAttributes(EFI_TEXT_BGCOLOR_BLACK | EFI_TEXT_FGCOLOR_YELLOW);
 
-    /* Print prompt */
-    Console::Print(L"XTLDR> ");
+    /* Print prompt at the start of the line */
+    Console::Print(L"\rXTLDR> ");
 
     /* Reset standard shell colors */
     Console::SetAttributes(EFI_TEXT_BGCOLOR_BLACK | EFI_TEXT_FGCOLOR_LIGHTGRAY);
+}
+
+/**
+ * Prints the whole prompt line, including the current command line and the cursor position.
+ *
+ * @param Buffer
+ *        Supplies a pointer to the buffer containing the command line.
+ *
+ * @param BufferLength
+ *        Supplies the buffer text length.
+ *
+ * @param CursorPosition
+ *        Supplies the current cursor position.
+ *
+ * @param PreviousBufferLength
+ *        Supplies the previous buffer text length to clear artifacts.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+Shell::PrintPromptLine(IN PWCHAR Buffer,
+                       IN ULONG BufferLength,
+                       IN ULONG CursorPosition,
+                       IN ULONG PreviousBufferLength)
+{
+    INT32 TargetX, TargetY;
+    WCHAR SavedChar;
+    ULONG Index;
+
+    /* Print the prompt */
+    PrintPrompt();
+
+    /* Temporarily truncate the string to capture cursor position */
+    SavedChar = Buffer[CursorPosition];
+    Buffer[CursorPosition] = L'\0';
+
+    /* Print up to the cursor position */
+    Console::Print(L"%S", Buffer);
+
+    /* Capture target cursor coordinates from the EFI text mode structure */
+    TargetX = XtLoader::GetEfiSystemTable()->ConOut->Mode->CursorColumn;
+    TargetY = XtLoader::GetEfiSystemTable()->ConOut->Mode->CursorRow;
+
+    /* Restore the character and print the remainder of the buffer */
+    Buffer[CursorPosition] = SavedChar;
+    Console::Print(L"%S", Buffer + CursorPosition);
+
+    /* Check if the previous buffer was longer than the current one */
+    if(PreviousBufferLength > BufferLength)
+    {
+        /* Clear artifacts from the previous longer line */
+        for(Index = 0; Index < (PreviousBufferLength - BufferLength); Index++)
+        {
+            /* Print a white space */
+            Console::Print(L" ");
+        }
+    }
+
+    /* Move the cursor back to the correct target position */
+    Console::SetCursorPosition(TargetX, TargetY);
 }
 
 /**
@@ -386,13 +446,17 @@ VOID
 Shell::ReadCommand(OUT PWCHAR Buffer,
                    IN ULONG BufferSize)
 {
-    ULONG CursorPosition;
+    ULONG BufferLength, CursorPosition, OldBufferLength;
     UINT_PTR EventIndex;
     EFI_INPUT_KEY Key;
 
     /* Start with an empty buffer */
     CursorPosition = 0;
+    BufferLength = 0;
     Buffer[0] = L'\0';
+
+    /* Reset history index */
+    HistoryIndex = HistoryCount;
 
     /* Read characters until the user submits the command line */
     while(TRUE)
@@ -403,38 +467,198 @@ Shell::ReadCommand(OUT PWCHAR Buffer,
         /* Read the keystroke from the input device */
         Console::ReadKeyStroke(&Key);
 
+        /* Capture the previous line length to wipe possible artifacts */
+        OldBufferLength = BufferLength;
+
         /* Check the keystroke */
         if(Key.UnicodeChar == 0x0D)
         {
-            /* ENTER key pressed - terminate the buffer and move to a new line */
-            Buffer[CursorPosition] = L'\0';
+            /* ENTER key pressed, terminate the buffer and move to a new line */
+            Buffer[BufferLength] = L'\0';
             Console::Print(L"\n");
+
+            /* Check if the buffer is not empty */
+            if(BufferLength > 0)
+            {
+                /* Check if the history is not full */
+                if(HistoryCount < XTBL_SH_HISTORY_ENTRIES)
+                {
+                    /* Store command in history and increment history count */
+                    RTL::Memory::CopyMemory(History[HistoryCount], Buffer, (BufferLength + 1) * sizeof(WCHAR));
+                    HistoryCount++;
+                }
+                else
+                {
+                    /* Shift history entries to fit new command */
+                    RTL::Memory::MoveMemory(History[0],
+                                            History[1],
+                                            (XTBL_SH_HISTORY_ENTRIES - 1) * XTBL_SH_MAX_LINE_LENGTH * sizeof(WCHAR));
+                    RTL::Memory::CopyMemory(History[XTBL_SH_HISTORY_ENTRIES - 1],
+                                            Buffer,
+                                            (BufferLength + 1) * sizeof(WCHAR));
+                }
+            }
 
             /* Return the command line to the caller */
             return;
         }
+        else if(Key.ScanCode == 0x01)
+        {
+            /* UP key pressed, go back in history */
+            if(HistoryIndex > 0)
+            {
+                /* Decrement history index */
+                HistoryIndex--;
+
+                /* Copy history entry to buffer and update cursor position */
+                BufferLength = RTL::WideString::WideStringLength(History[HistoryIndex], XTBL_SH_MAX_LINE_LENGTH - 1);
+                RTL::Memory::CopyMemory(Buffer, History[HistoryIndex], (BufferLength + 1) * sizeof(WCHAR));
+                CursorPosition = BufferLength;
+
+                /* Reprint the prompt line */
+                PrintPromptLine(Buffer, BufferLength, CursorPosition, OldBufferLength);
+            }
+
+            /* Continue to the next iteration */
+            continue;
+        }
+        else if(Key.ScanCode == 0x02)
+        {
+            /* DOWN key pressed, go forward in history */
+            if(HistoryIndex < HistoryCount)
+            {
+                /* Increment history index */
+                HistoryIndex++;
+
+                /* Check if we are at the end of history */
+                if(HistoryIndex == HistoryCount)
+                {
+                    /* End of history, show empty prompt */
+                    Buffer[0] = L'\0';
+                    BufferLength = 0;
+                    CursorPosition = 0;
+                }
+                else
+                {
+                    /* Copy history entry to buffer and update cursor position */
+                    BufferLength = RTL::WideString::WideStringLength(History[HistoryIndex],
+                                                                     XTBL_SH_MAX_LINE_LENGTH - 1);
+                    RTL::Memory::CopyMemory(Buffer, History[HistoryIndex], (BufferLength + 1) * sizeof(WCHAR));
+                    CursorPosition = BufferLength;
+                }
+
+                /* Reprint the prompt line */
+                PrintPromptLine(Buffer, BufferLength, CursorPosition, OldBufferLength);
+            }
+
+            /* Continue to the next iteration */
+            continue;
+        }
+        else if(Key.ScanCode == 0x03)
+            {
+            /* RIGHT key pressed, move cursor right */
+            if(CursorPosition < BufferLength)
+            {
+                /* Increment cursor position */
+                CursorPosition++;
+
+                /* Reprint the prompt line */
+                PrintPromptLine(Buffer, BufferLength, CursorPosition, OldBufferLength);
+            }
+
+            /* Continue to the next iteration */
+            continue;
+        }
+        else if(Key.ScanCode == 0x04)
+        {
+            /* LEFT key pressed, move cursor left */
+            if(CursorPosition > 0)
+            {
+                /* Decrement cursor position */
+                CursorPosition--;
+
+                /* Reprint the prompt line */
+                PrintPromptLine(Buffer, BufferLength, CursorPosition, OldBufferLength);
+            }
+
+            /* Continue to the next iteration */
+            continue;
+        }
+        else if(Key.ScanCode == 0x05)
+        {
+            /* HOME key pressed, move cursor to beginning */
+            if (CursorPosition > 0)
+            {
+                /* Set cursor position to beginning of the line and reprint the prompt line */
+                CursorPosition = 0;
+                PrintPromptLine(Buffer, BufferLength, CursorPosition, OldBufferLength);
+            }
+
+            /* Continue to the next iteration */
+            continue;
+        }
+        else if(Key.ScanCode == 0x06)
+        {
+            /* END key pressed, move cursor to end */
+            if (CursorPosition < BufferLength)
+            {
+                /* Set cursor position to end of the line and reprint the prompt line */
+                CursorPosition = BufferLength;
+                PrintPromptLine(Buffer, BufferLength, CursorPosition, OldBufferLength);
+            }
+
+            /* Continue to the next iteration */
+            continue;
+        }
         else if(Key.ScanCode == 0x17)
         {
-            /* ESC key pressed - discard the current input, move to a new line and reprint the prompt */
+            /* ESC key pressed, discard the current input, move to a new line and reprint the prompt */
             Buffer[0] = L'\0';
             Console::Print(L"\n");
             PrintPrompt();
+
+            /* Reset cursor position, buffer length and history index */
             CursorPosition = 0;
+            BufferLength = 0;
+            HistoryIndex = HistoryCount;
 
             /* Continue reading the command line */
             continue;
         }
+        else if(Key.ScanCode == 0x08)
+        {
+            /* DELETE key pressed, remove character at cursor */
+            if(CursorPosition < BufferLength)
+            {
+                /* Move memory to remove the character at cursor */
+                RTL::Memory::MoveMemory(Buffer + CursorPosition,
+                                        Buffer + CursorPosition + 1,
+                                        (BufferLength - CursorPosition) * sizeof(WCHAR));
+
+                /* Decrement buffer length and reprint the prompt line */
+                BufferLength--;
+                PrintPromptLine(Buffer, BufferLength, CursorPosition, OldBufferLength);
+            }
+
+            /* Continue to the next iteration */
+            continue;
+        }
         else if(Key.UnicodeChar == 0x08)
         {
-            /* Backspace key pressed - erase the last character from the buffer */
+            /* BACKSPACE key pressed, delete character before cursor */
             if(CursorPosition > 0)
             {
-                /* Erase the last character from the buffer */
-                CursorPosition--;
-                Buffer[CursorPosition] = L'\0';
+                /* Move memory to remove the character before cursor */
+                RTL::Memory::MoveMemory(Buffer + CursorPosition - 1,
+                                        Buffer + CursorPosition,
+                                        (BufferLength - CursorPosition + 1) * sizeof(WCHAR));
 
-                /* Move the cursor back, overwrite the character with a space, then move back again */
-                Console::Print(L"\b \b");
+                /* Decrement cursor position and buffer length */
+                CursorPosition--;
+                BufferLength--;
+
+                /* Reprint the prompt line */
+                PrintPromptLine(Buffer, BufferLength, CursorPosition, OldBufferLength);
             }
 
             /* Continue reading the command line */
@@ -447,15 +671,20 @@ Shell::ReadCommand(OUT PWCHAR Buffer,
         }
 
         /* Make sure there is room in the buffer (reserve one slot for NULL terminator) */
-        if(CursorPosition < BufferSize - 1)
+        if(BufferLength < BufferSize - 1)
         {
-            /* Append the character to the buffer and NULL-terminate it */
+            /* Insert character in the middle or end of the buffer */
+            RTL::Memory::MoveMemory(Buffer + CursorPosition + 1,
+                                    Buffer + CursorPosition,
+                                    (BufferLength - CursorPosition + 1) * sizeof(WCHAR));
             Buffer[CursorPosition] = Key.UnicodeChar;
-            CursorPosition++;
-            Buffer[CursorPosition] = L'\0';
 
-            /* Echo the character to the console */
-            Console::PutChar(Key.UnicodeChar);
+            /* Increment cursor position and buffer length */
+            CursorPosition++;
+            BufferLength++;
+
+            /* Reprint the prompt line */
+            PrintPromptLine(Buffer, BufferLength, CursorPosition, OldBufferLength);
         }
     }
 }
@@ -554,7 +783,7 @@ XTCDECL
 VOID
 Shell::StartLoaderShell()
 {
-    WCHAR CommandLine[XTBL_SHELL_MAX_LINE_LENGTH];
+    WCHAR CommandLine[XTBL_SH_MAX_LINE_LENGTH];
     PWCHAR *ArgumentVector;
     ULONG ArgumentCount;
     EFI_STATUS Status;
@@ -578,14 +807,14 @@ Shell::StartLoaderShell()
         PrintPrompt();
 
         /* Read a command line */
-        ReadCommand(CommandLine, XTBL_SHELL_MAX_LINE_LENGTH);
+        ReadCommand(CommandLine, XTBL_SH_MAX_LINE_LENGTH);
 
         /* Parse the command line into a list of arguments */
         Status = ParseCommand(CommandLine, &ArgumentCount, &ArgumentVector);
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Parsing failed, print error and continue */
-            Console::Print(L"ERROR: Failed to parse command line (Status: 0x%llx).\n", Status);
+            Console::Print(L"ERROR: Failed to parse command line (Status: 0x%llx).\n\n", Status);
             continue;
         }
 
@@ -596,10 +825,17 @@ Shell::StartLoaderShell()
             continue;
         }
 
-        /* Dispatch the command */
-        ExecuteCommand(ArgumentCount, ArgumentVector);
+        /* Check if command line starts with a comment symbol (#) */
+        if(ArgumentVector[0][0] != L'#')
+        {
+            /* Dispatch the command */
+            ExecuteCommand(ArgumentCount, ArgumentVector);
+        }
 
         /* Free the argument vector */
         Memory::FreePool(ArgumentVector);
+
+        /* Print a trailing blank line for visual separation */
+        Console::Print(L"\n");
     }
 }

@@ -255,6 +255,9 @@ class Shell
 {
     private:
         STATIC BOOLEAN ExitRequest;
+        STATIC WCHAR History[XTBL_SH_HISTORY_ENTRIES][XTBL_SH_MAX_LINE_LENGTH];
+        STATIC ULONG HistoryCount;
+        STATIC ULONG HistoryIndex;
         STATIC LIST_ENTRY ShellCommands;
 
     public:
@@ -280,6 +283,10 @@ class Shell
                                                OUT PULONG Argc,
                                                OUT PWCHAR **Argv);
         STATIC XTCDECL VOID PrintPrompt();
+        STATIC XTCDECL VOID PrintPromptLine(IN PWCHAR Buffer,
+                                            IN ULONG BufferLength,
+                                            IN ULONG CursorPosition,
+                                            IN ULONG PreviousBufferLength);
         STATIC XTCDECL VOID ReadCommand(OUT PWCHAR Buffer,
                                         IN ULONG BufferSize);
         STATIC XTCDECL VOID RegisterBuiltinCommands();
