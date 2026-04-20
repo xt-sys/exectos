@@ -15,7 +15,7 @@
  * shell loop to terminate and return control to the boot menu.
  *
  * @param Argc
- *        Supplies the number of arguments.
+ *        Supplies the number of arguments provided by the user.
  *
  * @param Argv
  *        Supplies a list of arguments provided by the user.
@@ -37,7 +37,7 @@ Shell::CommandExit(IN ULONG Argc,
  * Implements the built-in `help` command. Prints a list of available commands alongside their descriptions.
  *
  * @param Argc
- *        Supplies the number of arguments.
+ *        Supplies the number of arguments provided by the user.
  *
  * @param Argv
  *        Supplies a list of arguments provided by the user.
@@ -78,11 +78,37 @@ Shell::CommandHelp(IN ULONG Argc,
 }
 
 /**
+ * Implements the built-in `poweroff` command. Shuts down the machine.
+ *
+ * @param Argc
+ *        Supplies the number of arguments provided by the user.
+ *
+ * @param Argv
+ *        Supplies a list of arguments provided by the user.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+Shell::CommandPoweroff(IN ULONG Argc,
+                       IN PWCHAR *Argv)
+{
+    /* Attempt to power off the machine */
+    Console::Print(L"Powering off...\n");
+    EfiUtils::ShutdownSystem();
+
+    /* The poweroff call failed, print error message */
+    Console::Print(L"ERROR: Failed to power off the machine\n");
+}
+
+/**
  * Implements the built-in `reboot` command. Performs a normal system restart via the EFI runtime services.
  * When the '/EFI' parameter is supplied, the routine instead schedules a reboot into the UEFI firmware setup interface.
  *
  * @param Argc
- *        Supplies the number of arguments.
+ *        Supplies the number of arguments provided by the user.
  *
  * @param Argv
  *        Supplies a list of arguments provided by the user.
@@ -121,7 +147,7 @@ Shell::CommandReboot(IN ULONG Argc,
  * Implements the built-in `ver` command. Prints the bootloader identification string.
  *
  * @param Argc
- *        Supplies the number of arguments.
+ *        Supplies the number of arguments provided by the user.
  *
  * @param Argv
  *        Supplies a list of arguments provided by the user.
@@ -512,6 +538,7 @@ Shell::RegisterBuiltinCommands()
     /* Register all built-in shell commands */
     RegisterCommand(L"exit", L"Exits the shell and returns to the boot menu", CommandExit);
     RegisterCommand(L"help", L"Displays a list of all available shell commands", CommandHelp);
+    RegisterCommand(L"poweroff", L"Shuts down the machine", CommandPoweroff);
     RegisterCommand(L"reboot", L"Reboots the machine (/EFI to enter firmware setup)", CommandReboot);
     RegisterCommand(L"ver", L"Displays the boot loader version information", CommandVersion);
 }
@@ -528,9 +555,9 @@ VOID
 Shell::StartLoaderShell()
 {
     WCHAR CommandLine[XTBL_SHELL_MAX_LINE_LENGTH];
-    EFI_STATUS Status;
     PWCHAR *ArgumentVector;
     ULONG ArgumentCount;
+    EFI_STATUS Status;
 
     /* Initialize console */
     Console::InitializeConsole();
