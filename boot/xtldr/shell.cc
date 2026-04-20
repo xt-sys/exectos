@@ -229,14 +229,31 @@ Shell::ParseCommand(IN PWCHAR CommandLine,
 
     /* Count the tokens to determine the size of the argument vector */
     TempLine = CommandLine;
-    Token = RTL::WideString::TokenizeWideString(TempLine, L" ", &SavePtr);
-    while(Token != NULLPTR)
+    while(*TempLine != L'\0')
     {
+        /* Skip leading spaces */
+        while(*TempLine == L' ')
+        {
+            /* Move to the next character */
+            TempLine++;
+        }
+
+        /* Check if the end of the string was reached */
+        if(*TempLine == L'\0')
+        {
+            /* End of the string, break the loop */
+            break;
+        }
+
         /* One more argument found */
         ArgumentCount++;
 
-        /* Continue tokenizing */
-        Token = RTL::WideString::TokenizeWideString(NULLPTR, L" ", &SavePtr);
+        /* Skip the characters of the token */
+        while(*TempLine != L'\0' && *TempLine != L' ')
+        {
+            /* Move to the next character */
+            TempLine++;
+        }
     }
 
     /* Check if the command line was empty */
