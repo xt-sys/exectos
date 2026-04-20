@@ -302,6 +302,7 @@ Protocol::LoadModule(IN PWCHAR ModuleName)
     PXTBL_MODULE_DEPS ModuleDependency;
     PXTBL_MODULE_INFO ModuleInfo;
     WCHAR ModuleFileName[24];
+    ULONG ModuleNameLength;
     USHORT SectionIndex;
     PWCHAR SectionData;
     SIZE_T ModuleSize;
@@ -328,8 +329,11 @@ Protocol::LoadModule(IN PWCHAR ModuleName)
     /* Print debug message */
     Debug::Print(L"Loading module '%S' ...\n", ModuleName);
 
+    /* Calculate module name length */
+    ModuleNameLength = RTL::WideString::WideStringLength(ModuleName, 0) + 1;
+
     /* Set module path */
-    RTL::Memory::CopyMemory(ModuleFileName, ModuleName, (RTL::WideString::WideStringLength(ModuleName, 0) + 1) * sizeof(WCHAR));
+    RTL::Memory::CopyMemory(ModuleFileName, ModuleName, ModuleNameLength * sizeof(WCHAR));
     RTL::WideString::ConcatenateWideString(ModuleFileName, (PWCHAR)L".EFI", 0);
 
     /* Open EFI volume */
@@ -438,7 +442,8 @@ Protocol::LoadModule(IN PWCHAR ModuleName)
         if(Status != STATUS_EFI_SUCCESS)
         {
             /* Failed to load module, print error message and return status code */
-            Debug::Print(L"Failed to load dependency module '%S' (Status Code: 0x%zX)\n", ModuleDependency->ModuleName, Status);
+            Debug::Print(L"Failed to load dependency module '%S' (Status Code: 0x%zX)\n",
+                         ModuleDependency->ModuleName, Status);
             return STATUS_EFI_UNSUPPORTED;
         }
 
@@ -501,8 +506,19 @@ Protocol::LoadModule(IN PWCHAR ModuleName)
         XtLoader::GetEfiSystemTable()->BootServices->CloseProtocol(LoadedImage, &LIPGuid, LoadedImage, NULLPTR);
     }
 
+    /* Allocate memory for module name */
+    Status = Memory::AllocatePool(ModuleNameLength * sizeof(WCHAR), (PVOID *)&ModuleInfo->ModuleName);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to allocate memory for module name, return error */
+        Debug::Print(L"ERROR: Failed to allocate memory (Status Code: 0x%zX)\n", Status);
+        return Status;
+    }
+
+    /* Copy module name */
+    RTL::Memory::CopyMemory(ModuleInfo->ModuleName, ModuleName, ModuleNameLength * sizeof(WCHAR));
+
     /* Save additional module information, not found in '.modinfo' section */
-    ModuleInfo->ModuleName = ModuleName;
     ModuleInfo->ModuleBase = LoadedImage->ImageBase;
     ModuleInfo->ModuleSize = LoadedImage->ImageSize;
     ModuleInfo->Revision = LoadedImage->Revision;
