@@ -78,6 +78,94 @@ Shell::CommandHelp(IN ULONG Argc,
 }
 
 /**
+ * Implements the built-in `insmod` command. Loads an XTLDR module by its name.
+ *
+ * @param Argc
+ *        Supplies the number of arguments provided by the user.
+ *
+ * @param Argv
+ *        Supplies a list of arguments provided by the user.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+Shell::CommandInsmod(IN ULONG Argc,
+                     IN PWCHAR *Argv)
+{
+    EFI_STATUS Status;
+
+    /* Check if the module name was provided */
+    if(Argc != 2)
+    {
+        /* Print usage message and return */
+        Console::Print(L"Usage: insmod <module_name>\n");
+        return;
+    }
+
+    /* Load the module */
+    Status = Protocol::LoadModule(Argv[1]);
+    if(Status != STATUS_EFI_SUCCESS)
+    {
+        /* Failed to load module, print error message */
+        Console::Print(L"ERROR: Failed to load module '%S' (Status: 0x%llx).\n", Argv[1], Status);
+    }
+}
+
+/**
+ * Implements the built-in `lsmod`  command. Lists all loaded XTLDR modules.
+ *
+ * @param Argc
+ *        Supplies the number of arguments provided by the user.
+ *
+ * @param Argv
+ *        Supplies a list of arguments provided by the user.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+Shell::CommandLsmod(IN ULONG Argc,
+                    IN PWCHAR *Argv)
+{
+    PXTBL_MODULE_INFO ModuleInfo;
+    PLIST_ENTRY ModulesList;
+    PLIST_ENTRY ListEntry;
+
+    /* Print header */
+    Console::Print(L"Module Name       Version           Base Address          Size\n");
+    Console::Print(L"----------------------------------------------------------------------\n");
+
+    /* Get modules list */
+    ModulesList = Protocol::GetModulesList();
+    if(ModulesList == NULLPTR)
+    {
+        /* No modules loaded */
+        return;
+    }
+
+    /* Iterate over all loaded modules */
+    ListEntry = ModulesList->Flink;
+    while(ListEntry != ModulesList)
+    {
+        /* Retrieve the module information */
+        ModuleInfo = CONTAIN_RECORD(ListEntry, XTBL_MODULE_INFO, Flink);
+
+        /* Print module information */
+        Console::Print(L"%-16S  %-16S  0x%016llx    %llu\n",
+                       ModuleInfo->ModuleName, ModuleInfo->Version,
+                       (ULONGLONG)ModuleInfo->ModuleBase, ModuleInfo->ModuleSize);
+
+        /* Advance to the next entry */
+        ListEntry = ListEntry->Flink;
+    }
+}
+
+/**
  * Implements the built-in `poweroff` command. Shuts down the machine.
  *
  * @param Argc
@@ -767,6 +855,8 @@ Shell::RegisterBuiltinCommands()
     /* Register all built-in shell commands */
     RegisterCommand(L"exit", L"Exits the shell and returns to the boot menu", CommandExit);
     RegisterCommand(L"help", L"Displays a list of all available shell commands", CommandHelp);
+    RegisterCommand(L"insmod", L"Loads a specific XTLDR module", CommandInsmod);
+    RegisterCommand(L"lsmod", L"Displays a list of loaded modules", CommandLsmod);
     RegisterCommand(L"poweroff", L"Shuts down the machine", CommandPoweroff);
     RegisterCommand(L"reboot", L"Reboots the machine (/EFI to enter firmware setup)", CommandReboot);
     RegisterCommand(L"ver", L"Displays the boot loader version information", CommandVersion);

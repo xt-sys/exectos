@@ -271,6 +271,10 @@ class Shell
                                         IN PWCHAR *Argv);
         STATIC XTCDECL VOID CommandHelp(IN ULONG Argc,
                                         IN PWCHAR *Argv);
+        STATIC XTCDECL VOID CommandInsmod(IN ULONG Argc,
+                                          IN PWCHAR *Argv);
+        STATIC XTCDECL VOID CommandLsmod(IN ULONG Argc,
+                                         IN PWCHAR *Argv);
         STATIC XTCDECL VOID CommandPoweroff(IN ULONG Argc,
                                             IN PWCHAR *Argv);
         STATIC XTCDECL VOID CommandReboot(IN ULONG Argc,
