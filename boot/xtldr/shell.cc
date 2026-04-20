@@ -219,8 +219,7 @@ Shell::ParseCommand(IN PWCHAR CommandLine,
                     OUT PULONG Argc,
                     OUT PWCHAR **Argv)
 {
-    PWCHAR Token, SavePtr, TempLine;
-    PWCHAR *ArgumentVector;
+    PWCHAR *ArgumentVector, TempLine;
     ULONG ArgumentCount;
     EFI_STATUS Status;
 
