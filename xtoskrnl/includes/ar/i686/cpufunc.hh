@@ -39,6 +39,7 @@ namespace AR
             STATIC XTCDECL ULONGLONG ReadModelSpecificRegister(IN ULONG Register);
             STATIC XTCDECL UINT ReadMxCsrRegister(VOID);
             STATIC XTCDECL ULONGLONG ReadTimeStampCounter(VOID);
+            STATIC XTCDECL ULONGLONG ReadTimeStampCounterProcessor(OUT PULONG TscAux);
             STATIC XTCDECL VOID ReadWriteBarrier(VOID);
             STATIC XTCDECL VOID SetInterruptFlag(VOID);
             STATIC XTCDECL VOID StoreGlobalDescriptorTable(OUT PVOID Destination);

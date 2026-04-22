@@ -574,6 +574,33 @@ AR::CpuFunc::ReadTimeStampCounter(VOID)
 }
 
 /**
+ * Reads the current value of the CPU's time-stamp counter and processor ID.
+ *
+ * @param TscAux
+ *        Supplies a pointer to a variable that receives the auxiliary TSC information (IA32_TSC_AUX).
+ *
+ * @return This routine returns the current instruction cycle count since the processor was last reset.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+ULONGLONG
+AR::CpuFunc::ReadTimeStampCounterProcessor(OUT PULONG TscAux)
+{
+    ULONG Low, High;
+
+    /* Execute the RDTSCP instruction */
+    __asm__ volatile("rdtscp"
+                     : "=a" (Low),
+                       "=d" (High),
+                       "=c" (*TscAux)
+    );
+
+    /* Combine the two 32-bit registers into a single 64-bit unsigned integer and return the value */
+    return ((ULONGLONG)High << 32) | Low;
+}
+
+/**
  * Orders memory accesses as seen by other processors, without fence.
  *
  * @return This routine does not return any value.
