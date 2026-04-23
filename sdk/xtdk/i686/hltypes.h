@@ -37,6 +37,7 @@
 #define APIC_VECTOR_GENERIC                             0xC1
 #define APIC_VECTOR_SYNC                                0xC1
 #define APIC_VECTOR_CLOCK                               0xD1
+#define APIC_VECTOR_CLOCK_IPI                           0xD2
 #define APIC_VECTOR_IPI                                 0xE1
 #define APIC_VECTOR_ERROR                               0xE3
 #define APIC_VECTOR_POWERFAIL                           0xEF
@@ -58,6 +59,10 @@
 
 /* Maximum number of I/O APICs */
 #define APIC_MAX_IOAPICS                                64
+
+/* CMOS controller I/O ports */
+#define CMOS_ADDRESS_PORT                               0x70
+#define CMOS_DATA_PORT                                  0x71
 
 /* I/O APIC base address */
 #define IOAPIC_DEFAULT_BASE                             0xFEC00000

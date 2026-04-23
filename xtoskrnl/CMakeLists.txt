@@ -17,9 +17,10 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/ex/exports.cc
     ${XTOSKRNL_SOURCE_DIR}/ex/rundown.cc
     ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/cpu.cc
-    ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/pic.cc
+    ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/firmware.cc
     ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/ioport.cc
     ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/irq.cc
+    ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/pic.cc
     ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/runlevel.cc
     ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/timer.cc
     ${XTOSKRNL_SOURCE_DIR}/hl/acpi.cc

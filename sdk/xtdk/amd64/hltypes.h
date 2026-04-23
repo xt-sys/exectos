@@ -54,6 +54,10 @@
 /* Maximum number of I/O APICs */
 #define APIC_MAX_IOAPICS                                64
 
+/* CMOS controller I/O ports */
+#define CMOS_ADDRESS_PORT                               0x70
+#define CMOS_DATA_PORT                                  0x71
+
 /* I/O APIC base address */
 #define IOAPIC_DEFAULT_BASE                             0xFEC00000
 
@@ -87,6 +91,8 @@
 /* PIT ports definitions */
 #define PIT_COMMAND_PORT                                0x43
 #define PIT_DATA_PORT0                                  0x40
+#define PIT_DATA_PORT1                                  0x41
+#define PIT_DATA_PORT2                                  0x42
 
 /* Serial ports information */
 #define COMPORT_ADDRESS                                 {0x3F8, 0x2F8, 0x3E8, 0x2E8, 0x5F8, 0x4F8, 0x5E8, 0x4E8}

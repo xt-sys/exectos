@@ -15,6 +15,7 @@
 #include <hl/cport.hh>
 #include <hl/cpu.hh>
 #include <hl/fbdev.hh>
+#include <hl/firmware.hh>
 #include <hl/init.hh>
 #include <hl/ioport.hh>
 #include <hl/ioreg.hh>
