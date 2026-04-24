@@ -58,6 +58,10 @@
 /* Macro for calculating size of an array */
 #define ARRAY_SIZE(Array)                      (sizeof(Array) / sizeof(*Array))
 
+/* Macros for converting Binary Coded Decimal (BCD) into decimal and vice versa */
+#define BCD_TO_DECIMAL(Value)                  (((Value) & 0x0F) + (((Value) >> 4) * 10))
+#define DECIMAL_TO_BCD(Value)                  ((((Value) / 10) << 4) | ((Value) % 10))
+
 /* Macros for concatenating two strings */
 #define CONCAT_STRING(Str1, Str2)              Str1##Str2
 #define CONCATENATE(Str1, Str2)                CONCAT_STRING(Str1, Str2)
