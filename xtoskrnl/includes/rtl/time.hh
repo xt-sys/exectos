@@ -19,7 +19,6 @@ namespace RTL
     {
         private:
             STATIC CUSHORT DaysInMonth[2][12];
-            STATIC CUSHORT DaysPrecedingMonth[2][12];
 
         public:
             STATIC XTAPI XTSTATUS TimeFieldsToUnixEpoch(IN PTIME_FIELDS TimeFields,

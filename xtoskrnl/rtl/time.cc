@@ -45,23 +45,49 @@ XTSTATUS
 RTL::Time::TimeFieldsToUnixEpoch(IN PTIME_FIELDS TimeFields,
                                  OUT PLONGLONG UnixTime)
 {
-    LONGLONG TotalSeconds;
-    LARGE_INTEGER XtTime;
-    XTSTATUS Status;
+    LONGLONG ElapsedDays, TotalSeconds;
+    LONG Month, Year;
+    ULONG Leap;
 
-    /* Convert to XT Epoch */
-    Status = TimeFieldsToXtEpoch(TimeFields, &XtTime);
-    if(Status != STATUS_SUCCESS)
+    /* Check leap year */
+    Leap = LeapYear(TimeFields->Year) ? 1 : 0;
+
+    /* 2. Validate input data */
+    if(TimeFields->Hour < 0 || TimeFields->Hour > 23 ||
+       TimeFields->Minute < 0 || TimeFields->Minute > 59 ||
+       TimeFields->Second < 0 || TimeFields->Second > 59 ||
+       TimeFields->Year < 0 || TimeFields->Year > 30827 ||
+       TimeFields->Month < 1 || TimeFields->Month > 12 ||
+       TimeFields->Day < 1 || TimeFields->Day > DaysInMonth[Leap][TimeFields->Month - 1])
     {
-        /* Failed to convert to XT Epoch, return error code */
-        return Status;
+        /* Invalid input data, return error code */
+        return STATUS_INVALID_PARAMETER;
     }
 
-    /* Convert 100-nanosecond intervals (TICKS) to whole seconds */
-    TotalSeconds = XtTime.QuadPart / TIME_TICKS_PER_SECOND;
+    /* Copy year and month */
+    Year = (LONG)TimeFields->Year;
+    Month = (LONG)TimeFields->Month;
 
-    /* Subtract the number of seconds between January 1, 1601 and January 1, 1970 */
-    *UnixTime = TotalSeconds - 11644473600LL;
+    /* Put February at the end of the calculation cycle, making leap day handling implicit in the year division */
+    if(0 >= (LONG)(Month -= 2))
+    {
+        /* Adjust month and year */
+        Month += 12;
+        Year -= 1;
+    }
+
+    /* Calculate absolute elapsed days */
+    ElapsedDays = (LONGLONG)(Year/4 - Year/100 + Year/400 + 367*Month/12 + TimeFields->Day) +
+                  (LONGLONG)Year*365 - 719499LL;
+
+    /* Calculate total seconds */
+    TotalSeconds = (ElapsedDays * TIME_SECONDS_PER_DAY) +
+                   ((LONGLONG)TimeFields->Hour * TIME_SECONDS_PER_HOUR) +
+                   ((LONGLONG)TimeFields->Minute * TIME_SECONDS_PER_MINUTE) +
+                   (LONGLONG)TimeFields->Second;
+
+    /* Output the final Unix timestamp */
+    *UnixTime = TotalSeconds;
 
     /* Return success */
     return STATUS_SUCCESS;
@@ -86,8 +112,9 @@ XTSTATUS
 RTL::Time::TimeFieldsToXtEpoch(IN PTIME_FIELDS TimeFields,
                                OUT PLARGE_INTEGER XtTime)
 {
-    ULONG Leap, ElapsedYears, ElapsedDays;
-    ULONGLONG TotalSeconds;
+    LONGLONG ElapsedDays, TotalSeconds;
+    LONG Month, Year;
+    ULONG Leap;
 
     /* Check leap year */
     Leap = LeapYear(TimeFields->Year) ? 1 : 0;
@@ -105,25 +132,31 @@ RTL::Time::TimeFieldsToXtEpoch(IN PTIME_FIELDS TimeFields,
         return STATUS_INVALID_PARAMETER;
     }
 
-    /* Calculate days elapsed in previous years */
-    ElapsedYears = (ULONG)(TimeFields->Year - 1601);
-    ElapsedDays = (ElapsedYears * 365) + (ElapsedYears / 4) - (ElapsedYears / 100) + (ElapsedYears / 400);
+    /* Copy year and month */
+    Year = (LONG)TimeFields->Year;
+    Month = (LONG)TimeFields->Month;
 
-    /* Add days elapsed in previous months of the current year */
-    ElapsedDays += DaysPrecedingMonth[Leap][TimeFields->Month - 1];
+    /* Put February at the end of the calculation cycle, making leap day handling implicit in the year division */
+    if(0 >= (LONG)(Month -= 2))
+    {
+        /* Adjust month and year */
+        Month += 12;
+        Year -= 1;
+    }
 
-    /* Add days elapsed in the current month */
-    ElapsedDays += (TimeFields->Day - 1);
+    /* Calculate absolute elapsed days */
+    ElapsedDays = (LONGLONG)(Year/4 - Year/100 + Year/400 + 367*Month/12 + TimeFields->Day) +
+                  (LONGLONG)Year*365 - 584725LL;
 
-    /* Calculate a total number of seconds */
-    TotalSeconds = ((ULONGLONG)ElapsedDays * TIME_SECONDS_PER_DAY) +
-                   ((ULONGLONG)TimeFields->Hour * TIME_SECONDS_PER_HOUR) +
-                   ((ULONGLONG)TimeFields->Minute * TIME_SECONDS_PER_MINUTE) +
-                   (ULONGLONG)TimeFields->Second;
+    /* Calculate total seconds */
+    TotalSeconds = (ElapsedDays * TIME_SECONDS_PER_DAY) +
+                   ((LONGLONG)TimeFields->Hour * TIME_SECONDS_PER_HOUR) +
+                   ((LONGLONG)TimeFields->Minute * TIME_SECONDS_PER_MINUTE) +
+                   (LONGLONG)TimeFields->Second;
 
     /* Convert to 100-ns intervals and slap milliseconds on top */
     XtTime->QuadPart = (TotalSeconds * TIME_TICKS_PER_SECOND) +
-                       ((ULONGLONG)TimeFields->Milliseconds * TIME_TICKS_PER_MILLISECOND);
+                       ((LONGLONG)TimeFields->Milliseconds * TIME_TICKS_PER_MILLISECOND);
 
     /* Return success */
     return STATUS_SUCCESS;
