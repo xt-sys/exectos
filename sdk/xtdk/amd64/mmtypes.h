@@ -101,6 +101,9 @@
 /* HAL memory pool virtual address start */
 #define MM_HARDWARE_VA_START                       0xFFFFFFFFFFC00000ULL
 
+/* Kernel shared data address */
+#define MM_KERNEL_SHARED_DATA_ADDRESS              0xFFFFFFFFFFDF0000ULL
+
 /* Maximum physical address used by HAL allocations */
 #define MM_MAXIMUM_PHYSICAL_ADDRESS                0x00000000FFFFFFFFULL
 
