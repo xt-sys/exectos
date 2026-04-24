@@ -53,6 +53,13 @@
 #define SHA1_BLOCK_SIZE                 64
 #define SHA1_DIGEST_SIZE                20
 
+/* Time related definitions */
+#define TIME_SECONDS_PER_MINUTE         60ULL
+#define TIME_SECONDS_PER_HOUR           3600ULL
+#define TIME_SECONDS_PER_DAY            86400ULL
+#define TIME_TICKS_PER_SECOND           10000000ULL
+#define TIME_TICKS_PER_MILLISECOND      10000ULL
+
 
 /* C/C++ specific code */
 #ifndef __XTOS_ASSEMBLER__

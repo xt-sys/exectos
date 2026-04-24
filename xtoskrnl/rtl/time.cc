@@ -58,7 +58,7 @@ RTL::Time::TimeFieldsToUnixEpoch(IN PTIME_FIELDS TimeFields,
     }
 
     /* Convert 100-nanosecond intervals (TICKS) to whole seconds */
-    TotalSeconds = XtTime.QuadPart / TICKS_PER_SECOND;
+    TotalSeconds = XtTime.QuadPart / TIME_TICKS_PER_SECOND;
 
     /* Subtract the number of seconds between January 1, 1601 and January 1, 1970 */
     *UnixTime = TotalSeconds - 11644473600LL;
@@ -116,13 +116,14 @@ RTL::Time::TimeFieldsToXtEpoch(IN PTIME_FIELDS TimeFields,
     ElapsedDays += (TimeFields->Day - 1);
 
     /* Calculate a total number of seconds */
-    TotalSeconds = ((ULONGLONG)ElapsedDays * SECONDS_PER_DAY) +
-                   ((ULONGLONG)TimeFields->Hour * SECONDS_PER_HOUR) +
-                   ((ULONGLONG)TimeFields->Minute * SECONDS_PER_MINUTE) +
+    TotalSeconds = ((ULONGLONG)ElapsedDays * TIME_SECONDS_PER_DAY) +
+                   ((ULONGLONG)TimeFields->Hour * TIME_SECONDS_PER_HOUR) +
+                   ((ULONGLONG)TimeFields->Minute * TIME_SECONDS_PER_MINUTE) +
                    (ULONGLONG)TimeFields->Second;
 
     /* Convert to 100-ns intervals and slap milliseconds on top */
-    Time->QuadPart = (TotalSeconds * TICKS_PER_SECOND) + ((ULONGLONG)TimeFields->Milliseconds * TICKS_PER_MILLISECOND);
+    XtTime->QuadPart = (TotalSeconds * TIME_TICKS_PER_SECOND) +
+                       ((ULONGLONG)TimeFields->Milliseconds * TIME_TICKS_PER_MILLISECOND);
 
     /* Return success */
     return STATUS_SUCCESS;
