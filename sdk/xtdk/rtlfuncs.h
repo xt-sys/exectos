@@ -299,6 +299,18 @@ RtlTestBit(IN PRTL_BITMAP BitMap,
 
 XTCLINK
 XTAPI
+XTSTATUS
+RtlTimeFieldsToUnixEpoch(IN PTIME_FIELDS TimeFields,
+                         OUT PLONGLONG UnixTime);
+
+XTCLINK
+XTAPI
+XTSTATUS
+RtlTimeFieldsToXtEpoch(IN PTIME_FIELDS TimeFields,
+                       OUT PLARGE_INTEGER XtTime);
+
+XTCLINK
+XTAPI
 PCHAR
 RtlTokenizeString(IN PCHAR String,
                   IN PCSTR Delimiter,

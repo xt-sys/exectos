@@ -90,6 +90,8 @@
 @ stdcall RtlStringLength(str long)
 @ stdcall RtlStringToWideString(wstr str long)
 @ stdcall RtlTestBit(ptr long)
+@ stdcall RtlTimeFieldsToUnixEpoch(ptr ptr)
+@ stdcall RtlTimeFieldsToXtEpoch(ptr ptr)
 @ stdcall RtlTokenizeString(str str str)
 @ stdcall RtlTokenizeWideString(wstr wstr wstr)
 @ stdcall RtlToLowerCharacter(long)

@@ -1034,6 +1034,52 @@ RtlTestBit(IN PRTL_BITMAP BitMap,
 }
 
 /**
+ * Converts a TIME_FIELDS calendar structure to a 64-bit Unix timestamp.
+ *
+ * @param TimeFields
+ *        Supplies a pointer to a fully populated TIME_FIELDS structure.
+ *
+ * @param UnixTime
+ *        Supplies a pointer to a 64-bit integer that receives the number of
+ *        seconds elapsed since January 1, 1970.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTCLINK
+XTAPI
+XTSTATUS
+RtlTimeFieldsToUnixEpoch(IN PTIME_FIELDS TimeFields,
+                         OUT PLONGLONG UnixTime)
+{
+    return RTL::Time::TimeFieldsToUnixEpoch(TimeFields, UnixTime);
+}
+
+/**
+ * Converts a TIME_FIELDS calendar structure to a 64-bit XT timestamp.
+ *
+ * @param TimeFields
+ *        Supplies a pointer to a fully populated TIME_FIELDS structure.
+ *
+ * @param Time
+ *        Supplies a pointer to variable that receives the converted time value in 100-nanosecond
+ *        intervals since January 1, 1601.
+ *
+ * @return This routine returns the status code.
+ *
+ * @since XT 1.0
+ */
+XTCLINK
+XTAPI
+XTSTATUS
+RtlTimeFieldsToXtEpoch(IN PTIME_FIELDS TimeFields,
+                       OUT PLARGE_INTEGER XtTime)
+{
+    return RTL::Time::TimeFieldsToXtEpoch(TimeFields, XtTime);
+}
+
+/**
  * Finds the next token in a NULL-terminated string.
  *
  * @param String
