@@ -53,8 +53,8 @@ KE::KernelInit::InitializeMachine(VOID)
     /* Initialize page map support */
     MM::Paging::InitializePageMapSupport();
 
-    /* Map Kernel Shared Data (KSD) */
-    MM::Manager::MapKernelSharedData();
+    /* Initialize Kernel Shared Data (KSD) */
+    KE::SharedData::InitializeKernelSharedData();
 
     /* Initialize processor */
     HL::Cpu::InitializeProcessor();

@@ -449,6 +449,27 @@ typedef struct _KPROCESS
     UCHAR Spare;
 } KPROCESS, *PKPROCESS;
 
+/* System Time structure definition */
+typedef struct _KSYSTEM_TIME
+{
+    ULONG LowPart;
+    LONG High1Part;
+    LONG High2Part;
+} KSYSTEM_TIME, *PKSYSTEM_TIME;
+
+/* Kernel Shared Data (KSD) structure definition */
+typedef struct _KSHARED_DATA
+{
+    VOLATILE KSYSTEM_TIME SystemTime;
+    ULONG XtMajorVersion;
+    ULONG XtMinorVersion;
+    WCHAR XtBuild[8];
+    WCHAR XtBuildHash[11];
+    WCHAR XtArchitecture[8];
+    WCHAR XtDate[9];
+    WCHAR XtFullDate[25];
+} KSHARED_DATA, *PKSHARED_DATA;
+
 /* Thread control block structure definition */
 typedef struct _KTHREAD
 {

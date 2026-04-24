@@ -50,6 +50,7 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/ke/kubsan.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/runlevel.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/semphore.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/shdata.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/spinlock.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/sysres.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/timer.cc

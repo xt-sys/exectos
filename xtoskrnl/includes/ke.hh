@@ -24,6 +24,7 @@
 #include <ke/proc.hh>
 #include <ke/runlevel.hh>
 #include <ke/semphore.hh>
+#include <ke/shdata.hh>
 #include <ke/spinlock.hh>
 #include <ke/sysres.hh>
 #include <ke/timer.hh>

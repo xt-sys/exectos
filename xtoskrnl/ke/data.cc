@@ -21,6 +21,9 @@ ETHREAD KE::KThread::InitialThread = {};
 /* Kernel UBSAN active frame flag */
 BOOLEAN KE::KUbsan::ActiveFrame = FALSE;
 
+/* Kernel shared data (KSD) */
+PKSHARED_DATA KE::SharedData::KernelSharedData;
+
 /* Kernel dispatcher lock queue */
 KSPIN_LOCK KE::SpinLock::DispatcherLockQueue;
 
