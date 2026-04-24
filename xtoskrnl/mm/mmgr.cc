@@ -283,6 +283,45 @@ MM::Manager::InitializeMemoryManager(VOID)
 }
 
 /**
+ * Allocates and maps the Kernel Shared Data page to its hardcoded virtual address.
+ *
+ * @return This routine returns status code.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+MM::Manager::MapKernelSharedData(VOID)
+{
+    PHYSICAL_ADDRESS PhysAddr;
+    PMMPTE PtePointer;
+    XTSTATUS Status;
+
+    /* Allocate one physical page from the hardware pool for the shared data */
+    Status = MM::HardwarePool::AllocateHardwareMemory(1, FALSE, &PhysAddr);
+    if(Status != STATUS_SUCCESS)
+    {
+        /* Memory allocation failed, return error code */
+        return Status;
+    }
+
+    /* Retrieve the Page Table Entry (PTE) corresponding to the KSD virtual address */
+    PtePointer = MM::Paging::GetPteAddress((PVOID)MM_KERNEL_SHARED_DATA_ADDRESS);
+
+    /* Manually map the corresponding PTE */
+    MM::Paging::SetPte(PtePointer, (PFN_NUMBER)(PhysAddr.QuadPart >> MM_PAGE_SHIFT), MM_PTE_READWRITE);
+
+    /* Flush the Translation Lookaside Buffer (TLB) */
+    MM::Paging::FlushTlb();
+
+    /* Zero the page content */
+    RTL::Memory::ZeroMemory((PVOID)MM_KERNEL_SHARED_DATA_ADDRESS, MM_PAGE_SIZE);
+
+    /* Return success */
+    return STATUS_SUCCESS;
+}
+
+/**
  * Checks whether the specified memory type should be considered as free.
  *
  * @param MemoryType

@@ -50,11 +50,14 @@ KE::KernelInit::InitializeMachine(VOID)
     /* Initialize frame buffer */
     HL::FrameBuffer::InitializeFrameBuffer();
 
-    /* Initialize processor */
-    HL::Cpu::InitializeProcessor();
-
     /* Initialize page map support */
     MM::Paging::InitializePageMapSupport();
+
+    /* Map Kernel Shared Data (KSD) */
+    MM::Manager::MapKernelSharedData();
+
+    /* Initialize processor */
+    HL::Cpu::InitializeProcessor();
 }
 
 /**

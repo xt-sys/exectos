@@ -29,6 +29,7 @@ namespace MM
             STATIC XTAPI PPHYSICAL_MEMORY_DESCRIPTOR GetPhysicalMemoryBlock(VOID);
             STATIC XTAPI VOID InitializeMemoryLayout(VOID);
             STATIC XTAPI VOID InitializeMemoryManager(VOID);
+            STATIC XTAPI XTSTATUS MapKernelSharedData(VOID);
             STATIC XTAPI BOOLEAN VerifyMemoryTypeFree(IN LOADER_MEMORY_TYPE MemoryType);
             STATIC XTAPI BOOLEAN VerifyMemoryTypeInvisible(IN LOADER_MEMORY_TYPE MemoryType);
 
