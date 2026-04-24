@@ -24,7 +24,7 @@ UCHAR
 HL::Firmware::ReadCmosRegister(IN UCHAR Register)
 {
     /* Select the register (Setting the highest bit disables NMI) */
-    HL::IoPort::WritePort8(CMOS_ADDRESS_PORT, Register | 0x80);
+    HL::IoPort::WritePort8(CMOS_SELECT_PORT, Register | CMOS_NMI_SELECT);
 
     /* Read value from the data port */
     return HL::IoPort::ReadPort8(CMOS_DATA_PORT);
@@ -49,7 +49,7 @@ HL::Firmware::WriteCmosRegister(IN UCHAR Register,
                                 IN UCHAR Value)
 {
     /* Select the register (Setting the highest bit disables NMI) */
-    HL::IoPort::WritePort8(CMOS_ADDRESS_PORT, Register | 0x80);
+    HL::IoPort::WritePort8(CMOS_SELECT_PORT, Register | CMOS_NMI_SELECT);
 
     /* Write the provided value to the data port */
     HL::IoPort::WritePort8(CMOS_DATA_PORT, Value);
