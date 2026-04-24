@@ -21,6 +21,7 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/ioport.cc
     ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/irq.cc
     ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/pic.cc
+    ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/rtc.cc
     ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/runlevel.cc
     ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/timer.cc
     ${XTOSKRNL_SOURCE_DIR}/hl/acpi.cc

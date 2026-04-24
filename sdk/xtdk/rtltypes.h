@@ -111,5 +111,18 @@ typedef struct _RTL_SHA1_CONTEXT
     UCHAR   Buffer[SHA1_BLOCK_SIZE];
 } RTL_SHA1_CONTEXT, *PRTL_SHA1_CONTEXT;
 
+/* Runtime time fields structure definition */
+typedef struct _TIME_FIELDS
+{
+    SHORT Year;
+    SHORT Month;
+    SHORT Day;
+    SHORT Hour;
+    SHORT Minute;
+    SHORT Second;
+    SHORT Milliseconds;
+    SHORT Weekday;
+} TIME_FIELDS, *PTIME_FIELDS;
+
 #endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_RTLTYPES_H */

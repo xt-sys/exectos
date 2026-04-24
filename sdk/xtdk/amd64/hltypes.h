@@ -54,10 +54,6 @@
 /* Maximum number of I/O APICs */
 #define APIC_MAX_IOAPICS                                64
 
-/* CMOS controller I/O ports */
-#define CMOS_ADDRESS_PORT                               0x70
-#define CMOS_DATA_PORT                                  0x71
-
 /* I/O APIC base address */
 #define IOAPIC_DEFAULT_BASE                             0xFEC00000
 
@@ -93,6 +89,40 @@
 #define PIT_DATA_PORT0                                  0x40
 #define PIT_DATA_PORT1                                  0x41
 #define PIT_DATA_PORT2                                  0x42
+
+/* CMOS controller access ports */
+#define CMOS_SELECT_PORT                                0x70
+#define CMOS_DATA_PORT                                  0x71
+
+/* CMOD Select port definitions */
+#define CMOS_NMI_SELECT                                 0x80
+#define CMOS_REGISTER_SECOND                            0x00
+#define CMOS_REGISTER_MINUTE                            0x02
+#define CMOS_REGISTER_HOUR                              0x04
+#define CMOS_REGISTER_WEEKDAY                           0x06
+#define CMOS_REGISTER_DAY                               0x07
+#define CMOS_REGISTER_MONTH                             0x08
+#define CMOS_REGISTER_YEAR                              0x09
+#define CMOS_REGISTER_A                                 0x0A
+#define CMOS_REGISTER_B                                 0x0B
+#define CMOS_REGISTER_C                                 0x0C
+
+/* CMOS Register A definitions */
+#define CMOS_REGISTER_A_RATE_MASK                       0x0F
+#define CMOS_REGISTER_A_UPDATE_IN_PROGRESS              0x80
+
+/* CMOS Register B definitions */
+#define CMOS_REGISTER_B_24_HOUR                         0x02
+#define CMOS_REGISTER_B_BINARY                          0x04
+#define CMOS_REGISTER_B_PERIODIC                        0x40
+#define CMOS_REGISTER_B_SET_CLOCK                       0x80
+
+/* CMOS Register C definitions */
+#define CMOS_REGISTER_C_PERIODIC                        0x40
+#define CMOS_REGISTER_C_INTERRUPT                       0x80
+
+/* CMOS RTC 24-hour mode */
+#define CMOS_RTC_POST_MERIDIEM                          0x80
 
 /* Serial ports information */
 #define COMPORT_ADDRESS                                 {0x3F8, 0x2F8, 0x3E8, 0x2E8, 0x5F8, 0x4F8, 0x5E8, 0x4E8}

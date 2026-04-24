@@ -21,6 +21,7 @@
 #include <hl/ioreg.hh>
 #include <hl/irq.hh>
 #include <hl/pic.hh>
+#include <hl/rtc.hh>
 #include <hl/runlevel.hh>
 #include <hl/timer.hh>
 
