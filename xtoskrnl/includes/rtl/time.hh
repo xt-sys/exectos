@@ -25,6 +25,10 @@ namespace RTL
                                                         OUT PLONGLONG UnixTime);
             STATIC XTAPI XTSTATUS TimeFieldsToXtEpoch(IN PTIME_FIELDS TimeFields,
                                                       OUT PLARGE_INTEGER XtTime);
+            STATIC XTAPI XTSTATUS UnixEpochToTimeFields(IN PLONGLONG UnixTime,
+                                                        OUT PTIME_FIELDS TimeFields);
+            STATIC XTAPI XTSTATUS XtEpochToTimeFields(IN PLARGE_INTEGER XtTime,
+                                                      OUT PTIME_FIELDS TimeFields);
 
         private:
             STATIC XTFASTCALL BOOLEAN LeapYear(SHORT Year);
