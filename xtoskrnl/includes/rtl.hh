@@ -11,6 +11,8 @@
 
 #include <xtos.hh>
 
+#include XTOS_ARCH_HEADER(rtl, intrin.hh)
+
 #include <rtl/atomic.hh>
 #include <rtl/bitmap.hh>
 #include <rtl/dispatch.hh>

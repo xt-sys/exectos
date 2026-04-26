@@ -9,7 +9,6 @@
 #include <xtos.hh>
 
 
-
 /**
  * Divides a 64-bit signed integer by a 64-bit signed integer.
  *
@@ -24,7 +23,7 @@
  * @since XT 1.0
  */
 XTCLINK
-XTCDECL
+XTAPI
 LONGLONG
 _alldiv(IN LONGLONG Dividend,
         IN LONGLONG Divisor)
@@ -50,7 +49,7 @@ _alldiv(IN LONGLONG Dividend,
  * @since XT 1.0
  */
 XTCLINK
-XTCDECL
+XTAPI
 LONGLONG
 _alldvrm(IN LONGLONG Dividend,
          IN LONGLONG Divisor,
@@ -73,7 +72,7 @@ _alldvrm(IN LONGLONG Dividend,
  * @since XT 1.0
  */
 XTCLINK
-XTCDECL
+XTAPI
 LONGLONG
 _allrem(IN LONGLONG Dividend,
         IN LONGLONG Divisor)
@@ -99,7 +98,7 @@ _allrem(IN LONGLONG Dividend,
  * @since XT 1.0
  */
 XTCLINK
-XTCDECL
+XTAPI
 ULONGLONG
 _aulldiv(IN ULONGLONG Dividend,
          IN ULONGLONG Divisor)
@@ -125,11 +124,11 @@ _aulldiv(IN ULONGLONG Dividend,
  * @since XT 1.0
  */
 XTCLINK
-XTCDECL
+XTAPI
 ULONGLONG
-_aulldvrm(ULONGLONG Dividend,
-          ULONGLONG Divisor,
-          PULONGLONG Remainder)
+_aulldvrm(IN ULONGLONG Dividend,
+          IN ULONGLONG Divisor,
+          OUT PULONGLONG Remainder)
 {
     /* Call the internal unsigned division routine to compute both quotient and remainder */
     return RTL::Math::DivideUnsigned64(Dividend, Divisor, Remainder);
@@ -149,7 +148,7 @@ _aulldvrm(ULONGLONG Dividend,
  * @since XT 1.0
  */
 XTCLINK
-XTCDECL
+XTAPI
 ULONGLONG
 _aullrem(IN ULONGLONG Dividend,
          IN ULONGLONG Divisor)
