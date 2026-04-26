@@ -383,13 +383,9 @@ HL::Pic::InitializeApic(VOID)
     /* Setup the LVT Error entry to deliver APIC errors on a dedicated vector */
     WriteApicRegister(APIC_ERRLVTR, APIC_VECTOR_ERROR);
 
-    /* Program the APIC timer for periodic mode */
+    /* Mask the APIC Timer */
     LvtRegister.Long = 0;
     LvtRegister.Mask = 1;
-    LvtRegister.DeliveryMode = APIC_DM_FIXED;
-    LvtRegister.TimerMode = 1;
-    LvtRegister.TriggerMode = APIC_TGM_EDGE;
-    LvtRegister.Vector = APIC_VECTOR_PROFILE;
     WriteApicRegister(APIC_TMRLVTR, LvtRegister.Long);
 
     /* Configure the performance counter overflow */
