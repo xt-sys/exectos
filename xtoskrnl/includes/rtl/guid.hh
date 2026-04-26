@@ -1,7 +1,7 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/includes/rtl/gui.hh
+ * FILE:            xtoskrnl/includes/rtl/guid.hh
  * DESCRIPTION:     Endian conversion routines
  * DEVELOPERS:      Aiken Harris <harraiken91@gmail.com>
  */
