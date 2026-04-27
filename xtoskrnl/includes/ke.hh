@@ -27,6 +27,7 @@
 #include <ke/shdata.hh>
 #include <ke/spinlock.hh>
 #include <ke/sysres.hh>
+#include <ke/systime.hh>
 #include <ke/timer.hh>
 
 #endif /* __XTOSKRNL_KE_HH */
