@@ -74,3 +74,6 @@ LIST_ENTRY KE::SystemResources::ResourcesListHead;
 
 /* Kernel boot resources lock */
 KSPIN_LOCK KE::SystemResources::ResourcesLock;
+
+/* Kernel boot time */
+LARGE_INTEGER KE::SystemTime::BootTime;
