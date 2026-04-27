@@ -20,6 +20,7 @@ namespace HL
         public:
             STATIC XTFASTCALL KRUNLEVEL GetRunLevel(VOID);
             STATIC XTFASTCALL VOID SetRunLevel(IN KRUNLEVEL RunLevel);
+            STATIC XTFASTCALL UCHAR TransformRunLevelToSoftwareVector(IN KRUNLEVEL RunLevel);
 
         private:
             STATIC XTFASTCALL KRUNLEVEL TransformApicTprToRunLevel(IN UCHAR Tpr);

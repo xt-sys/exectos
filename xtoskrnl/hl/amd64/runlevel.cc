@@ -20,6 +20,7 @@ XTFASTCALL
 KRUNLEVEL
 HL::RunLevel::GetRunLevel(VOID)
 {
+    /* Read current run level */
     return (KRUNLEVEL)AR::CpuFunc::ReadControlRegister(8);
 }
 
@@ -37,6 +38,7 @@ XTFASTCALL
 VOID
 HL::RunLevel::SetRunLevel(IN KRUNLEVEL RunLevel)
 {
+    /* Set new run level */
     AR::CpuFunc::WriteControlRegister(8, RunLevel);
 }
 
@@ -54,6 +56,7 @@ XTFASTCALL
 KRUNLEVEL
 HL::RunLevel::TransformApicTprToRunLevel(IN UCHAR Tpr)
 {
+    /* Transform APIC TPR to run level */
     return (KRUNLEVEL)(Tpr >> 4);
 }
 
@@ -71,5 +74,25 @@ XTFASTCALL
 UCHAR
 HL::RunLevel::TransformRunLevelToApicTpr(IN KRUNLEVEL RunLevel)
 {
+    /* Transform run level to APIC TPR */
     return (RunLevel << 4);
+}
+
+/**
+ * Transforms a given execution run level into a corresponding hardware interrupt vector
+ * suitable for software interrupts.
+ *
+ * @param RunLevel
+ *        Supplies the run level to be translated into a software interrupt vector.
+ *
+ * @return This routine returns the 8-bit APIC vector corresponding to the requested software interrupt level.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+UCHAR
+HL::RunLevel::TransformRunLevelToSoftwareVector(IN KRUNLEVEL RunLevel)
+{
+    /* Transform run level to APIC interrupt vector */
+    return TransformRunLevelToApicTpr(RunLevel) | 0xF;
 }
