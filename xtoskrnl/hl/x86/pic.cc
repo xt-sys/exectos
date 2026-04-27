@@ -787,6 +787,7 @@ XTAPI
 VOID
 HL::Pic::SendSelfIpi(IN ULONG Vector)
 {
+    APIC_COMMAND_REGISTER Register;
     BOOLEAN Interrupts;
 
     /* Check whether interrupts are enabled */
@@ -803,6 +804,13 @@ HL::Pic::SendSelfIpi(IN ULONG Vector)
     }
     else
     {
+        /* Prepare APIC command register */
+        Register.LongLong = 0;
+        Register.DeliveryMode = APIC_DM_FIXED;
+        Register.DestinationShortHand = APIC_DSH_Self;
+        Register.TriggerMode = APIC_TGM_EDGE;
+        Register.Vector = Vector;
+
         /* Wait for the APIC to clear the delivery status */
         while((ReadApicRegister(APIC_ICR0) & 0x1000) != 0)
         {
@@ -811,14 +819,15 @@ HL::Pic::SendSelfIpi(IN ULONG Vector)
         }
 
         /* In xAPIC compatibility mode, ICR0 is used */
-        WriteApicRegister(APIC_ICR0, Vector | (1 << 18));
-    }
+        WriteApicRegister(APIC_ICR1, Register.Long1);
+        WriteApicRegister(APIC_ICR0, Register.Long0);
 
-    /* Wait for the APIC to complete delivery of the IPI */
-    while((ReadApicRegister(APIC_ICR0) & 0x1000) != 0)
-    {
-        /* Yield the processor */
-        AR::CpuFunc::YieldProcessor();
+        /* Wait until the interrupt physically arrives in the requested state */
+        while((ReadApicRegister((APIC_REGISTER)(APIC_IRR + (Vector / 32))) & (1UL << (Vector % 32))) == 0)
+        {
+            /* Yield the processor */
+            AR::CpuFunc::YieldProcessor();
+        }
     }
 
     /* Check whether interrupts need to be re-enabled */
