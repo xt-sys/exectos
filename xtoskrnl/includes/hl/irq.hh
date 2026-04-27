@@ -18,6 +18,12 @@ namespace HL
     class Irq
     {
         public:
+            STATIC XTAPI VOID BeginSystemInterrupt(IN KRUNLEVEL RunLevel,
+                                                   OUT PKRUNLEVEL OldRunLevel);
+            STATIC XTAPI VOID EndInterrupt(IN PKTRAP_FRAME TrapFrame,
+                                           IN KRUNLEVEL RunLevel);
+            STATIC XTAPI VOID EndSystemInterrupt(IN PKTRAP_FRAME TrapFrame,
+                                                 IN KRUNLEVEL RunLevel);
             STATIC XTCDECL VOID HandleProfileInterrupt(IN PKTRAP_FRAME TrapFrame);
             STATIC XTCDECL VOID HandleUnexpectedInterrupt(IN PKTRAP_FRAME TrapFrame);
             STATIC XTAPI PVOID QueryInterruptHandler(IN ULONG Vector);
@@ -26,6 +32,7 @@ namespace HL
                                                        IN PVOID Handler);
             STATIC XTAPI VOID RegisterSystemInterruptHandler(IN ULONG Vector,
                                                              IN PINTERRUPT_HANDLER Handler);
+            STATIC XTFASTCALL VOID SendSoftwareInterrupt(IN KRUNLEVEL RunLevel);
     };
 }
 

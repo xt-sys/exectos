@@ -11,6 +11,86 @@
 
 
 /**
+ * Begins a system interrupt handler by raising the processor's run level and re-enabling
+ * hardware interrupts to allow preemption by higher-priority events.
+ *
+ * @param RunLevel
+ *        Supplies the target run level to raise the processor to.
+ *
+ * @param OldRunLevel
+ *        Receives the previous run level before the elevation.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+HL::Irq::BeginSystemInterrupt(IN KRUNLEVEL RunLevel,
+                              OUT PKRUNLEVEL OldRunLevel)
+{
+    /* Get the current IRQL */
+    *OldRunLevel = KE::RunLevel::GetCurrentRunLevel();
+
+    /* Raise run level */
+    KE::RunLevel::RaiseRunLevel(RunLevel);
+
+    /* Enable interrupts */
+    AR::CpuFunc::SetInterruptFlag();
+}
+
+/**
+ * Safely concludes an interrupt handler by disabling hardware interrupts.
+ *
+ * @param TrapFrame
+ *        Supplies a pointer to the kernel trap frame containing the interrupted execution state.
+ *
+ * @param OldRunLevel
+ *        Supplies the previous run level to restore.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+HL::Irq::EndInterrupt(IN PKTRAP_FRAME TrapFrame,
+                      IN KRUNLEVEL OldRunLevel)
+{
+    /* Disable interrupts */
+    AR::CpuFunc::ClearInterruptFlag();
+
+    /* End system interrupt */
+    EndSystemInterrupt(TrapFrame, OldRunLevel);
+}
+
+/**
+ * Concludes a system interrupt by sending an End of Interrupt (EOI) to the hardware
+ * controller and restoring the processor's previous run level.
+ *
+ * @param TrapFrame
+ *        Supplies a pointer to the kernel trap frame containing the interrupted execution state.
+ *
+ * @param OldRunLevel
+ *        Supplies the previous run level to restore.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+HL::Irq::EndSystemInterrupt(IN PKTRAP_FRAME TrapFrame,
+                            IN KRUNLEVEL OldRunLevel)
+{
+    /* Send EOI */
+    HL::Pic::SendEoi();
+
+    /* Restore previous run level */
+    KE::RunLevel::LowerRunLevel(OldRunLevel);
+}
+
+/**
  * Handles profiling interrupt.
  *
  * @param TrapFrame
@@ -24,7 +104,7 @@ XTCDECL
 VOID
 HL::Irq::HandleProfileInterrupt(IN PKTRAP_FRAME TrapFrame)
 {
-    /* Send EOI*/
+    /* Send EOI */
     HL::Pic::SendEoi();
 }
 
@@ -159,4 +239,22 @@ HL::Irq::RegisterSystemInterruptHandler(IN ULONG Vector,
 
     /* Update interrupt handler in the processor's interrupt dispatch table */
     ProcessorBlock->InterruptDispatchTable[Vector] = Handler;
+}
+
+/**
+ * Requests a software interrupt by sending a Self-IPI mapped to the specified run level.
+ *
+ * @param RunLevel
+ *        Supplies the target run level for the software interrupt.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+VOID
+HL::Irq::SendSoftwareInterrupt(IN KRUNLEVEL RunLevel)
+{
+    /* Request a software interrupt */
+    HL::Pic::SendSelfIpi(HL::RunLevel::TransformRunLevelToSoftwareVector(RunLevel));
 }
