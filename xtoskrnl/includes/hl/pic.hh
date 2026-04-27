@@ -26,11 +26,16 @@ namespace HL
             STATIC UCHAR MappedVectors[256];
 
         public:
+            STATIC XTAPI VOID AllocateSystemInterrupt(IN UCHAR Irq,
+                                                      IN UCHAR RunLevel,
+                                                      IN UCHAR Vector);
             STATIC XTAPI VOID ClearApicErrors(VOID);
             STATIC XTAPI ULONG GetCpuApicId(VOID);
             STATIC XTAPI VOID InitializeIOApic(VOID);
             STATIC XTAPI VOID InitializePic(VOID);
             STATIC XTFASTCALL ULONGLONG ReadApicRegister(IN APIC_REGISTER Register);
+            STATIC XTAPI VOID SendBroadcastIpi(IN ULONG Vector,
+                                               IN BOOLEAN Self);
             STATIC XTAPI VOID SendEoi(VOID);
             STATIC XTAPI VOID SendIpi(IN ULONG ApicId,
                                       IN ULONG Vector);
@@ -39,9 +44,6 @@ namespace HL
                                                      IN ULONGLONG Value);
 
         private:
-            STATIC XTAPI VOID AllocateSystemInterrupt(IN UCHAR Irq,
-                                                      IN UCHAR RunLevel,
-                                                      IN UCHAR Vector);
             STATIC XTAPI BOOLEAN CheckApicSupport(VOID);
             STATIC XTAPI BOOLEAN CheckX2ApicSupport(VOID);
             STATIC XTAPI XTSTATUS DetectIoApicControllers(VOID);

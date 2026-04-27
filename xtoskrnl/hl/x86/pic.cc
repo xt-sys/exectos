@@ -727,6 +727,69 @@ HL::Pic::ResolveInterruptOverride(IN UCHAR Irq,
 }
 
 /**
+ * Sends a Broadcast IPI (Inter-Processor Interrupt) to all processors in the system.
+ *
+ * @param Vector
+ *        Supplies the hardware interrupt vector to trigger on the target processors.
+ *
+ * @param Self
+ *        Supplies a boolean value indicating the broadcast scope.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+HL::Pic::SendBroadcastIpi(IN ULONG Vector,
+                          IN BOOLEAN Self)
+{
+    APIC_COMMAND_REGISTER Register;
+    BOOLEAN Interrupts;
+
+    /* Check whether interrupts are enabled */
+    Interrupts = AR::CpuFunc::InterruptsEnabled();
+
+    /* Disable interrupts */
+    AR::CpuFunc::ClearInterruptFlag();
+
+    /* Prepare the APIC command register */
+    Register.LongLong = 0;
+    Register.DeliveryMode = APIC_DM_FIXED;
+    Register.DestinationShortHand = Self ? APIC_DSH_AllIncludingSelf : APIC_DSH_AllExclusingSelf;
+    Register.Level = 1;
+    Register.TriggerMode = APIC_TGM_EDGE;
+    Register.Vector = Vector;
+
+    /* Check current APIC mode */
+    if(ApicMode == APIC_MODE_X2APIC)
+    {
+        /* In x2APIC mode, writing the full 64-bit value to the ICR MSR is sufficient */
+        WriteApicRegister(APIC_ICR0, Register.LongLong);
+    }
+    else
+    {
+        /* Wait for the APIC to clear the delivery status */
+        while((ReadApicRegister(APIC_ICR0) & 0x1000) != 0)
+        {
+            /* Yield the processor */
+            AR::CpuFunc::YieldProcessor();
+        }
+
+        /* In xAPIC compatibility mode, write the command to the ICR registers */
+        WriteApicRegister(APIC_ICR1, Register.Long1);
+        WriteApicRegister(APIC_ICR0, Register.Long0);
+    }
+
+    /* Check whether interrupts need to be re-enabled */
+    if(Interrupts)
+    {
+        /* Re-enable interrupts */
+        AR::CpuFunc::SetInterruptFlag();
+    }
+}
+
+/**
  * Signals to the APIC that handling an interrupt is complete.
  *
  * @return This routine does not return any value.
@@ -818,7 +881,7 @@ HL::Pic::SendSelfIpi(IN ULONG Vector)
             AR::CpuFunc::YieldProcessor();
         }
 
-        /* In xAPIC compatibility mode, ICR0 is used */
+        /* In xAPIC compatibility mode, write the command to the ICR registers */
         WriteApicRegister(APIC_ICR1, Register.Long1);
         WriteApicRegister(APIC_ICR0, Register.Long0);
 
