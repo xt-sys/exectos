@@ -47,7 +47,7 @@ HL::Pic::AllocateSystemInterrupt(IN UCHAR Irq,
     }
 
     /* Model a logical connection */
-    Register.DeliveryMode = APIC_DM_LOWPRIO;
+    Register.DeliveryMode = APIC_DM_FIXED;
     Register.DeliveryStatus = 0;
     Register.Destination = HL::Pic::ReadApicRegister(APIC_ID) >> 24;
     Register.DestinationMode = APIC_DM_Physical;
