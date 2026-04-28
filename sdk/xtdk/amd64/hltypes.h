@@ -84,6 +84,25 @@
 /* PIC vector definitions */
 #define PIC1_VECTOR_SPURIOUS                            0x37
 
+/* HPET General Capabilities definitions */
+#define HPET_CAPABILITY_64BIT                           0x2000
+#define HPET_CAPABILITY_LEGACY_REPLACEMENT              0x8000
+
+/* HPET General Configuration definitions */
+#define HPET_CONFIG_ENABLE                              0x0001
+#define HPET_CONFIG_LEGACY_REPLACEMENT                  0x0002
+
+/* HPET Timer Configuration definitions */
+#define HPET_TIMER_CONFIG_LEVEL_TRIGGERED               0x0002
+#define HPET_TIMER_CONFIG_ENABLED                       0x0004
+#define HPET_TIMER_CONFIG_PERIODIC                      0x0008
+#define HPET_TIMER_CONFIG_SUPPORTS_PERIODIC             0x0010
+#define HPET_TIMER_CONFIG_SUPPORTS_64BIT                0x0020
+#define HPET_TIMER_CONFIG_VALUE_ACCUMULATOR             0x0040
+#define HPET_TIMER_CONFIG_FORCE_32BIT                   0x0100
+#define HPET_TIMER_CONFIG_FSB_ENABLED                   0x4000
+#define HPET_TIMER_CONFIG_SUPPORTS_FSB                  0x8000
+
 /* PIT ports definitions */
 #define PIT_COMMAND_PORT                                0x43
 #define PIT_DATA_PORT0                                  0x40
@@ -437,6 +456,27 @@ typedef union _PIC_I8259_ICW4
     };
     UCHAR Bits;
 } PIC_I8259_ICW4, *PPIC_I8259_ICW4;
+
+/* HPET Registers structure definition */
+typedef struct _HPET_REGISTERS
+{
+    VOLATILE ULONGLONG GeneralCapabilities;
+    VOLATILE ULONGLONG Reserved0;
+    VOLATILE ULONGLONG GeneralConfiguration;
+    VOLATILE ULONGLONG Reserved1;
+    VOLATILE ULONGLONG GeneralInterruptStatus;
+    VOLATILE ULONGLONG Reserved2;
+    VOLATILE ULONGLONG Reserved3[2][12];
+    VOLATILE ULONGLONG MainCounterValue;
+    VOLATILE ULONGLONG Reserved4;
+    struct
+    {
+        VOLATILE ULONGLONG Configuration;
+        VOLATILE ULONGLONG Comparator;
+        VOLATILE ULONGLONG FsbInterruptRoute;
+        VOLATILE ULONGLONG Reserved;
+    } Timers[];
+} HPET_REGISTERS, *PHPET_REGISTERS;
 
 typedef struct _TIMER_CAPABILITIES
 {
