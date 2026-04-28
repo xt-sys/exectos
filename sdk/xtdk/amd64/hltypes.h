@@ -109,6 +109,28 @@
 #define PIT_DATA_PORT1                                  0x41
 #define PIT_DATA_PORT2                                  0x42
 
+/* PIT related definitions */
+#define PIT_BASE_FREQUENCY                              1193182
+
+/* PIT Access Mode: Defines how the CPU reads or writes the counter value */
+#define PIT_CMD_ACCESS_LATCH                            0x00
+#define PIT_CMD_ACCESS_LOWBYTE_ONLY                     0x10
+#define PIT_CMD_ACCESS_HIGHBYTE_ONLY                    0x20
+#define PIT_CMD_ACCESS_LOWBYTE_HIGHBYTE                 0x30
+
+/* PIT Channel Selection: Specifies the physical timer channel to configure */
+#define PIT_CMD_CHANNEL0                                0x00
+#define PIT_CMD_CHANNEL1                                0x40
+#define PIT_CMD_CHANNEL2                                0x80
+
+/* PIT Operating Mode: Defines the hardware behavior and the generated waveform */
+#define PIT_MODE0_INT_ON_TERMINAL_COUNT                 0x00
+#define PIT_MODE1_ONESHOT                               0x02
+#define PIT_MODE2_RATE_GENERATOR                        0x04
+#define PIT_MODE3_SQUARE_WAVE_GEN                       0x06
+#define PIT_MODE4_SOFTWARE_STROBE                       0x08
+#define PIT_MODE5_HARDWARE_STROBE                       0x0A
+
 /* CMOS controller access ports */
 #define CMOS_SELECT_PORT                                0x70
 #define CMOS_DATA_PORT                                  0x71

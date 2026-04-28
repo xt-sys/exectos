@@ -101,6 +101,9 @@
 #define ACPI_MADT_PLACE_ENABLED                     0 /* Processor Local APIC CPU Enabled */
 #define ACPI_MADT_PLAOC_ENABLED                     1 /* Processor Local APIC Online Capable */
 
+/* ACPI Timer frequency */
+#define ACPI_PM_TIMER_FREQUENCY                     3579545
+
 /* ACPI address space definitions */
 #define ACPI_ADDRESS_SPACE_MEMORY                   0x00
 
@@ -186,7 +189,7 @@
 #define COMPORT_REG_SR                              0x07 /* Scratch Register */
 
 /* Minimum and maximum profile intervals */
-#define MIN_PROFILE_INTERVAL 1000
+#define MIN_PROFILE_INTERVAL 10000
 #define MAX_PROFILE_INTERVAL 10000000
 
 
