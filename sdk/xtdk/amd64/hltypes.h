@@ -85,23 +85,23 @@
 #define PIC1_VECTOR_SPURIOUS                            0x37
 
 /* HPET General Capabilities definitions */
-#define HPET_CAPABILITY_64BIT                           0x2000
-#define HPET_CAPABILITY_LEGACY_REPLACEMENT              0x8000
+#define HPET_CAPABILITY_64BIT                           0x2000ULL
+#define HPET_CAPABILITY_LEGACY_REPLACEMENT              0x8000ULL
 
 /* HPET General Configuration definitions */
-#define HPET_CONFIG_ENABLE                              0x0001
-#define HPET_CONFIG_LEGACY_REPLACEMENT                  0x0002
+#define HPET_CONFIG_ENABLE                              0x0001ULL
+#define HPET_CONFIG_LEGACY_REPLACEMENT                  0x0002ULL
 
 /* HPET Timer Configuration definitions */
-#define HPET_TIMER_CONFIG_LEVEL_TRIGGERED               0x0002
-#define HPET_TIMER_CONFIG_ENABLED                       0x0004
-#define HPET_TIMER_CONFIG_PERIODIC                      0x0008
-#define HPET_TIMER_CONFIG_SUPPORTS_PERIODIC             0x0010
-#define HPET_TIMER_CONFIG_SUPPORTS_64BIT                0x0020
-#define HPET_TIMER_CONFIG_VALUE_ACCUMULATOR             0x0040
-#define HPET_TIMER_CONFIG_FORCE_32BIT                   0x0100
-#define HPET_TIMER_CONFIG_FSB_ENABLED                   0x4000
-#define HPET_TIMER_CONFIG_SUPPORTS_FSB                  0x8000
+#define HPET_TIMER_CONFIG_LEVEL_TRIGGERED               0x0002ULL
+#define HPET_TIMER_CONFIG_ENABLED                       0x0004ULL
+#define HPET_TIMER_CONFIG_PERIODIC                      0x0008ULL
+#define HPET_TIMER_CONFIG_SUPPORTS_PERIODIC             0x0010ULL
+#define HPET_TIMER_CONFIG_SUPPORTS_64BIT                0x0020ULL
+#define HPET_TIMER_CONFIG_VALUE_ACCUMULATOR             0x0040ULL
+#define HPET_TIMER_CONFIG_FORCE_32BIT                   0x0100ULL
+#define HPET_TIMER_CONFIG_FSB_ENABLED                   0x4000ULL
+#define HPET_TIMER_CONFIG_SUPPORTS_FSB                  0x8000ULL
 
 /* PIT ports definitions */
 #define PIT_COMMAND_PORT                                0x43
