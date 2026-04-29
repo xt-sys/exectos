@@ -39,8 +39,8 @@ KE::SystemTime::GetSystemTime(OUT PLARGE_INTEGER SystemTime)
  * @param OldTime
  *        Supplies a pointer to a variable that receives the previous system time.
  *
- * @param AdjustInterruptTime
- *        Specifies if the physical interrupt time should be adjusted.
+ * @param CorrectInterruptTime
+ *        Specifies if the physical interrupt time should be corrected.
  *
  * @param WriteToRtc
  *        Specifies if the new system time should be written to RTC.
