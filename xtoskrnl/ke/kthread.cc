@@ -17,26 +17,6 @@ KE::KThread::GetInitialThread(VOID)
 }
 
 /**
- * Exits the dispatcher, switches context to a new thread and lowers runlevel to its original state.
- *
- * @param OldRunLevel
- *        Supplies the original runlevel state.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTFASTCALL
-VOID
-KE::KThread::ExitDispatcher(IN KRUNLEVEL OldRunLevel)
-{
-    UNIMPLEMENTED;
-
-    /* Lower runlevel */
-    RunLevel::LowerRunLevel(OldRunLevel);
-}
-
-/**
  * Initializes the thread.
  *
  * @param Process

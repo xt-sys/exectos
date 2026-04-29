@@ -43,7 +43,7 @@ KE::Timer::CancelTimer(IN PKTIMER Timer)
 
     /* Release dispatcher lock and process the deferred ready list */
     KE::SpinLock::ReleaseQueuedSpinLock(DispatcherLock);
-    KE::KThread::ExitDispatcher(RunLevel);
+    KE::Dispatcher::ExitDispatcher(RunLevel);
 
     /* Return result */
     return Result;
@@ -150,7 +150,7 @@ KE::Timer::QueryTimer(IN PKTIMER Timer)
 
     /* Release dispatcher lock and process the deferred ready list */
     KE::SpinLock::ReleaseQueuedSpinLock(DispatcherLock);
-    KE::KThread::ExitDispatcher(RunLevel);
+    KE::Dispatcher::ExitDispatcher(RunLevel);
 
     /* Return timer's due time */
     return DueTime;

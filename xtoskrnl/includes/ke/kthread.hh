@@ -21,7 +21,6 @@ namespace KE
             STATIC ETHREAD InitialThread;
 
         public:
-            STATIC XTFASTCALL VOID ExitDispatcher(IN KRUNLEVEL OldRunLevel);
             STATIC XTAPI PETHREAD GetInitialThread(VOID);
             STATIC XTAPI XTSTATUS InitializeThread(IN PKPROCESS Process,
                                                    IN OUT PKTHREAD Thread,
