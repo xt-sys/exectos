@@ -144,16 +144,15 @@ KE::KernelInit::SwitchBootStack(VOID)
     StartKernel = (PVOID)KE::KernelInit::StartKernel;
 
     /* Discard old stack frame, switch stack, make space for NPX and jump to KernelInit::StartKernel() */
-    __asm__ volatile("mov %0, %%edx\n"
-                     "xor %%ebp, %%ebp\n"
-                     "mov %%edx, %%esp\n"
-                     "sub %1, %%esp\n"
-                     "push %2\n"
-                     "jmp *%3\n"
+    __asm__ volatile("movl %[Stack], %%esp\n"
+                     "subl %[TotalSize], %%esp\n"
+                     "xorl %%ebp, %%ebp\n"
+                     "pushl %[Cr0Value]\n"
+                     "jmp *%[TargetRoutine]\n"
                      :
-                     : "m" (Stack),
-                       "i" (KTRAP_FRAME_ALIGN | KTRAP_FRAME_SIZE | NPX_FRAME_SIZE | KRETURN_ADDRESS_SIZE),
-                       "i" (CR0_EM | CR0_MP | CR0_TS),
-                       "r" (StartKernel)
-                     : "edx", "ebp", "esp", "memory");
+                     : [Cr0Value] "i" (CR0_EM | CR0_MP | CR0_TS),
+                       [Stack] "r" (Stack),
+                       [TargetRoutine] "r" (StartKernel),
+                       [TotalSize] "i" (KTRAP_FRAME_ALIGN + KTRAP_FRAME_SIZE + NPX_FRAME_SIZE + KRETURN_ADDRESS_SIZE)
+                     : "ebp", "esp", "memory");
 }
