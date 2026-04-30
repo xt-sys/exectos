@@ -21,9 +21,11 @@ namespace KE
             STATIC PKSHARED_DATA KernelSharedData;
 
         public:
+            STATIC XTAPI LARGE_INTEGER GetInterruptTime(VOID);
             STATIC XTAPI PKSHARED_DATA GetKernelSharedData(VOID);
             STATIC XTAPI LARGE_INTEGER GetSystemTime(VOID);
             STATIC XTAPI VOID InitializeKernelSharedData(VOID);
+            STATIC XTAPI VOID SetInterruptTime(IN LARGE_INTEGER Time);
             STATIC XTAPI VOID SetSystemTime(IN LARGE_INTEGER Time);
     };
 }

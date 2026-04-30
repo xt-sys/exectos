@@ -460,6 +460,7 @@ typedef struct _KSYSTEM_TIME
 /* Kernel Shared Data (KSD) structure definition */
 typedef struct _KSHARED_DATA
 {
+    VOLATILE KSYSTEM_TIME InterruptTime;
     VOLATILE KSYSTEM_TIME SystemTime;
     ULONG XtMajorVersion;
     ULONG XtMinorVersion;

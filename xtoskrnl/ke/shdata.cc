@@ -10,6 +10,35 @@
 
 
 /**
+ * Retrieves the current interrupt time using a lock-free read mechanism.
+ *
+ * @return This routine returns a LARGE_INTEGER containing the interrupt time.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+LARGE_INTEGER
+KE::SharedData::GetInterruptTime(VOID)
+{
+    LARGE_INTEGER InterruptTime;
+
+    /* Initialize to zero */
+    InterruptTime.QuadPart = 0;
+
+    /* Perform a lock-free read sequence */
+    do
+    {
+        /* Read the primary high part and low part */
+        InterruptTime.HighPart = KernelSharedData->SystemTime.High1Part;
+        InterruptTime.LowPart = KernelSharedData->SystemTime.LowPart;
+    }
+    while(InterruptTime.HighPart != KernelSharedData->SystemTime.High2Part);
+
+    /* Return the 64-bit time */
+    return InterruptTime;
+}
+
+/**
  * Retrieves a pointer to the memory-mapped Kernel Shared Data.
  *
  * @return This routine returns a pointer to the KSHARED_DATA structure.
@@ -106,6 +135,26 @@ KE::SharedData::InitializeKernelSharedData(VOID)
     SourceString = XTOS_VERSION_FULLDATE;
     RTL::String::StringToWideString(KernelSharedData->XtFullDate, (PCSTR*)&SourceString,
                                     (sizeof(KernelSharedData->XtFullDate) / sizeof(WCHAR)) - 1);
+}
+
+/**
+ * Updates the global interrupt time using a strict lock-free write mechanism.
+ *
+ * @param Time
+ *        Supplies the new interrupt time as a 64-bit LARGE_INTEGER value.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KE::SharedData::SetInterruptTime(IN LARGE_INTEGER Time)
+{
+    /* Set the new interrupt time */
+    KernelSharedData->InterruptTime.High2Part = Time.HighPart;
+    KernelSharedData->InterruptTime.LowPart = Time.LowPart;
+    KernelSharedData->InterruptTime.High1Part = Time.HighPart;
 }
 
 /**
