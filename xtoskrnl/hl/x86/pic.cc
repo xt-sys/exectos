@@ -4,6 +4,7 @@
  * FILE:            xtoskrnl/hl/x86/pic.cc
  * DESCRIPTION:     Programmable Interrupt Controller (PIC) for x86 (i686/AMD64) support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ *                  Aiken Harris <harraiken91@gmail.com>
  */
 
 #include <xtos.hh>
@@ -315,6 +316,33 @@ HL::Pic::GetIoApicController(IN ULONG Gsi,
 }
 
 /**
+ * Services the APIC Error interrupt, invoked when the APIC detects an internal hardware or message passing error.
+ *
+ * @param TrapFrame
+ *        Supplies a pointer to the hardware trap frame representing the interrupted execution context.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+HL::Pic::HandleApicErrorInterrupt(IN PKTRAP_FRAME TrapFrame)
+{
+    ULONG ErrorStatus;
+
+    /* Write 0 to the ESR register to trigger an internal state update, then read the latched status */
+    WriteApicRegister(APIC_ESR, 0);
+    ErrorStatus = (ULONG)ReadApicRegister(APIC_ESR);
+
+    /* Log the detected hardware error */
+    DebugPrint(L"Caught APIC Error interrupt with ESR = 0x%08X\n", ErrorStatus);
+
+    /* Acknowledge the interrupt to allow further interrupt delivery */
+    SendEoi();
+}
+
+/**
  * Initializes the APIC interrupt controller.
  *
  * @return This routine does not return any value.
@@ -416,8 +444,9 @@ HL::Pic::InitializeApic(VOID)
     WriteApicRegister(APIC_LINT1, LvtRegister.Long);
 
     /* Register interrupt handlers */
-    HL::Irq::RegisterInterruptHandler(APIC_VECTOR_SPURIOUS, (PVOID)ArHandleSpuriousInterrupt);
+    HL::Irq::RegisterSystemInterruptHandler(APIC_VECTOR_ERROR, HandleApicErrorInterrupt);
     HL::Irq::RegisterSystemInterruptHandler(APIC_VECTOR_PROFILE, HL::Irq::HandleProfileInterrupt);
+    HL::Irq::RegisterInterruptHandler(APIC_VECTOR_SPURIOUS, (PVOID)ArHandleSpuriousInterrupt);
 
     /* Clear any pre-existing errors */
     WriteApicRegister(APIC_ESR, 0);
@@ -718,6 +747,7 @@ HL::Pic::ResolveInterruptOverride(IN UCHAR Irq,
             /* Return overridden GSI and flags */
             *Flags = IrqOverrides[Index].Flags;
             *Gsi = IrqOverrides[Index].GlobalSystemInterrupt;
+            return;
         }
     }
 
@@ -746,6 +776,23 @@ HL::Pic::SendBroadcastIpi(IN ULONG Vector,
 {
     APIC_COMMAND_REGISTER Register;
     BOOLEAN Interrupts;
+
+    /* SMP not implemented */
+    if(TRUE)
+    {
+        /* Check if IPI is addressed to the current CPU */
+        if(Self)
+        {
+            /* Send IPI to the current CPU */
+            SendSelfIpi(Vector);
+            return;
+        }
+        else
+        {
+            /* Nothing to do */
+            return;
+        }
+    }
 
     /* Check whether interrupts are enabled */
     Interrupts = AR::CpuFunc::InterruptsEnabled();

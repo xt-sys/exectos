@@ -53,6 +53,7 @@ namespace HL
             STATIC XTAPI XTSTATUS GetIoApicController(IN ULONG Gsi,
                                                       OUT PIOAPIC_DATA *Controller,
                                                       OUT PULONG EntryNumber);
+            STATIC XTCDECL VOID HandleApicErrorInterrupt(IN PKTRAP_FRAME TrapFrame);
             STATIC XTAPI VOID InitializeApic(VOID);
             STATIC XTAPI VOID InitializeLegacyPic(VOID);
             STATIC XTFASTCALL ULONG ReadIOApicRegister(IN PIOAPIC_DATA Controller,
