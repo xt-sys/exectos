@@ -20,7 +20,7 @@ XTAPI
 PVOID
 AR::ProcSup::GetBootStack(VOID)
 {
-    return (PVOID)BootStack;
+    return (PVOID)((ULONG_PTR)BootStack + KERNEL_STACK_SIZE);
 }
 
 XTAPI
