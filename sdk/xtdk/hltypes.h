@@ -64,8 +64,8 @@
 #define ACPI_FADT_32BIT_TIMER                       (1<<8)
 
 /* ACPI Timer bit masks */
-#define ACPI_FADT_TIMER_32BIT                       0x80000000
-#define ACPI_FADT_TIMER_24BIT                       0x00800000
+#define ACPI_FADT_TIMER_32BIT                       0xFFFFFFFF
+#define ACPI_FADT_TIMER_24BIT                       0x00FFFFFF
 
 /* ACPI MADT subtable type definitions */
 #define ACPI_MADT_TYPE_LOCAL_APIC                   0
