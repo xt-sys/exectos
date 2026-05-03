@@ -29,10 +29,10 @@ KE::SharedData::GetInterruptTime(VOID)
     do
     {
         /* Read the primary high part and low part */
-        InterruptTime.HighPart = KernelSharedData->SystemTime.High1Part;
-        InterruptTime.LowPart = KernelSharedData->SystemTime.LowPart;
+        InterruptTime.HighPart = KernelSharedData->InterruptTime.High1Part;
+        InterruptTime.LowPart = KernelSharedData->InterruptTime.LowPart;
     }
-    while(InterruptTime.HighPart != KernelSharedData->SystemTime.High2Part);
+    while(InterruptTime.HighPart != KernelSharedData->InterruptTime.High2Part);
 
     /* Return the 64-bit time */
     return InterruptTime;
