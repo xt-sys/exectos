@@ -106,6 +106,28 @@ HL::Acpi::GetAcpiTable(IN ULONG Signature,
 }
 
 /**
+ * Retrieves the ACPI timer information.
+ *
+ * @param AcpiTimerInfo
+ *        Supplies a pointer to memory area, where ACPI timer information will be stored.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+HL::Acpi::GetAcpiTimerInfo(OUT PACPI_TIMER_INFO *AcpiTimerInfo)
+{
+    /* Check if ACPI timer info is available */
+    if(AcpiTimerInfo)
+    {
+        /* Return ACPI timer info */
+        *AcpiTimerInfo = &TimerInfo;
+    }
+}
+
+/**
  * Performs an initialization of the ACPI subsystem.
  *
  * @return This routine returns a status code.

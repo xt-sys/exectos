@@ -29,6 +29,7 @@ namespace HL
             STATIC XTAPI XTSTATUS GetAcpiSystemDescriptionPointer(OUT PACPI_RSDP *Rsdp);
             STATIC XTAPI XTSTATUS GetAcpiTable(IN ULONG Signature,
                                                OUT PACPI_DESCRIPTION_HEADER *AcpiTable);
+            STATIC XTAPI VOID GetAcpiTimerInfo(OUT PACPI_TIMER_INFO *AcpiTimerInfo);
             STATIC XTAPI XTSTATUS InitializeAcpi(VOID);
             STATIC XTAPI XTSTATUS InitializeAcpiSystemInformation(VOID);
         
