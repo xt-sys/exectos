@@ -394,6 +394,7 @@ XTSTATUS
 HL::Acpi::InitializeAcpiSystemStructure(VOID)
 {
     PHYSICAL_ADDRESS PhysicalAddress;
+    PACPI_SUBTABLE_HEADER SubTable;
     PFN_NUMBER PageCount;
     ULONG_PTR MadtTable;
     PACPI_MADT Madt;
@@ -413,11 +414,19 @@ HL::Acpi::InitializeAcpiSystemStructure(VOID)
     CpuCount = 0;
 
     /* Traverse all MADT tables to get number of processors */
-    while(MadtTable <= ((ULONG_PTR)Madt + Madt->Header.Length))
+    while(MadtTable < ((ULONG_PTR)Madt + Madt->Header.Length))
     {
+        SubTable = (PACPI_SUBTABLE_HEADER)MadtTable;
+
+        /* Prevent infinite loops if BIOS provides 0 length */
+        if(SubTable->Length == 0)
+        {
+            /* Broken ACPI table, abort traversal */
+            break;
+        }
+
         /* Check if this is a local APIC subtable */
-        if((((PACPI_SUBTABLE_HEADER)MadtTable)->Type == ACPI_MADT_TYPE_LOCAL_APIC) &&
-           (((PACPI_SUBTABLE_HEADER)MadtTable)->Length == sizeof(ACPI_MADT_LOCAL_APIC)))
+        if(SubTable->Type == ACPI_MADT_TYPE_LOCAL_APIC && SubTable->Length >= sizeof(ACPI_MADT_LOCAL_APIC))
         {
             /* Make sure, this CPU can be enabled */
             if(((PACPI_MADT_LOCAL_APIC)MadtTable)->Flags & ACPI_MADT_PLAOC_ENABLED)
@@ -425,12 +434,8 @@ HL::Acpi::InitializeAcpiSystemStructure(VOID)
                 /* Increment number of CPUs */
                 CpuCount++;
             }
-
-            /* Go to the next MADT table */
-            MadtTable += ((PACPI_SUBTABLE_HEADER)MadtTable)->Length;
         }
-        else if((((PACPI_SUBTABLE_HEADER)MadtTable)->Type == ACPI_MADT_TYPE_LOCAL_X2APIC) &&
-                (((PACPI_SUBTABLE_HEADER)MadtTable)->Length == sizeof(ACPI_MADT_LOCAL_X2APIC)))
+        else if(SubTable->Type == ACPI_MADT_TYPE_LOCAL_X2APIC && SubTable->Length >= sizeof(ACPI_MADT_LOCAL_X2APIC))
         {
             /* Make sure, this CPU can be enabled */
             if(((PACPI_MADT_LOCAL_X2APIC)MadtTable)->Flags & ACPI_MADT_PLAOC_ENABLED)
@@ -438,15 +443,10 @@ HL::Acpi::InitializeAcpiSystemStructure(VOID)
                 /* Increment number of CPUs */
                 CpuCount++;
             }
+        }
 
-            /* Go to the next MADT table */
-            MadtTable += ((PACPI_SUBTABLE_HEADER)MadtTable)->Length;
-        }
-        else
-        {
-            /* Any other MADT table, try to go to the next one byte-by-byte */
-            MadtTable += 1;
-        }
+        /* Safely advance pointer using proper subtable length */
+        MadtTable += SubTable->Length;
     }
 
     /* Zero the ACPI system information structure */
