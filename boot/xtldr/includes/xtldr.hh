@@ -93,7 +93,7 @@ class Console
         STATIC XTCDECL XTSTATUS PutChar(IN WCHAR Character);
         STATIC XTCDECL VOID QueryMode(OUT PUINT_PTR ResX,
                                       OUT PUINT_PTR ResY);
-        STATIC XTCDECL VOID ReadKeyStroke(OUT PEFI_INPUT_KEY Key);
+        STATIC XTCDECL EFI_STATUS ReadKeyStroke(OUT PEFI_INPUT_KEY Key);
         STATIC XTCDECL VOID ResetInputBuffer();
         STATIC XTCDECL VOID SetAttributes(IN ULONGLONG Attributes);
         STATIC XTCDECL VOID SetCursorPosition(IN ULONGLONG PosX,

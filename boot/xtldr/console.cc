@@ -221,10 +221,15 @@ Console::QueryMode(OUT PUINT_PTR ResX,
  * @since XT 1.0
  */
 XTCDECL
-VOID
+EFI_STATUS
 Console::ReadKeyStroke(OUT PEFI_INPUT_KEY Key)
 {
-    XtLoader::GetEfiSystemTable()->ConIn->ReadKeyStroke(XtLoader::GetEfiSystemTable()->ConIn, Key);
+    /* Clear the key structure to prevent ghost keystrokes */
+    Key->ScanCode = 0;
+    Key->UnicodeChar = 0;
+
+    /* Read the keystroke from the EFI input console */
+    return XtLoader::GetEfiSystemTable()->ConIn->ReadKeyStroke(XtLoader::GetEfiSystemTable()->ConIn, Key);
 }
 
 /**
