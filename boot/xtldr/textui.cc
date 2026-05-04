@@ -717,9 +717,9 @@ TextUi::DisplayEditMenu(IN PXTBL_BOOTMENU_ITEM MenuEntry)
                 RedrawEntries = TRUE;
             }
         }
-        else if(Key.UnicodeChar == 0x02)
+        else if(Key.ScanCode == 0x14)
         {
-            /* CTRL-B key pressed, boot the OS */
+            /* F10 key pressed, boot the OS */
             Console::SetAttributes(Handle.DialogColor | Handle.TextColor);
             Console::ClearLine(Handle.PosY + Handle.Height + 4);
             Console::SetCursorPosition(4, Handle.PosY + Handle.Height + 4);
@@ -1673,7 +1673,7 @@ TextUi::DrawEditMenu(OUT PXTBL_DIALOG_HANDLE Handle)
     Console::SetCursorPosition(0, Handle->PosY + Handle->Height);
     Console::SetAttributes(EFI_TEXT_BGCOLOR_BLACK | EFI_TEXT_FGCOLOR_LIGHTGRAY);
     Console::Print(L"    Use cursors to change the selection. Press ENTER key to edit the chosen\n"
-                   L"    option, ESC to return to the main boot menu or CTRL-B to boot.\n");
+                   L"    option, ESC to return to the main boot menu or F10 to boot.\n");
 }
 
 /**
