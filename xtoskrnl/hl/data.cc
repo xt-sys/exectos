@@ -33,6 +33,9 @@ KAFFINITY HL::Cpu::ActiveProcessors;
 /* FrameBuffer information */
 HL_FRAMEBUFFER_DATA HL::FrameBuffer::FrameBufferData;
 
+/* Pointer to the RAM shadow buffer used for double-buffered rendering */
+PVOID HL::FrameBuffer::ScreenShadowBuffer;
+
 /* Scroll region information */
 HL_SCROLL_REGION_DATA HL::FrameBuffer::ScrollRegionData;
 

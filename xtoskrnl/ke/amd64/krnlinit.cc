@@ -118,6 +118,9 @@ KE::KernelInit::StartKernel(VOID)
     /* Initialize Memory Manager */
     MM::Manager::InitializeMemoryManager();
 
+    /* Enable shadow buffer for framebuffer */
+    HL::FrameBuffer::EnableShadowBuffer();
+
     /* Enter infinite loop */
     DebugPrint(L"KernelInit::StartKernel() finished. Entering infinite loop.\n");
     KE::Crash::HaltSystem();

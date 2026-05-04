@@ -19,11 +19,13 @@ namespace HL
     {
         private:
             STATIC HL_FRAMEBUFFER_DATA FrameBufferData;
+            STATIC PVOID ScreenShadowBuffer;
             STATIC HL_SCROLL_REGION_DATA ScrollRegionData;
 
         public:
             STATIC XTAPI VOID ClearScreen(IN ULONG Color);
             STATIC XTCDECL XTSTATUS DisplayCharacter(IN WCHAR Character);
+            STATIC XTAPI XTSTATUS EnableShadowBuffer(VOID);
             STATIC XTAPI VOID GetFrameBufferResolution(OUT PULONG Width,
                                                        OUT PULONG Height);
             STATIC XTAPI XTSTATUS InitializeFrameBuffer(VOID);
@@ -32,7 +34,11 @@ namespace HL
                                                      IN ULONG Right,
                                                      IN ULONG Bottom,
                                                      IN ULONG FontColor);
-
+            STATIC XTAPI VOID UpdateScreen(VOID);
+            STATIC XTAPI VOID UpdateScreenRegion(IN ULONG Left,
+                                                 IN ULONG Top,
+                                                 IN ULONG Right,
+                                                 IN ULONG Bottom);
 
         private:
             STATIC XTAPI VOID DrawCharacter(IN ULONG PositionX,
