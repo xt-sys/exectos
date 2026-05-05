@@ -28,3 +28,23 @@ KE::Dispatcher::ExitDispatcher(IN KRUNLEVEL OldRunLevel)
     /* Lower runlevel */
     RunLevel::LowerRunLevel(OldRunLevel);
 }
+
+/**
+ * Updates the runtime quantum of the currently executing thread and handles preemption.
+ *
+ * @param TrapFrame
+ *        Supplies a pointer to the hardware trap frame representing the interrupted execution context.
+ *
+ * @param RunLevel
+ *        Supplies the system run level at which the interrupt was taken.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KE::Dispatcher::UpdateRunTime(IN PKTRAP_FRAME TrapFrame,
+                              IN KRUNLEVEL RunLevel)
+{
+}

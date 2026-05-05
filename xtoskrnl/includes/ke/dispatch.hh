@@ -19,6 +19,8 @@ namespace KE
     {
         public:
             STATIC XTFASTCALL VOID ExitDispatcher(IN KRUNLEVEL OldRunLevel);
+            STATIC XTAPI VOID UpdateRunTime(IN PKTRAP_FRAME TrapFrame,
+                                            IN KRUNLEVEL RunLevel);
     };
 }
 
