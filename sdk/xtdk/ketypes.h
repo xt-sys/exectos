@@ -462,6 +462,7 @@ typedef struct _KSHARED_DATA
 {
     VOLATILE KSYSTEM_TIME InterruptTime;
     VOLATILE KSYSTEM_TIME SystemTime;
+    VOLATILE KSYSTEM_TIME TickCount;
     ULONG XtMajorVersion;
     ULONG XtMinorVersion;
     WCHAR XtBuild[8];

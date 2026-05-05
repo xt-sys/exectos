@@ -24,6 +24,8 @@ namespace KE
             STATIC XTAPI LARGE_INTEGER GetInterruptTime(VOID);
             STATIC XTAPI PKSHARED_DATA GetKernelSharedData(VOID);
             STATIC XTAPI LARGE_INTEGER GetSystemTime(VOID);
+            STATIC XTAPI LARGE_INTEGER GetTickCount(VOID);
+            STATIC XTAPI VOID IncrementTickCount();
             STATIC XTAPI VOID InitializeKernelSharedData(VOID);
             STATIC XTAPI VOID SetInterruptTime(IN LARGE_INTEGER Time);
             STATIC XTAPI VOID SetSystemTime(IN LARGE_INTEGER Time);

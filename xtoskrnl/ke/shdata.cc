@@ -83,6 +83,48 @@ KE::SharedData::GetSystemTime(VOID)
 }
 
 /**
+ * Retrieves the global system tick count.
+ *
+ * @return This routine returns the current tick count.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+LARGE_INTEGER
+KE::SharedData::GetTickCount(VOID)
+{
+    LARGE_INTEGER Ticks;
+
+    /* Read the 64-bit tick count */
+    Ticks.QuadPart = (*(ULONGLONG*)&KernelSharedData->TickCount);
+
+    /* Return the retrieved tick count */
+    return Ticks;
+}
+
+/**
+ * Increments the global system tick count by one using a strict lock-free write mechanism.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KE::SharedData::IncrementTickCount()
+{
+    LARGE_INTEGER Ticks;
+
+    /* Increment tick count */
+    Ticks.QuadPart = (*(ULONGLONG*)&KernelSharedData->TickCount) + 1;
+
+    /* Set the new tick count */
+    KernelSharedData->TickCount.High2Part = Ticks.HighPart;
+    KernelSharedData->TickCount.LowPart = Ticks.LowPart;
+    KernelSharedData->TickCount.High1Part = Ticks.HighPart;
+}
+
+/**
  * Maps and initializes the Kernel Shared Data (KSD) structure.
  *
  * @return This routine does not return any value.
