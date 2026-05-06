@@ -9,6 +9,7 @@
 #include <xtos.hh>
 
 
+
 /**
  * Returns the current system time.
  *
@@ -95,5 +96,87 @@ KE::SystemTime::SetSystemTime(IN PLARGE_INTEGER NewTime,
     if(CorrectInterruptTime)
     {
         UNIMPLEMENTED;
+    }
+}
+
+/**
+ * Sets the maximum and minimum time increment values in 100ns units.
+ *
+ * @param MinIncrement
+ *        Supplies the minimum time increment.
+ *
+ * @param MaxIncrement
+ *        Supplies the maximum time increment.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KE::SystemTime::SetTimeIncrement(IN ULONG MinIncrement,
+                                 IN ULONG MaxIncrement)
+{
+    /* Store resolution boundaries while enforcing a 1ms architectural floor */
+    MaximumIncrement = MaxIncrement;
+    MinimumIncrement = MAX(MinIncrement, 10000);
+
+    /* Set the tick offset to the maximum increment */
+    TickOffset = (LONG)MaxIncrement;
+
+    /* Set the default time adjustment to the full tick period */
+    TimeAdjustment = MaxIncrement;
+}
+
+/**
+ * Services the periodic clock interrupt by advancing the global interrupt time, detecting full
+ * system tick boundaries via the tick offset accumulator, and advancing the wall-clock system time.
+ *
+ * @param TrapFrame
+ *        Supplies a pointer to the hardware trap frame representing the interrupted execution context.
+ *
+ * @param Increment
+ *        Supplies the calibrated time delta for this hardware interrupt in 100-nanosecond units.
+ *
+ * @param RunLevel
+ *        Supplies the system run level at which the interrupt was taken.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+VOID
+KE::SystemTime::UpdateSystemTime(IN PKTRAP_FRAME TrapFrame,
+                                 IN ULONG Increment,
+                                 IN KRUNLEVEL RunLevel)
+{
+    LARGE_INTEGER InterruptTime, SystemTime;
+    LONG CurrentTickOffset;
+
+    /* Advance the global interrupt time on every hardware tick */
+    InterruptTime = KE::SharedData::GetInterruptTime();
+    InterruptTime.QuadPart += Increment;
+    KE::SharedData::SetInterruptTime(InterruptTime);
+
+    /* Atomically consume the current tick budget and retrieve the pre-decrement value */
+    CurrentTickOffset = RTL::Atomic::ExchangeAdd32((PLONG)&TickOffset, -(LONG)Increment);
+
+    /* Determine whether the accumulated increments have crossed the full tick boundary */
+    if(CurrentTickOffset <= (LONG)Increment)
+    {
+        /* A full system tick has elapsed, advance the wall-clock time by the configured adjustment */
+        SystemTime = KE::SharedData::GetSystemTime();
+        SystemTime.QuadPart += TimeAdjustment;
+        KE::SharedData::SetSystemTime(SystemTime);
+
+        /* Update the tick count */
+        KE::SharedData::IncrementTickCount();
+
+        /* Reload the tick offset accumulator for the next full tick period */
+        TickOffset += MaximumIncrement;
+
+        /* Update processor and thread runtime accounting */
+        KE::Dispatcher::UpdateRunTime(TrapFrame, RunLevel);
     }
 }

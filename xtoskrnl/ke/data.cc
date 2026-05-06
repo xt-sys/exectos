@@ -77,3 +77,15 @@ KSPIN_LOCK KE::SystemResources::ResourcesLock;
 
 /* Kernel boot time */
 LARGE_INTEGER KE::SystemTime::BootTime;
+
+/* The maximum interval between system clock interrupts */
+ULONG KE::SystemTime::MaximumIncrement;
+
+/* The minimum interval between system clock interrupts */
+ULONG KE::SystemTime::MinimumIncrement;
+
+/* Accumulator tracking fractional ticks, decremented until a full tick elapses */
+LONG KE::SystemTime::TickOffset;
+
+/* The runtime adjustment value applied to the system clock at each interrupt */
+ULONG KE::SystemTime::TimeAdjustment;

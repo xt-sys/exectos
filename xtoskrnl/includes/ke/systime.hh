@@ -19,6 +19,10 @@ namespace KE
     {
         private:
             STATIC LARGE_INTEGER BootTime;
+            STATIC ULONG MaximumIncrement;
+            STATIC ULONG MinimumIncrement;
+            STATIC LONG TickOffset;
+            STATIC ULONG TimeAdjustment;
 
         public:
             STATIC XTAPI VOID GetSystemTime(OUT PLARGE_INTEGER SystemTime);
@@ -26,6 +30,11 @@ namespace KE
                                             OUT PLARGE_INTEGER OldTime,
                                             IN BOOLEAN AdjustInterruptTime,
                                             IN BOOLEAN WriteToRtc);
+            STATIC XTAPI VOID SetTimeIncrement(IN ULONG MinIncrement,
+                                               IN ULONG MaxIncrement);
+            STATIC XTFASTCALL VOID UpdateSystemTime(IN PKTRAP_FRAME TrapFrame,
+                                                    IN ULONG Increment,
+                                                    IN KRUNLEVEL RunLevel);
     };
 }
 
