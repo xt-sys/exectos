@@ -147,6 +147,12 @@ KeSetTargetProcessorDpc(IN PKDPC Dpc,
 XTCLINK
 XTAPI
 VOID
+KeSetTimeIncrement(IN ULONG MaxIncrement,
+                   IN ULONG MinIncrement);
+
+XTCLINK
+XTAPI
+VOID
 KeSetTimer(IN PKTIMER Timer,
            IN LARGE_INTEGER DueTime,
            IN LONG Period,

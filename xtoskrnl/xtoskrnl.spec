@@ -39,6 +39,7 @@
 @ fastcall KeReleaseSpinLock(ptr)
 @ stdcall KeReleaseSystemResource(ptr)
 @ stdcall KeSetTargetProcessorDpc(ptr long)
+@ stdcall KeSetTimeIncrement(long long)
 @ stdcall KeSetTimer(ptr long long long ptr)
 @ stdcall KeSignalCallDpcDone(ptr)
 @ stdcall KeSignalCallDpcSynchronize(ptr)

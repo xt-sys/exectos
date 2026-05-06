@@ -467,6 +467,28 @@ KeSetTargetProcessorDpc(IN PKDPC Dpc,
 }
 
 /**
+ * Sets the maximum and minimum time increment values in 100ns units.
+ *
+ * @param MaxIncrement
+ *        Supplies the maximum time increment.
+ *
+ * @param MinIncrement
+ *        Supplies the minimum time increment.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCLINK
+XTAPI
+VOID
+KeSetTimeIncrement(IN ULONG MaxIncrement,
+                   IN ULONG MinIncrement)
+{
+    KE::SystemTime::SetTimeIncrement(MaxIncrement, MinIncrement);
+}
+
+/**
  * Sets the supplied timer to expire at the specified time.
  *
  * @param Timer
