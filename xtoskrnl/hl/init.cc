@@ -39,6 +39,9 @@ HL::Init::InitializeSystem(VOID)
     /* Initialize I/O APIC */
     HL::Pic::InitializeIOApic();
 
+    /* Initialize timer */
+    HL::Timer::InitializeTimer();
+
     /* Return success */
     return STATUS_SUCCESS;
 }
