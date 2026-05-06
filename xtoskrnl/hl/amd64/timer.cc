@@ -2,7 +2,7 @@
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
  * FILE:            xtoskrnl/hl/amd64/timer.cc
- * DESCRIPTION:     APIC Timer for AMD64 support
+ * DESCRIPTION:     Timer support for AMD64
  * DEVELOPERS:      Aiken Harris <harraiken91@gmail.com>
  */
 
