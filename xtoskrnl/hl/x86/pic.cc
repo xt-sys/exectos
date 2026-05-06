@@ -48,6 +48,7 @@ HL::Pic::AllocateSystemInterrupt(IN UCHAR Irq,
     }
 
     /* Model a logical connection */
+    Register.LongLong = 0;
     Register.DeliveryMode = APIC_DM_FIXED;
     Register.DeliveryStatus = 0;
     Register.Destination = HL::Pic::ReadApicRegister(APIC_ID) >> 24;
@@ -502,6 +503,7 @@ HL::Pic::InitializeIOApic(VOID)
         Controllers[ControllerIndex].LineCount = ((VersionRegister >> 16) & 0xFF) + 1;
 
         /* Set up the default redirection entry for this controller */
+        Register.LongLong = 0;
         Register.DeliveryMode = APIC_DM_FIXED;
         Register.DeliveryStatus = 0;
         Register.Destination = ReadIOApicRegister(&Controllers[ControllerIndex], IOAPIC_ID) >> 24;
