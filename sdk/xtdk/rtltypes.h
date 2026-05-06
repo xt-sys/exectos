@@ -54,11 +54,11 @@
 #define SHA1_DIGEST_SIZE                20
 
 /* Time related definitions */
-#define TIME_SECONDS_PER_MINUTE         60ULL
-#define TIME_SECONDS_PER_HOUR           3600ULL
-#define TIME_SECONDS_PER_DAY            86400ULL
-#define TIME_TICKS_PER_SECOND           10000000ULL
-#define TIME_TICKS_PER_MILLISECOND      10000ULL
+#define TIME_SECONDS_PER_MINUTE         60
+#define TIME_SECONDS_PER_HOUR           3600
+#define TIME_SECONDS_PER_DAY            86400
+#define TIME_TICKS_PER_SECOND           10000000
+#define TIME_TICKS_PER_MILLISECOND      10000
 
 
 /* C/C++ specific code */
