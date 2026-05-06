@@ -52,7 +52,7 @@ HL::Pic::AllocateSystemInterrupt(IN UCHAR Irq,
     Register.DeliveryStatus = 0;
     Register.Destination = HL::Pic::ReadApicRegister(APIC_ID) >> 24;
     Register.DestinationMode = APIC_DM_Physical;
-    Register.Mask = 1;
+    Register.Mask = 0;
     Register.PinPolarity = ((Flags & 0x03) == 0x03) ? 1 : 0;
     Register.RemoteIRR = 0;
     Register.Reserved = 0;
@@ -483,10 +483,15 @@ HL::Pic::InitializeIOApic(VOID)
     while(ControllerIndex < ControllerCount)
     {
         /* Map the I/O APIC controller memory into hardware space */
-        MM::HardwarePool::MapHardwareMemory(Controllers[ControllerIndex].PhysicalAddress,
-                                            1,
-                                            FALSE,
-                                            (PVOID*)&Controllers[ControllerIndex].VirtualAddress);
+        Status = MM::HardwarePool::MapHardwareMemory(Controllers[ControllerIndex].PhysicalAddress,
+                                                     1,
+                                                     FALSE,
+                                                     (PVOID*)&Controllers[ControllerIndex].VirtualAddress);
+        if(Status != STATUS_SUCCESS || Controllers[ControllerIndex].VirtualAddress == 0)
+        {
+            DebugPrint(L"ERROR: Failed to map I/O APIC Controller\n");
+            KE::Crash::Panic(0x0E, 0x0, 0x0, 0x0, 0x0);
+        }
 
         /* Perform a memory barrier */
         AR::CpuFunc::MemoryBarrier();
