@@ -343,10 +343,14 @@ typedef struct _KTSS
     UCHAR IntDirectionMap[IOPM_DIRECTION_MAP_SIZE];
 } KTSS, *PKTSS;
 
-/* Exception frame definition (not available on ia32) */
+/* Exception frame definition (not available on i686) */
 typedef struct _KEXCEPTION_FRAME
 {
-    ULONG PlaceHolder;
+    ULONG Ebp;
+    ULONG Ebx;
+    ULONG Edi;
+    ULONG Esi;
+    ULONG Return;
 } KEXCEPTION_FRAME, *PKEXCEPTION_FRAME;
 
 /* Thread start frame definition */
