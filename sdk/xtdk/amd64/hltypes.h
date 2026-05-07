@@ -307,6 +307,17 @@ typedef enum _PIC_I8259_ICW4_SYSTEM_MODE
     New8086Mode
 } PIC_I8259_ICW4_SYSTEM_MODE, *PPIC_I8259_ICW4_SYSTEM_MODE;
 
+/* Supported hardware timer backends */
+typedef enum _TIMER_TYPE
+{
+    TimerNone,
+    TimerAcpiPm,
+    TimerHpet,
+    TimerLapic,
+    TimerPit,
+    TimerTsc
+} TIMER_TYPE, *PTIMER_TYPE;
+
 /* APIC Base Register */
 typedef union _APIC_BASE_REGISTER
 {
@@ -500,6 +511,7 @@ typedef struct _HPET_REGISTERS
     } Timers[];
 } HPET_REGISTERS, *PHPET_REGISTERS;
 
+/* Hardware timer capabilities and CPU clock features */
 typedef struct _TIMER_CAPABILITIES
 {
     BOOLEAN Arat;

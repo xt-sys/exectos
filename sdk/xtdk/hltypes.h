@@ -188,13 +188,32 @@
 #define COMPORT_REG_MSR                             0x06 /* Modem Status Register */
 #define COMPORT_REG_SR                              0x07 /* Scratch Register */
 
+/* Standard system clock rates (in 100-nanosecond units)*/
+#define HL_CLOCK_RATE_1000HZ                        10000  /* 1 ms (1000 Hz) - Best Performance */
+#define HL_CLOCK_RATE_500HZ                         20000  /* 2 ms (500 Hz) - High Responsiveness */
+#define HL_CLOCK_RATE_300HZ                         33333  /* 3.33ms (300 Hz) - Multimedia Sync */
+#define HL_CLOCK_RATE_250HZ                         40000  /* 4 ms (250 Hz) - Optimal Balance */
+#define HL_CLOCK_RATE_100HZ                         100000 /* 10 ms (100 Hz) - Power Saving */
+#define HL_CLOCK_RATE_50HZ                          200000 /* 20 ms (50 Hz) - Deep Power Saving */
+
+/* Minimum and maximum system clock rate definitions */
+#define HL_MINIMUM_CLOCK_RATE                       HL_CLOCK_RATE_1000HZ
+#define HL_MAXIMUM_CLOCK_RATE                       HL_CLOCK_RATE_50HZ
+
 /* Minimum and maximum profile intervals */
-#define MIN_PROFILE_INTERVAL 10000
-#define MAX_PROFILE_INTERVAL 10000000
+#define MIN_PROFILE_INTERVAL                        10000
+#define MAX_PROFILE_INTERVAL                        10000000
 
 
 /* C/C++ specific code */
 #ifndef __XTOS_ASSEMBLER__
+
+/* Hardware Layer routine callbacks */
+typedef XTSTATUS (XTAPI *PHALP_INITIALIZE_CLOCK)(VOID);
+typedef ULONGLONG (XTAPI *PHALP_QUERY_PERF_COUNTER)(VOID);
+typedef ULONG (XTAPI *PHALP_QUERY_TIME_DELTA)(VOID);
+typedef ULONG (XTAPI *PHALP_SET_CLOCK_RATE)(IN ULONG Increment);
+typedef VOID (XTAPI *PHALP_STALL_EXECUTION)(IN ULONG MicroSeconds);
 
 /* Generic Address structure */
 typedef struct _GENERIC_ADDRESS
@@ -497,6 +516,16 @@ typedef struct _SMBIOS3_TABLE_HEADER
     ULONG MaxStructureSize;
     ULONGLONG TableAddress;
 } SMBIOS3_TABLE_HEADER, *PSMBIOS3_TABLE_HEADER;
+
+/* Timer dispatch table */
+typedef struct _TIMER_ROUTINES
+{
+    PHALP_INITIALIZE_CLOCK InitializeClock;
+    PHALP_QUERY_PERF_COUNTER QueryPerformanceCounter;
+    PHALP_QUERY_TIME_DELTA QueryTimeDelta;
+    PHALP_SET_CLOCK_RATE SetClockRate;
+    PHALP_STALL_EXECUTION StallExecution;
+} TIMER_ROUTINES, *PTIMER_ROUTINES;
 
 #endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_HLTYPES_H */

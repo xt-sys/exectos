@@ -456,6 +456,7 @@ typedef struct _KPROCESSOR_CONTROL_BLOCK
     VOLATILE ULONG_PTR TimerRequest;
     SINGLE_LIST_ENTRY DeferredReadyListHead;
     PROCESSOR_POWER_STATE PowerState;
+    ULONG ProfilingCountdown;
 } KPROCESSOR_CONTROL_BLOCK, *PKPROCESSOR_CONTROL_BLOCK;
 
 /* Processor Block structure definition */
