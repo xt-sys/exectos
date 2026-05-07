@@ -37,7 +37,7 @@ HL::Timer::CalibrateApicTimer()
         HL::Pic::WriteApicRegister(APIC_TICR, InitialCount);
 
         /* Stall CPU execution for exactly 10 milliseconds */
-        StallExecutionPit(10000);
+        StallExecution(10000);
 
         /* Read current tick count from APIC timer and clear APIC timer */
         CurrentCount = HL::Pic::ReadApicRegister(APIC_TCCR);
@@ -87,7 +87,7 @@ HL::Timer::CalibrateTscCounter(VOID)
     InitialTickCount = AR::CpuFunc::ReadTimeStampCounterProcessor(&TscAux);
 
     /* Stall CPU execution for exactly 10 milliseconds */
-    StallExecutionPit(10000);
+    StallExecution(10000);
 
     /* Read current tick count from TSC */
     FinalTickCount = AR::CpuFunc::ReadTimeStampCounterProcessor(&TscAux);
@@ -683,12 +683,12 @@ HL::Timer::ProbeTimerType(VOID)
     /* Determine if the ACPI PM Timer port is physically provisioned */
     if(AcpiTimerInfo->TimerPort != 0)
     {
-        /* Route execution stalls through the active ACPI PM hardware */
+        /* Temporarily route execution stalls through the active ACPI PM hardware */
         TimerRoutines.StallExecution = StallExecutionAcpiPm;
     }
     else
     {
-        /* Route execution stalls through the legacy PIT hardware */
+        /* Temporarily route execution stalls through the legacy PIT hardware */
         TimerRoutines.StallExecution = StallExecutionPit;
     }
 
@@ -720,27 +720,31 @@ HL::Timer::ProbeTimerType(VOID)
     {
         case TimerTsc:
             /* Register the TSC */
-            TimerRoutines.QueryPerformanceCounter = QueryPerformanceCounterTsc;
             PerformanceFrequency = CalibrateTscCounter();
+            TimerRoutines.QueryPerformanceCounter = QueryPerformanceCounterTsc;
+            TimerRoutines.StallExecution = StallExecutionTsc;
             DebugPrint(L"Performance Counter: Invariant TSC @ %lluHz\n", PerformanceFrequency);
             break;
         case TimerHpet:
             /* Register the HPET */
-            TimerRoutines.QueryPerformanceCounter = QueryPerformanceCounterHpet;
             PerformanceFrequency = HpetFrequency;
+            TimerRoutines.QueryPerformanceCounter = QueryPerformanceCounterHpet;
+            TimerRoutines.StallExecution = StallExecutionHpet;
             DebugPrint(L"Performance Counter: HPET @ %lluHz\n", PerformanceFrequency);
             break;
         case TimerAcpiPm:
             /* Register the ACPI PM */
-            TimerRoutines.QueryPerformanceCounter = QueryPerformanceCounterAcpiPm;
             PerformanceFrequency = 3579545;
+            TimerRoutines.QueryPerformanceCounter = QueryPerformanceCounterAcpiPm;
+            TimerRoutines.StallExecution = StallExecutionAcpiPm;
             KeInitializeSpinLock(&PerformanceCounterLock);
             DebugPrint(L"Performance Counter: ACPI PM Timer\n");
             break;
         default:
             /* Register the legacy PIT */
-            TimerRoutines.QueryPerformanceCounter = QueryPerformanceCounterPit;
             PerformanceFrequency = 1193182;
+            TimerRoutines.QueryPerformanceCounter = QueryPerformanceCounterPit;
+            TimerRoutines.StallExecution = StallExecutionPit;
             KeInitializeSpinLock(&PerformanceCounterLock);
             DebugPrint(L"Performance Counter: Legacy PIT\n");
             break;
@@ -1210,7 +1214,7 @@ HL::Timer::StallExecution(IN ULONG MicroSeconds)
  * Stalls the CPU execution for a specified duration using the ACPI Power Management Timer.
  *
  * @param MicroSeconds
- * Supplies the number of microseconds to stall execution.
+ *        Supplies the number of microseconds to stall execution.
  *
  * @return This routine does not return any value.
  *
@@ -1259,6 +1263,50 @@ HL::Timer::StallExecutionAcpiPm(IN ULONG MicroSeconds)
         TicksElapsed += Delta;
         StartTick = CurrentTick;
 
+        /* Issue a PAUSE instruction to relieve memory bus contention */
+        AR::CpuFunc::YieldProcessor();
+    }
+}
+
+/**
+ * Stalls the CPU execution for a specified duration (maximum 3 seconds) using the High Precision Event Timer (HPET).
+ *
+ * @param MicroSeconds
+ *        Supplies the number of microseconds to stall execution.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+HL::Timer::StallExecutionHpet(IN ULONG MicroSeconds)
+{
+    PHPET_REGISTERS Hpet;
+    ULONGLONG StartTick, TargetTicks;
+
+    /* Validate input parameter */
+    if(MicroSeconds == 0)
+    {
+        /* Nothing to do */
+        return;
+    }
+    else if(MicroSeconds > 3000000)
+    {
+        /* Cap execution stall to 3 seconds */
+        MicroSeconds = 3000000;
+    }
+
+    /* Cast the mapped virtual address to the HPET hardware register */
+    Hpet = (PHPET_REGISTERS)HpetAddress;
+
+    /* Calculate target ticks based on HPET frequency */
+    TargetTicks = ((ULONGLONG)MicroSeconds * PerformanceFrequency) / 1000000ULL;
+    StartTick = Hpet->MainCounterValue;
+
+    /* Spin until the elapsed ticks reach the target */
+    while((Hpet->MainCounterValue - StartTick) < TargetTicks)
+    {
         /* Issue a PAUSE instruction to relieve memory bus contention */
         AR::CpuFunc::YieldProcessor();
     }
@@ -1333,6 +1381,46 @@ HL::Timer::StallExecutionPit(IN ULONG MicroSeconds)
 
     /* Restore the original state of PIT Port */
     HL::IoPort::WritePort8(0x61, Port61State);
+}
+
+/**
+ * Stalls the CPU execution for a specified duration (maximum 3 seconds) using the Time Stamp Counter (TSC).
+ *
+ * @param MicroSeconds
+ *        Supplies the number of microseconds to stall execution.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+HL::Timer::StallExecutionTsc(IN ULONG MicroSeconds)
+{
+    ULONGLONG StartTick, TargetTicks;
+
+    /* Validate input parameter */
+    if(MicroSeconds == 0)
+    {
+        /* Nothing to do */
+        return;
+    }
+    else if(MicroSeconds > 3000000)
+    {
+        /* Cap execution stall to 3 seconds */
+        MicroSeconds = 3000000;
+    }
+
+    /* Calculate target ticks based on calibrated TSC frequency */
+    TargetTicks = ((ULONGLONG)MicroSeconds * PerformanceFrequency) / 1000000ULL;
+    StartTick = AR::CpuFunc::ReadTimeStampCounter();
+
+    /* Spin until the elapsed ticks reach the target */
+    while((AR::CpuFunc::ReadTimeStampCounter() - StartTick) < TargetTicks)
+    {
+        /* Issue a PAUSE instruction to relieve memory bus contention */
+        AR::CpuFunc::YieldProcessor();
+    }
 }
 
 /**

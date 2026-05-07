@@ -65,7 +65,9 @@ namespace HL
             STATIC XTAPI VOID QueryTimerCapabilities(VOID);
             STATIC XTAPI ULONG SetClockRateApic(ULONG TargetIncrement);
             STATIC XTAPI VOID StallExecutionAcpiPm(IN ULONG MicroSeconds);
+            STATIC XTAPI VOID StallExecutionHpet(IN ULONG MicroSeconds);
             STATIC XTAPI VOID StallExecutionPit(IN ULONG MicroSeconds);
+            STATIC XTAPI VOID StallExecutionTsc(IN ULONG MicroSeconds);
             STATIC XTAPI BOOLEAN ValidateTimerSupport(IN TIMER_TYPE TimerType,
                                                       IN BOOLEAN IsClock);
     };
