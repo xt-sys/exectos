@@ -190,6 +190,9 @@ HL::Timer::DetectHpet(VOID)
         HpetFrequency = 14318180;
     }
 
+    /* Enable the HPET main counter and disable legacy replacement */
+    Hpet->GeneralConfiguration = (Hpet->GeneralConfiguration & ~HPET_CONFIG_LEGACY_REPLACEMENT) | HPET_CONFIG_ENABLE;
+
     /* Return success */
     return STATUS_SUCCESS;
 }
