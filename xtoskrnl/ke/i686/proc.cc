@@ -67,6 +67,92 @@ KE::Processor::GetCurrentThread(VOID)
 }
 
 /**
+ * Gets the processor block for the specified processor number.
+ *
+ * @param CpuNumber
+ *        Supplies the zero-indexed processor number.
+ *
+ * @return This routine returns a pointer to the processor block, or NULLPTR if invalid.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PKPROCESSOR_BLOCK
+KE::Processor::GetProcessorBlock(IN ULONG CpuNumber)
+{
+    /* Check if the requested CPU number is within dynamic bounds */
+    if(ProcessorBlocks == NULLPTR || CpuNumber >= InstalledCpus)
+    {
+        /* Invalid CPU number, return NULLPTR */
+        return NULLPTR;
+    }
+
+    /* Return requested processor block */
+    return ProcessorBlocks[CpuNumber];
+}
+
+/**
+ * Initializes the global processor structures by allocating an array of processor block pointers.
+ *
+ * @param CpuCount
+ *        Supplies the total number of processors present in the system.
+ *
+ * @return This routine returns a status code indicating the success or failure of the allocation.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+KE::Processor::InitializeProcessorStructures(IN ULONG CpuCount)
+{
+    XTSTATUS Status;
+
+    /* Save number of CPUs installed */
+    InstalledCpus = CpuCount;
+
+    /* Allocate an array of pointers */
+    Status = MM::Allocator::AllocatePool(NonPagedPool,
+                                         CpuCount * sizeof(PKPROCESSOR_BLOCK),
+                                         (PVOID*)&ProcessorBlocks);
+    if(Status != STATUS_SUCCESS)
+    {
+        /* Failed to allocate memory, return error */
+        return Status;
+    }
+
+    /* Zero the array initially */
+    RTL::Memory::ZeroMemory(ProcessorBlocks, CpuCount * sizeof(PKPROCESSOR_BLOCK));
+
+    /* Return success */
+    return STATUS_SUCCESS;
+}
+
+/**
+ * Registers the hardware APIC ID for the currently executing processor.
+ *
+ * @param ApicId
+ *        Supplies the hardware APIC ID to register in the processor block.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KE::Processor::RegisterHardwareId(IN ULONG HardwareId)
+{
+    PKPROCESSOR_BLOCK CurrentBlock;
+
+    /* Retrieve the processor block for the executing core */
+    CurrentBlock = GetCurrentProcessorBlock();
+    if(CurrentBlock != NULLPTR)
+    {
+        /* Register the hardware identifier for IPI targeting */
+        CurrentBlock->HardwareId = HardwareId;
+    }
+}
+
+/**
  * Saves the current processor state.
  *
  * @param State

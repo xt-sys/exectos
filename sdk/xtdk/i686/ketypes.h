@@ -483,6 +483,8 @@ typedef struct _KPROCESSOR_BLOCK
     KAFFINITY SetMember;
     ULONG StallScaleFactor;
     UCHAR CpuNumber;
+    ULONG HardwareId;
+    VOLATILE BOOLEAN Started;
     PINTERRUPT_HANDLER InterruptDispatchTable[256];
 } KPROCESSOR_BLOCK, *PKPROCESSOR_BLOCK;
 

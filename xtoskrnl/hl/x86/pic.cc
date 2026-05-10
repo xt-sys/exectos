@@ -402,6 +402,9 @@ HL::Pic::InitializeApic(VOID)
         WriteApicRegister(APIC_LDR, (1UL << CpuNumber) << 24);
     }
 
+    /* Report the APIC ID to the kernel logic */
+    KE::Processor::RegisterHardwareId(GetCpuApicId());
+
     /* Configure the spurious interrupt vector */
     SpuriousRegister.Long = ReadApicRegister(APIC_SIVR);
     SpuriousRegister.Vector = APIC_VECTOR_SPURIOUS;
@@ -781,25 +784,21 @@ VOID
 HL::Pic::SendBroadcastIpi(IN ULONG Vector,
                           IN BOOLEAN Self)
 {
-    APIC_COMMAND_REGISTER Register;
+    PKPROCESSOR_BLOCK CurrentProcessorBlock, TargetProcessorBlock;
+    PACPI_SYSTEM_INFO SysInfo;
     BOOLEAN Interrupts;
+    ULONG Index;
 
-    /* SMP not implemented */
-    if(TRUE)
+    /* Get the current processor block */
+    CurrentProcessorBlock = KE::Processor::GetCurrentProcessorBlock();
+    if(CurrentProcessorBlock == NULLPTR)
     {
-        /* Check if IPI is addressed to the current CPU */
-        if(Self)
-        {
-            /* Send IPI to the current CPU */
-            SendSelfIpi(Vector);
-            return;
-        }
-        else
-        {
-            /* Nothing to do */
-            return;
-        }
+        /* Processor block not available, return */
+        return;
     }
+
+    /* Get the ACPI system information */
+    HL::Acpi::GetSystemInformation(&SysInfo);
 
     /* Check whether interrupts are enabled */
     Interrupts = AR::CpuFunc::InterruptsEnabled();
@@ -807,32 +806,31 @@ HL::Pic::SendBroadcastIpi(IN ULONG Vector,
     /* Disable interrupts */
     AR::CpuFunc::ClearInterruptFlag();
 
-    /* Prepare the APIC command register */
-    Register.LongLong = 0;
-    Register.DeliveryMode = APIC_DM_FIXED;
-    Register.DestinationShortHand = Self ? APIC_DSH_AllIncludingSelf : APIC_DSH_AllExclusingSelf;
-    Register.Level = 1;
-    Register.TriggerMode = APIC_TGM_EDGE;
-    Register.Vector = Vector;
+    /* Iterate over all logical CPUs */
+    for(Index = 0; Index < SysInfo->CpuCount; Index++)
+    {
+        /* Retrieve the target processor block by its Logical CPU Number */
+        TargetProcessorBlock = KE::Processor::GetProcessorBlock(Index);
 
-    /* Check current APIC mode */
-    if(ApicMode == APIC_MODE_X2APIC)
-    {
-        /* In x2APIC mode, writing the full 64-bit value to the ICR MSR is sufficient */
-        WriteApicRegister(APIC_ICR0, Register.LongLong);
-    }
-    else
-    {
-        /* Wait for the APIC to clear the delivery status */
-        while((ReadApicRegister(APIC_ICR0) & 0x1000) != 0)
+        /* Only send to processors that exist and have successfully started */
+        if(TargetProcessorBlock != NULLPTR && TargetProcessorBlock->Started)
         {
-            /* Yield the processor */
-            AR::CpuFunc::YieldProcessor();
+            /* Check if this processor originated the broadcast */
+            if(TargetProcessorBlock->HardwareId == CurrentProcessorBlock->HardwareId)
+            {
+                /* Check if this is a self broadcast */
+                if(Self)
+                {
+                    /* Dispatch the IPI to the current processor */
+                    SendSelfIpi(Vector);
+                }
+            }
+            else
+            {
+                /* Dispatch the IPI to the target processor */
+                SendIpi(TargetProcessorBlock->HardwareId, Vector);
+            }
         }
-
-        /* In xAPIC compatibility mode, write the command to the ICR registers */
-        WriteApicRegister(APIC_ICR1, Register.Long1);
-        WriteApicRegister(APIC_ICR0, Register.Long0);
     }
 
     /* Check whether interrupts need to be re-enabled */
