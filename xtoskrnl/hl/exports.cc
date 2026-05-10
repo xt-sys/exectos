@@ -10,6 +10,24 @@
 
 
 /**
+ * Retrieves the current value of the high-resolution performance counter.
+ *
+ * @param PerformanceFrequency
+ *        Suplies an optional pointer to a variable that receives the performance counter frequency in Hz.
+ *
+ * @return This routine returns the current 64-bit monotonic tick count.
+ *
+ * @since XT 1.0
+ */
+XTCLINK
+XTAPI
+LARGE_INTEGER
+HlQueryPerformanceCounter(OUT PLARGE_INTEGER PerformanceFrequency)
+{
+    return HL::Timer::QueryPerformanceCounter(PerformanceFrequency);
+}
+
+/**
  * Reads the 8-bit data from the specified I/O port.
  *
  * @param Port
@@ -115,6 +133,24 @@ ULONG
 HlReadRegister32(IN PVOID Register)
 {
     return HL::IoRegister::ReadRegister32(Register);
+}
+
+/**
+ * Requests a dynamic adjustment of the system clock resolution.
+ *
+ * @param Rate
+ *        The requested clock rate change in 100-nanosecond units.
+ *
+ * @return This routine returns the actual clock rate granted by the hardware.
+ *
+ * @since XT 1.0
+ */
+XTCLINK
+XTAPI
+ULONG
+HlSetClockRate(IN ULONG Rate)
+{
+    return HL::Timer::SetClockRate(Rate);
 }
 
 /**

@@ -20,6 +20,11 @@
 /* Hardware layer routines forward references */
 XTCLINK
 XTAPI
+LARGE_INTEGER
+HlQueryPerformanceCounter(OUT PLARGE_INTEGER PerformanceFrequency);
+
+XTCLINK
+XTAPI
 UCHAR
 HlReadRegister8(IN PVOID Register);
 
@@ -32,6 +37,11 @@ XTCLINK
 XTAPI
 ULONG
 HlReadRegister32(IN PVOID Register);
+
+XTCLINK
+XTAPI
+ULONG
+HlSetClockRate(IN ULONG Rate);
 
 XTCLINK
 XTAPI
