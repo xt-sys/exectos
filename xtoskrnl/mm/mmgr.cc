@@ -298,7 +298,7 @@ MM::Manager::MapKernelSharedData(VOID)
     XTSTATUS Status;
 
     /* Allocate one physical page from the hardware pool for the shared data */
-    Status = MM::HardwarePool::AllocateHardwareMemory(1, FALSE, &PhysAddr);
+    Status = MM::HardwarePool::AllocateHardwareMemory(1, FALSE, MM_MAXIMUM_PHYSICAL_ADDRESS, &PhysAddr);
     if(Status != STATUS_SUCCESS)
     {
         /* Memory allocation failed, return error code */

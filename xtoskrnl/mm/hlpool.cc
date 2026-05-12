@@ -18,6 +18,9 @@
  * @param Aligned
  *        Specifies whether allocated memory should be aligned to 64k boundary or not.
  *
+ * @param MaximumAddress
+ *        Supplies the maximum acceptable physical address for the allocation.
+ *
  * @param Buffer
  *        Supplies a buffer that receives the physical address.
  *
@@ -29,18 +32,19 @@ XTAPI
 XTSTATUS
 MM::HardwarePool::AllocateHardwareMemory(IN PFN_NUMBER PageCount,
                                          IN BOOLEAN Aligned,
+                                         IN ULONGLONG MaximumAddress,
                                          OUT PPHYSICAL_ADDRESS Buffer)
 {
     PLOADER_MEMORY_DESCRIPTOR Descriptor, ExtraDescriptor, HardwareDescriptor;
+    PLIST_ENTRY ListEntry, LoaderMemoryDescriptors;
     PFN_NUMBER Alignment, MaxPage;
     ULONGLONG PhysicalAddress;
-    PLIST_ENTRY ListEntry, LoaderMemoryDescriptors;
 
     /* Assume failure */
     (*Buffer).QuadPart = 0;
 
-    /* Calculate maximum page address */
-    MaxPage = MM_MAXIMUM_PHYSICAL_ADDRESS >> MM_PAGE_SHIFT;
+    /* Calculate maximum page address based on the requested limit */
+    MaxPage = MaximumAddress >> MM_PAGE_SHIFT;
 
     /* Make sure there are at least 2 descriptors available */
     if((UsedHardwareAllocationDescriptors + 2) > MM_HARDWARE_ALLOCATION_DESCRIPTORS)
@@ -53,7 +57,7 @@ MM::HardwarePool::AllocateHardwareMemory(IN PFN_NUMBER PageCount,
     LoaderMemoryDescriptors = KE::BootInformation::GetMemoryDescriptors();
 
     /* Scan memory descriptors provided by the boot loader */
-    ListEntry = LoaderMemoryDescriptors->Flink;
+    ListEntry = LoaderMemoryDescriptors->Blink;
     while(ListEntry != LoaderMemoryDescriptors)
     {
         Descriptor = CONTAIN_RECORD(ListEntry, LOADER_MEMORY_DESCRIPTOR, ListEntry);
@@ -75,8 +79,8 @@ MM::HardwarePool::AllocateHardwareMemory(IN PFN_NUMBER PageCount,
             }
         }
 
-        /* Move to next descriptor */
-        ListEntry = ListEntry->Flink;
+        /* Move to previous descriptor */
+        ListEntry = ListEntry->Blink;
     }
 
     /* Make sure we found a descriptor */

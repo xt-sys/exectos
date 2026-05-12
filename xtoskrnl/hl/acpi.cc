@@ -496,7 +496,7 @@ HL::Acpi::InitializeAcpiSystemStructure(VOID)
     PageCount = SIZE_TO_PAGES(CpuCount * sizeof(PROCESSOR_IDENTITY));
 
     /* Allocate memory for CPU information */
-    Status = MM::HardwarePool::AllocateHardwareMemory(PageCount, TRUE, &PhysicalAddress);
+    Status = MM::HardwarePool::AllocateHardwareMemory(PageCount, TRUE, MM_MAXIMUM_PHYSICAL_ADDRESS, &PhysicalAddress);
     if(Status != STATUS_SUCCESS)
     {
         /* Failed to allocate memory, return error */
