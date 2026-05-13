@@ -401,7 +401,7 @@ ArStartApplicationProcessor:
 
     /* Far return to enter 32-bit protected mode */
     leal (ApEnterProtectedMode - ArStartApplicationProcessor)(%ebx), %eax
-    pushl $0x08
+    pushl $KGDT_R0_CMCODE
     pushl %eax
     lretl
 
@@ -410,7 +410,7 @@ ApEnterProtectedMode:
     .code32
 
     /* Setup all data segment registers */
-    movw $0x18, %ax
+    movw $KGDT_R0_DATA, %ax
     movw %ax, %ds
     movw %ax, %es
     movw %ax, %ss
@@ -431,19 +431,19 @@ ApEnterProtectedMode:
     movl %eax, %cr3
 
     /* Enable Long Mode and No-Execute */
-    movl $0xC0000080, %ecx
+    movl $X86_MSR_EFER, %ecx
     rdmsr
-    orl $0x00000900, %eax
+    orl $(X86_MSR_EFER_LME | X86_MSR_EFER_NXE), %eax
     wrmsr
 
     /* Enable Paging */
     movl %cr0, %eax
-    orl $0x80000000, %eax
+    orl $CR0_PG, %eax
     movl %eax, %cr0
 
     /* Far return to enter 64-bit long mode */
     leal (ApEnterLongMode - ArStartApplicationProcessor)(%ebx), %eax
-    pushl $0x10
+    pushl $KGDT_R0_CODE
     pushl %eax
     lretl
 

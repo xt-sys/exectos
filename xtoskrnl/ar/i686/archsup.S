@@ -242,7 +242,7 @@ _ArHandleSpuriousInterrupt:
  */
 .global _ArStartApplicationProcessor
 _ArStartApplicationProcessor:
-    /* Enter 16-bit (real mode) */
+    /* Enter 16-bit real mode */
     .code16
 
     /* Disable interrupts and clear direction flag */
@@ -276,7 +276,7 @@ _ArStartApplicationProcessor:
 
     /* Far return to enter 32-bit protected mode */
     leal (ApEnterProtectedMode - _ArStartApplicationProcessor)(%ebx), %eax
-    pushl $0x08
+    pushl $KGDT_R0_CODE
     pushl %eax
     lretl
 
@@ -285,7 +285,7 @@ ApEnterProtectedMode:
     .code32
 
     /* Setup all data segment registers */
-    movw $0x10, %ax
+    movw $KGDT_R0_DATA, %ax
     movw %ax, %ds
     movw %ax, %es
     movw %ax, %ss
@@ -298,7 +298,7 @@ ApEnterProtectedMode:
 
     /* Load CR4 from BSP, but mask PCIDE and PGE */
     movl PROCESSOR_START_BLOCK_Cr4(%edi), %eax
-    andl $~0x00020080, %eax
+    andl $~(CR4_PGE | CR4_PCIDE), %eax
     movl %eax, %cr4
 
     /* Load the Kernel Page Directory Base from BSP */
@@ -307,7 +307,7 @@ ApEnterProtectedMode:
 
     /* Enable Paging */
     movl %cr0, %eax
-    orl $0x80000000, %eax
+    orl $CR0_PG, %eax
     movl %eax, %cr0
 
     /* Load dedicated Stack for AP */
