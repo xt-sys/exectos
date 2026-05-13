@@ -150,7 +150,7 @@ MM::HardwarePool::AllocateHardwareMemory(IN PFN_NUMBER PageCount,
 /**
  * Allocates a physical page in low memory (addressable in real-mode) and maps it into the virtual address space.
  *
- * @param TrampolineAddress
+ * @param MemoryAddress
  *        Supplies a pointer to a variable that receives the identity-mapped virtual address of the allocated memory.
  *
  * @return This routine returns a status code.
