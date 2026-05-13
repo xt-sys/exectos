@@ -27,6 +27,8 @@ namespace MM
                                                          IN BOOLEAN Aligned,
                                                          IN ULONGLONG MaximumAddress,
                                                          OUT PPHYSICAL_ADDRESS Buffer);
+            STATIC XTAPI XTSTATUS AllocateRealModeMemory(IN PFN_NUMBER PageCount,
+                                                         OUT PVOID *MemoryAddress);
             STATIC XTAPI XTSTATUS MapHardwareMemory(IN PHYSICAL_ADDRESS PhysicalAddress,
                                                     IN PFN_NUMBER PageCount,
                                                     IN BOOLEAN FlushTlb,

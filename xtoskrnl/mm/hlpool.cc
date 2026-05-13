@@ -4,6 +4,7 @@
  * FILE:            xtoskrnl/mm/hlpool.cc
  * DESCRIPTION:     Hardware layer pool memory management
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ *                  Aiken Harris <harraiken91@gmail.com>
  */
 
 #include <xtos.hh>
@@ -143,6 +144,51 @@ MM::HardwarePool::AllocateHardwareMemory(IN PFN_NUMBER PageCount,
 
     /* Return physical address */
     (*Buffer).QuadPart = PhysicalAddress;
+    return STATUS_SUCCESS;
+}
+
+/**
+ * Allocates a physical page in low memory (addressable in real-mode) and maps it into the virtual address space.
+ *
+ * @param TrampolineAddress
+ *        Supplies a pointer to a variable that receives the identity-mapped virtual address of the allocated memory.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+MM::HardwarePool::AllocateRealModeMemory(IN PFN_NUMBER PageCount,
+                                         OUT PVOID *MemoryAddress)
+{
+    PHYSICAL_ADDRESS PhysicalAddress;
+    PFN_NUMBER PageFrameNumber;
+    PVOID VirtualAddress;
+    XTSTATUS Status;
+
+    /* Allocate physical memory in first 1MB */
+    Status = AllocateHardwareMemory(PageCount, TRUE, 0x100000, &PhysicalAddress);
+    if(Status != STATUS_SUCCESS)
+    {
+        /* Failed to allocate memory, return error */
+        return Status;
+    }
+
+    /* Calculate virtual address and page frame number */
+    VirtualAddress = (PVOID)(ULONG_PTR)PhysicalAddress.QuadPart;
+    PageFrameNumber = PhysicalAddress.QuadPart >> MM_PAGE_SHIFT;
+
+    /* Identity map the memory to the virtual address */
+    Status = MM::Paging::MapVirtualAddress(VirtualAddress, PageFrameNumber, MM_PTE_EXECUTE_READWRITE);
+    if(Status != STATUS_SUCCESS)
+    {
+        /* Failed to map memory, return error */
+        return Status;
+    }
+
+    /* Set the trampoline virtual address and return success */
+    *MemoryAddress = VirtualAddress;
     return STATUS_SUCCESS;
 }
 
