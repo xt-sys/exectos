@@ -254,12 +254,15 @@ _ArStartApplicationProcessor:
     movw %ax, %ds
     movw %ax, %es
     movw %ax, %ss
-    movw $0x1000, %sp
 
     /* Calculate absolute physical base address */
     xorl %ebx, %ebx
     movw %cs, %bx
     shll $4, %ebx
+
+    /* Set up a temporary stack for the AP initialization */
+    movl %ebx, %esp
+    addl $0x1000, %esp
 
     /* Load the temporary Global Descriptor Table */
     leal (ApTemporaryGdtDesc - _ArStartApplicationProcessor)(%ebx), %eax
