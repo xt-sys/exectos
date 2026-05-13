@@ -47,6 +47,9 @@ namespace MM
             STATIC XTAPI PVOID GetPteVirtualAddress(IN PMMPTE PtePointer);
             STATIC XTAPI BOOLEAN GetXpaStatus(VOID);
             STATIC XTAPI VOID InitializePageMapSupport(VOID);
+            STATIC XTAPI XTSTATUS MapVirtualAddress(IN PVOID VirtualAddress,
+                                                    IN PFN_NUMBER PageFrameNumber,
+                                                    IN ULONGLONG Attributes);
             STATIC XTAPI BOOLEAN PteValid(IN PMMPTE PtePointer);
             STATIC XTAPI VOID SetNextEntry(IN PMMPTE Pte,
                                            IN ULONG_PTR Value);

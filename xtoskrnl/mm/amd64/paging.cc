@@ -98,6 +98,64 @@ MM::Paging::GetPxeVirtualAddress(IN PMMPXE PxePointer)
 }
 
 /**
+ * Maps a specific virtual address to a specific physical page frame.
+ *
+ * @param VirtualAddress
+ *        The virtual address to map.
+ *
+ * @param PageFrameNumber
+ *        The physical frame number to back the virtual address.
+ *
+ * @param Attributes
+ *        Specifies the attributes (protections, caching) to apply to the PTE.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+MM::Paging::MapVirtualAddress(IN PVOID VirtualAddress,
+                              IN PFN_NUMBER PageFrameNumber,
+                              IN ULONGLONG Attributes)
+{
+    MMPTE TemplatePte;
+    PMMPTE PointerPte;
+
+    /* Initialize the template PTE */
+    MM::Paging::ClearPte(&TemplatePte);
+    MM::Paging::SetPte(&TemplatePte, 0, Attributes | MM_PTE_CACHE_ENABLE);
+
+    /* Check if XPA is enabled */
+    if(MM::Paging::GetXpaStatus())
+    {
+        /* Map Page 5-level Entry*/
+        MM::Pte::MapP5E(VirtualAddress, VirtualAddress, (PMMP5E)&TemplatePte);
+    }
+
+    /* Map PXE, PPE and PDE for the corresponding virtual address */
+    MM::Pte::MapPXE(VirtualAddress, VirtualAddress, (PMMPXE)&TemplatePte);
+    MM::Pte::MapPPE(VirtualAddress, VirtualAddress, (PMMPPE)&TemplatePte);
+    MM::Pte::MapPDE(VirtualAddress, VirtualAddress, (PMMPDE)&TemplatePte);
+
+    /* Get PTE address */
+    PointerPte = MM::Paging::GetPteAddress(VirtualAddress);
+
+    /* Initialize the template PTE */
+    MM::Paging::ClearPte(&TemplatePte);
+    MM::Paging::SetPte(&TemplatePte, PageFrameNumber, Attributes);
+
+    /* Write the PTE */
+    MM::Paging::WritePte(PointerPte, TemplatePte);
+
+    /* Flush the TLB to reflect the changes */
+    MM::Paging::FlushTlb();
+
+    /* Return success */
+    return STATUS_SUCCESS;
+}
+
+/**
  * Fills a section of memory with zeroes like RtlZeroMemory(), but in more efficient way.
  *
  * @param Address
