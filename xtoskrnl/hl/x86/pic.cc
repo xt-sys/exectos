@@ -828,7 +828,7 @@ HL::Pic::SendBroadcastIpi(IN ULONG Vector,
             else
             {
                 /* Dispatch the IPI to the target processor */
-                SendIpi(TargetProcessorBlock->HardwareId, Vector);
+                SendIpi(TargetProcessorBlock->HardwareId, Vector, APIC_DM_FIXED, APIC_DSH_Destination, APIC_TGM_EDGE);
             }
         }
     }
@@ -865,6 +865,15 @@ HL::Pic::SendEoi(VOID)
  * @param Vector
  *        Supplies the IPI vector to send.
  *
+ * @param DeliveryMode
+ *        Supplies the delivery mode for the IPI.
+ *
+ * @param DestinationShorthand
+ *        Supplies the shorthand.
+ *
+ * @param TriggerMode
+ *        Supplies the trigger mode (Edge or Level).
+ *
  * @return This routine does not return any value.
  *
  * @since XT 1.0
@@ -872,19 +881,85 @@ HL::Pic::SendEoi(VOID)
 XTAPI
 VOID
 HL::Pic::SendIpi(IN ULONG ApicId,
-                 IN ULONG Vector)
+                 IN ULONG Vector,
+                 IN APIC_DM DeliveryMode,
+                 IN APIC_DSH DestinationShortHand,
+                 IN ULONG TriggerMode)
 {
+    APIC_COMMAND_REGISTER Register;
+    BOOLEAN Interrupts;
+
+    /* Check whether interrupts are enabled */
+    Interrupts = AR::CpuFunc::InterruptsEnabled();
+
+    /* Disable interrupts */
+    AR::CpuFunc::ClearInterruptFlag();
+
+    /* Check current APIC mode and destination */
+    if(ApicMode == APIC_MODE_X2APIC && DestinationShortHand == APIC_DSH_Self)
+    {
+        /* In x2APIC mode, a dedicated Self-IPI register is used */
+        WriteApicRegister(APIC_SIPI, Vector);
+
+        /* Check whether interrupts need to be re-enabled */
+        if(Interrupts)
+        {
+            /* Check whether interrupts need to be re-enabled */
+            AR::CpuFunc::SetInterruptFlag();
+        }
+
+        /* Nothing more to do */
+        return;
+    }
+
+    /* Prepare APIC command register struct */
+    Register.LongLong = 0;
+    Register.DeliveryMode = DeliveryMode;
+    Register.Destination = ApicId;
+    Register.DestinationShortHand = DestinationShortHand;
+    Register.Level = 1;
+    Register.TriggerMode = TriggerMode;
+    Register.Vector = Vector;
+
     /* Check current APIC mode */
     if(ApicMode == APIC_MODE_X2APIC)
     {
+        /* Set destination APIC ID */
+        Register.Long1 = ApicId;
+
         /* Send IPI using x2APIC mode */
-        WriteApicRegister(APIC_ICR0, ((ULONGLONG)ApicId << 32) | Vector);
+        WriteApicRegister(APIC_ICR0, Register.LongLong);
     }
     else
     {
-        /* Send IPI using xAPIC compatibility mode */
-        WriteApicRegister(APIC_ICR1, ApicId << 24);
-        WriteApicRegister(APIC_ICR0, Vector);
+        /* Wait for the APIC to clear the delivery status */
+        while((ReadApicRegister(APIC_ICR0) & 0x1000) != 0)
+        {
+            /* Yield the processor */
+            AR::CpuFunc::YieldProcessor();
+        }
+
+        /* In xAPIC compatibility mode, write the command to the ICR registers */
+        WriteApicRegister(APIC_ICR1, Register.Long1);
+        WriteApicRegister(APIC_ICR0, Register.Long0);
+
+        /* Check if this is a Self-IPI */
+        if(DestinationShortHand == APIC_DSH_Self)
+        {
+            /* Wait until the interrupt physically arrives in the requested state */
+            while((ReadApicRegister((APIC_REGISTER)(APIC_IRR + (Vector / 32))) & (1UL << (Vector % 32))) == 0)
+            {
+                /* Yield the processor */
+                AR::CpuFunc::YieldProcessor();
+            }
+        }
+    }
+
+    /* Check whether interrupts need to be re-enabled */
+    if(Interrupts)
+    {
+        /* Re-enable interrupts */
+        AR::CpuFunc::SetInterruptFlag();
     }
 }
 
@@ -902,55 +977,7 @@ XTAPI
 VOID
 HL::Pic::SendSelfIpi(IN ULONG Vector)
 {
-    APIC_COMMAND_REGISTER Register;
-    BOOLEAN Interrupts;
-
-    /* Check whether interrupts are enabled */
-    Interrupts = AR::CpuFunc::InterruptsEnabled();
-
-    /* Disable interrupts */
-    AR::CpuFunc::ClearInterruptFlag();
-
-    /* Check current APIC mode */
-    if(ApicMode == APIC_MODE_X2APIC)
-    {
-        /* In x2APIC mode, a dedicated Self-IPI register is used */
-        WriteApicRegister(APIC_SIPI, Vector);
-    }
-    else
-    {
-        /* Prepare APIC command register */
-        Register.LongLong = 0;
-        Register.DeliveryMode = APIC_DM_FIXED;
-        Register.DestinationShortHand = APIC_DSH_Self;
-        Register.TriggerMode = APIC_TGM_EDGE;
-        Register.Vector = Vector;
-
-        /* Wait for the APIC to clear the delivery status */
-        while((ReadApicRegister(APIC_ICR0) & 0x1000) != 0)
-        {
-            /* Yield the processor */
-            AR::CpuFunc::YieldProcessor();
-        }
-
-        /* In xAPIC compatibility mode, write the command to the ICR registers */
-        WriteApicRegister(APIC_ICR1, Register.Long1);
-        WriteApicRegister(APIC_ICR0, Register.Long0);
-
-        /* Wait until the interrupt physically arrives in the requested state */
-        while((ReadApicRegister((APIC_REGISTER)(APIC_IRR + (Vector / 32))) & (1UL << (Vector % 32))) == 0)
-        {
-            /* Yield the processor */
-            AR::CpuFunc::YieldProcessor();
-        }
-    }
-
-    /* Check whether interrupts need to be re-enabled */
-    if(Interrupts)
-    {
-        /* Re-enable interrupts */
-        AR::CpuFunc::SetInterruptFlag();
-    }
+    SendIpi(0, Vector, APIC_DM_FIXED, APIC_DSH_Self, APIC_TGM_EDGE);
 }
 
 /**
