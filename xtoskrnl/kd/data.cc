@@ -9,6 +9,9 @@
 #include <xtos.hh>
 
 
+/* Debug I/O spinlock */
+KSPIN_LOCK KD::DebugIo::DebugIoLock;
+
 /* Kernel Debugger mode */
 KD_DEBUG_MODE KD::DebugIo::DebugMode;
 
