@@ -118,8 +118,8 @@
 #define KERNEL_STACK_GUARD_PAGES          1
 
 /* Processor structures size */
-#define KPROCESSOR_STRUCTURES_SIZE        ((2 * KERNEL_STACK_SIZE) + (GDT_ENTRIES * sizeof(KGDTENTRY)) + sizeof(KTSS) + \
-                                          sizeof(KPROCESSOR_BLOCK) + MM_PAGE_SIZE)
+#define KPROCESSOR_STRUCTURES_SIZE        ((KERNEL_STACKS * KERNEL_STACK_SIZE) + (GDT_ENTRIES * sizeof(KGDTENTRY)) + \
+                                          sizeof(KTSS) + sizeof(KPROCESSOR_BLOCK) + MM_PAGE_SIZE)
 
 /* Kernel frames */
 #define KEXCEPTION_FRAME_SIZE             sizeof(KEXCEPTION_FRAME)
@@ -470,11 +470,23 @@ typedef struct _KSPECIAL_REGISTERS
     ULONG64 MsrSyscallMask;
 } KSPECIAL_REGISTERS, *PKSPECIAL_REGISTERS;
 
+/* Processor start block structure definition */
+typedef struct _PROCESSOR_START_BLOCK
+{
+    ULONG_PTR Cr3;
+    ULONG_PTR Cr4;
+    PVOID EntryPoint;
+    PVOID ProcessorBlock;
+    ULONG ProcessorNumber;
+    PVOID Stack;
+    BOOLEAN Started;
+} PROCESSOR_START_BLOCK, *PPROCESSOR_START_BLOCK;
+
 /* Processor state frame structure definition */
 typedef struct _KPROCESSOR_STATE
 {
-    KSPECIAL_REGISTERS SpecialRegisters;
     CONTEXT ContextFrame;
+    KSPECIAL_REGISTERS SpecialRegisters;
 } KPROCESSOR_STATE, *PKPROCESSOR_STATE;
 
 /* Processor Control Block (PRCB) structure definition */
