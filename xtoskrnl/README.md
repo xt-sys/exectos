@@ -11,9 +11,17 @@ These parameters can be configured either temporarily by editing the boot entry 
 permanently by modifying the XTLDR configuration file.
 
 The following is a consolidated list of available kernel parameters:
+ * **CLOCK**: Specifies the primary hardware source used to drive the periodic system clock interrupts and the thread
+   scheduler tick. Valid values include `LAPIC` (Local APIC Timer), `HPET` (High Precision Event Timer), and `PIT`
+   (Legacy Programmable Interval Timer). If this parameter is omitted, the kernel will autonomously probe the hardware
+   and select the most optimal clock source for the current CPU topology, (defaulting to the Local APIC on modern systems.
  * **NOXPA**: Disables PAE or LA57 support, depending on the CPU architecture. This parameter is handled by the
    bootloader, which configures paging and selects the appropriate Page Map Level (PML) before transferring control to
    the kernel.
+ * **TIMER**: Designates the hardware counter used for high-resolution performance tracking (Query Performance Counter)
+   and microsecond execution stalls. Valid values include `TSC` (Invariant Time Stamp Counter), `HPET`, `ACPI` (or `PM`)
+   for the ACPI Power Management Timer, and `PIT`. If not specified, the kernel evaluates hardware capabilities and
+   defaults to the most precise and reliable counter available (e.g., Invariant TSC).
 
 ## Source Code
 The source code of the kernel is organized into subsystem-specific directories. Each directory name also defines the
