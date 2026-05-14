@@ -35,6 +35,13 @@ namespace AR
                                                        OUT PVOID *TrampolineCode,
                                                        OUT PULONG_PTR TrampolineSize);
             STATIC XTAPI VOID InitializeProcessor(IN PVOID ProcessorStructures);
+            STATIC XTAPI VOID InitializeProcessorStructures(IN PVOID ProcessorStructures,
+                                                            OUT PKGDTENTRY *Gdt,
+                                                            OUT PKTSS *Tss,
+                                                            OUT PKPROCESSOR_BLOCK *ProcessorBlock,
+                                                            OUT PVOID *KernelBootStack,
+                                                            OUT PVOID *KernelFaultStack,
+                                                            OUT PVOID *KernelNmiStack);
             STATIC XTAPI VOID SetIdtGate(IN PKIDTENTRY Idt,
                                          IN USHORT Vector,
                                          IN PVOID Handler,
@@ -53,13 +60,6 @@ namespace AR
                                                        IN PKTSS Tss,
                                                        IN PVOID DpcStack);
             STATIC XTAPI VOID InitializeProcessorRegisters(VOID);
-            STATIC XTAPI VOID InitializeProcessorStructures(IN PVOID ProcessorStructures,
-                                                            OUT PKGDTENTRY *Gdt,
-                                                            OUT PKTSS *Tss,
-                                                            OUT PKPROCESSOR_BLOCK *ProcessorBlock,
-                                                            OUT PVOID *KernelBootStack,
-                                                            OUT PVOID *KernelFaultStack,
-                                                            OUT PVOID *KernelNmiStack);
             STATIC XTAPI VOID InitializeSegments(VOID);
             STATIC XTAPI VOID InitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock,
                                             IN PVOID KernelBootStack,
