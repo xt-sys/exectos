@@ -20,6 +20,7 @@ XTAPI
 PVOID
 AR::ProcSup::GetBootStack(VOID)
 {
+    /* Return base address of kernel boot stack */
     return (PVOID)((ULONG_PTR)BootStack + KERNEL_STACK_SIZE);
 }
 
@@ -29,19 +30,23 @@ AR::ProcSup::GetTrampolineInformation(IN TRAMPOLINE_TYPE TrampolineType,
                                       OUT PVOID *TrampolineCode,
                                       OUT PULONG_PTR TrampolineSize)
 {
+    /* Get trampoline information */
     switch(TrampolineType)
     {
         case TrampolineApStartup:
+            /* Get AP startup trampoline information */
             *TrampolineCode = (PVOID)ArStartApplicationProcessor;
             *TrampolineSize = (ULONG_PTR)ArStartApplicationProcessorEnd -
                               (ULONG_PTR)ArStartApplicationProcessor;
             break;
         case TrampolineEnableXpa:
+            /* Get Enable XPA trampoline information */
             *TrampolineCode = (PVOID)ArEnableExtendedPhysicalAddressing;
             *TrampolineSize = (ULONG_PTR)ArEnableExtendedPhysicalAddressingEnd -
                               (ULONG_PTR)ArEnableExtendedPhysicalAddressing;
             break;
         default:
+            /* Unknown trampoline type */
             *TrampolineCode = NULLPTR;
             *TrampolineSize = 0;
             break;
@@ -64,9 +69,6 @@ AR::ProcSup::IdentifyProcessor(VOID)
     CPUID_REGISTERS CpuRegisters;
     CPUID_SIGNATURE CpuSignature;
 
-    /* Not fully implemented yet */
-    UNIMPLEMENTED;
-
     /* Get current processor control block */
     Prcb = KE::Processor::GetCurrentProcessorControlBlock();
 
@@ -75,12 +77,28 @@ AR::ProcSup::IdentifyProcessor(VOID)
     CpuRegisters.Leaf = CPUID_GET_VENDOR_STRING;
     AR::CpuFunc::CpuId(&CpuRegisters);
 
-    /* Store CPU vendor in processor control block */
-    Prcb->CpuId.Vendor = (CPU_VENDOR)CpuRegisters.Ebx;
+    /* Store CPU vendor name in processor control block */
     *(PULONG)&Prcb->CpuId.VendorName[0] = CpuRegisters.Ebx;
     *(PULONG)&Prcb->CpuId.VendorName[4] = CpuRegisters.Edx;
     *(PULONG)&Prcb->CpuId.VendorName[8] = CpuRegisters.Ecx;
     Prcb->CpuId.VendorName[12] = '\0';
+
+    /* Resolve CPU vendor */
+    if(RTL::Memory::CompareMemory(Prcb->CpuId.VendorName, "AuthenticAMD", 12) == 12)
+    {
+        /* AMD CPU */
+        Prcb->CpuId.Vendor = CPU_VENDOR_AMD;
+    }
+    else if(RTL::Memory::CompareMemory(Prcb->CpuId.VendorName, "GenuineIntel", 12) == 12)
+    {
+        /* Intel CPU */
+        Prcb->CpuId.Vendor = CPU_VENDOR_INTEL;
+    }
+    else
+    {
+        /* Unknown CPU vendor */
+        Prcb->CpuId.Vendor = CPU_VENDOR_UNKNOWN;
+    }
 
     /* Get CPU standard features */
     RtlZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
@@ -116,17 +134,13 @@ AR::ProcSup::IdentifyProcessor(VOID)
             Prcb->CpuId.Model += (CpuSignature.ExtendedModel << 4);
         }
     }
-    else
-    {
-        /* Unknown CPU vendor */
-        Prcb->CpuId.Vendor = CPU_VENDOR_UNKNOWN;
-    }
 
-    /* TODO: Store a list of CPU features in processor control block */
+    /* Identify processor features */
+    IdentifyProcessorFeatures();
 }
 
 /**
- * Initializes AMD64 processor specific structures.
+ * Identifies processor features and stores them in Processor Control Block (PRCB).
  *
  * @return This routine does not return any value.
  *
@@ -134,71 +148,12 @@ AR::ProcSup::IdentifyProcessor(VOID)
  */
 XTAPI
 VOID
-AR::ProcSup::InitializeProcessor(IN PVOID ProcessorStructures)
+AR::ProcSup::IdentifyProcessorFeatures(VOID)
 {
-    PVOID KernelBootStack, KernelFaultStack, KernelNmiStack;
-    KDESCRIPTOR GdtDescriptor, IdtDescriptor;
-    PKPROCESSOR_BLOCK ProcessorBlock;
-    PKGDTENTRY Gdt;
-    PKIDTENTRY Idt;
-    PKTSS Tss;
+    PKPROCESSOR_CONTROL_BLOCK Prcb;
 
-    /* Check if processor structures buffer provided */
-    if(ProcessorStructures)
-    {
-        /* Assign CPU structures from provided buffer */
-        InitializeProcessorStructures(ProcessorStructures, &Gdt, &Tss, &ProcessorBlock,
-                                      &KernelBootStack, &KernelFaultStack, &KernelNmiStack);
-
-        /* Use global IDT */
-        Idt = InitialIdt;
-    }
-    else
-    {
-        /* Use initial structures */
-        Gdt = InitialGdt;
-        Idt = InitialIdt;
-        Tss = &InitialTss;
-        KernelBootStack = (PVOID)((ULONG_PTR)&BootStack + KERNEL_STACK_SIZE);
-        KernelFaultStack = (PVOID)((ULONG_PTR)&FaultStack + KERNEL_STACK_SIZE);
-        KernelNmiStack = (PVOID)((ULONG_PTR)&NmiStack + KERNEL_STACK_SIZE);
-        ProcessorBlock = &InitialProcessorBlock;
-    }
-
-    /* Initialize processor block */
-    InitializeProcessorBlock(ProcessorBlock, Gdt, Idt, Tss, KernelFaultStack);
-
-    /* Initialize GDT, IDT and TSS */
-    InitializeGdt(ProcessorBlock);
-    InitializeIdt(ProcessorBlock);
-    InitializeTss(ProcessorBlock, KernelBootStack, KernelFaultStack, KernelNmiStack);
-
-    /* Set GDT and IDT descriptors */
-    GdtDescriptor.Base = Gdt;
-    GdtDescriptor.Limit = (GDT_ENTRIES * sizeof(KGDTENTRY)) - 1;
-    IdtDescriptor.Base = Idt;
-    IdtDescriptor.Limit = (IDT_ENTRIES * sizeof(KIDTENTRY)) - 1;
-
-    /* Load GDT, IDT and TSS */
-    AR::CpuFunc::LoadGlobalDescriptorTable(&GdtDescriptor.Limit);
-    AR::CpuFunc::LoadInterruptDescriptorTable(&IdtDescriptor.Limit);
-    AR::CpuFunc::LoadTaskRegister((UINT)KGDT_SYS_TSS);
-
-    /* Enter passive IRQ level */
-    HL::RunLevel::SetRunLevel(PASSIVE_LEVEL);
-
-    /* Initialize segment registers */
-    InitializeSegments();
-
-    /* Set GS base */
-    AR::CpuFunc::WriteModelSpecificRegister(X86_MSR_GSBASE, (ULONGLONG)ProcessorBlock);
-    AR::CpuFunc::WriteModelSpecificRegister(X86_MSR_KERNEL_GSBASE, (ULONGLONG)ProcessorBlock);
-
-    /* Initialize processor registers */
-    InitializeProcessorRegisters();
-
-    /* Identify processor */
-    IdentifyProcessor();
+    /* Get current processor control block */
+    Prcb = KE::Processor::GetCurrentProcessorControlBlock();
 }
 
 /**
@@ -279,6 +234,82 @@ AR::ProcSup::InitializeIdt(IN PKPROCESSOR_BLOCK ProcessorBlock)
     SetIdtGate(ProcessorBlock->IdtBase, 0x2D, (PVOID)ArTrapEntry[0x2D], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING3, AMD64_TRAP_GATE);
     SetIdtGate(ProcessorBlock->IdtBase, 0x2F, (PVOID)ArTrapEntry[0x2F], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_INTERRUPT_GATE);
     SetIdtGate(ProcessorBlock->IdtBase, 0xE1, (PVOID)ArInterruptEntry[0xE1], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_INTERRUPT_GATE);
+}
+
+/**
+ * Initializes AMD64 processor specific structures.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+AR::ProcSup::InitializeProcessor(IN PVOID ProcessorStructures)
+{
+    PVOID KernelBootStack, KernelFaultStack, KernelNmiStack;
+    KDESCRIPTOR GdtDescriptor, IdtDescriptor;
+    PKPROCESSOR_BLOCK ProcessorBlock;
+    PKGDTENTRY Gdt;
+    PKIDTENTRY Idt;
+    PKTSS Tss;
+
+    /* Check if processor structures buffer provided */
+    if(ProcessorStructures)
+    {
+        /* Assign CPU structures from provided buffer */
+        InitializeProcessorStructures(ProcessorStructures, &Gdt, &Tss, &ProcessorBlock,
+                                      &KernelBootStack, &KernelFaultStack, &KernelNmiStack);
+
+        /* Use global IDT */
+        Idt = InitialIdt;
+    }
+    else
+    {
+        /* Use initial structures */
+        Gdt = InitialGdt;
+        Idt = InitialIdt;
+        Tss = &InitialTss;
+        KernelBootStack = (PVOID)((ULONG_PTR)&BootStack + KERNEL_STACK_SIZE);
+        KernelFaultStack = (PVOID)((ULONG_PTR)&FaultStack + KERNEL_STACK_SIZE);
+        KernelNmiStack = (PVOID)((ULONG_PTR)&NmiStack + KERNEL_STACK_SIZE);
+        ProcessorBlock = &InitialProcessorBlock;
+    }
+
+    /* Initialize processor block */
+    InitializeProcessorBlock(ProcessorBlock, Gdt, Idt, Tss, KernelFaultStack);
+
+    /* Initialize GDT, IDT and TSS */
+    InitializeGdt(ProcessorBlock);
+    InitializeIdt(ProcessorBlock);
+    InitializeTss(ProcessorBlock, KernelBootStack, KernelFaultStack, KernelNmiStack);
+
+    /* Set GDT and IDT descriptors */
+    GdtDescriptor.Base = Gdt;
+    GdtDescriptor.Limit = (GDT_ENTRIES * sizeof(KGDTENTRY)) - 1;
+    IdtDescriptor.Base = Idt;
+    IdtDescriptor.Limit = (IDT_ENTRIES * sizeof(KIDTENTRY)) - 1;
+
+    /* Load GDT, IDT and TSS */
+    AR::CpuFunc::LoadGlobalDescriptorTable(&GdtDescriptor.Limit);
+    AR::CpuFunc::LoadInterruptDescriptorTable(&IdtDescriptor.Limit);
+    AR::CpuFunc::LoadTaskRegister((UINT)KGDT_SYS_TSS);
+
+    /* Enter passive IRQ level */
+    HL::RunLevel::SetRunLevel(PASSIVE_LEVEL);
+
+    /* Initialize segment registers */
+    InitializeSegments();
+
+    /* Set GS base */
+    AR::CpuFunc::WriteModelSpecificRegister(X86_MSR_GSBASE, (ULONGLONG)ProcessorBlock);
+    AR::CpuFunc::WriteModelSpecificRegister(X86_MSR_KERNEL_GSBASE, (ULONGLONG)ProcessorBlock);
+
+    /* Initialize processor registers */
+    InitializeProcessorRegisters();
+
+    /* Identify processor */
+    IdentifyProcessor();
 }
 
 /**

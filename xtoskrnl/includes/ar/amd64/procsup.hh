@@ -49,6 +49,7 @@ namespace AR
 
         private:
             STATIC XTAPI VOID IdentifyProcessor(VOID);
+            STATIC XTAPI VOID IdentifyProcessorFeatures(VOID);
             STATIC XTAPI VOID InitializeGdt(IN PKPROCESSOR_BLOCK ProcessorBlock);
             STATIC XTAPI VOID InitializeIdt(IN PKPROCESSOR_BLOCK ProcessorBlock);
             STATIC XTAPI VOID InitializeProcessorBlock(OUT PKPROCESSOR_BLOCK ProcessorBlock,

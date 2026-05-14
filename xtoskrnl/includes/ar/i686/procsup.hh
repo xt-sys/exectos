@@ -52,6 +52,7 @@ namespace AR
 
         private:
             STATIC XTAPI VOID IdentifyProcessor(VOID);
+            STATIC XTAPI VOID IdentifyProcessorFeatures(VOID);
             STATIC XTAPI VOID InitializeGdt(IN PKPROCESSOR_BLOCK ProcessorBlock);
             STATIC XTAPI VOID InitializeIdt(IN PKPROCESSOR_BLOCK ProcessorBlock);
             STATIC XTAPI VOID InitializeProcessorBlock(OUT PKPROCESSOR_BLOCK ProcessorBlock,
@@ -79,7 +80,6 @@ namespace AR
                                               IN ULONG_PTR Base);
             STATIC XTAPI VOID SetNonMaskableInterruptTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock,
                                                               IN PVOID KernelNmiStack);
-
     };
 }
 
