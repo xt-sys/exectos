@@ -81,7 +81,7 @@ PKPROCESSOR_BLOCK
 KE::Processor::GetProcessorBlock(IN ULONG CpuNumber)
 {
     /* Check if the requested CPU number is within dynamic bounds */
-    if(ProcessorBlocks == NULLPTR || CpuNumber >= InstalledCpus)
+    if(CpuNumber >= InstalledCpus || ProcessorBlocks == NULLPTR || ProcessorBlocks[CpuNumber] == NULLPTR)
     {
         /* Invalid CPU number, return NULLPTR */
         return NULLPTR;
@@ -94,25 +94,24 @@ KE::Processor::GetProcessorBlock(IN ULONG CpuNumber)
 /**
  * Initializes the global processor structures by allocating an array of processor block pointers.
  *
- * @param CpuCount
- *        Supplies the total number of processors present in the system.
- *
  * @return This routine returns a status code indicating the success or failure of the allocation.
  *
  * @since XT 1.0
  */
 XTAPI
 XTSTATUS
-KE::Processor::InitializeProcessorStructures(IN ULONG CpuCount)
+KE::Processor::InitializeProcessorBlocks()
 {
+    PACPI_SYSTEM_INFO SystemInfo;
     XTSTATUS Status;
 
     /* Save number of CPUs installed */
-    InstalledCpus = CpuCount;
+    HL::Acpi::GetSystemInformation(&SystemInfo);
+    InstalledCpus = SystemInfo->CpuCount;
 
     /* Allocate an array of pointers */
     Status = MM::Allocator::AllocatePool(NonPagedPool,
-                                         CpuCount * sizeof(PKPROCESSOR_BLOCK),
+                                         InstalledCpus * sizeof(PKPROCESSOR_BLOCK),
                                          (PVOID*)&ProcessorBlocks);
     if(Status != STATUS_SUCCESS)
     {
@@ -121,7 +120,7 @@ KE::Processor::InitializeProcessorStructures(IN ULONG CpuCount)
     }
 
     /* Zero the array initially */
-    RTL::Memory::ZeroMemory(ProcessorBlocks, CpuCount * sizeof(PKPROCESSOR_BLOCK));
+    RTL::Memory::ZeroMemory(ProcessorBlocks, InstalledCpus * sizeof(PKPROCESSOR_BLOCK));
 
     /* Return success */
     return STATUS_SUCCESS;
@@ -149,6 +148,32 @@ KE::Processor::RegisterHardwareId(IN ULONG HardwareId)
     {
         /* Register the hardware identifier for IPI targeting */
         CurrentBlock->HardwareId = HardwareId;
+    }
+}
+
+/**
+ * Registers or deregisters a processor block in the global CPU table.
+ *
+ * @param CpuNumber
+ *        Specifies the logical processor number.
+ *
+ * @param ProcessorBlock
+ *        Supplies a pointer to the processor block.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KE::Processor::RegisterProcessorBlock(ULONG CpuNumber,
+                                      PKPROCESSOR_BLOCK ProcessorBlock)
+{
+    /* Check if the requested CPU number is within dynamic bounds */
+    if(ProcessorBlocks != NULLPTR && CpuNumber < InstalledCpus)
+    {
+        /* Register processor block */
+        ProcessorBlocks[CpuNumber] = ProcessorBlock;
     }
 }
 

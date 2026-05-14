@@ -27,8 +27,10 @@ namespace KE
             STATIC XTAPI ULONG GetCurrentProcessorNumber(VOID);
             STATIC XTAPI PKTHREAD GetCurrentThread(VOID);
             STATIC XTAPI PKPROCESSOR_BLOCK GetProcessorBlock(IN ULONG CpuNumber);
-            STATIC XTAPI XTSTATUS InitializeProcessorStructures(IN ULONG CpuCount);
+            STATIC XTAPI XTSTATUS InitializeProcessorBlocks();
             STATIC XTAPI VOID RegisterHardwareId(IN ULONG HardwareId);
+            STATIC XTAPI VOID RegisterProcessorBlock(ULONG CpuNumber,
+                                                     PKPROCESSOR_BLOCK ProcessorBlock);
             STATIC XTAPI VOID SaveProcessorState(OUT PKPROCESSOR_STATE CpuState);
     };
 }
