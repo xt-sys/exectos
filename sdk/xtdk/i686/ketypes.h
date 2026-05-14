@@ -90,6 +90,62 @@
 #define I686_INTERRUPT_GATE               0xE
 #define I686_TRAP_GATE                    0xF
 
+/* Kernel CPU Standard Features */
+#define KCF_VME                           (1ULL << 0)  /* Virtual 8086 Mode Enhancements */
+#define KCF_LARGE_PAGE                    (1ULL << 1)  /* Page Size Extensions */
+#define KCF_RDTSC                         (1ULL << 2)  /* Time Stamp Counter */
+#define KCF_PAE                           (1ULL << 3)  /* Physical Address Extension */
+#define KCF_MCE                           (1ULL << 4)  /* Machine Check Exception */
+#define KCF_CMPXCHG8B                     (1ULL << 5)  /* CMPXCHG8B Instruction */
+#define KCF_APIC                          (1ULL << 6)  /* APIC On-Chip */
+#define KCF_FAST_SYSCALL                  (1ULL << 7)  /* SYSENTER/SYSEXIT Instructions */
+#define KCF_MTRR                          (1ULL << 8)  /* Memory Type Range Registers */
+#define KCF_GLOBAL_PAGE                   (1ULL << 9)  /* Page Global Enable */
+#define KCF_MCA                           (1ULL << 10) /* Machine Check Architecture */
+#define KCF_CMOV                          (1ULL << 11) /* Conditional Move Instructions */
+#define KCF_PAT                           (1ULL << 12) /* Page Attribute Table */
+#define KCF_PSE36                         (1ULL << 13) /* 36-bit Page Size Extension */
+#define KCF_CLFLUSH                       (1ULL << 14) /* CLFLUSH Instruction */
+#define KCF_FXSR                          (1ULL << 15) /* FXSAVE/FXRSTOR Instructions */
+#define KCF_ACPI                          (1ULL << 16) /* Thermal Monitor and Software Controlled Clock */
+#define KCF_MMX                           (1ULL << 17) /* MMX Technology */
+#define KCF_SSE                           (1ULL << 18) /* Streaming SIMD Extensions */
+#define KCF_SSE2                          (1ULL << 19) /* Streaming SIMD Extensions 2 */
+#define KCF_SMT                           (1ULL << 20) /* Hyper-Threading Technology */
+#define KCF_SSE3                          (1ULL << 21) /* Streaming SIMD Extensions 3 */
+#define KCF_VMX                           (1ULL << 22) /* Intel Virtual Machine Extensions */
+#define KCF_SSSE3                         (1ULL << 23) /* Supplemental SSE3 Instructions */
+#define KCF_SSE41                         (1ULL << 24) /* SSE4.1 Instructions */
+#define KCF_SSE42                         (1ULL << 25) /* SSE4.2 Instructions */
+#define KCF_X2APIC                        (1ULL << 26) /* x2APIC Support */
+#define KCF_POPCNT                        (1ULL << 27) /* POPCNT Instruction */
+#define KCF_TSC_DEADLINE                  (1ULL << 28) /* TSC Deadline Timer */
+#define KCF_AES                           (1ULL << 29) /* AES-NI Instruction Set */
+#define KCF_XSAVE                         (1ULL << 30) /* XSAVE/XRSTOR Instructions */
+#define KCF_AVX                           (1ULL << 31) /* Advanced Vector Extensions */
+#define KCF_RDRAND                        (1ULL << 32) /* RDRAND Instruction */
+#define KCF_FSGSBASE                      (1ULL << 33) /* RDFSBASE/WRFSBASE Instructions */
+#define KCF_AVX2                          (1ULL << 34) /* AVX2 Instructions */
+#define KCF_SMEP                          (1ULL << 35) /* Supervisor Mode Execution Prevention */
+#define KCF_RDSEED                        (1ULL << 36) /* RDSEED Instruction */
+#define KCF_SMAP                          (1ULL << 37) /* Supervisor Mode Access Prevention */
+#define KCF_SHA                           (1ULL << 38) /* SHA Extensions */
+#define KCF_LA57                          (1ULL << 39) /* 57-bit Linear Addresses */
+#define KCF_ARAT                          (1ULL << 40) /* Always Running APIC Timer */
+
+/* Kernel CPU Extended Features */
+#define KCF_SVM                           (1ULL << 0)  /* AMD Secure Virtual Machine */
+#define KCF_SSE4A                         (1ULL << 1)  /* SSE4A Instructions */
+#define KCF_FMA4                          (1ULL << 2)  /* FMA4 Instructions */
+#define KCF_TOPOEXT                       (1ULL << 3)  /* AMD Topology Extensions */
+#define KCF_SYSCALL                       (1ULL << 4)  /* SYSCALL/SYSRET Instructions */
+#define KCF_NX_BIT                        (1ULL << 5)  /* No-Execute Page Protection */
+#define KCF_RDTSCP                        (1ULL << 6)  /* RDTSCP Instruction */
+#define KCF_64BIT                         (1ULL << 7)  /* Long Mode Support */
+#define KCF_3DNOW_EXT                     (1ULL << 8)  /* 3DNow! Extensions */
+#define KCF_3DNOW                         (1ULL << 9)  /* 3DNow! Instructions */
+#define KCF_INVARIANT_TSC                 (1ULL << 10) /* Invariant Time Stamp Counter */
+
 /* Context control flags */
 #define CONTEXT_ARCHITECTURE              0x00010000
 #define CONTEXT_CONTROL                   (CONTEXT_ARCHITECTURE | 0x01)
