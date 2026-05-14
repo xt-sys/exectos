@@ -405,9 +405,6 @@ AR::ProcSup::InitializeProcessor(IN PVOID ProcessorStructures)
     AR::CpuFunc::LoadInterruptDescriptorTable(&IdtDescriptor.Limit);
     AR::CpuFunc::LoadTaskRegister((UINT)KGDT_SYS_TSS);
 
-    /* Enter passive IRQ level */
-    HL::RunLevel::SetRunLevel(PASSIVE_LEVEL);
-
     /* Initialize segment registers */
     InitializeSegments();
 
