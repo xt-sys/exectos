@@ -70,28 +70,12 @@ AR::ProcSup::IdentifyProcessor(VOID)
     CpuRegisters.Leaf = CPUID_GET_VENDOR_STRING;
     AR::CpuFunc::CpuId(&CpuRegisters);
 
-    /* Store CPU vendor name in processor control block */
+    /* Store CPU vendor in processor control block */
+    Prcb->CpuId.Vendor = (CPU_VENDOR)CpuRegisters.Ebx;
     *(PULONG)&Prcb->CpuId.VendorName[0] = CpuRegisters.Ebx;
     *(PULONG)&Prcb->CpuId.VendorName[4] = CpuRegisters.Edx;
     *(PULONG)&Prcb->CpuId.VendorName[8] = CpuRegisters.Ecx;
     Prcb->CpuId.VendorName[12] = '\0';
-
-    /* Resolve CPU vendor */
-    if(RTL::Memory::CompareMemory(Prcb->CpuId.VendorName, "AuthenticAMD", 12) == 12)
-    {
-        /* AMD CPU */
-        Prcb->CpuId.Vendor = CPU_VENDOR_AMD;
-    }
-    else if(RTL::Memory::CompareMemory(Prcb->CpuId.VendorName, "GenuineIntel", 12) == 12)
-    {
-        /* Intel CPU */
-        Prcb->CpuId.Vendor = CPU_VENDOR_INTEL;
-    }
-    else
-    {
-        /* Unknown CPU vendor */
-        Prcb->CpuId.Vendor = CPU_VENDOR_UNKNOWN;
-    }
 
     /* Get CPU standard features */
     RtlZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
@@ -126,6 +110,11 @@ AR::ProcSup::IdentifyProcessor(VOID)
         {
             Prcb->CpuId.Model += (CpuSignature.ExtendedModel << 4);
         }
+    }
+    else
+    {
+        /* Unknown CPU vendor */
+        Prcb->CpuId.Vendor = CPU_VENDOR_UNKNOWN;
     }
 
     /* Identify processor features */
