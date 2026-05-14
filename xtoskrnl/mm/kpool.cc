@@ -95,9 +95,6 @@ MM::KernelPool::AllocateKernelStack(OUT PVOID *Stack,
 /**
  * Allocates a buffer for structures needed by a processor and assigns it to a corresponding CPU.
  *
- * @param CpuNumber
- *        Specifies the zero-indexed CPU number as an owner of the allocated structures.
- *
  * @param StructuresData
  *        Supplies a pointer to the memory area that will contain the allocated buffer.
  *
@@ -107,12 +104,9 @@ MM::KernelPool::AllocateKernelStack(OUT PVOID *Stack,
  */
 XTAPI
 XTSTATUS
-MM::KernelPool::AllocateProcessorStructures(IN ULONG CpuNumber,
-                                            OUT PVOID *StructuresData)
+MM::KernelPool::AllocateProcessorStructures(OUT PVOID *StructuresData)
 {
-    PKPROCESSOR_BLOCK ProcessorBlock;
     PVOID ProcessorStructures;
-    UINT_PTR Address;
     XTSTATUS Status;
 
     /* Assign memory for processor structures */
@@ -125,15 +119,6 @@ MM::KernelPool::AllocateProcessorStructures(IN ULONG CpuNumber,
 
     /* Make sure all structures are zeroed */
     RTL::Memory::ZeroMemory(ProcessorStructures, KPROCESSOR_STRUCTURES_SIZE);
-
-    /* Align address to page size boundary and find a space for processor block */
-    Address = ROUND_UP((UINT_PTR)ProcessorStructures, MM_PAGE_SIZE);
-    ProcessorBlock = (PKPROCESSOR_BLOCK)((PUCHAR)Address +
-                     (KERNEL_STACKS * KERNEL_STACK_SIZE) +
-                     (GDT_ENTRIES * sizeof(KGDTENTRY)));
-
-    /* Store processor number in the processor block */
-    ProcessorBlock->CpuNumber = CpuNumber;
 
     /* Return pointer to the processor structures */
     *StructuresData = ProcessorStructures;
