@@ -396,6 +396,7 @@ typedef VOID (*PINTERRUPT_HANDLER)(PKTRAP_FRAME TrapFrame);
 typedef struct _CPU_IDENTIFICATION
 {
     USHORT Family;
+    ULONGLONG FeatureBits;
     USHORT Model;
     USHORT Stepping;
     CPU_VENDOR Vendor;
