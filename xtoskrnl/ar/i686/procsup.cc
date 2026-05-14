@@ -391,26 +391,49 @@ AR::ProcSup::InitializeProcessorStructures(IN PVOID ProcessorStructures,
     Address = ROUND_UP((UINT_PTR)ProcessorStructures, MM_PAGE_SIZE) + KERNEL_STACK_SIZE;
 
     /* Assign a space for kernel boot stack and advance */
-    *KernelBootStack = (PVOID)Address;
+    if(KernelBootStack != NULLPTR)
+    {
+        /* Return kernel boot stack address */
+        *KernelBootStack = (PVOID)Address;
+    }
     Address += KERNEL_STACK_SIZE;
 
     /* Assign a space for kernel fault stack and advance */
-    *KernelFaultStack = (PVOID)Address;
+    if(KernelFaultStack != NULLPTR)
+    {
+        /* Return kernel fault stack address */
+        *KernelFaultStack = (PVOID)Address;
+    }
     Address += KERNEL_STACK_SIZE;
 
     /* Assign a space for kernel NMI stack, no advance needed as stack grows down */
-    *KernelNmiStack = (PVOID)Address;
+    if(KernelNmiStack != NULLPTR)
+    {
+        /* Return kernel NMI stack address */
+        *KernelNmiStack = (PVOID)Address;
+    }
 
     /* Assign a space for GDT and advance */
-    *Gdt = (PKGDTENTRY)(PVOID)Address;
-    Address += sizeof(InitialGdt);
+    if(Gdt != NULLPTR)
+    {
+        /* Return GDT base address */
+        *Gdt = (PKGDTENTRY)(PVOID)Address;
+    }
+    Address += (GDT_ENTRIES * sizeof(KGDTENTRY));
+
+    /* Assign a space for TSS and advance */
+    if(Tss != NULLPTR)
+    {
+        *Tss = (PKTSS)(PVOID)Address;
+    }
+    Address += sizeof(KTSS);
 
     /* Assign a space for Processor Block and advance */
-    *ProcessorBlock = (PKPROCESSOR_BLOCK)(PVOID)Address;
-    Address += sizeof(InitialProcessorBlock);
-
-    /* Assign a space for TSS */
-    *Tss = (PKTSS)(PVOID)Address;
+    if(ProcessorBlock != NULLPTR)
+    {
+        /* Return processor block address */
+        *ProcessorBlock = (PKPROCESSOR_BLOCK)(PVOID)Address;
+    }
 }
 
 /**
