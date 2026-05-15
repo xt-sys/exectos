@@ -78,28 +78,13 @@ XTAPI
 BOOLEAN
 HL::Pic::CheckApicSupport(VOID)
 {
-    CPUID_REGISTERS CpuRegisters;
+    PKPROCESSOR_CONTROL_BLOCK Prcb;
 
-    /* Prepare CPUID registers */
-    CpuRegisters.Leaf = CPUID_GET_STANDARD1_FEATURES;
-    CpuRegisters.SubLeaf = 0;
-    CpuRegisters.Eax = 0;
-    CpuRegisters.Ebx = 0;
-    CpuRegisters.Ecx = 0;
-    CpuRegisters.Edx = 0;
+    /* Get current processor control block */
+    Prcb = KE::Processor::GetCurrentProcessorControlBlock();
 
-    /* Get CPUID */
-    AR::CpuFunc::CpuId(&CpuRegisters);
-
-    /* Check APIC status from the CPUID results */
-    if(!(CpuRegisters.Edx & CPUID_FEATURES_EDX_APIC))
-    {
-        /* APIC is not supported */
-        return FALSE;
-    }
-
-    /* APIC is supported */
-    return TRUE;
+    /* Return APIC status */
+    return (Prcb->CpuId.FeatureBits & KCF_APIC) ? TRUE : FALSE;
 }
 
 /**
@@ -116,28 +101,13 @@ XTAPI
 BOOLEAN
 HL::Pic::CheckX2ApicSupport(VOID)
 {
-    CPUID_REGISTERS CpuRegisters;
+    PKPROCESSOR_CONTROL_BLOCK Prcb;
 
-    /* Prepare CPUID registers */
-    CpuRegisters.Leaf = CPUID_GET_STANDARD1_FEATURES;
-    CpuRegisters.SubLeaf = 0;
-    CpuRegisters.Eax = 0;
-    CpuRegisters.Ebx = 0;
-    CpuRegisters.Ecx = 0;
-    CpuRegisters.Edx = 0;
+    /* Get current processor control block */
+    Prcb = KE::Processor::GetCurrentProcessorControlBlock();
 
-    /* Get CPUID */
-    AR::CpuFunc::CpuId(&CpuRegisters);
-
-    /* Check x2APIC status from the CPUID results */
-    if(!(CpuRegisters.Ecx & CPUID_FEATURES_ECX_X2APIC))
-    {
-        /* x2APIC is not supported */
-        return FALSE;
-    }
-
-    /* x2APIC is supported */
-    return TRUE;
+    /* Return x2APIC status */
+    return (Prcb->CpuId.FeatureBits & KCF_X2APIC) ? TRUE : FALSE;
 }
 
 /**
