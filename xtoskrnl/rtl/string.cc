@@ -428,6 +428,192 @@ RTL::String::StringLength(IN PCSTR String,
 }
 
 /**
+ * Converts a string to a number.
+ *
+ * @param String
+ *        Supplies a pointer to the NULL-terminated string to convert.
+ *
+ * @param Base
+ *        Supplies the optional numerical base for the conversion (2, 8, 10, or 16).
+ *
+ * @param Value
+ *        Supplies a pointer to a variable that receives the converted numeric value.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+RTL::String::StringToNumber(IN PCSTR String,
+                            IN ULONG Base,
+                            OUT PULONG Value)
+{
+    BOOLEAN NegativeValue;
+    ULONG Digit, Result;
+
+    /* Validate input parameters */
+    if(!String || !Value)
+    {
+        /* Invalid input parameters, return error code */
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    /* Initialize local variables */
+    NegativeValue = FALSE;
+    Result = 0;
+
+    /* Skip leading whitespaces and control characters */
+    while(*String != '\0' && *String <= ' ')
+    {
+        /* Advance to the next character */
+        String++;
+    }
+
+    /* Consume and record sign */
+    if(*String == '-')
+    {
+        /* Set negative value flag and advance to the next character */
+        NegativeValue = TRUE;
+        String++;
+    }
+    else if(*String == '+')
+    {
+        /* Advance to the next character */
+        String++;
+    }
+
+    /* Autodetect and validate the base */
+    if(Base == 0)
+    {
+        /* Autodetect base based on prefix */
+        if(String[0] == '0')
+        {
+            /* Validate prefix */
+            if(String[1] == 'x' || String[1] == 'X')
+            {
+                /* Hexadecimal base */
+                Base = 16;
+                String += 2;
+            }
+            else if(String[1] == 'o' || String[1] == 'O')
+            {
+                /* Octal base */
+                Base = 8;
+                String += 2;
+            }
+            else if(String[1] == 'b' || String[1] == 'B')
+            {
+                /* Binary base */
+                Base = 2;
+                String += 2;
+            }
+            else
+            {
+                /* Starts with 0 but no known prefix, treat as decimal */
+                Base = 10;
+            }
+        }
+        else
+        {
+            /* Default to decimal base */
+            Base = 10;
+        }
+    }
+    else
+    {
+        /* Validate explicitly provided base */
+        if(Base != 2 && Base != 8 && Base != 10 && Base != 16)
+        {
+            /* Invalid base, return error code */
+            return STATUS_INVALID_PARAMETER;
+        }
+
+        /* Check if number starts with 0 */
+        if(String[0] == '0')
+        {
+            /* Check for prefix */
+            if(Base == 16 && (String[1] == 'x' || String[1] == 'X'))
+            {
+                /* Skip hexadecimal prefix */
+                String += 2;
+            }
+            else if(Base == 8 && (String[1] == 'o' || String[1] == 'O'))
+            {
+                /* Skip octal prefix */
+                String += 2;
+            }
+            else if(Base == 2 && (String[1] == 'b' || String[1] == 'B'))
+            {
+                /* Skip binary prefix */
+                String += 2;
+            }
+        }
+    }
+
+    /* Parse string character by character */
+    while(*String != '\0')
+    {
+        /* Convert character to numeric digit */
+        if(*String >= '0' && *String <= '9')
+        {
+            /* Convert decimal digit */
+            Digit = *String - '0';
+        }
+        else if(*String >= 'A' && *String <= 'F')
+        {
+            /* Convert hexadecimal digit */
+            Digit = *String - 'A' + 10;
+        }
+        else if(*String >= 'a' && *String <= 'f')
+        {
+            /* Convert hexadecimal digit */
+            Digit = *String - 'a' + 10;
+        }
+        else
+        {
+            /* Invalid character for a number encountered, stop parsing */
+            break;
+        }
+
+        /* Check if digit is valid for the current base */
+        if(Digit >= Base)
+        {
+            /* Digit out of range for this base, stop parsing */
+            break;
+        }
+
+        /* Check for integer overflow */
+        if((Result > (MAXULONG / Base)) || ((Result * Base) > (MAXULONG - Digit)))
+        {
+            /* Integer overflow, return error code */
+            return STATUS_INTEGER_OVERFLOW;
+        }
+
+        /* Accumulate result */
+        Result = (Result * Base) + Digit;
+
+        /* Advance to the next character */
+        String++;
+    }
+
+    /* Check for negative value */
+    if(NegativeValue)
+    {
+        /* Apply sign and return the result */
+        *Value = (ULONG)(-(LONG)Result);
+    }
+    else
+    {
+        /* Return the result */
+        *Value = Result;
+    }
+
+    /* Return success */
+    return STATUS_SUCCESS;
+}
+
+/**
  * Converts a multibyte character string to its wide character representation.
  *
  * @param Destination

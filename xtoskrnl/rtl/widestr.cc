@@ -1525,6 +1525,192 @@ RTL::WideString::WideStringLength(IN PCWSTR String,
 }
 
 /**
+ * Converts a wide string to a number.
+ *
+ * @param String
+ *        Supplies a pointer to the NULL-terminated wide string to convert.
+ *
+ * @param Base
+ *        Supplies the optional numerical base for the conversion (2, 8, 10, or 16).
+ *
+ * @param Value
+ *        Supplies a pointer to a variable that receives the converted numeric value.
+ *
+ * @return This routine returns a status code.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+RTL::WideString::WideStringToNumber(IN PCWSTR String,
+                                    IN ULONG Base,
+                                    OUT PULONG Value)
+{
+    BOOLEAN NegativeValue;
+    ULONG Digit, Result;
+
+    /* Validate input parameters */
+    if(!String || !Value)
+    {
+        /* Invalid input parameters, return error code */
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    /* Initialize local variables */
+    NegativeValue = FALSE;
+    Result = 0;
+
+    /* Skip leading whitespaces and control characters */
+    while(*String != L'\0' && *String <= L' ')
+    {
+        /* Advance to the next character */
+        String++;
+    }
+
+    /* Consume and record sign */
+    if(*String == L'-')
+    {
+        /* Set negative value flag and advance to the next character */
+        NegativeValue = TRUE;
+        String++;
+    }
+    else if(*String == L'+')
+    {
+        /* Advance to the next character */
+        String++;
+    }
+
+    /* Autodetect and validate the base */
+    if(Base == 0)
+    {
+        /* Autodetect base based on prefix */
+        if(String[0] == L'0')
+        {
+            /* Validate prefix */
+            if(String[1] == L'x' || String[1] == L'X')
+            {
+                /* Hexadecimal base */
+                Base = 16;
+                String += 2;
+            }
+            else if(String[1] == L'o' || String[1] == L'O')
+            {
+                /* Octal base */
+                Base = 8;
+                String += 2;
+            }
+            else if(String[1] == L'b' || String[1] == L'B')
+            {
+                /* Binary base */
+                Base = 2;
+                String += 2;
+            }
+            else
+            {
+                /* Starts with 0 but no known prefix, treat as decimal */
+                Base = 10;
+            }
+        }
+        else
+        {
+            /* Default to decimal base */
+            Base = 10;
+        }
+    }
+    else
+    {
+        /* Validate explicitly provided base */
+        if(Base != 2 && Base != 8 && Base != 10 && Base != 16)
+        {
+            /* Invalid base, return error code */
+            return STATUS_INVALID_PARAMETER;
+        }
+
+        /* Check if number starts with 0 */
+        if(String[0] == L'0')
+        {
+            /* Check for prefix */
+            if(Base == 16 && (String[1] == L'x' || String[1] == L'X'))
+            {
+                /* Skip hexadecimal prefix */
+                String += 2;
+            }
+            else if(Base == 8 && (String[1] == L'o' || String[1] == L'O'))
+            {
+                /* Skip octal prefix */
+                String += 2;
+            }
+            else if(Base == 2 && (String[1] == L'b' || String[1] == L'B'))
+            {
+                /* Skip binary prefix */
+                String += 2;
+            }
+        }
+    }
+
+    /* Parse string character by character */
+    while(*String != L'\0')
+    {
+        /* Convert wide character to numeric digit */
+        if(*String >= L'0' && *String <= L'9')
+        {
+            /* Convert decimal digit */
+            Digit = *String - L'0';
+        }
+        else if(*String >= L'A' && *String <= L'F')
+        {
+            /* Convert hexadecimal digit */
+            Digit = *String - L'A' + 10;
+        }
+        else if(*String >= L'a' && *String <= L'f')
+        {
+            /* Convert hexadecimal digit */
+            Digit = *String - L'a' + 10;
+        }
+        else
+        {
+            /* Invalid character for a number encountered, stop parsing */
+            break;
+        }
+
+        /* Check if digit is valid for the current base */
+        if(Digit >= Base)
+        {
+            /* Digit out of range for this base, stop parsing */
+            break;
+        }
+
+        /* Check for integer overflow */
+        if((Result > (MAXULONG / Base)) || ((Result * Base) > (MAXULONG - Digit)))
+        {
+            /* Integer overflow, return error code */
+            return STATUS_INTEGER_OVERFLOW;
+        }
+
+        /* Accumulate result */
+        Result = (Result * Base) + Digit;
+
+        /* Advance to the next character */
+        String++;
+    }
+
+    /* Check for negative value */
+    if(NegativeValue)
+    {
+        /* Apply sign and return the result */
+        *Value = (ULONG)(-(LONG)Result);
+    }
+    else
+    {
+        /* Return the result */
+        *Value = Result;
+    }
+
+    /* Return success */
+    return STATUS_SUCCESS;
+}
+
+/**
  * Writes a wide character to the destination provided by the print context.
  *
  * @param Context
