@@ -16,11 +16,8 @@
  * @param Stack
  *        Supplies a pointer to the memory area that will contain a new kernel stack.
  *
- * @param LargeStack
- *        Determines whether the stack is large or small.
- *
- * @param SystemNode
- *        Specifies a preferred node used for new stack on multi-processor systems.
+ * @param StackSize
+ *        Supplies the size of the stack to be allocated, in bytes.
  *
  * @return This routine returns a status code.
  *
@@ -133,8 +130,8 @@ MM::KernelPool::AllocateProcessorStructures(OUT PVOID *StructuresData)
  * @param Stack
  *        Supplies a pointer to the memory area containing a kernel stack.
  *
- * @param LargeStack
- *        Determines whether the stack is large or small.
+ * @param StackSize
+ *        Supplies the size of the stack to be freed, in bytes.
  *
  * @return This routine does not return any value.
  *
@@ -197,6 +194,6 @@ MM::KernelPool::FreeProcessorStructures(IN PVOID StructuresData)
     if(StructuresData != NULLPTR)
     {
         /* Release the contiguous memory block back */
-        MM::Allocator::FreePool(StructuresData, 0);
+        MM::Allocator::FreePool(StructuresData);
     }
 }
