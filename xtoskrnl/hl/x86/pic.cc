@@ -102,6 +102,14 @@ BOOLEAN
 HL::Pic::CheckX2ApicSupport(VOID)
 {
     PKPROCESSOR_CONTROL_BLOCK Prcb;
+    PCWSTR KernelParameter;
+
+    /* Check if the user forced xAPIC via boot parameters */
+    if(KE::BootInformation::GetKernelParameter(L"NOX2APIC", &KernelParameter) == STATUS_SUCCESS)
+    {
+        /* The NOX2APIC flag is present, explicitly disable x2APIC support */
+        return FALSE;
+    }
 
     /* Get current processor control block */
     Prcb = KE::Processor::GetCurrentProcessorControlBlock();
