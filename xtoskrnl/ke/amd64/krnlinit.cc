@@ -110,6 +110,10 @@ KE::KernelInit::BootstrapKernel(VOID)
     /* Enable shadow buffer for framebuffer */
     HL::FrameBuffer::EnableShadowBuffer();
 
+    /* Start all application processors */
+    KE::Processor::InitializeProcessorBlocks();
+    HL::Cpu::StartAllProcessors();
+
     /* Enter infinite loop */
     DebugPrint(L"KernelInit::BootstrapKernel() finished. Entering infinite loop.\n");
     KE::Crash::HaltSystem();
