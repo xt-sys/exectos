@@ -10,7 +10,11 @@
 
 
 /**
- * This routine initializes XT kernel.
+ * Bootstraps an Application Processor (AP) into the active kernel. This routine is executed exclusively by secondary
+ * processors after being awakened by the BSP. It is called directly from the startup trampoline.
+ *
+ * @param StartBlock
+ *        Supplies a pointer to the processor start block containing initialization information provided by the kernel.
  *
  * @return This routine does not return any value.
  *
@@ -18,50 +22,34 @@
  */
 XTAPI
 VOID
-KE::KernelInit::InitializeKernel(VOID)
+KE::KernelInit::BootstrapApplicationProcessor(IN PPROCESSOR_START_BLOCK StartBlock)
 {
-    XTSTATUS Status;
+    PKPROCESSOR_BLOCK ProcessorBlock;
 
-    /* Initialize hardware layer subsystem */
-    Status = HL::Init::InitializeSystem();
-    if(Status != STATUS_SUCCESS)
-    {
-        /* Hardware layer initialization failed, kernel panic */
-        DebugPrint(L"Failed to initialize hardware layer subsystem!\n");
-        KE::Crash::Panic(0);
-    }
-}
-
-/**
- * Performs architecture-specific initialization for the kernel executive.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTAPI
-VOID
-KE::KernelInit::InitializeMachine(VOID)
-{
-    /* Re-enable IDE interrupts */
-    HL::IoPort::WritePort8(0x376, 0);
-    HL::IoPort::WritePort8(0x3F6, 0);
-
-    /* Initialize frame buffer */
-    HL::FrameBuffer::InitializeFrameBuffer();
-
-    /* Initialize page map support */
-    MM::Paging::InitializePageMapSupport();
-
-    /* Initialize Kernel Shared Data (KSD) */
-    KE::SharedData::InitializeKernelSharedData();
+    /* Initialize application CPU */
+    AR::ProcSup::InitializeProcessor(StartBlock->ProcessorStructures);
 
     /* Initialize processor */
     HL::Cpu::InitializeProcessor();
+
+    /* Raise to HIGH runlevel */
+    KE::RunLevel::RaiseRunLevel(HIGH_LEVEL);
+
+    /* Mark processor as started */
+    StartBlock->Started = TRUE;
+
+    /* Get current processor block */
+    ProcessorBlock = KE::Processor::GetCurrentProcessorBlock();
+
+    /* Enter infinite loop */
+    DebugPrint(L"KernelInit::BootstrapApplicationProcessor() finished for CPU #%lu. Entering infinite loop.\n",
+               ProcessorBlock->CpuNumber);
+    KE::Crash::HaltSystem();
 }
 
 /**
- * This routine starts up the XT kernel. It is called after switching boot stack.
+ * Bootstraps the XT kernel and global subsystems. This routine is executed exclusively by the Bootstrap Processor
+ * and it is called immediately after switching to the kernel boot stack.
  *
  * @return This routine does not return any value.
  *
@@ -69,7 +57,7 @@ KE::KernelInit::InitializeMachine(VOID)
  */
 XTAPI
 VOID
-KE::KernelInit::StartKernel(VOID)
+KE::KernelInit::BootstrapKernel(VOID)
 {
     PKPROCESSOR_CONTROL_BLOCK Prcb;
     ULONG_PTR PageDirectory[2];
@@ -122,8 +110,59 @@ KE::KernelInit::StartKernel(VOID)
     HL::FrameBuffer::EnableShadowBuffer();
 
     /* Enter infinite loop */
-    DebugPrint(L"KernelInit::StartKernel() finished. Entering infinite loop.\n");
+    DebugPrint(L"KernelInit::BootstrapKernel() finished. Entering infinite loop.\n");
     KE::Crash::HaltSystem();
+}
+
+/**
+ * This routine initializes XT kernel.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KE::KernelInit::InitializeKernel(VOID)
+{
+    XTSTATUS Status;
+
+    /* Initialize hardware layer subsystem */
+    Status = HL::Init::InitializeSystem();
+    if(Status != STATUS_SUCCESS)
+    {
+        /* Hardware layer initialization failed, kernel panic */
+        DebugPrint(L"Failed to initialize hardware layer subsystem!\n");
+        KE::Crash::Panic(0);
+    }
+}
+
+/**
+ * Performs architecture-specific initialization for the kernel executive.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KE::KernelInit::InitializeMachine(VOID)
+{
+    /* Re-enable IDE interrupts */
+    HL::IoPort::WritePort8(0x376, 0);
+    HL::IoPort::WritePort8(0x3F6, 0);
+
+    /* Initialize frame buffer */
+    HL::FrameBuffer::InitializeFrameBuffer();
+
+    /* Initialize page map support */
+    MM::Paging::InitializePageMapSupport();
+
+    /* Initialize Kernel Shared Data (KSD) */
+    KE::SharedData::InitializeKernelSharedData();
+
+    /* Initialize processor */
+    HL::Cpu::InitializeProcessor();
 }
 
 /**
@@ -144,7 +183,7 @@ KE::KernelInit::SwitchBootStack(VOID)
     Stack = ((ULONG_PTR)AR::ProcSup::GetBootStack() + KERNEL_STACK_SIZE) & ~(STACK_ALIGNMENT - 1);
 
     /* Get address of KernelInit::StartKernel() */
-    StartKernel = (PVOID)KE::KernelInit::StartKernel;
+    StartKernel = (PVOID)KE::KernelInit::BootstrapKernel;
 
     /* Discard old stack frame, switch stack and jump to KernelInit::StartKernel() */
     __asm__ volatile("movq %[Stack], %%rsp\n"
