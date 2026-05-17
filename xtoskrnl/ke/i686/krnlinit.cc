@@ -4,6 +4,7 @@
  * FILE:            xtoskrnl/ke/i686/krnlinit.cc
  * DESCRIPTION:     CPU architecture specific kernel initialization
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ *                  Aiken Harris <harraiken91@gmail.com>
  */
 
 #include <xtos.hh>
@@ -180,7 +181,7 @@ KE::KernelInit::SwitchBootStack(VOID)
     PVOID StartKernel;
 
     /* Calculate the stack pointer at the top of the buffer, ensuring it is properly aligned as required by the ABI */
-    Stack = ((ULONG_PTR)AR::ProcSup::GetBootStack() + KERNEL_STACK_SIZE) & ~(STACK_ALIGNMENT - 1);
+    Stack = ((ULONG_PTR)AR::ProcSup::GetBootStack() & ~(STACK_ALIGNMENT - 1));
 
     /* Get address of KernelInit::StartKernel() */
     StartKernel = (PVOID)KE::KernelInit::BootstrapKernel;
