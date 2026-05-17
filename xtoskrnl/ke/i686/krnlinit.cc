@@ -110,7 +110,7 @@ KE::KernelInit::BootstrapKernel(VOID)
     HL::FrameBuffer::EnableShadowBuffer();
 
     /* Enter infinite loop */
-    DebugPrint(L"KernelInit::StartKernel() finished. Entering infinite loop.\n");
+    DebugPrint(L"KernelInit::BootstrapKernel() finished. Entering infinite loop.\n");
     KE::Crash::HaltSystem();
 }
 
