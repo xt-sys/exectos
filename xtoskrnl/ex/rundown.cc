@@ -17,7 +17,7 @@
  *
  * @return This routine returns TRUE if protection acquired successfully, or FALSE otherwise.
  *
- * @since NT 5.1
+ * @since XT 1.0
  */
 XTFASTCALL
 BOOLEAN
@@ -65,7 +65,7 @@ EX::Rundown::AcquireProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
  *
  * @return This routine does not return any value.
  *
- * @since NT 5.1
+ * @since XT 1.0
  */
 XTFASTCALL
 VOID
@@ -82,7 +82,7 @@ EX::Rundown::CompleteProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
  *
  * @return This routine does not return any value.
  *
- * @since NT 5.1
+ * @since XT 1.0
  */
 XTFASTCALL
 VOID
@@ -100,7 +100,7 @@ EX::Rundown::InitializeProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
  *
  * @return This routine does not return any value.
  *
- * @since NT 5.1
+ * @since XT 1.0
  */
 XTFASTCALL
 VOID
@@ -117,7 +117,7 @@ EX::Rundown::ReInitializeProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
  *
  * @return This routine does not return any value.
  *
- * @since NT 5.1
+ * @since XT 1.0
  */
 XTFASTCALL
 VOID
@@ -168,7 +168,7 @@ EX::Rundown::ReleaseProtection(IN PEX_RUNDOWN_REFERENCE Descriptor)
  *
  * @return This routine does not return any value.
  *
- * @since NT 5.1
+ * @since XT 1.0
  */
 XTFASTCALL
 VOID
