@@ -12,7 +12,7 @@
 /**
  * Calibrates the Local APIC timer frequency.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -104,6 +104,10 @@ HL::Timer::CalibrateTscCounter(VOID)
  *
  * @param HardwareDivider
  *        Supplies the programmed threshold/divider for the interrupt generation.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
  */
 XTAPI
 VOID
@@ -124,7 +128,7 @@ HL::Timer::ConfigureTimeIncrement(IN ULONGLONG BaseFrequency, IN ULONGLONG Hardw
  * Initializes the High Precision Event Timer (HPET) by discovering its ACPI configuration and mapping
  * its hardware registers into the kernel's virtual address space.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -388,7 +392,7 @@ HL::Timer::InitializeApicTimer(VOID)
 /**
  * Initializes the High Precision Event Timer (HPET) Timer.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -446,7 +450,7 @@ HL::Timer::InitializeHpetTimer(VOID)
 /**
  * Initializes the legacy Programmable Interval Timer (PIT).
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */

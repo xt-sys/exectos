@@ -15,7 +15,7 @@
  * @param Time
  *        Supplies a pointer to a structure to receive the system time.
  *
- * @return This routine returns the status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -192,7 +192,7 @@ HL::Rtc::GetRealTimeClock(OUT PTIME_FIELDS Time)
  * @param Time
  *        Supplies a pointer to a structure with populated data and time.
  *
- * @return This routine returns the status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
