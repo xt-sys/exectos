@@ -29,7 +29,7 @@ AR::CpuFunc::ClearInterruptFlag(VOID)
  * @param Registers
  *        Supplies a pointer to the structure containing all the necessary registers and leafs for CPUID.
  *
- * @return TRUE if CPUID function could be executed, FALSE otherwise.
+ * @return This routine returns TRUE if CPUID function could be executed, FALSE otherwise.
  *
  * @since XT 1.0
  */
@@ -365,7 +365,7 @@ AR::CpuFunc::MemoryBarrier(VOID)
  * @param ControlRegister
  *        Supplies a number of a control register which controls the general behavior of a CPU.
  *
- * @return The value stored in the control register.
+ * @return This routine returns the value stored in the control register.
  *
  * @since XT 1.0
  */
@@ -429,7 +429,7 @@ AR::CpuFunc::ReadControlRegister(IN USHORT ControlRegister)
  * @param DebugRegister
  *        Supplies a number of a debug register to read from.
  *
- * @return The value stored in the specified debug register.
+ * @return This routine returns the value stored in the specified debug register.
  *
  * @since XT 1.0
  */
@@ -498,7 +498,7 @@ AR::CpuFunc::ReadDebugRegister(IN USHORT DebugRegister)
  * @param Offset
  *        Specifies the offset from the beginning of GS segment.
  *
- * @return Returns the value read from the specified memory location relative to GS segment.
+ * @return This routine returns the value read from the specified memory location relative to GS segment.
  *
  * @since XT 1.0
  */
@@ -707,7 +707,7 @@ AR::CpuFunc::StoreLocalDescriptorTable(OUT PVOID Destination)
 XTCDECL
 VOID
 AR::CpuFunc::StoreSegment(IN USHORT Segment,
-                      OUT PVOID Destination)
+                          OUT PVOID Destination)
 {
     switch(Segment)
     {
