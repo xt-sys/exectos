@@ -18,7 +18,7 @@
  */
 XTAPI
 PVOID
-AR::ProcSup::GetBootStack(VOID)
+AR::ProcessorSupport::GetBootStack(VOID)
 {
     /* Return base address of kernel boot stack */
     return (PVOID)((ULONG_PTR)BootStack + KERNEL_STACK_SIZE);
@@ -26,9 +26,9 @@ AR::ProcSup::GetBootStack(VOID)
 
 XTAPI
 VOID
-AR::ProcSup::GetTrampolineInformation(IN TRAMPOLINE_TYPE TrampolineType,
-                                      OUT PVOID *TrampolineCode,
-                                      OUT PULONG_PTR TrampolineSize)
+AR::ProcessorSupport::GetTrampolineInformation(IN TRAMPOLINE_TYPE TrampolineType,
+                                               OUT PVOID *TrampolineCode,
+                                               OUT PULONG_PTR TrampolineSize)
 {
     /* Get trampoline information */
     switch(TrampolineType)
@@ -63,7 +63,7 @@ AR::ProcSup::GetTrampolineInformation(IN TRAMPOLINE_TYPE TrampolineType,
  */
 XTAPI
 VOID
-AR::ProcSup::IdentifyProcessor(VOID)
+AR::ProcessorSupport::IdentifyProcessor(VOID)
 {
     PKPROCESSOR_CONTROL_BLOCK Prcb;
     CPUID_REGISTERS CpuRegisters;
@@ -137,7 +137,7 @@ AR::ProcSup::IdentifyProcessor(VOID)
  */
 XTAPI
 VOID
-AR::ProcSup::IdentifyProcessorFeatures(VOID)
+AR::ProcessorSupport::IdentifyProcessorFeatures(VOID)
 {
     ULONG MaxExtendedLeaf, MaxStandardLeaf;
     PKPROCESSOR_CONTROL_BLOCK Prcb;
@@ -278,7 +278,7 @@ AR::ProcSup::IdentifyProcessorFeatures(VOID)
  */
 XTAPI
 VOID
-AR::ProcSup::InitializeGdt(IN PKPROCESSOR_BLOCK ProcessorBlock)
+AR::ProcessorSupport::InitializeGdt(IN PKPROCESSOR_BLOCK ProcessorBlock)
 {
     /* Initialize GDT entries */
     SetGdtEntry(ProcessorBlock->GdtBase, KGDT_NULL, 0x0, 0x0, KGDT_TYPE_NONE, KGDT_DPL_SYSTEM, 1);
@@ -307,7 +307,7 @@ AR::ProcSup::InitializeGdt(IN PKPROCESSOR_BLOCK ProcessorBlock)
  */
 XTAPI
 VOID
-AR::ProcSup::InitializeIdt(IN PKPROCESSOR_BLOCK ProcessorBlock)
+AR::ProcessorSupport::InitializeIdt(IN PKPROCESSOR_BLOCK ProcessorBlock)
 {
     UINT Vector;
 
@@ -355,7 +355,7 @@ AR::ProcSup::InitializeIdt(IN PKPROCESSOR_BLOCK ProcessorBlock)
  */
 XTAPI
 VOID
-AR::ProcSup::InitializeProcessor(IN PVOID ProcessorStructures)
+AR::ProcessorSupport::InitializeProcessor(IN PVOID ProcessorStructures)
 {
     PVOID KernelBootStack, KernelFaultStack, KernelNmiStack;
     KDESCRIPTOR GdtDescriptor, IdtDescriptor;
@@ -440,11 +440,11 @@ AR::ProcSup::InitializeProcessor(IN PVOID ProcessorStructures)
  */
 XTAPI
 VOID
-AR::ProcSup::InitializeProcessorBlock(OUT PKPROCESSOR_BLOCK ProcessorBlock,
-                                      IN PKGDTENTRY Gdt,
-                                      IN PKIDTENTRY Idt,
-                                      IN PKTSS Tss,
-                                      IN PVOID DpcStack)
+AR::ProcessorSupport::InitializeProcessorBlock(OUT PKPROCESSOR_BLOCK ProcessorBlock,
+                                               IN PKGDTENTRY Gdt,
+                                               IN PKIDTENTRY Idt,
+                                               IN PKTSS Tss,
+                                               IN PVOID DpcStack)
 {
     /* Set processor block and processor control block */
     ProcessorBlock->Self = ProcessorBlock;
@@ -490,7 +490,7 @@ AR::ProcSup::InitializeProcessorBlock(OUT PKPROCESSOR_BLOCK ProcessorBlock,
  */
 XTAPI
 VOID
-AR::ProcSup::InitializeProcessorRegisters(VOID)
+AR::ProcessorSupport::InitializeProcessorRegisters(VOID)
 {
     ULONGLONG PatAttributes;
 
@@ -563,13 +563,13 @@ AR::ProcSup::InitializeProcessorRegisters(VOID)
  */
 XTAPI
 VOID
-AR::ProcSup::InitializeProcessorStructures(IN PVOID ProcessorStructures,
-                                           OUT PKGDTENTRY *Gdt,
-                                           OUT PKTSS *Tss,
-                                           OUT PKPROCESSOR_BLOCK *ProcessorBlock,
-                                           OUT PVOID *KernelBootStack,
-                                           OUT PVOID *KernelFaultStack,
-                                           OUT PVOID *KernelNmiStack)
+AR::ProcessorSupport::InitializeProcessorStructures(IN PVOID ProcessorStructures,
+                                                    OUT PKGDTENTRY *Gdt,
+                                                    OUT PKTSS *Tss,
+                                                    OUT PKPROCESSOR_BLOCK *ProcessorBlock,
+                                                    OUT PVOID *KernelBootStack,
+                                                    OUT PVOID *KernelFaultStack,
+                                                    OUT PVOID *KernelNmiStack)
 {
     UINT_PTR Address;
 
@@ -631,7 +631,7 @@ AR::ProcSup::InitializeProcessorStructures(IN PVOID ProcessorStructures,
  */
 XTAPI
 VOID
-AR::ProcSup::InitializeSegments(VOID)
+AR::ProcessorSupport::InitializeSegments(VOID)
 {
     /* Initialize segments */
     AR::CpuFunc::LoadSegment(SEGMENT_CS, KGDT_R0_CODE);
@@ -657,10 +657,10 @@ AR::ProcSup::InitializeSegments(VOID)
  */
 XTAPI
 VOID
-AR::ProcSup::InitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock,
-                           IN PVOID KernelBootStack,
-                           IN PVOID KernelFaultStack,
-                           IN PVOID KernelNmiStack)
+AR::ProcessorSupport::InitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock,
+                                    IN PVOID KernelBootStack,
+                                    IN PVOID KernelFaultStack,
+                                    IN PVOID KernelNmiStack)
 {
     /* Fill TSS with zeroes */
     RtlZeroMemory(ProcessorBlock->TssBase, sizeof(KTSS));
@@ -703,13 +703,13 @@ AR::ProcSup::InitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock,
  */
 XTAPI
 VOID
-AR::ProcSup::SetGdtEntry(IN PKGDTENTRY Gdt,
-                         IN USHORT Selector,
-                         IN ULONG_PTR Base,
-                         IN ULONG Limit,
-                         IN UCHAR Type,
-                         IN UCHAR Dpl,
-                         IN UCHAR SegmentMode)
+AR::ProcessorSupport::SetGdtEntry(IN PKGDTENTRY Gdt,
+                                  IN USHORT Selector,
+                                  IN ULONG_PTR Base,
+                                  IN ULONG Limit,
+                                  IN UCHAR Type,
+                                  IN UCHAR Dpl,
+                                  IN UCHAR SegmentMode)
 {
     PKGDTENTRY GdtEntry;
     UCHAR Granularity;
@@ -769,9 +769,9 @@ AR::ProcSup::SetGdtEntry(IN PKGDTENTRY Gdt,
  */
 XTAPI
 VOID
-AR::ProcSup::SetGdtEntryBase(IN PKGDTENTRY Gdt,
-                             IN USHORT Selector,
-                             IN ULONG_PTR Base)
+AR::ProcessorSupport::SetGdtEntryBase(IN PKGDTENTRY Gdt,
+                                      IN USHORT Selector,
+                                      IN ULONG_PTR Base)
 {
     PKGDTENTRY GdtEntry;
 
@@ -815,13 +815,13 @@ AR::ProcSup::SetGdtEntryBase(IN PKGDTENTRY Gdt,
  */
 XTAPI
 VOID
-AR::ProcSup::SetIdtGate(IN PKIDTENTRY Idt,
-                        IN USHORT Vector,
-                        IN PVOID Handler,
-                        IN USHORT Selector,
-                        IN USHORT Ist,
-                        IN USHORT Dpl,
-                        IN USHORT Type)
+AR::ProcessorSupport::SetIdtGate(IN PKIDTENTRY Idt,
+                                 IN USHORT Vector,
+                                 IN PVOID Handler,
+                                 IN USHORT Selector,
+                                 IN USHORT Ist,
+                                 IN USHORT Dpl,
+                                 IN USHORT Type)
 {
     /* Set the handler's address */
     Idt[Vector].OffsetLow = ((ULONG_PTR)Handler & 0xFFFF);

@@ -47,7 +47,7 @@ KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
     }
 
     /* Initialize boot CPU and set the unhandled interrupt routine */
-    AR::ProcSup::InitializeProcessor(NULLPTR);
+    AR::ProcessorSupport::InitializeProcessor(NULLPTR);
     AR::Traps::SetUnhandledInterruptRoutine(HL::Irq::HandleUnexpectedInterrupt);
 
     /* Initialize system resources */

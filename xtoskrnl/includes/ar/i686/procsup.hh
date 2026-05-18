@@ -15,7 +15,7 @@
 /* Architecture-specific Library */
 namespace AR
 {
-    class ProcSup
+    class ProcessorSupport
     {
         private:
             STATIC UCHAR BootStack[KERNEL_STACK_SIZE];

@@ -10,25 +10,25 @@
 
 
 /* Initial kernel boot stack */
-UCHAR AR::ProcSup::BootStack[KERNEL_STACK_SIZE] = {};
+UCHAR AR::ProcessorSupport::BootStack[KERNEL_STACK_SIZE] = {};
 
 /* Initial kernel fault stack */
-UCHAR AR::ProcSup::FaultStack[KERNEL_STACK_SIZE] = {};
+UCHAR AR::ProcessorSupport::FaultStack[KERNEL_STACK_SIZE] = {};
 
 /* Initial GDT */
-KGDTENTRY AR::ProcSup::InitialGdt[GDT_ENTRIES] = {};
+KGDTENTRY AR::ProcessorSupport::InitialGdt[GDT_ENTRIES] = {};
 
 /* Initial IDT */
-KIDTENTRY AR::ProcSup::InitialIdt[IDT_ENTRIES] = {};
+KIDTENTRY AR::ProcessorSupport::InitialIdt[IDT_ENTRIES] = {};
 
 /* Initial Processor Block */
-KPROCESSOR_BLOCK AR::ProcSup::InitialProcessorBlock;
+KPROCESSOR_BLOCK AR::ProcessorSupport::InitialProcessorBlock;
 
 /* Initial TSS */
-KTSS AR::ProcSup::InitialTss;
+KTSS AR::ProcessorSupport::InitialTss;
 
 /* Initial kernel NMI stack */
-UCHAR AR::ProcSup::NmiStack[KERNEL_STACK_SIZE] = {};
+UCHAR AR::ProcessorSupport::NmiStack[KERNEL_STACK_SIZE] = {};
 
 /* Unhandled interrupt routine */
 PINTERRUPT_HANDLER AR::Traps::UnhandledInterruptRoutine = NULLPTR;

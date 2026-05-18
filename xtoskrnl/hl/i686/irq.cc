@@ -204,13 +204,13 @@ HL::Irq::RegisterInterruptHandler(IN ULONG Vector,
     ProcessorBlock = KE::Processor::GetCurrentProcessorBlock();
 
     /* Update interrupt handler */
-    AR::ProcSup::SetIdtGate(ProcessorBlock->IdtBase,
-                            Vector,
-                            Handler,
-                            KGDT_R0_CODE,
-                            0,
-                            KIDT_ACCESS_RING0,
-                            I686_INTERRUPT_GATE);
+    AR::ProcessorSupport::SetIdtGate(ProcessorBlock->IdtBase,
+                                     Vector,
+                                     Handler,
+                                     KGDT_R0_CODE,
+                                     0,
+                                     KIDT_ACCESS_RING0,
+                                     I686_INTERRUPT_GATE);
 }
 
 /**

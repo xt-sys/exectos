@@ -1032,7 +1032,7 @@ Protocol::InstallXtLoaderProtocol()
     LoaderProtocol.Boot.RegisterMenu = XtLoader::RegisterBootMenu;
     LoaderProtocol.Boot.RegisterProtocol = RegisterBootProtocol;
     LoaderProtocol.BootUtils.GetBooleanParameter = BootUtils::GetBooleanParameter;
-    LoaderProtocol.BootUtils.GetTrampolineInformation = AR::ProcSup::GetTrampolineInformation;
+    LoaderProtocol.BootUtils.GetTrampolineInformation = AR::ProcessorSupport::GetTrampolineInformation;
     LoaderProtocol.Config.GetBooleanValue = Configuration::GetBooleanValue;
     LoaderProtocol.Config.GetBootOptionValue = Configuration::GetBootOptionValue;
     LoaderProtocol.Config.GetEditableOptions = Configuration::GetEditableOptions;

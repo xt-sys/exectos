@@ -99,7 +99,7 @@ HL::Cpu::StartAllProcessors(VOID)
     }
 
     /* Get trampoline information */
-    AR::ProcSup::GetTrampolineInformation(TrampolineApStartup, &TrampolineCode, &TrampolineCodeSize);
+    AR::ProcessorSupport::GetTrampolineInformation(TrampolineApStartup, &TrampolineCode, &TrampolineCodeSize);
 
     /* Verify trampoline information */
     if(TrampolineCode == NULLPTR || TrampolineCodeSize == 0)
@@ -161,8 +161,8 @@ HL::Cpu::StartAllProcessors(VOID)
         }
 
         /* Get ProcessorBlock and Stack address */
-        AR::ProcSup::InitializeProcessorStructures(CpuStructures, NULLPTR, NULLPTR, &ProcessorBlock,
-                                                   &StartBlock->Stack, NULLPTR, NULLPTR);
+        AR::ProcessorSupport::InitializeProcessorStructures(CpuStructures, NULLPTR, NULLPTR, &ProcessorBlock,
+                                                            &StartBlock->Stack, NULLPTR, NULLPTR);
 
         /* Set processor number directly in the processor block */
         ProcessorBlock->CpuNumber = CpuNumber;

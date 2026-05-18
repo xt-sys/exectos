@@ -25,7 +25,7 @@ namespace AR
                                                      IN UINT_PTR Value);
     };
 
-    class ProcSup
+    class ProcessorSupport
     {
         public:
             STATIC XTAPI VOID GetTrampolineInformation(IN TRAMPOLINE_TYPE TrampolineType,

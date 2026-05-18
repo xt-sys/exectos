@@ -28,7 +28,7 @@ KE::KernelInit::BootstrapApplicationProcessor(IN PPROCESSOR_START_BLOCK StartBlo
     PKPROCESSOR_BLOCK ProcessorBlock;
 
     /* Initialize application CPU */
-    AR::ProcSup::InitializeProcessor(StartBlock->ProcessorStructures);
+    AR::ProcessorSupport::InitializeProcessor(StartBlock->ProcessorStructures);
 
     /* Initialize processor */
     HL::Cpu::InitializeProcessor();
@@ -96,7 +96,7 @@ KE::KernelInit::BootstrapKernel(VOID)
 
     /* Initialize Idle thread */
     KE::KThread::InitializeThread(CurrentProcess, CurrentThread, NULLPTR, NULLPTR, NULLPTR,
-                                  NULLPTR, NULLPTR, AR::ProcSup::GetBootStack(), TRUE);
+                                  NULLPTR, NULLPTR, AR::ProcessorSupport::GetBootStack(), TRUE);
     CurrentThread->NextProcessor = Prcb->CpuNumber;
     CurrentThread->Priority = THREAD_HIGH_PRIORITY;
     CurrentThread->State = Running;
@@ -185,7 +185,7 @@ KE::KernelInit::SwitchBootStack(VOID)
     PVOID StartKernel;
 
     /* Calculate the stack pointer at the top of the buffer, ensuring it is properly aligned as required by the ABI */
-    Stack = ((ULONG_PTR)AR::ProcSup::GetBootStack() & ~(STACK_ALIGNMENT - 1));
+    Stack = ((ULONG_PTR)AR::ProcessorSupport::GetBootStack() & ~(STACK_ALIGNMENT - 1));
 
     /* Get address of KernelInit::StartKernel() */
     StartKernel = (PVOID)KE::KernelInit::BootstrapKernel;
