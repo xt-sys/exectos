@@ -13,13 +13,16 @@
 /**
  * Allocates, maps and commits a requested system interrupt level internally.
  *
+ * @param Irq
+ *        Supplies the hardware IRQ line number to be allocated and mapped.
+ *
  * @param RunLevel
  *        Supplies the actual system run level to allocate.
  *
  * @param Vector
  *        Supplies the interrupt handler vector assigned to process requests originating on the line.
  *
- * @return This routine returns the configured target vector.
+ * @return This routine does not return any value.
  *
  * @since XT 1.0
  */
@@ -136,7 +139,7 @@ HL::Pic::ClearApicErrors(VOID)
 /**
  * Searches the ACPI MADT tables for the I/O APIC controllers.
  *
- * @return This routine returns the status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -264,7 +267,7 @@ HL::Pic::GetCpuApicId(VOID)
  * @param EntryNumber
  *        Supplies a pointer to the memory area where the entry number will be stored.
  *
- * @return This routine returns the status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
