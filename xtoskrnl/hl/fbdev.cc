@@ -379,7 +379,7 @@ HL::FrameBuffer::DrawPixel(IN ULONG PositionX,
 /**
  * Enables the Shadow Buffer (Double Buffering) for high-performance rendering.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -452,7 +452,7 @@ HL::FrameBuffer::GetFrameBufferResolution(OUT PULONG Width,
  * @param Color
  *        Specifies the color in (A)RGB format.
  *
- * @return Returns the color in FrameBuffer format.
+ * @return This routine returns the color in FrameBuffer format.
  *
  * @since XT 1.0
  */
@@ -476,7 +476,7 @@ HL::FrameBuffer::GetRGBColor(IN ULONG Color)
 /**
  * Initializes frame buffer display.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */

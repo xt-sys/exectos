@@ -50,7 +50,7 @@ HL::Acpi::CacheAcpiTable(IN PACPI_DESCRIPTION_HEADER AcpiTable)
  * @param Rsdp
  *        Supplies a pointer to the memory area, where RSDP virtual address will be stored.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -72,7 +72,7 @@ HL::Acpi::GetAcpiSystemDescriptionPointer(OUT PACPI_RSDP *Rsdp)
  * @param AcpiTable
  *        Supplies a pointer to memory area where ACPI table virtual address will be stored.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -148,7 +148,7 @@ HL::Acpi::GetSystemInformation(OUT PACPI_SYSTEM_INFO *SystemInfo)
 /**
  * Performs an initialization of the ACPI subsystem.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -185,7 +185,7 @@ HL::Acpi::InitializeAcpi(VOID)
 /**
  * Initializes the kernel's local ACPI cache storage.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -220,7 +220,7 @@ HL::Acpi::InitializeAcpiCache(VOID)
  * @param AcpiTable
  *        Supplies a pointer to memory area where ACPI table virtual address will be stored.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -326,7 +326,7 @@ HL::Acpi::InitializeAcpiSystemDescriptionTable(OUT PACPI_DESCRIPTION_HEADER *Acp
 /**
  * Initializes System Information structure based on the ACPI provided data.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -425,7 +425,7 @@ HL::Acpi::InitializeAcpiSystemInformation(VOID)
 /**
  * Initializes ACPI System Information data structure based on the size of available ACPI data.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -521,7 +521,7 @@ HL::Acpi::InitializeAcpiSystemStructure(VOID)
 /**
  * Initializes the ACPI Timer.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -568,7 +568,7 @@ HL::Acpi::InitializeAcpiTimer(VOID)
  * @param AcpiTable
  *        Supplies a pointer to memory area where ACPI table virtual address will be stored.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -625,7 +625,7 @@ HL::Acpi::QueryAcpiCache(IN ULONG Signature,
  * @param AcpiTable
  *        Supplies a pointer to memory area where ACPI table virtual address will be stored.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */

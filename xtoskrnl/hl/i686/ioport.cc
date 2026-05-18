@@ -15,7 +15,7 @@
  * @param Port
  *        Specifies the address to read from, in the range of 0-0xFFFF.
  *
- * @return The value read from the port.
+ * @return This routine returns the value read from the port.
  *
  * @since XT 1.0
  */
@@ -36,7 +36,7 @@ HL::IoPort::ReadPort8(IN USHORT Port)
  * @param Port
  *        Specifies the address to read from, in the range of 0-0xFFFF.
  *
- * @return The value read from the port.
+ * @return This routine returns the value read from the port.
  *
  * @since XT 1.0
  */
@@ -57,7 +57,7 @@ HL::IoPort::ReadPort16(IN USHORT Port)
  * @param Port
  *        Specifies the address to read from, in the range of 0-0xFFFF.
  *
- * @return The value read from the port.
+ * @return This routine returns the value read from the port.
  *
  * @since XT 1.0
  */

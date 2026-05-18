@@ -24,7 +24,7 @@
  * @param Poll
  *        Indicates whether to only poll, not reading the data.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -98,7 +98,7 @@ HL::ComPort::ReadComPort(IN PCPPORT Port,
  * @param Byte
  *        Value expected from the port.
  *
- * @return Byte read from COM port.
+ * @return This routine returns a byte read from COM port.
  *
  * @since XT 1.0
  */
@@ -144,7 +144,7 @@ HL::ComPort::ReadComPortLsr(IN PCPPORT Port,
  * @param BaudRate
  *        Supplies an optional port baud rate.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -240,7 +240,7 @@ HL::ComPort::InitializeComPort(IN OUT PCPPORT Port,
  * @param Byte
  *        Data to be written.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
