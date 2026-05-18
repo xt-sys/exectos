@@ -82,7 +82,7 @@ KD::DebugIo::DbgPrint(PCWSTR Format,
 /**
  * Detects and enables the kernel's debug ports based on the 'DEBUG' parameter passed to the kernel.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -211,7 +211,7 @@ KD::DebugIo::DetectDebugPorts(VOID)
 /**
  * Initializes the kernel's debugger I/O providers.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -249,7 +249,7 @@ KD::DebugIo::InitializeDebugIoProviders(VOID)
 /**
  * Initializes the framebuffer device provider for the kernel debugger.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -288,7 +288,7 @@ KD::DebugIo::InitializeFrameBufferProvider(VOID)
 /**
  * Initializes the serial port device provider for the kernel debugger.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -376,7 +376,7 @@ KD::DebugIo::SetPrintRoutine(PKD_PRINT_ROUTINE DebugPrintRoutine)
  * @param Character
  *        The integer promotion of the character to be written.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
