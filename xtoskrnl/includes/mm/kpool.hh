@@ -20,8 +20,7 @@ namespace MM
         public:
             STATIC XTAPI XTSTATUS AllocateKernelStack(OUT PVOID *Stack,
                                                       IN ULONG StackSize);
-            STATIC XTAPI XTSTATUS AllocateProcessorStructures(IN ULONG CpuNumber,
-                                                              OUT PVOID *StructuresData);
+            STATIC XTAPI XTSTATUS AllocateProcessorStructures(OUT PVOID *StructuresData);
             STATIC XTAPI VOID FreeKernelStack(IN PVOID Stack,
                                               IN ULONG StackSize);
             STATIC XTAPI VOID FreeProcessorStructures(IN PVOID StructuresData);

@@ -18,12 +18,13 @@ namespace KE
     class KernelInit
     {
         public:
+            STATIC XTAPI VOID BootstrapApplicationProcessor(IN PPROCESSOR_START_BLOCK StartBlock);
             STATIC XTAPI VOID InitializeMachine(VOID);
             STATIC XTAPI VOID SwitchBootStack(VOID);
 
         private:
+            STATIC XTAPI VOID BootstrapKernel(VOID);
             STATIC XTAPI VOID InitializeKernel(VOID);
-            STATIC XTAPI VOID StartKernel(VOID);
     };
 }
 

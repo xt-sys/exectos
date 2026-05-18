@@ -33,7 +33,7 @@ DbgPrint(PCWSTR Format,
     /* Initialise the va_list */
     VA_START(Arguments, Format);
 
-    KD::DebugIo::DbgPrintEx(Format, Arguments);
+    KD::DebugIo::DbgPrint(Format, Arguments);
 
     /* Clean up the va_list */
     VA_END(Arguments);

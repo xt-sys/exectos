@@ -19,8 +19,10 @@ namespace HL
     {
         private:
             STATIC KAFFINITY ActiveProcessors;
+
         public:
             STATIC XTAPI VOID InitializeProcessor(VOID);
+            STATIC XTAPI XTSTATUS StartAllProcessors(VOID);
     };
 }
 

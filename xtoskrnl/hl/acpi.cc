@@ -128,6 +128,24 @@ HL::Acpi::GetAcpiTimerInfo(OUT PACPI_TIMER_INFO *AcpiTimerInfo)
 }
 
 /**
+ * Gets the ACPI system information structure containing processor and topology data.
+ *
+ * @param SystemInfo
+ *        Supplies a pointer to the memory area where the pointer to the system information structure will be stored.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+HL::Acpi::GetSystemInformation(OUT PACPI_SYSTEM_INFO *SystemInfo)
+{
+    /* Return a pointer to the ACPI system information */
+    *SystemInfo = &HL::Acpi::SystemInfo;
+}
+
+/**
  * Performs an initialization of the ACPI subsystem.
  *
  * @return This routine returns a status code.
@@ -478,7 +496,7 @@ HL::Acpi::InitializeAcpiSystemStructure(VOID)
     PageCount = SIZE_TO_PAGES(CpuCount * sizeof(PROCESSOR_IDENTITY));
 
     /* Allocate memory for CPU information */
-    Status = MM::HardwarePool::AllocateHardwareMemory(PageCount, TRUE, &PhysicalAddress);
+    Status = MM::HardwarePool::AllocateHardwareMemory(PageCount, TRUE, MM_MAXIMUM_PHYSICAL_ADDRESS, &PhysicalAddress);
     if(Status != STATUS_SUCCESS)
     {
         /* Failed to allocate memory, return error */

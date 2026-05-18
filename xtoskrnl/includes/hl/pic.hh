@@ -38,7 +38,10 @@ namespace HL
                                                IN BOOLEAN Self);
             STATIC XTAPI VOID SendEoi(VOID);
             STATIC XTAPI VOID SendIpi(IN ULONG ApicId,
-                                      IN ULONG Vector);
+                                      IN ULONG Vector,
+                                      IN APIC_DM DeliveryMode,
+                                      IN APIC_DSH Destination,
+                                      IN ULONG TriggerMode);
             STATIC XTAPI VOID SendSelfIpi(IN ULONG Vector);
             STATIC XTFASTCALL VOID WriteApicRegister(IN APIC_REGISTER Register,
                                                      IN ULONGLONG Value);

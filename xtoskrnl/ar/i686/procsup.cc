@@ -20,6 +20,7 @@ XTAPI
 PVOID
 AR::ProcSup::GetBootStack(VOID)
 {
+    /* Return base address of kernel boot stack */
     return (PVOID)((ULONG_PTR)BootStack + KERNEL_STACK_SIZE);
 }
 
@@ -29,14 +30,17 @@ AR::ProcSup::GetTrampolineInformation(IN TRAMPOLINE_TYPE TrampolineType,
                                       OUT PVOID *TrampolineCode,
                                       OUT PULONG_PTR TrampolineSize)
 {
+    /* Get trampoline information */
     switch(TrampolineType)
     {
         case TrampolineApStartup:
+            /* Get AP startup trampoline information */
             *TrampolineCode = (PVOID)ArStartApplicationProcessor;
             *TrampolineSize = (ULONG_PTR)ArStartApplicationProcessorEnd -
                               (ULONG_PTR)ArStartApplicationProcessor;
             break;
         default:
+            /* Unknown trampoline type */
             *TrampolineCode = NULLPTR;
             *TrampolineSize = 0;
             break;
@@ -44,8 +48,7 @@ AR::ProcSup::GetTrampolineInformation(IN TRAMPOLINE_TYPE TrampolineType,
 }
 
 /**
- * Identifies processor type (vendor, model, stepping) as well as looks for available CPU features and stores them
- * in Processor Control Block (PRCB).
+ * Identifies processor type (vendor, model, stepping) and stores them in Processor Control Block (PRCB).
  *
  * @return This routine does not return any value.
  *
@@ -58,9 +61,6 @@ AR::ProcSup::IdentifyProcessor(VOID)
     PKPROCESSOR_CONTROL_BLOCK Prcb;
     CPUID_REGISTERS CpuRegisters;
     CPUID_SIGNATURE CpuSignature;
-
-    /* Not fully implemented yet */
-    UNIMPLEMENTED;
 
     /* Get current processor control block */
     Prcb = KE::Processor::GetCurrentProcessorControlBlock();
@@ -117,11 +117,12 @@ AR::ProcSup::IdentifyProcessor(VOID)
         Prcb->CpuId.Vendor = CPU_VENDOR_UNKNOWN;
     }
 
-    /* TODO: Store a list of CPU features in processor control block */
+    /* Identify processor features */
+    IdentifyProcessorFeatures();
 }
 
 /**
- * Initializes i686 processor specific structures.
+ * Identifies processor features and stores them in Processor Control Block (PRCB).
  *
  * @return This routine does not return any value.
  *
@@ -129,67 +130,133 @@ AR::ProcSup::IdentifyProcessor(VOID)
  */
 XTAPI
 VOID
-AR::ProcSup::InitializeProcessor(IN PVOID ProcessorStructures)
+AR::ProcSup::IdentifyProcessorFeatures(VOID)
 {
-    KDESCRIPTOR GdtDescriptor, IdtDescriptor;
-    PVOID KernelBootStack, KernelFaultStack, KernelNmiStack;
-    PKPROCESSOR_BLOCK ProcessorBlock;
-    PKGDTENTRY Gdt;
-    PKIDTENTRY Idt;
-    PKTSS Tss;
+    ULONG MaxExtendedLeaf, MaxStandardLeaf;
+    PKPROCESSOR_CONTROL_BLOCK Prcb;
+    CPUID_REGISTERS CpuRegisters;
 
-    /* Check if processor structures buffer provided */
-    if(ProcessorStructures)
+    /* Get current processor control block */
+    Prcb = KE::Processor::GetCurrentProcessorControlBlock();
+
+    /* Get maximum CPUID standard leaf */
+    RTL::Memory::ZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
+    CpuRegisters.Leaf = CPUID_GET_VENDOR_STRING;
+    AR::CpuFunc::CpuId(&CpuRegisters);
+    MaxStandardLeaf = CpuRegisters.Eax;
+
+    /* Get maximum CPUID extended leaf */
+    RTL::Memory::ZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
+    CpuRegisters.Leaf = CPUID_GET_EXTENDED_MAX;
+    AR::CpuFunc::CpuId(&CpuRegisters);
+    MaxExtendedLeaf = CpuRegisters.Eax;
+
+    /* Check if CPU supports standard features leaf */
+    if(MaxStandardLeaf >= CPUID_GET_STANDARD1_FEATURES)
     {
-        /* Assign CPU structures from provided buffer */
-        InitializeProcessorStructures(ProcessorStructures, &Gdt, &Tss, &ProcessorBlock,
-                                      &KernelBootStack, &KernelFaultStack, &KernelNmiStack);
+        /* Get CPU standard features */
+        RTL::Memory::ZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
+        CpuRegisters.Leaf = CPUID_GET_STANDARD1_FEATURES;
+        AR::CpuFunc::CpuId(&CpuRegisters);
 
-        /* Use global IDT */
-        Idt = InitialIdt;
+        /* Store CPU standard features in processor control block */
+        if(CpuRegisters.Ecx & CPUID_FEATURES_ECX_SSE3) Prcb->CpuId.FeatureBits |= KCF_SSE3;
+        if(CpuRegisters.Ecx & CPUID_FEATURES_ECX_VMX) Prcb->CpuId.FeatureBits |= KCF_VMX;
+        if(CpuRegisters.Ecx & CPUID_FEATURES_ECX_SSSE3) Prcb->CpuId.FeatureBits |= KCF_SSSE3;
+        if(CpuRegisters.Ecx & CPUID_FEATURES_ECX_SSE4_1) Prcb->CpuId.FeatureBits |= KCF_SSE41;
+        if(CpuRegisters.Ecx & CPUID_FEATURES_ECX_SSE4_2) Prcb->CpuId.FeatureBits |= KCF_SSE42;
+        if(CpuRegisters.Ecx & CPUID_FEATURES_ECX_X2APIC) Prcb->CpuId.FeatureBits |= KCF_X2APIC;
+        if(CpuRegisters.Ecx & CPUID_FEATURES_ECX_POPCNT) Prcb->CpuId.FeatureBits |= KCF_POPCNT;
+        if(CpuRegisters.Ecx & CPUID_FEATURES_ECX_TSC_DEADLINE) Prcb->CpuId.FeatureBits |= KCF_TSC_DEADLINE;
+        if(CpuRegisters.Ecx & CPUID_FEATURES_ECX_AES) Prcb->CpuId.FeatureBits |= KCF_AES;
+        if(CpuRegisters.Ecx & CPUID_FEATURES_ECX_XSAVE) Prcb->CpuId.FeatureBits |= KCF_XSAVE;
+        if(CpuRegisters.Ecx & CPUID_FEATURES_ECX_AVX) Prcb->CpuId.FeatureBits |= KCF_AVX;
+        if(CpuRegisters.Ecx & CPUID_FEATURES_ECX_RDRAND) Prcb->CpuId.FeatureBits |= KCF_RDRAND;
+        if(CpuRegisters.Edx & CPUID_FEATURES_EDX_VME) Prcb->CpuId.FeatureBits |= KCF_VME;
+        if(CpuRegisters.Edx & CPUID_FEATURES_EDX_PSE) Prcb->CpuId.FeatureBits |= KCF_LARGE_PAGE;
+        if(CpuRegisters.Edx & CPUID_FEATURES_EDX_TSC) Prcb->CpuId.FeatureBits |= KCF_RDTSC;
+        if(CpuRegisters.Edx & CPUID_FEATURES_EDX_PAE) Prcb->CpuId.FeatureBits |= KCF_PAE;
+        if(CpuRegisters.Edx & CPUID_FEATURES_EDX_MCE) Prcb->CpuId.FeatureBits |= KCF_MCE;
+        if(CpuRegisters.Edx & CPUID_FEATURES_EDX_CX8) Prcb->CpuId.FeatureBits |= KCF_CMPXCHG8B;
+        if(CpuRegisters.Edx & CPUID_FEATURES_EDX_APIC) Prcb->CpuId.FeatureBits |= KCF_APIC;
+        if(CpuRegisters.Edx & CPUID_FEATURES_EDX_SEP) Prcb->CpuId.FeatureBits |= KCF_FAST_SYSCALL;
+        if(CpuRegisters.Edx & CPUID_FEATURES_EDX_MTRR) Prcb->CpuId.FeatureBits |= KCF_MTRR;
+        if(CpuRegisters.Edx & CPUID_FEATURES_EDX_PGE) Prcb->CpuId.FeatureBits |= KCF_GLOBAL_PAGE;
+        if(CpuRegisters.Edx & CPUID_FEATURES_EDX_MCA) Prcb->CpuId.FeatureBits |= KCF_MCA;
+        if(CpuRegisters.Edx & CPUID_FEATURES_EDX_CMOV) Prcb->CpuId.FeatureBits |= KCF_CMOV;
+        if(CpuRegisters.Edx & CPUID_FEATURES_EDX_PAT) Prcb->CpuId.FeatureBits |= KCF_PAT;
+        if(CpuRegisters.Edx & CPUID_FEATURES_EDX_PSE36) Prcb->CpuId.FeatureBits |= KCF_PSE36;
+        if(CpuRegisters.Edx & CPUID_FEATURES_EDX_CLFLUSH) Prcb->CpuId.FeatureBits |= KCF_CLFLUSH;
+        if(CpuRegisters.Edx & CPUID_FEATURES_EDX_FXSR) Prcb->CpuId.FeatureBits |= KCF_FXSR;
+        if(CpuRegisters.Edx & CPUID_FEATURES_EDX_ACPI) Prcb->CpuId.FeatureBits |= KCF_ACPI;
+        if(CpuRegisters.Edx & CPUID_FEATURES_EDX_MMX) Prcb->CpuId.FeatureBits |= KCF_MMX;
+        if(CpuRegisters.Edx & CPUID_FEATURES_EDX_SSE) Prcb->CpuId.FeatureBits |= KCF_SSE;
+        if(CpuRegisters.Edx & CPUID_FEATURES_EDX_SSE2) Prcb->CpuId.FeatureBits |= KCF_SSE2;
+        if(CpuRegisters.Edx & CPUID_FEATURES_EDX_HTT) Prcb->CpuId.FeatureBits |= KCF_SMT;
     }
-    else
+
+    /* Check if CPU supports standard7 features leaf */
+    if(MaxStandardLeaf >= CPUID_GET_STANDARD7_FEATURES)
     {
-        /* Use initial structures */
-        Gdt = InitialGdt;
-        Idt = InitialIdt;
-        Tss = &InitialTss;
-        KernelBootStack = (PVOID)((ULONG_PTR)&BootStack + KERNEL_STACK_SIZE);
-        KernelFaultStack = (PVOID)((ULONG_PTR)&FaultStack + KERNEL_STACK_SIZE);
-        KernelNmiStack = (PVOID)((ULONG_PTR)&NmiStack + KERNEL_STACK_SIZE);
-        ProcessorBlock = &InitialProcessorBlock;
+        /* Get CPU standard features */
+        RTL::Memory::ZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
+        CpuRegisters.Leaf = CPUID_GET_STANDARD7_FEATURES;
+        AR::CpuFunc::CpuId(&CpuRegisters);
+
+        /* Store CPU standard7 features in processor control block */
+        if(CpuRegisters.Ebx & CPUID_FEATURES_EBX_FSGSBASE) Prcb->CpuId.FeatureBits |= KCF_FSGSBASE;
+        if(CpuRegisters.Ebx & CPUID_FEATURES_EBX_AVX2) Prcb->CpuId.FeatureBits |= KCF_AVX2;
+        if(CpuRegisters.Ebx & CPUID_FEATURES_EBX_SMEP) Prcb->CpuId.FeatureBits |= KCF_SMEP;
+        if(CpuRegisters.Ebx & CPUID_FEATURES_EBX_RDSEED) Prcb->CpuId.FeatureBits |= KCF_RDSEED;
+        if(CpuRegisters.Ebx & CPUID_FEATURES_EBX_SMAP) Prcb->CpuId.FeatureBits |= KCF_SMAP;
+        if(CpuRegisters.Ebx & CPUID_FEATURES_EBX_SHA) Prcb->CpuId.FeatureBits |= KCF_SHA;
+        if(CpuRegisters.Ecx & CPUID_FEATURES_ECX_LA57) Prcb->CpuId.FeatureBits |= KCF_LA57;
     }
 
-    /* Initialize processor block */
-    InitializeProcessorBlock(ProcessorBlock, Gdt, Idt, Tss, KernelFaultStack);
+    /* Check if CPU supports power management leaf */
+    if(MaxStandardLeaf >= CPUID_GET_POWER_MANAGEMENT)
+    {
+        /* Get CPU power management features */
+        RTL::Memory::ZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
+        CpuRegisters.Leaf = CPUID_GET_POWER_MANAGEMENT;
+        AR::CpuFunc::CpuId(&CpuRegisters);
 
-    /* Initialize GDT, IDT and TSS */
-    InitializeGdt(ProcessorBlock);
-    InitializeIdt(ProcessorBlock);
-    InitializeTss(ProcessorBlock, KernelBootStack, KernelFaultStack, KernelNmiStack);
+        /* Store CPU power management features in processor control block */
+        if(CpuRegisters.Eax & CPUID_FEATURES_EAX_ARAT) Prcb->CpuId.FeatureBits |= KCF_ARAT;
+    }
 
-    /* Set GDT and IDT descriptors */
-    GdtDescriptor.Base = Gdt;
-    GdtDescriptor.Limit = (GDT_ENTRIES * sizeof(KGDTENTRY)) - 1;
-    IdtDescriptor.Base = Idt;
-    IdtDescriptor.Limit = (IDT_ENTRIES * sizeof(KIDTENTRY)) - 1;
+    /* Check if CPU supports extended features leaf */
+    if(MaxExtendedLeaf >= CPUID_GET_EXTENDED_FEATURES)
+    {
+        /* Get CPU extended features */
+        RTL::Memory::ZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
+        CpuRegisters.Leaf = CPUID_GET_EXTENDED_FEATURES;
+        AR::CpuFunc::CpuId(&CpuRegisters);
 
-    /* Load GDT, IDT and TSS */
-    AR::CpuFunc::LoadGlobalDescriptorTable(&GdtDescriptor.Limit);
-    AR::CpuFunc::LoadInterruptDescriptorTable(&IdtDescriptor.Limit);
-    AR::CpuFunc::LoadTaskRegister((UINT)KGDT_SYS_TSS);
+        /* Store CPU extended features in processor control block */
+        if(CpuRegisters.Ecx & CPUID_FEATURES_ECX_SVM) Prcb->CpuId.ExtendedFeatureBits |= KCF_SVM;
+        if(CpuRegisters.Ecx & CPUID_FEATURES_ECX_SSE4A) Prcb->CpuId.ExtendedFeatureBits |= KCF_SSE4A;
+        if(CpuRegisters.Ecx & CPUID_FEATURES_ECX_FMA4) Prcb->CpuId.ExtendedFeatureBits |= KCF_FMA4;
+        if(CpuRegisters.Ecx & CPUID_FEATURES_ECX_TOPOLOGY_EXTENSIONS) Prcb->CpuId.ExtendedFeatureBits |= KCF_TOPOEXT;
+        if(CpuRegisters.Edx & CPUID_FEATURES_EDX_SYSCALL_SYSRET) Prcb->CpuId.ExtendedFeatureBits |= KCF_SYSCALL;
+        if(CpuRegisters.Edx & CPUID_FEATURES_EDX_NX) Prcb->CpuId.ExtendedFeatureBits |= KCF_NX_BIT;
+        if(CpuRegisters.Edx & CPUID_FEATURES_EDX_RDTSCP) Prcb->CpuId.ExtendedFeatureBits |= KCF_RDTSCP;
+        if(CpuRegisters.Edx & CPUID_FEATURES_EDX_LONG_MODE) Prcb->CpuId.ExtendedFeatureBits |= KCF_64BIT;
+        if(CpuRegisters.Edx & CPUID_FEATURES_EDX_3DNOW_EXT) Prcb->CpuId.ExtendedFeatureBits |= KCF_3DNOW_EXT;
+        if(CpuRegisters.Edx & CPUID_FEATURES_EDX_3DNOW) Prcb->CpuId.ExtendedFeatureBits |= KCF_3DNOW;
+    }
 
-    /* Enter passive IRQ level */
-    HL::RunLevel::SetRunLevel(PASSIVE_LEVEL);
+    /* Check if CPU supports advanced power management leaf */
+    if(MaxExtendedLeaf >= CPUID_GET_ADVANCED_POWER_MANAGEMENT)
+    {
+        /* Get CPU advanced power management features */
+        RTL::Memory::ZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
+        CpuRegisters.Leaf = CPUID_GET_ADVANCED_POWER_MANAGEMENT;
+        AR::CpuFunc::CpuId(&CpuRegisters);
 
-    /* Initialize segment registers */
-    InitializeSegments();
-
-    /* Initialize processor registers */
-    InitializeProcessorRegisters();
-
-    /* Identify processor */
-    IdentifyProcessor();
+        /* Store CPU advanced power management features in processor control block */
+        if(CpuRegisters.Edx & CPUID_FEATURES_EDX_TSCI) Prcb->CpuId.ExtendedFeatureBits |= KCF_INVARIANT_TSC;
+    }
 }
 
 /**
@@ -272,6 +339,76 @@ AR::ProcSup::InitializeIdt(IN PKPROCESSOR_BLOCK ProcessorBlock)
     SetIdtGate(ProcessorBlock->IdtBase, 0x2C, (PVOID)ArTrapEntry[0x2C], KGDT_R0_CODE, 0, KIDT_ACCESS_RING3, I686_INTERRUPT_GATE);
     SetIdtGate(ProcessorBlock->IdtBase, 0x2D, (PVOID)ArTrapEntry[0x2D], KGDT_R0_CODE, 0, KIDT_ACCESS_RING3, I686_INTERRUPT_GATE);
     SetIdtGate(ProcessorBlock->IdtBase, 0x2E, (PVOID)ArTrapEntry[0x2E], KGDT_R0_CODE, 0, KIDT_ACCESS_RING3, I686_INTERRUPT_GATE);
+}
+
+
+/**
+ * Initializes i686 processor specific structures.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+AR::ProcSup::InitializeProcessor(IN PVOID ProcessorStructures)
+{
+    KDESCRIPTOR GdtDescriptor, IdtDescriptor;
+    PVOID KernelBootStack, KernelFaultStack, KernelNmiStack;
+    PKPROCESSOR_BLOCK ProcessorBlock;
+    PKGDTENTRY Gdt;
+    PKIDTENTRY Idt;
+    PKTSS Tss;
+
+    /* Check if processor structures buffer provided */
+    if(ProcessorStructures)
+    {
+        /* Assign CPU structures from provided buffer */
+        InitializeProcessorStructures(ProcessorStructures, &Gdt, &Tss, &ProcessorBlock,
+                                      &KernelBootStack, &KernelFaultStack, &KernelNmiStack);
+
+        /* Use global IDT */
+        Idt = InitialIdt;
+    }
+    else
+    {
+        /* Use initial structures */
+        Gdt = InitialGdt;
+        Idt = InitialIdt;
+        Tss = &InitialTss;
+        KernelBootStack = (PVOID)((ULONG_PTR)&BootStack + KERNEL_STACK_SIZE);
+        KernelFaultStack = (PVOID)((ULONG_PTR)&FaultStack + KERNEL_STACK_SIZE);
+        KernelNmiStack = (PVOID)((ULONG_PTR)&NmiStack + KERNEL_STACK_SIZE);
+        ProcessorBlock = &InitialProcessorBlock;
+    }
+
+    /* Initialize processor block */
+    InitializeProcessorBlock(ProcessorBlock, Gdt, Idt, Tss, KernelFaultStack);
+
+    /* Initialize GDT, IDT and TSS */
+    InitializeGdt(ProcessorBlock);
+    InitializeIdt(ProcessorBlock);
+    InitializeTss(ProcessorBlock, KernelBootStack, KernelFaultStack, KernelNmiStack);
+
+    /* Set GDT and IDT descriptors */
+    GdtDescriptor.Base = Gdt;
+    GdtDescriptor.Limit = (GDT_ENTRIES * sizeof(KGDTENTRY)) - 1;
+    IdtDescriptor.Base = Idt;
+    IdtDescriptor.Limit = (IDT_ENTRIES * sizeof(KIDTENTRY)) - 1;
+
+    /* Load GDT, IDT and TSS */
+    AR::CpuFunc::LoadGlobalDescriptorTable(&GdtDescriptor.Limit);
+    AR::CpuFunc::LoadInterruptDescriptorTable(&IdtDescriptor.Limit);
+    AR::CpuFunc::LoadTaskRegister((UINT)KGDT_SYS_TSS);
+
+    /* Initialize segment registers */
+    InitializeSegments();
+
+    /* Initialize processor registers */
+    InitializeProcessorRegisters();
+
+    /* Identify processor */
+    IdentifyProcessor();
 }
 
 /**
@@ -391,26 +528,49 @@ AR::ProcSup::InitializeProcessorStructures(IN PVOID ProcessorStructures,
     Address = ROUND_UP((UINT_PTR)ProcessorStructures, MM_PAGE_SIZE) + KERNEL_STACK_SIZE;
 
     /* Assign a space for kernel boot stack and advance */
-    *KernelBootStack = (PVOID)Address;
+    if(KernelBootStack != NULLPTR)
+    {
+        /* Return kernel boot stack address */
+        *KernelBootStack = (PVOID)Address;
+    }
     Address += KERNEL_STACK_SIZE;
 
     /* Assign a space for kernel fault stack and advance */
-    *KernelFaultStack = (PVOID)Address;
+    if(KernelFaultStack != NULLPTR)
+    {
+        /* Return kernel fault stack address */
+        *KernelFaultStack = (PVOID)Address;
+    }
     Address += KERNEL_STACK_SIZE;
 
     /* Assign a space for kernel NMI stack, no advance needed as stack grows down */
-    *KernelNmiStack = (PVOID)Address;
+    if(KernelNmiStack != NULLPTR)
+    {
+        /* Return kernel NMI stack address */
+        *KernelNmiStack = (PVOID)Address;
+    }
 
     /* Assign a space for GDT and advance */
-    *Gdt = (PKGDTENTRY)(PVOID)Address;
-    Address += sizeof(InitialGdt);
+    if(Gdt != NULLPTR)
+    {
+        /* Return GDT base address */
+        *Gdt = (PKGDTENTRY)(PVOID)Address;
+    }
+    Address += (GDT_ENTRIES * sizeof(KGDTENTRY));
+
+    /* Assign a space for TSS and advance */
+    if(Tss != NULLPTR)
+    {
+        *Tss = (PKTSS)(PVOID)Address;
+    }
+    Address += sizeof(KTSS);
 
     /* Assign a space for Processor Block and advance */
-    *ProcessorBlock = (PKPROCESSOR_BLOCK)(PVOID)Address;
-    Address += sizeof(InitialProcessorBlock);
-
-    /* Assign a space for TSS */
-    *Tss = (PKTSS)(PVOID)Address;
+    if(ProcessorBlock != NULLPTR)
+    {
+        /* Return processor block address */
+        *ProcessorBlock = (PKPROCESSOR_BLOCK)(PVOID)Address;
+    }
 }
 
 /**

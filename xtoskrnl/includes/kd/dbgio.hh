@@ -21,6 +21,7 @@ namespace KD
             STATIC PKD_PRINT_ROUTINE KdPrint;
 
         private:
+            STATIC KSPIN_LOCK DebugIoLock;
             STATIC KD_DEBUG_MODE DebugMode;
             STATIC PKD_INIT_ROUTINE IoProvidersInitRoutines[KDBG_PROVIDERS_COUNT];
             STATIC LIST_ENTRY Providers;
@@ -30,8 +31,8 @@ namespace KD
         public:
             STATIC XTCDECL VOID DbgPrint(PCWSTR Format,
                                          ...);
-            STATIC XTCDECL VOID DbgPrintEx(PCWSTR Format,
-                                           VA_LIST Arguments);
+            STATIC XTCDECL VOID DbgPrint(PCWSTR Format,
+                                         VA_LIST Arguments);
             STATIC XTAPI XTSTATUS InitializeDebugIoProviders(VOID);
             STATIC XTAPI VOID SetPrintRoutine(PKD_PRINT_ROUTINE DebugPrintRoutine);
 

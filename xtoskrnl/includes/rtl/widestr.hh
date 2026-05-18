@@ -49,6 +49,9 @@ namespace RTL
             STATIC XTAPI PWCHAR TrimWideString(IN PWCHAR String);
             STATIC XTAPI SIZE_T WideStringLength(IN PCWSTR String,
                                                  IN SIZE_T MaxLength);
+            STATIC XTAPI XTSTATUS WideStringToNumber(IN PCWSTR String,
+                                                     IN ULONG Base,
+                                                     OUT PULONG Value);
 
         private:
             STATIC XTAPI XTSTATUS FormatArgumentSpecifier(IN PRTL_PRINT_CONTEXT Context,

@@ -16,11 +16,8 @@
  * @param Stack
  *        Supplies a pointer to the memory area that will contain a new kernel stack.
  *
- * @param LargeStack
- *        Determines whether the stack is large or small.
- *
- * @param SystemNode
- *        Specifies a preferred node used for new stack on multi-processor systems.
+ * @param StackSize
+ *        Supplies the size of the stack to be allocated, in bytes.
  *
  * @return This routine returns a status code.
  *
@@ -95,9 +92,6 @@ MM::KernelPool::AllocateKernelStack(OUT PVOID *Stack,
 /**
  * Allocates a buffer for structures needed by a processor and assigns it to a corresponding CPU.
  *
- * @param CpuNumber
- *        Specifies the zero-indexed CPU number as an owner of the allocated structures.
- *
  * @param StructuresData
  *        Supplies a pointer to the memory area that will contain the allocated buffer.
  *
@@ -107,12 +101,9 @@ MM::KernelPool::AllocateKernelStack(OUT PVOID *Stack,
  */
 XTAPI
 XTSTATUS
-MM::KernelPool::AllocateProcessorStructures(IN ULONG CpuNumber,
-                                            OUT PVOID *StructuresData)
+MM::KernelPool::AllocateProcessorStructures(OUT PVOID *StructuresData)
 {
-    PKPROCESSOR_BLOCK ProcessorBlock;
     PVOID ProcessorStructures;
-    UINT_PTR Address;
     XTSTATUS Status;
 
     /* Assign memory for processor structures */
@@ -125,15 +116,6 @@ MM::KernelPool::AllocateProcessorStructures(IN ULONG CpuNumber,
 
     /* Make sure all structures are zeroed */
     RTL::Memory::ZeroMemory(ProcessorStructures, KPROCESSOR_STRUCTURES_SIZE);
-
-    /* Align address to page size boundary and find a space for processor block */
-    Address = ROUND_UP((UINT_PTR)ProcessorStructures, MM_PAGE_SIZE);
-    ProcessorBlock = (PKPROCESSOR_BLOCK)((PUCHAR)Address +
-                     (KERNEL_STACKS * KERNEL_STACK_SIZE) +
-                     (GDT_ENTRIES * sizeof(KGDTENTRY)));
-
-    /* Store processor number in the processor block */
-    ProcessorBlock->CpuNumber = CpuNumber;
 
     /* Return pointer to the processor structures */
     *StructuresData = ProcessorStructures;
@@ -148,8 +130,8 @@ MM::KernelPool::AllocateProcessorStructures(IN ULONG CpuNumber,
  * @param Stack
  *        Supplies a pointer to the memory area containing a kernel stack.
  *
- * @param LargeStack
- *        Determines whether the stack is large or small.
+ * @param StackSize
+ *        Supplies the size of the stack to be freed, in bytes.
  *
  * @return This routine does not return any value.
  *
@@ -212,6 +194,6 @@ MM::KernelPool::FreeProcessorStructures(IN PVOID StructuresData)
     if(StructuresData != NULLPTR)
     {
         /* Release the contiguous memory block back */
-        MM::Allocator::FreePool(StructuresData, 0);
+        MM::Allocator::FreePool(StructuresData);
     }
 }

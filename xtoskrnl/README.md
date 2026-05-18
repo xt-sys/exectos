@@ -15,6 +15,12 @@ The following is a consolidated list of available kernel parameters:
    scheduler tick. Valid values include `LAPIC` (Local APIC Timer), `HPET` (High Precision Event Timer), and `PIT`
    (Legacy Programmable Interval Timer). If this parameter is omitted, the kernel will autonomously probe the hardware
    and select the most optimal clock source for the current CPU topology, (defaulting to the Local APIC on modern systems.
+ * **MAXCPUS**: Specifies the maximum number of logical processors the kernel is allowed to initialize and schedule.
+   Setting `MAXCPUS=1` explicitly disables Symmetric Multiprocessing (SMP), restricting execution exclusively to the Boot
+   Strap Processor (BSP) and ignoring all Application Processors (APs).
+ * **NOX2APIC**: Explicitly disables x2APIC support. When specified, the kernel bypasses hardware feature detection for
+   x2APIC and forces the use of the classic, memory-mapped (MMIO) xAPIC mode. This parameter is particularly useful for
+   troubleshooting interrupt routing issues or ensuring compatibility with specific hypervisors and legacy emulators.
  * **NOXPA**: Disables PAE or LA57 support, depending on the CPU architecture. This parameter is handled by the
    bootloader, which configures paging and selects the appropriate Page Map Level (PML) before transferring control to
    the kernel.

@@ -21,6 +21,12 @@ ETHREAD KE::KThread::InitialThread = {};
 /* Kernel UBSAN active frame flag */
 BOOLEAN KE::KUbsan::ActiveFrame = FALSE;
 
+/* Total number of installed processors in the system */
+ULONG KE::Processor::InstalledCpus;
+
+/* Array of pointers to processor control blocks */
+PKPROCESSOR_BLOCK *KE::Processor::ProcessorBlocks;
+
 /* Kernel shared data (KSD) */
 PKSHARED_DATA KE::SharedData::KernelSharedData;
 

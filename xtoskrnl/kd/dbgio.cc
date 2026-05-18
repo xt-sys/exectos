@@ -33,7 +33,7 @@ KD::DebugIo::DbgPrint(PCWSTR Format,
     VA_START(Arguments, Format);
 
     /* Call the actual debug print routine */
-    DbgPrintEx(Format, Arguments);
+    DbgPrint(Format, Arguments);
 
     /* Clean up the va_list */
     VA_END(Arguments);
@@ -54,11 +54,15 @@ KD::DebugIo::DbgPrint(PCWSTR Format,
  */
 XTCDECL
 VOID
-KD::DebugIo::DbgPrintEx(PCWSTR Format,
-                        VA_LIST Arguments)
+KD::DebugIo::DbgPrint(PCWSTR Format,
+                      VA_LIST Arguments)
 {
     PLIST_ENTRY DispatchTableEntry;
     PKD_DISPATCH_TABLE DispatchTable;
+
+    /* Raise runlevel and acquire the Debug I/O lock */
+    KE::RaiseRunLevel RunLevel(HIGH_LEVEL);
+    KE::SpinLockGuard SpinLock(&DebugIoLock);
 
     /* Iterate over all registered debug providers */
     DispatchTableEntry = Providers.Flink;
@@ -217,6 +221,9 @@ KD::DebugIo::InitializeDebugIoProviders(VOID)
 {
     ULONG Index;
     XTSTATUS ProviderStatus, Status;
+
+    /* Initialize debug I/O spinlock */
+    KE::SpinLock::InitializeSpinLock(&DebugIoLock);
 
     /* Initialize debug providers list */
     RTL::LinkedList::InitializeListHead(&Providers);

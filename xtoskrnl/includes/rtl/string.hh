@@ -38,6 +38,9 @@ namespace RTL
                                             IN ULONG Length);
             STATIC XTAPI SIZE_T StringLength(IN PCSTR String,
                                              IN SIZE_T MaxLength);
+            STATIC XTAPI XTSTATUS StringToNumber(IN PCSTR String,
+                                                 IN ULONG Base,
+                                                 OUT PULONG Value);
             STATIC XTAPI SIZE_T StringToWideString(OUT PWCHAR Destination,
                                                    IN PCSTR *Source,
                                                    IN SIZE_T Length);

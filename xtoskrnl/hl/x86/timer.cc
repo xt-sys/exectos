@@ -925,84 +925,31 @@ XTAPI
 VOID
 HL::Timer::QueryTimerCapabilities(VOID)
 {
+    PKPROCESSOR_CONTROL_BLOCK Prcb;
     CPUID_REGISTERS CpuRegisters;
     ULONG MaxStandardLeaf;
-    ULONG MaxExtendedLeaf;
+
+    /* Get current processor control block */
+    Prcb = KE::Processor::GetCurrentProcessorControlBlock();
+
+    /* Set timer capabilities based on supported CPU features */
+    TimerCapabilities.Arat = (Prcb->CpuId.FeatureBits & KCF_ARAT) != 0;
+    TimerCapabilities.InvariantTsc= (Prcb->CpuId.ExtendedFeatureBits & KCF_INVARIANT_TSC) != 0;
+    TimerCapabilities.RDTSCP = (Prcb->CpuId.ExtendedFeatureBits & KCF_RDTSCP) != 0;
+    TimerCapabilities.TscDeadline = (Prcb->CpuId.FeatureBits & KCF_TSC_DEADLINE) != 0;
 
     /* Query maximum standard CPUID leaf */
+    RTL::Memory::ZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
     CpuRegisters.Leaf = CPUID_GET_VENDOR_STRING;
-    CpuRegisters.SubLeaf = 0;
-    CpuRegisters.Eax = 0;
-    CpuRegisters.Ebx = 0;
-    CpuRegisters.Ecx = 0;
-    CpuRegisters.Edx = 0;
     AR::CpuFunc::CpuId(&CpuRegisters);
-
-    /* Save maximum supported standard CPUID leaf */
     MaxStandardLeaf = CpuRegisters.Eax;
-
-    /* Query maximum extended CPUID leaf */
-    CpuRegisters.Leaf = CPUID_GET_EXTENDED_MAX;
-    CpuRegisters.SubLeaf = 0;
-    CpuRegisters.Eax = 0;
-    CpuRegisters.Ebx = 0;
-    CpuRegisters.Ecx = 0;
-    CpuRegisters.Edx = 0;
-    AR::CpuFunc::CpuId(&CpuRegisters);
-
-    /* Save maximum supported extended CPUID leaf */
-    MaxExtendedLeaf = CpuRegisters.Eax;
-
-    /* Check TSC-Deadline mode if leaf supported */
-    if(MaxStandardLeaf >= CPUID_GET_STANDARD1_FEATURES)
-    {
-        /* Query the standard feature CPUI leaf */
-        CpuRegisters.Leaf = CPUID_GET_STANDARD1_FEATURES;
-        CpuRegisters.SubLeaf = 0;
-        CpuRegisters.Eax = 0;
-        CpuRegisters.Ebx = 0;
-        CpuRegisters.Ecx = 0;
-        CpuRegisters.Edx = 0;
-        AR::CpuFunc::CpuId(&CpuRegisters);
-
-        /* Verify TSC-Deadline support */
-        if(CpuRegisters.Ecx & CPUID_FEATURES_ECX_TSC_DEADLINE)
-        {
-            /* Mark the TSC-Deadline mode as supported */
-            TimerCapabilities.TscDeadline = TRUE;
-        }
-    }
-
-    /* Check Always Running APIC Timer - ARAT if leaf supported */
-    if(MaxStandardLeaf >= CPUID_GET_POWER_MANAGEMENT)
-    {
-        /* Query the thermal and power management features CPUID leaf */
-        CpuRegisters.Leaf = CPUID_GET_POWER_MANAGEMENT;
-        CpuRegisters.SubLeaf = 0;
-        CpuRegisters.Eax = 0;
-        CpuRegisters.Ebx = 0;
-        CpuRegisters.Ecx = 0;
-        CpuRegisters.Edx = 0;
-        AR::CpuFunc::CpuId(&CpuRegisters);
-
-        /* Verify Always Running APIC Timer support */
-        if(CpuRegisters.Eax & CPUID_FEATURES_EAX_ARAT)
-        {
-            /* Mark the ARAT as supported */
-            TimerCapabilities.Arat = TRUE;
-        }
-    }
 
     /* Check Always Running Timer - ART if leaf supported */
     if(MaxStandardLeaf >= CPUID_GET_TSC_CRYSTAL_CLOCK)
     {
         /* Query the Time Stamp Counter and Core Crystal Clock information CPUID leaf */
+        RTL::Memory::ZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
         CpuRegisters.Leaf = CPUID_GET_TSC_CRYSTAL_CLOCK;
-        CpuRegisters.SubLeaf = 0;
-        CpuRegisters.Eax = 0;
-        CpuRegisters.Ebx = 0;
-        CpuRegisters.Ecx = 0;
-        CpuRegisters.Edx = 0;
         AR::CpuFunc::CpuId(&CpuRegisters);
 
         /* Verify Always Running Timer support */
@@ -1021,46 +968,6 @@ HL::Timer::QueryTimerCapabilities(VOID)
                 /* Save the base frequency for the APIC Timer */
                 TimerCapabilities.TimerFrequency = CpuRegisters.Ecx;
             }
-        }
-    }
-
-    /* Check RDTSCP instruction support if leaf supported */
-    if(MaxExtendedLeaf >= CPUID_GET_EXTENDED_FEATURES)
-    {
-        /* Query the extended processor features CPUID leaf */
-        CpuRegisters.Leaf = CPUID_GET_EXTENDED_FEATURES;
-        CpuRegisters.SubLeaf = 0;
-        CpuRegisters.Eax = 0;
-        CpuRegisters.Ebx = 0;
-        CpuRegisters.Ecx = 0;
-        CpuRegisters.Edx = 0;
-        AR::CpuFunc::CpuId(&CpuRegisters);
-
-        /* Verify RDTSCP support */
-        if(CpuRegisters.Edx & CPUID_FEATURES_EDX_RDTSCP)
-        {
-            /* Mark the RDTSCP instruction as supported */
-            TimerCapabilities.RDTSCP = TRUE;
-        }
-    }
-
-    /* Check Invariant TSC if leaf supported */
-    if(MaxExtendedLeaf >= CPUID_GET_ADVANCED_POWER_MANAGEMENT)
-    {
-        /* Query the advanced power management features CPUID leaf */
-        CpuRegisters.Leaf = CPUID_GET_ADVANCED_POWER_MANAGEMENT;
-        CpuRegisters.SubLeaf = 0;
-        CpuRegisters.Eax = 0;
-        CpuRegisters.Ebx = 0;
-        CpuRegisters.Ecx = 0;
-        CpuRegisters.Edx = 0;
-        AR::CpuFunc::CpuId(&CpuRegisters);
-
-        /* Verify Invariant TSC support */
-        if(CpuRegisters.Edx & CPUID_FEATURES_EDX_TSCI)
-        {
-            /* Mark the Invariant TSC feature as supported */
-            TimerCapabilities.InvariantTsc = TRUE;
         }
     }
 }

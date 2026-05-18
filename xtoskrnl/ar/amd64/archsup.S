@@ -359,7 +359,7 @@ ArHandleSpuriousInterrupt:
     iretq
 
 /**
- * Starts an application processor (AP). This is just a stub.
+ * Starts an application processor (AP).
  *
  * @return This routine does not return any value.
  *
@@ -367,6 +367,123 @@ ArHandleSpuriousInterrupt:
  */
 .global ArStartApplicationProcessor
 ArStartApplicationProcessor:
+    /* Enter 16-bit real mode */
+    .code16
+
+    /* Disable interrupts and clear direction flag */
+    cli
+    cld
+
+    /* Establish a flat addressing baseline */
+    movw %cs, %ax
+    movw %ax, %ds
+    movw %ax, %es
+    movw %ax, %ss
+
+    /* Calculate absolute physical base address */
+    xorl %ebx, %ebx
+    movw %cs, %bx
+    shll $4, %ebx
+
+    /* Set up a temporary stack for the AP initialization */
+    movl %ebx, %esp
+    addl $0x1000, %esp
+
+    /* Load the temporary Global Descriptor Table */
+    leal (ApTemporaryGdtDesc - ArStartApplicationProcessor)(%ebx), %eax
+    movl %eax, (ApTemporaryGdtBase - ArStartApplicationProcessor)
+    lgdtl (ApTemporaryGdtSize - ArStartApplicationProcessor)
+
+    /* Enable Protected Mode */
+    movl %cr0, %eax
+    orl $0x01, %eax
+    movl %eax, %cr0
+
+    /* Far return to enter 32-bit protected mode */
+    leal (ApEnterProtectedMode - ArStartApplicationProcessor)(%ebx), %eax
+    pushl $KGDT_R0_CMCODE
+    pushl %eax
+    lretl
+
+ApEnterProtectedMode:
+    /* Enter 32-bit protected mode */
+    .code32
+
+    /* Setup all data segment registers */
+    movw $KGDT_R0_DATA, %ax
+    movw %ax, %ds
+    movw %ax, %es
+    movw %ax, %ss
+    xorw %ax, %ax
+    movw %ax, %fs
+    movw %ax, %gs
+
+    /* Locate PROCESSOR_START_BLOCK structure */
+    leal (ArStartApplicationProcessorEnd - ArStartApplicationProcessor)(%ebx), %edi
+
+    /* Load CR4 from BSP, but mask PCIDE and PGE */
+    movl PROCESSOR_START_BLOCK_Cr4(%edi), %eax
+    andl $~(CR4_PGE | CR4_PCIDE), %eax
+    movl %eax, %cr4
+
+    /* Load the Kernel Page Directory Base from BSP */
+    movl PROCESSOR_START_BLOCK_Cr3(%edi), %eax
+    movl %eax, %cr3
+
+    /* Enable Long Mode and No-Execute */
+    movl $X86_MSR_EFER, %ecx
+    rdmsr
+    orl $(X86_MSR_EFER_LME | X86_MSR_EFER_NXE), %eax
+    wrmsr
+
+    /* Enable Paging */
+    movl %cr0, %eax
+    orl $CR0_PG, %eax
+    movl %eax, %cr0
+
+    /* Far return to enter 64-bit long mode */
+    leal (ApEnterLongMode - ArStartApplicationProcessor)(%ebx), %eax
+    pushl $KGDT_R0_CODE
+    pushl %eax
+    lretl
+
+ApEnterLongMode:
+    /* Enter 64-bit long mode */
+    .code64
+
+    /* Clear all segment registers */
+    xorw %ax, %ax
+    movw %ax, %ds
+    movw %ax, %es
+    movw %ax, %ss
+    movw %ax, %fs
+    movw %ax, %gs
+
+    /* Zero-extend EDI into RDI to ensure safe 64-bit pointer usage */
+    movl %edi, %edi
+
+    /* Load dedicated Stack for AP */
+    movq PROCESSOR_START_BLOCK_Stack(%rdi), %rsp
+
+    /* Save the pointer to PROCESSOR_START_BLOCK */
+    movq %rdi, %rcx
+    pushq %rdi
+
+    /* Call the EntryPoint routine */
+    movq PROCESSOR_START_BLOCK_EntryPoint(%rdi), %rax
+    call *%rax
+
+    /* Fire the breakpoint and halt if the entry point returns */
+.ApNoReturnPoint:
+    int $0x03
+    hlt
+    jmp .ApNoReturnPoint
+
+/* Data section for temporary GDT */
+.align 8
+ApTemporaryGdtSize: .short ArStartApplicationProcessorEnd - ApTemporaryGdtDesc - 1
+ApTemporaryGdtBase: .quad 0x0000000000000000
+ApTemporaryGdtDesc: .quad 0x0000000000000000, 0x00CF9A000000FFFF, 0x00AF9A000000FFFF, 0x00CF92000000FFFF
 
 .global ArStartApplicationProcessorEnd
 ArStartApplicationProcessorEnd:
