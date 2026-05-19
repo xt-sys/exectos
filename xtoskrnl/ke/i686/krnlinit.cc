@@ -25,10 +25,13 @@ XTAPI
 VOID
 KE::KernelInit::BootstrapApplicationProcessor(IN PPROCESSOR_START_BLOCK StartBlock)
 {
-    PKPROCESSOR_BLOCK ProcessorBlock;
+    PKPROCESSOR_CONTROL_BLOCK ControlBlock;
 
     /* Initialize application CPU */
     AR::ProcessorSupport::InitializeProcessor(StartBlock->ProcessorStructures);
+
+    /* Get processor control block */
+    ControlBlock = KE::Processor::GetCurrentProcessorControlBlock();
 
     /* Initialize processor */
     HL::Cpu::InitializeProcessor();
@@ -39,12 +42,21 @@ KE::KernelInit::BootstrapApplicationProcessor(IN PPROCESSOR_START_BLOCK StartBlo
     /* Mark processor as started */
     StartBlock->Started = TRUE;
 
-    /* Get current processor block */
-    ProcessorBlock = KE::Processor::GetCurrentProcessorBlock();
+    /* Initialize CPU power state structures */
+    PO::Idle::InitializeProcessorIdleState(ControlBlock);
+
+    /* Save processor state */
+    KE::Processor::SaveProcessorState(&ControlBlock->ProcessorState);
+
+    /* Lower to APC runlevel */
+    KE::RunLevel::LowerRunLevel(APC_LEVEL);
+
+    /* Initialize local clock for this CPU */
+    HL::Timer::InitializeLocalClock();
 
     /* Enter infinite loop */
     DebugPrint(L"KernelInit::BootstrapApplicationProcessor() finished for CPU #%lu. Entering infinite loop.\n",
-               ProcessorBlock->CpuNumber);
+               ControlBlock->CpuNumber);
     KE::Crash::HaltSystem();
 }
 
