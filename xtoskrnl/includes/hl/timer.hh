@@ -38,6 +38,7 @@ namespace HL
             STATIC TIMER_TYPE TimerType;
 
         public:
+            STATIC XTAPI VOID InitializeLocalClock(VOID);
             STATIC XTAPI VOID InitializeTimer(VOID);
             STATIC XTAPI LARGE_INTEGER QueryPerformanceCounter(OUT PLARGE_INTEGER PerformanceFrequency);
             STATIC XTAPI ULONG SetClockRate(IN ULONG Rate);

@@ -448,6 +448,37 @@ HL::Timer::InitializeHpetTimer(VOID)
 }
 
 /**
+ * Initializes the local hardware clock for the executing processor and registers
+ * the necessary clock interrupt handlers.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+HL::Timer::InitializeLocalClock(VOID)
+{
+    XTSTATUS Status;
+
+    /* Check if LAPIC timer was selected as the system clock */
+    if(ClockType == TimerLapic && TimerRoutines.InitializeClock != NULLPTR)
+    {
+        /* Proceed with system clock initialization */
+        Status = TimerRoutines.InitializeClock();
+        if(Status != STATUS_SUCCESS)
+        {
+            /* CPU cannot operate without a functional system clock interrupt */
+            KE::Crash::Panic(0);
+        }
+    }
+
+    /* Register the system clock interrupt handler */
+    HL::Irq::RegisterSystemInterruptHandler(APIC_VECTOR_CLOCK, HL::Timer::HandleClockInterrupt);
+    HL::Irq::RegisterSystemInterruptHandler(APIC_VECTOR_CLOCK_IPI, HL::Timer::HandleClockIpiInterrupt);
+}
+
+/**
  * Initializes the legacy Programmable Interval Timer (PIT).
  *
  * @return This routine returns a status code indicating the success or failure of the operation.
