@@ -58,7 +58,7 @@ HL::Rtc::GetRealTimeClock(OUT PTIME_FIELDS Time)
         while(HL::Firmware::ReadCmosRegister(CMOS_REGISTER_A) & CMOS_REGISTER_A_UPDATE_IN_PROGRESS)
         {
             /* Yield the processor */
-            AR::CpuFunc::YieldProcessor();
+            AR::CpuFunctions::YieldProcessor();
         }
 
         /* Latch the first sequential hardware time snapshot */
@@ -81,7 +81,7 @@ HL::Rtc::GetRealTimeClock(OUT PTIME_FIELDS Time)
         while(HL::Firmware::ReadCmosRegister(CMOS_REGISTER_A) & CMOS_REGISTER_A_UPDATE_IN_PROGRESS)
         {
             /* Yield the processor */
-            AR::CpuFunc::YieldProcessor();
+            AR::CpuFunctions::YieldProcessor();
         }
 
         /* Latch the second sequential hardware time snapshot for verification */

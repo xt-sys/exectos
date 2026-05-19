@@ -15,7 +15,7 @@
 /* Minimal forward references for AR classes used by XTLDR */
 namespace AR
 {
-    class CpuFunc
+    class CpuFunctions
     {
         public:
             STATIC XTCDECL BOOLEAN CpuId(IN OUT PCPUID_REGISTERS Registers);

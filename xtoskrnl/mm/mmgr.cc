@@ -279,7 +279,7 @@ MM::Manager::InitializeMemoryManager(VOID)
     MM::Pool::InitializePagedPool();
 
     /* Flush TLB */
-    AR::CpuFunc::FlushTlb();
+    AR::CpuFunctions::FlushTlb();
 }
 
 /**

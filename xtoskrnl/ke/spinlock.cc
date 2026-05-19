@@ -49,12 +49,12 @@ KE::SpinLock::AcquireSpinLock(IN OUT PKSPIN_LOCK SpinLock)
         while(*(VOLATILE PKSPIN_LOCK)SpinLock & 1)
         {
                 /* Yield processor and keep waiting */
-                AR::CpuFunc::YieldProcessor();
+                AR::CpuFunctions::YieldProcessor();
         }
     }
 
     /* Add an explicit memory barrier */
-    AR::CpuFunc::ReadWriteBarrier();
+    AR::CpuFunctions::ReadWriteBarrier();
 }
 
 /**
@@ -183,7 +183,7 @@ KE::SpinLock::ReleaseSpinLock(IN OUT PKSPIN_LOCK SpinLock)
     RTL::Atomic::And32((PLONG)SpinLock, 0);
 
     /* Add an explicit memory barrier */
-    AR::CpuFunc::ReadWriteBarrier();
+    AR::CpuFunctions::ReadWriteBarrier();
 }
 
 /**
@@ -204,7 +204,7 @@ TestSpinLock(IN PKSPIN_LOCK SpinLock)
     if(*SpinLock)
     {
         /* Spinlock is busy, yield processor and return FALSE */
-        AR::CpuFunc::YieldProcessor();
+        AR::CpuFunctions::YieldProcessor();
         return FALSE;
     }
 

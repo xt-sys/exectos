@@ -22,7 +22,7 @@ BOOLEAN
 MM::Paging::GetExtendedPhysicalAddressingStatus(VOID)
 {
     /* Check if PAE is enabled */
-    return ((AR::CpuFunc::ReadControlRegister(4) & CR4_PAE) != 0) ? TRUE : FALSE;
+    return ((AR::CpuFunctions::ReadControlRegister(4) & CR4_PAE) != 0) ? TRUE : FALSE;
 }
 
 /**

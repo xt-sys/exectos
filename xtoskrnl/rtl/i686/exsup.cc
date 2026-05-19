@@ -73,7 +73,7 @@ __CxxFrameHandler3(IN PEXCEPTION_RECORD ExceptionRecord,
     UNIMPLEMENTED;
 
     /* Disable interrupts and hang */
-    AR::CpuFunc::ClearInterruptFlag();
+    AR::CpuFunctions::ClearInterruptFlag();
     KE::Crash::Panic(0);
 
     /* Continue search */
@@ -128,6 +128,6 @@ _purecall(VOID)
     UNIMPLEMENTED;
 
     /* Disable interrupts and hang */
-    AR::CpuFunc::ClearInterruptFlag();
+    AR::CpuFunctions::ClearInterruptFlag();
     KE::Crash::Panic(0);
 }

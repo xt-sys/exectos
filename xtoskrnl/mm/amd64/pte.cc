@@ -99,7 +99,7 @@ MM::Pte::InitializePageTable(VOID)
     MemoryLayout = MM::Manager::GetMemoryLayout();
 
     /* Enable the Global Paging (PGE) feature */
-    AR::CpuFunc::WriteControlRegister(4, AR::CpuFunc::ReadControlRegister(4) | CR4_PGE);
+    AR::CpuFunctions::WriteControlRegister(4, AR::CpuFunctions::ReadControlRegister(4) | CR4_PGE);
 
     /* Check XPA status */
     if(Xpa)
@@ -123,7 +123,7 @@ MM::Pte::InitializePageTable(VOID)
     }
 
     /* Flush the TLB to invalidate all non-global entries */
-    AR::CpuFunc::FlushTlb();
+    AR::CpuFunctions::FlushTlb();
 
     /* Create a template PTE for mapping kernel pages */
     MM::Paging::ClearPte(&TemplatePte);

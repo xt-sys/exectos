@@ -21,7 +21,7 @@ KRUNLEVEL
 HL::RunLevel::GetRunLevel(VOID)
 {
     /* Read current run level */
-    return (KRUNLEVEL)AR::CpuFunc::ReadControlRegister(8);
+    return (KRUNLEVEL)AR::CpuFunctions::ReadControlRegister(8);
 }
 
 /**
@@ -39,7 +39,7 @@ VOID
 HL::RunLevel::SetRunLevel(IN KRUNLEVEL RunLevel)
 {
     /* Set new run level */
-    AR::CpuFunc::WriteControlRegister(8, RunLevel);
+    AR::CpuFunctions::WriteControlRegister(8, RunLevel);
 }
 
 /**

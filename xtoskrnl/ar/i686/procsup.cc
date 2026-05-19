@@ -68,7 +68,7 @@ AR::ProcessorSupport::IdentifyProcessor(VOID)
     /* Get CPU vendor by issueing CPUID instruction */
     RtlZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
     CpuRegisters.Leaf = CPUID_GET_VENDOR_STRING;
-    AR::CpuFunc::CpuId(&CpuRegisters);
+    AR::CpuFunctions::CpuId(&CpuRegisters);
 
     /* Store CPU vendor in processor control block */
     Prcb->CpuId.Vendor = (CPU_VENDOR)CpuRegisters.Ebx;
@@ -80,7 +80,7 @@ AR::ProcessorSupport::IdentifyProcessor(VOID)
     /* Get CPU standard features */
     RtlZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
     CpuRegisters.Leaf = CPUID_GET_STANDARD1_FEATURES;
-    AR::CpuFunc::CpuId(&CpuRegisters);
+    AR::CpuFunctions::CpuId(&CpuRegisters);
 
     /* Store CPU signature in processor control block */
     CpuSignature = *(PCPUID_SIGNATURE)&CpuRegisters.Eax;
@@ -142,13 +142,13 @@ AR::ProcessorSupport::IdentifyProcessorFeatures(VOID)
     /* Get maximum CPUID standard leaf */
     RTL::Memory::ZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
     CpuRegisters.Leaf = CPUID_GET_VENDOR_STRING;
-    AR::CpuFunc::CpuId(&CpuRegisters);
+    AR::CpuFunctions::CpuId(&CpuRegisters);
     MaxStandardLeaf = CpuRegisters.Eax;
 
     /* Get maximum CPUID extended leaf */
     RTL::Memory::ZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
     CpuRegisters.Leaf = CPUID_GET_EXTENDED_MAX;
-    AR::CpuFunc::CpuId(&CpuRegisters);
+    AR::CpuFunctions::CpuId(&CpuRegisters);
     MaxExtendedLeaf = CpuRegisters.Eax;
 
     /* Check if CPU supports standard features leaf */
@@ -157,7 +157,7 @@ AR::ProcessorSupport::IdentifyProcessorFeatures(VOID)
         /* Get CPU standard features */
         RTL::Memory::ZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
         CpuRegisters.Leaf = CPUID_GET_STANDARD1_FEATURES;
-        AR::CpuFunc::CpuId(&CpuRegisters);
+        AR::CpuFunctions::CpuId(&CpuRegisters);
 
         /* Store CPU standard features in processor control block */
         if(CpuRegisters.Ecx & CPUID_FEATURES_ECX_SSE3) Prcb->CpuId.FeatureBits |= KCF_SSE3;
@@ -201,7 +201,7 @@ AR::ProcessorSupport::IdentifyProcessorFeatures(VOID)
         /* Get CPU standard features */
         RTL::Memory::ZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
         CpuRegisters.Leaf = CPUID_GET_STANDARD7_FEATURES;
-        AR::CpuFunc::CpuId(&CpuRegisters);
+        AR::CpuFunctions::CpuId(&CpuRegisters);
 
         /* Store CPU standard7 features in processor control block */
         if(CpuRegisters.Ebx & CPUID_FEATURES_EBX_FSGSBASE) Prcb->CpuId.FeatureBits |= KCF_FSGSBASE;
@@ -219,7 +219,7 @@ AR::ProcessorSupport::IdentifyProcessorFeatures(VOID)
         /* Get CPU power management features */
         RTL::Memory::ZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
         CpuRegisters.Leaf = CPUID_GET_POWER_MANAGEMENT;
-        AR::CpuFunc::CpuId(&CpuRegisters);
+        AR::CpuFunctions::CpuId(&CpuRegisters);
 
         /* Store CPU power management features in processor control block */
         if(CpuRegisters.Eax & CPUID_FEATURES_EAX_ARAT) Prcb->CpuId.FeatureBits |= KCF_ARAT;
@@ -231,7 +231,7 @@ AR::ProcessorSupport::IdentifyProcessorFeatures(VOID)
         /* Get CPU extended features */
         RTL::Memory::ZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
         CpuRegisters.Leaf = CPUID_GET_EXTENDED_FEATURES;
-        AR::CpuFunc::CpuId(&CpuRegisters);
+        AR::CpuFunctions::CpuId(&CpuRegisters);
 
         /* Store CPU extended features in processor control block */
         if(CpuRegisters.Ecx & CPUID_FEATURES_ECX_SVM) Prcb->CpuId.ExtendedFeatureBits |= KCF_SVM;
@@ -252,7 +252,7 @@ AR::ProcessorSupport::IdentifyProcessorFeatures(VOID)
         /* Get CPU advanced power management features */
         RTL::Memory::ZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
         CpuRegisters.Leaf = CPUID_GET_ADVANCED_POWER_MANAGEMENT;
-        AR::CpuFunc::CpuId(&CpuRegisters);
+        AR::CpuFunctions::CpuId(&CpuRegisters);
 
         /* Store CPU advanced power management features in processor control block */
         if(CpuRegisters.Edx & CPUID_FEATURES_EDX_TSCI) Prcb->CpuId.ExtendedFeatureBits |= KCF_INVARIANT_TSC;
@@ -397,9 +397,9 @@ AR::ProcessorSupport::InitializeProcessor(IN PVOID ProcessorStructures)
     IdtDescriptor.Limit = (IDT_ENTRIES * sizeof(KIDTENTRY)) - 1;
 
     /* Load GDT, IDT and TSS */
-    AR::CpuFunc::LoadGlobalDescriptorTable(&GdtDescriptor.Limit);
-    AR::CpuFunc::LoadInterruptDescriptorTable(&IdtDescriptor.Limit);
-    AR::CpuFunc::LoadTaskRegister((UINT)KGDT_SYS_TSS);
+    AR::CpuFunctions::LoadGlobalDescriptorTable(&GdtDescriptor.Limit);
+    AR::CpuFunctions::LoadInterruptDescriptorTable(&IdtDescriptor.Limit);
+    AR::CpuFunctions::LoadTaskRegister((UINT)KGDT_SYS_TSS);
 
     /* Initialize segment registers */
     InitializeSegments();
@@ -481,10 +481,10 @@ VOID
 AR::ProcessorSupport::InitializeProcessorRegisters(VOID)
 {
     /* Clear EFLAGS register */
-    AR::CpuFunc::WriteEflagsRegister(0);
+    AR::CpuFunctions::WriteEflagsRegister(0);
 
     /* Enable write-protection */
-    AR::CpuFunc::WriteControlRegister(0, AR::CpuFunc::ReadControlRegister(0) | CR0_WP);
+    AR::CpuFunctions::WriteControlRegister(0, AR::CpuFunctions::ReadControlRegister(0) | CR0_WP);
 }
 
 /**
@@ -585,12 +585,12 @@ VOID
 AR::ProcessorSupport::InitializeSegments(VOID)
 {
     /* Initialize segments */
-    AR::CpuFunc::LoadSegment(SEGMENT_CS, KGDT_R0_CODE);
-    AR::CpuFunc::LoadSegment(SEGMENT_DS, KGDT_R3_DATA | RPL_MASK);
-    AR::CpuFunc::LoadSegment(SEGMENT_ES, KGDT_R3_DATA | RPL_MASK);
-    AR::CpuFunc::LoadSegment(SEGMENT_FS, KGDT_R0_PB);
-    AR::CpuFunc::LoadSegment(SEGMENT_GS, 0);
-    AR::CpuFunc::LoadSegment(SEGMENT_SS, KGDT_R0_DATA);
+    AR::CpuFunctions::LoadSegment(SEGMENT_CS, KGDT_R0_CODE);
+    AR::CpuFunctions::LoadSegment(SEGMENT_DS, KGDT_R3_DATA | RPL_MASK);
+    AR::CpuFunctions::LoadSegment(SEGMENT_ES, KGDT_R3_DATA | RPL_MASK);
+    AR::CpuFunctions::LoadSegment(SEGMENT_FS, KGDT_R0_PB);
+    AR::CpuFunctions::LoadSegment(SEGMENT_GS, 0);
+    AR::CpuFunctions::LoadSegment(SEGMENT_SS, KGDT_R0_DATA);
 }
 
 /**
@@ -644,7 +644,7 @@ AR::ProcessorSupport::InitializeTss(IN PKPROCESSOR_BLOCK ProcessorBlock,
     ProcessorBlock->TssBase->Flags = 0;
 
     /* Set CR3, LDT and SS */
-    ProcessorBlock->TssBase->CR3 = AR::CpuFunc::ReadControlRegister(3);
+    ProcessorBlock->TssBase->CR3 = AR::CpuFunctions::ReadControlRegister(3);
     ProcessorBlock->TssBase->LDT = 0;
     ProcessorBlock->TssBase->Ss0 = KGDT_R0_DATA;
 
@@ -683,7 +683,7 @@ AR::ProcessorSupport::SetDoubleFaultTssEntry(IN PKPROCESSOR_BLOCK ProcessorBlock
     Tss->IoMapBase = sizeof(KTSS);
     Tss->Flags = 0;
     Tss->LDT = 0;
-    Tss->CR3 = AR::CpuFunc::ReadControlRegister(3);
+    Tss->CR3 = AR::CpuFunctions::ReadControlRegister(3);
     Tss->Esp = (ULONG_PTR)KernelFaultStack;
     Tss->Esp0 = (ULONG_PTR)KernelFaultStack;
     Tss->Eip = (ULONG)(ULONG_PTR)ArTrapEntry[0x08];
@@ -897,7 +897,7 @@ AR::ProcessorSupport::SetNonMaskableInterruptTssEntry(IN PKPROCESSOR_BLOCK Proce
     Tss->IoMapBase = sizeof(KTSS);
     Tss->Flags = 0;
     Tss->LDT = 0;
-    Tss->CR3 = AR::CpuFunc::ReadControlRegister(3);
+    Tss->CR3 = AR::CpuFunctions::ReadControlRegister(3);
     Tss->Esp = (ULONG_PTR)KernelNmiStack;
     Tss->Esp0 = (ULONG_PTR)KernelNmiStack;
     Tss->Eip = (ULONG)(ULONG_PTR)ArTrapEntry[0x02];

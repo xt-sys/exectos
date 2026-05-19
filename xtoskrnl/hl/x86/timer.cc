@@ -84,13 +84,13 @@ HL::Timer::CalibrateTscCounter(VOID)
     }
 
     /* Latch the initial TSC value */
-    InitialTickCount = AR::CpuFunc::ReadTimeStampCounterProcessor(&TscAux);
+    InitialTickCount = AR::CpuFunctions::ReadTimeStampCounterProcessor(&TscAux);
 
     /* Stall CPU execution for exactly 10 milliseconds */
     StallExecution(10000);
 
     /* Read current tick count from TSC */
-    FinalTickCount = AR::CpuFunc::ReadTimeStampCounterProcessor(&TscAux);
+    FinalTickCount = AR::CpuFunctions::ReadTimeStampCounterProcessor(&TscAux);
 
     /* Calculate the elapsed ticks over the 10ms window */
     return (FinalTickCount - InitialTickCount) * 100;
@@ -915,7 +915,7 @@ HL::Timer::QueryPerformanceCounterTsc(VOID)
     ULONG TscAux;
 
     /* Retrieve the timestamp */
-    return AR::CpuFunc::ReadTimeStampCounterProcessor(&TscAux);
+    return AR::CpuFunctions::ReadTimeStampCounterProcessor(&TscAux);
 }
 
 /**
@@ -945,7 +945,7 @@ HL::Timer::QueryTimerCapabilities(VOID)
     /* Query maximum standard CPUID leaf */
     RTL::Memory::ZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
     CpuRegisters.Leaf = CPUID_GET_VENDOR_STRING;
-    AR::CpuFunc::CpuId(&CpuRegisters);
+    AR::CpuFunctions::CpuId(&CpuRegisters);
     MaxStandardLeaf = CpuRegisters.Eax;
 
     /* Check Always Running Timer - ART if leaf supported */
@@ -954,7 +954,7 @@ HL::Timer::QueryTimerCapabilities(VOID)
         /* Query the Time Stamp Counter and Core Crystal Clock information CPUID leaf */
         RTL::Memory::ZeroMemory(&CpuRegisters, sizeof(CPUID_REGISTERS));
         CpuRegisters.Leaf = CPUID_GET_TSC_CRYSTAL_CLOCK;
-        AR::CpuFunc::CpuId(&CpuRegisters);
+        AR::CpuFunctions::CpuId(&CpuRegisters);
 
         /* Verify Always Running Timer support */
         if(CpuRegisters.Eax != 0 && CpuRegisters.Ebx != 0)
@@ -1051,10 +1051,10 @@ HL::Timer::SetClockRateApic(ULONG Rate)
     }
 
     /* Check whether interrupts are enabled */
-    Interrupts = AR::CpuFunc::InterruptsEnabled();
+    Interrupts = AR::CpuFunctions::InterruptsEnabled();
 
     /* Disable interrupts */
-    AR::CpuFunc::ClearInterruptFlag();
+    AR::CpuFunctions::ClearInterruptFlag();
 
     /* Commit the new divider to the TICR register */
     HL::Pic::WriteApicRegister(APIC_TICR, NewDivider);
@@ -1066,7 +1066,7 @@ HL::Timer::SetClockRateApic(ULONG Rate)
     if(Interrupts)
     {
         /* Re-enable interrupts */
-        AR::CpuFunc::SetInterruptFlag();
+        AR::CpuFunctions::SetInterruptFlag();
     }
 
     /* Return the actual clock rate set */
@@ -1178,7 +1178,7 @@ HL::Timer::StallExecutionAcpiPm(IN ULONG MicroSeconds)
         StartTick = CurrentTick;
 
         /* Issue a PAUSE instruction to relieve memory bus contention */
-        AR::CpuFunc::YieldProcessor();
+        AR::CpuFunctions::YieldProcessor();
     }
 }
 
@@ -1222,7 +1222,7 @@ HL::Timer::StallExecutionHpet(IN ULONG MicroSeconds)
     while((Hpet->MainCounterValue - StartTick) < TargetTicks)
     {
         /* Issue a PAUSE instruction to relieve memory bus contention */
-        AR::CpuFunc::YieldProcessor();
+        AR::CpuFunctions::YieldProcessor();
     }
 }
 
@@ -1327,13 +1327,13 @@ HL::Timer::StallExecutionTsc(IN ULONG MicroSeconds)
 
     /* Calculate target ticks based on calibrated TSC frequency */
     TargetTicks = ((ULONGLONG)MicroSeconds * PerformanceFrequency) / 1000000ULL;
-    StartTick = AR::CpuFunc::ReadTimeStampCounter();
+    StartTick = AR::CpuFunctions::ReadTimeStampCounter();
 
     /* Spin until the elapsed ticks reach the target */
-    while((AR::CpuFunc::ReadTimeStampCounter() - StartTick) < TargetTicks)
+    while((AR::CpuFunctions::ReadTimeStampCounter() - StartTick) < TargetTicks)
     {
         /* Issue a PAUSE instruction to relieve memory bus contention */
-        AR::CpuFunc::YieldProcessor();
+        AR::CpuFunctions::YieldProcessor();
     }
 }
 

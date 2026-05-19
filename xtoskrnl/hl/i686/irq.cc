@@ -37,7 +37,7 @@ HL::Irq::BeginSystemInterrupt(IN KRUNLEVEL RunLevel,
     KE::RunLevel::RaiseRunLevel(RunLevel);
 
     /* Enable interrupts */
-    AR::CpuFunc::SetInterruptFlag();
+    AR::CpuFunctions::SetInterruptFlag();
 }
 
 /**
@@ -59,7 +59,7 @@ HL::Irq::EndInterrupt(IN PKTRAP_FRAME TrapFrame,
                       IN KRUNLEVEL OldRunLevel)
 {
     /* Disable interrupts */
-    AR::CpuFunc::ClearInterruptFlag();
+    AR::CpuFunctions::ClearInterruptFlag();
 
     /* End system interrupt */
     EndSystemInterrupt(TrapFrame, OldRunLevel);
@@ -126,7 +126,7 @@ HL::Irq::HandleUnexpectedInterrupt(IN PKTRAP_FRAME TrapFrame)
     UNIMPLEMENTED;
 
     /* Disable interrupts */
-    AR::CpuFunc::ClearInterruptFlag();
+    AR::CpuFunctions::ClearInterruptFlag();
 
     /* Print debug message and raise kernel panic */
     DebugPrint(L"ERROR: Caught unexpected interrupt (0x%.2lX)!\n", TrapFrame->Vector);

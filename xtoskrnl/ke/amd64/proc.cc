@@ -21,7 +21,7 @@ PKPROCESSOR_BLOCK
 KE::Processor::GetCurrentProcessorBlock(VOID)
 {
     /* Get processor block from GS register */
-    return (PKPROCESSOR_BLOCK)AR::CpuFunc::ReadGSQuadWord(FIELD_OFFSET(KPROCESSOR_BLOCK, Self));
+    return (PKPROCESSOR_BLOCK)AR::CpuFunctions::ReadGSQuadWord(FIELD_OFFSET(KPROCESSOR_BLOCK, Self));
 }
 
 /**
@@ -35,7 +35,7 @@ XTAPI
 PKPROCESSOR_CONTROL_BLOCK
 KE::Processor::GetCurrentProcessorControlBlock(VOID)
 {
-    return (PKPROCESSOR_CONTROL_BLOCK)AR::CpuFunc::ReadGSQuadWord(FIELD_OFFSET(KPROCESSOR_BLOCK, CurrentPrcb));
+    return (PKPROCESSOR_CONTROL_BLOCK)AR::CpuFunctions::ReadGSQuadWord(FIELD_OFFSET(KPROCESSOR_BLOCK, CurrentPrcb));
 }
 
 /**
@@ -49,7 +49,7 @@ XTAPI
 ULONG
 KE::Processor::GetCurrentProcessorNumber(VOID)
 {
-    return (ULONG)AR::CpuFunc::ReadGSQuadWord(FIELD_OFFSET(KPROCESSOR_BLOCK, CpuNumber));
+    return (ULONG)AR::CpuFunctions::ReadGSQuadWord(FIELD_OFFSET(KPROCESSOR_BLOCK, CpuNumber));
 }
 
 /**
@@ -63,7 +63,7 @@ XTAPI
 PKTHREAD
 KE::Processor::GetCurrentThread(VOID)
 {
-    return (PKTHREAD)AR::CpuFunc::ReadGSQuadWord(FIELD_OFFSET(KPROCESSOR_BLOCK, Prcb.CurrentThread));
+    return (PKTHREAD)AR::CpuFunctions::ReadGSQuadWord(FIELD_OFFSET(KPROCESSOR_BLOCK, Prcb.CurrentThread));
 }
 
 /**
@@ -158,7 +158,7 @@ KE::Processor::RegisterHardwareId(IN ULONG HardwareId)
  *        Specifies the logical processor number.
  *
  * @param ProcessorBlock
- *        Supplies a pointer to the processor block.
+ *        Supplies a pointer to the processor block. 
  *
  * @return This routine does not return any value.
  *
@@ -192,34 +192,34 @@ VOID
 KE::Processor::SaveProcessorState(OUT PKPROCESSOR_STATE CpuState)
 {
     /* Save CR registers */
-    CpuState->SpecialRegisters.Cr0 = AR::CpuFunc::ReadControlRegister(0);
-    CpuState->SpecialRegisters.Cr2 = AR::CpuFunc::ReadControlRegister(2);
-    CpuState->SpecialRegisters.Cr3 = AR::CpuFunc::ReadControlRegister(3);
-    CpuState->SpecialRegisters.Cr4 = AR::CpuFunc::ReadControlRegister(4);
-    CpuState->SpecialRegisters.Cr8 = AR::CpuFunc::ReadControlRegister(8);
+    CpuState->SpecialRegisters.Cr0 = AR::CpuFunctions::ReadControlRegister(0);
+    CpuState->SpecialRegisters.Cr2 = AR::CpuFunctions::ReadControlRegister(2);
+    CpuState->SpecialRegisters.Cr3 = AR::CpuFunctions::ReadControlRegister(3);
+    CpuState->SpecialRegisters.Cr4 = AR::CpuFunctions::ReadControlRegister(4);
+    CpuState->SpecialRegisters.Cr8 = AR::CpuFunctions::ReadControlRegister(8);
 
     /* Save DR registers */
-    CpuState->SpecialRegisters.KernelDr0 = AR::CpuFunc::ReadDebugRegister(0);
-    CpuState->SpecialRegisters.KernelDr1 = AR::CpuFunc::ReadDebugRegister(1);
-    CpuState->SpecialRegisters.KernelDr2 = AR::CpuFunc::ReadDebugRegister(2);
-    CpuState->SpecialRegisters.KernelDr3 = AR::CpuFunc::ReadDebugRegister(3);
-    CpuState->SpecialRegisters.KernelDr6 = AR::CpuFunc::ReadDebugRegister(6);
-    CpuState->SpecialRegisters.KernelDr7 = AR::CpuFunc::ReadDebugRegister(7);
+    CpuState->SpecialRegisters.KernelDr0 = AR::CpuFunctions::ReadDebugRegister(0);
+    CpuState->SpecialRegisters.KernelDr1 = AR::CpuFunctions::ReadDebugRegister(1);
+    CpuState->SpecialRegisters.KernelDr2 = AR::CpuFunctions::ReadDebugRegister(2);
+    CpuState->SpecialRegisters.KernelDr3 = AR::CpuFunctions::ReadDebugRegister(3);
+    CpuState->SpecialRegisters.KernelDr6 = AR::CpuFunctions::ReadDebugRegister(6);
+    CpuState->SpecialRegisters.KernelDr7 = AR::CpuFunctions::ReadDebugRegister(7);
 
     /* Save MSR registers */
-    CpuState->SpecialRegisters.MsrGsBase = AR::CpuFunc::ReadModelSpecificRegister(X86_MSR_GSBASE);
-    CpuState->SpecialRegisters.MsrGsSwap = AR::CpuFunc::ReadModelSpecificRegister(X86_MSR_KERNEL_GSBASE);
-    CpuState->SpecialRegisters.MsrCStar = AR::CpuFunc::ReadModelSpecificRegister(X86_MSR_CSTAR);
-    CpuState->SpecialRegisters.MsrLStar = AR::CpuFunc::ReadModelSpecificRegister(X86_MSR_LSTAR);
-    CpuState->SpecialRegisters.MsrStar = AR::CpuFunc::ReadModelSpecificRegister(X86_MSR_STAR);
-    CpuState->SpecialRegisters.MsrSyscallMask = AR::CpuFunc::ReadModelSpecificRegister(X86_MSR_FMASK);
+    CpuState->SpecialRegisters.MsrGsBase = AR::CpuFunctions::ReadModelSpecificRegister(X86_MSR_GSBASE);
+    CpuState->SpecialRegisters.MsrGsSwap = AR::CpuFunctions::ReadModelSpecificRegister(X86_MSR_KERNEL_GSBASE);
+    CpuState->SpecialRegisters.MsrCStar = AR::CpuFunctions::ReadModelSpecificRegister(X86_MSR_CSTAR);
+    CpuState->SpecialRegisters.MsrLStar = AR::CpuFunctions::ReadModelSpecificRegister(X86_MSR_LSTAR);
+    CpuState->SpecialRegisters.MsrStar = AR::CpuFunctions::ReadModelSpecificRegister(X86_MSR_STAR);
+    CpuState->SpecialRegisters.MsrSyscallMask = AR::CpuFunctions::ReadModelSpecificRegister(X86_MSR_FMASK);
 
     /* Save XMM control/status register */
-    CpuState->SpecialRegisters.MxCsr = AR::CpuFunc::ReadMxCsrRegister();
+    CpuState->SpecialRegisters.MxCsr = AR::CpuFunctions::ReadMxCsrRegister();
 
     /* Save GDT, IDT, LDT and TaskRegister */
-    AR::CpuFunc::StoreGlobalDescriptorTable(&CpuState->SpecialRegisters.Gdtr.Limit);
-    AR::CpuFunc::StoreInterruptDescriptorTable(&CpuState->SpecialRegisters.Idtr.Limit);
-    AR::CpuFunc::StoreLocalDescriptorTable(&CpuState->SpecialRegisters.Ldtr);
-    AR::CpuFunc::StoreTaskRegister(&CpuState->SpecialRegisters.Tr);
+    AR::CpuFunctions::StoreGlobalDescriptorTable(&CpuState->SpecialRegisters.Gdtr.Limit);
+    AR::CpuFunctions::StoreInterruptDescriptorTable(&CpuState->SpecialRegisters.Idtr.Limit);
+    AR::CpuFunctions::StoreLocalDescriptorTable(&CpuState->SpecialRegisters.Ldtr);
+    AR::CpuFunctions::StoreTaskRegister(&CpuState->SpecialRegisters.Tr);
 }

@@ -98,39 +98,39 @@ MM::Paging::FlushTlb(VOID)
     ULONG_PTR Cr4;
 
     /* Save interrupts state and disable them */
-    Interrupts = AR::CpuFunc::InterruptsEnabled();
-    AR::CpuFunc::ClearInterruptFlag();
+    Interrupts = AR::CpuFunctions::InterruptsEnabled();
+    AR::CpuFunctions::ClearInterruptFlag();
 
     /* Get CPU features */
     CpuRegisters.Leaf = CPUID_GET_STANDARD1_FEATURES;
-    AR::CpuFunc::CpuId(&CpuRegisters);
+    AR::CpuFunctions::CpuId(&CpuRegisters);
 
     /* Check if Paging Global Extensions (PGE) is supported */
     if(CpuRegisters.Edx & CPUID_FEATURES_EDX_PGE)
     {
         /* Read CR4 */
-        Cr4 = AR::CpuFunc::ReadControlRegister(4);
+        Cr4 = AR::CpuFunctions::ReadControlRegister(4);
 
         /* Disable PGE */
-        AR::CpuFunc::WriteControlRegister(4, Cr4 & ~CR4_PGE);
+        AR::CpuFunctions::WriteControlRegister(4, Cr4 & ~CR4_PGE);
 
         /* Flush the TLB */
-        AR::CpuFunc::FlushTlb();
+        AR::CpuFunctions::FlushTlb();
 
         /* Restore CR4 */
-        AR::CpuFunc::WriteControlRegister(4, Cr4);
+        AR::CpuFunctions::WriteControlRegister(4, Cr4);
     }
     else
     {
         /* Simply flush the TLB */
-        AR::CpuFunc::FlushTlb();
+        AR::CpuFunctions::FlushTlb();
     }
 
     /* Check if interrupts should be enabled */
     if(Interrupts)
     {
         /* Re-enable interrupts */
-        AR::CpuFunc::SetInterruptFlag();
+        AR::CpuFunctions::SetInterruptFlag();
     }
 }
 

@@ -62,10 +62,10 @@ KE::SystemResources::GetSystemResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
     Status = STATUS_SUCCESS;
 
     /* Check if interrupts are enabled */
-    Interrupts = AR::CpuFunc::InterruptsEnabled();
+    Interrupts = AR::CpuFunctions::InterruptsEnabled();
 
     /* Disable interrupts and acquire a spinlock */
-    AR::CpuFunc::ClearInterruptFlag();
+    AR::CpuFunctions::ClearInterruptFlag();
     KE::SpinLock::AcquireSpinLock(&ResourcesLock);
 
     /* Iterate through system resources list */
@@ -114,7 +114,7 @@ KE::SystemResources::GetSystemResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
     if(Interrupts)
     {
         /* Re-enable interrupts */
-        AR::CpuFunc::SetInterruptFlag();
+        AR::CpuFunctions::SetInterruptFlag();
     }
 
     /* Return resource header and status code */
@@ -220,7 +220,7 @@ VOID
 KE::SystemResources::ReleaseResource(IN PSYSTEM_RESOURCE_HEADER ResourceHeader)
 {
     /* Disable interrupts and acquire a spinlock */
-    AR::CpuFunc::ClearInterruptFlag();
+    AR::CpuFunctions::ClearInterruptFlag();
     KE::SpinLock::AcquireSpinLock(&ResourcesLock);
 
     /* Release resource lock */
@@ -228,5 +228,5 @@ KE::SystemResources::ReleaseResource(IN PSYSTEM_RESOURCE_HEADER ResourceHeader)
 
     /* Release spinlock and enable interrupts */
     KE::SpinLock::ReleaseSpinLock(&ResourcesLock);
-    AR::CpuFunc::SetInterruptFlag();
+    AR::CpuFunctions::SetInterruptFlag();
 }

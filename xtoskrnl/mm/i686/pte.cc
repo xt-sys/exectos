@@ -70,13 +70,13 @@ MM::Pte::InitializePageTable(VOID)
 
     /* Get CPU features */
     CpuRegisters.Leaf = CPUID_GET_STANDARD1_FEATURES;
-    AR::CpuFunc::CpuId(&CpuRegisters);
+    AR::CpuFunctions::CpuId(&CpuRegisters);
 
     /* Check if Paging Global Extensions (PGE) is supported */
     if(CpuRegisters.Edx & CPUID_FEATURES_EDX_PGE)
     {
         /* Enable the Global Paging (PGE) feature */
-        AR::CpuFunc::WriteControlRegister(4, AR::CpuFunc::ReadControlRegister(4) | CR4_PGE);
+        AR::CpuFunctions::WriteControlRegister(4, AR::CpuFunctions::ReadControlRegister(4) | CR4_PGE);
     }
 
     /* Get the PD user-space range for both legacy and PAE paging */
@@ -91,7 +91,7 @@ MM::Pte::InitializePageTable(VOID)
     }
 
     /* Flush the TLB to invalidate all non-global entries */
-    AR::CpuFunc::FlushTlb();
+    AR::CpuFunctions::FlushTlb();
 
     /* Create a template PTE for mapping kernel pages */
     MM::Paging::ClearPte(&TemplatePte);

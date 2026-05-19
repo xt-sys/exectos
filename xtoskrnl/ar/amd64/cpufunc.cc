@@ -18,7 +18,7 @@
  */
 XTCDECL
 VOID
-AR::CpuFunc::ClearInterruptFlag(VOID)
+AR::CpuFunctions::ClearInterruptFlag(VOID)
 {
     __asm__ volatile("cli");
 }
@@ -35,7 +35,7 @@ AR::CpuFunc::ClearInterruptFlag(VOID)
  */
 XTCDECL
 BOOLEAN
-AR::CpuFunc::CpuId(IN OUT PCPUID_REGISTERS Registers)
+AR::CpuFunctions::CpuId(IN OUT PCPUID_REGISTERS Registers)
 {
     UINT32 MaxLeaf;
 
@@ -76,7 +76,7 @@ AR::CpuFunc::CpuId(IN OUT PCPUID_REGISTERS Registers)
  */
 XTCDECL
 VOID
-AR::CpuFunc::FlushTlb(VOID)
+AR::CpuFunctions::FlushTlb(VOID)
 {
     /* Flush the TLB by resetting the CR3 */
     WriteControlRegister(3, ReadControlRegister(3));
@@ -91,7 +91,7 @@ AR::CpuFunc::FlushTlb(VOID)
  */
 XTCDECL
 ULONG
-AR::CpuFunc::GetCpuFlags(VOID)
+AR::CpuFunctions::GetCpuFlags(VOID)
 {
     ULONG_PTR Flags;
 
@@ -116,7 +116,7 @@ AR::CpuFunc::GetCpuFlags(VOID)
 XTASSEMBLY
 XTCDECL
 ULONG_PTR
-AR::CpuFunc::GetStackPointer(VOID)
+AR::CpuFunctions::GetStackPointer(VOID)
 {
     /* Get current stack pointer */
     __asm__ volatile("movq %%rsp, %%rax\n"
@@ -135,7 +135,7 @@ AR::CpuFunc::GetStackPointer(VOID)
  */
 XTCDECL
 VOID
-AR::CpuFunc::Halt(VOID)
+AR::CpuFunctions::Halt(VOID)
 {
     __asm__ volatile("hlt");
 }
@@ -149,7 +149,7 @@ AR::CpuFunc::Halt(VOID)
  */
 XTCDECL
 BOOLEAN
-AR::CpuFunc::InterruptsEnabled(VOID)
+AR::CpuFunctions::InterruptsEnabled(VOID)
 {
     ULONG_PTR Flags;
 
@@ -172,7 +172,7 @@ AR::CpuFunc::InterruptsEnabled(VOID)
  */
 XTCDECL
 VOID
-AR::CpuFunc::InvalidateTlbEntry(IN PVOID Address)
+AR::CpuFunctions::InvalidateTlbEntry(IN PVOID Address)
 {
     __asm__ volatile("invlpg (%0)"
                      :
@@ -192,7 +192,7 @@ AR::CpuFunc::InvalidateTlbEntry(IN PVOID Address)
  */
 XTCDECL
 VOID
-AR::CpuFunc::LoadGlobalDescriptorTable(IN PVOID Source)
+AR::CpuFunctions::LoadGlobalDescriptorTable(IN PVOID Source)
 {
     __asm__ volatile("lgdt %0"
                      :
@@ -212,7 +212,7 @@ AR::CpuFunc::LoadGlobalDescriptorTable(IN PVOID Source)
  */
 XTCDECL
 VOID
-AR::CpuFunc::LoadInterruptDescriptorTable(IN PVOID Source)
+AR::CpuFunctions::LoadInterruptDescriptorTable(IN PVOID Source)
 {
     __asm__ volatile("lidt %0"
                      :
@@ -232,7 +232,7 @@ AR::CpuFunc::LoadInterruptDescriptorTable(IN PVOID Source)
  */
 XTCDECL
 VOID
-AR::CpuFunc::LoadLocalDescriptorTable(IN USHORT Source)
+AR::CpuFunctions::LoadLocalDescriptorTable(IN USHORT Source)
 {
     __asm__ volatile("lldtw %0"
                      :
@@ -251,7 +251,7 @@ AR::CpuFunc::LoadLocalDescriptorTable(IN USHORT Source)
  */
 XTCDECL
 VOID
-AR::CpuFunc::LoadMxcsrRegister(IN ULONG Source)
+AR::CpuFunctions::LoadMxcsrRegister(IN ULONG Source)
 {
     __asm__ volatile("ldmxcsr %0"
                      :
@@ -273,7 +273,7 @@ AR::CpuFunc::LoadMxcsrRegister(IN ULONG Source)
  */
 XTCDECL
 VOID
-AR::CpuFunc::LoadSegment(IN USHORT Segment,
+AR::CpuFunctions::LoadSegment(IN USHORT Segment,
                      IN ULONG Source)
 {
     switch(Segment)
@@ -335,7 +335,7 @@ AR::CpuFunc::LoadSegment(IN USHORT Segment,
  */
 XTCDECL
 VOID
-AR::CpuFunc::LoadTaskRegister(USHORT Source)
+AR::CpuFunctions::LoadTaskRegister(USHORT Source)
 {
     __asm__ volatile("ltr %0"
                      :
@@ -351,7 +351,7 @@ AR::CpuFunc::LoadTaskRegister(USHORT Source)
  */
 XTCDECL
 VOID
-AR::CpuFunc::MemoryBarrier(VOID)
+AR::CpuFunctions::MemoryBarrier(VOID)
 {
     LONG Barrier;
     __asm__ volatile("lock; orl $0, %0;"
@@ -371,7 +371,7 @@ AR::CpuFunc::MemoryBarrier(VOID)
  */
 XTCDECL
 ULONG_PTR
-AR::CpuFunc::ReadControlRegister(IN USHORT ControlRegister)
+AR::CpuFunctions::ReadControlRegister(IN USHORT ControlRegister)
 {
     ULONG_PTR Value;
 
@@ -435,7 +435,7 @@ AR::CpuFunc::ReadControlRegister(IN USHORT ControlRegister)
  */
 XTCDECL
 ULONG_PTR
-AR::CpuFunc::ReadDebugRegister(IN USHORT DebugRegister)
+AR::CpuFunctions::ReadDebugRegister(IN USHORT DebugRegister)
 {
     ULONG_PTR Value;
 
@@ -504,7 +504,7 @@ AR::CpuFunc::ReadDebugRegister(IN USHORT DebugRegister)
  */
 XTCDECL
 ULONGLONG
-AR::CpuFunc::ReadGSQuadWord(ULONG Offset)
+AR::CpuFunctions::ReadGSQuadWord(ULONG Offset)
 {
     ULONGLONG Value;
 
@@ -527,7 +527,7 @@ AR::CpuFunc::ReadGSQuadWord(ULONG Offset)
  */
 XTCDECL
 ULONGLONG
-AR::CpuFunc::ReadModelSpecificRegister(IN ULONG Register)
+AR::CpuFunctions::ReadModelSpecificRegister(IN ULONG Register)
 {
     ULONG Low, High;
 
@@ -548,7 +548,7 @@ AR::CpuFunc::ReadModelSpecificRegister(IN ULONG Register)
  */
 XTCDECL
 UINT
-AR::CpuFunc::ReadMxCsrRegister(VOID)
+AR::CpuFunctions::ReadMxCsrRegister(VOID)
 {
     return __builtin_ia32_stmxcsr();
 }
@@ -562,7 +562,7 @@ AR::CpuFunc::ReadMxCsrRegister(VOID)
  */
 XTCDECL
 ULONGLONG
-AR::CpuFunc::ReadTimeStampCounter(VOID)
+AR::CpuFunctions::ReadTimeStampCounter(VOID)
 {
     ULONGLONG Low, High;
 
@@ -585,7 +585,7 @@ AR::CpuFunc::ReadTimeStampCounter(VOID)
  */
 XTCDECL
 ULONGLONG
-AR::CpuFunc::ReadTimeStampCounterProcessor(OUT PULONG TscAux)
+AR::CpuFunctions::ReadTimeStampCounterProcessor(OUT PULONG TscAux)
 {
     ULONG Low, High;
 
@@ -609,7 +609,7 @@ AR::CpuFunc::ReadTimeStampCounterProcessor(OUT PULONG TscAux)
  */
 XTCDECL
 VOID
-AR::CpuFunc::ReadWriteBarrier(VOID)
+AR::CpuFunctions::ReadWriteBarrier(VOID)
 {
     __asm__ volatile(""
                      :
@@ -626,7 +626,7 @@ AR::CpuFunc::ReadWriteBarrier(VOID)
  */
 XTCDECL
 VOID
-AR::CpuFunc::SetInterruptFlag(VOID)
+AR::CpuFunctions::SetInterruptFlag(VOID)
 {
     __asm__ volatile("sti");
 }
@@ -643,7 +643,7 @@ AR::CpuFunc::SetInterruptFlag(VOID)
  */
 XTCDECL
 VOID
-AR::CpuFunc::StoreGlobalDescriptorTable(OUT PVOID Destination)
+AR::CpuFunctions::StoreGlobalDescriptorTable(OUT PVOID Destination)
 {
     __asm__ volatile("sgdt %0"
                      : "=m" (*(PSHORT)Destination)
@@ -663,7 +663,7 @@ AR::CpuFunc::StoreGlobalDescriptorTable(OUT PVOID Destination)
  */
 XTCDECL
 VOID
-AR::CpuFunc::StoreInterruptDescriptorTable(OUT PVOID Destination)
+AR::CpuFunctions::StoreInterruptDescriptorTable(OUT PVOID Destination)
 {
     __asm__ volatile("sidt %0"
                      : "=m" (*(PSHORT)Destination)
@@ -683,7 +683,7 @@ AR::CpuFunc::StoreInterruptDescriptorTable(OUT PVOID Destination)
  */
 XTCDECL
 VOID
-AR::CpuFunc::StoreLocalDescriptorTable(OUT PVOID Destination)
+AR::CpuFunctions::StoreLocalDescriptorTable(OUT PVOID Destination)
 {
     __asm__ volatile("sldt %0"
                      : "=m" (*(PSHORT)Destination)
@@ -706,8 +706,8 @@ AR::CpuFunc::StoreLocalDescriptorTable(OUT PVOID Destination)
  */
 XTCDECL
 VOID
-AR::CpuFunc::StoreSegment(IN USHORT Segment,
-                          OUT PVOID Destination)
+AR::CpuFunctions::StoreSegment(IN USHORT Segment,
+                               OUT PVOID Destination)
 {
     switch(Segment)
     {
@@ -753,7 +753,7 @@ AR::CpuFunc::StoreSegment(IN USHORT Segment,
  */
 XTCDECL
 VOID
-AR::CpuFunc::StoreTaskRegister(OUT PVOID Destination)
+AR::CpuFunctions::StoreTaskRegister(OUT PVOID Destination)
 {
     __asm__ volatile("str %0"
                      : "=m" (*(PULONG)Destination)
@@ -776,8 +776,8 @@ AR::CpuFunc::StoreTaskRegister(OUT PVOID Destination)
  */
 XTCDECL
 VOID
-AR::CpuFunc::WriteControlRegister(IN USHORT ControlRegister,
-                              IN UINT_PTR Value)
+AR::CpuFunctions::WriteControlRegister(IN USHORT ControlRegister,
+                                       IN UINT_PTR Value)
 {
     /* Write a value into specified control register */
     switch(ControlRegister)
@@ -835,8 +835,8 @@ AR::CpuFunc::WriteControlRegister(IN USHORT ControlRegister,
  */
 XTCDECL
 VOID
-AR::CpuFunc::WriteDebugRegister(IN USHORT DebugRegister,
-                            IN UINT_PTR Value)
+AR::CpuFunctions::WriteDebugRegister(IN USHORT DebugRegister,
+                                     IN UINT_PTR Value)
 {
     /* Write a value into specified debug register */
     switch(DebugRegister)
@@ -912,7 +912,7 @@ AR::CpuFunc::WriteDebugRegister(IN USHORT DebugRegister,
  */
 XTCDECL
 VOID
-AR::CpuFunc::WriteEflagsRegister(IN UINT_PTR Value)
+AR::CpuFunctions::WriteEflagsRegister(IN UINT_PTR Value)
 {
     __asm__ volatile("push %0\n"
                      "popf"
@@ -935,8 +935,8 @@ AR::CpuFunc::WriteEflagsRegister(IN UINT_PTR Value)
  */
 XTCDECL
 VOID
-AR::CpuFunc::WriteModelSpecificRegister(IN ULONG Register,
-                                    IN ULONGLONG Value)
+AR::CpuFunctions::WriteModelSpecificRegister(IN ULONG Register,
+                                             IN ULONGLONG Value)
 {
     ULONG Low = Value & 0xFFFFFFFF;
     ULONG High = Value >> 32;
@@ -957,7 +957,7 @@ AR::CpuFunc::WriteModelSpecificRegister(IN ULONG Register,
  */
 XTCDECL
 VOID
-AR::CpuFunc::YieldProcessor(VOID)
+AR::CpuFunctions::YieldProcessor(VOID)
 {
     __asm__ volatile("pause"
                      :

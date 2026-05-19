@@ -15,7 +15,7 @@
 /* Architecture-specific Library */
 namespace AR
 {
-    class CpuFunc
+    class CpuFunctions
     {
         public:
             STATIC XTCDECL VOID ClearInterruptFlag(VOID);

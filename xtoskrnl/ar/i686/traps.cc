@@ -26,8 +26,8 @@ AR::Traps::DispatchInterrupt(IN PKTRAP_FRAME TrapFrame)
     PINTERRUPT_HANDLER Handler;
 
     /* Read the handler pointer from the CPU's interrupt dispatch table */
-    Handler = (PINTERRUPT_HANDLER)AR::CpuFunc::ReadFSDualWord(FIELD_OFFSET(KPROCESSOR_BLOCK, InterruptDispatchTable) +
-                                                              (TrapFrame->Vector * sizeof(PINTERRUPT_HANDLER)));
+    Handler = (PINTERRUPT_HANDLER)AR::CpuFunctions::ReadFSDualWord(FIELD_OFFSET(KPROCESSOR_BLOCK, InterruptDispatchTable) +
+                                                                   (TrapFrame->Vector * sizeof(PINTERRUPT_HANDLER)));
 
     /* Check if the interrupt has a handler registered */
     if(Handler != NULLPTR)

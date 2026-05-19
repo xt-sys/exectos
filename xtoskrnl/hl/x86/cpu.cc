@@ -171,14 +171,14 @@ HL::Cpu::StartAllProcessors(VOID)
         KE::Processor::RegisterProcessorBlock(CpuNumber, ProcessorBlock);
 
         /* Initialize processor start block */
-        StartBlock->Cr3 = AR::CpuFunc::ReadControlRegister(3);
-        StartBlock->Cr4 = AR::CpuFunc::ReadControlRegister(4);
+        StartBlock->Cr3 = AR::CpuFunctions::ReadControlRegister(3);
+        StartBlock->Cr4 = AR::CpuFunctions::ReadControlRegister(4);
         StartBlock->EntryPoint = (PVOID)&KE::KernelInit::BootstrapApplicationProcessor;
         StartBlock->ProcessorStructures = CpuStructures;
         StartBlock->Started = FALSE;
 
         /* Memory barrier */
-        AR::CpuFunc::MemoryBarrier();
+        AR::CpuFunctions::MemoryBarrier();
 
         /* Send INIT IPI and wait for 10ms */
         HL::Pic::SendIpi(SysInfo->CpuInfo[Index].ApicId, 0, APIC_DM_INIT, APIC_DSH_Destination, APIC_TGM_EDGE);
@@ -196,7 +196,7 @@ HL::Cpu::StartAllProcessors(VOID)
         while(!StartBlock->Started && Timeout < 100000)
         {
             /* Yield processor and wait for 10us */
-            AR::CpuFunc::YieldProcessor();
+            AR::CpuFunctions::YieldProcessor();
             HL::Timer::StallExecution(10);
             Timeout++;
         }

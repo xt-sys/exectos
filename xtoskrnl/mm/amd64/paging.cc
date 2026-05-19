@@ -22,7 +22,7 @@ BOOLEAN
 MM::Paging::GetExtendedPhysicalAddressingStatus(VOID)
 {
     /* Check if LA57 is enabled */
-    return ((AR::CpuFunc::ReadControlRegister(4) & CR4_LA57) != 0) ? TRUE : FALSE;
+    return ((AR::CpuFunctions::ReadControlRegister(4) & CR4_LA57) != 0) ? TRUE : FALSE;
 }
 
 /**

@@ -26,8 +26,8 @@ AR::Traps::DispatchInterrupt(IN PKTRAP_FRAME TrapFrame)
     PINTERRUPT_HANDLER Handler;
 
     /* Read the handler pointer from the CPU's interrupt dispatch table */
-    Handler = (PINTERRUPT_HANDLER)AR::CpuFunc::ReadGSQuadWord(FIELD_OFFSET(KPROCESSOR_BLOCK, InterruptDispatchTable) +
-                                                              (TrapFrame->Vector * sizeof(PINTERRUPT_HANDLER)));
+    Handler = (PINTERRUPT_HANDLER)AR::CpuFunctions::ReadGSQuadWord(FIELD_OFFSET(KPROCESSOR_BLOCK, InterruptDispatchTable) +
+                                                                   (TrapFrame->Vector * sizeof(PINTERRUPT_HANDLER)));
 
     /* Check if the interrupt has a handler registered */
     if(Handler != NULLPTR)
@@ -672,13 +672,13 @@ VOID
 AR::Traps::InitializeSystemCallMsrs(VOID)
 {
     /* Initialize system calls MSR */
-    CpuFunc::WriteModelSpecificRegister(X86_MSR_STAR, (((ULONG64)KGDT_R3_CMCODE | RPL_MASK) << 48) | ((ULONG64)KGDT_R0_CODE << 32));
-    CpuFunc::WriteModelSpecificRegister(X86_MSR_CSTAR, (ULONG64)&HandleSystemCall32);
-    CpuFunc::WriteModelSpecificRegister(X86_MSR_LSTAR, (ULONG64)&HandleSystemCall64);
-    CpuFunc::WriteModelSpecificRegister(X86_MSR_FMASK, X86_EFLAGS_IF_MASK | X86_EFLAGS_TF_MASK);
+    CpuFunctions::WriteModelSpecificRegister(X86_MSR_STAR, (((ULONG64)KGDT_R3_CMCODE | RPL_MASK) << 48) | ((ULONG64)KGDT_R0_CODE << 32));
+    CpuFunctions::WriteModelSpecificRegister(X86_MSR_CSTAR, (ULONG64)&HandleSystemCall32);
+    CpuFunctions::WriteModelSpecificRegister(X86_MSR_LSTAR, (ULONG64)&HandleSystemCall64);
+    CpuFunctions::WriteModelSpecificRegister(X86_MSR_FMASK, X86_EFLAGS_IF_MASK | X86_EFLAGS_TF_MASK);
 
     /* Enable system call extensions (SCE) in EFER MSR */
-    CpuFunc::WriteModelSpecificRegister(X86_MSR_EFER, CpuFunc::ReadModelSpecificRegister(X86_MSR_EFER) | X86_MSR_EFER_SCE);
+    CpuFunctions::WriteModelSpecificRegister(X86_MSR_EFER, CpuFunctions::ReadModelSpecificRegister(X86_MSR_EFER) | X86_MSR_EFER_SCE);
 }
 
 /**

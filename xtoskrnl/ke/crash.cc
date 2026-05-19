@@ -24,8 +24,8 @@ KE::Crash::HaltSystem(VOID)
     for(;;)
     {
         /* Halt system */
-        AR::CpuFunc::ClearInterruptFlag();
-        AR::CpuFunc::Halt();
+        AR::CpuFunctions::ClearInterruptFlag();
+        AR::CpuFunctions::Halt();
     }
 }
 

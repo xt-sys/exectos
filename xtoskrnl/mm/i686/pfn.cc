@@ -150,7 +150,7 @@ MM::Pfn::InitializePageTablePfns(VOID)
         RootLevel = 3;
 
         /* Retrieve the PFN of the PML3 table and its virtual base address */
-        PageFrameIndex = AR::CpuFunc::ReadControlRegister(3) >> MM_PAGE_SHIFT;
+        PageFrameIndex = AR::CpuFunctions::ReadControlRegister(3) >> MM_PAGE_SHIFT;
         RootPte = (PMMPTE)MM::Paging::GetPpeAddress(NULLPTR);
     }
     else
@@ -159,7 +159,7 @@ MM::Pfn::InitializePageTablePfns(VOID)
         RootLevel = 2;
 
         /* Retrieve the PFN of the PML2 table and its virtual base address */
-        PageFrameIndex = AR::CpuFunc::ReadControlRegister(3) >> MM_PAGE_SHIFT;
+        PageFrameIndex = AR::CpuFunctions::ReadControlRegister(3) >> MM_PAGE_SHIFT;
         RootPte = (PMMPTE)MM::Paging::GetPdeAddress(NULLPTR);
     }
 

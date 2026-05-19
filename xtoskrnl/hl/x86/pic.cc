@@ -364,11 +364,11 @@ HL::Pic::InitializeApic(VOID)
     CpuNumber = KE::Processor::GetCurrentProcessorNumber();
 
     /* Enable the APIC */
-    BaseRegister.LongLong = AR::CpuFunc::ReadModelSpecificRegister(APIC_LAPIC_MSR_BASE);
+    BaseRegister.LongLong = AR::CpuFunctions::ReadModelSpecificRegister(APIC_LAPIC_MSR_BASE);
     BaseRegister.Enable = 1;
     BaseRegister.ExtendedMode = (ApicMode == APIC_MODE_X2APIC);
     BaseRegister.BootStrapProcessor = (CpuNumber == 0) ? 1 : 0;
-    AR::CpuFunc::WriteModelSpecificRegister(APIC_LAPIC_MSR_BASE, BaseRegister.LongLong);
+    AR::CpuFunctions::WriteModelSpecificRegister(APIC_LAPIC_MSR_BASE, BaseRegister.LongLong);
 
     /* Mask all interrupts by raising Task Priority Register (TPR)  */
     WriteApicRegister(APIC_TPR, 0xFF);
@@ -479,8 +479,8 @@ HL::Pic::InitializeIOApic(VOID)
         }
 
         /* Perform a memory barrier */
-        AR::CpuFunc::MemoryBarrier();
-        AR::CpuFunc::ReadWriteBarrier();
+        AR::CpuFunctions::MemoryBarrier();
+        AR::CpuFunctions::ReadWriteBarrier();
 
         /* Read the version register and calculate the maximum number of redirection entries */
         VersionRegister = ReadIOApicRegister(&Controllers[ControllerIndex], IOAPIC_VER);
@@ -639,7 +639,7 @@ HL::Pic::ReadApicRegister(IN APIC_REGISTER Register)
     if(ApicMode == APIC_MODE_X2APIC)
     {
         /* Read from x2APIC MSR */
-        return AR::CpuFunc::ReadModelSpecificRegister((ULONG)(APIC_X2APIC_MSR_BASE + Register));
+        return AR::CpuFunctions::ReadModelSpecificRegister((ULONG)(APIC_X2APIC_MSR_BASE + Register));
     }
     else
     {
@@ -782,10 +782,10 @@ HL::Pic::SendBroadcastIpi(IN ULONG Vector,
     HL::Acpi::GetSystemInformation(&SysInfo);
 
     /* Check whether interrupts are enabled */
-    Interrupts = AR::CpuFunc::InterruptsEnabled();
+    Interrupts = AR::CpuFunctions::InterruptsEnabled();
 
     /* Disable interrupts */
-    AR::CpuFunc::ClearInterruptFlag();
+    AR::CpuFunctions::ClearInterruptFlag();
 
     /* Iterate over all logical CPUs */
     for(Index = 0; Index < SysInfo->CpuCount; Index++)
@@ -818,7 +818,7 @@ HL::Pic::SendBroadcastIpi(IN ULONG Vector,
     if(Interrupts)
     {
         /* Re-enable interrupts */
-        AR::CpuFunc::SetInterruptFlag();
+        AR::CpuFunctions::SetInterruptFlag();
     }
 }
 
@@ -871,10 +871,10 @@ HL::Pic::SendIpi(IN ULONG ApicId,
     BOOLEAN Interrupts;
 
     /* Check whether interrupts are enabled */
-    Interrupts = AR::CpuFunc::InterruptsEnabled();
+    Interrupts = AR::CpuFunctions::InterruptsEnabled();
 
     /* Disable interrupts */
-    AR::CpuFunc::ClearInterruptFlag();
+    AR::CpuFunctions::ClearInterruptFlag();
 
     /* Check current APIC mode and destination */
     if(ApicMode == APIC_MODE_X2APIC && DestinationShortHand == APIC_DSH_Self)
@@ -886,7 +886,7 @@ HL::Pic::SendIpi(IN ULONG ApicId,
         if(Interrupts)
         {
             /* Check whether interrupts need to be re-enabled */
-            AR::CpuFunc::SetInterruptFlag();
+            AR::CpuFunctions::SetInterruptFlag();
         }
 
         /* Nothing more to do */
@@ -917,7 +917,7 @@ HL::Pic::SendIpi(IN ULONG ApicId,
         while((ReadApicRegister(APIC_ICR0) & 0x1000) != 0)
         {
             /* Yield the processor */
-            AR::CpuFunc::YieldProcessor();
+            AR::CpuFunctions::YieldProcessor();
         }
 
         /* In xAPIC compatibility mode, write the command to the ICR registers */
@@ -931,7 +931,7 @@ HL::Pic::SendIpi(IN ULONG ApicId,
             while((ReadApicRegister((APIC_REGISTER)(APIC_IRR + (Vector / 32))) & (1UL << (Vector % 32))) == 0)
             {
                 /* Yield the processor */
-                AR::CpuFunc::YieldProcessor();
+                AR::CpuFunctions::YieldProcessor();
             }
         }
     }
@@ -940,7 +940,7 @@ HL::Pic::SendIpi(IN ULONG ApicId,
     if(Interrupts)
     {
         /* Re-enable interrupts */
-        AR::CpuFunc::SetInterruptFlag();
+        AR::CpuFunctions::SetInterruptFlag();
     }
 }
 
@@ -1016,7 +1016,7 @@ HL::Pic::WriteApicRegister(IN APIC_REGISTER Register,
     if(ApicMode == APIC_MODE_X2APIC)
     {
         /* Write to x2APIC MSR */
-        AR::CpuFunc::WriteModelSpecificRegister((ULONG)(APIC_X2APIC_MSR_BASE + Register), Value);
+        AR::CpuFunctions::WriteModelSpecificRegister((ULONG)(APIC_X2APIC_MSR_BASE + Register), Value);
     }
     else
     {

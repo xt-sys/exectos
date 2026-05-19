@@ -539,7 +539,7 @@ MM::Pte::ReserveSystemPtes(IN PFN_COUNT NumberOfPtes,
     TotalSystemFreePtes[SystemPtePoolType] -= NumberOfPtes;
 
     /* Flush the TLB to ensure address translation consistency */
-    AR::CpuFunc::FlushTlb();
+    AR::CpuFunctions::FlushTlb();
 
     /* Return a pointer to the start of the reserved PTE block */
     return ReservedPte;

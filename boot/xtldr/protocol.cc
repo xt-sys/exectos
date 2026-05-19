@@ -1049,10 +1049,10 @@ Protocol::InstallXtLoaderProtocol()
     LoaderProtocol.Console.SetAttributes = Console::SetAttributes;
     LoaderProtocol.Console.SetCursorPosition = Console::SetCursorPosition;
     LoaderProtocol.Console.Write = Console::Write;
-    LoaderProtocol.Cpu.CpuId = AR::CpuFunc::CpuId;
-    LoaderProtocol.Cpu.ReadControlRegister = AR::CpuFunc::ReadControlRegister;
-    LoaderProtocol.Cpu.ReadModelSpecificRegister = AR::CpuFunc::ReadModelSpecificRegister;
-    LoaderProtocol.Cpu.WriteControlRegister = AR::CpuFunc::WriteControlRegister;
+    LoaderProtocol.Cpu.CpuId = AR::CpuFunctions::CpuId;
+    LoaderProtocol.Cpu.ReadControlRegister = AR::CpuFunctions::ReadControlRegister;
+    LoaderProtocol.Cpu.ReadModelSpecificRegister = AR::CpuFunctions::ReadModelSpecificRegister;
+    LoaderProtocol.Cpu.WriteControlRegister = AR::CpuFunctions::WriteControlRegister;
     LoaderProtocol.Debug.Print = Debug::Print;
     LoaderProtocol.Disk.CloseVolume = Volume::CloseVolume;
     LoaderProtocol.Disk.OpenVolume = Volume::OpenVolume;
