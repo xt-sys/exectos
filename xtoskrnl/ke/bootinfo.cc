@@ -46,7 +46,7 @@ KE::BootInformation::GetFirmwareType(VOID)
  * @param Parameter
  *        Supplies a pointer to a variable that receives a pointer to the matching parameter, or NULLPTR if not found.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -116,7 +116,7 @@ KE::BootInformation::GetKernelParameter(IN PCWSTR ParameterName,
  * @param BufferSize
  *        Supplies the size of the value buffer, in wide characters.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */

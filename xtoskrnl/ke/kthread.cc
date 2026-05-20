@@ -9,6 +9,13 @@
 #include <xtos.hh>
 
 
+/**
+ * Retrieves a pointer to the system's initial executive thread object.
+ *
+ * @return This routine returns a pointer to the initial executive thread.
+ *
+ * @since XT 1.0
+ */
 XTAPI
 PETHREAD
 KE::KThread::GetInitialThread(VOID)
@@ -43,9 +50,9 @@ KE::KThread::GetInitialThread(VOID)
  * @param Stack
  *        Supplies a pointer to the stack of the thread.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
- * @since NT 3.5
+ * @since XT 1.0
  */
 XTAPI
 XTSTATUS
@@ -189,7 +196,7 @@ KE::KThread::InitializeThread(IN PKPROCESS Process,
  *
  * @return This routine does not return any value.
  *
- * @since NT 5.1
+ * @since XT 1.0
  */
 XTAPI
 VOID

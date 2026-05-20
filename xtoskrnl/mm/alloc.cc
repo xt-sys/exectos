@@ -18,7 +18,7 @@
  * @param Memory
  *        Supplies a pointer to the allocated pool of pages.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -192,7 +192,7 @@ MM::Allocator::AllocateNonPagedPoolPages(IN PFN_COUNT Pages,
  * @param Memory
  *        Supplies a pointer to the allocated pool of pages.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -219,7 +219,7 @@ MM::Allocator::AllocatePagedPoolPages(IN PFN_COUNT Pages,
  * @param Memory
  *        Supplies a pointer to the allocated pool of pages.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -271,7 +271,7 @@ MM::Allocator::AllocatePages(IN MMPOOL_TYPE PoolType,
  * @param Memory
  *        Supplies a pointer to the allocated memory.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -300,7 +300,7 @@ MM::Allocator::AllocatePool(IN MMPOOL_TYPE PoolType,
  * @param Tag
  *        Specifies the allocation identifying tag.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -737,7 +737,7 @@ MM::Allocator::ExpandBigAllocationsTable(VOID)
  * @param PagesFreed
  *        Supplies a pointer to a variable that will receive the number of pages freed.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -985,7 +985,7 @@ MM::Allocator::FreeNonPagedPoolPages(IN PVOID VirtualAddress,
  * @param PagesFreed
  *        Supplies a pointer to a variable that will receive the number of pages freed.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -1006,7 +1006,7 @@ MM::Allocator::FreePagedPoolPages(IN PVOID VirtualAddress,
  * @param VirtualAddress
  *        Supplies the base virtual address of the pages allocation to free.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -1026,7 +1026,7 @@ MM::Allocator::FreePages(IN PVOID VirtualAddress)
  * @param PagesFreed
  *        Supplies a pointer to a variable that will receive the number of pages freed.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -1059,7 +1059,7 @@ MM::Allocator::FreePages(IN PVOID VirtualAddress,
  * @param VirtualAddress
  *        Supplies the base virtual address of the pool allocation to free.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -1080,7 +1080,7 @@ MM::Allocator::FreePool(IN PVOID VirtualAddress)
  * @param Tag
  *        Specifies the allocation identifying tag.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */

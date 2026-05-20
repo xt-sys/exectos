@@ -18,7 +18,7 @@
  * @param Count
  *        The number of PTE entries to advance by.
  *
- * @return The advanced PTE pointer.
+ * @return This routine returns the advanced PTE pointer.
  *
  * @since XT 1.0
  */
@@ -96,7 +96,7 @@ MM::PageMap::GetNextEntry(IN PMMPTE Pte)
  * @param Pte
  *        The PTE pointer to advance.
  *
- * @return The advanced PTE pointer.
+ * @return This routine returns the advanced PTE pointer.
  *
  * @since XT 1.0
  */

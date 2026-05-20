@@ -18,7 +18,7 @@
  * @param Count
  *        The number of PTE entries to advance by.
  *
- * @return The advanced PTE pointer.
+ * @return This routine returns the advanced PTE pointer.
  *
  * @since XT 1.0
  */
@@ -158,7 +158,7 @@ MM::Paging::GetNextEntry(IN PMMPTE Pte)
  * @param Pte
  *        The PTE pointer to advance.
  *
- * @return The advanced PTE pointer.
+ * @return This routine returns the advanced PTE pointer.
  *
  * @since XT 1.0
  */
@@ -517,7 +517,7 @@ MM::Paging::InitializePageMapSupport(VOID)
  * @param PtePointer
  *        Pointer to the page table entry (PTE) to check.
  *
- * @return Returns TRUE if the entry is valid, FALSE otherwise.
+ * @return This routine returns TRUE if the entry is valid, FALSE otherwise.
  *
  * @since XT 1.0
  */

@@ -251,7 +251,7 @@ MM::PageMapBasic::GetNextEntry(IN PMMPTE Pte)
  * @param Pte
  *        The PTE pointer to advance.
  *
- * @return The advanced PTE pointer.
+ * @return This routine returns the advanced PTE pointer.
  *
  * @since XT 1.0
  */
@@ -472,7 +472,7 @@ MM::PageMapBasic::InitializePageMapInfo(VOID)
  * @param PtePointer
  *        Pointer to the page table entry (PTE) to check.
  *
- * @return Returns TRUE if the entry is valid, FALSE otherwise.
+ * @return This routine returns TRUE if the entry is valid, FALSE otherwise.
  *
  * @since XT 1.0
  */
@@ -666,7 +666,7 @@ MM::PageMapBasic::WritePte(IN PMMPTE Pte,
  * @param Count
  *        The number of PTE entries to advance by.
  *
- * @return The advanced PTE pointer.
+ * @return This routine returns the advanced PTE pointer.
  *
  * @since XT 1.0
  */
@@ -721,7 +721,7 @@ MM::PageMapXpa::GetNextEntry(IN PMMPTE Pte)
  * @param Pte
  *        The PTE pointer to advance.
  *
- * @return The advanced PTE pointer.
+ * @return This routine returns the advanced PTE pointer.
  *
  * @since XT 1.0
  */
@@ -942,7 +942,7 @@ MM::PageMapXpa::InitializePageMapInfo(VOID)
  * @param PtePointer
  *        Pointer to the page table entry (PTE) to check.
  *
- * @return Returns TRUE if the entry is valid, FALSE otherwise.
+ * @return This routine returns TRUE if the entry is valid, FALSE otherwise.
  *
  * @since XT 1.0
  */

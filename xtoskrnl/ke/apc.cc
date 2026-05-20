@@ -38,7 +38,7 @@
  *
  * @return This routine does not return any value.
  *
- * @since NT 3.5
+ * @since XT 1.0
  */
 XTAPI
 VOID

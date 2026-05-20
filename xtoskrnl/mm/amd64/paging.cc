@@ -109,7 +109,7 @@ MM::Paging::GetPxeVirtualAddress(IN PMMPXE PxePointer)
  * @param Attributes
  *        Specifies the attributes (protections, caching) to apply to the PTE.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */

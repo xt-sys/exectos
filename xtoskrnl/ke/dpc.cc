@@ -23,7 +23,7 @@
  *
  * @return This routine does not return any value.
  *
- * @since NT 3.5
+ * @since XT 1.0
  */
 XTAPI
 VOID
@@ -56,7 +56,7 @@ KE::Dpc::InitializeDpc(IN PKDPC Dpc,
  *
  * @return This routine does not return any value.
  *
- * @since NT 5.2
+ * @since XT 1.0
  */
 XTAPI
 VOID
@@ -86,7 +86,7 @@ KE::Dpc::InitializeThreadedDpc(IN PKDPC Dpc,
  *
  * @return This routine does not return any value.
  *
- * @since NT 4.0
+ * @since XT 1.0
  */
 XTAPI
 VOID
@@ -104,7 +104,7 @@ KE::Dpc::SetTargetProcessor(IN PKDPC Dpc,
  *
  * @return This routine does not return any value.
  *
- * @since NT 5.2
+ * @since XT 1.0
  */
 XTAPI
 VOID
@@ -121,7 +121,7 @@ KE::Dpc::SignalCallDone(IN PVOID SystemArgument)
  *
  * @return This routine returns TRUE if just one processor is waiting on the barrier, FALSE if more.
  *
- * @since NT 5.2
+ * @since XT 1.0
  */
 XTAPI
 BOOLEAN

@@ -390,7 +390,7 @@ MM::Pfn::GetHighestPhysicalPage(VOID)
 /**
  * Retrieves the total number of physical pages managed by the system.
  *
- * @return Returns the total count of physical memory pages.
+ * @return This routine returns the total count of physical memory pages.
  *
  * @since XT 1.0
  */

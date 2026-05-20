@@ -25,7 +25,7 @@
  * @param Buffer
  *        Supplies a buffer that receives the physical address.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -153,7 +153,7 @@ MM::HardwarePool::AllocateHardwareMemory(IN PFN_NUMBER PageCount,
  * @param MemoryAddress
  *        Supplies a pointer to a variable that receives the identity-mapped virtual address of the allocated memory.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -207,7 +207,7 @@ MM::HardwarePool::AllocateRealModeMemory(IN PFN_NUMBER PageCount,
  * @param VirtualAddress
  *        Supplies a buffer that receives the virtual address of the mapped pages.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -374,7 +374,7 @@ MM::HardwarePool::RemapHardwareMemory(IN PVOID VirtualAddress,
  * @param FlushTlb
  *        Specifies whether to flush the TLB or not.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */

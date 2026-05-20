@@ -285,7 +285,7 @@ MM::Manager::InitializeMemoryManager(VOID)
 /**
  * Allocates and maps the Kernel Shared Data page to its hardcoded virtual address.
  *
- * @return This routine returns status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */

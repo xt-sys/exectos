@@ -19,7 +19,7 @@
  * @param StackSize
  *        Supplies the size of the stack to be allocated, in bytes.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -95,7 +95,7 @@ MM::KernelPool::AllocateKernelStack(OUT PVOID *Stack,
  * @param StructuresData
  *        Supplies a pointer to the memory area that will contain the allocated buffer.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */

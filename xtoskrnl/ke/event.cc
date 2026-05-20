@@ -17,7 +17,7 @@
  *
  * @return This routine does not return any value.
  *
- * @since NT 3.5
+ * @since XT 1.0
  */
 XTAPI
 VOID
@@ -41,7 +41,7 @@ KE::Event::ClearEvent(IN PKEVENT Event)
  *
  * @return This routine does not return any value.
  *
- * @since NT 3.5
+ * @since XT 1.0
  */
 XTAPI
 VOID
@@ -71,7 +71,7 @@ KE::Event::InitializeEvent(OUT PKEVENT Event,
  *
  * @return This routine returns the previous signal state of the event.
  *
- * @since NT 3.5
+ * @since XT 1.0
  */
 XTAPI
 LONG

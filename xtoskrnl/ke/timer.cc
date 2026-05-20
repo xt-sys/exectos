@@ -17,7 +17,7 @@
  *
  * @return This routine returns TRUE if the cancelled timer was set, or FALSE otherwise.
  *
- * @since NT 3.5
+ * @since XT 1.0
  */
 XTAPI
 BOOLEAN
@@ -57,7 +57,7 @@ KE::Timer::CancelTimer(IN PKTIMER Timer)
  *
  * @return This routine does not return any value.
  *
- * @since NT 4.0
+ * @since XT 1.0
  */
 XTAPI
 VOID

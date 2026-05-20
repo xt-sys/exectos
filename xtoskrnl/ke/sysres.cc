@@ -18,7 +18,7 @@
  * @param ResourceHeader
  *        Specifies a memory area where a pointer to the system resource header will be stored.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -131,7 +131,7 @@ KE::SystemResources::GetSystemResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
  * @param ResourceHeader
  *        Specifies a memory area where a pointer to the system resource header will be stored.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -147,7 +147,7 @@ KE::SystemResources::GetResource(IN SYSTEM_RESOURCE_TYPE ResourceType,
 /**
  * Initializes system resource management.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */

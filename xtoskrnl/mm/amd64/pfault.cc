@@ -16,6 +16,8 @@
  *        Specifies the virtual address to verify.
  *
  * @return This routine returns ACCESS_VIOLATION regardless PML4 or PML5 is used.
+ *
+ * @since XT 1.0
  */
 XTFASTCALL
 XTSTATUS

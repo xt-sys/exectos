@@ -63,7 +63,7 @@ PO::Idle::Idle0Function(IN PPROCESSOR_POWER_STATE PowerState)
  *
  * @return This routine does not return any value.
  *
- * @since NT 5.1
+ * @since XT 1.0
  */
 XTAPI
 VOID
@@ -89,7 +89,7 @@ PO::Idle::PerfIdle(PPROCESSOR_POWER_STATE PowerState)
  *
  * @return This routine does not return any value.
  *
- * @since NT 5.1
+ * @since XT 1.0
  */
 XTAPI
 VOID

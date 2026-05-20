@@ -9,6 +9,13 @@
 #include <xtos.hh>
 
 
+/**
+ * Retrieves a pointer to the system's initial executive process object.
+ *
+ * @return This routine returns a pointer to the initial executive process.
+ *
+ * @since XT 1.0
+ */
 XTAPI
 PEPROCESS
 KE::KProcess::GetInitialProcess(VOID)
@@ -36,7 +43,7 @@ KE::KProcess::GetInitialProcess(VOID)
  *
  * @return This routine does not return any value.
  *
- * @since NT 3.5
+ * @since XT 1.0
  */
 XTAPI
 VOID
