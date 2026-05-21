@@ -21,6 +21,7 @@
 #include <rtl/llist.hh>
 #include <rtl/math.hh>
 #include <rtl/memory.hh>
+#include <rtl/rbtree.hh>
 #include <rtl/sha1.hh>
 #include <rtl/slist.hh>
 #include <rtl/string.hh>

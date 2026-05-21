@@ -14,51 +14,55 @@
 
 
 /* UUID string lengths */
-#define GUID_STRING_LENGTH              38
-#define PARTUUID_STRING_LENGTH          13
+#define GUID_STRING_LENGTH                              38
+#define PARTUUID_STRING_LENGTH                          13
 
 /* Maximum double/integer value string length */
-#define MAX_DOUBLE_STRING_SIZE          15
-#define MAX_INTEGER_STRING_SIZE         25
+#define MAX_DOUBLE_STRING_SIZE                          15
+#define MAX_INTEGER_STRING_SIZE                         25
 
 /* Floating point definitions */
-#define DOUBLE_EXPONENT_MASK            0x7FF0000000000000ULL
-#define DOUBLE_EXPONENT_SHIFT           0x34
-#define DOUBLE_EXPONENT_BIAS            0x3FF
-#define DOUBLE_HIGH_VALUE_MASK          0x000FFFFF
-#define DOUBLE_HIGH_VALUE_SHIFT         0x20
-#define DOUBLE_PRECISION                6
-#define DOUBLE_HEX_PRECISION            13
-#define DOUBLE_SCIENTIFIC_PRECISION     -4
-#define DOUBLE_SIGN_BIT                 0x8000000000000000ULL
+#define DOUBLE_EXPONENT_MASK                            0x7FF0000000000000ULL
+#define DOUBLE_EXPONENT_SHIFT                           0x34
+#define DOUBLE_EXPONENT_BIAS                            0x3FF
+#define DOUBLE_HIGH_VALUE_MASK                          0x000FFFFF
+#define DOUBLE_HIGH_VALUE_SHIFT                         0x20
+#define DOUBLE_PRECISION                                6
+#define DOUBLE_HEX_PRECISION                            13
+#define DOUBLE_SCIENTIFIC_PRECISION                     -4
+#define DOUBLE_SIGN_BIT                                 0x8000000000000000ULL
 
 /* Print flag definitions */
-#define PFL_ALWAYS_PRINT_SIGN           0x00000001
-#define PFL_SPACE_FOR_PLUS              0x00000002
-#define PFL_LEFT_JUSTIFIED              0x00000004
-#define PFL_LEADING_ZEROES              0x00000008
-#define PFL_LONG_INTEGER                0x00000010
-#define PFL_LONG_DOUBLE                 0x00000020
-#define PFL_WIDE_CHARACTER              0x00000040
-#define PFL_SHORT_VALUE                 0x00000080
-#define PFL_UNSIGNED                    0x00000100
-#define PFL_UPPERCASE                   0x00000200
-#define PFL_PRINT_RADIX                 0x00000400
-#define PFL_FLOAT_FORMAT                0x00000800
-#define PFL_SCI_FORMAT                  0x00001000
-#define PFL_DIGIT_PRECISION             0x00002000
-#define PFL_THOUSANDS_GROUPING          0x00004000
+#define PFL_ALWAYS_PRINT_SIGN                           0x00000001
+#define PFL_SPACE_FOR_PLUS                              0x00000002
+#define PFL_LEFT_JUSTIFIED                              0x00000004
+#define PFL_LEADING_ZEROES                              0x00000008
+#define PFL_LONG_INTEGER                                0x00000010
+#define PFL_LONG_DOUBLE                                 0x00000020
+#define PFL_WIDE_CHARACTER                              0x00000040
+#define PFL_SHORT_VALUE                                 0x00000080
+#define PFL_UNSIGNED                                    0x00000100
+#define PFL_UPPERCASE                                   0x00000200
+#define PFL_PRINT_RADIX                                 0x00000400
+#define PFL_FLOAT_FORMAT                                0x00000800
+#define PFL_SCI_FORMAT                                  0x00001000
+#define PFL_DIGIT_PRECISION                             0x00002000
+#define PFL_THOUSANDS_GROUPING                          0x00004000
+
+/* Red-black tree definitions */
+#define RTL_BALANCED_NODE_RESERVED_PARENT_MASK          3
+#define RTL_BALANCED_NODE_COLOR_MASK                    1
 
 /* Cryptographic related definitions */
-#define SHA1_BLOCK_SIZE                 64
-#define SHA1_DIGEST_SIZE                20
+#define SHA1_BLOCK_SIZE                                 64
+#define SHA1_DIGEST_SIZE                                20
 
 /* Time related definitions */
-#define TIME_SECONDS_PER_MINUTE         60
-#define TIME_SECONDS_PER_HOUR           3600
-#define TIME_SECONDS_PER_DAY            86400
-#define TIME_TICKS_PER_SECOND           10000000
-#define TIME_TICKS_PER_MILLISECOND      10000
+#define TIME_SECONDS_PER_MINUTE                         60
+#define TIME_SECONDS_PER_HOUR                           3600
+#define TIME_SECONDS_PER_DAY                            86400
+#define TIME_TICKS_PER_SECOND                           10000000
+#define TIME_TICKS_PER_MILLISECOND                      10000
 
 
 /* C/C++ specific code */
@@ -67,6 +71,13 @@
 /* Runtime Library routine callbacks */
 typedef XTSTATUS (*PWRITE_CHARACTER)(IN CHAR Character);
 typedef XTSTATUS (*PWRITE_WIDE_CHARACTER)(IN WCHAR Character);
+
+/* Red-black tree node color enumeration list */
+typedef enum _RTL_BALANCED_NODE_COLOR
+{
+    NodeBlack,
+    NodeRed
+} RTL_BALANCED_NODE_COLOR, *PRTL_BALANCED_NODE_COLOR;
 
 /* Variable types enumeration list */
 typedef enum _RTL_VARIABLE_TYPE
@@ -83,6 +94,26 @@ typedef enum _RTL_VARIABLE_TYPE
     TypeWideChar,
     TypeWideString
 } RTL_VARIABLE_TYPE, *PRTL_VARIABLE_TYPE;
+
+/* Runtime Library red-black tree balanced node structure definition */
+typedef struct _RTL_BALANCED_NODE
+{
+    union
+    {
+        PRTL_BALANCED_NODE Children[2];
+        struct
+        {
+            PRTL_BALANCED_NODE Left;
+            PRTL_BALANCED_NODE Right;
+        };
+    };
+    union
+    {
+        UCHAR Red:1;
+        UCHAR Balance:2;
+        ULONG_PTR ParentValue;
+    };
+} RTL_BALANCED_NODE, *PRTL_BALANCED_NODE;
 
 /* Bit Map structure definition */
 typedef struct _RTL_BITMAP
@@ -110,12 +141,19 @@ typedef struct _RTL_PRINT_FORMAT_PROPERTIES
     LONG Flags;
 } RTL_PRINT_FORMAT_PROPERTIES, *PRTL_PRINT_FORMAT_PROPERTIES;
 
+/* Runtime Library red-black tree structure definition */
+typedef struct _RTL_RB_TREE
+{
+    PRTL_BALANCED_NODE Root;
+    PRTL_BALANCED_NODE Min;
+} RTL_RB_TREE, *PRTL_RB_TREE;
+
 /* Runtime Library SHA-1 context structure definition */
 typedef struct _RTL_SHA1_CONTEXT
 {
-    ULONG   State[5];
-    ULONG   Count[2];
-    UCHAR   Buffer[SHA1_BLOCK_SIZE];
+    ULONG State[5];
+    ULONG Count[2];
+    UCHAR Buffer[SHA1_BLOCK_SIZE];
 } RTL_SHA1_CONTEXT, *PRTL_SHA1_CONTEXT;
 
 /* Runtime time fields structure definition */
