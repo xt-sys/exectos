@@ -722,7 +722,7 @@ MM::Allocator::ExpandBigAllocationsTable(VOID)
 
     /* Update the pool tracking statistics */
     UnregisterAllocationTag(SIGNATURE32('M', 'M', 'g', 'r'), PagesFreed << MM_PAGE_SHIFT, (MMPOOL_TYPE)0);
-    RegisterAllocationTag(SIGNATURE32('M', 'M', 'g', 'r'), ROUND_UP(NewSize, MM_PAGE_SIZE), (MMPOOL_TYPE)0);
+    RegisterAllocationTag(SIGNATURE32('M', 'M', 'g', 'r'), ROUND_UP(AllocationBytes, MM_PAGE_SIZE), (MMPOOL_TYPE)0);
 
     /* Return success */
     return TRUE;
