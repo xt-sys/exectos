@@ -119,9 +119,6 @@
 /* Number of pool lists per page */
 #define MM_POOL_LISTS_PER_PAGE                     (MM_PAGE_SIZE / MM_POOL_BLOCK_SIZE)
 
-/* Number of pool tracking tables */
-#define MM_POOL_TRACKING_TABLES                    64
-
 
 /* C/C++ specific code */
 #ifndef __XTOS_ASSEMBLER__

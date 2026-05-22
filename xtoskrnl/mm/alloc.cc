@@ -1379,9 +1379,6 @@ MM::Allocator::InitializeAllocationsTracking(VOID)
     /* Zero the entire memory used by the table */
     RtlZeroMemory(AllocationsTrackingTable, AllocationsTrackingTableSize * sizeof(POOL_TRACKING_TABLE));
 
-    /* Assign the global tracking table as the local table for the bootstrap processor */
-    TagTables[0] = AllocationsTrackingTable;
-
     /* Calculate and store the hash mask */
     AllocationsTrackingTableMask = AllocationsTrackingTableSize - 2;
 
@@ -1527,12 +1524,8 @@ MM::Allocator::RegisterAllocationTag(IN ULONG Tag,
                                      IN SIZE_T Bytes,
                                      IN MMPOOL_TYPE PoolType)
 {
-    PPOOL_TRACKING_TABLE CpuTable, TableEntry;
-    ULONG Hash, Index, Processor;
-
-    /* Retrieve the local tracking table for the current processor */
-    Processor = KE::Processor::GetCurrentProcessorNumber();
-    CpuTable = TagTables[Processor];
+    PPOOL_TRACKING_TABLE TableEntry;
+    ULONG Hash, Index;
 
     /* Strip the protected pool bit */
     Tag &= ~MM_POOL_PROTECTED;
@@ -1544,8 +1537,8 @@ MM::Allocator::RegisterAllocationTag(IN ULONG Tag,
     /* Probe the tracking table until a match or an empty slot is found */
     do
     {
-        /* Fetch the tracker entry from the CPU table */
-        TableEntry = &CpuTable[Hash];
+        /* Fetch the tracker entry from the table */
+        TableEntry = &AllocationsTrackingTable[Hash];
 
         /* Check if the current entry tracks the requested pool tag */
         if(TableEntry->Tag == Tag)
@@ -1568,34 +1561,21 @@ MM::Allocator::RegisterAllocationTag(IN ULONG Tag,
             return;
         }
 
-        /* Check if the CPU table is entirely empty */
+        /* Check if the table is entirely empty */
         if(TableEntry->Tag == 0)
         {
-            /* Check if another processor has claimed this slot in the global table */
-            if(AllocationsTrackingTable[Hash].Tag != 0)
-            {
-                /* Synchronize the local table with the global table */
-                TableEntry->Tag = AllocationsTrackingTable[Hash].Tag;
-
-                /* Restart the loop to evaluation */
-                continue;
-            }
-
             /* Check if this is not the designated overflow bucket */
             if(Hash != (AllocationsTrackingTableSize - 1))
             {
-                /* Start a guarded code block */
-                {
-                    /* Acquire the tracking table lock */
-                    KE::SpinLockGuard TrackingTableLock(&AllocationsTrackingTableLock);
+                /* Acquire the tracking table lock */
+                KE::SpinLockGuard TrackingTableLock(&AllocationsTrackingTableLock);
 
-                    /* Perform a double-checked lock */
-                    if(AllocationsTrackingTable[Hash].Tag == 0)
-                    {
-                        /* Claim the slot in both, local and global tracking tables */
-                        AllocationsTrackingTable[Hash].Tag = Tag;
-                        TableEntry->Tag = Tag;
-                    }
+                /* Perform a double-checked lock */
+                if(AllocationsTrackingTable[Hash].Tag == 0)
+                {
+                    /* Claim the slot in both, local and global tracking tables */
+                    AllocationsTrackingTable[Hash].Tag = Tag;
+                    TableEntry->Tag = Tag;
                 }
 
                 /* Restart the loop */
@@ -1923,13 +1903,7 @@ MM::Allocator::UnregisterAllocationTag(IN ULONG Tag,
                                        IN MMPOOL_TYPE PoolType)
 {
     ULONG Hash, Index;
-    PPOOL_TRACKING_TABLE CpuTable;
     PPOOL_TRACKING_TABLE TableEntry;
-    ULONG Processor;
-
-    /* Retrieve the local tracking table for the current processor */
-    Processor = KE::Processor::GetCurrentProcessorNumber();
-    CpuTable = TagTables[Processor];
 
     /* Strip the protected pool bit */
     Tag &= ~MM_POOL_PROTECTED;
@@ -1941,8 +1915,8 @@ MM::Allocator::UnregisterAllocationTag(IN ULONG Tag,
     /* Probe the tracking table until a match or an empty slot is found */
     do
     {
-        /* Fetch the tracker entry from the CPU table */
-        TableEntry = &CpuTable[Hash];
+        /* Fetch the tracker entry from the table */
+        TableEntry = &AllocationsTrackingTable[Hash];
 
         /* Check if the current entry tracks the requested pool tag */
         if(TableEntry->Tag == Tag)
@@ -1952,31 +1926,17 @@ MM::Allocator::UnregisterAllocationTag(IN ULONG Tag,
             {
                 /* Update the non-paged allocation statistics */
                 RTL::Atomic::Increment32(&TableEntry->NonPagedFrees);
-                RTL::Atomic::ExchangeAdd64((PLONG_PTR)&TableEntry->NonPagedBytes, 0 - Bytes);
+                RTL::Atomic::ExchangeAdd64((PLONG_PTR)&TableEntry->NonPagedBytes, -(LONG_PTR)Bytes);
             }
             else
             {
                 /* Update the paged allocation statistics */
                 RTL::Atomic::Increment32(&TableEntry->PagedFrees);
-                RTL::Atomic::ExchangeAdd64((PLONG_PTR)&TableEntry->PagedBytes, 0 - Bytes);
+                RTL::Atomic::ExchangeAdd64((PLONG_PTR)&TableEntry->PagedBytes, -(LONG_PTR)Bytes);
             }
 
             /* The allocation has been successfully tracked, return */
             return;
-        }
-
-        /* Check if the CPU table is entirely empty */
-        if(TableEntry->Tag == 0)
-        {
-            /* Check if another processor has claimed this slot in the global table */
-            if(AllocationsTrackingTable[Hash].Tag != 0)
-            {
-                /* Synchronize the local table with the global table */
-                TableEntry->Tag = AllocationsTrackingTable[Hash].Tag;
-
-                /* Restart the loop to evaluation */
-                continue;
-            }
         }
 
         /* Advance to the next index as hash collision occurred */
@@ -2010,9 +1970,7 @@ MM::Allocator::UnregisterAllocationTagExpansion(IN ULONG Tag,
                                                 IN SIZE_T Bytes,
                                                 IN MMPOOL_TYPE PoolType)
 {
-    PPOOL_TRACKING_TABLE CpuTable;
     ULONG Hash;
-    ULONG Processor;
 
     /* Start a guarded code block */
     {
@@ -2055,22 +2013,18 @@ MM::Allocator::UnregisterAllocationTagExpansion(IN ULONG Tag,
     /* Target the index of the overflow bucket */
     Hash = (ULONG)AllocationsTrackingTableSize - 1;
 
-    /* Retrieve the local tracking table for the current processor */
-    Processor = KE::Processor::GetCurrentProcessorNumber();
-    CpuTable = TagTables[Processor];
-
     /* Update the appropriate statistics based on the pool type */
     if((PoolType & MM_POOL_TYPE_MASK) == NonPagedPool)
     {
         /* Update the non-paged allocation statistics */
-        RTL::Atomic::Increment32((PLONG)&CpuTable[Hash].NonPagedFrees);
-        RTL::Atomic::ExchangeAdd64((PLONG_PTR)&CpuTable[Hash].NonPagedBytes, 0 - Bytes);
+        RTL::Atomic::Increment32((PLONG)&AllocationsTrackingTable[Hash].NonPagedFrees);
+        RTL::Atomic::ExchangeAdd64((PLONG_PTR)&AllocationsTrackingTable[Hash].NonPagedBytes, -(LONG_PTR)Bytes);
     }
     else
     {
         /* Update the paged allocation statistics */
-        RTL::Atomic::Increment32((PLONG)&CpuTable[Hash].PagedFrees);
-        RTL::Atomic::ExchangeAdd64((PLONG_PTR)&CpuTable[Hash].PagedBytes, 0 - Bytes);
+        RTL::Atomic::Increment32((PLONG)&AllocationsTrackingTable[Hash].PagedFrees);
+        RTL::Atomic::ExchangeAdd64((PLONG_PTR)&AllocationsTrackingTable[Hash].PagedBytes, -(LONG_PTR)Bytes);
     }
 }
 

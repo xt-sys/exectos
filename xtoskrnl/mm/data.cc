@@ -42,9 +42,6 @@ KSPIN_LOCK MM::Allocator::BigAllocationsTrackingTableLock;
 /* Maximum capacity of the tracking hash table */
 SIZE_T MM::Allocator::BigAllocationsTrackingTableSize;
 
-/* Array of CPU-local tracking tables */
-PPOOL_TRACKING_TABLE MM::Allocator::TagTables[MM_POOL_TRACKING_TABLES];
-
 /* Array of free page lists segregated by cache color */
 PMMCOLOR_TABLES MM::Colors::FreePages[FreePageList + 1];
 

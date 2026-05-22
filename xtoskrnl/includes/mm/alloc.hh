@@ -30,7 +30,6 @@ namespace MM
             STATIC SIZE_T BigAllocationsTrackingTableHash;
             STATIC KSPIN_LOCK BigAllocationsTrackingTableLock;
             STATIC SIZE_T BigAllocationsTrackingTableSize;
-            STATIC PPOOL_TRACKING_TABLE TagTables[MM_POOL_TRACKING_TABLES];
 
         public:
             STATIC XTAPI XTSTATUS AllocatePages(IN MMPOOL_TYPE PoolType,
