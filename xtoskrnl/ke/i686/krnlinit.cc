@@ -215,6 +215,6 @@ KE::KernelInit::SwitchBootStack(VOID)
                      : [Cr0Value] "i" (CR0_EM | CR0_MP | CR0_TS),
                        [Stack] "r" (Stack),
                        [TargetRoutine] "r" (StartKernel),
-                       [TotalSize] "i" (KTRAP_FRAME_ALIGN + KTRAP_FRAME_SIZE + NPX_FRAME_SIZE + KRETURN_ADDRESS_SIZE)
+                       [TotalSize] "i" (KTHREAD_STACK_INITIAL_RESERVE)
                      : "ebp", "esp", "memory");
 }

@@ -213,7 +213,6 @@ KE::KernelInit::SwitchBootStack(VOID)
                      :
                      : [Stack] "r" (Stack),
                        [TargetRoutine] "r" (StartKernel),
-                       [TotalSize] "i" (FLOATING_SAVE_AREA_SIZE + KEXCEPTION_FRAME_SIZE +
-                                        KSWITCH_FRAME_SIZE + KRETURN_ADDRESS_SIZE)
+                       [TotalSize] "i" (KTHREAD_STACK_INITIAL_RESERVE)
                      : "memory", "rbp", "rsp");
 }
