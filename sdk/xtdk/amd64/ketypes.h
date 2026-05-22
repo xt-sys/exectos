@@ -18,56 +18,56 @@
 
 
 /* Selector masks */
-#define MODE_MASK                                 0x0001
-#define RPL_MASK                                  0x0003
+#define MODE_MASK                         0x0001
+#define RPL_MASK                          0x0003
 
 /* GDT selector names */
-#define KGDT_NULL                                 0x0000
-#define KGDT_R0_CMCODE                            0x0008
-#define KGDT_R0_CODE                              0x0010
-#define KGDT_R0_DATA                              0x0018
-#define KGDT_R3_CMCODE                            0x0020
-#define KGDT_R3_DATA                              0x0028
-#define KGDT_R3_CODE                              0x0030
-#define KGDT_SYS_TSS                              0x0040
-#define KGDT_R3_CMTEB                             0x0050
-#define KGDT_R0_LDT                               0x0060
-#define KGDT_ALIAS                                0x0070
+#define KGDT_NULL                         0x0000
+#define KGDT_R0_CMCODE                    0x0008
+#define KGDT_R0_CODE                      0x0010
+#define KGDT_R0_DATA                      0x0018
+#define KGDT_R3_CMCODE                    0x0020
+#define KGDT_R3_DATA                      0x0028
+#define KGDT_R3_CODE                      0x0030
+#define KGDT_SYS_TSS                      0x0040
+#define KGDT_R3_CMTEB                     0x0050
+#define KGDT_R0_LDT                       0x0060
+#define KGDT_ALIAS                        0x0070
 
 /* GDT descriptor privilege levels */
-#define KGDT_DPL_SYSTEM                           0
-#define KGDT_DPL_USER                             3
+#define KGDT_DPL_SYSTEM                   0
+#define KGDT_DPL_USER                     3
 
 /* GDT descriptor properties */
-#define KGDT_DESCRIPTOR_ACCESSED                  0x01
-#define KGDT_DESCRIPTOR_READ_WRITE                0x02
-#define KGDT_DESCRIPTOR_EXECUTE_READ              0x02
-#define KGDT_DESCRIPTOR_EXPAND_DOWN               0x04
-#define KGDT_DESCRIPTOR_CONFORMING                0x04
-#define KGDT_DESCRIPTOR_CODE                      0x08
+#define KGDT_DESCRIPTOR_ACCESSED          0x01
+#define KGDT_DESCRIPTOR_READ_WRITE        0x02
+#define KGDT_DESCRIPTOR_EXECUTE_READ      0x02
+#define KGDT_DESCRIPTOR_EXPAND_DOWN       0x04
+#define KGDT_DESCRIPTOR_CONFORMING        0x04
+#define KGDT_DESCRIPTOR_CODE              0x08
 
 /* GDT descriptor type codes */
-#define KGDT_TYPE_NONE                            0x00
-#define KGDT_TYPE_CODE                            (0x10 | KGDT_DESCRIPTOR_CODE | KGDT_DESCRIPTOR_EXECUTE_READ)
-#define KGDT_TYPE_DATA                            (0x10 | KGDT_DESCRIPTOR_READ_WRITE)
+#define KGDT_TYPE_NONE                    0x00
+#define KGDT_TYPE_CODE                    (0x10 | KGDT_DESCRIPTOR_CODE | KGDT_DESCRIPTOR_EXECUTE_READ)
+#define KGDT_TYPE_DATA                    (0x10 | KGDT_DESCRIPTOR_READ_WRITE)
 
 /* IDT access levels */
-#define KIDT_ACCESS_RING0                         0x0
-#define KIDT_ACCESS_RING3                         0x3
+#define KIDT_ACCESS_RING0                 0x0
+#define KIDT_ACCESS_RING3                 0x3
 
 /* IDT Interrupt Stack Table entries */
-#define KIDT_IST_RESERVED                         0
-#define KIDT_IST_PANIC                            1
-#define KIDT_IST_MCA                              2
-#define KIDT_IST_NMI                              3
+#define KIDT_IST_RESERVED                 0
+#define KIDT_IST_PANIC                    1
+#define KIDT_IST_MCA                      2
+#define KIDT_IST_NMI                      3
 
 /* AMD64 Segment Types */
-#define AMD64_TASK_GATE                           0x5
-#define AMD64_TSS                                 0x9
-#define AMD64_ACTIVE_TSS                          0xB
-#define AMD64_CALL_GATE                           0xC
-#define AMD64_INTERRUPT_GATE                      0xE
-#define AMD64_TRAP_GATE                           0xF
+#define AMD64_TASK_GATE                   0x5
+#define AMD64_TSS                         0x9
+#define AMD64_ACTIVE_TSS                  0xB
+#define AMD64_CALL_GATE                   0xC
+#define AMD64_INTERRUPT_GATE              0xE
+#define AMD64_TRAP_GATE                   0xF
 
 /* Kernel CPU Standard Features */
 #define KCF_VME                           (1ULL << 0)  /* Virtual 8086 Mode Enhancements */
@@ -126,33 +126,33 @@
 #define KCF_INVARIANT_TSC                 (1ULL << 10) /* Invariant Time Stamp Counter */
 
 /* Context control flags */
-#define CONTEXT_ARCHITECTURE                      0x00100000
-#define CONTEXT_CONTROL                           (CONTEXT_ARCHITECTURE | 0x01)
-#define CONTEXT_INTEGER                           (CONTEXT_ARCHITECTURE | 0x02)
-#define CONTEXT_SEGMENTS                          (CONTEXT_ARCHITECTURE | 0x04)
-#define CONTEXT_FLOATING_POINT                    (CONTEXT_ARCHITECTURE | 0x08)
-#define CONTEXT_DEBUG_REGISTERS                   (CONTEXT_ARCHITECTURE | 0x10)
+#define CONTEXT_ARCHITECTURE              0x00100000
+#define CONTEXT_CONTROL                   (CONTEXT_ARCHITECTURE | 0x01)
+#define CONTEXT_INTEGER                   (CONTEXT_ARCHITECTURE | 0x02)
+#define CONTEXT_SEGMENTS                  (CONTEXT_ARCHITECTURE | 0x04)
+#define CONTEXT_FLOATING_POINT            (CONTEXT_ARCHITECTURE | 0x08)
+#define CONTEXT_DEBUG_REGISTERS           (CONTEXT_ARCHITECTURE | 0x10)
 
 /* Interrupt request levels definitions */
-#define PASSIVE_LEVEL                             0
-#define LOW_LEVEL                                 0
-#define APC_LEVEL                                 1
-#define DISPATCH_LEVEL                            2
-#define CMC_LEVEL                                 5
-#define DEVICE1_LEVEL                             6
-#define DEVICE2_LEVEL                             7
-#define DEVICE3_LEVEL                             8
-#define DEVICE4_LEVEL                             9
-#define DEVICE5_LEVEL                             10
-#define DEVICE6_LEVEL                             11
-#define DEVICE7_LEVEL                             12
-#define SYNC_LEVEL                                12
-#define CLOCK_LEVEL                               13
-#define IPI_LEVEL                                 14
-#define DRS_LEVEL                                 14
-#define POWER_LEVEL                               14
-#define PROFILE_LEVEL                             15
-#define HIGH_LEVEL                                15
+#define PASSIVE_LEVEL                     0
+#define LOW_LEVEL                         0
+#define APC_LEVEL                         1
+#define DISPATCH_LEVEL                    2
+#define CMC_LEVEL                         5
+#define DEVICE1_LEVEL                     6
+#define DEVICE2_LEVEL                     7
+#define DEVICE3_LEVEL                     8
+#define DEVICE4_LEVEL                     9
+#define DEVICE5_LEVEL                     10
+#define DEVICE6_LEVEL                     11
+#define DEVICE7_LEVEL                     12
+#define SYNC_LEVEL                        12
+#define CLOCK_LEVEL                       13
+#define IPI_LEVEL                         14
+#define DRS_LEVEL                         14
+#define POWER_LEVEL                       14
+#define PROFILE_LEVEL                     15
+#define HIGH_LEVEL                        15
 
 /* Size of the exception area */
 #define EXCEPTION_AREA_SIZE               64
