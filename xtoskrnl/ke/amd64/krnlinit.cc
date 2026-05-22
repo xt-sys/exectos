@@ -48,6 +48,9 @@ KE::KernelInit::BootstrapApplicationProcessor(IN PPROCESSOR_START_BLOCK StartBlo
     /* Save processor state */
     KE::Processor::SaveProcessorState(&ControlBlock->ProcessorState);
 
+    /* Initialize per-CPU spin lock queues */
+    KE::SpinLock::InitializeLockQueues();
+
     /* Lower to APC runlevel */
     KE::RunLevel::LowerRunLevel(APC_LEVEL);
 
