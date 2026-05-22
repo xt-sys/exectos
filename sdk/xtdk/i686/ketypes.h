@@ -202,7 +202,7 @@
 #define NPX_FRAME_SIZE                    0x210
 
 /* Initial stack reservation size */
-#define KTHREAD_STACK_INITIAL_RESERVE     ((sizeof(KTHREAD_INIT_FRAME) + STACK_ALIGNMENT - 1) & ~(STACK_ALIGNMENT - 1))
+#define KTHREAD_STACK_OFFSET              ((sizeof(KTHREAD_INIT_FRAME) + STACK_ALIGNMENT - 1) & ~(STACK_ALIGNMENT - 1))
 
 /* Number of supported extensions */
 #define MAXIMUM_SUPPORTED_EXTENSION       512

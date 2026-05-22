@@ -184,7 +184,7 @@
 #define KTRAP_FRAME_SIZE                  sizeof(KTRAP_FRAME)
 
 /* Initial stack reservation size */
-#define KTHREAD_STACK_INITIAL_RESERVE     ((sizeof(KTHREAD_INIT_FRAME) + STACK_ALIGNMENT - 1) & ~(STACK_ALIGNMENT - 1))
+#define KTHREAD_STACK_OFFSET              ((sizeof(KTHREAD_INIT_FRAME) + STACK_ALIGNMENT - 1) & ~(STACK_ALIGNMENT - 1))
 
 /* Return address size pushed by 'call' instruction */
 #define KRETURN_ADDRESS_SIZE              0x8

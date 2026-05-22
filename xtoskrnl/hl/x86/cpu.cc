@@ -174,7 +174,7 @@ HL::Cpu::StartAllProcessors(VOID)
         StartBlock->Cr3 = AR::CpuFunctions::ReadControlRegister(3);
         StartBlock->Cr4 = AR::CpuFunctions::ReadControlRegister(4);
         StartBlock->EntryPoint = (PVOID)&KE::KernelInit::BootstrapApplicationProcessor;
-        StartBlock->InitialStack = (PVOID)((ULONG_PTR)StartBlock->Stack - KTHREAD_STACK_INITIAL_RESERVE);
+        StartBlock->InitialStack = (PVOID)((ULONG_PTR)StartBlock->Stack - KTHREAD_STACK_OFFSET);
         StartBlock->ProcessorStructures = CpuStructures;
         StartBlock->Started = FALSE;
 

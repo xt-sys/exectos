@@ -213,6 +213,6 @@ KE::KernelInit::SwitchBootStack(VOID)
                      :
                      : [Stack] "r" (Stack),
                        [TargetRoutine] "r" (StartKernel),
-                       [TotalSize] "i" (KTHREAD_STACK_INITIAL_RESERVE)
+                       [TotalSize] "i" (KTHREAD_STACK_OFFSET)
                      : "memory", "rbp", "rsp");
 }
