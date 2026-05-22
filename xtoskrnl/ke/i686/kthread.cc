@@ -43,7 +43,7 @@ KE::KThread::InitializeThreadContext(IN PKTHREAD Thread,
     PFX_SAVE_FORMAT FxSaveFormat;
 
     /* Set initial thread frame */
-    ThreadFrame = (PKTHREAD_INIT_FRAME)((ULONG_PTR)Thread->InitialStack - sizeof(KTHREAD_INIT_FRAME));
+    ThreadFrame = ((PKTHREAD_INIT_FRAME)Thread->InitialStack) - 1;
 
     /* Fill floating point save area with zeroes */
     RTL::Memory::ZeroMemory(&ThreadFrame->NpxFrame, sizeof(FX_SAVE_AREA));
