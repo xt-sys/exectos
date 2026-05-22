@@ -535,6 +535,7 @@ typedef struct _PROCESSOR_START_BLOCK
     ULONG_PTR Cr3;
     ULONG_PTR Cr4;
     PVOID EntryPoint;
+    PVOID InitialStack;
     PVOID ProcessorStructures;
     PVOID Stack;
     BOOLEAN Started;

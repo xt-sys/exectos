@@ -311,7 +311,7 @@ ApEnterProtectedMode:
     movl %eax, %cr0
 
     /* Load dedicated Stack for AP */
-    movl PROCESSOR_START_BLOCK_Stack(%edi), %esp
+    movl PROCESSOR_START_BLOCK_InitialStack(%edi), %esp
 
     /* Save the pointer to PROCESSOR_START_BLOCK */
     movl %edi, %ecx

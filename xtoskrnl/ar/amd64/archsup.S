@@ -463,7 +463,7 @@ ApEnterLongMode:
     movl %edi, %edi
 
     /* Load dedicated Stack for AP */
-    movq PROCESSOR_START_BLOCK_Stack(%rdi), %rsp
+    movq PROCESSOR_START_BLOCK_InitialStack(%rdi), %rsp
 
     /* Save the pointer to PROCESSOR_START_BLOCK */
     movq %rdi, %rcx
