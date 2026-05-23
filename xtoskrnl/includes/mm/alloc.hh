@@ -64,6 +64,7 @@ namespace MM
                                                         OUT PPFN_NUMBER PagesFreed);
             STATIC XTAPI XTSTATUS FreePagedPoolPages(IN PVOID VirtualAddress,
                                                      OUT PPFN_NUMBER PagesFreed);
+            STATIC XTAPI VOID PopulateAllocationTags(VOID);
             STATIC XTAPI VOID RegisterAllocationTag(IN ULONG Tag,
                                                     IN SIZE_T Bytes,
                                                     IN MMPOOL_TYPE PoolType);

@@ -1382,6 +1382,9 @@ MM::Allocator::InitializeAllocationsTracking(VOID)
     /* Calculate and store the hash mask */
     AllocationsTrackingTableMask = AllocationsTrackingTableSize - 2;
 
+    /* Populate the pool tracking table with the most frequently used allocation tags */
+    PopulateAllocationTags();
+
     /* Initialize the spinlock used to synchronize concurrent modifications to the tracking table */
     KE::SpinLock::InitializeSpinLock(&AllocationsTrackingTableLock);
 }
@@ -1500,6 +1503,64 @@ MM::Allocator::InitializeBigAllocationsTracking(VOID)
     RegisterAllocationTag(SIGNATURE32('M', 'M', 'g', 'r'),
                           SIZE_TO_PAGES(BigAllocationsTrackingTableSize * sizeof(POOL_TRACKING_BIG_ALLOCATIONS)),
                           NonPagedPool);
+}
+
+/**
+ * Populates the pool tracking table with the most frequently used allocation tags.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::Allocator::PopulateAllocationTags(VOID)
+{
+    ULONG Hash, HashIndex, Index;
+
+    CULONG HotTags[] =
+    {
+        SIGNATURE32('B', 'i', 'g', 'A'), /* Big Allocations */
+        SIGNATURE32('M', 'M', 'g', 'r'), /* Memory Manager Internal */
+        SIGNATURE32('N', 'o', 'n', 'e'), /* Untagged allocations */
+        SIGNATURE32('O', 'v', 'f', 'l'), /* Global table expansion overflow fallback */
+    };
+
+    /* Seed all tags */
+    for(Index = 0; Index < ARRAY_SIZE(HotTags); Index++)
+    {
+        /* Compute the initial hash index */
+        Hash = ComputeHash(HotTags[Index], AllocationsTrackingTableMask);
+        HashIndex = Hash;
+
+        /* Probe the tracking table until an empty slot is found */
+        while(TRUE)
+        {
+            /* Check if the tag is already present in the table */
+            if(AllocationsTrackingTable[Hash].Tag == HotTags[Index])
+            {
+                /* The tag has already been registered, skip it */
+                break;
+            }
+
+            /* Check if the slot is empty */
+            if((AllocationsTrackingTable[Hash].Tag == 0) && (Hash != (AllocationsTrackingTableSize - 1)))
+            {
+                /* Claim the slot and break the loop */
+                AllocationsTrackingTable[Hash].Tag = HotTags[Index];
+                break;
+            }
+
+            /* Advance to the next index on collision */
+            Hash = (Hash + 1) & AllocationsTrackingTableMask;
+
+            /* Check if the hash index has wrapped around */
+            if(Hash == HashIndex)
+            {
+                break;
+            }
+        }
+    }
 }
 
 /**
