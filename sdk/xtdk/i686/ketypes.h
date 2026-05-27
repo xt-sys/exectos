@@ -519,6 +519,7 @@ typedef struct _KPROCESSOR_CONTROL_BLOCK
     ULONG_PTR SetMember;
     CPU_IDENTIFICATION CpuId;
     KPROCESSOR_STATE ProcessorState;
+    KSPIN_LOCK PrcbLock;
     KSPIN_LOCK_QUEUE LockQueue[MaximumLock];
     ULONG_PTR MultiThreadProcessorSet;
     KDPC_DATA DpcData[2];
@@ -526,6 +527,11 @@ typedef struct _KPROCESSOR_CONTROL_BLOCK
     VOLATILE BOOLEAN DpcRoutineActive;
     VOLATILE ULONG_PTR TimerRequest;
     SINGLE_LIST_ENTRY DeferredReadyListHead;
+    ULONG InterruptCount;
+    ULONG KernelTime;
+    ULONG UserTime;
+    ULONG DpcTime;
+    ULONG InterruptTime;
     PROCESSOR_POWER_STATE PowerState;
     ULONG ProfilingCountdown;
 } KPROCESSOR_CONTROL_BLOCK, *PKPROCESSOR_CONTROL_BLOCK;

@@ -152,6 +152,7 @@ KE::SystemTime::UpdateSystemTime(IN PKTRAP_FRAME TrapFrame,
                                  IN KRUNLEVEL RunLevel)
 {
     LARGE_INTEGER InterruptTime, SystemTime;
+    PKPROCESSOR_CONTROL_BLOCK ControlBlock;
     LONG CurrentTickOffset;
 
     /* Advance the global interrupt time on every hardware tick */
@@ -178,5 +179,11 @@ KE::SystemTime::UpdateSystemTime(IN PKTRAP_FRAME TrapFrame,
 
         /* Update processor and thread runtime accounting */
         KE::Dispatcher::UpdateRunTime(TrapFrame, RunLevel);
+    }
+    else
+    {
+        /* Increment the interrupt count */
+        ControlBlock = KE::Processor::GetCurrentProcessorControlBlock();
+        ControlBlock->InterruptCount++;
     }
 }
