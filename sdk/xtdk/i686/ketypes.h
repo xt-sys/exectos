@@ -525,6 +525,7 @@ typedef struct _KPROCESSOR_CONTROL_BLOCK
     KDPC_DATA DpcData[2];
     PVOID DpcStack;
     VOLATILE BOOLEAN DpcRoutineActive;
+    VOLATILE ULONG_PTR TimerHand;
     VOLATILE ULONG_PTR TimerRequest;
     SINGLE_LIST_ENTRY DeferredReadyListHead;
     ULONG InterruptCount;

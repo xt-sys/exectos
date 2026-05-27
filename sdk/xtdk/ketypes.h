@@ -30,8 +30,9 @@
 /* Kernel service descriptor tables count */
 #define KSERVICE_TABLES_COUNT                       4
 
-/* Timer length */
+/* Timer related definitions */
 #define KTIMER_LENGTH                               (FIELD_OFFSET(KTIMER, Period) + sizeof(LONG))
+#define KTIMER_TABLE_SIZE                           512
 
 /* Kernel builtin wait blocks */
 #define EVENT_WAIT_BLOCK                            2

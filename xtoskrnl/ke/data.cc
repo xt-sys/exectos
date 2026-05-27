@@ -95,3 +95,6 @@ LONG KE::SystemTime::TickOffset;
 
 /* The runtime adjustment value applied to the system clock at each interrupt */
 ULONG KE::SystemTime::TimeAdjustment;
+
+/* Kernel timer table containing a list of active timers */
+LIST_ENTRY KE::Timer::TimerTableListHead[KTIMER_TABLE_SIZE];
