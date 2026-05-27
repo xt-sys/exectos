@@ -212,6 +212,55 @@ typedef enum _KTIMER_TYPE
     SynchronizationTimer
 } KTIMER_TYPE, *PKTIMER_TYPE;
 
+/* Wait reason */
+typedef enum _KWAIT_REASON
+{
+    Executive,
+    FreePage,
+    PageIn,
+    PoolAllocation,
+    DelayExecution,
+    Suspended,
+    UserRequest,
+    WrExecutive,
+    WrFreePage,
+    WrPageIn,
+    WrPoolAllocation,
+    WrDelayExecution,
+    WrSuspended,
+    WrUserRequest,
+    WrEventPair,
+    WrQueue,
+    WrLpcReceive,
+    WrLpcReply,
+    WrVirtualMemory,
+    WrPageOut,
+    WrRendezvous,
+    WrKeyedEvent,
+    WrTerminated,
+    WrProcessInSwap,
+    WrCpuRateControl,
+    WrCalloutStack,
+    WrKernel,
+    WrResource,
+    WrPushLock,
+    WrMutex,
+    WrQuantumEnd,
+    WrDispatchInt,
+    WrPreempted,
+    WrYieldExecution,
+    WrFastMutex,
+    WrGuardedMutex,
+    WrRundown,
+    WrAlertByThreadId,
+    WrDeferredPreempt,
+    WrPhysicalFault,
+    WrIoRing,
+    WrMdlCache,
+    WrRcu,
+    MaximumWaitReason
+} KWAIT_REASON, *PKWAIT_REASON;
+
 /* APC Types */
 typedef enum _MODE
 {
@@ -507,7 +556,7 @@ typedef struct _KTHREAD
     PKWAIT_BLOCK WaitBlockList;
     BOOLEAN Alertable;
     BOOLEAN WaitNext;
-    UCHAR WaitReason;
+    KWAIT_REASON WaitReason;
     SCHAR Priority;
     UCHAR StackSwap;
     VOLATILE UCHAR SwapBusy;
