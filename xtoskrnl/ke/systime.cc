@@ -163,6 +163,12 @@ KE::SystemTime::UpdateSystemTime(IN PKTRAP_FRAME TrapFrame,
     /* Atomically consume the current tick budget and retrieve the pre-decrement value */
     CurrentTickOffset = RTL::Atomic::ExchangeAdd32((PLONG)&TickOffset, -(LONG)Increment);
 
+    /* Retrieve the current processor control block */
+    ControlBlock = KE::Processor::GetCurrentProcessorControlBlock();
+
+    /* Verify the system timer expiration */
+    KE::Timer::VerifySystemTimerExpiration(ControlBlock, TrapFrame, InterruptTime);
+
     /* Determine whether the accumulated increments have crossed the full tick boundary */
     if(CurrentTickOffset <= (LONG)Increment)
     {
@@ -171,8 +177,9 @@ KE::SystemTime::UpdateSystemTime(IN PKTRAP_FRAME TrapFrame,
         SystemTime.QuadPart += TimeAdjustment;
         KE::SharedData::SetSystemTime(SystemTime);
 
-        /* Update the tick count */
+        /* Update the tick count and reverify the system timer expiration */
         KE::SharedData::IncrementTickCount();
+        KE::Timer::VerifySystemTimerExpiration(ControlBlock, TrapFrame, InterruptTime);
 
         /* Reload the tick offset accumulator for the next full tick period */
         TickOffset += MaximumIncrement;
@@ -183,7 +190,6 @@ KE::SystemTime::UpdateSystemTime(IN PKTRAP_FRAME TrapFrame,
     else
     {
         /* Increment the interrupt count */
-        ControlBlock = KE::Processor::GetCurrentProcessorControlBlock();
         ControlBlock->InterruptCount++;
     }
 }
