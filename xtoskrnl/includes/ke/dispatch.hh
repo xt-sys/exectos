@@ -19,6 +19,7 @@ namespace KE
     {
         public:
             STATIC XTFASTCALL VOID ExitDispatcher(IN KRUNLEVEL OldRunLevel);
+            STATIC XTCDECL VOID HandleDispatchInterrupt(IN PKTRAP_FRAME TrapFrame);
             STATIC XTFASTCALL BOOLEAN SwitchContext(IN PKTHREAD CurrentThread,
                                                     IN KRUNLEVEL RunLevel);
             STATIC XTAPI VOID UpdateRunTime(IN PKTRAP_FRAME TrapFrame,

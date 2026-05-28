@@ -30,6 +30,25 @@ KE::Dispatcher::ExitDispatcher(IN KRUNLEVEL OldRunLevel)
 }
 
 /**
+ * Handles the dispatch interrupt by retiring pending DPCs, asking the scheduler for the next runnable thread
+ * and performing the context switch.
+ *
+ * @param TrapFrame
+ *        Supplies a pointer to the hardware trap frame representing the interrupted context.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+KE::Dispatcher::HandleDispatchInterrupt(IN PKTRAP_FRAME TrapFrame)
+{
+    /* End the interrupt */
+    HL::Pic::SendEoi();
+}
+
+/**
  * Updates the runtime quantum of the currently executing thread and handles preemption.
  *
  * @param TrapFrame

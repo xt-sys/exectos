@@ -57,6 +57,9 @@ KE::KernelInit::BootstrapApplicationProcessor(IN PPROCESSOR_START_BLOCK StartBlo
     /* Initialize local clock for this CPU */
     HL::Timer::InitializeLocalClock();
 
+    /* Register DISPATCH interrupt handler */
+    HL::Irq::RegisterSystemInterruptHandler(APIC_VECTOR_DPC, KE::Dispatcher::HandleDispatchInterrupt);
+
     /* Enter infinite loop */
     DebugPrint(L"KernelInit::BootstrapApplicationProcessor() finished for CPU #%lu. Entering infinite loop.\n",
                ControlBlock->CpuNumber);
@@ -128,6 +131,9 @@ KE::KernelInit::BootstrapKernel(VOID)
     /* Start all application processors */
     KE::Processor::InitializeProcessorBlocks();
     HL::Cpu::StartAllProcessors();
+
+    /* Register DISPATCH interrupt handler */
+    HL::Irq::RegisterSystemInterruptHandler(APIC_VECTOR_DPC, KE::Dispatcher::HandleDispatchInterrupt);
 
     /* Enter infinite loop */
     DebugPrint(L"KernelInit::BootstrapKernel() finished. Entering infinite loop.\n");
