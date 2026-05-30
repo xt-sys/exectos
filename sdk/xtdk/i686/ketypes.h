@@ -155,6 +155,15 @@
 #define CONTEXT_DEBUG_REGISTERS           (CONTEXT_ARCHITECTURE | 0x10)
 #define CONTEXT_EXTENDED_REGISTERS        (CONTEXT_ARCHITECTURE | 0x20)
 
+/* Clock control flags */
+#define CLOCK_QUANTUM_DECREMENT           3
+
+/* DPC definitions */
+#define DPC_ADJUST_THRESHOLD              20
+#define DPC_IDEAL_RATE                    20
+#define DPC_MAXIMUM_QUEUE_DEPTH           4
+#define DPC_MINIMUM_RATE                  3
+
 /* Interrupt request levels definitions */
 #define PASSIVE_LEVEL                     0
 #define LOW_LEVEL                         0
@@ -524,7 +533,11 @@ typedef struct _KPROCESSOR_CONTROL_BLOCK
     ULONG_PTR MultiThreadProcessorSet;
     KDPC_DATA DpcData[2];
     PVOID DpcStack;
+    LONG MaximumDpcQueueDepth;
+    ULONG DpcRequestRate;
+    BOOLEAN DpcInterruptRequested;
     VOLATILE BOOLEAN DpcRoutineActive;
+    ULONG DpcLastCount;
     VOLATILE ULONG_PTR TimerHand;
     VOLATILE ULONG_PTR TimerRequest;
     SINGLE_LIST_ENTRY DeferredReadyListHead;
@@ -533,6 +546,7 @@ typedef struct _KPROCESSOR_CONTROL_BLOCK
     ULONG UserTime;
     ULONG DpcTime;
     ULONG InterruptTime;
+    ULONG AdjustDpcThreshold;
     PROCESSOR_POWER_STATE PowerState;
     ULONG ProfilingCountdown;
 } KPROCESSOR_CONTROL_BLOCK, *PKPROCESSOR_CONTROL_BLOCK;

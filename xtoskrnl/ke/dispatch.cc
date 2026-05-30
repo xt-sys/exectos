@@ -4,6 +4,7 @@
  * FILE:            xtoskrnl/ke/dispatch.cc
  * DESCRIPTION:     Kernel Thread Dispatcher
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ *                  Aiken Harris <harraiken91@gmail.com>
  */
 
 #include <xtos.hh>
@@ -66,4 +67,101 @@ VOID
 KE::Dispatcher::UpdateRunTime(IN PKTRAP_FRAME TrapFrame,
                               IN KRUNLEVEL RunLevel)
 {
+    PKPROCESSOR_CONTROL_BLOCK ControlBlock;
+    PKTHREAD Thread;
+
+    /* Retrieve current processor control block and current thread */
+    ControlBlock = KE::Processor::GetCurrentProcessorControlBlock();
+    Thread = KE::Processor::GetCurrentThread();
+
+    /* Increment interrupt count */
+    ControlBlock->InterruptCount++;
+
+    /* Check if the thread ran in user mode */
+    if(TrapFrame->PreviousMode == UserMode)
+    {
+        /* Atomically increment the process-wide user time */
+        RTL::Atomic::Increment32((PLONG)&Thread->ApcState.Process->UserTime);
+
+        /* Increment thread and total time this processor has spent executing in user time */
+        ControlBlock->UserTime++;
+        Thread->UserTime++;
+    }
+    else
+    {
+        /* Increment the total time this processor has spent executing in kernel mode */
+        ControlBlock->KernelTime++;
+
+        /* Check if normal kernel thread execution was interrupted */
+        if((RunLevel < DISPATCH_LEVEL) || !(ControlBlock->DpcRoutineActive))
+        {
+            /* Atomically increment the process-wide kernel time */
+            RTL::Atomic::Increment32((PLONG)&Thread->ApcState.Process->KernelTime);
+
+            /* Increment the kernel execution time for the current thread */
+            Thread->KernelTime++;
+        }
+        else if(RunLevel > DISPATCH_LEVEL)
+        {
+            /* Increment the time spent servicing hardware interrupts */
+            ControlBlock->InterruptTime++;
+        }
+        else
+        {
+            /* Increment the time spent servicing DPCs */
+            ControlBlock->DpcTime++;
+        }
+    }
+
+    /* Calculate the new DPC request rate as a moving average of the current and previous rates */
+    ControlBlock->DpcRequestRate = ((ControlBlock->DpcData[0].DpcCount - ControlBlock->DpcLastCount) +
+                                    ControlBlock->DpcRequestRate) >> 1;
+
+    /* Snapshot the current DPC count */
+    ControlBlock->DpcLastCount = ControlBlock->DpcData[0].DpcCount;
+
+    /* Check if there are pending DPCs, no DPC routine is currently executing, and DPC interrupt is not pending */
+    if((ControlBlock->DpcData[0].DpcQueueDepth) &&
+       !(ControlBlock->DpcRoutineActive) &&
+       !(ControlBlock->DpcInterruptRequested))
+    {
+        /* Reset the adjustment threshold counter */
+        ControlBlock->AdjustDpcThreshold = DPC_ADJUST_THRESHOLD;
+
+        /* Request a DISPATCH_LEVEL software interrupt to process the pending DPCs */
+        HL::Irq::SendSoftwareInterrupt(DISPATCH_LEVEL);
+
+        /* Evaluate if the DPC request rate is below the ideal threshold */
+        if((ControlBlock->DpcRequestRate < DPC_IDEAL_RATE) && (ControlBlock->MaximumDpcQueueDepth > 1))
+        {
+            /* Decrease the maximum queue depth */
+            ControlBlock->MaximumDpcQueueDepth--;
+        }
+    }
+    else
+    {
+        /* Decrement the tuning threshold counter and verify if an adjustment cycle is required */
+        if(!(--ControlBlock->AdjustDpcThreshold))
+        {
+            /* Reset the counter for the next tuning cycle */
+            ControlBlock->AdjustDpcThreshold = DPC_ADJUST_THRESHOLD;
+
+            /* Check if the current queue depth limit is below the system-wide absolute maximum */
+            if(ControlBlock->MaximumDpcQueueDepth != DPC_MAXIMUM_QUEUE_DEPTH)
+            {
+                /* Increase the maximum queue depth to batch more DPCs */
+                ControlBlock->MaximumDpcQueueDepth++;
+            }
+        }
+    }
+
+    /* Decrement the execution time slice */
+    Thread->Quantum -= CLOCK_QUANTUM_DECREMENT;
+
+    /* Check if the thread has exhausted its quantum, ignoring the idle thread */
+    if((Thread->Quantum <= 0) && (Thread != ControlBlock->IdleThread))
+    {
+        /* Request a DISPATCH_LEVEL software interrupt to preempt the thread */
+        HL::Irq::SendSoftwareInterrupt(DISPATCH_LEVEL);
+    }
 }
