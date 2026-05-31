@@ -11,6 +11,7 @@
 
 #include <xtos.hh>
 
+#include <ke/affinity.hh>
 #include <ke/apc.hh>
 #include <ke/bootinfo.hh>
 #include <ke/crash.hh>

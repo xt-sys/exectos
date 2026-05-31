@@ -38,6 +38,7 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/krnlinit.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/kthread.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/proc.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/affinity.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/apc.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/bootinfo.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/crash.cc
