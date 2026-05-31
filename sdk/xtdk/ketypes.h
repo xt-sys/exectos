@@ -313,6 +313,23 @@ typedef struct _EXCEPTION_RECORD
     ULONG_PTR ExceptionInformation[EXCEPTION_MAXIMUM_PARAMETERS];
 } EXCEPTION_RECORD, *PEXCEPTION_RECORD;
 
+/* Group affinity structure definition */
+typedef struct _GROUP_AFFINITY
+{
+    KAFFINITY Mask;
+    USHORT Group;
+    USHORT Reserved[3];
+} GROUP_AFFINITY, *PGROUP_AFFINITY;
+
+/* Extended affinity structure definition */
+typedef struct _KAFFINITY_MAP
+{
+    USHORT Count;
+    USHORT Size;
+    ULONG Reserved;
+    KAFFINITY Bitmap[1];
+} KAFFINITY_MAP, *PKAFFINITY_MAP;
+
 /* Asynchronous Procedure Call (APC) object structure definition */
 typedef struct _KAPC
 {
@@ -469,7 +486,8 @@ typedef struct _KPROCESS
     ULONG_PTR DirectoryTable[2];
     USHORT IopmOffset;
     UCHAR Iopl;
-    VOLATILE KAFFINITY ActiveProcessors;
+    KAFFINITY_MAP Affinity;
+    VOLATILE KAFFINITY_MAP ActiveProcessors;
     ULONG KernelTime;
     ULONG UserTime;
     LIST_ENTRY ReadyListHead;
@@ -477,7 +495,6 @@ typedef struct _KPROCESS
     PVOID VdmTrapHandler;
     LIST_ENTRY ThreadListHead;
     KSPIN_LOCK ProcessLock;
-    KAFFINITY Affinity;
     union
     {
         struct
@@ -532,7 +549,6 @@ typedef struct _KTHREAD
     PVOID StackBase;
     PVOID StackLimit;
     KSPIN_LOCK ThreadLock;
-
     ULONG ContextSwitches;
     VOLATILE UCHAR State;
     UCHAR NpxState;
@@ -595,9 +611,9 @@ typedef struct _KTHREAD
     CHAR PreviousMode;
     UCHAR ResourceIndex;
     UCHAR DisableBoost;
-    KAFFINITY UserAffinity;
+    GROUP_AFFINITY UserAffinity;
     PKPROCESS Process;
-    KAFFINITY Affinity;
+    GROUP_AFFINITY Affinity;
     PVOID ServiceTable;
     PKAPC_STATE ApcStatePointer[2];
     KAPC_STATE SavedApcState;
