@@ -66,13 +66,19 @@ KE::KProcess::InitializeProcess(IN OUT PKPROCESS Process,
 
     /* Set base process properties */
     Process->BasePriority = Priority;
-    Process->Affinity = Affinity;
     Process->AutoAlignment = Alignment;
+
+    /* Initialize KAFFINITY_MAP for single-group affinity */
+    Process->Affinity.Count = 1;
+    Process->Affinity.Size = 1;
+    Process->Affinity.Bitmap[0] = Affinity;
+
+    /* Set directory tables */
     Process->DirectoryTable[0] = DirectoryTable[0];
     Process->DirectoryTable[1] = DirectoryTable[1];
-    Process->StackCount = MAXSHORT;
 
-    /* Set thread quantum */
+    /* Set the initial stack count and process quantum */
+    Process->StackCount = MAXSHORT;
     Process->Quantum = THREAD_QUANTUM;
 
     /* Set IOPM offset */
