@@ -588,6 +588,56 @@ AR::CpuFunctions::ReadWriteBarrier(VOID)
 }
 
 /**
+ * Performs a Bit Scan Forward instruction to locate the most significant set bit.
+ *
+ * @param Index
+ *        Receives the zero-based index of the highest set bit when one is found.
+ *
+ * @param Mask
+ *        Supplies the bitmap to scan.
+ *
+ * @return This routine returns TRUE when a set bit was found, otherwise FALSE.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+BOOLEAN
+AR::CpuFunctions::ScanForwardBit(OUT PULONG Index,
+                                 IN ULONG Mask)
+{
+    /* Defer to the BSF instruction */
+    __asm__("bsfl %[Mask], %[Index]" : [Index] "=r" (*Index) : [Mask] "mr" (Mask));
+
+    /* Report whether the input had any bit set */
+    return Mask ? TRUE : FALSE;
+}
+
+/**
+ * Performs a Bit Scan Reverse instruction to locate the most significant set bit.
+ *
+ * @param Index
+ *        Receives the zero-based index of the highest set bit when one is found.
+ *
+ * @param Mask
+ *        Supplies the bitmap to scan.
+ *
+ * @return This routine returns TRUE when a set bit was found, otherwise FALSE.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+BOOLEAN
+AR::CpuFunctions::ScanReverseBit(OUT PULONG Index,
+                                 IN ULONG Mask)
+{
+    /* Defer to the BSR instruction */
+    __asm__("bsrl %[Mask], %[Index]" : [Index] "=r" (*Index) : [Mask] "mr" (Mask));
+
+    /* Report whether the input had any bit set */
+    return Mask ? TRUE : FALSE;
+}
+
+/**
  * Instructs the processor to set the interrupt flag.
  *
  * @return This routine does not return any value.
