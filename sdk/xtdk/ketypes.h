@@ -313,14 +313,6 @@ typedef struct _EXCEPTION_RECORD
     ULONG_PTR ExceptionInformation[EXCEPTION_MAXIMUM_PARAMETERS];
 } EXCEPTION_RECORD, *PEXCEPTION_RECORD;
 
-/* Group affinity structure definition */
-typedef struct _GROUP_AFFINITY
-{
-    KAFFINITY Mask;
-    USHORT Group;
-    USHORT Reserved[3];
-} GROUP_AFFINITY, *PGROUP_AFFINITY;
-
 /* Extended affinity structure definition */
 typedef struct _KAFFINITY_MAP
 {
@@ -611,9 +603,9 @@ typedef struct _KTHREAD
     CHAR PreviousMode;
     UCHAR ResourceIndex;
     UCHAR DisableBoost;
-    GROUP_AFFINITY UserAffinity;
+    KAFFINITY_MAP UserAffinity;
     PKPROCESS Process;
-    GROUP_AFFINITY Affinity;
+    KAFFINITY_MAP Affinity;
     PVOID ServiceTable;
     PKAPC_STATE ApcStatePointer[2];
     KAPC_STATE SavedApcState;

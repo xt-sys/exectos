@@ -118,8 +118,9 @@ KE::KernelInit::BootstrapKernel(VOID)
     CurrentThread->NextProcessor = Prcb->CpuNumber;
     CurrentThread->Priority = THREAD_HIGH_PRIORITY;
     CurrentThread->State = Running;
-    CurrentThread->Affinity.Mask = (KAFFINITY)1 << Prcb->CpuNumber;
-    CurrentThread->Affinity.Group = 0;
+    CurrentThread->Affinity.Count = 1;
+    CurrentThread->Affinity.Size = 1;
+    CurrentThread->Affinity.Bitmap[0] = (KAFFINITY)1 << Prcb->CpuNumber;
     CurrentThread->WaitRunLevel = DISPATCH_LEVEL;
     CurrentProcess->ActiveProcessors.Bitmap[0] |= (KAFFINITY)1 << Prcb->CpuNumber;
 
