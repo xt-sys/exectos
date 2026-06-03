@@ -342,7 +342,6 @@ AR::ProcessorSupport::InitializeIdt(IN PKPROCESSOR_BLOCK ProcessorBlock)
     SetIdtGate(ProcessorBlock->IdtBase, 0x1F, (PVOID)ArTrapEntry[0x1F], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_INTERRUPT_GATE);
     SetIdtGate(ProcessorBlock->IdtBase, 0x2C, (PVOID)ArTrapEntry[0x2C], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING3, AMD64_TRAP_GATE);
     SetIdtGate(ProcessorBlock->IdtBase, 0x2D, (PVOID)ArTrapEntry[0x2D], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING3, AMD64_TRAP_GATE);
-    SetIdtGate(ProcessorBlock->IdtBase, 0x2F, (PVOID)ArInterruptEntry[0x2F], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_INTERRUPT_GATE);
     SetIdtGate(ProcessorBlock->IdtBase, 0xE1, (PVOID)ArInterruptEntry[0xE1], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_INTERRUPT_GATE);
 }
 
