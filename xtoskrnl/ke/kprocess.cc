@@ -96,9 +96,6 @@ KE::KProcess::InitializeIdleProcess(IN OUT PKPROCESS Process,
  * @param Priority
  *        Specifies the process priority.
  *
- * @param Affinity
- *        Specifies a process affinity designating processors on which process can run.
- *
  * @param DirectoryTable
  *        Supplies a pointer to the directory table.
  *
