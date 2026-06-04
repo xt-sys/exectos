@@ -12,7 +12,7 @@
 #include <xtos.hh>
 
 
-/* Runtime Library */
+/* Power Management */
 namespace PO
 {
     class Idle
