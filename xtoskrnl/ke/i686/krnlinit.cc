@@ -27,7 +27,7 @@ KE::KernelInit::BootstrapApplicationProcessor(IN PPROCESSOR_START_BLOCK StartBlo
 {
     PKPROCESSOR_CONTROL_BLOCK ControlBlock;
     PKPROCESS IdleProcess;
-    PKTHREAD IdleThread;
+    PETHREAD IdleThread;
 
     /* Initialize application CPU */
     AR::ProcessorSupport::InitializeProcessor(StartBlock->ProcessorStructures);
@@ -60,13 +60,14 @@ KE::KernelInit::BootstrapApplicationProcessor(IN PPROCESSOR_START_BLOCK StartBlo
     HL::Timer::InitializeLocalClock();
 
     /* Allocate and wipe memory for Idle thread */
-    MM::Allocator::AllocatePool(NonPagedPool, sizeof(KTHREAD), (PVOID *)&IdleThread);
-    RTL::Memory::ZeroMemory(IdleThread, sizeof(KTHREAD));
+    MM::Allocator::AllocatePool(NonPagedPool, sizeof(ETHREAD), (PVOID *)&IdleThread);
+    RTL::Memory::ZeroMemory(IdleThread, sizeof(ETHREAD));
 
     /* Initialize Idle thread */
     IdleProcess = KE::KProcess::GetIdleProcess();
-    ControlBlock->CurrentThread = IdleThread;
-    KE::KThread::InitializeIdleThread(IdleProcess, IdleThread, ControlBlock, StartBlock->Stack);
+    ControlBlock->CurrentThread = &IdleThread->ThreadControlBlock;
+    ControlBlock->IdleThread = &IdleThread->ThreadControlBlock;
+    KE::KThread::InitializeIdleThread(IdleProcess, &IdleThread->ThreadControlBlock, ControlBlock, StartBlock->Stack);
 
     /* Register DISPATCH interrupt handler */
     HL::Irq::RegisterSystemInterruptHandler(APIC_VECTOR_DPC, KE::Dispatcher::HandleDispatchInterrupt);
