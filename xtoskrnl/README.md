@@ -40,6 +40,7 @@ corresponding C++ namespace in which the subsystem's classes and routines reside
  * Ke - Core Kernel Library
  * Mm - Memory Manager
  * Po - Plug&Play and Power Manager
+ * Ps - Process and Thread Manager
  * Rtl - Runtime library
 
 ### AR: Architecture Library
@@ -75,6 +76,12 @@ physical memory.
 This subsystem handles power management events, such as shutdown or standby. It also manages Plug and Play (PnP),
 supporting device detection and installation at boot time. Furthermore, it is responsible for starting and stopping
 devices on demand.
+
+### PS: Process and Thread Manager
+This subsystem is responsible for managing the lifecycle of processes and threads within the operating system. It
+handles the creation, termination, and state tracking of these execution units. Furthermore, it provides the high-level
+executive abstractions required to allocate system resources, manage process boundaries, and coordinate with the core
+kernel for thread execution.
 
 ### RTL: Runtime Library
 The Runtime Library provides a kernel-mode implementation of common C library functions. It includes many utility
