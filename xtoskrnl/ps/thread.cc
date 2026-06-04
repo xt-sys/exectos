@@ -50,5 +50,14 @@ PS::Thread::CreateIdleThread(IN PKPROCESSOR_CONTROL_BLOCK Prcb,
     Prcb->IdleThread = &IdleThread->ThreadControlBlock;
 
     /* Initialize the IDLE thread */
-    return KE::KThread::InitializeIdleThread(IdleProcess, &IdleThread->ThreadControlBlock, Prcb, Stack);
+    Status = KE::KThread::InitializeIdleThread(IdleProcess, &IdleThread->ThreadControlBlock, Prcb, Stack);
+    if(Status != STATUS_SUCCESS)
+    {
+        /* Failed to initialize the IDLE thread state, free the ETHREAD object and return the status code */
+        MM::Allocator::FreePool((PVOID)IdleThread);
+        return Status;
+    }
+
+    /* Return success */
+    return STATUS_SUCCESS;
 }

@@ -75,7 +75,8 @@ KE::KThread::InitializeIdleThread(IN PKPROCESS IdleProcess,
     Status = MM::Allocator::AllocatePool(NonPagedPool, MapSize, (PVOID*)&IdleThread->UserAffinity);
     if(Status != STATUS_SUCCESS)
     {
-        /* Memory allocation failed, return the status code */
+        /* Memory allocation failed, free previously allocated memory and return the status code */
+        MM::Allocator::FreePool((PVOID)IdleThread->Affinity);
         return Status;
     }
 
@@ -88,7 +89,9 @@ KE::KThread::InitializeIdleThread(IN PKPROCESS IdleProcess,
                                            NULLPTR, NULLPTR, Stack, TRUE);
     if(Status != STATUS_SUCCESS)
     {
-        /* Failed to initialize IDLE thread, return status code */
+        /* Failed to initialize IDLE thread, free both affinity maps and return the status code */
+        MM::Allocator::FreePool((PVOID)IdleThread->Affinity);
+        MM::Allocator::FreePool((PVOID)IdleThread->UserAffinity);
         return Status;
     }
 

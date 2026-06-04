@@ -82,7 +82,8 @@ KE::KProcess::InitializeIdleProcess(IN OUT PKPROCESS Process,
     Status = MM::Allocator::AllocatePool(NonPagedPool, MapSize, (PVOID*)&Process->ActiveProcessors);
     if(Status != STATUS_SUCCESS)
     {
-        /* Memory allocation failed, return the status code */
+        /* Memory allocation failed, free previously allocated memory and return the status code */
+        MM::Allocator::FreePool((PVOID)Process->Affinity);
         return Status;
     }
 
