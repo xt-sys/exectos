@@ -26,8 +26,6 @@ VOID
 KE::KernelInit::BootstrapApplicationProcessor(IN PPROCESSOR_START_BLOCK StartBlock)
 {
     PKPROCESSOR_CONTROL_BLOCK ControlBlock;
-    PKPROCESS IdleProcess;
-    PETHREAD IdleThread;
 
     /* Initialize application CPU */
     AR::ProcessorSupport::InitializeProcessor(StartBlock->ProcessorStructures);
@@ -59,15 +57,8 @@ KE::KernelInit::BootstrapApplicationProcessor(IN PPROCESSOR_START_BLOCK StartBlo
     /* Initialize local clock for this CPU */
     HL::Timer::InitializeLocalClock();
 
-    /* Allocate and wipe memory for Idle thread */
-    MM::Allocator::AllocatePool(NonPagedPool, sizeof(ETHREAD), (PVOID *)&IdleThread);
-    RTL::Memory::ZeroMemory(IdleThread, sizeof(ETHREAD));
-
-    /* Initialize Idle thread */
-    IdleProcess = KE::KProcess::GetIdleProcess();
-    ControlBlock->CurrentThread = &IdleThread->ThreadControlBlock;
-    ControlBlock->IdleThread = &IdleThread->ThreadControlBlock;
-    KE::KThread::InitializeIdleThread(IdleProcess, &IdleThread->ThreadControlBlock, ControlBlock, StartBlock->Stack);
+    /* Create and initialize IDLE thread */
+    PS::Thread::CreateIdleThread(ControlBlock, StartBlock->Stack);
 
     /* Register DISPATCH interrupt handler */
     HL::Irq::RegisterSystemInterruptHandler(APIC_VECTOR_DPC, KE::Dispatcher::HandleDispatchInterrupt);
@@ -91,16 +82,9 @@ VOID
 KE::KernelInit::BootstrapKernel(VOID)
 {
     PKPROCESSOR_CONTROL_BLOCK Prcb;
-    ULONG_PTR PageDirectory[2];
-    PKPROCESS CurrentProcess;
-    PKTHREAD CurrentThread;
 
-    /* Get processor control block and current thread */
+    /* Get processor control block */
     Prcb = KE::Processor::GetCurrentProcessorControlBlock();
-    CurrentThread = KE::Processor::GetCurrentThread();
-
-    /* Get current process */
-    CurrentProcess = CurrentThread->ApcState.Process;
 
     /* Initialize CPU power state structures */
     PO::Idle::InitializeProcessorIdleState(Prcb);
@@ -124,11 +108,8 @@ KE::KernelInit::BootstrapKernel(VOID)
     /* Enable shadow buffer for framebuffer */
     HL::FrameBuffer::EnableShadowBuffer();
 
-    /* Initialize Idle process and Idle thread */
-    PageDirectory[0] = 0;
-    PageDirectory[1] = 0;
-    KE::KProcess::InitializeIdleProcess(CurrentProcess, PageDirectory);
-    KE::KThread::InitializeIdleThread(CurrentProcess, CurrentThread, Prcb, AR::ProcessorSupport::GetBootStack());
+    /* Create and initialize IDLE process */
+    PS::Process::CreateIdleProcess(Prcb);
 
     /* Start all application processors */
     KE::Processor::InitializeProcessorBlocks();

@@ -50,10 +50,7 @@ PS::Thread::CreateIdleThread(IN PKPROCESSOR_CONTROL_BLOCK Prcb,
     Prcb->IdleThread = &IdleThread->ThreadControlBlock;
 
     /* Initialize the IDLE thread */
-    KE::KThread::InitializeIdleThread(IdleProcess,
-                                      &IdleThread->ThreadControlBlock,
-                                      Prcb,
-                                      Stack);
+    KE::KThread::InitializeIdleThread(IdleProcess, &IdleThread->ThreadControlBlock, Prcb, Stack);
 
     /* Return success */
     return STATUS_SUCCESS;
