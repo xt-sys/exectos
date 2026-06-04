@@ -24,4 +24,5 @@
 #include <ke.hh>
 #include <mm.hh>
 #include <po.hh>
+#include <ps.hh>
 #include <rtl.hh>
