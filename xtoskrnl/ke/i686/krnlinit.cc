@@ -26,6 +26,8 @@ VOID
 KE::KernelInit::BootstrapApplicationProcessor(IN PPROCESSOR_START_BLOCK StartBlock)
 {
     PKPROCESSOR_CONTROL_BLOCK ControlBlock;
+    PKPROCESS IdleProcess;
+    PKTHREAD IdleThread;
 
     /* Initialize application CPU */
     AR::ProcessorSupport::InitializeProcessor(StartBlock->ProcessorStructures);
@@ -56,6 +58,15 @@ KE::KernelInit::BootstrapApplicationProcessor(IN PPROCESSOR_START_BLOCK StartBlo
 
     /* Initialize local clock for this CPU */
     HL::Timer::InitializeLocalClock();
+
+    /* Allocate and wipe memory for Idle thread */
+    MM::Allocator::AllocatePool(NonPagedPool, sizeof(KTHREAD), (PVOID *)&IdleThread);
+    RTL::Memory::ZeroMemory(IdleThread, sizeof(KTHREAD));
+
+    /* Initialize Idle thread */
+    IdleProcess = KE::KProcess::GetIdleProcess();
+    ControlBlock->CurrentThread = IdleThread;
+    KE::KThread::InitializeIdleThread(IdleProcess, IdleThread, ControlBlock, StartBlock->Stack);
 
     /* Register DISPATCH interrupt handler */
     HL::Irq::RegisterSystemInterruptHandler(APIC_VECTOR_DPC, KE::Dispatcher::HandleDispatchInterrupt);
@@ -106,29 +117,17 @@ KE::KernelInit::BootstrapKernel(VOID)
     /* Initialize XTOS kernel */
     InitializeKernel();
 
-    /* Initialize Idle process */
-    PageDirectory[0] = 0;
-    PageDirectory[1] = 0;
-    KE::KProcess::InitializeProcess(CurrentProcess, 0, MAXULONG_PTR, PageDirectory, FALSE);
-    CurrentProcess->Quantum = MAXCHAR;
-
-    /* Initialize Idle thread */
-    KE::KThread::InitializeThread(CurrentProcess, CurrentThread, NULLPTR, NULLPTR, NULLPTR,
-                                  NULLPTR, NULLPTR, AR::ProcessorSupport::GetBootStack(), TRUE);
-    CurrentThread->NextProcessor = Prcb->CpuNumber;
-    CurrentThread->Priority = THREAD_HIGH_PRIORITY;
-    CurrentThread->State = Running;
-    CurrentThread->Affinity.Count = 1;
-    CurrentThread->Affinity.Size = 1;
-    CurrentThread->Affinity.Bitmap[0] = (KAFFINITY)1 << Prcb->CpuNumber;
-    CurrentThread->WaitRunLevel = DISPATCH_LEVEL;
-    CurrentProcess->ActiveProcessors.Bitmap[0] |= (KAFFINITY)1 << Prcb->CpuNumber;
-
     /* Initialize Memory Manager */
     MM::Manager::InitializeMemoryManager();
 
     /* Enable shadow buffer for framebuffer */
     HL::FrameBuffer::EnableShadowBuffer();
+
+    /* Initialize Idle process and Idle thread */
+    PageDirectory[0] = 0;
+    PageDirectory[1] = 0;
+    KE::KProcess::InitializeIdleProcess(CurrentProcess, PageDirectory);
+    KE::KThread::InitializeIdleThread(CurrentProcess, CurrentThread, Prcb, AR::ProcessorSupport::GetBootStack());
 
     /* Start all application processors */
     KE::Processor::InitializeProcessorBlocks();

@@ -478,8 +478,8 @@ typedef struct _KPROCESS
     ULONG_PTR DirectoryTable[2];
     USHORT IopmOffset;
     UCHAR Iopl;
-    KAFFINITY_MAP Affinity;
-    VOLATILE KAFFINITY_MAP ActiveProcessors;
+    PKAFFINITY_MAP Affinity;
+    PKAFFINITY_MAP ActiveProcessors;
     ULONG KernelTime;
     ULONG UserTime;
     LIST_ENTRY ReadyListHead;
@@ -603,9 +603,9 @@ typedef struct _KTHREAD
     CHAR PreviousMode;
     UCHAR ResourceIndex;
     UCHAR DisableBoost;
-    KAFFINITY_MAP UserAffinity;
+    PKAFFINITY_MAP UserAffinity;
     PKPROCESS Process;
-    KAFFINITY_MAP Affinity;
+    PKAFFINITY_MAP Affinity;
     PVOID ServiceTable;
     PKAPC_STATE ApcStatePointer[2];
     KAPC_STATE SavedApcState;

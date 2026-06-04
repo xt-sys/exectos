@@ -24,6 +24,81 @@ KE::KThread::GetInitialThread(VOID)
 }
 
 /**
+ * Initializes an Idle Thread.
+ *
+ * @param IdleProcess
+ *        Supplies a pointer to the global Idle Process container.
+ *
+ * @param IdleThread
+ *        Supplies a pointer to the KTHREAD structure being initialized.
+ *
+ * @param Prcb
+ *        Supplies a pointer to the Processor Control Block of the target CPU.
+ *
+ * @param Stack
+ *        Supplies a pointer to the pre-allocated kernel stack for this thread.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KE::KThread::InitializeIdleThread(IN PKPROCESS IdleProcess,
+                                  IN OUT PKTHREAD IdleThread,
+                                  IN PKPROCESSOR_CONTROL_BLOCK Prcb,
+                                  IN PVOID Stack)
+{
+    ULONG AffinitySize, CpuIndex, CpuTargetBit, MapSize;
+    PACPI_SYSTEM_INFO SysInfo;
+
+    /* Retrieve hardware topology from ACPI */
+    HL::Acpi::GetSystemInformation(&SysInfo);
+
+    /* Calculate the required size for KAFFINITY_MAP structures */
+    AffinitySize = (SysInfo->CpuCount + 63) / 64;
+    MapSize = sizeof(KAFFINITY_MAP) + (AffinitySize * sizeof(KAFFINITY));
+
+    /* Align size to the 8-byte boundary */
+    MapSize = (MapSize + 7) & ~7;
+
+    /* Allocate the thread-level affinity structures */
+    MM::Allocator::AllocatePool(NonPagedPool, MapSize, (PVOID*)&IdleThread->Affinity);
+    MM::Allocator::AllocatePool(NonPagedPool, MapSize, (PVOID*)&IdleThread->UserAffinity);
+
+    /* Zero the thread-level affinity structures */
+    RTL::Memory::ZeroMemory(IdleThread->Affinity, MapSize);
+    RTL::Memory::ZeroMemory(IdleThread->UserAffinity, MapSize);
+
+    /* Initialize Idle thread */
+    KE::KThread::InitializeThread(IdleProcess, IdleThread, NULLPTR, NULLPTR, NULLPTR,
+                                  NULLPTR, NULLPTR, Stack, TRUE);
+
+    /* Configure Idle thread scheduling parameters */
+    IdleThread->NextProcessor = Prcb->CpuNumber;
+    IdleThread->Priority = THREAD_HIGH_PRIORITY;
+    IdleThread->State = Running;
+    IdleThread->WaitRunLevel = DISPATCH_LEVEL;
+
+    /* Calculate exact block array index and bit offset for this specific CPU */
+    CpuIndex = Prcb->CpuNumber / 64;
+    CpuTargetBit = Prcb->CpuNumber % 64;
+
+    /* Configure Idle thread affinity */
+    IdleThread->Affinity->Bitmap[CpuIndex] = ((KAFFINITY)1 << CpuTargetBit);
+    IdleThread->Affinity->Count = (USHORT)(CpuIndex + 1);
+    IdleThread->Affinity->Size = (USHORT)AffinitySize;
+
+    /* Configure Idle thread user affinity */
+    IdleThread->UserAffinity->Bitmap[CpuIndex] = ((KAFFINITY)1 << CpuTargetBit);
+    IdleThread->UserAffinity->Count = (USHORT)(CpuIndex + 1);
+    IdleThread->UserAffinity->Size = (USHORT)AffinitySize;
+
+    /* Register this CPU as active in the Idle Process */
+    IdleProcess->ActiveProcessors->Bitmap[CpuIndex] |= ((KAFFINITY)1 << CpuTargetBit);
+}
+
+/**
  * Initializes the thread.
  *
  * @param Process
