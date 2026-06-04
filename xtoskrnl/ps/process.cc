@@ -20,12 +20,13 @@
  * @since XT 1.0
  */
 XTAPI
-VOID
+XTSTATUS
 PS::Process::CreateIdleProcess(IN PKPROCESSOR_CONTROL_BLOCK Prcb)
 {
     ULONG_PTR PageDirectory[2];
     PKPROCESS IdleProcess;
     PKTHREAD IdleThread;
+    XTSTATUS Status;
 
     /* Get initial IDLE thread */
     IdleThread = Prcb->CurrentThread;
@@ -37,7 +38,14 @@ PS::Process::CreateIdleProcess(IN PKPROCESSOR_CONTROL_BLOCK Prcb)
     PageDirectory[0] = 0;
     PageDirectory[1] = 0;
 
-    /* Initialize Idle process and Idle thread */
-    KE::KProcess::InitializeIdleProcess(IdleProcess, PageDirectory);
-    KE::KThread::InitializeIdleThread(IdleProcess, IdleThread, Prcb, AR::ProcessorSupport::GetBootStack());
+    /* Initialize IDLE process */
+    Status = KE::KProcess::InitializeIdleProcess(IdleProcess, PageDirectory);
+    if(Status != STATUS_SUCCESS)
+    {
+        /* Failed to initialize IDLE process, return status code */
+        return Status;
+    }
+
+    /* Initialize IDLE thread */
+    return KE::KThread::InitializeIdleThread(IdleProcess, IdleThread, Prcb, AR::ProcessorSupport::GetBootStack());
 }

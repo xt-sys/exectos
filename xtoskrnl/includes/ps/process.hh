@@ -18,7 +18,7 @@ namespace PS
     class Process
     {
         public:
-            STATIC XTAPI VOID CreateIdleProcess(IN PKPROCESSOR_CONTROL_BLOCK Prcb);
+            STATIC XTAPI XTSTATUS CreateIdleProcess(IN PKPROCESSOR_CONTROL_BLOCK Prcb);
     };
 }
 

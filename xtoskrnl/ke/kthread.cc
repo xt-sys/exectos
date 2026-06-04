@@ -43,7 +43,7 @@ KE::KThread::GetInitialThread(VOID)
  * @since XT 1.0
  */
 XTAPI
-VOID
+XTSTATUS
 KE::KThread::InitializeIdleThread(IN PKPROCESS IdleProcess,
                                   IN OUT PKTHREAD IdleThread,
                                   IN PKPROCESSOR_CONTROL_BLOCK Prcb,
@@ -51,6 +51,7 @@ KE::KThread::InitializeIdleThread(IN PKPROCESS IdleProcess,
 {
     ULONG AffinitySize, CpuIndex, CpuTargetBit, MapSize;
     PACPI_SYSTEM_INFO SysInfo;
+    XTSTATUS Status;
 
     /* Retrieve hardware topology from ACPI */
     HL::Acpi::GetSystemInformation(&SysInfo);
@@ -62,17 +63,34 @@ KE::KThread::InitializeIdleThread(IN PKPROCESS IdleProcess,
     /* Align size to the 8-byte boundary */
     MapSize = (MapSize + 7) & ~7;
 
-    /* Allocate the thread-level affinity structures */
-    MM::Allocator::AllocatePool(NonPagedPool, MapSize, (PVOID*)&IdleThread->Affinity);
-    MM::Allocator::AllocatePool(NonPagedPool, MapSize, (PVOID*)&IdleThread->UserAffinity);
+    /* Allocate the thread-level affinity structure */
+    Status = MM::Allocator::AllocatePool(NonPagedPool, MapSize, (PVOID*)&IdleThread->Affinity);
+    if(Status != STATUS_SUCCESS)
+    {
+        /* Memory allocation failed, return the status code */
+        return Status;
+    }
+
+    /* Allocate the thread-level user affinity structure */
+    Status = MM::Allocator::AllocatePool(NonPagedPool, MapSize, (PVOID*)&IdleThread->UserAffinity);
+    if(Status != STATUS_SUCCESS)
+    {
+        /* Memory allocation failed, return the status code */
+        return Status;
+    }
 
     /* Zero the thread-level affinity structures */
     RTL::Memory::ZeroMemory(IdleThread->Affinity, MapSize);
     RTL::Memory::ZeroMemory(IdleThread->UserAffinity, MapSize);
 
     /* Initialize Idle thread */
-    KE::KThread::InitializeThread(IdleProcess, IdleThread, NULLPTR, NULLPTR, NULLPTR,
-                                  NULLPTR, NULLPTR, Stack, TRUE);
+    Status = KE::KThread::InitializeThread(IdleProcess, IdleThread, NULLPTR, NULLPTR, NULLPTR,
+                                           NULLPTR, NULLPTR, Stack, TRUE);
+    if(Status != STATUS_SUCCESS)
+    {
+        /* Failed to initialize IDLE thread, return status code */
+        return Status;
+    }
 
     /* Configure Idle thread scheduling parameters */
     IdleThread->NextProcessor = Prcb->CpuNumber;
@@ -96,6 +114,9 @@ KE::KThread::InitializeIdleThread(IN PKPROCESS IdleProcess,
 
     /* Register this CPU as active in the Idle Process */
     IdleProcess->ActiveProcessors->Bitmap[CpuIndex] |= ((KAFFINITY)1 << CpuTargetBit);
+
+    /* Return success */
+    return STATUS_SUCCESS;
 }
 
 /**

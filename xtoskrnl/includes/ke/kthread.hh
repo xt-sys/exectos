@@ -22,10 +22,10 @@ namespace KE
 
         public:
             STATIC XTAPI PETHREAD GetInitialThread(VOID);
-            STATIC XTAPI VOID InitializeIdleThread(IN PKPROCESS IdleProcess,
-                                                   IN OUT PKTHREAD IdleThread,
-                                                   IN PKPROCESSOR_CONTROL_BLOCK Prcb,
-                                                   IN PVOID Stack);
+            STATIC XTAPI XTSTATUS InitializeIdleThread(IN PKPROCESS IdleProcess,
+                                                       IN OUT PKTHREAD IdleThread,
+                                                       IN PKPROCESSOR_CONTROL_BLOCK Prcb,
+                                                       IN PVOID Stack);
             STATIC XTAPI XTSTATUS InitializeThread(IN PKPROCESS Process,
                                                    IN OUT PKTHREAD Thread,
                                                    IN PKSYSTEM_ROUTINE SystemRoutine,

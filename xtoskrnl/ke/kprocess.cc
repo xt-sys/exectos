@@ -52,12 +52,13 @@ KE::KProcess::GetInitialProcess(VOID)
  * @since XT 1.0
  */
 XTAPI
-VOID
+XTSTATUS
 KE::KProcess::InitializeIdleProcess(IN OUT PKPROCESS Process,
                                     IN PULONG_PTR DirectoryTable)
 {
     ULONG AffinitySize, MapSize;
     PACPI_SYSTEM_INFO SysInfo;
+    XTSTATUS Status;
 
     /* Retrieve hardware topology from ACPI */
     HL::Acpi::GetSystemInformation(&SysInfo);
@@ -69,9 +70,21 @@ KE::KProcess::InitializeIdleProcess(IN OUT PKPROCESS Process,
     /* Align size to the 8-byte boundary */
     MapSize = (MapSize + 7) & ~7;
 
-    /* Allocate the process-level affinity structures */
-    MM::Allocator::AllocatePool(NonPagedPool, MapSize, (PVOID*)&Process->Affinity);
-    MM::Allocator::AllocatePool(NonPagedPool, MapSize, (PVOID*)&Process->ActiveProcessors);
+    /* Allocate the process-level affinity structure */
+    Status = MM::Allocator::AllocatePool(NonPagedPool, MapSize, (PVOID*)&Process->Affinity);
+    if(Status != STATUS_SUCCESS)
+    {
+        /* Memory allocation failed, return the status code */
+        return Status;
+    }
+
+    /* Allocate the process-level active processors structure */
+    Status = MM::Allocator::AllocatePool(NonPagedPool, MapSize, (PVOID*)&Process->ActiveProcessors);
+    if(Status != STATUS_SUCCESS)
+    {
+        /* Memory allocation failed, return the status code */
+        return Status;
+    }
 
     /* Zero the process-level affinity structures */
     RTL::Memory::ZeroMemory(Process->Affinity, MapSize);
@@ -85,6 +98,9 @@ KE::KProcess::InitializeIdleProcess(IN OUT PKPROCESS Process,
     /* Initialize Idle process */
     KE::KProcess::InitializeProcess(Process, 0, DirectoryTable, FALSE);
     Process->Quantum = MAXCHAR;
+
+    /* Return success */
+    return STATUS_SUCCESS;
 }
 
 /**

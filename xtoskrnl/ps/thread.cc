@@ -38,7 +38,7 @@ PS::Thread::CreateIdleThread(IN PKPROCESSOR_CONTROL_BLOCK Prcb,
     Status = MM::Allocator::AllocatePool(NonPagedPool, sizeof(ETHREAD), (PVOID*)&IdleThread);
     if(Status != STATUS_SUCCESS)
     {
-        /* Allocation failed, return the status code */
+        /* Memory allocation failed, return the status code */
         return Status;
     }
 
@@ -50,8 +50,5 @@ PS::Thread::CreateIdleThread(IN PKPROCESSOR_CONTROL_BLOCK Prcb,
     Prcb->IdleThread = &IdleThread->ThreadControlBlock;
 
     /* Initialize the IDLE thread */
-    KE::KThread::InitializeIdleThread(IdleProcess, &IdleThread->ThreadControlBlock, Prcb, Stack);
-
-    /* Return success */
-    return STATUS_SUCCESS;
+    return KE::KThread::InitializeIdleThread(IdleProcess, &IdleThread->ThreadControlBlock, Prcb, Stack);
 }

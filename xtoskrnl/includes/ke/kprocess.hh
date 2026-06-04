@@ -23,8 +23,8 @@ namespace KE
         public:
             STATIC XTAPI PKPROCESS GetIdleProcess(VOID);
             STATIC XTAPI PEPROCESS GetInitialProcess(VOID);
-            STATIC XTAPI VOID InitializeIdleProcess(IN OUT PKPROCESS Process,
-                                                    IN PULONG_PTR DirectoryTable);
+            STATIC XTAPI XTSTATUS InitializeIdleProcess(IN OUT PKPROCESS Process,
+                                                        IN PULONG_PTR DirectoryTable);
             STATIC XTAPI VOID InitializeProcess(IN OUT PKPROCESS Process,
                                                 IN KPRIORITY Priority,
                                                 IN PULONG_PTR DirectoryTable,
