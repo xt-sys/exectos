@@ -12,6 +12,9 @@
 /* Kernel initialization block passed by boot loader */
 PKERNEL_INITIALIZATION_BLOCK KE::BootInformation::InitializationBlock = {};
 
+/* Kernel panic state */
+BOOLEAN KE::Crash::KernelPanic;
+
 /* Kernel initial process */
 EPROCESS KE::KProcess::InitialProcess;
 

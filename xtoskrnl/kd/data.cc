@@ -9,6 +9,9 @@
 #include <xtos.hh>
 
 
+/* Debugger active flag */
+BOOLEAN KD::Debugger::Active;
+
 /* Debug I/O spinlock */
 KSPIN_LOCK KD::DebugIo::DebugIoLock;
 
