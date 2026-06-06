@@ -19,17 +19,26 @@ namespace KE
     {
         private:
             KSPIN_LOCK_QUEUE_LEVEL QueuedLockLevel;
+            BOOLEAN Owned;
 
         public:
-            QueuedSpinLockGuard(IN OUT KSPIN_LOCK_QUEUE_LEVEL LockLevel)
+            QueuedSpinLockGuard(IN OUT KSPIN_LOCK_QUEUE_LEVEL LockLevel,
+                                IN BOOLEAN Acquire = TRUE)
             {
                 QueuedLockLevel = LockLevel;
-                KE::SpinLock::AcquireQueuedSpinLock(QueuedLockLevel);
+                Owned = Acquire;
+                if(Owned)
+                {
+                    KE::SpinLock::AcquireQueuedSpinLock(QueuedLockLevel);
+                }
             }
 
             ~QueuedSpinLockGuard()
             {
-                KE::SpinLock::ReleaseQueuedSpinLock(QueuedLockLevel);
+                if(Owned)
+                {
+                    KE::SpinLock::ReleaseQueuedSpinLock(QueuedLockLevel);
+                }
             }
 
             QueuedSpinLockGuard(const QueuedSpinLockGuard&) = delete;
@@ -40,17 +49,26 @@ namespace KE
     {
         private:
             PKSPIN_LOCK Lock;
+            BOOLEAN Owned;
 
         public:
-            SpinLockGuard(IN OUT PKSPIN_LOCK SpinLock)
+            SpinLockGuard(IN OUT PKSPIN_LOCK SpinLock,
+                          IN BOOLEAN Acquire = TRUE)
             {
                 Lock = SpinLock;
-                KE::SpinLock::AcquireSpinLock(Lock);
+                Owned = Acquire;
+                if(Owned)
+                {
+                    KE::SpinLock::AcquireSpinLock(Lock);
+                }
             }
 
             ~SpinLockGuard()
             {
-                KE::SpinLock::ReleaseSpinLock(Lock);
+                if(Owned)
+                {
+                    KE::SpinLock::ReleaseSpinLock(Lock);
+                }
             }
 
             SpinLockGuard(const SpinLockGuard&) = delete;
