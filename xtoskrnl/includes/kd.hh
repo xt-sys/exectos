@@ -13,5 +13,6 @@
 
 #include <kd/dbg.hh>
 #include <kd/dbgio.hh>
+#include <kd/debug.hh>
 
 #endif /* __XTOSKRNL_KD_HH */
