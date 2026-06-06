@@ -4,6 +4,7 @@
  * FILE:            xtoskrnl/ke/panic.cc
  * DESCRIPTION:     System shutdown and kernel panic mechanism
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ *                  Aiken Harris <harraiken91@gmail.com>
  */
 
 #include <xtos.hh>
@@ -43,6 +44,7 @@ XTAPI
 VOID
 KE::Crash::Panic(IN ULONG Code)
 {
+    /* Call panic function */
     Panic(Code, 0, 0, 0, 0);
 }
 
@@ -76,7 +78,28 @@ KE::Crash::Panic(IN ULONG Code,
                  IN ULONG_PTR Parameter3,
                  IN ULONG_PTR Parameter4)
 {
+    /* Set kernel panic state */
+    KernelPanic = TRUE;
+
+    /* Print error message to debug console */
     KD::DebugIo::KdPrint(L"Fatal System Error: 0x%08lx (0x%zx 0x%zx 0x%zx 0x%zx)\nKernel Panic!\n\n",
                          Code, Parameter1, Parameter2, Parameter3, Parameter4);
+
+    /* Halt system */
     HaltSystem();
+}
+
+/**
+ * Determines whether the system has experienced a fatal error and entered a kernel panic state.
+ *
+ * @return This routine returns TRUE if the system has halted due to a kernel panic, or FALSE otherwise.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+BOOLEAN
+KE::Crash::SystemCrashed(VOID)
+{
+    /* Return kernel panic state */
+    return KernelPanic;
 }

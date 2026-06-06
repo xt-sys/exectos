@@ -17,6 +17,9 @@ namespace KE
 {
     class Crash
     {
+        private:
+            STATIC BOOLEAN KernelPanic;
+
         public:
             STATIC XTAPI VOID HaltSystem(VOID);
             STATIC XTAPI VOID Panic(IN ULONG Code);
@@ -25,6 +28,7 @@ namespace KE
                                     IN ULONG_PTR Parameter2,
                                     IN ULONG_PTR Parameter3,
                                     IN ULONG_PTR Parameter4);
+            STATIC XTAPI BOOLEAN SystemCrashed(VOID);
     };
 }
 
