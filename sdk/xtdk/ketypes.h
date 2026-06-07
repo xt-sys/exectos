@@ -24,6 +24,21 @@
 /* Maximum number of exception parameters */
 #define EXCEPTION_MAXIMUM_PARAMETERS                15
 
+/* IPI types */
+#define IPI_APC                                     1
+#define IPI_DPC                                     2
+#define IPI_FREEZE                                  4
+#define IPI_PACKET_READY                            8
+#define IPI_SYNC_REQUEST                            16
+
+/* IPI frozen states */
+#define IPI_FROZEN_STATE_RUNNING                    0x00
+#define IPI_FROZEN_STATE_FROZEN                     0x02
+#define IPI_FROZEN_STATE_THAW                       0x03
+#define IPI_FROZEN_STATE_OWNER                      0x04
+#define IPI_FROZEN_STATE_FREEZE                     0x05
+#define IPI_FROZEN_STATE_ACTIVE                     0x20
+
 /* APC pending state length */
 #define KAPC_STATE_LENGTH                           (FIELD_OFFSET(KAPC_STATE, UserApcPending) + sizeof(BOOLEAN))
 
@@ -79,6 +94,15 @@ typedef enum _KAPC_ENVIRONMENT
     CurrentApcEnvironment,
     InsertApcEnvironment
 } KAPC_ENVIRONMENT, *PKAPC_ENVIRONMENT;
+
+/* Continue status enumeration list */
+typedef enum _KCONTINUE_STATUS
+{
+    ContinueError,
+    ContinueSuccess,
+    ContinueProcessorReselected,
+    ContinueNextProcessor
+} KCONTINUE_STATUS, *PKCONTINUE_STATUS;
 
 /* DPC importance enumeration list */
 typedef enum _KDPC_IMPORTANCE
@@ -319,7 +343,7 @@ typedef struct _KAFFINITY_MAP
     USHORT Count;
     USHORT Size;
     ULONG Reserved;
-    KAFFINITY Bitmap[1];
+    KAFFINITY Bitmap[];
 } KAFFINITY_MAP, *PKAFFINITY_MAP;
 
 /* Asynchronous Procedure Call (APC) object structure definition */
