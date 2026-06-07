@@ -17,17 +17,6 @@
 #include ARCH_HEADER(artypes.h)
 
 
-/* Processor context flags */
-#define CONTEXT_ARCH                      0x100000
-#define CONTEXT_CONTROL                   (CONTEXT_ARCH | 0x1L)
-#define CONTEXT_INTEGER                   (CONTEXT_ARCH | 0x2L)
-#define CONTEXT_SEGMENTS                  (CONTEXT_ARCH | 0x4L)
-#define CONTEXT_FLOATING_POINT            (CONTEXT_ARCH | 0x8L)
-#define CONTEXT_DEBUG_REGISTERS           (CONTEXT_ARCH | 0x10L)
-#define CONTEXT_FULL                      (CONTEXT_CONTROL | CONTEXT_INTEGER | CONTEXT_FLOATING_POINT)
-#define CONTEXT_ALL                       (CONTEXT_CONTROL | CONTEXT_INTEGER | CONTEXT_SEGMENTS | \
-                                           CONTEXT_FLOATING_POINT | CONTEXT_DEBUG_REGISTERS)
-
 /* Selector masks */
 #define MODE_MASK                         0x0001
 #define RPL_MASK                          0x0003
@@ -143,6 +132,9 @@
 #define CONTEXT_SEGMENTS                  (CONTEXT_ARCHITECTURE | 0x04)
 #define CONTEXT_FLOATING_POINT            (CONTEXT_ARCHITECTURE | 0x08)
 #define CONTEXT_DEBUG_REGISTERS           (CONTEXT_ARCHITECTURE | 0x10)
+#define CONTEXT_FULL                      (CONTEXT_CONTROL | CONTEXT_INTEGER | CONTEXT_FLOATING_POINT)
+#define CONTEXT_ALL                       (CONTEXT_CONTROL | CONTEXT_INTEGER | CONTEXT_SEGMENTS | \
+                                           CONTEXT_FLOATING_POINT | CONTEXT_DEBUG_REGISTERS)
 
 /* Clock control flags */
 #define CLOCK_QUANTUM_DECREMENT           3
