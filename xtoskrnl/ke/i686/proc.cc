@@ -67,6 +67,21 @@ KE::Processor::GetCurrentThread(VOID)
 }
 
 /**
+ * Retrieves the number of installed and enabled CPUs in the system.
+ *
+ * @return This routine returns the number of installed CPUs in the system.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG
+KE::Processor::GetInstalledCpus(VOID)
+{
+    /* Return number of installed CPUs */
+    return InstalledCpus;
+}
+
+/**
  * Gets the processor block for the specified processor number.
  *
  * @param CpuNumber
@@ -189,7 +204,7 @@ KE::Processor::RegisterProcessorBlock(ULONG CpuNumber,
  */
 XTAPI
 VOID
-KE::Processor::SaveProcessorState(OUT PKPROCESSOR_STATE CpuState)
+KE::Processor::SaveProcessorControlState(OUT PKPROCESSOR_STATE CpuState)
 {
     /* Save CR registers */
     CpuState->SpecialRegisters.Cr0 = AR::CpuFunctions::ReadControlRegister(0);
