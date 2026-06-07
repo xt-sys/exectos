@@ -17,6 +17,19 @@
 #include ARCH_HEADER(artypes.h)
 
 
+/* Processor context flags */
+#define CONTEXT_ARCH                      0x10000
+#define CONTEXT_CONTROL                   (CONTEXT_ARCH | 0x1L)
+#define CONTEXT_INTEGER                   (CONTEXT_ARCH | 0x2L)
+#define CONTEXT_SEGMENTS                  (CONTEXT_ARCH | 0x4L)
+#define CONTEXT_FLOATING_POINT            (CONTEXT_ARCH | 0x8L)
+#define CONTEXT_DEBUG_REGISTERS           (CONTEXT_ARCH | 0x10L)
+#define CONTEXT_EXTENDED_REGISTERS        (CONTEXT_ARCH | 0x20L)
+#define CONTEXT_FULL                      (CONTEXT_CONTROL | CONTEXT_INTEGER | CONTEXT_SEGMENTS)
+#define CONTEXT_ALL                       (CONTEXT_CONTROL | CONTEXT_INTEGER | CONTEXT_SEGMENTS | \
+                                           CONTEXT_FLOATING_POINT | CONTEXT_DEBUG_REGISTERS | \
+                                           CONTEXT_EXTENDED_REGISTERS)
+
 /* Selector masks */
 #define MODE_MASK                         0x0001
 #define RPL_MASK                          0x0003
@@ -300,7 +313,7 @@ typedef struct _CONTEXT
     ULONG Ebp;
     ULONG Eip;
     ULONG SegCs;
-    ULONG EFlags;
+    ULONG Flags;
     ULONG Esp;
     ULONG SegSs;
     UCHAR ExtendedRegisters[MAXIMUM_SUPPORTED_EXTENSION];
@@ -531,6 +544,8 @@ typedef struct _KPROCESSOR_CONTROL_BLOCK
     KSPIN_LOCK PrcbLock;
     KSPIN_LOCK_QUEUE LockQueue[MaximumLock];
     ULONG_PTR MultiThreadProcessorSet;
+    VOLATILE ULONG IpiFrozen;
+    VOLATILE LONG_PTR RequestSummary;
     KDPC_DATA DpcData[2];
     PVOID DpcStack;
     LONG MaximumDpcQueueDepth;
