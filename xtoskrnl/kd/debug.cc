@@ -41,7 +41,7 @@ KD::Debugger::EnterDebugger(IN PKTRAP_FRAME TrapFrame)
     Active = TRUE;
 
     /* Print debug message and enter an infinite loop */
-    DebugPrint(L"\n\n*** KDebugger Entered at RIP 0x%.16llX ***\n", TrapFrame->Rip);
+    DebugPrint(L"\n\n*** Entered KDebugger ***\n");
     for(;;);
 
     /* Mark the debugger as inactive */
@@ -71,30 +71,4 @@ KD::Debugger::ProcessCpuStateChange(IN PEXCEPTION_RECORD ExceptionRecord,
                                     IN BOOLEAN SecondChance)
 {
     return FALSE;
-}
-
-/**
- * Transfers active control to a previously frozen processor.
- *
- * @return This routine returns a value indicating how execution should proceed after the debugging session concludes.
- *
- * @since XT 1.0
- */
-XTAPI
-KCONTINUE_STATUS
-KD::Debugger::SwitchProcessor(VOID)
-{
-    EXCEPTION_RECORD ExceptionRecord;
-    PKPROCESSOR_CONTROL_BLOCK Prcb;
-
-    /* Get processor control block */
-    Prcb = KE::Processor::GetCurrentProcessorControlBlock();
-
-    /* Construct an exception record */
-    ExceptionRecord.ExceptionAddress = (PVOID)&Prcb->ProcessorState.ContextFrame.Rip;
-    ExceptionRecord.ExceptionCode = STATUS_WAKE_SYSTEM_DEBUGGER;
-    ExceptionRecord.ExceptionRecord  = &ExceptionRecord;
-
-    /* Pass the synthetic exception and the processor context to the debugger */
-    return (KCONTINUE_STATUS)ProcessCpuStateChange(&ExceptionRecord, &Prcb->ProcessorState.ContextFrame, FALSE);
 }

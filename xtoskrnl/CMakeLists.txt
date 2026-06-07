@@ -31,6 +31,7 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/hl/fbdev.cc
     ${XTOSKRNL_SOURCE_DIR}/hl/init.cc
     ${XTOSKRNL_SOURCE_DIR}/hl/ioreg.cc
+    ${XTOSKRNL_SOURCE_DIR}/kd/${ARCH}/debug.cc
     ${XTOSKRNL_SOURCE_DIR}/kd/data.cc
     ${XTOSKRNL_SOURCE_DIR}/kd/dbgio.cc
     ${XTOSKRNL_SOURCE_DIR}/kd/debug.cc
