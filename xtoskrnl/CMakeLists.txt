@@ -33,6 +33,7 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/hl/ioreg.cc
     ${XTOSKRNL_SOURCE_DIR}/kd/data.cc
     ${XTOSKRNL_SOURCE_DIR}/kd/dbgio.cc
+    ${XTOSKRNL_SOURCE_DIR}/kd/debug.cc
     ${XTOSKRNL_SOURCE_DIR}/kd/exports.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/dispatch.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/krnlinit.cc
