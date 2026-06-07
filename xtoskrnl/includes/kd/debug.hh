@@ -25,6 +25,13 @@ namespace KD
 
         public:
             STATIC XTAPI BOOLEAN DebuggerActive(VOID);
+            STATIC XTAPI VOID EnterDebugger(IN PKTRAP_FRAME TrapFrame);
+            STATIC XTAPI KCONTINUE_STATUS SwitchCpu(VOID);
+
+        private:
+            STATIC XTAPI BOOLEAN ProcessCpuStateChange(IN PEXCEPTION_RECORD ExceptionRecord,
+                                                       IN OUT PCONTEXT Context,
+                                                       IN BOOLEAN SecondChanceException);
     };
 }
 
