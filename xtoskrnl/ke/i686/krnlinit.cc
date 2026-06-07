@@ -46,7 +46,7 @@ KE::KernelInit::BootstrapApplicationProcessor(IN PPROCESSOR_START_BLOCK StartBlo
     PO::Idle::InitializeProcessorIdleState(ControlBlock);
 
     /* Save processor state */
-    KE::Processor::SaveProcessorState(&ControlBlock->ProcessorState);
+    KE::Processor::SaveProcessorControlState(&ControlBlock->ProcessorState);
 
     /* Initialize per-CPU spin lock queues */
     KE::SpinLock::InitializeLockQueues();
@@ -90,7 +90,7 @@ KE::KernelInit::BootstrapKernel(VOID)
     PO::Idle::InitializeProcessorIdleState(Prcb);
 
     /* Save processor state */
-    KE::Processor::SaveProcessorState(&Prcb->ProcessorState);
+    KE::Processor::SaveProcessorControlState(&Prcb->ProcessorState);
 
     /* Initialize spin locks */
     KE::SpinLock::InitializeAllLocks();
