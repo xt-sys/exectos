@@ -57,12 +57,16 @@ VOID
 KD::DebugIo::DbgPrint(PCWSTR Format,
                       VA_LIST Arguments)
 {
-    PLIST_ENTRY DispatchTableEntry;
     PKD_DISPATCH_TABLE DispatchTable;
+    PLIST_ENTRY DispatchTableEntry;
+    BOOLEAN BypassLocks;
 
-    /* Raise runlevel and acquire the Debug I/O lock */
-    KE::RaiseRunLevel RunLevel(HIGH_LEVEL);
-    KE::SpinLockGuard SpinLock(&DebugIoLock);
+    /* Evaluate if the system is currently in a critical or debugging state */
+    BypassLocks = (KE::Crash::SystemCrashed() || KD::Debugger::DebuggerActive());
+
+    /* Conditionally raise runlevel and acquire the Debug I/O lock */
+    KE::RaiseRunLevel RunLevel(HIGH_LEVEL, !BypassLocks);
+    KE::SpinLockGuard SpinLock(&DebugIoLock, !BypassLocks);
 
     /* Iterate over all registered debug providers */
     DispatchTableEntry = Providers.Flink;
