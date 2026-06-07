@@ -193,10 +193,233 @@ KE::Processor::RegisterProcessorBlock(ULONG CpuNumber,
 }
 
 /**
- * Saves the current processor state.
+ * Restores the processor's architectural state from the provided context frame back into the hardware trap
+ * and exception frames.
+ *
+ * @param TrapFrame
+ *        Supplies a pointer to the trap frame that will receive the volatile processor state and control registers.
+ *
+ * @param ExceptionFrame
+ *        Supplies a pointer to the exception frame that will receive the non-volatile integer and FP registers.
+ *
+ * @param ContextFrame
+ *        Supplies a pointer to the context frame containing the state to be restored.
+ *
+ * @param ContextFlags
+ *        Supplies a bitmask indicating which specific register groups should be restored from the ContextFrame.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KE::Processor::RestoreProcessorContext(IN OUT PKTRAP_FRAME TrapFrame,
+                                       IN OUT PKEXCEPTION_FRAME ExceptionFrame,
+                                       IN PCONTEXT ContextFrame,
+                                       IN ULONG ContextFlags)
+{
+    UNIMPLEMENTED;
+}
+
+/**
+ * Restores the processor's low-level hardware control state.
+ *
+ * @param CpuState
+ *        Supplies a pointer to the processor state block containing the previously saved control data.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KE::Processor::RestoreProcessorControlState(IN PKPROCESSOR_STATE CpuState)
+{
+    /* Restore the CR registers */
+    AR::CpuFunctions::WriteControlRegister(0, CpuState->SpecialRegisters.Cr0);
+    AR::CpuFunctions::WriteControlRegister(2, CpuState->SpecialRegisters.Cr2);
+    AR::CpuFunctions::WriteControlRegister(3, CpuState->SpecialRegisters.Cr3);
+    AR::CpuFunctions::WriteControlRegister(4, CpuState->SpecialRegisters.Cr4);
+    AR::CpuFunctions::WriteControlRegister(8, CpuState->SpecialRegisters.Cr8);
+
+    /* Restore the DR registers */
+    AR::CpuFunctions::WriteDebugRegister(0, CpuState->SpecialRegisters.KernelDr0);
+    AR::CpuFunctions::WriteDebugRegister(1, CpuState->SpecialRegisters.KernelDr1);
+    AR::CpuFunctions::WriteDebugRegister(2, CpuState->SpecialRegisters.KernelDr2);
+    AR::CpuFunctions::WriteDebugRegister(3, CpuState->SpecialRegisters.KernelDr3);
+    AR::CpuFunctions::WriteDebugRegister(6, CpuState->SpecialRegisters.KernelDr6);
+    AR::CpuFunctions::WriteDebugRegister(7, CpuState->SpecialRegisters.KernelDr7);
+
+    /* Restore MSR registers */
+    AR::CpuFunctions::WriteModelSpecificRegister(X86_MSR_GSBASE, CpuState->SpecialRegisters.MsrGsBase);
+    AR::CpuFunctions::WriteModelSpecificRegister(X86_MSR_KERNEL_GSBASE, CpuState->SpecialRegisters.MsrGsSwap);
+    AR::CpuFunctions::WriteModelSpecificRegister(X86_MSR_CSTAR, CpuState->SpecialRegisters.MsrCStar);
+    AR::CpuFunctions::WriteModelSpecificRegister(X86_MSR_LSTAR, CpuState->SpecialRegisters.MsrLStar);
+    AR::CpuFunctions::WriteModelSpecificRegister(X86_MSR_STAR, CpuState->SpecialRegisters.MsrStar);
+    AR::CpuFunctions::WriteModelSpecificRegister(X86_MSR_FMASK, CpuState->SpecialRegisters.MsrSyscallMask);
+
+    /* Restore XMM control/status register */
+    AR::CpuFunctions::LoadMxcsrRegister(CpuState->SpecialRegisters.MxCsr);
+
+    /* Restore GDT, IDT, LDT and TaskRegister */
+    AR::CpuFunctions::LoadGlobalDescriptorTable(&CpuState->SpecialRegisters.Gdtr.Limit);
+    AR::CpuFunctions::LoadInterruptDescriptorTable(&CpuState->SpecialRegisters.Idtr.Limit);
+    AR::CpuFunctions::LoadLocalDescriptorTable(CpuState->SpecialRegisters.Ldtr);
+    AR::CpuFunctions::LoadTaskRegister(CpuState->SpecialRegisters.Tr);
+}
+
+/**
+ * Restores the executing processor's state.
+ *
+ * @param TrapFrame
+ *        Supplies a pointer to the hardware trap frame that will be populated with the restored volatile state.
+ *
+ * @param ExceptionFrame
+ *        Supplies a pointer to the exception frame that will be populated with the restored non-volatile state.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KE::Processor::RestoreProcessorState(OUT PKTRAP_FRAME TrapFrame,
+                                     OUT PKEXCEPTION_FRAME ExceptionFrame)
+{
+    PKPROCESSOR_CONTROL_BLOCK Prcb;
+
+    /* Retrieve current processor control block */
+    Prcb = GetCurrentProcessorControlBlock();
+
+    /* Restore processor context */
+    RestoreProcessorContext(TrapFrame, ExceptionFrame, &Prcb->ProcessorState.ContextFrame, CONTEXT_ALL);
+
+    /* Restore processor control registers */
+    RestoreProcessorControlState(&Prcb->ProcessorState);
+}
+
+/**
+ * Constructs a standardized processor context from the hardware trap and exception frames.
+ *
+ * @param TrapFrame
+ *        Supplies a pointer to the trap frame containing volatile processor state, control registers and debug
+ *        registers saved at the time of the interrupt or exception.
+ *
+ * @param ExceptionFrame
+ *        Supplies a pointer to the exception frame containing non-volatile integer and floating-point registers.
+ *
+ * @param ContextFrame
+ *        Supplies a pointer to the context frame that will receive the processor state.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KE::Processor::SaveProcessorContext(IN PKTRAP_FRAME TrapFrame,
+                                    IN PKEXCEPTION_FRAME ExceptionFrame,
+                                    IN OUT PCONTEXT ContextFrame)
+{
+    /* Elevate RunLevel to APC_LEVEL to prevent thread preemption */
+    KE::RaiseRunLevel RunLevel(APC_LEVEL);
+
+    /* Check if control registers are requested */
+    if(ContextFrame->ContextFlags & CONTEXT_CONTROL)
+    {
+        /* Copy instruction pointer, stack pointer, and CPU status flags */
+        ContextFrame->Flags = TrapFrame->Flags;
+        ContextFrame->Rbp = TrapFrame->Rbp;
+        ContextFrame->Rip = TrapFrame->Rip;
+        ContextFrame->Rsp = TrapFrame->Rsp;
+        ContextFrame->SegCs = TrapFrame->SegCs;
+        ContextFrame->SegSs = TrapFrame->SegSs;
+    }
+
+    /* Check if general-purpose integer registers are requested */
+    if(ContextFrame->ContextFlags & CONTEXT_INTEGER)
+    {
+        /* Copy volatile integer registers directly from the trap frame */
+        ContextFrame->Rax = TrapFrame->Rax;
+        ContextFrame->Rcx = TrapFrame->Rcx;
+        ContextFrame->Rdx = TrapFrame->Rdx;
+        ContextFrame->R8 = TrapFrame->R8;
+        ContextFrame->R9 = TrapFrame->R9;
+        ContextFrame->R10 = TrapFrame->R10;
+        ContextFrame->R11 = TrapFrame->R11;
+
+        /* Check if a valid exception frame was provided */
+        if(ExceptionFrame)
+        {
+            /* Copy non-volatile integer registers from the exception frame */
+            ContextFrame->Rbx = ExceptionFrame->Rbx;
+            ContextFrame->R12 = ExceptionFrame->R12;
+            ContextFrame->R13 = ExceptionFrame->R13;
+            ContextFrame->R14 = ExceptionFrame->R14;
+            ContextFrame->R15 = ExceptionFrame->R15;
+            ContextFrame->Rdi = ExceptionFrame->Rdi;
+            ContextFrame->Rsi = ExceptionFrame->Rsi;
+        }
+    }
+
+    /* Check if segment registers are requested */
+    if(ContextFrame->ContextFlags & CONTEXT_SEGMENTS)
+    {
+        /* Populate segment selectors with standard Ring 3 values */
+        ContextFrame->SegDs = KGDT_R3_DATA | RPL_MASK;
+        ContextFrame->SegEs = KGDT_R3_DATA | RPL_MASK;
+        ContextFrame->SegFs = KGDT_R3_CMTEB | RPL_MASK;
+        ContextFrame->SegGs = KGDT_R3_DATA | RPL_MASK;
+    }
+
+    /* Check if floating-point registers are requested */
+    if(ContextFrame->ContextFlags & CONTEXT_FLOATING_POINT)
+    {
+        /* Copy the SSE control/status register and volatile XMM registers */
+        ContextFrame->MxCsr = TrapFrame->MxCsr;
+        ContextFrame->Xmm0 = TrapFrame->Xmm0;
+        ContextFrame->Xmm1 = TrapFrame->Xmm1;
+        ContextFrame->Xmm2 = TrapFrame->Xmm2;
+        ContextFrame->Xmm3 = TrapFrame->Xmm3;
+        ContextFrame->Xmm4 = TrapFrame->Xmm4;
+        ContextFrame->Xmm5 = TrapFrame->Xmm5;
+
+        /* Check if a valid exception frame was provided */
+        if(ExceptionFrame)
+        {
+            /* Copy non-volatile XMM registers from the exception frame */
+            ContextFrame->Xmm6 = ExceptionFrame->Xmm6;
+            ContextFrame->Xmm7 = ExceptionFrame->Xmm7;
+            ContextFrame->Xmm8 = ExceptionFrame->Xmm8;
+            ContextFrame->Xmm9 = ExceptionFrame->Xmm9;
+            ContextFrame->Xmm10 = ExceptionFrame->Xmm10;
+            ContextFrame->Xmm11 = ExceptionFrame->Xmm11;
+            ContextFrame->Xmm12 = ExceptionFrame->Xmm12;
+            ContextFrame->Xmm13 = ExceptionFrame->Xmm13;
+            ContextFrame->Xmm14 = ExceptionFrame->Xmm14;
+            ContextFrame->Xmm15 = ExceptionFrame->Xmm15;
+        }
+    }
+
+    /* Check if debug registers are requested */
+    if(ContextFrame->ContextFlags & CONTEXT_DEBUG_REGISTERS)
+    {
+        /* Copy debug registers */
+        ContextFrame->Dr0 = TrapFrame->Dr0;
+        ContextFrame->Dr1 = TrapFrame->Dr1;
+        ContextFrame->Dr2 = TrapFrame->Dr2;
+        ContextFrame->Dr3 = TrapFrame->Dr3;
+        ContextFrame->Dr6 = TrapFrame->Dr6;
+        ContextFrame->Dr7 = TrapFrame->Dr7;
+    }
+}
+
+/**
+ * Saves the current processor's low-level hardware control state.
  *
  * @param State
- *        Supplies a pointer to the processor state structure.
+ *        Supplies a pointer to the processor state block that will receive processor's control data.
  *
  * @return This routine does not return any value.
  *
@@ -237,4 +460,37 @@ KE::Processor::SaveProcessorControlState(OUT PKPROCESSOR_STATE CpuState)
     AR::CpuFunctions::StoreInterruptDescriptorTable(&CpuState->SpecialRegisters.Idtr.Limit);
     AR::CpuFunctions::StoreLocalDescriptorTable(&CpuState->SpecialRegisters.Ldtr);
     AR::CpuFunctions::StoreTaskRegister(&CpuState->SpecialRegisters.Tr);
+}
+
+/**
+ * Captures the executing processor's state.
+ *
+ * @param TrapFrame
+ *        Supplies a pointer to the hardware trap frame containing the processor's volatile state.
+ *
+ * @param ExceptionFrame
+ *        Supplies a pointer to the exception frame containing the processor's non-volatile state.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KE::Processor::SaveProcessorState(IN PKTRAP_FRAME TrapFrame,
+                                  IN PKEXCEPTION_FRAME ExceptionFrame)
+{
+    PKPROCESSOR_CONTROL_BLOCK Prcb;
+
+    /* Retrieve current processor control block */
+    Prcb = GetCurrentProcessorControlBlock();
+
+    /* Set context flags to save whole all context */
+    Prcb->ProcessorState.ContextFrame.ContextFlags = CONTEXT_ALL;
+
+    /* Save processor context */
+    SaveProcessorContext(TrapFrame, ExceptionFrame, &Prcb->ProcessorState.ContextFrame);
+
+    /* Save processor control registers */
+    SaveProcessorControlState(&Prcb->ProcessorState);
 }

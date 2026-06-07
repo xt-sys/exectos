@@ -32,7 +32,19 @@ namespace KE
             STATIC XTAPI VOID RegisterHardwareId(IN ULONG HardwareId);
             STATIC XTAPI VOID RegisterProcessorBlock(ULONG CpuNumber,
                                                      PKPROCESSOR_BLOCK ProcessorBlock);
+            STATIC XTAPI VOID RestoreProcessorContext(IN OUT PKTRAP_FRAME TrapFrame,
+                                                      IN OUT PKEXCEPTION_FRAME ExceptionFrame,
+                                                      IN PCONTEXT ContextFrame,
+                                                      IN ULONG ContextFlags);
+            STATIC XTAPI VOID RestoreProcessorControlState(IN PKPROCESSOR_STATE CpuState);
+            STATIC XTAPI VOID RestoreProcessorState(OUT PKTRAP_FRAME TrapFrame,
+                                                    OUT PKEXCEPTION_FRAME ExceptionFrame);
+            STATIC XTAPI VOID SaveProcessorContext(IN PKTRAP_FRAME TrapFrame,
+                                                   IN PKEXCEPTION_FRAME ExceptionFrame,
+                                                   IN OUT PCONTEXT ContextRecord);
             STATIC XTAPI VOID SaveProcessorControlState(OUT PKPROCESSOR_STATE CpuState);
+            STATIC XTAPI VOID SaveProcessorState(IN PKTRAP_FRAME TrapFrame,
+                                                 IN PKEXCEPTION_FRAME ExceptionFrame);
     };
 }
 
