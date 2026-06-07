@@ -82,7 +82,7 @@ KD::Debugger::ProcessCpuStateChange(IN PEXCEPTION_RECORD ExceptionRecord,
  */
 XTAPI
 KCONTINUE_STATUS
-KD::Debugger::SwitchCpu(VOID)
+KD::Debugger::SwitchProcessor(VOID)
 {
     EXCEPTION_RECORD ExceptionRecord;
     PKPROCESSOR_CONTROL_BLOCK Prcb;
