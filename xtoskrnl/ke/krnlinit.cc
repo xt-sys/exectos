@@ -9,9 +9,6 @@
 #include <xtos.hh>
 
 
-/* Use routines from Kernel Library */
-using namespace KE;
-
 /**
  * This routine starts up the XT kernel. It is called by boot loader.
  *
@@ -22,6 +19,7 @@ using namespace KE;
  *
  * @since XT 1.0
  */
+XTCLINK
 XTAPI
 VOID
 KeStartXtSystem(IN PKERNEL_INITIALIZATION_BLOCK Parameters)
