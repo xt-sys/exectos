@@ -303,6 +303,9 @@ KE::Crash::Panic(IN ULONG Code,
     /* Set kernel panic state */
     KernelPanic = TRUE;
 
+    /* Broadcast IPI_FREEZE to all other processors */
+    FreezeExecution(NULLPTR, NULLPTR);
+
     /* Print error message to debug console */
     KD::DebugIo::KdPrint(L"Fatal System Error: 0x%08lx (0x%zx 0x%zx 0x%zx 0x%zx)\nKernel Panic!\n\n",
                          Code, Parameter1, Parameter2, Parameter3, Parameter4);
