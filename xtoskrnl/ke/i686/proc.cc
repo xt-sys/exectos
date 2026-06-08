@@ -253,10 +253,13 @@ KE::Processor::RestoreProcessorControlState(IN PKPROCESSOR_STATE CpuState)
     AR::CpuFunctions::WriteDebugRegister(6, CpuState->SpecialRegisters.KernelDr6);
     AR::CpuFunctions::WriteDebugRegister(7, CpuState->SpecialRegisters.KernelDr7);
 
-    /* Restore GDT, IDT, LDT and TaskRegister */
+    /* Restore GDT, IDT and LDT */
     AR::CpuFunctions::LoadGlobalDescriptorTable(&CpuState->SpecialRegisters.Gdtr.Limit);
     AR::CpuFunctions::LoadInterruptDescriptorTable(&CpuState->SpecialRegisters.Idtr.Limit);
     AR::CpuFunctions::LoadLocalDescriptorTable(CpuState->SpecialRegisters.Ldtr);
+
+    /* Force the TSS descriptor into a non-busy state and restore TaskRegister */
+    *(VOLATILE PUCHAR)((ULONG_PTR)CpuState->SpecialRegisters.Gdtr.Base + CpuState->SpecialRegisters.Tr + 5) &= ~0x02;
     AR::CpuFunctions::LoadTaskRegister(CpuState->SpecialRegisters.Tr);
 }
 
