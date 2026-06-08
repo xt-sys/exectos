@@ -265,11 +265,10 @@ KE::Processor::RestoreProcessorControlState(IN PKPROCESSOR_STATE CpuState)
     /* Restore XMM control/status register */
     AR::CpuFunctions::LoadMxcsrRegister(CpuState->SpecialRegisters.MxCsr);
 
-    /* Restore GDT, IDT, LDT and TaskRegister */
+    /* Restore GDT, IDT and LDT */
     AR::CpuFunctions::LoadGlobalDescriptorTable(&CpuState->SpecialRegisters.Gdtr.Limit);
     AR::CpuFunctions::LoadInterruptDescriptorTable(&CpuState->SpecialRegisters.Idtr.Limit);
     AR::CpuFunctions::LoadLocalDescriptorTable(CpuState->SpecialRegisters.Ldtr);
-    AR::CpuFunctions::LoadTaskRegister(CpuState->SpecialRegisters.Tr);
 }
 
 /**
