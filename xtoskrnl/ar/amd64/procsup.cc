@@ -476,8 +476,9 @@ AR::ProcessorSupport::InitializeProcessorBlock(OUT PKPROCESSOR_BLOCK ProcessorBl
     /* Set initial MXCSR register value */
     ProcessorBlock->Prcb.MxCsr = INITIAL_MXCSR;
 
-    /* Set initial runlevel */
+    /* Set initial runlevel and mark processor as started */
     ProcessorBlock->RunLevel = PASSIVE_LEVEL;
+    ProcessorBlock->Started = TRUE;
 }
 
 /**
