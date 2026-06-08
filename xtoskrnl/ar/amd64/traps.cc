@@ -171,10 +171,6 @@ AR::Traps::DispatchTrap(IN PKTRAP_FRAME TrapFrame)
             /* Debug-Service-Request raised */
             HandleTrap2D(TrapFrame);
             break;
-        case 0xE1:
-            /* InterProcessor Interrupt (IPI) */
-            HandleTrapE1(TrapFrame);
-            break;
         default:
             /* Unknown/Unexpected trap */
             HandleTrapFF(TrapFrame);
@@ -602,23 +598,6 @@ AR::Traps::HandleTrap2D(IN PKTRAP_FRAME TrapFrame)
 {
     DebugPrint(L"Handled Debug-Service-Request (0x2D)!\n");
     KE::Crash::Panic(0x2D);
-}
-
-/**
- * Handles the trap 0xE1 when InterProcessor Interrupt (IPI) occurs.
- *
- * @param TrapFrame
- *        Supplies a kernel trap frame pushed by common trap handler on the stack.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTCDECL
-VOID
-AR::Traps::HandleTrapE1(IN PKTRAP_FRAME TrapFrame)
-{
-    DebugPrint(L"Unhandled IPI interrupt (0xE1)!\n");
 }
 
 /**

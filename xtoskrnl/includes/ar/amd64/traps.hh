@@ -51,7 +51,6 @@ namespace AR
             STATIC XTCDECL VOID HandleTrap1F(IN PKTRAP_FRAME TrapFrame);
             STATIC XTCDECL VOID HandleTrap2C(IN PKTRAP_FRAME TrapFrame);
             STATIC XTCDECL VOID HandleTrap2D(IN PKTRAP_FRAME TrapFrame);
-            STATIC XTCDECL VOID HandleTrapE1(IN PKTRAP_FRAME TrapFrame);
             STATIC XTCDECL VOID HandleTrapFF(IN PKTRAP_FRAME TrapFrame);
     };
 }
