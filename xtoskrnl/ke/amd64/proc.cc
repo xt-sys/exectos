@@ -137,6 +137,9 @@ KE::Processor::InitializeProcessorBlocks()
     /* Zero the array initially */
     RTL::Memory::ZeroMemory(ProcessorBlocks, InstalledCpus * sizeof(PKPROCESSOR_BLOCK));
 
+    /* Register the processor block for the BSP processor */
+    KE::Processor::RegisterProcessorBlock(0, KE::Processor::GetCurrentProcessorBlock());
+
     /* Return success */
     return STATUS_SUCCESS;
 }
