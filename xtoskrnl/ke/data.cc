@@ -12,8 +12,14 @@
 /* Kernel initialization block passed by boot loader */
 PKERNEL_INITIALIZATION_BLOCK KE::BootInformation::InitializationBlock = {};
 
+/* Processor control block belonging to the freeze owner */
+PKPROCESSOR_CONTROL_BLOCK KE::Crash::FreezeOwner;
+
 /* Kernel panic state */
 BOOLEAN KE::Crash::KernelPanic;
+
+/* System runlevel before execution freeze */
+KRUNLEVEL KE::Crash::RunLevel;
 
 /* Kernel initial process */
 EPROCESS KE::KProcess::InitialProcess;
