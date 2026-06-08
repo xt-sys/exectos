@@ -51,6 +51,9 @@ KE::KernelInit::BootstrapApplicationProcessor(IN PPROCESSOR_START_BLOCK StartBlo
     /* Initialize per-CPU spin lock queues */
     KE::SpinLock::InitializeLockQueues();
 
+    /* Initialize interrupt handlers */
+    InitializeInterruptHandlers();
+
     /* Lower to APC runlevel */
     KE::RunLevel::LowerRunLevel(APC_LEVEL);
 
@@ -96,6 +99,9 @@ KE::KernelInit::BootstrapKernel(VOID)
     KE::SpinLock::InitializeAllLocks();
     KE::SpinLock::InitializeLockQueues();
 
+    /* Initialize interrupt handlers */
+    InitializeInterruptHandlers();
+
     /* Lower to APC runlevel */
     KE::RunLevel::LowerRunLevel(APC_LEVEL);
 
@@ -121,6 +127,22 @@ KE::KernelInit::BootstrapKernel(VOID)
     /* Enter infinite loop */
     DebugPrint(L"KernelInit::BootstrapKernel() finished. Entering infinite loop.\n");
     KE::Crash::HaltSystem();
+}
+
+/**
+ * Initializes and registers the core system interrupt handlers.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KE::KernelInit::InitializeInterruptHandlers(VOID)
+{
+    /* Register interrupt handlers */
+    HL::Irq::RegisterSystemInterruptHandler(APIC_VECTOR_DPC, KE::Dispatcher::HandleDispatchInterrupt);
+    HL::Irq::RegisterSystemInterruptHandler(APIC_VECTOR_IPI, KE::Ipi::HandleIpiInterrupt);
 }
 
 /**
