@@ -49,51 +49,31 @@ KE::KThread::InitializeIdleThread(IN PKPROCESS IdleProcess,
                                   IN PKPROCESSOR_CONTROL_BLOCK Prcb,
                                   IN PVOID Stack)
 {
-    ULONG AffinitySize, CpuIndex, CpuTargetBit, MapSize;
-    PACPI_SYSTEM_INFO SysInfo;
     XTSTATUS Status;
+    ULONG Cpus;
 
-    /* Retrieve hardware topology from ACPI */
-    HL::Acpi::GetSystemInformation(&SysInfo);
+    /* Get the number of installed CPUs */
+    Cpus = KE::Processor::GetInstalledCpus();
 
-    /* Calculate the required size for KAFFINITY_MAP structures */
-    AffinitySize = (SysInfo->CpuCount + 63) / 64;
-    MapSize = sizeof(KAFFINITY_MAP) + (AffinitySize * sizeof(KAFFINITY));
-
-    /* Align size to the 8-byte boundary */
-    MapSize = (MapSize + 7) & ~7;
-
-    /* Allocate the thread-level affinity structure */
-    Status = MM::Allocator::AllocatePool(NonPagedPool, MapSize, (PVOID*)&IdleThread->Affinity);
+    /* Allocate and initialize the primary affinity map for the thread */
+    Status = KE::Affinity::CreateAffinityMap(Cpus, &IdleThread->Affinity);
     if(Status != STATUS_SUCCESS)
     {
-        /* Memory allocation failed, return the status code */
+        /* Affinity map allocation failed, return status code */
         return Status;
     }
 
-    /* Allocate the thread-level user affinity structure */
-    Status = MM::Allocator::AllocatePool(NonPagedPool, MapSize, (PVOID*)&IdleThread->UserAffinity);
+    /* Allocate and initialize the primary affinity map for the thread */
+    Status = KE::Affinity::CreateAffinityMap(Cpus, &IdleThread->UserAffinity);
     if(Status != STATUS_SUCCESS)
     {
-        /* Memory allocation failed, free previously allocated memory and return the status code */
-        MM::Allocator::FreePool((PVOID)IdleThread->Affinity);
+        /* Affinity map allocation failed, return status code */
         return Status;
     }
-
-    /* Zero the thread-level affinity structures */
-    RTL::Memory::ZeroMemory(IdleThread->Affinity, MapSize);
-    RTL::Memory::ZeroMemory(IdleThread->UserAffinity, MapSize);
 
     /* Initialize Idle thread */
-    Status = KE::KThread::InitializeThread(IdleProcess, IdleThread, NULLPTR, NULLPTR, NULLPTR,
-                                           NULLPTR, NULLPTR, Stack, TRUE);
-    if(Status != STATUS_SUCCESS)
-    {
-        /* Failed to initialize IDLE thread, free both affinity maps and return the status code */
-        MM::Allocator::FreePool((PVOID)IdleThread->Affinity);
-        MM::Allocator::FreePool((PVOID)IdleThread->UserAffinity);
-        return Status;
-    }
+    KE::KThread::InitializeThread(IdleProcess, IdleThread, NULLPTR, NULLPTR, NULLPTR,
+                                  NULLPTR, NULLPTR, Stack, TRUE);
 
     /* Configure Idle thread scheduling parameters */
     IdleThread->NextProcessor = Prcb->CpuNumber;
@@ -101,22 +81,12 @@ KE::KThread::InitializeIdleThread(IN PKPROCESS IdleProcess,
     IdleThread->State = Running;
     IdleThread->WaitRunLevel = DISPATCH_LEVEL;
 
-    /* Calculate exact block array index and bit offset for this specific CPU */
-    CpuIndex = Prcb->CpuNumber / 64;
-    CpuTargetBit = Prcb->CpuNumber % 64;
+    /* Configure thread affinity */
+    KE::Affinity::SetProcessorAffinity(IdleThread->Affinity, Prcb->CpuNumber);
+    KE::Affinity::SetProcessorAffinity(IdleThread->UserAffinity, Prcb->CpuNumber);
 
-    /* Configure Idle thread affinity */
-    IdleThread->Affinity->Bitmap[CpuIndex] = ((KAFFINITY)1 << CpuTargetBit);
-    IdleThread->Affinity->Count = (USHORT)(CpuIndex + 1);
-    IdleThread->Affinity->Size = (USHORT)AffinitySize;
-
-    /* Configure Idle thread user affinity */
-    IdleThread->UserAffinity->Bitmap[CpuIndex] = ((KAFFINITY)1 << CpuTargetBit);
-    IdleThread->UserAffinity->Count = (USHORT)(CpuIndex + 1);
-    IdleThread->UserAffinity->Size = (USHORT)AffinitySize;
-
-    /* Register this CPU as active in the Idle Process */
-    IdleProcess->ActiveProcessors->Bitmap[CpuIndex] |= ((KAFFINITY)1 << CpuTargetBit);
+    /* Register CPU as active in the IDLE Process */
+    KE::Affinity::AtomicSetProcessorAffinity(IdleProcess->ActiveProcessors, Prcb->CpuNumber);
 
     /* Return success */
     return STATUS_SUCCESS;
