@@ -18,12 +18,23 @@ namespace KE
     class Affinity
     {
         public:
+            STATIC XTFASTCALL VOID AtomicSetProcessorAffinity(IN OUT PKAFFINITY_MAP AffinityMap,
+                                                              IN ULONG CpuNumber);
+            STATIC XTFASTCALL ULONG CalculateAffinityMapSize(IN ULONG CpuCount);
+            STATIC XTFASTCALL BOOLEAN CheckProcessorAffinity(IN PKAFFINITY_MAP AffinityMap,
+                                                             IN ULONG CpuNumber);
+            STATIC XTFASTCALL VOID ClearAffinityMap(IN OUT PKAFFINITY_MAP AffinityMap);
+            STATIC XTFASTCALL VOID ClearProcessorAffinity(IN OUT PKAFFINITY_MAP AffinityMap,
+                                                          IN ULONG CpuNumber);
+
             STATIC XTAPI VOID CopyAffinity(OUT PKAFFINITY_MAP Destination,
                                            IN PKAFFINITY_MAP Source);
             STATIC XTAPI ULONG FindNextLeftSetProcessor(IN ULONG ThreadSeed,
                                                         IN PKAFFINITY_MAP AffinityMap);
             STATIC XTAPI ULONG FindNextRightSetProcessor(IN ULONG ThreadSeed,
                                                          IN PKAFFINITY_MAP AffinityMap);
+            STATIC XTFASTCALL VOID SetProcessorAffinity(IN OUT PKAFFINITY_MAP AffinityMap,
+                                                        IN ULONG CpuNumber);
     };
 }
 

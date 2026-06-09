@@ -10,6 +10,114 @@
 
 
 /**
+ * Atomically sets the target processor's affinity bit within the affinity map.
+ *
+ * @param AffinityMap
+ *        Supplies a pointer to the affinity map to be modified.
+ *
+ * @param CpuNumber
+ *        Supplies the logical processor number to include in the affinity map.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+VOID
+KE::Affinity::AtomicSetProcessorAffinity(IN OUT PKAFFINITY_MAP AffinityMap,
+                                         IN ULONG CpuNumber)
+{
+    /* Atomically set the target CPU bit */
+    RTL::Atomic::Or64((PLONG_PTR)&AffinityMap->Bitmap[CpuNumber / 64], ((KAFFINITY)1 << (CpuNumber % 64)));
+}
+
+/**
+ * Computes the memory size required to allocate an affinity map.
+ *
+ * @param CpuCount
+ *        Supplies the total number of logical processors the map needs to support.
+ *
+ * @return This routine returns the required allocation bytes.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+ULONG
+KE::Affinity::CalculateAffinityMapSize(IN ULONG CpuCount)
+{
+    ULONG AffinitySize, MapSize;
+
+    /* Calculate the required number of blocks and the total structure size */
+    AffinitySize = (CpuCount + 63) / 64;
+    MapSize = sizeof(KAFFINITY_MAP) + (AffinitySize * sizeof(KAFFINITY));
+
+    /* Align the calculated size to an 8-byte boundary */
+    return (MapSize + 7) & ~7;
+}
+
+/**
+ * Checks whether a specific processor is included in the affinity map.
+ *
+ * @param AffinityMap
+ *        Supplies a pointer to the affinity map to query.
+ *
+ * @param CpuNumber
+ *        Supplies the logical processor number to test.
+ *
+ * @return This routine returns TRUE if the processor's bit is set in the map, or FALSE otherwise.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+BOOLEAN
+KE::Affinity::CheckProcessorAffinity(IN PKAFFINITY_MAP AffinityMap,
+                                     IN ULONG CpuNumber)
+{
+    /* Isolate and test the specific bit corresponding to the target CPU */
+    return (AffinityMap->Bitmap[CpuNumber / 64] & ((KAFFINITY)1 << (CpuNumber % 64))) != 0;
+}
+
+/**
+ * Clears all processor bindings from the given affinity map.
+ *
+ * @param AffinityMap
+ *        Supplies a pointer to the affinity map to be cleared.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+VOID
+KE::Affinity::ClearAffinityMap(IN OUT PKAFFINITY_MAP AffinityMap)
+{
+    /* Zero out the entire bitmap */
+    RTL::Memory::ZeroMemory(AffinityMap->Bitmap, AffinityMap->Size * sizeof(KAFFINITY));
+}
+
+/**
+ * Clears the affinity bit for a specified processor. This is a non-atomic operation.
+ *
+ * @param AffinityMap
+ *        Supplies a pointer to the affinity map to be modified.
+ *
+ * @param CpuNumber
+ *        Supplies the logical processor number to exclude from the affinity map.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+VOID
+KE::Affinity::ClearProcessorAffinity(IN OUT PKAFFINITY_MAP AffinityMap,
+                                     IN ULONG CpuNumber)
+{
+    /* Clear the target CPU bit in the affinity map */
+    AffinityMap->Bitmap[CpuNumber / 64] &= ~((KAFFINITY)1 << (CpuNumber % 64));
+}
+
+/**
  * Copies the topological layout and processor bindings from a source affinity map to a destination map.
  *
  * @param Destination
@@ -229,4 +337,26 @@ KE::Affinity::FindNextRightSetProcessor(IN ULONG ThreadSeed,
 
     /* Fallback to the bootstrap processor */
     return 0;
+}
+
+/**
+ * Sets the affinity bit for a specified processor. This is a non-atomic operation.
+ *
+ * @param AffinityMap
+ *        Supplies a pointer to the affinity map to be modified.
+ *
+ * @param CpuNumber
+ *        Supplies the logical processor number to include in the affinity map.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+VOID
+KE::Affinity::SetProcessorAffinity(IN OUT PKAFFINITY_MAP AffinityMap,
+                                   IN ULONG CpuNumber)
+{
+    /* Set the target CPU bit in the affinity map */
+    AffinityMap->Bitmap[CpuNumber / 64] |= ((KAFFINITY)1 << (CpuNumber % 64));
 }
