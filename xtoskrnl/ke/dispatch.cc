@@ -11,6 +11,76 @@
 
 
 /**
+ * Enters the system idle thread loop for the current processor, running continuously when no other
+ * threads are scheduled for execution.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KE::Dispatcher::EnterIdleLoop(VOID)
+{
+    PKTHREAD CurrentThread, NextThread;
+    PKPROCESSOR_CONTROL_BLOCK Prcb;
+
+    /* Retrieve the processor control block */
+    Prcb = KE::Processor::GetCurrentProcessorControlBlock();
+
+    /* Enter the infinite idle loop */
+    while(TRUE)
+    {
+        /* Temporarily enable interrupts and yield the processor to handle pending hardware events */
+        AR::CpuFunctions::SetInterruptFlag();
+        AR::CpuFunctions::YieldProcessor();
+        AR::CpuFunctions::YieldProcessor();
+        AR::CpuFunctions::ClearInterruptFlag();
+
+        /* Check for pending deferred ready threads, DPCs, or timer requests */
+        if(Prcb->DeferredReadyListHead.Next ||
+           Prcb->DpcData[0].DpcQueueDepth ||
+           Prcb->TimerRequest)
+        {
+            /* Unimplemented path */
+            UNIMPLEMENTED;
+        }
+
+        /* Check if a new thread has been scheduled for execution */
+        if(Prcb->NextThread)
+        {
+            /* Enable interrupts to allow hardware events during context switch preparation */
+            AR::CpuFunctions::SetInterruptFlag();
+
+            /* Capture the current and next thread pointers */
+            CurrentThread = Prcb->CurrentThread;
+            NextThread = Prcb->NextThread;
+
+            /* Update the processor control block with the incoming thread */
+            Prcb->NextThread = NULLPTR;
+            Prcb->CurrentThread = NextThread;
+
+            /* Transition the incoming thread to the running state */
+            NextThread->State = Running;
+
+            /* Start a guarded code block */
+            {
+                /* Raise runlevel to SYNC level */
+                KE::RaiseRunLevel RunLevel(SYNC_LEVEL);
+
+                /* Perform the context switch away from the idle thread */
+                KE::Dispatcher::SwitchContext(CurrentThread, APC_LEVEL);
+            }
+        }
+        else
+        {
+            /* No threads scheduled, enter a low-power processor state and wait for interrupts */
+            Prcb->PowerState.IdleFunction(&Prcb->PowerState);
+        }
+    }
+}
+
+/**
  * Exits the dispatcher, switches context to a new thread and lowers runlevel to its original state.
  *
  * @param OldRunLevel
