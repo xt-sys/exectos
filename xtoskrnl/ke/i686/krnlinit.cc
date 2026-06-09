@@ -66,10 +66,10 @@ KE::KernelInit::BootstrapApplicationProcessor(IN PPROCESSOR_START_BLOCK StartBlo
     /* Register DISPATCH interrupt handler */
     HL::Irq::RegisterSystemInterruptHandler(APIC_VECTOR_DPC, KE::Dispatcher::HandleDispatchInterrupt);
 
-    /* Enter infinite loop */
-    DebugPrint(L"KernelInit::BootstrapApplicationProcessor() finished for CPU #%lu. Entering infinite loop.\n",
+    /* Enter idle loop */
+    DebugPrint(L"KernelInit::BootstrapApplicationProcessor() finished for CPU #%lu. Entering IDLE loop.\n",
                ControlBlock->CpuNumber);
-    KE::Crash::HaltSystem();
+    KE::Dispatcher::EnterIdleLoop();
 }
 
 /**
@@ -124,9 +124,9 @@ KE::KernelInit::BootstrapKernel(VOID)
     /* Register DISPATCH interrupt handler */
     HL::Irq::RegisterSystemInterruptHandler(APIC_VECTOR_DPC, KE::Dispatcher::HandleDispatchInterrupt);
 
-    /* Enter infinite loop */
-    DebugPrint(L"KernelInit::BootstrapKernel() finished. Entering infinite loop.\n");
-    KE::Crash::HaltSystem();
+    /* Enter idle loop */
+    DebugPrint(L"KernelInit::BootstrapKernel() finished. Entering IDLE loop.\n");
+    KE::Dispatcher::EnterIdleLoop();
 }
 
 /**
