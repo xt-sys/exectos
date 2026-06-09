@@ -18,7 +18,7 @@ namespace HL
     class Cpu
     {
         private:
-            STATIC KAFFINITY ActiveProcessors;
+            STATIC KAFFINITY_MAP ActiveProcessors;
 
         public:
             STATIC XTAPI VOID InitializeProcessor(VOID);

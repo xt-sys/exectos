@@ -28,7 +28,7 @@ ACPI_SYSTEM_INFO HL::Acpi::SystemInfo;
 ACPI_TIMER_INFO HL::Acpi::TimerInfo;
 
 /* Represents the number of active processors */
-KAFFINITY HL::Cpu::ActiveProcessors;
+KAFFINITY_MAP HL::Cpu::ActiveProcessors;
 
 /* Metadata detailing the linear frame buffer geometry */
 HL_FRAMEBUFFER_DATA HL::FrameBuffer::FrameBufferData;

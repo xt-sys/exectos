@@ -24,7 +24,7 @@ VOID
 HL::Cpu::InitializeProcessor(VOID)
 {
     PKPROCESSOR_BLOCK ProcessorBlock;
-    KAFFINITY Affinity;
+    ULONG BlockIndex, BitIndex;
 
     /* Get current processor block */
     ProcessorBlock = KE::Processor::GetCurrentProcessorBlock();
@@ -33,17 +33,18 @@ HL::Cpu::InitializeProcessor(VOID)
     ProcessorBlock->StallScaleFactor = INITIAL_STALL_FACTOR;
     ProcessorBlock->Idr = 0xFFFFFFFF;
 
-    /* Set processor affinity */
-    Affinity = (KAFFINITY) 1 << ProcessorBlock->CpuNumber;
+    /* Calculate the precise block and bit index for the affinity map */
+    BlockIndex = ProcessorBlock->CpuNumber / 64;
+    BitIndex = ProcessorBlock->CpuNumber % 64;
 
     /* Apply affinity to a set of processors */
-    ActiveProcessors |= Affinity;
+    RTL::Atomic::Or64((PLONG_PTR)&ActiveProcessors.Bitmap[BlockIndex], ((KAFFINITY)1 << BitIndex));
 
     /* Initialize APIC for this processor */
     HL::Pic::InitializePic();
 
     /* Set the APIC running level */
-    HL::RunLevel::SetRunLevel(KE::Processor::GetCurrentProcessorBlock()->RunLevel);
+    HL::RunLevel::SetRunLevel(ProcessorBlock->RunLevel);
 }
 
 /**
