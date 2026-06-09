@@ -56,49 +56,38 @@ XTSTATUS
 KE::KProcess::InitializeIdleProcess(IN OUT PKPROCESS Process,
                                     IN PULONG_PTR DirectoryTable)
 {
-    ULONG AffinitySize, MapSize;
-    PACPI_SYSTEM_INFO SysInfo;
+    ULONG Cpus, Index;
     XTSTATUS Status;
 
-    /* Retrieve hardware topology from ACPI */
-    HL::Acpi::GetSystemInformation(&SysInfo);
+    /* Get the number of natively installed CPUs */
+    Cpus = KE::Processor::GetInstalledCpus();
 
-    /* Calculate the required size for KAFFINITY_MAP structures */
-    AffinitySize = (SysInfo->CpuCount + 63) / 64;
-    MapSize = sizeof(KAFFINITY_MAP) + (AffinitySize * sizeof(KAFFINITY));
-
-    /* Align size to the 8-byte boundary */
-    MapSize = (MapSize + 7) & ~7;
-
-    /* Allocate the process-level affinity structure */
-    Status = MM::Allocator::AllocatePool(NonPagedPool, MapSize, (PVOID*)&Process->Affinity);
+    /* Allocate and initialize the baseline affinity map for the process */
+    Status = KE::Affinity::CreateAffinityMap(Cpus, &Process->Affinity);
     if(Status != STATUS_SUCCESS)
     {
-        /* Memory allocation failed, return the status code */
+        /* Affinity map allocation failed, return status code */
         return Status;
     }
 
-    /* Allocate the process-level active processors structure */
-    Status = MM::Allocator::AllocatePool(NonPagedPool, MapSize, (PVOID*)&Process->ActiveProcessors);
+    /* Allocate and initialize the dynamic map used to track actively running CPUs */
+    Status = KE::Affinity::CreateAffinityMap(Cpus, &Process->ActiveProcessors);
     if(Status != STATUS_SUCCESS)
     {
-        /* Memory allocation failed, free previously allocated memory and return the status code */
-        MM::Allocator::FreePool((PVOID)Process->Affinity);
+        /* Affinity map allocation failed, return status code */
         return Status;
     }
-
-    /* Zero the process-level affinity structures */
-    RTL::Memory::ZeroMemory(Process->Affinity, MapSize);
-    RTL::Memory::ZeroMemory(Process->ActiveProcessors, MapSize);
-
-    /* Initialize size metadata */
-    Process->Affinity->Count = (USHORT)AffinitySize;
-    Process->Affinity->Size = (USHORT)AffinitySize;
-    Process->ActiveProcessors->Size = (USHORT)AffinitySize;
 
     /* Initialize Idle process */
     KE::KProcess::InitializeProcess(Process, 0, DirectoryTable, FALSE);
     Process->Quantum = MAXCHAR;
+
+    /* Populate the global Idle Process affinity */
+    for(Index = 0; Index < Cpus; Index++)
+    {
+        /* Include every installed hardware thread in the base affinity map */
+        KE::Affinity::SetProcessorAffinity(Process->Affinity, Index);
+    }
 
     /* Return success */
     return STATUS_SUCCESS;
