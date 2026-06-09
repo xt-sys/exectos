@@ -20,7 +20,9 @@ namespace KE
         public:
             STATIC XTFASTCALL VOID AtomicSetProcessorAffinity(IN OUT PKAFFINITY_MAP AffinityMap,
                                                               IN ULONG CpuNumber);
-            STATIC XTFASTCALL ULONG CalculateAffinityMapSize(IN ULONG CpuCount);
+            STATIC XTFASTCALL VOID CalculateAffinityMapSize(IN ULONG CpuCount,
+                                                            OUT PULONG RequiredMapSize,
+                                                            OUT PULONG RequiredBlockCount);
             STATIC XTFASTCALL BOOLEAN CheckProcessorAffinity(IN PKAFFINITY_MAP AffinityMap,
                                                              IN ULONG CpuNumber);
             STATIC XTFASTCALL VOID ClearAffinityMap(IN OUT PKAFFINITY_MAP AffinityMap);
@@ -29,6 +31,8 @@ namespace KE
 
             STATIC XTAPI VOID CopyAffinity(OUT PKAFFINITY_MAP Destination,
                                            IN PKAFFINITY_MAP Source);
+            STATIC XTAPI XTSTATUS CreateAffinityMap(IN ULONG CpuCount,
+                                                    OUT PKAFFINITY_MAP* AffinityMap);
             STATIC XTAPI ULONG FindNextLeftSetProcessor(IN ULONG ThreadSeed,
                                                         IN PKAFFINITY_MAP AffinityMap);
             STATIC XTAPI ULONG FindNextRightSetProcessor(IN ULONG ThreadSeed,

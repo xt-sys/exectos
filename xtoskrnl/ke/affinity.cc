@@ -37,13 +37,21 @@ KE::Affinity::AtomicSetProcessorAffinity(IN OUT PKAFFINITY_MAP AffinityMap,
  * @param CpuCount
  *        Supplies the total number of logical processors the map needs to support.
  *
- * @return This routine returns the required allocation bytes.
+ * @param RequiredMapSize
+ *        Supplies a pointer to a variable that receives the 8-byte aligned allocation size in bytes.
+ *
+ * @param RequiredBlockCount
+ *        Supplies a pointer to a variable that receives the number of KAFFINITY blocks required to hold all CPUs.
+ *
+ * @return This routine does not return any value.
  *
  * @since XT 1.0
  */
 XTFASTCALL
-ULONG
-KE::Affinity::CalculateAffinityMapSize(IN ULONG CpuCount)
+VOID
+KE::Affinity::CalculateAffinityMapSize(IN ULONG CpuCount,
+                                       OUT PULONG RequiredMapSize,
+                                       OUT PULONG RequiredBlockCount)
 {
     ULONG AffinitySize, MapSize;
 
@@ -51,8 +59,19 @@ KE::Affinity::CalculateAffinityMapSize(IN ULONG CpuCount)
     AffinitySize = (CpuCount + 63) / 64;
     MapSize = sizeof(KAFFINITY_MAP) + (AffinitySize * sizeof(KAFFINITY));
 
-    /* Align the calculated size to an 8-byte boundary */
-    return (MapSize + 7) & ~7;
+    /* Check if an allocation size is required */
+    if(RequiredMapSize != NULLPTR)
+    {
+        /* Return the required allocation bytes aligned to an 8-byte boundary */
+        *RequiredMapSize = (MapSize + 7) & ~7;
+    }
+
+    /* Check if a block count is required */
+    if(RequiredBlockCount != NULLPTR)
+    {
+        /* Return the required logical block count */
+        *RequiredBlockCount = (USHORT)AffinitySize;
+    }
 }
 
 /**
@@ -150,6 +169,52 @@ KE::Affinity::CopyAffinity(OUT PKAFFINITY_MAP Destination,
     }
 }
 
+/**
+ * Allocates and initializes a new affinity map for the specified number of processors.
+ *
+ * @param CpuCount
+ *        Supplies the total number of logical processors the map needs to support.
+ *
+ * @param AffinityMap
+ *        Supplies a pointer to a variable that receives the address of the newly allocated and initialized map.
+ *
+ * @return This routine returns a status code indicating the success or failure of the operation.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+KE::Affinity::CreateAffinityMap(IN ULONG CpuCount,
+                                OUT PKAFFINITY_MAP* AffinityMap)
+{
+    PKAFFINITY_MAP AllocatedMap;
+    ULONG BlockCount, MapSize;
+    XTSTATUS Status;
+
+    /* Query the required allocation size and internal block count */
+    KE::Affinity::CalculateAffinityMapSize(CpuCount, &MapSize, &BlockCount);
+
+    /* Allocate the memory block from the specified pool */
+    Status = MM::Allocator::AllocatePool(NonPagedPool, MapSize, (PVOID*)&AllocatedMap);
+    if(Status != STATUS_SUCCESS)
+    {
+        /* Allocation failed, return status code */
+        return Status;
+    }
+
+    /* Zero the memory to ensure all processor bits are initially cleared */
+    RTL::Memory::ZeroMemory(AllocatedMap, MapSize);
+
+    /* Initialize the internal metadata required by iteration and validation routines */
+    AllocatedMap->Size = BlockCount;
+    AllocatedMap->Count = BlockCount;
+
+    /* Return the constructed map to the caller */
+    *AffinityMap = AllocatedMap;
+
+    /* Return success */
+    return STATUS_SUCCESS;
+}
 
 /**
  * Locates the next available logical processor to the left (higher topological index) of a specified seed.
