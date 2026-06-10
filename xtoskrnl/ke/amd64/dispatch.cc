@@ -22,13 +22,12 @@
  *
  * @since XT 1.0
  */
+XTASSEMBLY
 XTFASTCALL
 BOOLEAN
 KE::Dispatcher::SwitchContext(IN PKTHREAD CurrentThread,
                               IN KRUNLEVEL RunLevel)
 {
-    BOOLEAN PendingApc;
-
     /* Save non-volatile and XMM registers to the exception frame, align the stack and invoke the switch routine */
     __asm__ volatile("subq %[ExFrameSize], %%rsp\n"
                      "movq %%rbp, %c[ExRbp](%%rsp)\n"
@@ -69,10 +68,9 @@ KE::Dispatcher::SwitchContext(IN PKTHREAD CurrentThread,
                      "movdqa %c[ExXmm14](%%rsp), %%xmm14\n"
                      "movdqa %c[ExXmm15](%%rsp), %%xmm15\n"
                      "addq %[ExFrameSize], %%rsp\n"
-                     : "=a" (PendingApc)
-                     : "c" (CurrentThread),
-                       "d" (RunLevel),
-                       [ExFrameSize] "i" (sizeof(KEXCEPTION_FRAME) - 8),
+                     "ret\n"
+                     :
+                     : [ExFrameSize] "i" (sizeof(KEXCEPTION_FRAME) - 8),
                        [ExR12] "i" (FIELD_OFFSET(KEXCEPTION_FRAME, R12)),
                        [ExR13] "i" (FIELD_OFFSET(KEXCEPTION_FRAME, R13)),
                        [ExR14] "i" (FIELD_OFFSET(KEXCEPTION_FRAME, R14)),
@@ -93,9 +91,6 @@ KE::Dispatcher::SwitchContext(IN PKTHREAD CurrentThread,
                        [ExXmm15] "i" (FIELD_OFFSET(KEXCEPTION_FRAME, Xmm15)),
                        [SwitchRoutine] "i" (SwitchThreadStack)
                      : "cc", "memory", "r8", "r9", "r10", "r11");
-
-    /* Return the APC status */
-    return PendingApc;
 }
 
 /**
@@ -134,13 +129,12 @@ KE::Dispatcher::SwitchThreadContext(IN PKTHREAD CurrentThread,
  *
  * @since XT 1.0
  */
+XTASSEMBLY
 XTFASTCALL
 BOOLEAN
 KE::Dispatcher::SwitchThreadStack(IN PKTHREAD CurrentThread,
                                   IN KRUNLEVEL RunLevel)
 {
-    BOOLEAN PendingApc;
-
     /* Preserve MXCSR, synchronize with CPUs, switch stack and call the switch routine */
     __asm__ volatile("pushq %%rbp\n"
                      "subq %[FrameSize], %%rsp\n"
@@ -160,10 +154,9 @@ KE::Dispatcher::SwitchThreadStack(IN PKTHREAD CurrentThread,
                      "ldmxcsr %c[SwMxCsr](%%rsp)\n"
                      "addq %[FrameSize], %%rsp\n"
                      "popq %%rbp\n"
-                     : "=a" (PendingApc)
-                     : "c" (CurrentThread),
-                       "d" (RunLevel),
-                       [FrameSize] "i" (FIELD_OFFSET(KSWITCH_FRAME, Rbp)),
+                     "ret\n"
+                     :
+                     : [FrameSize] "i" (FIELD_OFFSET(KSWITCH_FRAME, Rbp)),
                        [PrcbcCurrentThread] "i" (FIELD_OFFSET(KPROCESSOR_BLOCK, Prcb.CurrentThread)),
                        [SwApcBypass] "i" (FIELD_OFFSET(KSWITCH_FRAME, ApcBypass)),
                        [SwMxCsr] "i" (FIELD_OFFSET(KSWITCH_FRAME, MxCsr)),
@@ -171,7 +164,4 @@ KE::Dispatcher::SwitchThreadStack(IN PKTHREAD CurrentThread,
                        [ThrdStack] "i" (FIELD_OFFSET(KTHREAD, KernelStack)),
                        [ThrdSwapBusy] "i" (FIELD_OFFSET(KTHREAD, SwapBusy))
                      : "cc", "memory", "r8", "r9", "r10", "r11");
-
-    /* Return the APC status */
-    return PendingApc;
 }
