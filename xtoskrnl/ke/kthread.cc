@@ -63,11 +63,12 @@ KE::KThread::InitializeIdleThread(IN PKPROCESS IdleProcess,
         return Status;
     }
 
-    /* Allocate and initialize the primary affinity map for the thread */
+    /* Allocate and initialize the user-mode affinity map for the thread */
     Status = KE::Affinity::CreateAffinityMap(Cpus, &IdleThread->UserAffinity);
     if(Status != STATUS_SUCCESS)
     {
-        /* Affinity map allocation failed, return status code */
+        /* Affinity map allocation failed, free affinity map and return status code */
+        KE::Affinity::DestroyAffinityMap(IdleThread->Affinity);
         return Status;
     }
 

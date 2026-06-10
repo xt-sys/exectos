@@ -239,6 +239,28 @@ KE::Affinity::CreateAffinityMap(IN ULONG CpuCount,
 }
 
 /**
+ * Frees a previously allocated affinity map and returns its memory to the pool.
+ *
+ * @param AffinityMap
+ *        Supplies a pointer to the affinity map to be freed and destroyed.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KE::Affinity::DestroyAffinityMap(IN PKAFFINITY_MAP AffinityMap)
+{
+    /* Ensure the map pointer is valid */
+    if(AffinityMap != NULLPTR)
+    {
+        /* Free the memory block back to the kernel pool */
+        MM::Allocator::FreePool((PVOID)AffinityMap);
+    }
+}
+
+/**
  * Locates the next available logical processor to the left (higher topological index) of a specified seed.
  *
  * @param ThreadSeed

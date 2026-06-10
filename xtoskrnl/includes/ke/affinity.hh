@@ -33,6 +33,7 @@ namespace KE
                                                IN PKAFFINITY_MAP Source);
             STATIC XTAPI XTSTATUS CreateAffinityMap(IN ULONG CpuCount,
                                                     OUT PKAFFINITY_MAP* AffinityMap);
+            STATIC XTAPI VOID DestroyAffinityMap(IN PKAFFINITY_MAP AffinityMap);
             STATIC XTAPI ULONG FindNextLeftSetProcessor(IN ULONG ThreadSeed,
                                                         IN PKAFFINITY_MAP AffinityMap);
             STATIC XTAPI ULONG FindNextRightSetProcessor(IN ULONG ThreadSeed,

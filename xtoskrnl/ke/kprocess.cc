@@ -53,17 +53,17 @@ KE::KProcess::GetInitialProcess(VOID)
  */
 XTAPI
 XTSTATUS
-KE::KProcess::InitializeIdleProcess(IN OUT PKPROCESS Process,
+KE::KProcess::InitializeIdleProcess(IN OUT PKPROCESS IdleProcess,
                                     IN PULONG_PTR DirectoryTable)
 {
-    ULONG Cpus, Index;
     XTSTATUS Status;
+    ULONG Cpus;
 
     /* Get the number of natively installed CPUs */
     Cpus = KE::Processor::GetInstalledCpus();
 
     /* Allocate and initialize the baseline affinity map for the process */
-    Status = KE::Affinity::CreateAffinityMap(Cpus, &Process->Affinity);
+    Status = KE::Affinity::CreateAffinityMap(Cpus, &IdleProcess->Affinity);
     if(Status != STATUS_SUCCESS)
     {
         /* Affinity map allocation failed, return status code */
@@ -71,26 +71,20 @@ KE::KProcess::InitializeIdleProcess(IN OUT PKPROCESS Process,
     }
 
     /* Allocate and initialize the dynamic map used to track actively running CPUs */
-    Status = KE::Affinity::CreateAffinityMap(Cpus, &Process->ActiveProcessors);
+    Status = KE::Affinity::CreateAffinityMap(Cpus, &IdleProcess->ActiveProcessors);
     if(Status != STATUS_SUCCESS)
     {
-        /* Affinity map allocation failed, return status code */
+        /* Affinity map allocation failed, free affinity map and return status code */
+        KE::Affinity::DestroyAffinityMap(IdleProcess->Affinity);
         return Status;
     }
 
     /* Set Idle Process affinity */
-    KE::Affinity::SetAllProcessorsAffinity(Process->Affinity);
+    KE::Affinity::SetAllProcessorsAffinity(IdleProcess->Affinity);
 
     /* Initialize Idle process */
-    KE::KProcess::InitializeProcess(Process, 0, NULLPTR, DirectoryTable, FALSE);
-    Process->Quantum = MAXCHAR;
-
-    /* Populate the global Idle Process affinity */
-    for(Index = 0; Index < Cpus; Index++)
-    {
-        /* Include every installed hardware thread in the base affinity map */
-        KE::Affinity::SetProcessorAffinity(Process->Affinity, Index);
-    }
+    KE::KProcess::InitializeProcess(IdleProcess, 0, NULLPTR, DirectoryTable, FALSE);
+    IdleProcess->Quantum = MAXCHAR;
 
     /* Return success */
     return STATUS_SUCCESS;
