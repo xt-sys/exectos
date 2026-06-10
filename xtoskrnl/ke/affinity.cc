@@ -27,8 +27,12 @@ VOID
 KE::Affinity::AtomicSetProcessorAffinity(IN OUT PKAFFINITY_MAP AffinityMap,
                                          IN ULONG CpuNumber)
 {
-    /* Atomically set the target CPU bit */
-    RTL::Atomic::Or64((PLONG_PTR)&AffinityMap->Bitmap[CpuNumber / 64], ((KAFFINITY)1 << (CpuNumber % 64)));
+    /* Verify that the target processor falls within the allocated map boundaries */
+    if((CpuNumber / 64) < AffinityMap->Size)
+    {
+        /* Atomically set the target CPU bit */
+        RTL::Atomic::Or64((PLONG_PTR)&AffinityMap->Bitmap[CpuNumber / 64], ((KAFFINITY)1 << (CpuNumber % 64)));
+    }
 }
 
 /**
@@ -70,7 +74,7 @@ KE::Affinity::CalculateAffinityMapSize(IN ULONG CpuCount,
     if(RequiredBlockCount != NULLPTR)
     {
         /* Return the required logical block count */
-        *RequiredBlockCount = (USHORT)AffinitySize;
+        *RequiredBlockCount = AffinitySize;
     }
 }
 
@@ -92,8 +96,15 @@ BOOLEAN
 KE::Affinity::CheckProcessorAffinity(IN PKAFFINITY_MAP AffinityMap,
                                      IN ULONG CpuNumber)
 {
-    /* Isolate and test the specific bit corresponding to the target CPU */
-    return (AffinityMap->Bitmap[CpuNumber / 64] & ((KAFFINITY)1 << (CpuNumber % 64))) != 0;
+    /* Verify that the target processor falls within the allocated map boundaries */
+    if((CpuNumber / 64) < AffinityMap->Size)
+    {
+        /* Isolate and test the specific bit corresponding to the target CPU */
+        return (AffinityMap->Bitmap[CpuNumber / 64] & ((KAFFINITY)1 << (CpuNumber % 64))) != 0;
+    }
+
+    /* Return FALSE if the requested CPU exceeds the map capacity */
+    return FALSE;
 }
 
 /**
@@ -132,8 +143,12 @@ VOID
 KE::Affinity::ClearProcessorAffinity(IN OUT PKAFFINITY_MAP AffinityMap,
                                      IN ULONG CpuNumber)
 {
-    /* Clear the target CPU bit in the affinity map */
-    AffinityMap->Bitmap[CpuNumber / 64] &= ~((KAFFINITY)1 << (CpuNumber % 64));
+    /* Verify that the target processor falls within the allocated map boundaries */
+    if((CpuNumber / 64) < AffinityMap->Size)
+    {
+        /* Clear the target CPU bit in the affinity map */
+        AffinityMap->Bitmap[CpuNumber / 64] &= ~((KAFFINITY)1 << (CpuNumber % 64));
+    }
 }
 
 /**
@@ -150,15 +165,20 @@ KE::Affinity::ClearProcessorAffinity(IN OUT PKAFFINITY_MAP AffinityMap,
  * @since XT 1.0
  */
 XTAPI
-VOID
+XTSTATUS
 KE::Affinity::CopyAffinity(OUT PKAFFINITY_MAP Destination,
                            IN PKAFFINITY_MAP Source)
 {
-    USHORT Index;
+    ULONG Index;
+
+    /* Validate that the destination map can accommodate the source topology */
+    if(Destination->Size < Source->Size)
+    {
+        /* Buffer overrun prevention */
+        return STATUS_BUFFER_TOO_SMALL;
+    }
 
     /* Copy map metadata */
-    Destination->Count = Source->Count;
-    Destination->Size = Source->Size;
     Destination->Reserved = Source->Reserved;
 
     /* Copy the active affinity bitmasks */
@@ -167,6 +187,9 @@ KE::Affinity::CopyAffinity(OUT PKAFFINITY_MAP Destination,
         /* Replicate the hardware topology bindings across all active array elements */
         Destination->Bitmap[Index] = Source->Bitmap[Index];
     }
+
+    /* Return success */
+    return STATUS_SUCCESS;
 }
 
 /**
@@ -207,7 +230,6 @@ KE::Affinity::CreateAffinityMap(IN ULONG CpuCount,
 
     /* Initialize the internal metadata required by iteration and validation routines */
     AllocatedMap->Size = BlockCount;
-    AllocatedMap->Count = BlockCount;
 
     /* Return the constructed map to the caller */
     *AffinityMap = AllocatedMap;
@@ -225,7 +247,7 @@ KE::Affinity::CreateAffinityMap(IN ULONG CpuCount,
  * @param AffinityMap
  *        Supplies a pointer to the extended affinity map defining the permitted processors.
  *
- * @return Returns the absolute topological index of the selected processor.
+ * @return This routine returns the absolute topological index of the selected processor.
  *
  * @since XT 1.0
  */
@@ -323,7 +345,7 @@ KE::Affinity::FindNextLeftSetProcessor(IN ULONG ThreadSeed,
  * @param AffinityMap
  *        Supplies a pointer to the extended affinity map defining the permitted processors.
  *
- * @return Returns the absolute topological index of the selected processor.
+ * @return This routine returns the absolute topological index of the selected processor.
  *
  * @since XT 1.0
  */
@@ -405,6 +427,50 @@ KE::Affinity::FindNextRightSetProcessor(IN ULONG ThreadSeed,
 }
 
 /**
+ * Initializes a caller-allocated affinity map structure.
+ *
+ * @param AffinityMap
+ *        Supplies a pointer to the caller-allocated buffer to be initialized.
+ *
+ * @param BufferSize
+ *        Supplies the size, in bytes, of the provided buffer.
+ *
+ * @return This routine returns a status code indicating the success or failure of the operation.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+KE::Affinity::InitializeAffinityMap(IN OUT PKAFFINITY_MAP AffinityMap,
+                                    IN ULONG BufferSize)
+{
+    ULONG Cpus, RequiredBlocks, RequiredSize;
+
+    /* Get the number of available CPUs */
+    Cpus = KE::Processor::GetInstalledCpus();
+
+    /* Query the required size in bytes and the architectural block count */
+    KE::Affinity::CalculateAffinityMapSize(Cpus, &RequiredSize, &RequiredBlocks);
+
+    /* Validate that the provided buffer is large enough to hold the structure */
+    if(BufferSize < RequiredSize)
+    {
+        /* Buffer overrun prevention */
+        return STATUS_BUFFER_TOO_SMALL;
+    }
+
+    /* Zero only the required portion of the memory to clear any garbage data */
+    RTL::Memory::ZeroMemory(AffinityMap, RequiredSize);
+
+    /* Initialize the internal metadata required by iteration routines */
+    AffinityMap->Reserved = 0;
+    AffinityMap->Size = RequiredBlocks;
+
+    /* Return success */
+    return STATUS_SUCCESS;
+}
+
+/**
  * Populates the affinity map with all available processors.
  *
  * @param AffinityMap
@@ -465,6 +531,10 @@ VOID
 KE::Affinity::SetProcessorAffinity(IN OUT PKAFFINITY_MAP AffinityMap,
                                    IN ULONG CpuNumber)
 {
-    /* Set the target CPU bit in the affinity map */
-    AffinityMap->Bitmap[CpuNumber / 64] |= ((KAFFINITY)1 << (CpuNumber % 64));
+    /* Verify that the target processor falls within the allocated map boundaries */
+    if((CpuNumber / 64) < AffinityMap->Size)
+    {
+        /* Set the target CPU bit in the affinity map */
+        AffinityMap->Bitmap[CpuNumber / 64] |= ((KAFFINITY)1 << (CpuNumber % 64));
+    }
 }

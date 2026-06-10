@@ -29,14 +29,16 @@ namespace KE
             STATIC XTFASTCALL VOID ClearProcessorAffinity(IN OUT PKAFFINITY_MAP AffinityMap,
                                                           IN ULONG CpuNumber);
 
-            STATIC XTAPI VOID CopyAffinity(OUT PKAFFINITY_MAP Destination,
-                                           IN PKAFFINITY_MAP Source);
+            STATIC XTAPI XTSTATUS CopyAffinity(OUT PKAFFINITY_MAP Destination,
+                                               IN PKAFFINITY_MAP Source);
             STATIC XTAPI XTSTATUS CreateAffinityMap(IN ULONG CpuCount,
                                                     OUT PKAFFINITY_MAP* AffinityMap);
             STATIC XTAPI ULONG FindNextLeftSetProcessor(IN ULONG ThreadSeed,
                                                         IN PKAFFINITY_MAP AffinityMap);
             STATIC XTAPI ULONG FindNextRightSetProcessor(IN ULONG ThreadSeed,
                                                          IN PKAFFINITY_MAP AffinityMap);
+            STATIC XTAPI XTSTATUS InitializeAffinityMap(IN OUT PKAFFINITY_MAP AffinityMap,
+                                                        IN ULONG BufferSize);
             STATIC XTFASTCALL VOID SetAllProcessorsAffinity(IN OUT PKAFFINITY_MAP AffinityMap);
             STATIC XTFASTCALL VOID SetProcessorAffinity(IN OUT PKAFFINITY_MAP AffinityMap,
                                                         IN ULONG CpuNumber);

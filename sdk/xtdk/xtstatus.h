@@ -60,6 +60,7 @@
 #define STATUS_INVALID_PARAMETER                                           ((XTSTATUS) 0xC000000DL)
 #define STATUS_END_OF_FILE                                                 ((XTSTATUS) 0xC0000011L)
 #define STATUS_NO_MEMORY                                                   ((XTSTATUS) 0xC0000017L)
+#define STATUS_BUFFER_TOO_SMALL                                            ((XTSTATUS) 0xC0000023L)
 #define STATUS_PORT_DISCONNECTED                                           ((XTSTATUS) 0xC0000037L)
 #define STATUS_CRC_ERROR                                                   ((XTSTATUS) 0xC000003FL)
 #define STATUS_FLOAT_OVERFLOW                                              ((XTSTATUS) 0xC0000091L)
