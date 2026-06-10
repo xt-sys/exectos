@@ -46,6 +46,13 @@ HL::Cpu::InitializeProcessor(VOID)
     HL::RunLevel::SetRunLevel(ProcessorBlock->RunLevel);
 }
 
+/**
+ * Initializes the global processor affinity map for active processors and registers Bootstrap Processor (BSP).
+ *
+ * @return This routine returns a status code indicating the success or failure of the operation.
+ *
+ * @since XT 1.0
+ */
 XTAPI
 XTSTATUS
 HL::Cpu::InitializeProcessorAffinity(VOID)
