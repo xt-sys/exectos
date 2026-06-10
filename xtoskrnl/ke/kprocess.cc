@@ -127,6 +127,8 @@ KE::KProcess::InitializeProcess(IN OUT PKPROCESS Process,
                                 IN BOOLEAN Alignment)
 {
     /* Initialize process dispatcher header */
+    Process->Header.SignalState = 0;
+    Process->Header.Size = sizeof(KPROCESS) / sizeof(LONG);
     Process->Header.Type = ProcessObject;
 
     /* Initialize process wait list */

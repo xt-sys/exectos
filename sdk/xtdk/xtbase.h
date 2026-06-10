@@ -99,14 +99,20 @@ typedef struct _M128
 /* Dispatcher object header structure definition */
 typedef struct _DISPATCHER_HEADER
 {
-    UCHAR Type;
     union
     {
-        UCHAR Absolute;
-        UCHAR NpxIrql;
+        struct
+        {
+            UCHAR Type;
+            UCHAR Absolute;
+            UCHAR Size;
+            union {
+                UCHAR Inserted;
+                BOOLEAN DebugActive;
+            };
+        };
+        VOLATILE LONG Lock;
     };
-    UCHAR Inserted;
-    BOOLEAN DebugActive;
     LONG SignalState;
     LIST_ENTRY WaitListHead;
 } DISPATCHER_HEADER, *PDISPATCHER_HEADER;
