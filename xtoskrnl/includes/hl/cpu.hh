@@ -18,10 +18,11 @@ namespace HL
     class Cpu
     {
         private:
-            STATIC KAFFINITY_MAP ActiveProcessors;
+            STATIC PKAFFINITY_MAP ActiveProcessors;
 
         public:
             STATIC XTAPI VOID InitializeProcessor(VOID);
+            STATIC XTAPI XTSTATUS InitializeProcessorAffinity(VOID);
             STATIC XTAPI XTSTATUS StartAllProcessors(VOID);
     };
 }

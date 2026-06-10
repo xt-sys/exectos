@@ -32,14 +32,39 @@ HL::Cpu::InitializeProcessor(VOID)
     ProcessorBlock->StallScaleFactor = INITIAL_STALL_FACTOR;
     ProcessorBlock->Idr = 0xFFFFFFFF;
 
-    /* Register this CPU in the global active processors map */
-    KE::Affinity::AtomicSetProcessorAffinity(&ActiveProcessors, ProcessorBlock->CpuNumber);
+    /* Check if active processors map is initialized */
+    if(ActiveProcessors != NULLPTR)
+    {
+        /* Register this CPU in the global active processors map */
+        KE::Affinity::AtomicSetProcessorAffinity(ActiveProcessors, ProcessorBlock->CpuNumber);
+    }
 
     /* Initialize APIC for this processor */
     HL::Pic::InitializePic();
 
     /* Set the APIC running level */
     HL::RunLevel::SetRunLevel(ProcessorBlock->RunLevel);
+}
+
+XTAPI
+XTSTATUS
+HL::Cpu::InitializeProcessorAffinity(VOID)
+{
+    XTSTATUS Status;
+
+    /* Allocate an array of pointers */
+    Status = KE::Affinity::CreateAffinityMap(KE::Processor::GetInstalledCpus(), &ActiveProcessors);
+    if(Status != STATUS_SUCCESS)
+    {
+        /* Failed to allocate memory, return error */
+        return Status;
+    }
+
+    /* Register BSP in the global active processors map */
+    KE::Affinity::SetProcessorAffinity(ActiveProcessors, 0);
+
+    /* Return success */
+    return STATUS_SUCCESS;
 }
 
 /**

@@ -119,6 +119,7 @@ KE::KernelInit::BootstrapKernel(VOID)
 
     /* Start all application processors */
     KE::Processor::InitializeProcessorBlocks();
+    HL::Cpu::InitializeProcessorAffinity();
     HL::Cpu::StartAllProcessors();
 
     /* Register DISPATCH interrupt handler */
