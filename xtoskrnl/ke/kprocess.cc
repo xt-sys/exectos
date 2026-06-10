@@ -78,8 +78,11 @@ KE::KProcess::InitializeIdleProcess(IN OUT PKPROCESS Process,
         return Status;
     }
 
+    /* Set Idle Process affinity */
+    KE::Affinity::SetAllProcessorsAffinity(Process->Affinity);
+
     /* Initialize Idle process */
-    KE::KProcess::InitializeProcess(Process, 0, DirectoryTable, FALSE);
+    KE::KProcess::InitializeProcess(Process, 0, NULLPTR, DirectoryTable, FALSE);
     Process->Quantum = MAXCHAR;
 
     /* Populate the global Idle Process affinity */
@@ -102,6 +105,9 @@ KE::KProcess::InitializeIdleProcess(IN OUT PKPROCESS Process,
  * @param Priority
  *        Specifies the process priority.
  *
+ * @param AffinityMap
+ *        Specifies a process affinity map designating processors on which process can run.
+ *
  * @param DirectoryTable
  *        Supplies a pointer to the directory table.
  *
@@ -116,6 +122,7 @@ XTAPI
 VOID
 KE::KProcess::InitializeProcess(IN OUT PKPROCESS Process,
                                 IN KPRIORITY Priority,
+                                IN PKAFFINITY_MAP AffinityMap,
                                 IN PULONG_PTR DirectoryTable,
                                 IN BOOLEAN Alignment)
 {
@@ -129,6 +136,13 @@ KE::KProcess::InitializeProcess(IN OUT PKPROCESS Process,
     RtlInitializeListHead(&Process->ProfileListHead);
     RtlInitializeListHead(&Process->ReadyListHead);
     RtlInitializeListHead(&Process->ThreadListHead);
+
+    /* Check if source affinity map was provided */
+    if(AffinityMap != NULLPTR && AffinityMap != Process->Affinity)
+    {
+        /* Set process affinity */
+        KE::Affinity::CopyAffinity(Process->Affinity, AffinityMap);
+    }
 
     /* Set base process properties */
     Process->BasePriority = Priority;

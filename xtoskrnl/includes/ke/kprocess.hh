@@ -27,6 +27,7 @@ namespace KE
                                                         IN PULONG_PTR DirectoryTable);
             STATIC XTAPI VOID InitializeProcess(IN OUT PKPROCESS Process,
                                                 IN KPRIORITY Priority,
+                                                IN PKAFFINITY_MAP AffinityMap,
                                                 IN PULONG_PTR DirectoryTable,
                                                 IN BOOLEAN Alignment);
     };
