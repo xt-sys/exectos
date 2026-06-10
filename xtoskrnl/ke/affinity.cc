@@ -405,6 +405,49 @@ KE::Affinity::FindNextRightSetProcessor(IN ULONG ThreadSeed,
 }
 
 /**
+ * Populates the affinity map with all available processors.
+ *
+ * @param AffinityMap
+ *        Supplies a pointer to the affinity map to be fully populated.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+VOID
+KE::Affinity::SetAllProcessorsAffinity(IN OUT PKAFFINITY_MAP AffinityMap)
+{
+    ULONG Cpus, Index;
+
+    /* Get the number of available CPUs */
+    Cpus = KE::Processor::GetInstalledCpus();
+
+    /* Iterate through all allocated blocks in the map */
+    for(Index = 0; Index < AffinityMap->Size; Index++)
+    {
+        /* Evaluate if the remaining logical processors fully saturate the current block */
+        if(Cpus >= 64)
+        {
+            /* Set all 64 bits and decrement the remaining count */
+            AffinityMap->Bitmap[Index] = ~((KAFFINITY)0);
+            Cpus -= 64;
+        }
+        else if(Cpus > 0)
+        {
+            /* Generate a partial bitmask for the tail end of the processors */
+            AffinityMap->Bitmap[Index] = (((KAFFINITY)1 << Cpus) - 1);
+            Cpus = 0;
+        }
+        else
+        {
+            /* Ensure any remaining blocks are safely zeroed */
+            AffinityMap->Bitmap[Index] = 0;
+        }
+    }
+}
+
+/**
  * Sets the affinity bit for a specified processor. This is a non-atomic operation.
  *
  * @param AffinityMap

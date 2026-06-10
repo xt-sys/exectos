@@ -37,6 +37,7 @@ namespace KE
                                                         IN PKAFFINITY_MAP AffinityMap);
             STATIC XTAPI ULONG FindNextRightSetProcessor(IN ULONG ThreadSeed,
                                                          IN PKAFFINITY_MAP AffinityMap);
+            STATIC XTFASTCALL VOID SetAllProcessorsAffinity(IN OUT PKAFFINITY_MAP AffinityMap);
             STATIC XTFASTCALL VOID SetProcessorAffinity(IN OUT PKAFFINITY_MAP AffinityMap,
                                                         IN ULONG CpuNumber);
     };
