@@ -66,7 +66,7 @@ KE::KThread::InitializeThreadContext(IN PKTHREAD Thread,
 
         /* Disable coprocessor floating point state */
         Thread->NpxState = NPX_STATE_UNLOADED;
-        Thread->Header.NpxIrql = PASSIVE_LEVEL;
+        Thread->NpxRunLevel = PASSIVE_LEVEL;
 
         /* Set initial floating point state */
         FxSaveFormat = (PFX_SAVE_FORMAT)ContextRecord->ExtendedRegisters;

@@ -645,7 +645,7 @@ typedef struct _KTHREAD
     LIST_ENTRY ThreadListEntry;
     UCHAR LargeStack;
     UCHAR PowerState;
-    UCHAR NpxIrql;
+    UCHAR NpxRunLevel;
     UCHAR Spare5;
     BOOLEAN AutoAlignment;
     UCHAR Iopl;

@@ -144,8 +144,9 @@ KE::KThread::InitializeThread(IN PKPROCESS Process,
     Allocation = FALSE;
 
     /* Initialize thread dispatcher header */
-    Thread->Header.Type = ThreadObject;
     Thread->Header.SignalState = 0;
+    Thread->Header.Size = sizeof(KTHREAD) / sizeof(LONG);
+    Thread->Header.Type = ThreadObject;
 
     /* Initialize thread wait list */
     RTL::LinkedList::InitializeListHead(&Thread->Header.WaitListHead);
@@ -269,7 +270,7 @@ KE::KThread::InitializeThread(IN PKPROCESS Process,
  */
 XTAPI
 VOID
-KE::KThread::StartThread(IN PKTHREAD Thread)
+KE::KThread::StartThread(IN OUT PKTHREAD Thread)
 {
     UNIMPLEMENTED;
 }
