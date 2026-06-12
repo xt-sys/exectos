@@ -256,6 +256,9 @@ MM::Manager::InitializeMemoryManager(VOID)
     /* Initialize page table */
     MM::Pte::InitializePageTable();
 
+    /* Initialize PFN database */
+    MM::Pfn::InitializePfnDatabase();
+
     /* Initialize system PTE space */
     MM::Pte::InitializeSystemPteSpace();
 
@@ -264,9 +267,6 @@ MM::Manager::InitializeMemoryManager(VOID)
 
     /* Initialize non-paged pool */
     MM::Pool::InitializeNonPagedPool();
-
-    /* Initialize PFN database */
-    MM::Pfn::InitializePfnDatabase();
 
     /* Initialize allocations tracking tables */
     MM::Allocator::InitializeAllocationsTracking();

@@ -242,6 +242,7 @@ MM::Pte::MapPDE(IN PVOID StartAddress,
                 IN PMMPDE TemplatePde)
 {
     PMMPDE EndSpace, PointerPde;
+    PFN_NUMBER PageFrameNumber;
 
     /* Get PDE addresses */
     PointerPde = MM::Paging::GetPdeAddress(StartAddress);
@@ -253,8 +254,18 @@ MM::Pte::MapPDE(IN PVOID StartAddress,
         /* Check if PDE is already mapped */
         if(!MM::Paging::PteValid(PointerPde))
         {
-            /* Map PDE */
-            MM::Paging::SetPte(TemplatePde, MM::Pfn::AllocateBootstrapPages(1), 0);
+            /* Attempt to allocate a physical page from the PFN database */
+            PageFrameNumber = MM::Pfn::AllocatePhysicalPage(0);
+
+            /* Check if the primary allocation failed */
+            if(!PageFrameNumber)
+            {
+                /* Allocate a physical page from the fallback allocator */
+                PageFrameNumber = MM::Pfn::AllocateBootstrapPages(1);
+            }
+
+            /* Update the template with new page frame and write the PTE */
+            MM::Paging::SetPte(TemplatePde, PageFrameNumber, 0);
             MM::Paging::WritePte(PointerPde, *TemplatePde);
 
             /* Clear the page table */
@@ -289,6 +300,7 @@ MM::Pte::MapPTE(IN PVOID StartAddress,
                 IN PMMPTE TemplatePte)
 {
     PMMPTE EndSpace, PointerPte;
+    PFN_NUMBER PageFrameNumber;
 
     /* Get PTE addresses */
     PointerPte = MM::Paging::GetPteAddress(StartAddress);
@@ -300,8 +312,18 @@ MM::Pte::MapPTE(IN PVOID StartAddress,
         /* Check if PTE is already mapped */
         if(!MM::Paging::PteValid(PointerPte))
         {
-            /* Map PTE */
-            MM::Paging::SetPte(TemplatePte, MM::Pfn::AllocateBootstrapPages(1), 0);
+            /* Attempt to allocate a physical page from the PFN database */
+            PageFrameNumber = MM::Pfn::AllocatePhysicalPage(0);
+
+            /* Check if the primary allocation failed */
+            if(!PageFrameNumber)
+            {
+                /* Allocate a physical page from the fallback allocator */
+                PageFrameNumber = MM::Pfn::AllocateBootstrapPages(1);
+            }
+
+            /* Update the template with new page frame and write the PTE */
+            MM::Paging::SetPte(TemplatePte, PageFrameNumber, 0);
             MM::Paging::WritePte(PointerPte, *TemplatePte);
 
             /* Clear the page table */
@@ -312,7 +334,6 @@ MM::Pte::MapPTE(IN PVOID StartAddress,
         PointerPte = MM::Paging::GetNextPte(PointerPte);
     }
 }
-
 
 /**
  * Releases a block of system PTEs into a specified pool.

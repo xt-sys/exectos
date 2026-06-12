@@ -176,6 +176,7 @@ MM::Pte::MapP5E(IN PVOID StartAddress,
                 IN PMMP5E TemplateP5e)
 {
     PMMP5E EndSpace, PointerP5e;
+    PFN_NUMBER PageFrameNumber;
 
     /* Get P5E addresses */
     PointerP5e = MM::Paging::GetP5eAddress(StartAddress);
@@ -187,8 +188,18 @@ MM::Pte::MapP5E(IN PVOID StartAddress,
         /* Check if P5E is already mapped */
         if(!MM::Paging::PteValid(PointerP5e))
         {
-            /* Map P5E */
-            MM::Paging::SetPte(TemplateP5e, MM::Pfn::AllocateBootstrapPages(1), 0);
+            /* Attempt to allocate a physical page from the PFN database */
+            PageFrameNumber = MM::Pfn::AllocatePhysicalPage(0);
+
+            /* Check if the primary allocation failed */
+            if(!PageFrameNumber)
+            {
+                /* Allocate a physical page from the fallback allocator */
+                PageFrameNumber = MM::Pfn::AllocateBootstrapPages(1);
+            }
+
+            /* Update the template with new page frame and write the PTE */
+            MM::Paging::SetPte(TemplateP5e, PageFrameNumber, 0);
             *PointerP5e = *TemplateP5e;
 
             /* Clear the page table */
@@ -223,6 +234,7 @@ MM::Pte::MapPPE(IN PVOID StartAddress,
                 IN PMMPPE TemplatePpe)
 {
     PMMPPE EndSpace, PointerPpe;
+    PFN_NUMBER PageFrameNumber;
 
     /* Get PPE addresses */
     PointerPpe = MM::Paging::GetPpeAddress(StartAddress);
@@ -234,8 +246,18 @@ MM::Pte::MapPPE(IN PVOID StartAddress,
         /* Check if PPE is already mapped */
         if(!MM::Paging::PteValid(PointerPpe))
         {
-            /* Map PPE */
-            MM::Paging::SetPte(TemplatePpe, MM::Pfn::AllocateBootstrapPages(1), 0);
+            /* Attempt to allocate a physical page from the PFN database */
+            PageFrameNumber = MM::Pfn::AllocatePhysicalPage(0);
+
+            /* Check if the primary allocation failed */
+            if(!PageFrameNumber)
+            {
+                /* Allocate a physical page from the fallback allocator */
+                PageFrameNumber = MM::Pfn::AllocateBootstrapPages(1);
+            }
+
+            /* Update the template with new page frame and write the PTE */
+            MM::Paging::SetPte(TemplatePpe, PageFrameNumber, 0);
             *PointerPpe = *TemplatePpe;
 
             /* Clear the page table */
@@ -270,6 +292,7 @@ MM::Pte::MapPXE(IN PVOID StartAddress,
                 IN PMMPXE TemplatePxe)
 {
     PMMPXE EndSpace, PointerPxe;
+    PFN_NUMBER PageFrameNumber;
 
     /* Get PXE addresses */
     PointerPxe = MM::Paging::GetPxeAddress(StartAddress);
@@ -281,8 +304,18 @@ MM::Pte::MapPXE(IN PVOID StartAddress,
         /* Check if PTE is already mapped */
         if(!MM::Paging::PteValid(PointerPxe))
         {
-            /* Map PTE */
-            MM::Paging::SetPte(TemplatePxe, MM::Pfn::AllocateBootstrapPages(1), 0);
+            /* Attempt to allocate a physical page from the PFN database */
+            PageFrameNumber = MM::Pfn::AllocatePhysicalPage(0);
+
+            /* Check if the primary allocation failed */
+            if(!PageFrameNumber)
+            {
+                /* Allocate a physical page from the fallback allocator */
+                PageFrameNumber = MM::Pfn::AllocateBootstrapPages(1);
+            }
+
+            /* Update the template with new page frame and write the PTE */
+            MM::Paging::SetPte(TemplatePxe, PageFrameNumber, 0);
             *PointerPxe = *TemplatePxe;
 
             /* Clear the page table */
