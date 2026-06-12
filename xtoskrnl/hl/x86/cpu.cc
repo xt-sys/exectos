@@ -163,7 +163,7 @@ HL::Cpu::StartAllProcessors(VOID)
     StartBlock = (PPROCESSOR_START_BLOCK)((PUCHAR)ApVirtualAddress + TrampolineCodeSize);
 
     /* Get SIPI vector */
-    SipiVector = (ULONG)(ApPhysicalAddress.QuadPart >> 12);
+    SipiVector = (ULONG)(ApPhysicalAddress.QuadPart >> APIC_VECTOR_SIPI_SHIFT);
 
     /* Loop over all CPUs */
     CpuNumber = 0;
