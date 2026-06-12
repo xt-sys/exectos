@@ -172,7 +172,7 @@ KE::KThread::InitializeThread(IN PKPROCESS Process,
     Thread->AdjustReason = AdjustNone;
 
     /* Set the thread service table */
-    Thread->ServiceTable = NULLPTR;
+    Thread->ServiceTable = KE::SystemServices::GetSystemServicesDescriptorTable();
 
     /* Initialize thread lock */
     KE::SpinLock::InitializeSpinLock(&Thread->ThreadLock);
