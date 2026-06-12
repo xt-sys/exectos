@@ -28,7 +28,7 @@ XTAPI
 VOID
 AR::ProcessorSupport::GetTrampolineInformation(IN TRAMPOLINE_TYPE TrampolineType,
                                                OUT PVOID *TrampolineCode,
-                                               OUT PULONG_PTR TrampolineSize)
+                                               OUT PULONG TrampolineSize)
 {
     /* Get trampoline information */
     switch(TrampolineType)

@@ -116,7 +116,7 @@ Xtos::EnablePaging(IN PXTBL_PAGE_MAPPING PageMap)
     EFI_STATUS Status;
     EFI_PHYSICAL_ADDRESS TrampolineAddress;
     PXT_TRAMPOLINE_ENTRY TrampolineEntry;
-    ULONG_PTR TrampolineSize;
+    ULONG TrampolineSize;
     PVOID TrampolineCode;
 
     /* Check the configured page map level to set the LA57 state accordingly */
