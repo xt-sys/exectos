@@ -85,9 +85,9 @@ XTAPI
 XTSTATUS
 HL::Cpu::StartAllProcessors(VOID)
 {
-    ULONG CpuNumber, Index, MaxCpus, SipiVector, Timeout, TrampolineCodeSize, TrampolinePages;
-    PVOID CpuStructures, TrampolineAddress, TrampolineCode;
-    ULONG_PTR AllocationSize;
+    ULONG ApPages, CpuNumber, Index, MaxCpus, SipiVector, Timeout, TrampolineCodeSize;
+    PVOID ApVirtualAddress, CpuStructures, TrampolineCode;
+    PHYSICAL_ADDRESS ApPhysicalAddress;
     PPROCESSOR_START_BLOCK StartBlock;
     PKPROCESSOR_BLOCK ProcessorBlock;
     PACPI_SYSTEM_INFO SysInfo;
@@ -136,27 +136,34 @@ HL::Cpu::StartAllProcessors(VOID)
         return STATUS_UNSUCCESSFUL;
     }
 
-    /* Compute trampoline memory allocation size (trampoline + processor start block + temporary stack) */
-    AllocationSize = TrampolineCodeSize + sizeof(PROCESSOR_START_BLOCK) + 512;
-    TrampolinePages = (ULONG)(ROUND_UP(AllocationSize, MM_PAGE_SIZE) / MM_PAGE_SIZE);
-
-    /* Allocate real mode memory for AP trampoline */
-    Status = MM::HardwarePool::AllocateRealModeMemory(TrampolinePages, &TrampolineAddress);
+    /* Allocate low memory for AP trampoline code */
+    Status = MM::HardwarePool::AllocateLowMemory(&ApPhysicalAddress, &ApVirtualAddress);
     if(Status != STATUS_SUCCESS)
     {
         /* Failed to allocate memory, print error message and return error */
-        DebugPrint(L"Failed to allocate %lu pages for AP Trampoline!\n", TrampolinePages);
+        DebugPrint(L"Failed to allocate low memory for AP Trampoline!\n");
         return Status;
     }
 
     /* Copy trampoline code to low memory */
-    RTL::Memory::CopyMemory(TrampolineAddress, TrampolineCode, TrampolineCodeSize);
+    RTL::Memory::CopyMemory(ApVirtualAddress, TrampolineCode, TrampolineCodeSize);
+
+    /* Compute number of pages for trampoline */
+    ApPages = MM::HardwarePool::CalculateRealModeAllocationPages(TrampolineCodeSize);
+
+    /* Temporarily identity map trampoline address */
+    Status = MM::HardwarePool::MapRealModeMemory(ApPhysicalAddress, ApPages);
+    if(Status != STATUS_SUCCESS)
+    {
+        /* Failed to map memory, return error */
+        return Status;
+    }
 
     /* Get start block address relative to trampoline address */
-    StartBlock = (PPROCESSOR_START_BLOCK)((PUCHAR)TrampolineAddress + TrampolineCodeSize);
+    StartBlock = (PPROCESSOR_START_BLOCK)((PUCHAR)ApVirtualAddress + TrampolineCodeSize);
 
     /* Get SIPI vector */
-    SipiVector = (ULONG)((ULONG_PTR)TrampolineAddress >> 12);
+    SipiVector = (ULONG)(ApPhysicalAddress.QuadPart >> 12);
 
     /* Loop over all CPUs */
     CpuNumber = 0;
@@ -183,8 +190,8 @@ HL::Cpu::StartAllProcessors(VOID)
         Status = MM::KernelPool::AllocateProcessorStructures(&CpuStructures);
         if(Status != STATUS_SUCCESS)
         {
-            /* Failed to allocate memory, unmap memory and return error */
-            MM::HardwarePool::UnmapHardwareMemory(TrampolineAddress, TrampolinePages, TRUE);
+            /* Failed to allocate memory, unmap temporary identity mapping and return error */
+            MM::HardwarePool::UnmapRealModeMemory(ApPhysicalAddress, ApPages);
             return Status;
         }
 
@@ -242,7 +249,7 @@ HL::Cpu::StartAllProcessors(VOID)
         }
     }
 
-    /* Unmap trampoline memory and return success */
-    MM::HardwarePool::UnmapHardwareMemory(TrampolineAddress, TrampolinePages, TRUE);
+    /* Unmap temporary identity mapping and return success */
+    MM::HardwarePool::UnmapRealModeMemory(ApPhysicalAddress, ApPages);
     return STATUS_SUCCESS;
 }

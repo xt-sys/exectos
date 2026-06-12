@@ -150,8 +150,11 @@ MM::HardwarePool::AllocateHardwareMemory(IN PFN_NUMBER PageCount,
 /**
  * Allocates a physical page in low memory (addressable in real-mode) and maps it into the virtual address space.
  *
- * @param MemoryAddress
- *        Supplies a pointer to a variable that receives the identity-mapped virtual address of the allocated memory.
+ * @param PhysicalAddress
+ *        Supplies a pointer to a variable that receives the physical address of the allocated memory.
+ *
+ * @param VirtualAddress
+ *        Supplies a pointer to a variable that receives the virtual address of the allocated memory.
  *
  * @return This routine returns a status code indicating the success or failure of the operation.
  *
@@ -159,37 +162,139 @@ MM::HardwarePool::AllocateHardwareMemory(IN PFN_NUMBER PageCount,
  */
 XTAPI
 XTSTATUS
-MM::HardwarePool::AllocateRealModeMemory(IN PFN_NUMBER PageCount,
-                                         OUT PVOID *MemoryAddress)
+MM::HardwarePool::AllocateLowMemory(OUT PPHYSICAL_ADDRESS PhysicalAddress,
+                                    OUT PVOID *VirtualAddress)
 {
-    PHYSICAL_ADDRESS PhysicalAddress;
-    PFN_NUMBER PageFrameNumber;
-    PVOID VirtualAddress;
+    ULONG AllocationPages, TrampolineCodeSize;
+    PVOID TrampolineCode;
     XTSTATUS Status;
 
+    /* Check if low memory is already allocated and mapped */
+    if(LowMemoryVirtualAddress && LowMemoryPhysicalAddress.QuadPart != 0)
+    {
+        /* Check if the caller requested the allocated addresses */
+        if(PhysicalAddress != NULLPTR && VirtualAddress != NULLPTR)
+        {
+            /* Set the trampoline physical and virtual address and return success */
+            *PhysicalAddress = LowMemoryPhysicalAddress;
+            *VirtualAddress = LowMemoryVirtualAddress;
+        }
+
+        /* Return success */
+        return STATUS_SUCCESS;
+    }
+
+    /* Get trampoline information */
+    AR::ProcessorSupport::GetTrampolineInformation(TrampolineApStartup, &TrampolineCode, &TrampolineCodeSize);
+
+    /* Verify trampoline information */
+    if(TrampolineCode == NULLPTR || TrampolineCodeSize == 0)
+    {
+        /* Failed to get trampoline information, return error */
+        return STATUS_UNSUCCESSFUL;
+    }
+
+    /* Compute number of pages for real-mode memory allocation (trampoline + processor start block + temporary stack) */
+    AllocationPages = CalculateRealModeAllocationPages(TrampolineCodeSize);
+
     /* Allocate physical memory in first 1MB */
-    Status = AllocateHardwareMemory(PageCount, TRUE, 0x100000, &PhysicalAddress);
+    Status = AllocateHardwareMemory(AllocationPages, TRUE, 0x100000, &LowMemoryPhysicalAddress);
     if(Status != STATUS_SUCCESS)
     {
         /* Failed to allocate memory, return error */
         return Status;
     }
 
-    /* Calculate virtual address and page frame number */
-    VirtualAddress = (PVOID)(ULONG_PTR)PhysicalAddress.QuadPart;
-    PageFrameNumber = PhysicalAddress.QuadPart >> MM_PAGE_SHIFT;
-
-    /* Identity map the memory to the virtual address */
-    Status = MM::Paging::MapVirtualAddress(VirtualAddress, PageFrameNumber, MM_PTE_EXECUTE_READWRITE);
+    /* Map the memory to the virtual address */
+    Status = MapHardwareMemory(LowMemoryPhysicalAddress, AllocationPages, FALSE, &LowMemoryVirtualAddress);
     if(Status != STATUS_SUCCESS)
     {
-        /* Failed to map memory, return error */
+        /* Failed to map memory, free memory and return error */
+        FreeHardwareMemory(LowMemoryPhysicalAddress, AllocationPages);
         return Status;
     }
 
-    /* Set the trampoline virtual address and return success */
-    *MemoryAddress = VirtualAddress;
+    /* Check if the caller requested the allocated addresses */
+    if(PhysicalAddress != NULLPTR && VirtualAddress != NULLPTR)
+    {
+        /* Set the trampoline physical and virtual address and return success */
+        *PhysicalAddress = LowMemoryPhysicalAddress;
+        *VirtualAddress = LowMemoryVirtualAddress;
+    }
+
+    /* Return success */
     return STATUS_SUCCESS;
+}
+
+/**
+ * Computes the total memory allocation size required for the real-mode trampoline execution environment.
+ *
+ * @param TrampolineCodeSize
+ *        Supplies the size of the trampoline code in bytes.
+ *
+ * @return This routine returns the computed allocation size in pages.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG
+MM::HardwarePool::CalculateRealModeAllocationPages(IN ULONG TrampolineCodeSize)
+{
+    ULONG Size;
+
+    /* Compute real-mode memory allocation size (trampoline + processor start block + temporary stack) */
+    Size = TrampolineCodeSize + sizeof(PROCESSOR_START_BLOCK) + 512;
+
+    /* Calculate and return number of pages */
+    return (ULONG)(ROUND_UP(Size, MM_PAGE_SIZE) / MM_PAGE_SIZE);
+}
+
+/**
+ * Releases physical memory allocated for kernel hardware layer.
+ *
+ * @param PhysicalAddress
+ *        Supplies the physical address of the memory block to be freed.
+ *
+ * @param PageCount
+ *        Supplies the number of pages associated with the allocation descriptor.
+ *
+ * @return This routine returns a status code indicating the success or failure of the operation.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+MM::HardwarePool::FreeHardwareMemory(IN PHYSICAL_ADDRESS PhysicalAddress,
+                                     IN PFN_NUMBER PageCount)
+{
+    PLOADER_MEMORY_DESCRIPTOR Descriptor;
+    PFN_NUMBER BasePage;
+    ULONG Index;
+
+    /* Calculate base page from physical address */
+    BasePage = PhysicalAddress.QuadPart >> MM_PAGE_SHIFT;
+
+    /* Iterate through recorded hardware descriptors to find the matching allocation */
+    for(Index = 0; Index < UsedHardwareAllocationDescriptors; Index++)
+    {
+        /* Get current hardware allocation descriptor */
+        Descriptor = &HardwareAllocationDescriptors[Index];
+
+        /* Verify descriptor properties */
+        if(Descriptor->MemoryType == LoaderHardwareCachedMemory &&
+           Descriptor->BasePage == BasePage &&
+           Descriptor->PageCount == PageCount)
+        {
+            /* Make descriptor available again */
+            Descriptor->MemoryType = LoaderFree;
+
+            /* Return success */
+            return STATUS_SUCCESS;
+        }
+    }
+
+    /* Descriptors not found, return error */
+    return STATUS_INVALID_PARAMETER;
 }
 
 /**
@@ -288,6 +393,46 @@ MM::HardwarePool::MapHardwareMemory(IN PHYSICAL_ADDRESS PhysicalAddress,
 
     /* Return virtual address */
     *VirtualAddress = ReturnAddress;
+    return STATUS_SUCCESS;
+}
+
+/**
+ * Establishes a temporary identity mapping for a specified physical memory range to facilitate real-mode execution.
+ *
+ * @param PhysicalAddress
+ *        Supplies the physical address of the trampoline memory.
+ *
+ * @param Size
+ *        Supplies the size of the trampoline memory allocation.
+ *
+ * @return This routine returns a status code indicating the success or failure of the operation.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+MM::HardwarePool::MapRealModeMemory(IN PHYSICAL_ADDRESS PhysicalAddress,
+                                    IN ULONG Pages)
+{
+    PFN_NUMBER Index;
+    XTSTATUS Status;
+
+    /* Identity map each page of the real-mode memory allocation */
+    for(Index = 0; Index < Pages; Index++)
+    {
+        /* Map the current physical page */
+        Status = MM::Paging::MapVirtualAddress((PVOID)(PhysicalAddress.QuadPart + (Index * MM_PAGE_SIZE)),
+                                               (PhysicalAddress.QuadPart >> MM_PAGE_SHIFT) + Index,
+                                               MM_PTE_EXECUTE_READWRITE);
+        if(Status != STATUS_SUCCESS)
+        {
+            /* Failed to map the page, unmap previously mapped pages and return the error code */
+            UnmapRealModeMemory(PhysicalAddress, Index * MM_PAGE_SIZE);
+            return Status;
+        }
+    }
+
+    /* Return success */
     return STATUS_SUCCESS;
 }
 
@@ -424,4 +569,35 @@ MM::HardwarePool::UnmapHardwareMemory(IN PVOID VirtualAddress,
 
     /* Return success */
     return STATUS_SUCCESS;
+}
+
+/**
+ * Removes the temporary identity mapping for a real-mode memory region.
+ *
+ * @param PhysicalAddress
+ *        Supplies the physical address of the trampoline memory.
+ *
+ * @param Size
+ *        Supplies the size of the trampoline memory allocation.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+MM::HardwarePool::UnmapRealModeMemory(IN PHYSICAL_ADDRESS PhysicalAddress,
+                                      IN ULONG Size)
+{
+    PFN_NUMBER AllocationPages, Index;
+
+    /* Calculate number of pages to unmap */
+    AllocationPages = (ULONG)(ROUND_UP(Size, MM_PAGE_SIZE) / MM_PAGE_SIZE);
+
+    /* Iterate over the allocation pages to remove the identity mapping */
+    for(Index = 0; Index < AllocationPages; Index++)
+    {
+        /* Clear the page table entry for the current virtual address */
+        MM::Paging::ClearPte(MM::Paging::GetPteAddress((PVOID)(PhysicalAddress.QuadPart + (Index * MM_PAGE_SIZE))));
+    }
 }

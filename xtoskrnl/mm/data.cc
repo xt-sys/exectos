@@ -60,6 +60,12 @@ LOADER_MEMORY_DESCRIPTOR MM::HardwarePool::HardwareAllocationDescriptors[MM_HARD
 /* Live address of kernel's hardware heap */
 PVOID MM::HardwarePool::HardwareHeapStart = MM_HARDWARE_HEAP_START_ADDRESS;
 
+/* Physical address of kernel's low memory region */
+PHYSICAL_ADDRESS MM::HardwarePool::LowMemoryPhysicalAddress;
+
+/* Virtual address of kernel's low memory region */
+PVOID MM::HardwarePool::LowMemoryVirtualAddress;
+
 /* Number of used hardware allocation descriptors */
 ULONG MM::HardwarePool::UsedHardwareAllocationDescriptors = 0;
 
