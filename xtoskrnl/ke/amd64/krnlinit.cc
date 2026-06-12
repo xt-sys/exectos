@@ -221,7 +221,7 @@ KE::KernelInit::SwitchBootStack(VOID)
     __asm__ volatile("movq %[Stack], %%rsp\n"
                      "subq %[TotalSize], %%rsp\n"
                      "xorq %%rbp, %%rbp\n"
-                     "jmp *%[TargetRoutine]\n"
+                     "call *%[TargetRoutine]\n"
                      :
                      : [Stack] "r" (Stack),
                        [TargetRoutine] "r" (StartKernel),
