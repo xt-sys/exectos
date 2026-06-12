@@ -147,6 +147,7 @@ KE::KThread::InitializeThread(IN PKPROCESS Process,
     /* Initialize thread dispatcher header */
     Thread->Header.SignalState = 0;
     Thread->Header.Size = sizeof(KTHREAD) / sizeof(LONG);
+    Thread->Header.DebugActive = FALSE;
     Thread->Header.Type = ThreadObject;
 
     /* Initialize thread wait list */
@@ -170,15 +171,18 @@ KE::KThread::InitializeThread(IN PKPROCESS Process,
     /* Set priority adjustment reason */
     Thread->AdjustReason = AdjustNone;
 
+    /* Set the thread service table */
+    Thread->ServiceTable = NULLPTR;
+
     /* Initialize thread lock */
     KE::SpinLock::InitializeSpinLock(&Thread->ThreadLock);
 
     /* Initialize thread APC */
-    Thread->ApcStatePointer[0] = &Thread->ApcState;
-    Thread->ApcStatePointer[1] = &Thread->SavedApcState;
     Thread->ApcQueueable = TRUE;
     Thread->ApcState.Process = Process;
-    Thread->Process = Process;
+    Thread->ApcStateIndex = OriginalApcEnvironment;
+    Thread->ApcStatePointer[OriginalApcEnvironment] = &Thread->ApcState;
+    Thread->ApcStatePointer[AttachedApcEnvironment] = &Thread->SavedApcState;
 
     /* Initialize APC list heads */
     RTL::LinkedList::InitializeListHead(&Thread->ApcState.ApcListHead[KernelMode]);
@@ -203,8 +207,9 @@ KE::KThread::InitializeThread(IN PKPROCESS Process,
     TimerWaitBlock->WaitListEntry.Flink = &(&Thread->Timer)->Header.WaitListHead;
     TimerWaitBlock->WaitListEntry.Blink = &(&Thread->Timer)->Header.WaitListHead;
 
-    /* Initialize Thread Environment Block*/
+    /* Initialize Thread Environment Block and set owner process */
     Thread->EnvironmentBlock = (PTHREAD_ENVIRONMENT_BLOCK)EnvironmentBlock;
+    Thread->Process = Process;
 
     /* Make sure there is a valid stack available */
     if(!Stack)
@@ -221,6 +226,7 @@ KE::KThread::InitializeThread(IN PKPROCESS Process,
         Allocation = TRUE;
     }
 
+    /* Setup thread stack */
     Thread->InitialStack = Stack;
     Thread->StackBase = Stack;
     Thread->StackLimit = (PVOID)((ULONG_PTR)Stack - KERNEL_STACK_SIZE);
