@@ -30,6 +30,7 @@
 #include <ke/shdata.hh>
 #include <ke/spinlock.hh>
 #include <ke/sysres.hh>
+#include <ke/sysserv.hh>
 #include <ke/systime.hh>
 #include <ke/timer.hh>
 
