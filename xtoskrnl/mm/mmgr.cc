@@ -232,6 +232,9 @@ XTAPI
 VOID
 MM::Manager::InitializeMemoryManager(VOID)
 {
+    /* Allocate low memory from the hardware pool before initializing the memory manager */
+    MM::HardwarePool::AllocateLowMemory(NULLPTR, NULLPTR);
+
     /* Scan memory descriptors provided by the boot loader */
     MM::Pfn::ScanMemoryDescriptors();
 
