@@ -85,9 +85,9 @@ XTAPI
 XTSTATUS
 HL::Cpu::StartAllProcessors(VOID)
 {
-    ULONG CpuNumber, Index, MaxCpus, SipiVector, Timeout, TrampolinePages;
+    ULONG CpuNumber, Index, MaxCpus, SipiVector, Timeout, TrampolineCodeSize, TrampolinePages;
     PVOID CpuStructures, TrampolineAddress, TrampolineCode;
-    ULONG_PTR AllocationSize, TrampolineCodeSize;
+    ULONG_PTR AllocationSize;
     PPROCESSOR_START_BLOCK StartBlock;
     PKPROCESSOR_BLOCK ProcessorBlock;
     PACPI_SYSTEM_INFO SysInfo;
