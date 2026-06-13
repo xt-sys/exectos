@@ -38,6 +38,7 @@ namespace KE
             STATIC XTAPI VOID StartThread(IN PKTHREAD Thread);
 
         private:
+            STATIC XTAPI VOID HandleSystemThreadExit(VOID);
             STATIC XTAPI VOID InitializeThreadContext(IN PKTHREAD Thread,
                                                       IN PKSYSTEM_ROUTINE SystemRoutine,
                                                       IN PKSTART_ROUTINE StartRoutine,
@@ -53,6 +54,7 @@ namespace KE
             STATIC XTAPI VOID SuspendThread(IN PVOID NormalContext,
                                             IN PVOID SystemArgument1,
                                             IN PVOID SystemArgument2);
+            STATIC XTAPI VOID SwitchToUserMode(VOID);
     };
 }
 

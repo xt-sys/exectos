@@ -24,6 +24,19 @@ KE::KThread::GetInitialThread(VOID)
 }
 
 /**
+ * Handles an unexpected system thread exit.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KE::KThread::HandleSystemThreadExit(VOID)
+{
+}
+
+/**
  * Initializes an Idle Thread.
  *
  * @param IdleProcess
@@ -368,4 +381,17 @@ KE::KThread::SuspendThread(IN PVOID NormalContext,
                            IN PVOID SystemArgument2)
 {
     UNIMPLEMENTED;
+}
+
+/**
+ * Switches a new thread into User Mode.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KE::KThread::SwitchToUserMode(VOID)
+{
 }

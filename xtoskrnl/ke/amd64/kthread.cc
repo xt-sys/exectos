@@ -105,6 +105,9 @@ KE::KThread::InitializeThreadContext(IN PKTHREAD Thread,
         ThreadFrame->ExceptionFrame.P2Home = (ULONGLONG)StartRoutine;
         ThreadFrame->ExceptionFrame.P3Home = (ULONGLONG)SystemRoutine;
         ThreadFrame->ExceptionFrame.P4Home = (ULONGLONG)SystemRoutine;
+
+        /* Set the routine that will handle the thread finishing its initialization and transition it to UserMode */
+        ThreadFrame->StartFrame.Return = (ULONG64)SwitchToUserMode;
     }
     else
     {
@@ -113,6 +116,9 @@ KE::KThread::InitializeThreadContext(IN PKTHREAD Thread,
 
         /* Disable floating point state */
         Thread->NpxState = NPX_STATE_UNUSED;
+
+        /* Set the routine that will handle a system thread that unexpectedly finished its execution */
+        ThreadFrame->StartFrame.Return = (ULONG64)HandleSystemThreadExit;
     }
 
     /* Initialize thread startup information */

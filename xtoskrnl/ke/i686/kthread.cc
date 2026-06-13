@@ -99,6 +99,9 @@ KE::KThread::InitializeThreadContext(IN PKTHREAD Thread,
         ThreadFrame->TrapFrame.SegDs |= RPL_MASK;
         ThreadFrame->TrapFrame.SegEs |= RPL_MASK;
         ThreadFrame->TrapFrame.SegSs |= RPL_MASK;
+
+        /* Set the routine that will handle the thread finishing its initialization and transition it to UserMode */
+        ThreadFrame->StartFrame.Return = (ULONG)SwitchToUserMode;
     }
     else
     {
@@ -112,6 +115,9 @@ KE::KThread::InitializeThreadContext(IN PKTHREAD Thread,
         /* Set initial floating point state */
         ThreadFrame->NpxFrame.FxArea.ControlWord = 0x27F;
         ThreadFrame->NpxFrame.FxArea.MxCsr = 0x1F80;
+
+        /* Set the routine that will handle a system thread that unexpectedly finished its execution */
+        ThreadFrame->StartFrame.Return = (ULONG)HandleSystemThreadExit;
     }
 
     /* Initialize thread startup information */
