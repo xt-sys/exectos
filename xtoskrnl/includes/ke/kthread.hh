@@ -43,6 +43,7 @@ namespace KE
                                                       IN PKSTART_ROUTINE StartRoutine,
                                                       IN PVOID StartContext,
                                                       IN PCONTEXT ContextRecord);
+            STATIC XTAPI VOID RunThread(VOID);
             STATIC XTAPI VOID SuspendNop(IN PKAPC Apc,
                                          IN OUT PKNORMAL_ROUTINE *NormalRoutine,
                                          IN OUT PVOID *NormalContext,
