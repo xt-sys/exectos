@@ -114,7 +114,7 @@ KE::Dispatcher::SwitchThreadStack(IN PKTHREAD CurrentThread,
                      :
                      : [FrameSize] "i" (sizeof(KSWITCH_FRAME) - 4),
                        [PrcbcCurrentThread] "i" (FIELD_OFFSET(KPROCESSOR_BLOCK, Prcb.CurrentThread)),
-                       [SwApcBypass] "i" (FIELD_OFFSET(KSWITCH_FRAME, ApcBypassDisabled)),
+                       [SwApcBypass] "i" (FIELD_OFFSET(KSWITCH_FRAME, ApcBypass)),
                        [SwExceptionList] "i" (FIELD_OFFSET(KSWITCH_FRAME, ExceptionList)),
                        [SwitchRoutine] "i" (SwitchThreadContext),
                        [ThrdInfoExceptions] "i" (FIELD_OFFSET(THREAD_INFORMATION_BLOCK, ExceptionList)),

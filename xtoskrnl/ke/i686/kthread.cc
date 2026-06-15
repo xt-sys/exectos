@@ -121,14 +121,14 @@ KE::KThread::InitializeThreadContext(IN PKTHREAD Thread,
     }
 
     /* Initialize thread startup information */
-    ThreadFrame->StartFrame.StartContext = StartContext;
-    ThreadFrame->StartFrame.StartRoutine = StartRoutine;
-    ThreadFrame->StartFrame.SystemRoutine = SystemRoutine;
+    ThreadFrame->StartFrame.P1Home = (ULONG)StartContext;
+    ThreadFrame->StartFrame.P2Home = (ULONG)StartRoutine;
+    ThreadFrame->StartFrame.P3Home = (ULONG)SystemRoutine;
 
     /* Initialize switch frame */
-    ThreadFrame->SwitchFrame.ApcBypassDisabled = TRUE;
+    ThreadFrame->SwitchFrame.ApcBypass = APC_LEVEL;
     ThreadFrame->SwitchFrame.ExceptionList = (PEXCEPTION_REGISTRATION_RECORD) - 1;
-    ThreadFrame->SwitchFrame.Return = (PVOID)(ULONG)RunThread;
+    ThreadFrame->SwitchFrame.Return = (ULONG)RunThread;
 
     /* Set thread stack boundaries */
     Thread->InitialStack = (PVOID)&ThreadFrame->NpxFrame;

@@ -428,18 +428,19 @@ typedef struct _KEXCEPTION_FRAME
 /* Thread start frame definition */
 typedef struct _KSTART_FRAME
 {
-    PKSYSTEM_ROUTINE SystemRoutine;
-    PKSTART_ROUTINE StartRoutine;
-    PVOID StartContext;
+    ULONG P1Home;
+    ULONG P2Home;
+    ULONG P3Home;
     BOOLEAN UserMode;
+    ULONG Return;
 } KSTART_FRAME, *PKSTART_FRAME;
 
 /* Switch frame definition */
 typedef struct _KSWITCH_FRAME
 {
     PVOID ExceptionList;
-    BOOLEAN ApcBypassDisabled;
-    PVOID Return;
+    KRUNLEVEL ApcBypass;
+    ULONG Return;
 } KSWITCH_FRAME, *PKSWITCH_FRAME;
 
 /* Trap frame definition */
