@@ -281,19 +281,6 @@ KE::KThread::InitializeThread(IN PKPROCESS Process,
 }
 
 /**
- * Serves as the initial execution point for all threads after first context switch.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTAPI
-VOID
-KE::KThread::RunThread(VOID)
-{
-}
-
-/**
  * Starts the thread.
  *
  * @param Thread
