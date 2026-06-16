@@ -145,8 +145,36 @@ KE::KThread::InitializeThreadContext(IN PKTHREAD Thread,
  *
  * @since XT 1.0
  */
+XTASSEMBLY
 XTAPI
 VOID
 KE::KThread::RunThread(VOID)
 {
+    /* Initialize execution context, adjust runlevel and dispatch the thread */
+    __asm__ volatile("xorq %%rbx, %%rbx\n"
+                     "xorq %%r10, %%r10\n"
+                     "xorq %%r11, %%r11\n"
+                     "xorq %%r12, %%r12\n"
+                     "xorq %%r13, %%r13\n"
+                     "xorq %%r14, %%r14\n"
+                     "xorq %%r15, %%r15\n"
+                     "xorq %%rbp, %%rbp\n"
+                     "xorq %%rdi, %%rdi\n"
+                     "xorq %%rsi, %%rsi\n"
+                     "subq $32, %%rsp\n"
+                     "movb $%c[RunLevel], %%cl\n"
+                     "callq %P[LowerRunLevel]\n"
+                     "addq $32, %%rsp\n"
+                     "movq 8(%%rsp), %%rcx\n"
+                     "movq 0(%%rsp), %%rdx\n"
+                     "movq 24(%%rsp), %%rax\n"
+                     "subq $32, %%rsp\n"
+                     "callq *%%rax\n"
+                     "addq $32, %%rsp\n"
+                     "addq $40, %%rsp\n"
+                     "ret\n"
+                     :
+                     : [RunLevel] "i" (APC_LEVEL),
+                       [LowerRunLevel] "i" (KE::RunLevel::LowerRunLevel)
+                     : "memory");
 }
