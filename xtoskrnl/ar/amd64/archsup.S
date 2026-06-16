@@ -467,9 +467,11 @@ ApEnterLongMode:
 
     /* Save the pointer to PROCESSOR_START_BLOCK */
     movq %rdi, %rcx
-    pushq %rdi
 
-    /* Call the EntryPoint routine */
+    /* Allocate 32 bytes of shadow space */
+    subq $32, %rsp
+
+    /* Fetch the EntryPoint address and call the routine */
     movq PROCESSOR_START_BLOCK_EntryPoint(%rdi), %rax
     call *%rax
 
