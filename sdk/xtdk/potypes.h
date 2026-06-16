@@ -14,6 +14,7 @@
 #include <ketypes.h>
 
 
+/* Processor performance scale factor */
 #define POWER_PERFORMANCE_SCALE                     100
 
 
