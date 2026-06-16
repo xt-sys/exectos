@@ -14,6 +14,9 @@
 #include <ketypes.h>
 
 
+#define POWER_PERFORMANCE_SCALE                     100
+
+
 /* C/C++ specific code */
 #ifndef __XTOS_ASSEMBLER__
 
