@@ -34,6 +34,8 @@ XTAPI
 VOID
 KE::KThread::HandleSystemThreadExit(VOID)
 {
+    /* Trigger a debugger breakpoint */
+    asm("int $3\n");
 }
 
 /**
