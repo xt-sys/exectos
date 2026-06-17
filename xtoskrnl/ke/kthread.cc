@@ -278,6 +278,7 @@ KE::KThread::InitializeThread(IN PKPROCESS Process,
     /* Initialize the builtin wait blocks */
     for(Index = 0; Index <= KTHREAD_WAIT_BLOCK; Index++)
     {
+        /* Backlink the wait block to the owning thread */
         Thread->WaitBlock[Index].Thread = Thread;
     }
 
