@@ -76,44 +76,6 @@ KE::KThread::AttachThread(IN OUT PKTHREAD Thread)
 }
 
 /**
- * Transitions a thread to the ready state and queues it for execution within the dispatcher database.
- *
- * @param Thread
- *        Supplies a pointer to the thread to be dispatched.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTAPI
-VOID
-KE::KThread::DispatchReadyThread(IN PKTHREAD Thread)
-{
-    PKPROCESS Process;
-
-    /* Extract the process from the thread's APC state */
-    Process = Thread->ApcState.Process;
-
-    /* Verify if the process and thread are resident in physical memory */
-    if(Process->State != ProcessInMemory)
-    {
-        /* Process is swapped out, place the thread in a transition state */
-        Thread->State = Transition;
-    }
-    else if(!Thread->KernelStackResident)
-    {
-        /* Increment the active stack count and transition the thread */
-        Process->StackCount++;
-        Thread->State = Transition;
-    }
-    else
-    {
-        /* Both process and thread's stack are fully resident, queue the thread for execution */
-        KE::Scheduler::InsertDeferredReadyList(Thread);
-    }
-}
-
-/**
  * Retrieves a pointer to the system's initial executive thread object.
  *
  * @return This routine returns a pointer to the initial executive thread.
@@ -383,28 +345,6 @@ KE::KThread::InitializeThread(IN PKPROCESS Process,
 
     /* Return success */
     return STATUS_SUCCESS;
-}
-
-/**
- * Prepares a thread for execution by safely acquiring the dispatcher database lock.
- *
- * @param Thread
- *        Supplies a pointer to the thread to be readied.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTAPI
-VOID
-KE::KThread::ReadyThread(IN PKTHREAD Thread)
-{
-    /* Raise runlevel to SYNC level and acquire the dispatcher database lock */
-    KE::RaiseRunLevel RunLevel(SYNC_LEVEL);
-    KE::QueuedSpinLockGuard DispatcherGuard(DispatcherLock);
-
-    /* Evaluate residency and queue the thread */
-    DispatchReadyThread(Thread);
 }
 
 /**

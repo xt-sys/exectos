@@ -19,6 +19,8 @@ namespace KE
     {
         public:
             STATIC XTFASTCALL VOID InsertDeferredReadyList(IN PKTHREAD Thread);
+            STATIC XTAPI VOID ProcessReadyThread(IN PKTHREAD Thread);
+            STATIC XTAPI VOID ReadyThread(IN PKTHREAD Thread);
     };
 }
 
