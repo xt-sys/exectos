@@ -149,7 +149,7 @@ KE::KProcess::InitializeProcess(IN OUT PKPROCESS Process,
     Process->DirectoryTable[1] = DirectoryTable[1];
 
     /* Set the initial stack count and process quantum */
-    Process->StackCount = MAXSHORT;
+    Process->StackCount = MAXULONG_PTR;
     Process->Quantum = THREAD_QUANTUM;
 
     /* Set IOPM offset */
