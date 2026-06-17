@@ -21,6 +21,7 @@ namespace KE
             STATIC ETHREAD InitialThread;
 
         public:
+            STATIC XTAPI VOID AttachThread(IN PKTHREAD Thread);
             STATIC XTAPI PETHREAD GetInitialThread(VOID);
             STATIC XTAPI XTSTATUS InitializeIdleThread(IN PKPROCESS IdleProcess,
                                                        IN OUT PKTHREAD IdleThread,
@@ -34,8 +35,7 @@ namespace KE
                                                    IN PCONTEXT Context,
                                                    IN PVOID EnvironmentBlock,
                                                    IN PVOID Stack,
-                                                   IN BOOLEAN StartThread);
-            STATIC XTAPI VOID StartThread(IN PKTHREAD Thread);
+                                                   IN BOOLEAN AttachToProcess);
 
         private:
             STATIC XTAPI VOID HandleSystemThreadExit(VOID);

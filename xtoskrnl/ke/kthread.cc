@@ -10,6 +10,72 @@
 
 
 /**
+ * Finalizes thread initialization by inheriting parent process scheduling properties.
+ *
+ * @param Thread
+ *        Supplies a pointer to the thread.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KE::KThread::AttachThread(IN OUT PKTHREAD Thread)
+{
+    ULONG IdealProcessor;
+    PKPROCESS Process;
+
+    /* Extract the parent process from the thread's initial APC state */
+    Process = Thread->ApcState.Process;
+
+    /* Inherit scheduling properties from the parent process */
+    Thread->DisableBoost = Process->DisableBoost;
+    Thread->Iopl = Process->Iopl;
+    Thread->Quantum = Process->Quantum;
+    Thread->SystemAffinityActive = FALSE;
+
+    /* Acquire the process lock */
+    KE::SpinLockGuard ProcessGuard(&Process->ProcessLock);
+
+    /* Inherit priority from the parent process */
+    Thread->BasePriority = Process->BasePriority;
+    Thread->Priority = Process->BasePriority;
+
+    /* Inherit affinity state from the parent process */
+    KE::Affinity::CopyAffinity(Thread->Affinity, Process->Affinity);
+    KE::Affinity::CopyAffinity(Thread->UserAffinity, Process->Affinity);
+
+    /* Calculate the ideal processor based on the process thread seed and the affinity map */
+    IdealProcessor = KE::Affinity::FindNextRightSetProcessor(Process->ThreadSeed, Thread->Affinity);
+
+    /* Advance the thread seed for the next thread created in this process */
+    Process->ThreadSeed++;
+
+    /* Assign the selected ideal processor */
+    Thread->IdealProcessor = (UCHAR)IdealProcessor;
+    Thread->UserIdealProcessor = (UCHAR)IdealProcessor;
+
+    /* Acquire the dispatcher database lock */
+    KE::QueuedSpinLockGuard DispatcherGuard(DispatcherLock);
+
+    /* Insert the thread into the process's active thread list */
+    RTL::LinkedList::InsertTailList(&Process->ThreadListHead, &Thread->ThreadListEntry);
+
+    /* Handle edge cases where the stack count is uninitialized or explicitly maxed out */
+    if(Process->StackCount == MAXULONG_PTR)
+    {
+        /* Initialize the stack count for the first thread */
+        Process->StackCount = 1;
+    }
+    else
+    {
+        /* Increment the process stack count */
+        Process->StackCount++;
+    }
+}
+
+/**
  * Retrieves a pointer to the system's initial executive thread object.
  *
  * @return This routine returns a pointer to the initial executive thread.
@@ -149,7 +215,7 @@ KE::KThread::InitializeThread(IN PKPROCESS Process,
                               IN PCONTEXT Context,
                               IN PVOID EnvironmentBlock,
                               IN PVOID Stack,
-                              IN BOOLEAN RunThread)
+                              IN BOOLEAN AttachToProcess)
 {
     PKWAIT_BLOCK TimerWaitBlock;
     BOOLEAN Allocation;
@@ -270,31 +336,14 @@ KE::KThread::InitializeThread(IN PKPROCESS Process,
     Thread->State = Initialized;
 
     /* Check if thread should be started */
-    if(RunThread)
+    if(AttachToProcess)
     {
         /* Start thread */
-        StartThread(Thread);
+        AttachThread(Thread);
     }
 
     /* Return success */
     return STATUS_SUCCESS;
-}
-
-/**
- * Starts the thread.
- *
- * @param Thread
- *        Supplies a pointer to the thread.
- *
- * @return This routine does not return any value.
- *
- * @since XT 1.0
- */
-XTAPI
-VOID
-KE::KThread::StartThread(IN OUT PKTHREAD Thread)
-{
-    UNIMPLEMENTED;
 }
 
 /**
@@ -383,4 +432,5 @@ XTAPI
 VOID
 KE::KThread::SwitchToUserMode(VOID)
 {
+    UNIMPLEMENTED;
 }
