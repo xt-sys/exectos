@@ -92,6 +92,7 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/rtl/endian.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/exports.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/guid.cc
+    ${XTOSKRNL_SOURCE_DIR}/rtl/lifo.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/llist.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/math.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/memory.cc

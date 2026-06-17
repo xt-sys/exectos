@@ -18,6 +18,7 @@
 #include <rtl/dispatch.hh>
 #include <rtl/endian.hh>
 #include <rtl/guid.hh>
+#include <rtl/lifo.hh>
 #include <rtl/llist.hh>
 #include <rtl/math.hh>
 #include <rtl/memory.hh>
