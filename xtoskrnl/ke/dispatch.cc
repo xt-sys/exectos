@@ -115,8 +115,64 @@ XTCDECL
 VOID
 KE::Dispatcher::HandleDispatchInterrupt(IN PKTRAP_FRAME TrapFrame)
 {
+    PKTHREAD CurrentThread, NextThread;
+    PKPROCESSOR_CONTROL_BLOCK Prcb;
+
+    /* Receive the Processor Control Block*/
+    Prcb = KE::Processor::GetCurrentProcessorControlBlock();
+
+    /* Raise runlevel to DISPATCH level */
+    KE::RaiseRunLevel RunLevel(DISPATCH_LEVEL);
+
     /* End the interrupt */
     HL::Pic::SendEoi();
+
+    /* Check if there is pending deferred work */
+    if(Prcb->DeferredReadyListHead.Next ||
+       Prcb->DpcData[0].DpcQueueDepth ||
+       Prcb->TimerRequest)
+    {
+        UNIMPLEMENTED;
+    }
+
+    /* Re-enable hardware interrupts */
+    AR::CpuFunctions::SetInterruptFlag();
+
+    /* Check if the current thread has exhausted its execution quantum */
+    if((Prcb->CurrentThread->Quantum <= 0) && (Prcb->CurrentThread != Prcb->IdleThread))
+    {
+        /* Trigger the scheduler to recalculate thread parameters */
+        KE::Scheduler::ProcessQuantumEnd();
+    }
+    else if(Prcb->NextThread)
+    {
+        /* Start a guarded code block */
+        {
+            /* Lock the processor control block */
+            KE::SpinLockGuard ControlBlockGuard(&Prcb->PrcbLock);
+
+            /* Capture the outgoing (preempted) and incoming threads */
+            CurrentThread = Prcb->CurrentThread;
+            NextThread = Prcb->NextThread;
+
+            /* Acknowledge the pending thread and swap the pointers */
+            Prcb->NextThread = NULLPTR;
+            Prcb->CurrentThread = NextThread;
+
+            /* Update scheduling states */
+            NextThread->State = Running;
+            CurrentThread->WaitReason = WrDispatchInt;
+
+            /* Re-queue the preempted thread back into the local run queue or defer it */
+            KE::Scheduler::QueueReadyThread(CurrentThread, Prcb);
+        }
+
+        /* Perform the context switch */
+        SwitchContext(CurrentThread, APC_LEVEL);
+    }
+
+    /* Disable hardware interrupts before returning from the handler */
+    AR::CpuFunctions::ClearInterruptFlag();
 }
 
 /**
@@ -198,7 +254,7 @@ KE::Dispatcher::UpdateRunTime(IN PKTRAP_FRAME TrapFrame,
         /* Reset the adjustment threshold counter */
         ControlBlock->AdjustDpcThreshold = DPC_ADJUST_THRESHOLD;
 
-        /* Request a DISPATCH_LEVEL software interrupt to process the pending DPCs */
+        /* Request a DISPATCH level software interrupt to process the pending DPCs */
         HL::Irq::SendSoftwareInterrupt(DISPATCH_LEVEL);
 
         /* Evaluate if the DPC request rate is below the ideal threshold */
@@ -231,7 +287,7 @@ KE::Dispatcher::UpdateRunTime(IN PKTRAP_FRAME TrapFrame,
     /* Check if the thread has exhausted its quantum, ignoring the idle thread */
     if((Thread->Quantum <= 0) && (Thread != ControlBlock->IdleThread))
     {
-        /* Request a DISPATCH_LEVEL software interrupt to preempt the thread */
+        /* Request a DISPATCH level software interrupt to preempt the thread */
         HL::Irq::SendSoftwareInterrupt(DISPATCH_LEVEL);
     }
 }

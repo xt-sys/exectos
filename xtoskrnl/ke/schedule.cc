@@ -37,6 +37,20 @@ KE::Scheduler::InsertDeferredReadyList(IN PKTHREAD Thread)
 }
 
 /**
+ * Handles the expiration of the currently executing thread's time quantum.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KE::Scheduler::ProcessQuantumEnd(VOID)
+{
+    UNIMPLEMENTED;
+}
+
+/**
  * Transitions a thread to the ready state and queues it for execution within the dispatcher database.
  *
  * @param Thread
@@ -72,6 +86,27 @@ KE::Scheduler::ProcessReadyThread(IN PKTHREAD Thread)
         /* Both process and thread's stack are fully resident, queue the thread for execution */
         InsertDeferredReadyList(Thread);
     }
+}
+
+/**
+ * Enqueues a thread into the target processor's execution queue.
+ *
+ * @param Thread
+ *        Supplies a pointer to the thread that is ready for execution.
+ *
+ * @param Prcb
+ *        Supplies a pointer to the Processor Control Block of the target core.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+VOID
+KE::Scheduler::QueueReadyThread(IN PKTHREAD Thread,
+                                IN PKPROCESSOR_CONTROL_BLOCK Prcb)
+{
+    UNIMPLEMENTED;
 }
 
 /**
