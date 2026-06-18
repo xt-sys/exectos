@@ -101,7 +101,7 @@ VOID
 KE::KThread::HandleSystemThreadExit(VOID)
 {
     /* Trigger a debugger breakpoint */
-    asm("int $3\n");
+    __asm__ volatile("int $3\n");
 }
 
 /**
