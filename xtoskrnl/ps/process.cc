@@ -49,3 +49,18 @@ PS::Process::CreateIdleProcess(IN PKPROCESSOR_CONTROL_BLOCK Prcb)
     /* Initialize IDLE thread */
     return KE::KThread::InitializeIdleThread(IdleProcess, IdleThread, Prcb, AR::ProcessorSupport::GetBootStack());
 }
+
+/**
+ * Returns a pointer to the process object associated with the currently executing thread.
+ *
+ * @return This routine returns a pointer to the current process object.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+PEPROCESS
+PS::Process::GetCurrentProcess(VOID)
+{
+    /* Return the current process */
+    return (PEPROCESS)KE::Processor::GetCurrentThread()->ApcState.Process;
+}
