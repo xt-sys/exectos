@@ -4,10 +4,116 @@
  * FILE:            xtoskrnl/rtl/atomic.cc
  * DESCRIPTION:     Atomic operations support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ *                  Aiken Harris <harraiken91@gmail.com>
  */
 
 #include <xtos.hh>
 
+
+/**
+ * Performs an atomic addition on the 8-bit value.
+ *
+ * @param Address
+ *        Supplies the address of the value on which the addition is to be performed.
+ *
+ * @param Value
+ *        Supplies the value to be added.
+ *
+ * @return This routine returns the initial value at the given address.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+CHAR
+RTL::Atomic::Add8(IN PCHAR Address,
+                  IN CHAR Value)
+{
+    return __sync_fetch_and_add(Address, Value);
+}
+
+/**
+ * Performs an atomic addition on the 16-bit value.
+ *
+ * @param Address
+ *        Supplies the address of the value on which the addition is to be performed.
+ *
+ * @param Value
+ *        Supplies the value to be added.
+ *
+ * @return This routine returns the initial value at the given address.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+SHORT
+RTL::Atomic::Add16(IN PSHORT Address,
+                   IN SHORT Value)
+{
+    return __sync_fetch_and_add(Address, Value);
+}
+
+/**
+ * Performs an atomic addition on the 32-bit value.
+ *
+ * @param Address
+ *        Supplies the address of the value on which the addition is to be performed.
+ *
+ * @param Value
+ *        Supplies the value to be added.
+ *
+ * @return This routine returns the initial value at the given address.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+LONG
+RTL::Atomic::Add32(IN PLONG Address,
+                   IN LONG Value)
+{
+    return __sync_fetch_and_add(Address, Value);
+}
+
+/**
+ * Performs an atomic addition on the 64-bit value.
+ *
+ * @param Address
+ *        Supplies the address of the value on which the addition is to be performed.
+ *
+ * @param Value
+ *        Supplies the value to be added.
+ *
+ * @return This routine returns the initial value at the given address.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+LONG_PTR
+RTL::Atomic::Add64(IN PLONG_PTR Address,
+                   IN LONG_PTR Value)
+{
+    return __sync_fetch_and_add(Address, Value);
+}
+
+/**
+ * Performs an atomic addition on the pointer value.
+ *
+ * @param Address
+ *        Supplies the address of the pointer on which the addition is to be performed.
+ *
+ * @param Value
+ *        Supplies the value (in bytes) to be added to the pointer.
+ *
+ * @return This routine returns the initial pointer value at the given address.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+PVOID
+RTL::Atomic::AddPointer(IN PVOID *Address,
+                        IN PVOID Value)
+{
+    return (PVOID)__sync_fetch_and_add(Address, Value);
+}
 
 /**
  * Performs an atomic bitwise AND operation on the 8-bit value.

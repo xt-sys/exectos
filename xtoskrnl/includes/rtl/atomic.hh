@@ -18,6 +18,16 @@ namespace RTL
     class Atomic
     {
         public:
+            STATIC XTFASTCALL CHAR Add8(IN PCHAR Address,
+                                        IN CHAR Value);
+            STATIC XTFASTCALL SHORT Add16(IN PSHORT Address,
+                                          IN SHORT Value);
+            STATIC XTFASTCALL LONG Add32(IN PLONG Address,
+                                         IN LONG Value);
+            STATIC XTFASTCALL LONG_PTR Add64(IN PLONG_PTR Address,
+                                             IN LONG_PTR Value);
+            STATIC XTFASTCALL PVOID AddPointer(IN PVOID *Address,
+                                               IN PVOID Value);
             STATIC XTFASTCALL CHAR And8(IN PCHAR Address,
                                         IN CHAR Mask);
             STATIC XTFASTCALL SHORT And16(IN PSHORT Address,
