@@ -55,6 +55,9 @@
 /* Protection field shift */
 #define MM_PROTECT_FIELD_SHIFT                     5
 
+/* Process Quota Adjustment Thresholds */
+#define MMNONPAGED_QUOTA_INCREASE                  (64*1024)
+#define MMPAGED_QUOTA_INCREASE                     (512*1024)
 
 /* C/C++ specific code */
 #ifndef __XTOS_ASSEMBLER__
