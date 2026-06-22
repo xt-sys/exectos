@@ -19,10 +19,14 @@ namespace EX
     {
         public:
             STATIC XTFASTCALL BOOLEAN AcquireProtection(IN PEX_RUNDOWN_REFERENCE Descriptor);
+            STATIC XTFASTCALL BOOLEAN AcquireProtection(IN PEX_RUNDOWN_REFERENCE Descriptor,
+                                                        IN ULONG Count);
             STATIC XTFASTCALL VOID CompleteProtection(IN PEX_RUNDOWN_REFERENCE Descriptor);
             STATIC XTFASTCALL VOID InitializeProtection(IN PEX_RUNDOWN_REFERENCE Descriptor);
             STATIC XTFASTCALL VOID ReInitializeProtection(IN PEX_RUNDOWN_REFERENCE Descriptor);
             STATIC XTFASTCALL VOID ReleaseProtection(IN PEX_RUNDOWN_REFERENCE Descriptor);
+            STATIC XTFASTCALL VOID ReleaseProtection(IN PEX_RUNDOWN_REFERENCE Descriptor,
+                                                     IN ULONG Count);
             STATIC XTFASTCALL VOID WaitForProtectionRelease(IN PEX_RUNDOWN_REFERENCE Descriptor);
     };
 }
