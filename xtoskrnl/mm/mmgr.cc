@@ -141,7 +141,7 @@ MM::Manager::GetPhysicalMemoryBlock(VOID)
                                              sizeof(PHYSICAL_MEMORY_RUN) *
                                              (DescriptorCount - 1),
                                              (PVOID*)&PrimaryBuffer,
-                                             SIGNATURE32('M', 'M', 'g', 'r'));
+                                             TAG_MM_MEMORY_MGR);
         if(Status != STATUS_SUCCESS || !PrimaryBuffer)
         {
             /* Primary pool allocation failed, return NULLPTR */
@@ -197,14 +197,14 @@ MM::Manager::GetPhysicalMemoryBlock(VOID)
                                                  sizeof(PHYSICAL_MEMORY_RUN) *
                                                  (RunCount - 1),
                                                  (PVOID*)&SecondaryBuffer,
-                                                 SIGNATURE32('M', 'M', 'g', 'r'));
+                                                 TAG_MM_MEMORY_MGR);
             if(Status == STATUS_SUCCESS && SecondaryBuffer)
             {
                 /* Copy the coalesced runs from the oversized primary buffer */
                 RtlCopyMemory(SecondaryBuffer->Run, PrimaryBuffer->Run, sizeof(PHYSICAL_MEMORY_RUN) * RunCount);
 
                 /* Free the primary buffer */
-                MM::Allocator::FreePool(PrimaryBuffer, SIGNATURE32('M', 'M', 'g', 'r'));
+                MM::Allocator::FreePool(PrimaryBuffer, TAG_MM_MEMORY_MGR);
 
                 /* Update the primary buffer pointer */
                 PrimaryBuffer = SecondaryBuffer;

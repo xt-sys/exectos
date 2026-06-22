@@ -282,7 +282,7 @@ MM::Allocator::AllocatePool(IN MMPOOL_TYPE PoolType,
                             OUT PVOID *Memory)
 {
     /* Allocate pool */
-    return AllocatePool(PoolType, Bytes, Memory, SIGNATURE32('N', 'o', 'n', 'e'));
+    return AllocatePool(PoolType, Bytes, Memory, TAG_MM_NONE);
 }
 
 /**
@@ -351,7 +351,7 @@ MM::Allocator::AllocatePool(IN MMPOOL_TYPE PoolType,
         if(!RegisterBigAllocationTag(PoolEntry, Tag, (ULONG)SIZE_TO_PAGES(Bytes), PoolType))
         {
             /* Fallback to a default tag */
-            Tag = SIGNATURE32('B', 'i', 'g', 'A');
+            Tag = TAG_MM_BIG_ALLOC;
         }
 
         /* Register the allocation in the tracking table */
@@ -721,8 +721,8 @@ MM::Allocator::ExpandBigAllocationsTable(VOID)
     FreePages(OldTable, &PagesFreed);
 
     /* Update the pool tracking statistics */
-    UnregisterAllocationTag(SIGNATURE32('M', 'M', 'g', 'r'), PagesFreed << MM_PAGE_SHIFT, (MMPOOL_TYPE)0);
-    RegisterAllocationTag(SIGNATURE32('M', 'M', 'g', 'r'), ROUND_UP(AllocationBytes, MM_PAGE_SIZE), (MMPOOL_TYPE)0);
+    UnregisterAllocationTag(TAG_MM_MEMORY_MGR, PagesFreed << MM_PAGE_SHIFT, (MMPOOL_TYPE)0);
+    RegisterAllocationTag(TAG_MM_MEMORY_MGR, ROUND_UP(AllocationBytes, MM_PAGE_SIZE), (MMPOOL_TYPE)0);
 
     /* Return success */
     return TRUE;
@@ -1068,7 +1068,7 @@ XTSTATUS
 MM::Allocator::FreePool(IN PVOID VirtualAddress)
 {
     /* Free pool */
-    return FreePool(VirtualAddress, SIGNATURE32('N', 'o', 'n', 'e'));
+    return FreePool(VirtualAddress, TAG_MM_NONE);
 }
 
 /**
@@ -1116,7 +1116,7 @@ MM::Allocator::FreePool(IN PVOID VirtualAddress,
         else if(!Tag)
         {
             /* Fallback to a default tag */
-            Tag = SIGNATURE32('B', 'i', 'g', 'A');
+            Tag = TAG_MM_BIG_ALLOC;
             PageCount = 1;
         }
 
@@ -1500,7 +1500,7 @@ MM::Allocator::InitializeBigAllocationsTracking(VOID)
     KE::SpinLock::InitializeSpinLock(&BigAllocationsTrackingTableLock);
 
     /* Register the allocation in the tracking table */
-    RegisterAllocationTag(SIGNATURE32('M', 'M', 'g', 'r'),
+    RegisterAllocationTag(TAG_MM_MEMORY_MGR,
                           SIZE_TO_PAGES(BigAllocationsTrackingTableSize * sizeof(POOL_TRACKING_BIG_ALLOCATIONS)),
                           NonPagedPool);
 }
@@ -1520,10 +1520,10 @@ MM::Allocator::PopulateAllocationTags(VOID)
 
     CULONG HotTags[] =
     {
-        SIGNATURE32('B', 'i', 'g', 'A'), /* Big Allocations */
-        SIGNATURE32('M', 'M', 'g', 'r'), /* Memory Manager Internal */
-        SIGNATURE32('N', 'o', 'n', 'e'), /* Untagged allocations */
-        SIGNATURE32('O', 'v', 'f', 'l'), /* Global table expansion overflow fallback */
+        TAG_MM_BIG_ALLOC, /* Big Allocations */
+        TAG_MM_MEMORY_MGR, /* Memory Manager Internal */
+        TAG_MM_NONE, /* Untagged allocations */
+        TAG_MM_OVERFLOW, /* Global table expansion overflow fallback */
     };
 
     /* Seed all tags */
@@ -1754,7 +1754,7 @@ MM::Allocator::RegisterAllocationTagExpansion(IN ULONG Tag,
             if(Status != STATUS_SUCCESS || !NewTrackingTable)
             {
                 /* Activate the global overflow bucket */
-                AllocationsTrackingTable[AllocationsTrackingTableSize - 1].Tag = SIGNATURE32('O', 'v', 'f', 'l');
+                AllocationsTrackingTable[AllocationsTrackingTableSize - 1].Tag = TAG_MM_OVERFLOW;
                 UseOverflowBucket = TRUE;
             }
             else
@@ -1775,7 +1775,7 @@ MM::Allocator::RegisterAllocationTagExpansion(IN ULONG Tag,
                 AllocationsTrackingExpansionTableSize = Footprint / sizeof(POOL_TRACKING_TABLE);;
 
                 /* Register the new allocation tag */
-                RegisterAllocationTag(SIGNATURE32('M', 'M', 'g', 'r'), Footprint, NonPagedPool);
+                RegisterAllocationTag(TAG_MM_MEMORY_MGR, Footprint, NonPagedPool);
             }
         }
     }
@@ -1809,7 +1809,7 @@ MM::Allocator::RegisterAllocationTagExpansion(IN ULONG Tag,
     {
         /* Free the old tracking table and unregister the allocation tag */
         FreePages(OldTrackingTable, &FreedPages);
-        UnregisterAllocationTag(SIGNATURE32('M', 'M', 'g', 'r'), (SIZE_T)FreedPages * MM_PAGE_SIZE, NonPagedPool);
+        UnregisterAllocationTag(TAG_MM_MEMORY_MGR, (SIZE_T)FreedPages * MM_PAGE_SIZE, NonPagedPool);
     }
 
     /* Register the caller's original allocation */
@@ -2181,5 +2181,5 @@ MM::Allocator::UnregisterBigAllocationTag(IN PVOID VirtualAddress,
 
     /* Return an empty page count and a fallback tag */
     *Pages = 0;
-    return SIGNATURE32('B', 'i', 'g', 'A');
+    return TAG_MM_BIG_ALLOC;
 }

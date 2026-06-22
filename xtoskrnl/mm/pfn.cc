@@ -482,7 +482,7 @@ MM::Pfn::InitializePfnBitmap(VOID)
     Status = MM::Allocator::AllocatePool(NonPagedPool,
                                          (((HighestPhysicalPage + 1) + 31) / 32) * 4,
                                          (PVOID *)&BitMap,
-                                         SIGNATURE32('M', 'M', 'g', 'r'));
+                                         TAG_MM_MEMORY_MGR);
     if(Status != STATUS_SUCCESS || !BitMap)
     {
         /* Memory allocation failed, kernel panic */
