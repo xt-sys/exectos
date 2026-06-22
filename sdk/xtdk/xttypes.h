@@ -156,6 +156,13 @@ typedef LPCUWSTR PCUTSTR, LPCUTSTR;
 /* Variadic ABI types */
 typedef __builtin_va_list VA_LIST, *PVA_LIST;
 
+/* Double ULONG_PTR structure */
+typedef struct _DOUBLE_ULONG_PTR
+{
+    ULONG_PTR LowPart;
+    ULONG_PTR HighPart;
+} DOUBLE_ULONG_PTR, *PDOUBLE_ULONG_PTR;
+
 /* 128-bit floats structure */
 typedef struct _FLOAT128
 {
