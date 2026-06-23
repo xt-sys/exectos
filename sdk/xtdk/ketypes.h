@@ -13,6 +13,7 @@
 #include <xtstruct.h>
 #include <xttarget.h>
 #include <xttypes.h>
+#include <rtltypes.h>
 #include ARCH_HEADER(xtstruct.h)
 
 
@@ -325,6 +326,27 @@ typedef VOID (XTAPI *PKKERNEL_ROUTINE)(IN PKAPC Apc, IN OUT PKNORMAL_ROUTINE *No
 typedef VOID (XTAPI *PKRUNDOWN_ROUTINE)(IN PKAPC Apc);
 typedef VOID (XTCDECL *PKSTART_ROUTINE)(IN PVOID StartContext);
 typedef VOID (XTCDECL *PKSYSTEM_ROUTINE)(IN PKSTART_ROUTINE StartRoutine, IN PVOID StartContext);
+
+/* Dispatcher object header structure definition */
+typedef struct _DISPATCHER_HEADER
+{
+    union
+    {
+        struct
+        {
+            UCHAR Type;
+            UCHAR Absolute;
+            UCHAR Size;
+            union {
+                UCHAR Inserted;
+                BOOLEAN DebugActive;
+            };
+        };
+        VOLATILE LONG Lock;
+    };
+    LONG SignalState;
+    LIST_ENTRY WaitListHead;
+} DISPATCHER_HEADER, *PDISPATCHER_HEADER;
 
 /* Exception record structure definition */
 typedef struct _EXCEPTION_RECORD
@@ -649,8 +671,8 @@ typedef struct _KTHREAD
     UCHAR Spare5;
     BOOLEAN AutoAlignment;
     UCHAR Iopl;
-    CCHAR FreezeCount;
-    CCHAR SuspendCount;
+    CHAR FreezeCount;
+    CHAR SuspendCount;
     UCHAR Spare0[1];
     UCHAR UserIdealProcessor;
     UCHAR Spare2[3];

@@ -41,81 +41,12 @@ typedef ULONG_PTR PFN_NUMBER, *PPFN_NUMBER;
 /* Physical address */
 typedef LARGE_INTEGER PHYSICAL_ADDRESS, *PPHYSICAL_ADDRESS;
 
-/* 128-bit buffer containing a unique identifier value */
-typedef struct _GUID
-{
-    UINT Data1;
-    USHORT Data2;
-    USHORT Data3;
-    UCHAR Data4[8];
-} GUID, *PGUID;
-
-/* Double linked list structure definition */
-typedef struct _LIST_ENTRY
-{
-    PLIST_ENTRY Flink;
-    PLIST_ENTRY Blink;
-} LIST_ENTRY, *PLIST_ENTRY;
-
-/* 32-bit double linked list structure definition */
-typedef struct _LIST_ENTRY32
-{
-    ULONG Flink;
-    ULONG Blink;
-} LIST_ENTRY32, *PLIST_ENTRY32;
-
-/* 64-bit double linked list structure definition */
-typedef struct _LIST_ENTRY64
-{
-    ULONGLONG Flink;
-    ULONGLONG Blink;
-} LIST_ENTRY64, *PLIST_ENTRY64;
-
-/* Single linked list structure definition */
-typedef struct _SINGLE_LIST_ENTRY
-{
-    PSINGLE_LIST_ENTRY Next;
-} SINGLE_LIST_ENTRY, *PSINGLE_LIST_ENTRY;
-
-/* Header for a sequenced single linked list union definition */
-typedef union _SINGLE_LIST_HEADER
-{
-    ULONGLONG Alignment;
-    struct
-    {
-        SINGLE_LIST_ENTRY Next;
-        USHORT Depth;
-        USHORT Sequence;
-    };
-} SINGLE_LIST_HEADER, *PSINGLE_LIST_HEADER;
-
 /* 128-bit 16-byte aligned XMM register */
 typedef struct _M128
 {
     ULONGLONG Low;
     LONGLONG High;
 } ALIGN(16) M128, *PM128;
-
-/* Dispatcher object header structure definition */
-typedef struct _DISPATCHER_HEADER
-{
-    union
-    {
-        struct
-        {
-            UCHAR Type;
-            UCHAR Absolute;
-            UCHAR Size;
-            union {
-                UCHAR Inserted;
-                BOOLEAN DebugActive;
-            };
-        };
-        VOLATILE LONG Lock;
-    };
-    LONG SignalState;
-    LIST_ENTRY WaitListHead;
-} DISPATCHER_HEADER, *PDISPATCHER_HEADER;
 
 #endif /* __XTOS_ASSEMBLER_ */
 #endif /* __XTDK_XTBASE_H */

@@ -72,6 +72,36 @@
 typedef XTSTATUS (*PWRITE_CHARACTER)(IN CHAR Character);
 typedef XTSTATUS (*PWRITE_WIDE_CHARACTER)(IN WCHAR Character);
 
+/* 128-bit buffer containing a unique identifier value */
+typedef struct _GUID
+{
+    UINT Data1;
+    USHORT Data2;
+    USHORT Data3;
+    UCHAR Data4[8];
+} GUID, *PGUID;
+
+/* Double linked list structure definition */
+typedef struct _LIST_ENTRY
+{
+    PLIST_ENTRY Flink;
+    PLIST_ENTRY Blink;
+} LIST_ENTRY, *PLIST_ENTRY;
+
+/* 32-bit double linked list structure definition */
+typedef struct _LIST_ENTRY32
+{
+    ULONG Flink;
+    ULONG Blink;
+} LIST_ENTRY32, *PLIST_ENTRY32;
+
+/* 64-bit double linked list structure definition */
+typedef struct _LIST_ENTRY64
+{
+    ULONGLONG Flink;
+    ULONGLONG Blink;
+} LIST_ENTRY64, *PLIST_ENTRY64;
+
 /* Red-black tree node color enumeration list */
 typedef enum _RTL_BALANCED_NODE_COLOR
 {
@@ -155,6 +185,24 @@ typedef struct _RTL_SHA1_CONTEXT
     ULONG Count[2];
     UCHAR Buffer[SHA1_BLOCK_SIZE];
 } RTL_SHA1_CONTEXT, *PRTL_SHA1_CONTEXT;
+
+/* Single linked list structure definition */
+typedef struct _SINGLE_LIST_ENTRY
+{
+    PSINGLE_LIST_ENTRY Next;
+} SINGLE_LIST_ENTRY, *PSINGLE_LIST_ENTRY;
+
+/* Header for a sequenced single linked list union definition */
+typedef union _SINGLE_LIST_HEADER
+{
+    ULONGLONG Alignment;
+    struct
+    {
+        SINGLE_LIST_ENTRY Next;
+        USHORT Depth;
+        USHORT Sequence;
+    };
+} SINGLE_LIST_HEADER, *PSINGLE_LIST_HEADER;
 
 /* Runtime time fields structure definition */
 typedef struct _TIME_FIELDS
