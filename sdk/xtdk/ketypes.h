@@ -13,8 +13,8 @@
 #include <xtstruct.h>
 #include <xttarget.h>
 #include <xttypes.h>
-#include <rtltypes.h>
 #include ARCH_HEADER(xtstruct.h)
+#include ARCH_HEADER(rtltypes.h)
 
 
 /* Exception types and handling mechanisms */

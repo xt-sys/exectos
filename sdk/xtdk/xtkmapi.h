@@ -44,6 +44,7 @@
 #include ARCH_HEADER(hltypes.h)
 #include ARCH_HEADER(ketypes.h)
 #include ARCH_HEADER(mmtypes.h)
+#include ARCH_HEADER(rtltypes.h)
 
 /* XT routines */
 #include <exfuncs.h>
