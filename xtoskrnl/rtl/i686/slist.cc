@@ -1,8 +1,8 @@
 /**
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
- * FILE:            xtoskrnl/rtl/slist.cc
- * DESCRIPTION:     Singly linked list manipulation routines
+ * FILE:            xtoskrnl/rtl/i686/slist.cc
+ * DESCRIPTION:     Singly linked list manipulation routines for i686 architecture
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
  */
 
@@ -112,7 +112,7 @@ RTL::SinglyList::InsertTailList(IN OUT PSINGLE_LIST_HEADER ListHead,
     if(ListEmpty(ListHead))
     {
         /* Store the original last entry */
-        OriginalEntry = ListHead->Next.Next;
+        OriginalEntry = NULLPTR;
 
         /* Insert entry at the head */
         ListHead->Next.Next = Entry;
@@ -263,7 +263,7 @@ RTL::SinglyList::SpliceHeadList(IN OUT PSINGLE_LIST_HEADER ListHead,
 {
     PSINGLE_LIST_ENTRY LastEntry, OriginalEntry;
 
-    /* Store the original last entry */
+    /* Store the original first entry */
     OriginalEntry = ListHead->Next.Next;
 
     /* Check if the list to splice is empty */
