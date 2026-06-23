@@ -12,6 +12,7 @@
 #include <xtbase.h>
 #include <xtstruct.h>
 #include <xttypes.h>
+#include <extypes.h>
 #include <potypes.h>
 #include ARCH_HEADER(xtstruct.h)
 #include ARCH_HEADER(artypes.h)
@@ -535,6 +536,9 @@ typedef struct _KPROCESSOR_CONTROL_BLOCK
     KPROCESSOR_STATE ProcessorState;
     KSPIN_LOCK PrcbLock;
     KSPIN_LOCK_QUEUE LockQueue[MaximumLock];
+    LOOKASIDE_LIST LookasideList[16];
+    LOOKASIDE_LIST NonPagedLookasideList[POOL_LOOKASIDE_LISTS];
+    LOOKASIDE_LIST PagedLookasideList[POOL_LOOKASIDE_LISTS];
     ULONG_PTR MultiThreadProcessorSet;
     VOLATILE ULONG IpiFrozen;
     VOLATILE LONG_PTR RequestSummary;
