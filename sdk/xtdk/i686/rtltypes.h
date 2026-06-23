@@ -3,7 +3,7 @@
  * COPYRIGHT:       See COPYING.md in the top level directory
  * FILE:            sdk/xtdk/amd64/rtltypes.h
  * DESCRIPTION:     Runtime library structures definitions for i686 architecture
- * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ * DEVELOPERS:      Aiken Harris <harraiken91@gmail.com>
  */
 
 #ifndef __XTDK_I686_RTLTYPES_H
