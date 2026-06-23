@@ -11,6 +11,7 @@
 
 #include <xtos.hh>
 
+#include <ex/laslist.hh>
 #include <ex/rundown.hh>
 
 #endif /* __XTOSKRNL_EX_HH */
