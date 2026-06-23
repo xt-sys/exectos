@@ -81,13 +81,6 @@ typedef struct _GUID
     UCHAR Data4[8];
 } GUID, *PGUID;
 
-/* Double linked list structure definition */
-typedef struct _LIST_ENTRY
-{
-    PLIST_ENTRY Flink;
-    PLIST_ENTRY Blink;
-} LIST_ENTRY, *PLIST_ENTRY;
-
 /* 32-bit double linked list structure definition */
 typedef struct _LIST_ENTRY32
 {
