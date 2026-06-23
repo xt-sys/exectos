@@ -342,6 +342,41 @@ RTL::Atomic::CompareExchange64(IN PLONG_PTR Address,
 }
 
 /**
+ * Performs an atomic compare-exchange operation on the 64-bit or 128-bit value depending on architecture.
+ *
+ * @param Address
+ *        Supplies the address of the value to compare and potentially exchange.
+ *
+ * @param Comperand
+ *        Supplies the value to compare against.
+ *
+ * @param Exchange
+ *        Supplies the value to write if the comparison returns equality.
+ *
+ * @return This routine returns the original value at the given address.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+DOUBLE_ULONG_PTR
+RTL::Atomic::CompareExchange128(IN PDOUBLE_ULONG_PTR Address,
+                                IN DOUBLE_ULONG_PTR Comperand,
+                                IN DOUBLE_ULONG_PTR Exchange)
+{
+    DOUBLE_ULONG_PTR Value;
+
+    /* Make a local copy of the comperand */
+    Value = Comperand;
+
+    /* Perform an atomic compare-exchange operation */
+    __atomic_compare_exchange((VOLATILE PDOUBLE_ULONG_PTR)Address, &Value, &Exchange,
+                              FALSE, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+
+    /* Return value */
+    return Value;
+}
+
+/**
  * Performs atomically compare exchange operation.
  *
  * @param Address

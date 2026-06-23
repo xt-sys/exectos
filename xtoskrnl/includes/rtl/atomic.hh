@@ -52,6 +52,9 @@ namespace RTL
             STATIC XTFASTCALL LONG_PTR CompareExchange64(IN PLONG_PTR Address,
                                                       IN LONG_PTR Comperand,
                                                       IN LONG_PTR Exchange);
+            STATIC XTFASTCALL DOUBLE_ULONG_PTR CompareExchange128(IN PDOUBLE_ULONG_PTR Address,
+                                                                  IN DOUBLE_ULONG_PTR Comperand,
+                                                                  IN DOUBLE_ULONG_PTR Exchange);
             STATIC XTFASTCALL PVOID CompareExchangePointer(IN PVOID *Address,
                                                         IN PVOID Comperand,
                                                         IN PVOID Exchange);
