@@ -52,9 +52,6 @@ namespace RTL
             STATIC XTFASTCALL LONG_PTR CompareExchange64(IN PLONG_PTR Address,
                                                       IN LONG_PTR Comperand,
                                                       IN LONG_PTR Exchange);
-            STATIC XTFASTCALL DOUBLE_ULONG_PTR CompareExchange128(IN PDOUBLE_ULONG_PTR Address,
-                                                                  IN DOUBLE_ULONG_PTR Comperand,
-                                                                  IN DOUBLE_ULONG_PTR Exchange);
             STATIC XTFASTCALL PVOID CompareExchangePointer(IN PVOID *Address,
                                                         IN PVOID Comperand,
                                                         IN PVOID Exchange);
@@ -80,7 +77,7 @@ namespace RTL
                                                      IN LONG_PTR Value);
             STATIC XTFASTCALL PVOID ExchangePointer(IN PVOID *Address,
                                                     IN PVOID Exchange);
-            STATIC XTFASTCALL PSINGLE_LIST_ENTRY FlushSingleList(IN PSINGLE_LIST_HEADER Header);
+            STATIC XTFASTCALL PSINGLE_LIST_ENTRY FlushSingleList(IN PSINGLE_LIST_HEADER ListHead);
             STATIC XTFASTCALL CHAR Increment8(IN PCHAR Address);
             STATIC XTFASTCALL SHORT Increment16(IN PSHORT Address);
             STATIC XTFASTCALL LONG Increment32(IN PLONG Address);
@@ -93,8 +90,8 @@ namespace RTL
                                         IN LONG Mask);
             STATIC XTFASTCALL LONG_PTR Or64(IN PLONG_PTR Address,
                                             IN LONG_PTR Mask);
-            STATIC XTFASTCALL XTFASTCALL PSINGLE_LIST_ENTRY PopEntrySingleList(IN PSINGLE_LIST_HEADER Header);
-            STATIC XTFASTCALL PSINGLE_LIST_ENTRY PushEntrySingleList(IN PSINGLE_LIST_HEADER Header,
+            STATIC XTFASTCALL XTFASTCALL PSINGLE_LIST_ENTRY PopEntrySingleList(IN PSINGLE_LIST_HEADER ListHead);
+            STATIC XTFASTCALL PSINGLE_LIST_ENTRY PushEntrySingleList(IN PSINGLE_LIST_HEADER ListHead,
                                                                      IN PSINGLE_LIST_ENTRY Entry);
             STATIC XTFASTCALL CHAR Xor8(IN PCHAR Address,
                                         IN CHAR Mask);

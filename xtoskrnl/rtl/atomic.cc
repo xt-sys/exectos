@@ -342,41 +342,6 @@ RTL::Atomic::CompareExchange64(IN PLONG_PTR Address,
 }
 
 /**
- * Performs an atomic compare-exchange operation on the 64-bit or 128-bit value depending on architecture.
- *
- * @param Address
- *        Supplies the address of the value to compare and potentially exchange.
- *
- * @param Comperand
- *        Supplies the value to compare against.
- *
- * @param Exchange
- *        Supplies the value to write if the comparison returns equality.
- *
- * @return This routine returns the original value at the given address.
- *
- * @since XT 1.0
- */
-XTFASTCALL
-DOUBLE_ULONG_PTR
-RTL::Atomic::CompareExchange128(IN PDOUBLE_ULONG_PTR Address,
-                                IN DOUBLE_ULONG_PTR Comperand,
-                                IN DOUBLE_ULONG_PTR Exchange)
-{
-    DOUBLE_ULONG_PTR Value;
-
-    /* Make a local copy of the comperand */
-    Value = Comperand;
-
-    /* Perform an atomic compare-exchange operation */
-    __atomic_compare_exchange((VOLATILE PDOUBLE_ULONG_PTR)Address, &Value, &Exchange,
-                              FALSE, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
-
-    /* Return value */
-    return Value;
-}
-
-/**
  * Performs atomically compare exchange operation.
  *
  * @param Address
@@ -660,23 +625,6 @@ RTL::Atomic::ExchangePointer(IN PVOID *Address,
 }
 
 /**
- * Removes all entries from single linked list.
- *
- * @param Header
- *        Supplies a pointer to the header of linked list.
- *
- * @return This routine returns a pointer to the original list, or NULLPTR if the list was already empty.
- *
- * @since XT 1.0
- */
-XTFASTCALL
-PSINGLE_LIST_ENTRY
-RTL::Atomic::FlushSingleList(IN PSINGLE_LIST_HEADER Header)
-{
-    return (PSINGLE_LIST_ENTRY)Exchange64((PLONG_PTR)&Header->Alignment, (LONGLONG)NULLPTR);
-}
-
-/**
  * Performs atomically increment of the 8-bit value.
  *
  * @param Address
@@ -826,89 +774,6 @@ RTL::Atomic::Or64(IN PLONG_PTR Address,
                   IN LONG_PTR Mask)
 {
     return __sync_fetch_and_or(Address, Mask);
-}
-
-/**
- * Removes and returns the first entry from single linked list.
- *
- * @param Header
- *        Supplies a pointer to the header of a single linked list.
- *
- * @return This routine returns a pointer to the removed element, or NULLPTR if the list was empty.
- *
- * @since XT 1.0
- */
-XTFASTCALL
-PSINGLE_LIST_ENTRY
-RTL::Atomic::PopEntrySingleList(IN PSINGLE_LIST_HEADER Header)
-{
-    PSINGLE_LIST_ENTRY ListHead, FirstEntry, NextEntry;
-
-    /* Save header and first entry */
-    ListHead = (PSINGLE_LIST_ENTRY)Header;
-    FirstEntry = ListHead->Next;
-    do
-    {
-        /* Check if list is not empty */
-        if(!FirstEntry)
-        {
-            /* Empty list */
-            return NULLPTR;
-        }
-
-        /* Update link */
-        NextEntry = FirstEntry;
-
-        /* Compare and exchange */
-        FirstEntry = (PSINGLE_LIST_ENTRY)CompareExchange64((PLONG_PTR)ListHead,
-                                                           (LONG_PTR)FirstEntry->Next,
-                                                           (LONG_PTR)FirstEntry);
-    } while(FirstEntry != NextEntry);
-
-    /* Return removed element */
-    return FirstEntry;
-}
-
-/**
- * Inserts new entry at the beginning of single linked list.
- *
- * @param Header
- *        Supplies a pointer to the header of linked list.
- *
- * @param Entry
- *        Supplies a pointer to entry, that will be inserted into linked list.
- *
- * @return This routine returns a pointer to original heading, or NULLPTR if the list was originally empty.
- *
- * @since XT 1.0
- */
-XTFASTCALL
-PSINGLE_LIST_ENTRY
-RTL::Atomic::PushEntrySingleList(IN PSINGLE_LIST_HEADER Header,
-                                 IN PSINGLE_LIST_ENTRY Entry)
-{
-    PSINGLE_LIST_ENTRY ListHead, ListEntry, FirstEntry, NextEntry;
-
-    /* Save header and new entry */
-    ListHead = (PSINGLE_LIST_ENTRY)Header;
-    ListEntry = Entry;
-
-    /* Save next link in new first element */
-    FirstEntry = ListHead->Next;
-    do
-    {
-        /* Update links */
-        ListEntry->Next = FirstEntry;
-        NextEntry = FirstEntry;
-
-        /* Compare and exchange */
-        FirstEntry = (PSINGLE_LIST_ENTRY)CompareExchange64((PLONG_PTR)ListHead,
-                                                           (LONG_PTR)ListEntry,
-                                                           (LONG_PTR)FirstEntry);
-    } while(FirstEntry != NextEntry);
-
-    /* Return original first element */
-    return FirstEntry;
 }
 
 /**
