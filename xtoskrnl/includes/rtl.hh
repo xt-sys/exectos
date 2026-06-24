@@ -27,6 +27,7 @@
 #include <rtl/slist.hh>
 #include <rtl/string.hh>
 #include <rtl/time.hh>
+#include <rtl/unicode.hh>
 #include <rtl/widestr.hh>
 
 #endif /* __XTOSKRNL_RTL_HH */

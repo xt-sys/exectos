@@ -126,6 +126,12 @@ RtlCopyString(IN PCHAR Destination,
 XTCLINK
 XTAPI
 VOID
+RtlCopyUnicodeString(IN OUT PUNICODE_STRING Destination,
+                     IN PCUNICODE_STRING Source);
+
+XTCLINK
+XTAPI
+VOID
 RtlCopyWideString(IN PWCHAR Destination,
                   IN PCWSTR Source,
                   IN ULONG Length);
@@ -186,6 +192,18 @@ XTCLINK
 XTCDECL
 VOID
 RtlInitializeListHead(IN PLIST_ENTRY ListHead);
+
+XTCLINK
+XTAPI
+VOID
+RtlInitializeUnicodeString(OUT PUNICODE_STRING Destination,
+                           IN PCWSTR Source);
+
+XTCLINK
+XTAPI
+XTSTATUS
+RtlInitializeUnicodeStringEx(OUT PUNICODE_STRING Destination,
+                             IN PCWSTR Source);
 
 XTCLINK
 XTCDECL
