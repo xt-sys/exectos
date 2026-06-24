@@ -48,6 +48,7 @@
 
 /* XT status code definitions */
 #define STATUS_SUCCESS                                                     ((XTSTATUS) 0x00000000L)
+#define STATUS_TIMEOUT                                                     ((XTSTATUS) 0x00000102L)
 #define STATUS_WAKE_SYSTEM_DEBUGGER                                        ((XTSTATUS) 0x80000007L)
 #define STATUS_END_OF_MEDIA                                                ((XTSTATUS) 0x8000001EL)
 #define STATUS_RESOURCE_LOCKED                                             ((XTSTATUS) 0xC0000000L)
@@ -68,7 +69,7 @@
 #define STATUS_INSUFFICIENT_RESOURCES                                      ((XTSTATUS) 0xC000009AL)
 #define STATUS_DEVICE_NOT_READY                                            ((XTSTATUS) 0xC00000A3L)
 #define STATUS_NOT_SUPPORTED                                               ((XTSTATUS) 0xC00000BBL)
-#define STATUS_TIMEOUT                                                     ((XTSTATUS) 0x00000102L)
+#define STATUS_NAME_TOO_LONG                                               ((XTSTATUS) 0xC0000106L)
 #define STATUS_IO_DEVICE_ERROR                                             ((XTSTATUS) 0xC0000185L)
 #define STATUS_NOT_FOUND                                                   ((XTSTATUS) 0xC0000225L)
 
