@@ -393,6 +393,29 @@ RtlCopyString(IN PCHAR Destination,
 }
 
 /**
+ * Copies a source Unicode string to a destination Unicode string.
+ *
+ * @param Destination
+ *        Supplies a pointer to the destination string.
+ *
+ * @param Source
+ *        Supplies an optional pointer to the source string. If this parameter is not provided,
+ *        the destination string is effectively emptied.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since NT 3.5
+ */
+XTCLINK
+XTAPI
+VOID
+RtlCopyUnicodeString(IN OUT PUNICODE_STRING Destination,
+                     IN PCUNICODE_STRING Source)
+{
+    RTL::Unicode::CopyString(Destination, Source);
+}
+
+/**
  * Copies a wide string from a buffer into another buffer, ensuring that the destination string is NULL-terminated.
  *
  * @param Destination
@@ -626,6 +649,50 @@ VOID
 RtlInitializeListHead(IN PLIST_ENTRY ListHead)
 {
     RTL::LinkedList::InitializeListHead(ListHead);
+}
+
+/**
+ * Initializes a Unicode string.
+ *
+ * @param Destination
+ *        Supplies a pointer to the UNICODE_STRING structure to be initialized.
+ *
+ * @param Source
+ *        Supplies an optional pointer to a NULL-terminated wide character string.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCLINK
+XTAPI
+VOID
+RtlInitializeUnicodeString(OUT PUNICODE_STRING Destination,
+                           IN PCWSTR Source)
+{
+    RTL::Unicode::InitializeString(Destination, Source, TRUE);
+}
+
+/**
+ * Initializes a Unicode string.
+ *
+ * @param Destination
+ *        Supplies a pointer to the UNICODE_STRING structure to be initialized.
+ *
+ * @param Source
+ *        Supplies an optional pointer to a NULL-terminated wide character string.
+ *
+ * @return This routine returns a status code indicating the success or failure of the operation.
+ *
+ * @since XT 1.0
+ */
+XTCLINK
+XTAPI
+XTSTATUS
+RtlInitializeUnicodeStringEx(OUT PUNICODE_STRING Destination,
+                             IN PCWSTR Source)
+{
+    return RTL::Unicode::InitializeString(Destination, Source);
 }
 
 /**
