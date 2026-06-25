@@ -16,6 +16,37 @@
 /* Kernel Library */
 namespace KE
 {
+    class QueuedSpinLockGuard
+    {
+        private:
+            KLOCK_QUEUE_HANDLE LockQueueHandle;
+            PKSPIN_LOCK Lock;
+            BOOLEAN Owned;
+
+        public:
+            QueuedSpinLockGuard(IN OUT PKSPIN_LOCK SpinLock,
+                                IN BOOLEAN Acquire = TRUE)
+            {
+                Lock = SpinLock;
+                Owned = Acquire;
+                if(Owned)
+                {
+                    KE::SpinLock::AcquireQueuedSpinLock(Lock, &LockQueueHandle);
+                }
+            }
+
+            ~QueuedSpinLockGuard()
+            {
+                if(Owned)
+                {
+                    KE::SpinLock::ReleaseQueuedSpinLock(&LockQueueHandle);
+                }
+            }
+
+            QueuedSpinLockGuard(const QueuedSpinLockGuard&) = delete;
+            QueuedSpinLockGuard& operator=(const QueuedSpinLockGuard&) = delete;
+    };
+
     class SystemQueuedSpinLockGuard
     {
         private:
@@ -24,7 +55,7 @@ namespace KE
 
         public:
             SystemQueuedSpinLockGuard(IN OUT KSPIN_LOCK_QUEUE_LEVEL LockLevel,
-                                IN BOOLEAN Acquire = TRUE)
+                                      IN BOOLEAN Acquire = TRUE)
             {
                 QueuedLockLevel = LockLevel;
                 Owned = Acquire;
