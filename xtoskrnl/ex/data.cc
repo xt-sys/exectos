@@ -32,3 +32,12 @@ LIST_ENTRY EX::LookasideList::PoolLookasideListHead;
 
 /* Tracks dynamic system lookaside lists */
 LIST_ENTRY EX::LookasideList::SystemLookasideListHead;
+
+/* Specifies the default timeout interval for resource wait operations */
+LARGE_INTEGER EX::Resources::ResourcesTimeOut;
+
+/* Tracks all initialized structures currently active in the system */
+LIST_ENTRY EX::Resources::SystemResourcesList;
+
+/* The global spinlock that protects the system resources list */
+KSPIN_LOCK EX::Resources::SystemResourcesLock;
