@@ -12,17 +12,18 @@
 #include <xtos.hh>
 #include <ke/spinlock.hh>
 
+
 /* Kernel Library */
 namespace KE
 {
-    class QueuedSpinLockGuard
+    class SystemQueuedSpinLockGuard
     {
         private:
             KSPIN_LOCK_QUEUE_LEVEL QueuedLockLevel;
             BOOLEAN Owned;
 
         public:
-            QueuedSpinLockGuard(IN OUT KSPIN_LOCK_QUEUE_LEVEL LockLevel,
+            SystemQueuedSpinLockGuard(IN OUT KSPIN_LOCK_QUEUE_LEVEL LockLevel,
                                 IN BOOLEAN Acquire = TRUE)
             {
                 QueuedLockLevel = LockLevel;
@@ -33,7 +34,7 @@ namespace KE
                 }
             }
 
-            ~QueuedSpinLockGuard()
+            ~SystemQueuedSpinLockGuard()
             {
                 if(Owned)
                 {
@@ -41,8 +42,8 @@ namespace KE
                 }
             }
 
-            QueuedSpinLockGuard(const QueuedSpinLockGuard&) = delete;
-            QueuedSpinLockGuard& operator=(const QueuedSpinLockGuard&) = delete;
+            SystemQueuedSpinLockGuard(const SystemQueuedSpinLockGuard&) = delete;
+            SystemQueuedSpinLockGuard& operator=(const SystemQueuedSpinLockGuard&) = delete;
     };
 
     class SpinLockGuard

@@ -365,7 +365,7 @@ MM::Pte::ReleaseSystemPtes(IN PMMPTE StartingPte,
 
     /* Raise runlevel and acquire lock to protect the PTE pool */
     KE::RaiseRunLevel RunLevel(DISPATCH_LEVEL);
-    KE::QueuedSpinLockGuard SpinLock(SystemSpaceLock);
+    KE::SystemQueuedSpinLockGuard SpinLock(SystemSpaceLock);
 
     /* Increment the total number of available PTEs in this pool */
     TotalSystemFreePtes[SystemPtePoolType] += NumberOfPtes;
@@ -478,7 +478,7 @@ MM::Pte::ReserveSystemPtes(IN PFN_COUNT NumberOfPtes,
 
     /* Raise runlevel and acquire lock to protect the PTE pool */
     KE::RaiseRunLevel RunLevel(DISPATCH_LEVEL);
-    KE::QueuedSpinLockGuard SpinLock(SystemSpaceLock);
+    KE::SystemQueuedSpinLockGuard SpinLock(SystemSpaceLock);
 
     /* Find a free PTE cluster large enough for the request */
     if(!FindFreeCluster(NumberOfPtes, SystemPtePoolType, &NextPte, &PreviousPte))

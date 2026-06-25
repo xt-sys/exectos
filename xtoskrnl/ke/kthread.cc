@@ -57,7 +57,7 @@ KE::KThread::AttachThread(IN OUT PKTHREAD Thread)
     Thread->UserIdealProcessor = (UCHAR)IdealProcessor;
 
     /* Acquire the dispatcher database lock */
-    KE::QueuedSpinLockGuard DispatcherGuard(DispatcherLock);
+    KE::SystemQueuedSpinLockGuard DispatcherGuard(DispatcherLock);
 
     /* Insert the thread into the process's active thread list */
     RTL::LinkedList::InsertTailList(&Process->ThreadListHead, &Thread->ThreadListEntry);

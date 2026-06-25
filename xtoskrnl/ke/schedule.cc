@@ -125,7 +125,7 @@ KE::Scheduler::ReadyThread(IN PKTHREAD Thread)
 {
     /* Raise runlevel to SYNC level and acquire the dispatcher database lock */
     KE::RaiseRunLevel RunLevel(SYNC_LEVEL);
-    KE::QueuedSpinLockGuard DispatcherGuard(DispatcherLock);
+    KE::SystemQueuedSpinLockGuard DispatcherGuard(DispatcherLock);
 
     /* Evaluate residency and queue the thread */
     ProcessReadyThread(Thread);

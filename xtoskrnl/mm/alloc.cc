@@ -46,7 +46,7 @@ MM::Allocator::AllocateNonPagedPoolPages(IN PFN_COUNT Pages,
     {
         /* Acquire the Non-Paged pool lock and raise runlevel to DISPATCH level */
         KE::RaiseRunLevel RunLevel(DISPATCH_LEVEL);
-        KE::QueuedSpinLockGuard NonPagedPoolSpinLock(NonPagedPoolLock);
+        KE::SystemQueuedSpinLockGuard NonPagedPoolSpinLock(NonPagedPoolLock);
 
         /* Iterate through the free lists */
         do
@@ -124,10 +124,10 @@ MM::Allocator::AllocateNonPagedPoolPages(IN PFN_COUNT Pages,
 
     /* Acquire the Non-Paged pool lock and raise runlevel to DISPATCH level */
     KE::RaiseRunLevel RunLevel(DISPATCH_LEVEL);
-    KE::QueuedSpinLockGuard NonPagedPoolSpinLock(NonPagedPoolLock);
+    KE::SystemQueuedSpinLockGuard NonPagedPoolSpinLock(NonPagedPoolLock);
 
     /* Acquire the PFN database lock */
-    KE::QueuedSpinLockGuard PfnSpinLock(PfnLock);
+    KE::SystemQueuedSpinLockGuard PfnSpinLock(PfnLock);
 
     /* Check if there are enough available physical pages to back the allocation */
     if(Pages >= MM::Pfn::GetAvailablePages())
@@ -798,7 +798,7 @@ MM::Allocator::FreeNonPagedPoolPages(IN PVOID VirtualAddress,
 
     /* Acquire the Non-Paged pool lock and raise runlevel to DISPATCH level */
     KE::RaiseRunLevel RunLevel(DISPATCH_LEVEL);
-    KE::QueuedSpinLockGuard NonPagedPoolSpinLock(NonPagedPoolLock);
+    KE::SystemQueuedSpinLockGuard NonPagedPoolSpinLock(NonPagedPoolLock);
 
     /* Denote allocation boundaries */
     FirstPfn->u3.e1.ReadInProgress = 0;
