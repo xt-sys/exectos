@@ -40,6 +40,10 @@
 #define IPI_FROZEN_STATE_FREEZE                     0x05
 #define IPI_FROZEN_STATE_ACTIVE                     0x20
 
+/* Lock queue states */
+#define LOCK_QUEUE_WAIT                             1
+#define LOCK_QUEUE_OWNER                            2
+
 /* APC pending state length */
 #define KAPC_STATE_LENGTH                           (FIELD_OFFSET(KAPC_STATE, UserApcPending) + sizeof(BOOLEAN))
 
