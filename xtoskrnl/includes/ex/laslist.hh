@@ -12,7 +12,7 @@
 #include <xtos.hh>
 
 
-/* Architecture-specific Library */
+/* Kernel Executive */
 namespace EX
 {
     class LookasideList
