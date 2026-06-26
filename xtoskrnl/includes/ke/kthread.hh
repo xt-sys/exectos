@@ -22,6 +22,8 @@ namespace KE
 
         public:
             STATIC XTAPI VOID AttachThread(IN PKTHREAD Thread);
+            STATIC XTFASTCALL VOID EnterCriticalRegion();
+            STATIC XTFASTCALL VOID EnterCriticalRegion(IN PKTHREAD Thread);
             STATIC XTAPI PETHREAD GetInitialThread(VOID);
             STATIC XTAPI XTSTATUS InitializeIdleThread(IN PKPROCESS IdleProcess,
                                                        IN OUT PKTHREAD IdleThread,
@@ -36,6 +38,8 @@ namespace KE
                                                    IN PVOID EnvironmentBlock,
                                                    IN PVOID Stack,
                                                    IN BOOLEAN AttachToProcess);
+            STATIC XTFASTCALL VOID LeaveCriticalRegion();
+            STATIC XTFASTCALL VOID LeaveCriticalRegion(IN PKTHREAD Thread);
 
         private:
             STATIC XTAPI VOID HandleSystemThreadExit(VOID);

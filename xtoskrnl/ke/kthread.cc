@@ -76,6 +76,42 @@ KE::KThread::AttachThread(IN OUT PKTHREAD Thread)
 }
 
 /**
+ * Disables the delivery of normal kernel APCs for the current thread.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+VOID
+KE::KThread::EnterCriticalRegion()
+{
+    /* Prevent the thread from being preempted by an APC */
+    EnterCriticalRegion(KE::Processor::GetCurrentThread());
+}
+
+/**
+ * Disables the delivery of normal kernel APCs for the specified thread.
+ *
+ * @param Thread
+ *        Supplies a pointer to the thread object whose APC delivery is to be disabled.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+VOID
+KE::KThread::EnterCriticalRegion(IN PKTHREAD Thread)
+{
+    /* Disable Kernel APCs */
+    Thread->KernelApcDisable--;
+
+    /* Prevent the compiler from reordering code */
+    AR::CpuFunctions::ReadWriteBarrier();
+}
+
+/**
  * Retrieves a pointer to the system's initial executive thread object.
  *
  * @return This routine returns a pointer to the initial executive thread.
@@ -345,6 +381,60 @@ KE::KThread::InitializeThread(IN PKPROCESS Process,
 
     /* Return success */
     return STATUS_SUCCESS;
+}
+
+/**
+ * Re-enables the delivery of kernel APCs for the current thread.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+VOID
+KE::KThread::LeaveCriticalRegion()
+{
+    /* Allow APCs to preempt the thread */
+    LeaveCriticalRegion(KE::Processor::GetCurrentThread());
+}
+
+/**
+ * Re-enables the delivery of kernel APCs for the specified thread.
+ *
+ * @param Thread
+ *        Supplies a pointer to the thread object whose APC delivery is to be re-enabled.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+VOID
+KE::KThread::LeaveCriticalRegion(IN PKTHREAD Thread)
+{
+    /* Ensure the compiler does not reorder code */
+    AR::CpuFunctions::ReadWriteBarrier();
+
+    /* Re-enable APC delivery */
+    Thread->KernelApcDisable++;
+
+    /* Check if APC delivery is enabled */
+    if(!Thread->KernelApcDisable)
+    {
+        /* Memory barrier */
+        AR::CpuFunctions::MemoryBarrier();
+
+        /* Check for any pending kernel APCs */
+        if(!RTL::LinkedList::ListEmpty(&Thread->ApcState.ApcListHead[KernelMode]))
+        {
+            /* Check if special kernel APCs are not disabled */
+            if(!Thread->SpecialApcDisable)
+            {
+                /* Initiate delivery of the pending APCs */
+                KE::Apc::CheckApcDelivery();
+            }
+        }
+    }
 }
 
 /**
