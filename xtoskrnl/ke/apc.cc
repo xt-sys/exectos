@@ -77,6 +77,27 @@ KE::Apc::DeliverApc(IN KPROCESSOR_MODE ProcessorMode,
 }
 
 /**
+ * Handles the Asynchronous Procedure Call (APC) interrupt.
+ *
+ * @param TrapFrame
+ *        Supplies a pointer to the hardware trap frame representing the interrupted context.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+KE::Apc::HandleApcInterrupt(IN PKTRAP_FRAME TrapFrame)
+{
+    /* Raise runlevel to APC level */
+    KE::RaiseRunLevel RunLevel(APC_LEVEL);
+
+    /* Deliver the APC */
+    DeliverApc(TrapFrame->PreviousMode, NULLPTR, TrapFrame);
+}
+
+/**
  * Initializes an APC object.
  *
  * @param Apc

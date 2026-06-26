@@ -22,6 +22,7 @@ namespace KE
             STATIC XTAPI VOID DeliverApc(IN KPROCESSOR_MODE ProcessorMode,
                                          IN PKEXCEPTION_FRAME ExceptionFrame,
                                          IN PKTRAP_FRAME TrapFrame);
+            STATIC XTCDECL VOID HandleApcInterrupt(IN PKTRAP_FRAME TrapFrame);
             STATIC XTAPI VOID InitializeApc(IN PKAPC Apc,
                                             IN PKTHREAD Thread,
                                             IN KAPC_ENVIRONMENT Environment,

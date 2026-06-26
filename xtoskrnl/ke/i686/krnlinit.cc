@@ -142,6 +142,7 @@ VOID
 KE::KernelInit::InitializeInterruptHandlers(VOID)
 {
     /* Register interrupt handlers */
+    HL::Irq::RegisterSystemInterruptHandler(APIC_VECTOR_APC, KE::Apc::HandleApcInterrupt);
     HL::Irq::RegisterSystemInterruptHandler(APIC_VECTOR_DPC, KE::Dispatcher::HandleDispatchInterrupt);
     HL::Irq::RegisterSystemInterruptHandler(APIC_VECTOR_IPI, KE::Ipi::HandleIpiInterrupt);
 }
