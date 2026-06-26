@@ -116,7 +116,7 @@ KE::Apc::HandleApcInterrupt(IN PKTRAP_FRAME TrapFrame)
  *        Supplies a pointer to routine called on thread exit.
  *
  * @param NormalRoutine
- *        Supplies a pointer to routine called at IRQL 0.
+ *        Supplies a pointer to routine called at PASSIVE_LEVEL.
  *
  * @param ApcMode
  *        Specifies processor mode, in which NormalRoutine gets called.
