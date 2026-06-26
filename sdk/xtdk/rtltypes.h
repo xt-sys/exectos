@@ -32,6 +32,9 @@
 #define DOUBLE_SCIENTIFIC_PRECISION                     -4
 #define DOUBLE_SIGN_BIT                                 0x8000000000000000ULL
 
+/* Maximum number of lead bytes for NLS */
+#define NLS_MAXIMUM_LEADBYTES                           12
+
 /* Print flag definitions */
 #define PFL_ALWAYS_PRINT_SIGN                           0x00000001
 #define PFL_SPACE_FOR_PLUS                              0x00000002
@@ -72,6 +75,23 @@
 typedef XTSTATUS (*PWRITE_CHARACTER)(IN CHAR Character);
 typedef XTSTATUS (*PWRITE_WIDE_CHARACTER)(IN WCHAR Character);
 
+/* Code page table structure definition */
+typedef struct _CPTABLE_INFO
+{
+    USHORT CodePage;
+    USHORT MaximumCharacterSize;
+    USHORT DefaultChar;
+    USHORT UniDefaultChar;
+    USHORT TransDefaultChar;
+    USHORT TransUniDefaultChar;
+    USHORT DBCSCodePage;
+    UCHAR LeadByte[NLS_MAXIMUM_LEADBYTES];
+    PUSHORT MultiByteTable;
+    PVOID WideCharTable;
+    PUSHORT DBCSRanges;
+    PUSHORT DBCSOffsets;
+} CPTABLE_INFO, *PCPTABLE_INFO;
+
 /* 128-bit buffer containing a unique identifier value */
 typedef struct _GUID
 {
@@ -94,6 +114,15 @@ typedef struct _LIST_ENTRY64
     ULONGLONG Flink;
     ULONGLONG Blink;
 } LIST_ENTRY64, *PLIST_ENTRY64;
+
+/* NLS table structure definition */
+typedef struct _NLSTABLE_INFO
+{
+    CPTABLE_INFO OemTableInfo;
+    CPTABLE_INFO AnsiTableInfo;
+    PUSHORT UpperCaseTable;
+    PUSHORT LowerCaseTable;
+} NLSTABLE_INFO, *PNLSTABLE_INFO;
 
 /* Red-black tree node color enumeration list */
 typedef enum _RTL_BALANCED_NODE_COLOR
