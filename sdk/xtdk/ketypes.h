@@ -47,6 +47,9 @@
 /* APC pending state length */
 #define KAPC_STATE_LENGTH                           (FIELD_OFFSET(KAPC_STATE, UserApcPending) + sizeof(BOOLEAN))
 
+/* Push lock total bits */
+#define KPUSH_LOCK_TOTAL_BITS                       (sizeof(ULONG_PTR) * 8)
+
 /* Kernel service descriptor tables count */
 #define KSERVICE_TABLES_COUNT                       4
 
@@ -445,6 +448,36 @@ typedef struct _KGATE
 {
     DISPATCHER_HEADER Header;
 } KGATE, *PKGATE;
+
+/* Push Lock structure definition */
+typedef union _KPUSH_LOCK
+{
+    struct
+    {
+        ULONG_PTR Locked:1;
+        ULONG_PTR Waiting:1;
+        ULONG_PTR Waking:1;
+        ULONG_PTR MultipleShared:1;
+        ULONG_PTR Shared:(KPUSH_LOCK_TOTAL_BITS - 4);
+    };
+    ULONG_PTR Value;
+    PVOID Ptr;
+} KPUSH_LOCK, *PKPUSH_LOCK;
+
+/* Push lock wait block structure definition */
+typedef struct _KPUSH_LOCK_WAIT_BLOCK
+{
+    union
+    {
+        KGATE WakeGate;
+        KEVENT WakeEvent;
+    };
+    PKPUSH_LOCK_WAIT_BLOCK Next;
+    PKPUSH_LOCK_WAIT_BLOCK Last;
+    PKPUSH_LOCK_WAIT_BLOCK Previous;
+    LONG ShareCount;
+    LONG Flags;
+} KPUSH_LOCK_WAIT_BLOCK, *PKPUSH_LOCK_WAIT_BLOCK;
 
 /* Semaphore object structure definition */
 typedef struct _KSEMAPHORE
