@@ -200,6 +200,48 @@ RTL::Atomic::And64(IN PLONG_PTR Address,
 }
 
 /**
+ * Performs an atomic test of the specified bit of the specified long value and resets it to 0.
+ *
+ * @param Base
+ *        Supplies a pointer to the variable.
+ *
+ * @param Offset
+ *        Specifies the bit position to be tested.
+ *
+ * @return This routine returns the original value of the specified bit.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+UCHAR
+RTL::Atomic::BitTestAndReset(IN PLONG Base,
+                             IN LONG Offset)
+{
+    return (__atomic_fetch_and(Base, ~(1l << Offset), __ATOMIC_SEQ_CST) >> Offset) & 1;
+}
+
+/**
+ * Performs an atomic test of the specified bit of the specified 64-bit long value and resets it to 0.
+ *
+ * @param Base
+ *        Supplies a pointer to the variable.
+ *
+ * @param Offset
+ *        Specifies the bit position to be tested.
+ *
+ * @return This routine returns the original value of the specified bit.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+UCHAR
+RTL::Atomic::BitTestAndReset64(IN PLONGLONG Base,
+                               IN LONGLONG Offset)
+{
+    return (__atomic_fetch_and(Base, ~(1ll << Offset), __ATOMIC_SEQ_CST) >> Offset) & 1;
+}
+
+/**
  * Performs an atomic test of the specified bit of the specified long value and sets it to 1.
  *
  * @param Base
@@ -208,7 +250,7 @@ RTL::Atomic::And64(IN PLONG_PTR Address,
  * @param Offset
  *        Specifies the bit position to be tested.
  *
- * @return Returns a value of the specified bit.
+ * @return This routine returns a value of the specified bit.
  *
  * @since XT 1.0
  */
@@ -229,7 +271,7 @@ RTL::Atomic::BitTestAndSet(IN PLONG Base,
  * @param Offset
  *        Specifies the bit position to be tested.
  *
- * @return Returns a value of the specified bit.
+ * @return This routine returns a value of the specified bit.
  *
  * @since XT 1.0
  */

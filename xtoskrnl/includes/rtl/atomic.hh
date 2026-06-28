@@ -36,6 +36,10 @@ namespace RTL
                                          IN LONG Mask);
             STATIC XTFASTCALL LONG_PTR And64(IN PLONG_PTR Address,
                                              IN LONG_PTR Mask);
+            STATIC XTFASTCALL UCHAR BitTestAndReset(IN PLONG Base,
+                                                    IN LONG Offset);
+            STATIC XTFASTCALL UCHAR BitTestAndReset64(IN PLONGLONG Base,
+                                                      IN LONGLONG Offset);
             STATIC XTFASTCALL UCHAR BitTestAndSet(IN PLONG Base,
                                                   IN LONG Offset);
             STATIC XTFASTCALL UCHAR BitTestAndSet64(IN PLONGLONG Base,
