@@ -270,8 +270,8 @@ KE::KThread::InitializeThread(IN PKPROCESS Process,
     /* Initialize thread wait list */
     RTL::LinkedList::InitializeListHead(&Thread->Header.WaitListHead);
 
-    /* Initialize thread mutant list head */
-    RTL::LinkedList::InitializeListHead(&Thread->MutantListHead);
+    /* Initialize thread mutex list head */
+    RTL::LinkedList::InitializeListHead(&Thread->MutexListHead);
 
     /* Initialize the builtin wait blocks */
     for(Index = 0; Index <= KTHREAD_WAIT_BLOCK; Index++)
