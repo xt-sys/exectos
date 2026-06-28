@@ -443,11 +443,15 @@ typedef struct _KAPC_STATE
     BOOLEAN UserApcPending;
 } KAPC_STATE, *PKAPC_STATE;
 
-/* Event gate structure definition */
-typedef struct _KGATE
+/* Mutex object structure definition */
+typedef struct _KMUTEX
 {
     DISPATCHER_HEADER Header;
-} KGATE, *PKGATE;
+    LIST_ENTRY MutexListEntry;
+    PKTHREAD OwnerThread;
+    BOOLEAN Abandoned;
+    UCHAR ApcDisable;
+} KMUTEX, *PKMUTEX;
 
 /* Push Lock structure definition */
 typedef union _KPUSH_LOCK
@@ -467,11 +471,7 @@ typedef union _KPUSH_LOCK
 /* Push lock wait block structure definition */
 typedef struct _KPUSH_LOCK_WAIT_BLOCK
 {
-    union
-    {
-        KGATE WakeGate;
-        KEVENT WakeEvent;
-    };
+    KEVENT WakeEvent;
     PKPUSH_LOCK_WAIT_BLOCK Next;
     PKPUSH_LOCK_WAIT_BLOCK Last;
     PKPUSH_LOCK_WAIT_BLOCK Previous;
