@@ -25,6 +25,7 @@ namespace KE
             STATIC ULONG TimeAdjustment;
 
         public:
+            STATIC XTAPI VOID GetInterruptTime(OUT PLARGE_INTEGER InterruptTime);
             STATIC XTAPI VOID GetSystemTime(OUT PLARGE_INTEGER SystemTime);
             STATIC XTAPI VOID SetSystemTime(IN PLARGE_INTEGER NewTime,
                                             OUT PLARGE_INTEGER OldTime,

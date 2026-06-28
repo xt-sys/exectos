@@ -9,6 +9,26 @@
 #include <xtos.hh>
 
 
+/**
+ * Returns the current interrupt time.
+ *
+ * @param SystemTime
+ *        Supplies a pointer to a variable that receives the current interrupt time.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KE::SystemTime::GetInterruptTime(OUT PLARGE_INTEGER InterruptTime)
+{
+    LARGE_INTEGER CurrentTime;
+
+    /* Fetch the time using the lock-free shared data mechanism and return it */
+    CurrentTime = KE::SharedData::GetInterruptTime();
+    InterruptTime->QuadPart = CurrentTime.QuadPart;
+}
 
 /**
  * Returns the current system time.
