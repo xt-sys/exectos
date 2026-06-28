@@ -133,7 +133,7 @@ typedef enum _KOBJECTS
 {
     EventNotificationObject = 0,
     EventSynchronizationObject = 1,
-    MutantObject = 2,
+    MutexObject = 2,
     ProcessObject = 3,
     QueueObject = 4,
     SemaphoreObject = 5,
@@ -618,7 +618,7 @@ typedef struct _KSHARED_DATA
 typedef struct _KTHREAD
 {
     DISPATCHER_HEADER Header;
-    LIST_ENTRY MutantListHead;
+    LIST_ENTRY MutexListHead;
     PVOID InitialStack;
     PVOID KernelStack;
     PVOID StackBase;
