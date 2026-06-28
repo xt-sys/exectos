@@ -48,7 +48,18 @@
 
 /* XT status code definitions */
 #define STATUS_SUCCESS                                                     ((XTSTATUS) 0x00000000L)
+#define STATUS_WAIT_0                                                      ((XTSTATUS) 0x00000000L)
+#define STATUS_WAIT_1                                                      ((XTSTATUS) 0x00000001L)
+#define STATUS_WAIT_2                                                      ((XTSTATUS) 0x00000002L)
+#define STATUS_WAIT_3                                                      ((XTSTATUS) 0x00000003L)
+#define STATUS_WAIT_63                                                     ((XTSTATUS) 0x0000003FL)
+#define STATUS_ABANDONED                                                   ((XTSTATUS) 0x00000080L)
+#define STATUS_ABANDONED_WAIT_0                                            ((XTSTATUS) 0x00000080L)
+#define STATUS_ABANDONED_WAIT_63                                           ((XTSTATUS) 0x000000BFL)
+#define STATUS_ALERTED                                                     ((XTSTATUS) 0x00000101L)
 #define STATUS_TIMEOUT                                                     ((XTSTATUS) 0x00000102L)
+#define STATUS_PENDING                                                     ((XTSTATUS) 0x00000103L)
+#define STATUS_REPARSE                                                     ((XTSTATUS) 0x00000104L)
 #define STATUS_WAKE_SYSTEM_DEBUGGER                                        ((XTSTATUS) 0x80000007L)
 #define STATUS_END_OF_MEDIA                                                ((XTSTATUS) 0x8000001EL)
 #define STATUS_RESOURCE_LOCKED                                             ((XTSTATUS) 0xC0000000L)
@@ -62,6 +73,8 @@
 #define STATUS_END_OF_FILE                                                 ((XTSTATUS) 0xC0000011L)
 #define STATUS_NO_MEMORY                                                   ((XTSTATUS) 0xC0000017L)
 #define STATUS_BUFFER_TOO_SMALL                                            ((XTSTATUS) 0xC0000023L)
+#define STATUS_OBJECT_NAME_INVALID                                         ((XTSTATUS) 0xC0000033L)
+#define STATUS_OBJECT_NAME_COLLISION                                       ((XTSTATUS) 0xC0000035L)
 #define STATUS_PORT_DISCONNECTED                                           ((XTSTATUS) 0xC0000037L)
 #define STATUS_CRC_ERROR                                                   ((XTSTATUS) 0xC000003FL)
 #define STATUS_FLOAT_OVERFLOW                                              ((XTSTATUS) 0xC0000091L)
@@ -71,6 +84,7 @@
 #define STATUS_NOT_SUPPORTED                                               ((XTSTATUS) 0xC00000BBL)
 #define STATUS_NAME_TOO_LONG                                               ((XTSTATUS) 0xC0000106L)
 #define STATUS_IO_DEVICE_ERROR                                             ((XTSTATUS) 0xC0000185L)
+#define STATUS_MUTEX_LIMIT_EXCEEDED                                        ((XTSTATUS) 0xC0000191L)
 #define STATUS_NOT_FOUND                                                   ((XTSTATUS) 0xC0000225L)
 
 #endif /* __XTDK_XTSTATUS_H */
