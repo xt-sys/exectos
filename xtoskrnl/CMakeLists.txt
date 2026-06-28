@@ -49,6 +49,7 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/ke/crash.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/data.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/dispatch.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/dispobj.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/dpc.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/event.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/exports.cc

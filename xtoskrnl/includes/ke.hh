@@ -16,6 +16,7 @@
 #include <ke/bootinfo.hh>
 #include <ke/crash.hh>
 #include <ke/dispatch.hh>
+#include <ke/dispobj.hh>
 #include <ke/dpc.hh>
 #include <ke/event.hh>
 #include <ke/guard.hh>

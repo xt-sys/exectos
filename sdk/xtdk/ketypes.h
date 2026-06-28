@@ -67,6 +67,9 @@
 #define READY_SKIP_QUANTUM                          2
 #define THREAD_QUANTUM                              6
 
+/* Dispatcher object type mask */
+#define DISPATCHER_OBJECT_TYPE_MASK                 0x7L
+
 /* Thread priority levels */
 #define THREAD_LOW_PRIORITY                         0
 #define THREAD_LOW_REALTIME_PRIORITY                16
