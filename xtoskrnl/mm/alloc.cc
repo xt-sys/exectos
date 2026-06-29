@@ -203,8 +203,8 @@ MM::Allocator::AllocatePagedPoolPages(IN PFN_COUNT Pages,
 {
     UNIMPLEMENTED;
 
-    /* Return not implemented status code */
-    return STATUS_NOT_IMPLEMENTED;
+    /* Temporarily fall back to non-paged pool */
+    return AllocateNonPagedPoolPages(Pages, Memory);
 }
 
 /**
