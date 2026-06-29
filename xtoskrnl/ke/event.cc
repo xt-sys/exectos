@@ -83,3 +83,35 @@ KE::Event::SetEvent(IN PKEVENT Event,
 
     return 0;
 }
+
+/**
+ * Sets an event to the signaled state and attempts to boost the priority of the waiting thread.
+ *
+ * @param Event
+ *        Supplies a pointer to the dispatcher object (Event) to be signaled.
+ *
+ * @param WaitingThread
+ *        supplies an optional pointer to a variable that receives the unblocked thread.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KE::Event::SetEventBoostPriority(IN PKEVENT Event,
+                                 IN OUT PKTHREAD* WaitingThread)
+{
+    /* Not implemented, active polling only */
+    UNIMPLEMENTED;
+
+    /* Set the signal state */
+    Event->Header.SignalState = 1;
+
+    /* Check if the caller requested the unblocked thread */
+    if(WaitingThread != NULLPTR)
+    {
+        /* Return NULLPTR for now */
+        *WaitingThread = NULLPTR;
+    }
+}
