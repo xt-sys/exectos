@@ -26,6 +26,7 @@
 #include <ke/kthread.hh>
 #include <ke/kubsan.hh>
 #include <ke/proc.hh>
+#include <ke/pushlock.hh>
 #include <ke/runlevel.hh>
 #include <ke/schedule.hh>
 #include <ke/semphore.hh>

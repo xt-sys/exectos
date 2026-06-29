@@ -47,8 +47,20 @@
 /* APC pending state length */
 #define KAPC_STATE_LENGTH                           (FIELD_OFFSET(KAPC_STATE, UserApcPending) + sizeof(BOOLEAN))
 
-/* Push lock total bits */
+/* Indices used to access the PushLock data structure */
+#define KPUSHLOCK_INDEX                             ((ULONG_PTR)0x00)
+#define KPUSHLOCK_LOCK                              ((ULONG_PTR)0x01)
+#define KPUSHLOCK_WAITING                           ((ULONG_PTR)0x02)
+#define KPUSHLOCK_WAKING                            ((ULONG_PTR)0x04)
+#define KPUSHLOCK_MULTIPLE_SHARED                   ((ULONG_PTR)0x08)
+#define KPUSHLOCK_INCREMENT_SHARED                  ((ULONG_PTR)0x10)
+
+/* Mask for the pointer bits */
+#define KPUSHLOCK_PTR_BITS                          ((ULONG_PTR)0x0F)
+
+/* PushLock related definitions */
 #define KPUSH_LOCK_TOTAL_BITS                       (sizeof(ULONG_PTR) * 8)
+#define KPUSH_LOCK_SPIN_COUNT                       1024
 
 /* Kernel service descriptor tables count */
 #define KSERVICE_TABLES_COUNT                       4

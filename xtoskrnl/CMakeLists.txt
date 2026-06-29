@@ -58,6 +58,7 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/ke/krnlinit.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/kthread.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/kubsan.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/pushlock.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/runlevel.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/schedule.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/semphore.cc
