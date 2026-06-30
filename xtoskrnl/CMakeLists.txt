@@ -85,6 +85,7 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/mm/paging.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/pfn.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/pool.cc
+    ${XTOSKRNL_SOURCE_DIR}/mm/probe.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/pte.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/quota.cc
     ${XTOSKRNL_SOURCE_DIR}/po/idle.cc

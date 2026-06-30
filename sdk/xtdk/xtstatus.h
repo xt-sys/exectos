@@ -60,6 +60,7 @@
 #define STATUS_TIMEOUT                                                     ((XTSTATUS) 0x00000102L)
 #define STATUS_PENDING                                                     ((XTSTATUS) 0x00000103L)
 #define STATUS_REPARSE                                                     ((XTSTATUS) 0x00000104L)
+#define STATUS_DATATYPE_MISALIGNMENT                                       ((XTSTATUS) 0x80000002L)
 #define STATUS_WAKE_SYSTEM_DEBUGGER                                        ((XTSTATUS) 0x80000007L)
 #define STATUS_END_OF_MEDIA                                                ((XTSTATUS) 0x8000001EL)
 #define STATUS_RESOURCE_LOCKED                                             ((XTSTATUS) 0xC0000000L)
