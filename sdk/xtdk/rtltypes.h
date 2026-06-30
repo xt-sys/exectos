@@ -32,6 +32,16 @@
 #define DOUBLE_SCIENTIFIC_PRECISION                     -4
 #define DOUBLE_SIGN_BIT                                 0x8000000000000000ULL
 
+/* Exception Record flags */
+#define EXCEPTION_CONTINUE_SEARCH                       0x00
+#define EXCEPTION_NONCONTINUABLE                        0x01
+#define EXCEPTION_UNWINDING                             0x02
+#define EXCEPTION_EXIT_UNWIND                           0x04
+#define EXCEPTION_STACK_INVALID                         0x08
+#define EXCEPTION_NESTED_CALL                           0x10
+#define EXCEPTION_TARGET_UNWIND                         0x20
+#define EXCEPTION_COLLIDED_UNWIND                       0x40
+
 /* Maximum number of lead bytes for NLS */
 #define NLS_MAXIMUM_LEADBYTES                           12
 

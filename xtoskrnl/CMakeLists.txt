@@ -100,6 +100,7 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/rtl/data.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/endian.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/exports.cc
+    ${XTOSKRNL_SOURCE_DIR}/rtl/exsup.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/guid.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/lifo.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/llist.cc
