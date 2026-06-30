@@ -52,6 +52,7 @@ namespace MM
             XTAPI PMMPXE GetPxeAddress(IN PVOID Address);
             XTAPI ULONG GetPxeOffset(IN PVOID Address);
             VIRTUAL XTAPI PVOID GetPxeVirtualAddress(IN PMMPXE PxePointer) = 0;
+            VIRTUAL ULONG_PTR GetUserProbeAddress(VOID) = 0;
             XTAPI BOOLEAN GetXpaStatus();
             VIRTUAL XTAPI VOID InitializePageMapInfo(VOID) = 0;
             XTAPI BOOLEAN PteValid(IN PMMPTE PtePointer);
@@ -80,6 +81,7 @@ namespace MM
             XTAPI PVOID GetPpeVirtualAddress(IN PMMPPE PpePointer);
             XTAPI PVOID GetPteVirtualAddress(IN PMMPTE PtePointer);
             XTAPI PVOID GetPxeVirtualAddress(IN PMMPXE PxePointer);
+            XTAPI ULONG_PTR GetUserProbeAddress(VOID);
             XTAPI VOID InitializePageMapInfo(VOID);
     };
 
@@ -90,6 +92,7 @@ namespace MM
             XTAPI PVOID GetPpeVirtualAddress(IN PMMPPE PpePointer);
             XTAPI PVOID GetPteVirtualAddress(IN PMMPTE PtePointer);
             XTAPI PVOID GetPxeVirtualAddress(IN PMMPXE PxePointer);
+            XTAPI ULONG_PTR GetUserProbeAddress(VOID);
             XTAPI VOID InitializePageMapInfo(VOID);
     };
 }

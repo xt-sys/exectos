@@ -49,6 +49,7 @@ namespace MM
             STATIC XTAPI PVOID GetPteVirtualAddress(IN PMMPTE PtePointer);
             STATIC XTAPI PMMPXE GetPxeAddress(IN PVOID Address);
             STATIC XTAPI PVOID GetPxeVirtualAddress(IN PMMPXE PxePointer);
+            STATIC XTAPI ULONG_PTR GetUserProbeAddress(VOID);
             STATIC XTAPI BOOLEAN GetXpaStatus(VOID);
             STATIC XTAPI VOID InitializePageMapSupport(VOID);
             STATIC XTAPI XTSTATUS MapVirtualAddress(IN PVOID VirtualAddress,

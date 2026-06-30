@@ -108,6 +108,9 @@
 /* Highest system address */
 #define MM_HIGHEST_SYSTEM_ADDRESS                  0xFFFFFFFF
 
+/* User probe address */
+#define MM_USER_PROBE_ADDRESS                      0x7FFF0000
+
 /* Trampoline code address */
 #define MM_TRAMPOLINE_ADDRESS                      0x80000
 
