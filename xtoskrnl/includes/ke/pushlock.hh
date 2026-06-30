@@ -22,6 +22,7 @@ namespace KE
             STATIC XTFASTCALL VOID AcquireSharedPushLock(PKPUSH_LOCK PushLock);
             STATIC XTFASTCALL VOID AcquireWaitExclusivePushLock(IN PKPUSH_LOCK PushLock);
             STATIC XTFASTCALL VOID AcquireWaitSharedPushLock(IN OUT PKPUSH_LOCK PushLock);
+            STATIC XTFASTCALL VOID InitializePushLock(IN PKPUSH_LOCK PushLock);
             STATIC XTFASTCALL VOID ReleaseExclusivePushLock(IN PKPUSH_LOCK PushLock);
             STATIC XTFASTCALL VOID ReleasePushLock(IN PKPUSH_LOCK PushLock);
             STATIC XTFASTCALL VOID ReleaseSharedPushLock(IN PKPUSH_LOCK PushLock);
@@ -35,7 +36,7 @@ namespace KE
 
         private:
             STATIC XTINLINE VOID OptimizePushLockList(IN PKPUSH_LOCK PushLock, IN KPUSH_LOCK OldValue);
-            STATIC XTINLINE XTFASTCALL VOID SpinPushLock(IN PKPUSH_LOCK_WAIT_BLOCK WaitBlock);
+            STATIC XTINLINE VOID SpinPushLock(IN PKPUSH_LOCK_WAIT_BLOCK WaitBlock);
     };
 }
 

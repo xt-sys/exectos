@@ -300,6 +300,25 @@ KE::PushLock::AcquireWaitSharedPushLock(IN PKPUSH_LOCK PushLock)
 }
 
 /**
+ * Initializes a push lock.
+ *
+ * @param PushLock
+ *        Supplies a pointer to the push lock to be initialized.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ *
+ */
+XTFASTCALL
+VOID
+KE::PushLock::InitializePushLock(IN PKPUSH_LOCK PushLock)
+{
+    /* Initialize the push lock state */
+    PushLock->Value = 0;
+}
+
+/**
  * Optimizes the push lock wait list by converting it from a singly-linked LIFO list into a doubly-linked FIFO list.
  *
  * @param PushLock
@@ -715,7 +734,6 @@ KE::PushLock::ReleaseWaitSharedPushLock(IN PKPUSH_LOCK PushLock)
  * @since XT 1.0
  */
 XTINLINE
-XTFASTCALL
 VOID
 KE::PushLock::SpinPushLock(IN PKPUSH_LOCK_WAIT_BLOCK WaitBlock)
 {
