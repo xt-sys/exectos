@@ -300,6 +300,31 @@ KE::PushLock::AcquireWaitSharedPushLock(IN PKPUSH_LOCK PushLock)
 }
 
 /**
+ * Attempts to convert a push lock from shared to exclusive access.
+ *
+ * @param PushLock
+ *        Supplies a pointer to the push lock structure.
+ *
+ * @return This routine returns TRUE if the lock was successfully converted to exclusive mode, or FALSE otherwise.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+BOOLEAN
+KE::PushLock::ConvertSharedPushLockToExclusive(IN PKPUSH_LOCK PushLock)
+{
+    PVOID OldValue;
+
+    /* Swap the push lock state */
+    OldValue = RTL::Atomic::CompareExchangePointer(&PushLock->Ptr,
+                                                   (PVOID)KPUSHLOCK_INCREMENT_SHARED,
+                                                   (PVOID)KPUSHLOCK_LOCK);
+
+    /* Return conversion result */
+    return (OldValue == (PVOID)KPUSHLOCK_INCREMENT_SHARED);
+}
+
+/**
  * Initializes a push lock.
  *
  * @param PushLock
