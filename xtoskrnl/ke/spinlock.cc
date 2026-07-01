@@ -263,7 +263,7 @@ KE::SpinLock::ReleaseQueuedSpinLock(IN PKSPIN_LOCK_QUEUE LockQueue)
     if(!NextLockQueue)
     {
         /* Remove the lock  */
-        if(RTL::Atomic::CompareExchangePointer((PVOID *)LockQueue->Lock, NULLPTR, LockQueue) == LockQueue)
+        if(RTL::Atomic::CompareExchangePointer((PVOID *)LockQueue->Lock, LockQueue, NULLPTR) == LockQueue)
         {
             /* Lock removed, exit */
             return;
