@@ -261,7 +261,24 @@ XTAPI
 VOID
 MM::Pool::InitializePagedPool(VOID)
 {
+    PPOOL_DESCRIPTOR PoolDescriptor;
+    XTSTATUS Status;
+
+    /* Not implemented */
     UNIMPLEMENTED;
+
+    /* Allocate a pool descriptor for the paged pool */
+    Status = MM::Allocator::AllocatePool(NonPagedPool, sizeof(POOL_DESCRIPTOR),
+                                         (PVOID *)&PoolDescriptor, TAG_MM_MEMORY_POOL);
+    if(Status != STATUS_SUCCESS)
+    {
+        /* Allocation failed, raise kernel panic */
+        KE::Crash::Panic(0x41, 0, -1, -1, -1);
+    }
+
+    /* Store paged pool descriptor in the pool vector and initialize it */
+    PoolVector[PagedPool] = PoolDescriptor;
+    InitializePoolDescriptor(PoolVector[PagedPool], PagedPool, 0, 0, NULLPTR);
 }
 
 /**
