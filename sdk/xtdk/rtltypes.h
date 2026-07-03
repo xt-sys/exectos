@@ -4,6 +4,7 @@
  * FILE:            sdk/xtdk/rtltypes.h
  * DESCRIPTION:     Runtime library structures definitions
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ *                  Aiken Harris <harraiken91@gmail.com>
  */
 
 #ifndef __XTDK_RTLTYPES_H
@@ -11,6 +12,7 @@
 
 #include <xtbase.h>
 #include <xttypes.h>
+#include ARCH_HEADER(xtstruct.h)
 
 
 /* UUID string lengths */
@@ -41,6 +43,10 @@
 #define EXCEPTION_NESTED_CALL                           0x10
 #define EXCEPTION_TARGET_UNWIND                         0x20
 #define EXCEPTION_COLLIDED_UNWIND                       0x40
+
+/* Exception Record accessors */
+#define EXCEPTION_CODE                                  _exception_code()
+#define EXCEPTION_INFORMATION                           (PEXCEPTION_POINTERS)_exception_info()
 
 /* Maximum number of lead bytes for NLS */
 #define NLS_MAXIMUM_LEADBYTES                           12
@@ -113,6 +119,13 @@ typedef struct _CPTABLE_INFO
     PUSHORT DBCSRanges;
     PUSHORT DBCSOffsets;
 } CPTABLE_INFO, *PCPTABLE_INFO;
+
+/* Exception Pointers structure definition */
+typedef struct _EXCEPTION_POINTERS
+{
+    PEXCEPTION_RECORD ExceptionRecord;
+    PCONTEXT ContextRecord;
+} EXCEPTION_POINTERS, *PEXCEPTION_POINTERS;
 
 /* 128-bit buffer containing a unique identifier value */
 typedef struct _GUID

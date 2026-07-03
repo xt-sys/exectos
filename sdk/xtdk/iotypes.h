@@ -4,6 +4,7 @@
  * FILE:            sdk/xtdk/iotypes.h
  * DESCRIPTION:     I/O related type definitions
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ *                  Aiken Harris <harraiken91@gmail.com>
  */
 
 #ifndef __XTDK_IOTYPES_H
