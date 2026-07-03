@@ -110,6 +110,19 @@ typedef enum _MMSYSTEM_PTE_POOL_TYPE
     MaximumPtePoolTypes
 } MMSYSTEM_PTE_POOL_TYPE, *PMMSYSTEM_PTE_POOL_TYPE;
 
+/* Non-paged lookaside list indices */
+typedef enum _NONPAGED_LOOKASIDE_NUMBER
+{
+    LookasideSmallIrpList,
+    LookasideLargeIrpList,
+    LookasideMdlList,
+    LookasideCreateInfoList,
+    LookasideNameBufferList,
+    LookasideTwilightList,
+    LookasideCompletionList,
+    LookasideMaximumList
+} NONPAGED_LOOKASIDE_NUMBER, *PNONPAGED_LOOKASIDE_NUMBER;
+
 /* Memory Descriptor List structure definition */
 typedef struct _MDL
 {
