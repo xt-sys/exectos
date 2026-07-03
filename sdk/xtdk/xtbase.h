@@ -17,6 +17,9 @@
 /* C/C++ specific code */
 #ifndef __XTOS_ASSEMBLER__
 
+/* Access mask */
+typedef ULONG ACCESS_MASK, *PACCESS_MASK;
+
 /* Kernel affinity */
 typedef ULONG_PTR KAFFINITY, *PKAFFINITY;
 
@@ -40,6 +43,12 @@ typedef ULONG_PTR PFN_NUMBER, *PPFN_NUMBER;
 
 /* Physical address */
 typedef LARGE_INTEGER PHYSICAL_ADDRESS, *PPHYSICAL_ADDRESS;
+
+/* Security descriptor */
+typedef PVOID PSECURITY_DESCRIPTOR;
+
+/* Security context tracking mode */
+typedef BOOLEAN SECURITY_CONTEXT_TRACKING_MODE, *PSECURITY_CONTEXT_TRACKING_MODE;
 
 /* 128-bit 16-byte aligned XMM register */
 typedef struct _M128

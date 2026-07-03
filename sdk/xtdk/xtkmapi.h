@@ -38,6 +38,7 @@
 #include <potypes.h>
 #include <pstypes.h>
 #include <rtltypes.h>
+#include <setypes.h>
 
 /* Architecture-specific low level data types headers */
 #include ARCH_HEADER(artypes.h)
