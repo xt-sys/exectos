@@ -113,7 +113,9 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/rtl/string.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/time.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/unicode.cc
-    ${XTOSKRNL_SOURCE_DIR}/rtl/widestr.cc)
+    ${XTOSKRNL_SOURCE_DIR}/rtl/widestr.cc
+    ${XTOSKRNL_SOURCE_DIR}/se/descript.cc
+    ${XTOSKRNL_SOURCE_DIR}/se/privileg.cc)
 
 # Set module definition SPEC file
 set_specfile(xtoskrnl.spec xtoskrnl.exe)
