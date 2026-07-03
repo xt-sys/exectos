@@ -62,6 +62,13 @@
 /* C/C++ specific code */
 #ifndef __XTOS_ASSEMBLER__
 
+/* Client ID structure */
+typedef struct _CLIENT_ID
+{
+    HANDLE UniqueProcess;
+    HANDLE UniqueThread;
+} CLIENT_ID, *PCLIENT_ID;
+
 /* PCI bridge control registers */
 typedef struct _PCI_BRIDGE_CONTROL_REGISTER
 {

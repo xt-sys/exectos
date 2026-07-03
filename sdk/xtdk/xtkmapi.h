@@ -34,6 +34,7 @@
 #include <kdtypes.h>
 #include <ketypes.h>
 #include <ldrtypes.h>
+#include <lpctypes.h>
 #include <mmtypes.h>
 #include <potypes.h>
 #include <pstypes.h>
