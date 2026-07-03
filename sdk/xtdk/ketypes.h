@@ -384,7 +384,6 @@ typedef struct _EXCEPTION_RECORD
 /* Extended affinity structure definition */
 typedef struct _KAFFINITY_MAP
 {
-    USHORT Count;
     USHORT Size;
     ULONG Reserved;
     KAFFINITY Bitmap[];
