@@ -110,14 +110,18 @@ typedef enum _MMSYSTEM_PTE_POOL_TYPE
     MaximumPtePoolTypes
 } MMSYSTEM_PTE_POOL_TYPE, *PMMSYSTEM_PTE_POOL_TYPE;
 
-/* Page map routines structure definition */
-typedef CONST STRUCT _CMMPAGEMAP_ROUTINES
+/* Memory Descriptor List structure definition */
+typedef struct _MDL
 {
-    VOID (XTAPI *ClearPte)(PHARDWARE_PTE PtePointer);
-    BOOLEAN (XTAPI *PteValid)(PHARDWARE_PTE PtePointer);
-    VOID (XTAPI *SetPteCaching)(PHARDWARE_PTE PtePointer, BOOLEAN CacheDisable, BOOLEAN WriteThrough);
-    VOID (XTAPI *SetPte)(PHARDWARE_PTE PtePointer, PFN_NUMBER PageFrameNumber, BOOLEAN Writable);
-} CMMPAGEMAP_ROUTINES, *PCMMPAGEMAP_ROUTINES;
+    PMDL Next;
+    CSHORT Size;
+    CSHORT MdlFlags;
+    PEPROCESS Process;
+    PVOID MappedSystemVa;
+    PVOID StartVa;
+    ULONG ByteCount;
+    ULONG ByteOffset;
+} MDL, *PMDL;
 
 /* Color tables structure definition */
 typedef struct _MMCOLOR_TABLES

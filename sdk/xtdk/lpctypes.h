@@ -12,8 +12,6 @@
 #include <xttypes.h>
 #include <xtstruct.h>
 #include <iotypes.h>
-#include <ketypes.h>
-#include <setypes.h>
 
 
 /* C/C++ specific code */

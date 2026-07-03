@@ -112,6 +112,21 @@ typedef struct _PRIVILEGE_SET
     LUID_AND_ATTRIBUTES Privilege[1];
 } PRIVILEGE_SET, *PPRIVILEGE_SET;
 
+/* Identifier authority structure definition */
+typedef struct _SID_IDENTIFIER_AUTHORITY
+{
+    UCHAR Value[6];
+} SID_IDENTIFIER_AUTHORITY,*PSID_IDENTIFIER_AUTHORITY;
+
+/* Security identifier structure definition */
+typedef struct _SID
+{
+    UCHAR Revision;
+    UCHAR SubAuthorityCount;
+    SID_IDENTIFIER_AUTHORITY IdentifierAuthority;
+    ULONG SubAuthority[1];
+} SID, *PSID;
+
 /* Token source structure definition */
 typedef struct _TOKEN_SOURCE
 {

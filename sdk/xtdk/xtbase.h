@@ -20,8 +20,8 @@
 /* Access mask */
 typedef ULONG ACCESS_MASK, *PACCESS_MASK;
 
-/* Access token */
-typedef PVOID PACCESS_TOKEN;
+/* Device type */
+typedef ULONG DEVICE_TYPE;
 
 /* Kernel affinity */
 typedef ULONG_PTR KAFFINITY, *PKAFFINITY;
@@ -37,6 +37,12 @@ typedef UCHAR KRUNLEVEL, *PKRUNLEVEL;
 
 /* Spin locks synchronization mechanism */
 typedef ULONG_PTR KSPIN_LOCK, *PKSPIN_LOCK;
+
+/* Locale identifier */
+typedef ULONG LCID;
+
+/* Access token */
+typedef PVOID PACCESS_TOKEN;
 
 /* Page Frame Number count */
 typedef ULONG PFN_COUNT;
