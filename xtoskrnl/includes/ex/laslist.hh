@@ -30,6 +30,9 @@ namespace EX
         public:
             STATIC XTAPI PVOID AllocateFromLookasideList(IN PNONPAGED_LOOKASIDE_LIST LookasideList);
             STATIC XTAPI PVOID AllocateFromLookasideList(IN PPAGED_LOOKASIDE_LIST LookasideList);
+            STATIC XTAPI PVOID AllocateFromPerProcessorList(IN NONPAGED_LOOKASIDE_NUMBER Number);
+            STATIC XTAPI VOID FreeToPerProcessorList(IN NONPAGED_LOOKASIDE_NUMBER Number,
+                                                     IN PVOID Entry);
             STATIC XTAPI VOID InitializeLookasideList(IN OUT PGENERAL_LOOKASIDE LookasideList,
                                                       IN MMPOOL_TYPE PoolType,
                                                       IN ULONG Size,
