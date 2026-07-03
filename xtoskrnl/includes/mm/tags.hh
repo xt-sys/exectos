@@ -19,5 +19,6 @@
 #define TAG_MM_OVERFLOW                                         SIGNATURE32('O', 'V', 'F', 'L')
 #define TAG_MM_MEMORY_POOL                                      SIGNATURE32('P', 'O', 'O', 'L')
 #define TAG_MM_NONE                                             SIGNATURE32('N', 'O', 'N', 'E')
+#define TAG_SE_DESCRIPTOR                                       SIGNATURE32('S', 'E', 'S', 'D')
 
 #endif /* __XTOSKRNL_MM_TAGS_HH */
