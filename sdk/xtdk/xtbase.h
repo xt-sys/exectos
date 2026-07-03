@@ -20,6 +20,9 @@
 /* Access mask */
 typedef ULONG ACCESS_MASK, *PACCESS_MASK;
 
+/* Access token */
+typedef PVOID PACCESS_TOKEN;
+
 /* Kernel affinity */
 typedef ULONG_PTR KAFFINITY, *PKAFFINITY;
 
@@ -50,12 +53,8 @@ typedef PVOID PSECURITY_DESCRIPTOR;
 /* Security context tracking mode */
 typedef BOOLEAN SECURITY_CONTEXT_TRACKING_MODE, *PSECURITY_CONTEXT_TRACKING_MODE;
 
-/* 128-bit 16-byte aligned XMM register */
-typedef struct _M128
-{
-    ULONGLONG Low;
-    LONGLONG High;
-} ALIGN(16) M128, *PM128;
+/* Security information */
+typedef ULONG SECURITY_INFORMATION, *PSECURITY_INFORMATION;
 
 #endif /* __XTOS_ASSEMBLER_ */
 #endif /* __XTDK_XTBASE_H */

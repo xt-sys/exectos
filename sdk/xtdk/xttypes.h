@@ -234,6 +234,20 @@ typedef struct _LIST_ENTRY
     PLIST_ENTRY Blink;
 } LIST_ENTRY, *PLIST_ENTRY;
 
+/* Locally Unique Identifier structure definition */
+typedef struct _LUID
+{
+    ULONG LowPart;
+    LONG HighPart;
+} LUID, *PLUID;
+
+/* 128-bit 16-byte aligned XMM register */
+typedef struct _M128
+{
+    ULONGLONG Low;
+    LONGLONG High;
+} ALIGN(16) M128, *PM128;
+
 /* Quadruple-word alignment structure definition */
 typedef struct _QUAD
 {
