@@ -458,6 +458,14 @@ typedef struct _KAPC_STATE
     BOOLEAN UserApcPending;
 } KAPC_STATE, *PKAPC_STATE;
 
+/* Device queue entry structure definition */
+typedef struct _KDEVICE_QUEUE_ENTRY
+{
+    LIST_ENTRY DeviceListEntry;
+    ULONG SortKey;
+    BOOLEAN Inserted;
+} KDEVICE_QUEUE_ENTRY, *PKDEVICE_QUEUE_ENTRY;
+
 /* Mutex object structure definition */
 typedef struct _KMUTEX
 {

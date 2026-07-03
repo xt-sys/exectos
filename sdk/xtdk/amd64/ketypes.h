@@ -311,6 +311,24 @@ typedef struct _KDESCRIPTOR
     PVOID Base;
 } KDESCRIPTOR, *PKDESCRIPTOR;
 
+/* Device Queue structure definition */
+typedef struct _KDEVICE_QUEUE
+{
+    CSHORT Type;
+    CSHORT Size;
+    LIST_ENTRY DeviceListHead;
+    KSPIN_LOCK Lock;
+    union
+    {
+      BOOLEAN Busy;
+      struct
+      {
+        LONGLONG Reserved:8;
+        LONGLONG Hint:56;
+      };
+    };
+} KDEVICE_QUEUE, *PKDEVICE_QUEUE;
+
 /* Global Descriptor Table (GDT) entry union definition */
 typedef struct _KGDTENTRY
 {
