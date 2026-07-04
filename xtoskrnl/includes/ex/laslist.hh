@@ -31,6 +31,10 @@ namespace EX
             STATIC XTAPI PVOID AllocateFromLookasideList(IN PNONPAGED_LOOKASIDE_LIST LookasideList);
             STATIC XTAPI PVOID AllocateFromLookasideList(IN PPAGED_LOOKASIDE_LIST LookasideList);
             STATIC XTAPI PVOID AllocateFromPerProcessorList(IN NONPAGED_LOOKASIDE_NUMBER Number);
+            STATIC XTAPI VOID FreeToLookasideList(IN PNONPAGED_LOOKASIDE_LIST LookasideList,
+                                                  IN PVOID Entry);
+            STATIC XTAPI VOID FreeToLookasideList(IN PPAGED_LOOKASIDE_LIST LookasideList,
+                                                  IN PVOID Entry);
             STATIC XTAPI VOID FreeToPerProcessorList(IN NONPAGED_LOOKASIDE_NUMBER Number,
                                                      IN PVOID Entry);
             STATIC XTAPI VOID InitializeLookasideList(IN OUT PGENERAL_LOOKASIDE LookasideList,

@@ -79,7 +79,6 @@ EX::LookasideList::AllocateFromLookasideList(IN PPAGED_LOOKASIDE_LIST LookasideL
     return Buffer;
 }
 
-
 /**
  * Allocates a memory block from the specified per-processor lookaside list.
  *
@@ -138,6 +137,75 @@ EX::LookasideList::AllocateFromPerProcessorList(IN NONPAGED_LOOKASIDE_NUMBER Num
     return Entry;
 }
 
+/**
+ * Returns a previously allocated memory block to the specified non-paged lookaside list.
+ *
+ * @param LookasideList
+ *        Supplies a pointer to the non-paged lookaside list.
+ *
+ * @param Entry
+ *        Supplies a pointer to the memory block being freed.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+EX::LookasideList::FreeToLookasideList(IN PNONPAGED_LOOKASIDE_LIST LookasideList,
+                                       IN PVOID Entry)
+{
+    /* Increment the tracking metric */
+    LookasideList->Global.TotalFrees++;
+
+    /* Verify if the lookaside list has reached its maximum capacity threshold */
+    if(RTL::SinglyList::QueryListDepth(&LookasideList->Global.ListHead) >= LookasideList->Global.Depth)
+    {
+        /* The list is full, record a capacity miss */
+        LookasideList->Global.FreeMisses++;
+        (LookasideList->Global.Free)(Entry);
+    }
+    else
+    {
+        /* Push the block onto the lookaside list */
+        RTL::Atomic::PushEntrySingleList(&LookasideList->Global.ListHead, (PSINGLE_LIST_ENTRY)Entry);
+    }
+}
+
+/**
+ * Returns a previously allocated memory block to the specified paged lookaside list.
+ *
+ * @param LookasideList
+ *        Supplies a pointer to the paged lookaside list.
+ *
+ * @param Entry
+ *        Supplies a pointer to the memory block being freed.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+EX::LookasideList::FreeToLookasideList(IN PPAGED_LOOKASIDE_LIST LookasideList,
+                                       IN PVOID Entry)
+{
+    /* Increment the tracking metric */
+    LookasideList->Global.TotalFrees++;
+
+    /* Verify if the lookaside list has reached its maximum capacity threshold */
+    if(RTL::SinglyList::QueryListDepth(&LookasideList->Global.ListHead) >= LookasideList->Global.Depth)
+    {
+        /* The list is full, record a capacity miss */
+        LookasideList->Global.FreeMisses++;
+        (LookasideList->Global.Free)(Entry);
+    }
+    else
+    {
+        /* Push the block onto the lookaside list */
+        RTL::Atomic::PushEntrySingleList(&LookasideList->Global.ListHead, (PSINGLE_LIST_ENTRY)Entry);
+    }
+}
 
 /**
  * Frees a memory block back to the specified per-processor lookaside list.
