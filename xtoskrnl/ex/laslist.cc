@@ -326,35 +326,63 @@ XTAPI
 VOID
 EX::LookasideList::InitializePointers(VOID)
 {
-    PGENERAL_LOOKASIDE LookasideEntry;
+    PGENERAL_LOOKASIDE LookasideList;
     PKPROCESSOR_CONTROL_BLOCK Prcb;
-    ULONG Index;
+    ULONG Index, Offset;
+    XTSTATUS Status;
 
     /* Retrieve the processor control block */
     Prcb = KE::Processor::GetCurrentProcessorControlBlock();
 
+    /* Allocate a contiguous memory block for lookaside lists */
+    Status = MM::Allocator::AllocatePool(NonPagedPool, sizeof(GENERAL_LOOKASIDE) * POOL_LOOKASIDE_LISTS * 2,
+                                         (PVOID*)&LookasideList, TAG_MM_MEMORY_POOL);
+
     /* Initialize both non-paged and paged lookaside lists for all pool indexes */
     for(Index = 0; Index < POOL_LOOKASIDE_LISTS; Index++)
     {
-        /* Get the non-paged lookaside list entry */
-        LookasideEntry = &NonPagedPoolLookasideLists[Index];
+        /* Wire the global pointer for the non-paged lookaside list */
+        Prcb->NonPagedLookasideList[Index].Global = &NonPagedPoolLookasideLists[Index];
 
-        /* Initialize the singly linked list header for the non-paged entry */
-        RTL::SinglyList::InitializeListHead(&LookasideEntry->ListHead);
+        /* Check if the contiguous allocation was successful */
+        if(Status == STATUS_SUCCESS && LookasideList)
+        {
+            /* Map the pointer to the first half of the contiguous block */
+            Prcb->NonPagedLookasideList[Index].Local = &LookasideList[Index];
 
-        /* Assign the initialized non-paged entry to the PRCB */
-        Prcb->NonPagedLookasideList[Index].Global = LookasideEntry;
-        Prcb->NonPagedLookasideList[Index].Local = LookasideEntry;
+            /* Initialize the local non-paged list */
+            EX::LookasideList::InitializeLookasideList(&LookasideList[Index], NonPagedPool,
+                                                       (Index + 1) * 8, TAG_MM_MEMORY_POOL,
+                                                       256, &PoolLookasideListHead);
+        }
+        else
+        {
+            /* Allocation failed, use shared global list */
+            Prcb->NonPagedLookasideList[Index].Local = &NonPagedPoolLookasideLists[Index];
+        }
 
-        /* Get the paged lookaside list entry */
-        LookasideEntry = &PagedPoolLookasideLists[Index];
+        /* Wire the global pointer for the paged lookaside list */
+        Prcb->PagedLookasideList[Index].Global = &PagedPoolLookasideLists[Index];
 
-        /* Initialize the singly linked list header for the paged entry */
-        RTL::SinglyList::InitializeListHead(&LookasideEntry->ListHead);
+        /* Check if the contiguous allocation was successful */
+        if(Status == STATUS_SUCCESS && LookasideList)
+        {
+            /* Calculate the offset into the second half of the contiguous memory block */
+            Offset = POOL_LOOKASIDE_LISTS + Index;
 
-        /* Assign the initialized paged entry to the PRCB */
-        Prcb->PagedLookasideList[Index].Global = LookasideEntry;
-        Prcb->PagedLookasideList[Index].Local = LookasideEntry;
+            /* Map the pointer to the second half of the contiguous block */
+            Prcb->PagedLookasideList[Index].Local = &LookasideList[Offset];
+
+            /* Initialize the local paged list */
+            EX::LookasideList::InitializeLookasideList(&LookasideList[Offset], PagedPool,
+                                                       (Index + 1) * 8, TAG_MM_MEMORY_POOL,
+                                                       256, &PoolLookasideListHead);
+        }
+        else
+        {
+            /* Allocation failed, use shared global list */
+            Prcb->PagedLookasideList[Index].Local = &PagedPoolLookasideLists[Index];
+        }
     }
 }
 
@@ -392,4 +420,34 @@ EX::LookasideList::InitializeSystemLookasideLists(VOID)
         InitializeLookasideList(&PagedPoolLookasideLists[Index], PagedPool, (Index + 1) * 8,
                                 TAG_MM_MEMORY_POOL, 256, &PoolLookasideListHead);
     }
+}
+
+/**
+ * Retrieves the head of the pool lookaside list tracker.
+ *
+ * @return This routine returns a pointer to the global pool lookaside list head.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PLIST_ENTRY
+EX::LookasideList::GetPoolLookasideListHead(VOID)
+{
+    /* Return the head of the pool lookaside list */
+    return &PoolLookasideListHead;
+}
+
+/**
+ * Retrieves the head of the system-wide lookaside list tracker.
+ *
+ * @return This routine returns a pointer to the global system lookaside list head.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PLIST_ENTRY
+EX::LookasideList::GetSystemLookasideListHead(VOID)
+{
+    /* Return the head of the pool lookaside list */
+    return &SystemLookasideListHead;
 }

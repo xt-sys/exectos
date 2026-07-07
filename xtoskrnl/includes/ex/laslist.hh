@@ -45,6 +45,8 @@ namespace EX
                                                       IN PLIST_ENTRY ListHead);
             STATIC XTAPI VOID InitializePointers(VOID);
             STATIC XTAPI VOID InitializeSystemLookasideLists(VOID);
+            STATIC XTAPI PLIST_ENTRY GetPoolLookasideListHead(VOID);
+            STATIC XTAPI PLIST_ENTRY GetSystemLookasideListHead(VOID);
     };
 }
 
