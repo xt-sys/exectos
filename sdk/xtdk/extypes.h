@@ -28,6 +28,20 @@ typedef XTSTATUS (XTAPI *PALLOCATE_FUNCTION)(IN MMPOOL_TYPE PoolType, IN SIZE_T 
 typedef XTSTATUS (XTAPI *PALLOCATE_FUNCTION_EX)(IN MMPOOL_TYPE PoolType, IN SIZE_T Bytes, OUT PVOID *Memory, IN ULONG Tag, IN PLOOKASIDE_LIST_EX Lookaside);
 typedef XTSTATUS (XTAPI *PFREE_FUNCTION)(IN PVOID Buffer);
 typedef XTSTATUS (XTAPI *PFREE_FUNCTION_EX)(IN PVOID Buffer, IN OUT PLOOKASIDE_LIST_EX Lookaside);
+typedef VOID (XTAPI *PWORKER_THREAD_ROUTINE)(IN PVOID Parameter);
+
+/* Work queue types */
+typedef enum _WORK_QUEUE_TYPE
+{
+    CriticalWorkQueue,
+    DelayedWorkQueue,
+    HyperCriticalWorkQueue,
+    NormalWorkQueue,
+    BackgroundWorkQueue,
+    RealTimeWorkQueue,
+    SuperCriticalWorkQueue,
+    MaximumWorkQueue,
+} WORK_QUEUE_TYPE, *PWORK_QUEUE_TYPE;
 
 /* Owner entry structure definition */
 typedef struct _OWNER_ENTRY
@@ -149,6 +163,14 @@ typedef struct _PAGED_LOOKASIDE_LIST
 {
     GENERAL_LOOKASIDE Global;
 } PAGED_LOOKASIDE_LIST, *PPAGED_LOOKASIDE_LIST;
+
+/* Work queue item structure definition */
+typedef struct _WORK_QUEUE_ITEM
+{
+    LIST_ENTRY List;
+    PWORKER_THREAD_ROUTINE WorkerRoutine;
+    VOLATILE PVOID Parameter;
+} WORK_QUEUE_ITEM, *PWORK_QUEUE_ITEM;
 
 #endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_EXTYPES_H */
