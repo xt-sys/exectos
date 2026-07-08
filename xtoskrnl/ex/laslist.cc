@@ -228,37 +228,41 @@ EX::LookasideList::FreeToPerProcessorList(IN NONPAGED_LOOKASIDE_NUMBER Number,
     PKPROCESSOR_CONTROL_BLOCK Prcb;
     PGENERAL_LOOKASIDE Lookaside;
 
-    /* Retrieve the current Processor Control Block */
+    /* Retrieve the Processor Control Block */
     Prcb = KE::Processor::GetCurrentProcessorControlBlock();
 
-    /* Target the processor's local lookaside list and increment the tracking metric */
-    Lookaside = Prcb->LookasideList[Number].Local;
-    Lookaside->TotalFrees += 1;
+    /* Acquire the local lookaside list and increment its total free counter */
+    Lookaside = (PGENERAL_LOOKASIDE)Prcb->LookasideList[Number].Local;
+    Lookaside->TotalFrees++;
 
-    /* Check if the lookaside list has reached its maximum capacity threshold */
-    if(RTL::SinglyList::QueryListDepth(&Lookaside->ListHead) >= Lookaside->Depth)
+    /* Check if the local lookaside list has available capacity */
+    if(RTL::SinglyList::QueryListDepth(&Lookaside->ListHead) < Lookaside->Depth)
     {
-        /* The local list is full, record a capacity miss */
-        Lookaside->FreeMisses++;
-        Lookaside->TotalFrees++;
-
-        /* Switch the target to the shared global lookaside list */
-        Lookaside = Prcb->LookasideList[Number].Global;
-
-        /* Check if the lookaside list has reached its maximum capacity threshold */
-        if(RTL::SinglyList::QueryListDepth(&Lookaside->ListHead) >= Lookaside->Depth)
-        {
-            /* Both caches are saturated, record a miss */
-            Lookaside->FreeMisses++;
-            (Lookaside->Free)(Entry);
-
-            /* Exit the routine */
-            return;
-        }
+        /* Push the buffer onto the local list and exit */
+        RTL::Atomic::PushEntrySingleList(&Lookaside->ListHead, (PSINGLE_LIST_ENTRY)Entry);
+        return;
     }
 
-    /* Push the block onto the selected lookaside list */
-    RTL::Atomic::PushEntrySingleList(&Lookaside->ListHead, (PSINGLE_LIST_ENTRY)Entry);
+    /* Local list is full, record the miss */
+    Lookaside->FreeMisses++;
+
+    /* Acquire the global lookaside list and increment its free counter */
+    Lookaside = (PGENERAL_LOOKASIDE)Prcb->LookasideList[Number].Global;
+    Lookaside->TotalFrees++;
+
+    /* Check if the global lookaside list has available capacity */
+    if(RTL::SinglyList::QueryListDepth(&Lookaside->ListHead) < Lookaside->Depth)
+    {
+        /* Push the buffer onto the global list and exit */
+        RTL::Atomic::PushEntrySingleList(&Lookaside->ListHead, (PSINGLE_LIST_ENTRY)Entry);
+        return;
+    }
+
+    /* Global list is full, record the miss */
+    Lookaside->FreeMisses++;
+
+    /* Free directly to the system pool */
+    Lookaside->Free(Entry);
 }
 
 /**
