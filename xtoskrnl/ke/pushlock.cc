@@ -865,6 +865,61 @@ KE::PushLock::TryWakePushLock(IN PKPUSH_LOCK PushLock)
 }
 
 /**
+ * Unblocks an executive push lock and wakes up any pending threads waiting on it.
+ *
+ * @param PushLock
+ *        Supplies a pointer to the executive push lock being unblocked.
+ *
+ * @param CurrentWaitBlock
+ *        Optionally supplies a pointer to the current thread's push lock wait block.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+VOID
+KE::PushLock::UnblockPushLock(IN PKPUSH_LOCK PushLock,
+                              IN PKPUSH_LOCK_WAIT_BLOCK WaitBlock)
+{
+    PKPUSH_LOCK_WAIT_BLOCK CurrentWaitBlock, NextWaitBlock;
+
+    /* Capture the entire chain of wait blocks and clear the push lock pointer */
+    CurrentWaitBlock = (PKPUSH_LOCK_WAIT_BLOCK)RTL::Atomic::ExchangePointer((PVOID *)&PushLock->Ptr, NULLPTR);
+
+    /* Check if any wait blocks are present */
+    if(CurrentWaitBlock)
+    {
+        /* Raise runlevel to DISPATCH level */
+        KE::RaiseRunLevel RunLevel(DISPATCH_LEVEL, CurrentWaitBlock->Next);
+
+        /* Iterate through the captured chain of wait blocks */
+        while(CurrentWaitBlock)
+        {
+            /* Cache the next block pointer */
+            NextWaitBlock = CurrentWaitBlock->Next;
+
+            /* Test and clear the lock flag */
+            if(!RTL::Atomic::BitTestAndReset((VOLATILE PLONG)&CurrentWaitBlock->Flags, KPUSHLOCK_LOCK))
+            {
+                /* Boost priority and signal the wake event */
+                KE::Event::SetEventBoostPriority(&CurrentWaitBlock->WakeEvent, NULLPTR);
+            }
+
+            /* Advance to the next wait block */
+            CurrentWaitBlock = NextWaitBlock;
+        }
+    }
+
+    /* Check if a wait context was provided and its wait flag is pending */
+    if(WaitBlock && (WaitBlock->Flags & KPUSHLOCK_WAITING))
+    {
+        /* Suspend the thread until push lock wake event is signaled */
+        KE::Dispatcher::WaitForSingleObject(&WaitBlock->WakeEvent, WrPushLock, KernelMode, FALSE, NULLPTR);
+    }
+}
+
+/**
  * Wakes threads waiting on a PushLock.
  *
  * @param PushLock
