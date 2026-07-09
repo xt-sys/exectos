@@ -299,6 +299,51 @@ KE::PushLock::AcquireWaitSharedPushLock(IN PKPUSH_LOCK PushLock)
     }
 }
 
+
+/**
+ * Prepares a push lock wait block and enqueues it onto the lock's contention stack.
+ *
+ * @param PushLock
+ *        Supplies a pointer to the push lock being contended.
+ *
+ * @param WaitBlock
+ *        Supplies a pointer to the caller-allocated wait block to be enqueued.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+VOID
+KE::PushLock::BlockPushLock(IN PKPUSH_LOCK PushLock,
+                            IN PKPUSH_LOCK_WAIT_BLOCK WaitBlock)
+{
+    PVOID OldValue;
+
+    /* Initialize the synchronization event */
+    KE::Event::InitializeEvent(&WaitBlock->WakeEvent, SynchronizationEvent, FALSE);
+
+    /* Set the wait flag */
+    WaitBlock->Flags = KPUSHLOCK_WAITING;
+
+    /* Enter a retry loop */
+    while(TRUE)
+    {
+        /* Capture the current head of the wait stack */
+        OldValue = *(VOLATILE PVOID *)&PushLock->Ptr;
+
+        /* Link new wait block to the captured head */
+        WaitBlock->Next = (PKPUSH_LOCK_WAIT_BLOCK)OldValue;
+
+        /* Attempt to swap the lock's head pointer*/
+        if (RTL::Atomic::CompareExchangePointer((PVOID *)&PushLock->Ptr, (PVOID)WaitBlock, OldValue) == OldValue)
+        {
+            /* Successfully enqueued the wait block, return */
+            return;
+        }
+    }
+}
+
 /**
  * Attempts to convert a push lock from shared to exclusive access.
  *
