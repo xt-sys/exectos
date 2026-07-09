@@ -21,6 +21,38 @@
 #define PS_CURRENT_PROCESS_HANDLE                           ((HANDLE)(LONG_PTR)-1)
 #define PS_CURRENT_THREAD_HANDLE                            ((HANDLE)(LONG_PTR)-2)
 
+/* Generic access rights mapping for process */
+#define PS_PROCESS_GENERIC_MAPPING                          {SE_STANDARD_RIGHTS_READ | \
+                                                             SE_PROCESS_QUERY_INFORMATION | \
+                                                             SE_PROCESS_VM_READ, \
+                                                             SE_STANDARD_RIGHTS_WRITE | \
+                                                             SE_PROCESS_CREATE_PROCESS | \
+                                                             SE_PROCESS_CREATE_THREAD | \
+                                                             SE_PROCESS_DUP_HANDLE | \
+                                                             SE_PROCESS_SET_INFORMATION | \
+                                                             SE_PROCESS_SET_QUOTA | \
+                                                             SE_PROCESS_SUSPEND_RESUME | \
+                                                             SE_PROCESS_TERMINATE | \
+                                                             SE_PROCESS_VM_OPERATION | \
+                                                             SE_PROCESS_VM_WRITE, \
+                                                             SE_STANDARD_RIGHTS_EXECUTE | \
+                                                             SE_PROCESS_ALL_ACCESS | \
+                                                             SE_SYNCHRONIZE} \
+
+/* Generic access rights mapping for thread */
+#define PS_THREAD_GENERIC_MAPPING                           {SE_STANDARD_RIGHTS_READ | \
+                                                             SE_THREAD_GET_CONTEXT | \
+                                                             SE_THREAD_QUERY_INFORMATION, \
+                                                             SE_STANDARD_RIGHTS_WRITE | \
+                                                             SE_THREAD_ALERT | \
+                                                             SE_THREAD_SET_CONTEXT | \
+                                                             SE_THREAD_SET_INFORMATION | \
+                                                             SE_THREAD_SUSPEND_RESUME | \
+                                                             SE_THREAD_TERMINATE, \
+                                                             SE_STANDARD_RIGHTS_EXECUTE | \
+                                                             SE_THREAD_ALL_ACCESS | \
+                                                             SE_SYNCHRONIZE}
+
 /* C/C++ specific code */
 #ifndef __XTOS_ASSEMBLER__
 
