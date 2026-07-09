@@ -89,6 +89,13 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/mm/probe.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/pte.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/quota.cc
+    ${XTOSKRNL_SOURCE_DIR}/ob/data.cc
+    ${XTOSKRNL_SOURCE_DIR}/ob/devmap.cc
+    ${XTOSKRNL_SOURCE_DIR}/ob/lifecycl.cc
+    ${XTOSKRNL_SOURCE_DIR}/ob/obdir.cc
+    ${XTOSKRNL_SOURCE_DIR}/ob/obmgr.cc
+    ${XTOSKRNL_SOURCE_DIR}/ob/security.cc
+    ${XTOSKRNL_SOURCE_DIR}/ob/typereg.cc
     ${XTOSKRNL_SOURCE_DIR}/po/idle.cc
     ${XTOSKRNL_SOURCE_DIR}/ps/data.cc
     ${XTOSKRNL_SOURCE_DIR}/ps/process.cc
