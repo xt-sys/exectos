@@ -51,6 +51,24 @@
 #define SE_LUID_TIME_ZONE_PRIVILEGE                             (LUID){34, 0}
 #define SE_LUID_CREATE_SYMBOLIC_LINK_PRIVILEGE                  (LUID){35, 0}
 
+/* Standard Access Rights definitions */
+#define SE_DELETE                                               (0x00010000L)
+#define SE_READ_CONTROL                                         (0x00020000L)
+#define SE_WRITE_DAC                                            (0x00040000L)
+#define SE_WRITE_OWNER                                          (0x00080000L)
+#define SE_SYNCHRONIZE                                          (0x00100000L)
+#define SE_STANDARD_RIGHTS_REQUIRED                             (0x000F0000L)
+#define SE_STANDARD_RIGHTS_READ                                 (SE_READ_CONTROL)
+#define SE_STANDARD_RIGHTS_WRITE                                (SE_READ_CONTROL)
+#define SE_STANDARD_RIGHTS_EXECUTE                              (SE_READ_CONTROL)
+#define SE_STANDARD_RIGHTS_ALL                                  (0x001F0000L)
+#define SE_SPECIFIC_RIGHTS_ALL                                  (0x0000FFFFL)
+#define SE_ACCESS_SYSTEM_SECURITY                               (0x01000000L)
+#define SE_MAXIMUM_ALLOWED                                      (0x02000000L)
+
+/* Object full control access mask */
+#define SE_OBJECT_TYPE_ALL_ACCESS                               (SE_STANDARD_RIGHTS_REQUIRED | 0x1)
+
 /* Default security quota */
 #define SE_DEFAULT_SECURITY_QUOTA                               2048
 
