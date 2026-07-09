@@ -64,3 +64,18 @@ PS::Process::GetCurrentProcess(VOID)
     /* Return the current process */
     return (PEPROCESS)KE::Processor::GetCurrentThread()->ApcState.Process;
 }
+
+/**
+ * Returns a pointer to the primary system process object.
+ *
+ * @return This routine returns a pointer to the system process object.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+PEPROCESS
+PS::Process::GetSystemProcess(VOID)
+{
+    /* Return the system process */
+    return SystemProcess;
+}

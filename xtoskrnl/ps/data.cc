@@ -9,5 +9,8 @@
 #include <xtos.hh>
 
 
+/* Pointer to the system process object */
+PEPROCESS PS::Process::SystemProcess;
+
 /* Default system-wide quota block assigned to processes */
 EPROCESS_QUOTA_BLOCK PS::Quota::DefaultQuotaBlock;

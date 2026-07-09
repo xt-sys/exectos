@@ -17,9 +17,13 @@ namespace PS
 {
     class Process
     {
+        private:
+            STATIC PEPROCESS SystemProcess;
+
         public:
             STATIC XTAPI XTSTATUS CreateIdleProcess(IN PKPROCESSOR_CONTROL_BLOCK Prcb);
             STATIC XTFASTCALL PEPROCESS GetCurrentProcess(VOID);
+            STATIC XTFASTCALL PEPROCESS GetSystemProcess(VOID);
     };
 }
 
