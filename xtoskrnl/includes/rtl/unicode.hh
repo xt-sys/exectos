@@ -18,6 +18,9 @@ namespace RTL
     class Unicode
     {
         public:
+            STATIC XTAPI LONG CompareString(IN PCUNICODE_STRING String1,
+                                            IN PCUNICODE_STRING String2,
+                                            IN BOOLEAN CaseInsensitive);
             STATIC XTAPI VOID CopyString(IN OUT PUNICODE_STRING Destination,
                                          IN PCUNICODE_STRING Source);
             STATIC XTAPI XTSTATUS InitializeString(OUT PUNICODE_STRING Destination,

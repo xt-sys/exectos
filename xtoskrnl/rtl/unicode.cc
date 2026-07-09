@@ -10,6 +10,72 @@
 
 
 /**
+ * Compares two Unicode strings.
+ *
+ * @param String1
+ *        Supplies a pointer to the first UNICODE_STRING.
+ *
+ * @param String2
+ *        Supplies a pointer to the second UNICODE_STRING.
+ *
+ * @param CaseInsensitive
+ *        Specifies whether the comparison should be case-insensitive (TRUE) or case-sensitive (FALSE).
+ *
+ * @return This routine returns an integral value indicating the relationship between the wide strings.
+ */
+XTAPI
+LONG
+RTL::Unicode::CompareString(IN PCUNICODE_STRING String1,
+                            IN PCUNICODE_STRING String2,
+                            IN BOOLEAN CaseInsensitive)
+{
+    SIZE_T WideCharsToCompare;
+    PWCHAR Buffer1, Buffer2;
+    LONG Difference;
+
+    /* Isolate the bounded safe region determined by the shortest string */
+    WideCharsToCompare = (String1->Length < String2->Length ? String1->Length : String2->Length) >> 1;
+
+    /* Cache the string buffer pointers */
+    Buffer1 = String1->Buffer;
+    Buffer2 = String2->Buffer;
+
+    /* Determine the comparison mode */
+    if(CaseInsensitive)
+    {
+        /* Perform a case-insensitive comparison */
+        while(WideCharsToCompare--)
+        {
+            /* Convert both wide characters to uppercase and compute their lexicographical difference */
+            Difference = (LONG)RTL::Nls::ToUpperUnicodeCharacter(*Buffer1++) -
+                         (LONG)RTL::Nls::ToUpperUnicodeCharacter(*Buffer2++);
+            if(Difference != 0)
+            {
+                /* A character mismatch found, return the computed difference */
+                return Difference;
+            }
+        }
+    }
+    else
+    {
+        /* Perform a case-sensitive comparison */
+        while(WideCharsToCompare--)
+        {
+            /* Compute the lexicographical difference between the wide characters */
+            Difference = (LONG)(*Buffer1++) - (LONG)(*Buffer2++);
+            if(Difference != 0)
+            {
+                /* A character mismatch found, return the computed difference */
+                return Difference;
+            }
+        }
+    }
+
+    /* All characters match, return the relationship determined by the difference in length */
+    return (LONG)String1->Length - (LONG)String2->Length;
+}
+
+/**
  * Copies a source Unicode string to a destination Unicode string.
  *
  * @param Destination
