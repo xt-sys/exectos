@@ -265,7 +265,7 @@ EX::Handle::MapHandleToPointer(IN PHANDLE_TABLE HandleTable,
         if(TableEntry)
         {
             /* Acquire the entry lock */
-            if (!LockHandleTableEntry(HandleTable, TableEntry))
+            if(!LockHandleTableEntry(HandleTable, TableEntry))
             {
                 /* Lock acquisition failed, reset the pointer */
                 TableEntry = NULLPTR;

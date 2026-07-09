@@ -17,6 +17,10 @@
 /* Quota bypass marker */
 #define PS_QUOTA_BYPASS_MARKER                              ((PEPROCESS_QUOTA_BLOCK)1)
 
+/* Current process & thread handles */
+#define PS_CURRENT_PROCESS_HANDLE                           ((HANDLE)(LONG_PTR)-1)
+#define PS_CURRENT_THREAD_HANDLE                            ((HANDLE)(LONG_PTR)-2)
+
 /* C/C++ specific code */
 #ifndef __XTOS_ASSEMBLER__
 
@@ -39,7 +43,8 @@ typedef struct _EPROCESS
     EX_RUNDOWN_REFERENCE RundownProtect;
     HANDLE UniqueProcessId;
     SIZE_T QuotaUsage[PsQuotaTypes];
-    UINT Reserved0;
+    PHANDLE_TABLE ObjectTable;
+    ACCESS_MASK GrantedAccess;
 } EPROCESS, *PEPROCESS;
 
 /* Kernel's representation of a process quota entry*/
@@ -64,7 +69,7 @@ typedef struct _EPROCESS_QUOTA_BLOCK
 typedef struct _ETHREAD
 {
     KTHREAD ThreadControlBlock;
-    UINT Reserved0;
+    ACCESS_MASK GrantedAccess;
 } ETHREAD, *PETHREAD;
 
 #endif /* __XTOS_ASSEMBLER__ */
