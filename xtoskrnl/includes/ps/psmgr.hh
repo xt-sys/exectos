@@ -2,7 +2,7 @@
  * PROJECT:         ExectOS
  * COPYRIGHT:       See COPYING.md in the top level directory
  * FILE:            xtoskrnl/includes/ps/process.hh
- * DESCRIPTION:     Process Management
+ * DESCRIPTION:     Process Manager
  * DEVELOPERS:      Aiken Harris <harraiken91@gmail.com>
  */
 
@@ -24,6 +24,7 @@ namespace PS
         public:
             STATIC XTFASTCALL POBJECT_TYPE GetProcessType(VOID);
             STATIC XTFASTCALL POBJECT_TYPE GetThreadType(VOID);
+            STATIC XTAPI VOID InitializeProcessManager(VOID);
     };
 }
 
