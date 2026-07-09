@@ -20,6 +20,11 @@
     #define XTCLINK         extern "C"
     #define XTSYMBOL(Name)  __asm__(Name)
 
+    /* C++ attributes */
+    #define MUSTCHECK       [[nodiscard]]
+    #define NORETURN        [[noreturn]]
+    #define UNUSED          [[maybe_unused]]
+
     /* C++ boolean type */
     typedef bool BOOLEAN, *PBOOLEAN;
     #define TRUE true
@@ -33,6 +38,11 @@
     #define VIRTUAL
     #define XTCLINK
     #define XTSYMBOL(Name)
+
+    /* C attributes */
+    #define MUSTCHECK       __attribute__((warn_unused_result))
+    #define NORETURN        __attribute__((noreturn))
+    #define UNUSED          __attribute__((unused))
 
     /* C boolean type */
     typedef enum _BOOLEAN
