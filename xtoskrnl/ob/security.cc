@@ -53,6 +53,22 @@ OB::Security::ProcessObjectSecurityDescriptor(IN PVOID Object,
                                               IN MMPOOL_TYPE PoolType,
                                               IN PGENERIC_MAPPING GenericMapping)
 {
+    /* Switch on the operation code */
+    switch(OperationCode)
+    {
+        case AssignSecurityDescriptor:
+            break;
+        case DeleteSecurityDescriptor:
+            break;
+        case QuerySecurityDescriptor:
+            break;
+        case SetSecurityDescriptor:
+            break;
+        default:
+            KE::Crash::Panic(0x29, 0, STATUS_INVALID_PARAMETER, 0, 0);
+            break;
+    }
+
     UNIMPLEMENTED;
 
     /* Return success */
