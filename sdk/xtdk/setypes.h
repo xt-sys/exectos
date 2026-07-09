@@ -52,19 +52,58 @@
 #define SE_LUID_CREATE_SYMBOLIC_LINK_PRIVILEGE                  (LUID){35, 0}
 
 /* Standard Access Rights definitions */
-#define SE_DELETE                                               (0x00010000L)
-#define SE_READ_CONTROL                                         (0x00020000L)
-#define SE_WRITE_DAC                                            (0x00040000L)
-#define SE_WRITE_OWNER                                          (0x00080000L)
-#define SE_SYNCHRONIZE                                          (0x00100000L)
-#define SE_STANDARD_RIGHTS_REQUIRED                             (0x000F0000L)
-#define SE_STANDARD_RIGHTS_READ                                 (SE_READ_CONTROL)
-#define SE_STANDARD_RIGHTS_WRITE                                (SE_READ_CONTROL)
-#define SE_STANDARD_RIGHTS_EXECUTE                              (SE_READ_CONTROL)
-#define SE_STANDARD_RIGHTS_ALL                                  (0x001F0000L)
-#define SE_SPECIFIC_RIGHTS_ALL                                  (0x0000FFFFL)
-#define SE_ACCESS_SYSTEM_SECURITY                               (0x01000000L)
-#define SE_MAXIMUM_ALLOWED                                      (0x02000000L)
+#define SE_DELETE                                               0x00010000L
+#define SE_READ_CONTROL                                         0x00020000L
+#define SE_WRITE_DAC                                            0x00040000L
+#define SE_WRITE_OWNER                                          0x00080000L
+#define SE_SYNCHRONIZE                                          0x00100000L
+#define SE_STANDARD_RIGHTS_REQUIRED                             0x000F0000L
+#define SE_STANDARD_RIGHTS_READ                                 SE_READ_CONTROL
+#define SE_STANDARD_RIGHTS_WRITE                                SE_READ_CONTROL
+#define SE_STANDARD_RIGHTS_EXECUTE                              SE_READ_CONTROL
+#define SE_STANDARD_RIGHTS_ALL                                  0x001F0000L
+#define SE_SPECIFIC_RIGHTS_ALL                                  0x0000FFFFL
+#define SE_ACCESS_SYSTEM_SECURITY                               0x01000000L
+#define SE_MAXIMUM_ALLOWED                                      0x02000000L
+
+/* Generic access rights definitions */
+#define SE_GENERIC_ALL                                          0x10000000L
+#define SE_GENERIC_EXECUTE                                      0x20000000L
+#define SE_GENERIC_WRITE                                        0x40000000L
+#define SE_GENERIC_READ                                         0x80000000L
+
+/* Process access rights definitions */
+#define SE_PROCESS_TERMINATE                                    0x0001
+#define SE_PROCESS_CREATE_THREAD                                0x0002
+#define SE_PROCESS_SET_SESSIONID                                0x0004
+#define SE_PROCESS_VM_OPERATION                                 0x0008
+#define SE_PROCESS_VM_READ                                      0x0010
+#define SE_PROCESS_VM_WRITE                                     0x0020
+#define SE_PROCESS_DUP_HANDLE                                   0x0040
+#define SE_PROCESS_CREATE_PROCESS                               0x0080
+#define SE_PROCESS_SET_QUOTA                                    0x0100
+#define SE_PROCESS_SET_INFORMATION                              0x0200
+#define SE_PROCESS_QUERY_INFORMATION                            0x0400
+#define SE_PROCESS_SUSPEND_RESUME                               0x0800
+#define SE_PROCESS_QUERY_LIMITED_INFORMATION                    0x1000
+
+/* Process full control access mask */
+#define SE_PROCESS_ALL_ACCESS                                   (SE_STANDARD_RIGHTS_REQUIRED | SE_SYNCHRONIZE | 0xFFFF)
+
+/* Thread access rights definitions */
+#define SE_THREAD_TERMINATE                                     0x0001
+#define SE_THREAD_SUSPEND_RESUME                                0x0002
+#define SE_THREAD_ALERT                                         0x0004
+#define SE_THREAD_GET_CONTEXT                                   0x0008
+#define SE_THREAD_SET_CONTEXT                                   0x0010
+#define SE_THREAD_SET_INFORMATION                               0x0020
+#define SE_THREAD_QUERY_INFORMATION                             0x0040
+#define SE_THREAD_SET_THREAD_TOKEN                              0x0080
+#define SE_THREAD_IMPERSONATE                                   0x0100
+#define SE_THREAD_DIRECT_IMPERSONATION                          0x0200
+
+/* Thread full control access mask */
+#define SE_THREAD_ALL_ACCESS                                    (SE_STANDARD_RIGHTS_REQUIRED | SE_SYNCHRONIZE | 0xFFFF)
 
 /* Object full control access mask */
 #define SE_OBJECT_TYPE_ALL_ACCESS                               (SE_STANDARD_RIGHTS_REQUIRED | 0x1)
