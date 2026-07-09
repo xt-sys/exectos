@@ -17,6 +17,24 @@
 /* Rundown protection flags */
 #define EX_RUNDOWN_ACTIVE                               0x1
 
+/* Defines maximum number of handles */
+#define MAX_HANDLES                                     (1<<24)
+
+/* Handle Table Architecture Dimensions */
+#define HANDLE_HILEVEL_COUNT                            MAX_HANDLES / (LOWLEVEL_COUNT * MIDLEVEL_COUNT)
+#define HANDLE_MIDLEVEL_COUNT                           (MM_PAGE_SIZE / sizeof(PHANDLE_TABLE_ENTRY))
+#define HANDLE_LOWLEVEL_COUNT                           (MM_PAGE_SIZE / sizeof(HANDLE_TABLE_ENTRY))
+
+/* Handle Value and Table Routing Constants */
+#define HANDLE_LEVEL_CODE_MASK                          3
+#define HANDLE_VALUE_INCREMENT                          4
+
+/* Handle table entry lock bit */
+#define EXHANDLE_TABLE_ENTRY_LOCK_BIT                   1
+
+/* Handle additional information signature */
+#define HANDLE_ADDITIONAL_INFO_SIGNATURE (-2)
+
 /* Number of lookaside lists */
 #define POOL_LOOKASIDE_LISTS                            32
 
@@ -80,6 +98,18 @@ typedef struct _ERESOURCE
     };
     KSPIN_LOCK SpinLock;
 } ERESOURCE, *PERESOURCE;
+
+/* Handle table interface union definition */
+typedef union _EXHANDLE
+{
+    struct
+    {
+        ULONG TagBits:2;
+        ULONG Index:30;
+    };
+    HANDLE GenericHandleOverlay;
+    ULONG_PTR Value;
+} EXHANDLE, *PEXHANDLE;
 
 /* Executive rundown protection structure definition */
 typedef union _EX_RUNDOWN_REFERENCE
