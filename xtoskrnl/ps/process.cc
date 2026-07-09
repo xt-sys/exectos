@@ -51,6 +51,23 @@ PS::Process::CreateIdleProcess(IN PKPROCESSOR_CONTROL_BLOCK Prcb)
 }
 
 /**
+ * Deletes a Process object when the final reference is released.
+ *
+ * @param ProcessObject
+ *        Supplies a pointer to the terminating process object.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+PS::Process::DeleteProcess(IN PVOID ProcessObject)
+{
+    UNIMPLEMENTED;
+}
+
+/**
  * Returns a pointer to the process object associated with the currently executing thread.
  *
  * @return This routine returns a pointer to the current process object.

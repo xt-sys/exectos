@@ -22,6 +22,7 @@ namespace PS
 
         public:
             STATIC XTAPI XTSTATUS CreateIdleProcess(IN PKPROCESSOR_CONTROL_BLOCK Prcb);
+            STATIC XTAPI VOID DeleteProcess(IN PVOID ProcessObject);
             STATIC XTFASTCALL PEPROCESS GetCurrentProcess(VOID);
             STATIC XTFASTCALL PEPROCESS GetSystemProcess(VOID);
     };

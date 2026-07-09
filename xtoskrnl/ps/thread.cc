@@ -61,3 +61,20 @@ PS::Thread::CreateIdleThread(IN PKPROCESSOR_CONTROL_BLOCK Prcb,
     /* Return success */
     return STATUS_SUCCESS;
 }
+
+/**
+ * Deletes a Thread object when the final reference is released.
+ *
+ * @param ThreadObject
+ *        Supplies a pointer to the terminating thread object.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+PS::Thread::DeleteThread(IN PVOID ThreadObject)
+{
+    UNIMPLEMENTED;
+}
