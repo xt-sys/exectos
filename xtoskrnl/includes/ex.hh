@@ -14,5 +14,6 @@
 #include <ex/laslist.hh>
 #include <ex/resource.hh>
 #include <ex/rundown.hh>
+#include <ex/workitem.hh>
 
 #endif /* __XTOSKRNL_EX_HH */
