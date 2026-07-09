@@ -34,7 +34,9 @@
 #define OBJECT_LOCK_STATE_INITIALIZED                           0xFFFF1234
 
 /* Object name attribute flags */
+#define OBJECT_PROTECT_CLOSE                                    0x00000001L
 #define OBJECT_INHERIT                                          0x00000002L
+#define OBJECT_AUDIT_OBJECT_CLOSE                               0x00000004L
 #define OBJECT_PERMANENT                                        0x00000010L
 #define OBJECT_EXCLUSIVE                                        0x00000020L
 #define OBJECT_CASE_INSENSITIVE                                 0x00000040L
@@ -43,6 +45,14 @@
 #define OBJECT_KERNEL_HANDLE                                    0x00000200L
 #define OBJECT_FORCE_ACCESS_CHECK                               0x00000400L
 #define OBJECT_VALID_ATTRIBUTES                                 0x000007F2L
+
+/* Object handle attributes */
+#define OBJECT_HANDLE_ATTRIBUTES                                (OBJECT_PROTECT_CLOSE | \
+                                                                 OBJECT_INHERIT | \
+                                                                 OBJECT_AUDIT_OBJECT_CLOSE)
+
+/* Object protect-on-close access bit */
+#define OBJECT_ACCESS_PROTECT_CLOSE_BIT                         0x02000000L
 
 /* Maximum number of defined object types */
 #define OBJECT_MAX_DEFINED_OBJECT_TYPES                         48
@@ -56,6 +66,9 @@
 
 /* Object name path separator */
 #define OBJECT_NAME_PATH_SEPARATOR                              ((WCHAR)L'\\')
+
+/* Kernel mode object handle mask */
+#define OBJECT_HANDLE_KERNEL_MASK                               ((ULONG_PTR)((LONG)0x80000000))
 
 /* Number of hash buckets */
 #define OBJECT_NUMBER_HASH_BUCKETS                              37
@@ -200,6 +213,13 @@ typedef struct _OBJECT_HANDLE_INFO
 {
     OBJECT_HANDLE_COUNT_INFORMATION HandleCounts;
 } OBJECT_HANDLE_INFO, *POBJECT_HANDLE_INFO;
+
+/* Object Handle Information */
+typedef struct _OBJECT_HANDLE_INFORMATION
+{
+    ULONG HandleAttributes;
+    ACCESS_MASK GrantedAccess;
+} OBJECT_HANDLE_INFORMATION, *POBJECT_HANDLE_INFORMATION;
 
 /* Core object header */
 typedef struct _OBJECT_HEADER
