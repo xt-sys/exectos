@@ -16,6 +16,7 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/traps.cc
     ${XTOSKRNL_SOURCE_DIR}/ex/data.cc
     ${XTOSKRNL_SOURCE_DIR}/ex/exports.cc
+    ${XTOSKRNL_SOURCE_DIR}/ex/handle.cc
     ${XTOSKRNL_SOURCE_DIR}/ex/laslist.cc
     ${XTOSKRNL_SOURCE_DIR}/ex/resource.cc
     ${XTOSKRNL_SOURCE_DIR}/ex/rundown.cc
