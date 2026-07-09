@@ -303,7 +303,7 @@ OB::TypeRegistry::InitializeObjectType(IN OUT POBJECT_TYPE ObjectType,
     {
         /* Map to the global default event and append the SYNCHRONIZE access right */
         ObjectType->DefaultObject = &DefaultEvent;
-        ObjectType->TypeInfo.ValidAccessMask |= SYNCHRONIZE;
+        ObjectType->TypeInfo.ValidAccessMask |= SE_SYNCHRONIZE;
     }
     else if(TypeName->Length == 8 && !RTL::WideString::CompareWideString(TypeName->Buffer, L"File", 0))
     {
@@ -354,7 +354,7 @@ OB::TypeRegistry::InitializeObjectTypeRegistry(VOID)
     ObjectTypeInitializer.MaintainTypeList = TRUE;
     ObjectTypeInitializer.PoolType = NonPagedPool;
     ObjectTypeInitializer.UseDefaultObject = TRUE;
-    ObjectTypeInitializer.ValidAccessMask = OBJECT_TYPE_ALL_ACCESS;
+    ObjectTypeInitializer.ValidAccessMask = SE_OBJECT_TYPE_ALL_ACCESS;
 
     /* Register default destructor */
     ObjectTypeInitializer.DeleteProcedure = &DeleteObjectType;
