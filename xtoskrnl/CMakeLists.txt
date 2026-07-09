@@ -100,6 +100,7 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/po/idle.cc
     ${XTOSKRNL_SOURCE_DIR}/ps/data.cc
     ${XTOSKRNL_SOURCE_DIR}/ps/process.cc
+    ${XTOSKRNL_SOURCE_DIR}/ps/psmgr.cc
     ${XTOSKRNL_SOURCE_DIR}/ps/quota.cc
     ${XTOSKRNL_SOURCE_DIR}/ps/thread.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/${ARCH}/atomic.cc

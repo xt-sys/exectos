@@ -12,5 +12,11 @@
 /* Pointer to the system process object */
 PEPROCESS PS::Process::SystemProcess;
 
+/* Global object type descriptor for Process objects */
+POBJECT_TYPE PS::ProcessManager::ProcessType;
+
+/* Global object type descriptor for Thread objects */
+POBJECT_TYPE PS::ProcessManager::ThreadType;
+
 /* Default system-wide quota block assigned to processes */
 EPROCESS_QUOTA_BLOCK PS::Quota::DefaultQuotaBlock;

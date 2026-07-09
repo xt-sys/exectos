@@ -12,6 +12,7 @@
 #include <xtos.hh>
 
 #include <ps/process.hh>
+#include <ps/psmgr.hh>
 #include <ps/quota.hh>
 #include <ps/thread.hh>
 
