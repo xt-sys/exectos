@@ -78,6 +78,7 @@
 #define STATUS_OBJECT_NAME_COLLISION                                       ((XTSTATUS) 0xC0000035L)
 #define STATUS_PORT_DISCONNECTED                                           ((XTSTATUS) 0xC0000037L)
 #define STATUS_CRC_ERROR                                                   ((XTSTATUS) 0xC000003FL)
+#define STATUS_PRIVILEGE_NOT_HELD                                          ((XTSTATUS) 0xC0000061L)
 #define STATUS_FLOAT_OVERFLOW                                              ((XTSTATUS) 0xC0000091L)
 #define STATUS_INTEGER_OVERFLOW                                            ((XTSTATUS) 0xC0000095L)
 #define STATUS_INSUFFICIENT_RESOURCES                                      ((XTSTATUS) 0xC000009AL)
