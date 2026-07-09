@@ -139,6 +139,56 @@ typedef struct _GENERAL_LOOKASIDE
     ULONG Future[2];
 } GENERAL_LOOKASIDE, *PGENERAL_LOOKASIDE;
 
+/* Handle table entry structure definition */
+typedef struct _HANDLE_TABLE_ENTRY
+{
+    union
+    {
+        PVOID Object;
+        ULONG_PTR ObAttributes;
+        PHANDLE_TABLE_ENTRY_INFO InfoTable;
+        ULONG_PTR Value;
+    };
+    union
+    {
+        ULONG GrantedAccess;
+        struct
+        {
+            USHORT GrantedAccessIndex;
+            USHORT CreatorBackTraceIndex;
+        };
+        LONG NextFreeTableEntry;
+    };
+} HANDLE_TABLE_ENTRY, *PHANDLE_TABLE_ENTRY;
+
+/* Handle table entry info structure definition */
+typedef struct _HANDLE_TABLE_ENTRY_INFO
+{
+    ULONG AuditMask;
+} HANDLE_TABLE_ENTRY_INFO, *PHANDLE_TABLE_ENTRY_INFO;
+
+/* Handle table structure definition */
+typedef struct _HANDLE_TABLE
+{
+    ULONG_PTR TableCode;
+    PEPROCESS QuotaProcess;
+    PVOID UniqueProcessId;
+    KPUSH_LOCK HandleTableLock[4];
+    LIST_ENTRY HandleTableList;
+    KPUSH_LOCK HandleContentionEvent;
+    PVOID Reserved;
+    LONG ExtraInfoPages;
+    union
+    {
+        ULONG Flags;
+        UCHAR StrictFIFO:1;
+    };
+    PHANDLE_TABLE_ENTRY FirstFreeHandle;
+    PHANDLE_TABLE_ENTRY LastFreeHandle;
+    LONG HandleCount;
+    ULONG NextHandleNeedingPool;
+} HANDLE_TABLE, *PHANDLE_TABLE;
+
 /* Lookaside list pointers structure definition */
 typedef struct _LOOKASIDE_LIST
 {
