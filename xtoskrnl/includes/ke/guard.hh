@@ -10,6 +10,8 @@
 #define __XTOSKRNL_KE_GUARD_HH
 
 #include <xtos.hh>
+#include <ke/kthread.hh>
+#include <ke/proc.hh>
 #include <ke/spinlock.hh>
 
 
