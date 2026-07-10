@@ -12,6 +12,7 @@
 #include <xtos.hh>
 #include <ke/kthread.hh>
 #include <ke/proc.hh>
+#include <ke/pushlock.hh>
 #include <ke/spinlock.hh>
 
 
@@ -50,6 +51,66 @@ namespace KE
 
             CriticalRegionGuard(const CriticalRegionGuard&) = delete;
             CriticalRegionGuard& operator=(const CriticalRegionGuard&) = delete;
+    };
+
+    class PushLockExclusiveGuard
+    {
+        private:
+            PKPUSH_LOCK Lock;
+            BOOLEAN Owned;
+
+        public:
+            PushLockExclusiveGuard(IN PKPUSH_LOCK PushLock,
+                                   IN BOOLEAN Acquire = TRUE)
+            {
+                Lock = PushLock;
+                Owned = Acquire;
+                if(Owned)
+                {
+                    KE::PushLock::AcquireExclusivePushLock(Lock);
+                }
+            }
+
+            ~PushLockExclusiveGuard()
+            {
+                if(Owned)
+                {
+                    KE::PushLock::ReleaseExclusivePushLock(Lock);
+                }
+            }
+
+            PushLockExclusiveGuard(const PushLockExclusiveGuard&) = delete;
+            PushLockExclusiveGuard& operator=(const PushLockExclusiveGuard&) = delete;
+    };
+
+    class PushLockSharedGuard
+    {
+        private:
+            PKPUSH_LOCK Lock;
+            BOOLEAN Owned;
+
+        public:
+            PushLockSharedGuard(IN PKPUSH_LOCK PushLock,
+                                IN BOOLEAN Acquire = TRUE)
+            {
+                Lock = PushLock;
+                Owned = Acquire;
+                if(Owned)
+                {
+                    KE::PushLock::AcquireSharedPushLock(Lock);
+                }
+            }
+
+            ~PushLockSharedGuard()
+            {
+                if(Owned)
+                {
+                    KE::PushLock::ReleaseSharedPushLock(Lock);
+                }
+            }
+
+            PushLockSharedGuard(const PushLockSharedGuard&) = delete;
+            PushLockSharedGuard& operator=(const PushLockSharedGuard&) = delete;
     };
 
     class QueuedSpinLockGuard
