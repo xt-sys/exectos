@@ -299,7 +299,6 @@ KE::PushLock::AcquireWaitSharedPushLock(IN PKPUSH_LOCK PushLock)
     }
 }
 
-
 /**
  * Prepares a push lock wait block and enqueues it onto the lock's contention stack.
  *
