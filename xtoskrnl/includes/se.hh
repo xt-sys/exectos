@@ -11,6 +11,8 @@
 
 #include <xtos.hh>
 
+#include <se/access.hh>
+#include <se/audit.hh>
 #include <se/descript.hh>
 #include <se/privileg.hh>
 

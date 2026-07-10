@@ -28,7 +28,7 @@ namespace SE
                                                               OUT PULONG QuotaSize);
             STATIC XTAPI VOID ReleaseSecurityDescriptor(IN PSECURITY_DESCRIPTOR Descriptor,
                                                         IN KPROCESSOR_MODE ProcessorMode,
-                                                        IN BOOLEAN ForceRelease);
+                                                        IN BOOLEAN Force);
     };
 }
 

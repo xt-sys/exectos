@@ -101,7 +101,7 @@ SE::Descriptor::ComputeQuotaInformationSize(IN PSECURITY_DESCRIPTOR SecurityDesc
 * @param ProcessorMode
 *        Supplies the processor mode that was originally used to capture the descriptor.
 *
-* @param ForceRelease
+* @param Force
 *        Supplies a boolean value indicating whether to force the deallocation.
 *
 * @return This routine does not return any value.
@@ -112,10 +112,10 @@ XTAPI
 VOID
 SE::Descriptor::ReleaseSecurityDescriptor(IN PSECURITY_DESCRIPTOR Descriptor,
                                           IN KPROCESSOR_MODE ProcessorMode,
-                                          IN BOOLEAN ForceRelease)
+                                          IN BOOLEAN Force)
 {
     /* Check if the descriptor should be released */
-    if(((ProcessorMode == KernelMode) && (ForceRelease == TRUE)) || (ProcessorMode == UserMode))
+    if(((ProcessorMode == KernelMode) && (Force == TRUE)) || (ProcessorMode == UserMode))
     {
         /* Ensure the descriptor is valid */
         if(Descriptor)
