@@ -54,10 +54,13 @@ PS::Quota::DereferenceQuotaBlock(IN PEPROCESS_QUOTA_BLOCK QuotaBlock)
                     MM::Quota::ReturnPoolQuota((MMPOOL_TYPE)Index, ReturnAmount);
                 }
             }
-        }
 
-        /* Unlink the quota block from the global tracking list */
-        RTL::LinkedList::RemoveEntryList(&QuotaBlock->QuotaList);
+            /* Acquire a quota lock */
+            KE::SpinLockGuard SpinLock(&QuotaLock);
+
+            /* Unlink the quota block from the global tracking list */
+            RTL::LinkedList::RemoveEntryList(&QuotaBlock->QuotaList);
+        }
 
         /* Free the physical memory */
         MM::Allocator::FreePool(QuotaBlock, TAG_PS_QUOTA_BLOCK);
@@ -98,15 +101,24 @@ PS::Quota::ReturnProcessQuota(IN PEPROCESS_QUOTA_BLOCK QuotaBlock,
     QuotaEntry = &QuotaBlock->QuotaEntry[QuotaType];
     CurrentUsage = QuotaEntry->Usage;
 
-    /* Ensure quota usage does not exceed the limit */
-    if((Process != NULLPTR && Process->QuotaUsage[QuotaType] < Amount) || (CurrentUsage < Amount))
+    /* Check if process provided */
+    if(Process != NULLPTR)
     {
-        /* Quota underflow detected, raise kernel panic */
-        KE::Crash::Panic(0x21,
-                         (ULONG_PTR)Process,
-                         (ULONG_PTR)QuotaType,
-                         Process ? (ULONG_PTR)Process->QuotaUsage[QuotaType] : (ULONG_PTR)CurrentUsage,
-                         (ULONG_PTR)Amount);
+        /* Check if this is the system process */
+        if(Process == PS::Process::GetSystemProcess())
+        {
+            /* Do not do anything for system processes, return */
+            return;
+        }
+        else if(Process->QuotaUsage[QuotaType] < Amount || CurrentUsage < Amount)
+        {
+            /* Quota underflow detected, raise kernel panic */
+            KE::Crash::Panic(0x21,
+                             (ULONG_PTR)Process,
+                             (ULONG_PTR)QuotaType,
+                             Process ? (ULONG_PTR)Process->QuotaUsage[QuotaType] : (ULONG_PTR)CurrentUsage,
+                             (ULONG_PTR)Amount);
+        }
     }
 
     /* Determine the thresholds for returning excess quota limit */
@@ -126,8 +138,8 @@ PS::Quota::ReturnProcessQuota(IN PEPROCESS_QUOTA_BLOCK QuotaBlock,
 
             /* Attempt a lock-free update to shrink the quota limit */
             NewLimit = CurrentLimit - GiveBackAmount;
-            ExpectedLimit = (SIZE_T)RTL::Atomic::CompareExchangePointer((PVOID*)&QuotaEntry->Limit, (PVOID)NewLimit,
-                                                                        (PVOID)CurrentLimit);
+            ExpectedLimit = (SIZE_T)RTL::Atomic::CompareExchange64((PLONG_PTR)&QuotaEntry->Limit, (LONG_PTR)NewLimit,
+                                                                   (LONG_PTR)CurrentLimit);
 
             /* Check if the atomic limit update succeeded */
             if(ExpectedLimit == CurrentLimit)
@@ -139,7 +151,7 @@ PS::Quota::ReturnProcessQuota(IN PEPROCESS_QUOTA_BLOCK QuotaBlock,
                 if(AccumulatedGiveBack > GiveBackLimit)
                 {
                     /* Extract the accumulated return amount and reset the counter to zero */
-                    ExtractedReturnAmount = (SIZE_T)RTL::Atomic::ExchangePointer((PVOID*)&QuotaEntry->Return, (PVOID)0);
+                    ExtractedReturnAmount = (SIZE_T)RTL::Atomic::Exchange64((PLONG_PTR)&QuotaEntry->Return, (LONG_PTR)0);
 
                     /* Check if there is anything to return */
                     if(ExtractedReturnAmount > 0)
@@ -156,7 +168,7 @@ PS::Quota::ReturnProcessQuota(IN PEPROCESS_QUOTA_BLOCK QuotaBlock,
     RTL::Atomic::Add64((PLONG_PTR)&QuotaEntry->Usage, (SIZE_T)(-(SSIZE_T)Amount));
 
     /* Check if a specific process was provided */
-    if(Process != NULLPTR)
+    if(Process)
     {
         /* Decrease the process's specific usage count */
         RTL::Atomic::Add64((PLONG_PTR)&Process->QuotaUsage[QuotaType], (SIZE_T)(-(SSIZE_T)Amount));
@@ -186,7 +198,7 @@ PS::Quota::ReturnSharedPoolQuota(IN PEPROCESS_QUOTA_BLOCK QuotaBlock,
                                  IN SIZE_T NonPagedAmount)
 {
     /* Check for NULL pointers and bypass markers */
-    if(QuotaBlock == NULLPTR || QuotaBlock == (PEPROCESS_QUOTA_BLOCK)1)
+    if(!QuotaBlock || QuotaBlock == PS_QUOTA_BYPASS_MARKER)
     {
         /* No quota tracking is required for the system process or empty blocks, return */
         return;
