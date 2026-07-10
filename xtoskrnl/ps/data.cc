@@ -20,3 +20,6 @@ POBJECT_TYPE PS::ProcessManager::ThreadType;
 
 /* Default system-wide quota block assigned to processes */
 EPROCESS_QUOTA_BLOCK PS::Quota::DefaultQuotaBlock;
+
+/* Lock used for quota management */
+KSPIN_LOCK PS::Quota::QuotaLock;

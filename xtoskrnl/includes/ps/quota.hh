@@ -19,19 +19,19 @@ namespace PS
     {
         private:
             STATIC EPROCESS_QUOTA_BLOCK DefaultQuotaBlock;
+            STATIC KSPIN_LOCK QuotaLock;
 
         public:
+            STATIC XTFASTCALL VOID ReturnProcessQuota(IN PEPROCESS_QUOTA_BLOCK QuotaBlock,
+                                                      IN PEPROCESS Process,
+                                                      IN PS_QUOTA_TYPE QuotaType,
+                                                      IN SIZE_T Amount);
             STATIC XTAPI VOID ReturnSharedPoolQuota(IN PEPROCESS_QUOTA_BLOCK QuotaBlock,
                                                     IN SIZE_T PagedAmount,
                                                     IN SIZE_T NonPagedAmount);
 
         private:
             STATIC XTAPI VOID DereferenceQuotaBlock(IN PEPROCESS_QUOTA_BLOCK QuotaBlock);
-            STATIC XTFASTCALL VOID ReturnProcessQuota(IN PEPROCESS_QUOTA_BLOCK QuotaBlock,
-                                                      IN PEPROCESS Process,
-                                                      IN PS_QUOTA_TYPE QuotaType,
-                                                      IN SIZE_T Amount);
-
     };
 }
 
