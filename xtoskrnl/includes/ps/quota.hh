@@ -22,6 +22,7 @@ namespace PS
             STATIC KSPIN_LOCK QuotaLock;
 
         public:
+            STATIC VOID XTAPI InitializeQuota(VOID);
             STATIC XTFASTCALL VOID ReturnProcessQuota(IN PEPROCESS_QUOTA_BLOCK QuotaBlock,
                                                       IN PEPROCESS Process,
                                                       IN PS_QUOTA_TYPE QuotaType,

@@ -77,4 +77,7 @@ PS::ProcessManager::InitializeProcessManager(VOID)
     ObjectTypeInitializer.GenericMapping = PS_THREAD_GENERIC_MAPPING;
     ObjectTypeInitializer.ValidAccessMask = SE_THREAD_ALL_ACCESS;
     OB::TypeRegistry::CreateObjectType(&ObjectTypeName, &ObjectTypeInitializer, NULLPTR, &ThreadType);
+
+    /* Initialize system quota */
+    PS::Quota::InitializeQuota();
 }

@@ -68,6 +68,36 @@ PS::Quota::DereferenceQuotaBlock(IN PEPROCESS_QUOTA_BLOCK QuotaBlock)
 }
 
 /**
+ * Initializes the system-wide process quota subsystem.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+VOID
+XTAPI
+PS::Quota::InitializeQuota(VOID)
+{
+    /* Initialize the quota lock */
+    KE::SpinLock::InitializeSpinLock(&QuotaLock);
+
+    /* Clear the default quota block */
+    RtlZeroMemory(&DefaultQuotaBlock, sizeof(DefaultQuotaBlock));
+
+    /* Set up the counters */
+    DefaultQuotaBlock.ProcessCount = 1;
+    DefaultQuotaBlock.ReferenceCount = 1;
+
+    /* Set up the limits */
+    DefaultQuotaBlock.QuotaEntry[PsNonPagedPool].Limit = (SIZE_T)-1;
+    DefaultQuotaBlock.QuotaEntry[PsPagedPool].Limit = (SIZE_T)-1;
+    DefaultQuotaBlock.QuotaEntry[PsPageFile].Limit = (SIZE_T)-1;
+
+    /* Assign the default quota block to the current process */
+    PS::Process::GetCurrentProcess()->QuotaBlock = &DefaultQuotaBlock;
+}
+
+/**
  * Returns a specified amount of quota to a quota block and updates process usage.
  *
  * @param QuotaBlock
