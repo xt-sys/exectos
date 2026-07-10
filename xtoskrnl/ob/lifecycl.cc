@@ -840,7 +840,7 @@ OB::LifeCycle::DeleteObject(IN PVOID Object,
     if(CreatorInfo && !RTL::LinkedList::ListEmpty(&CreatorInfo->TypeList))
     {
         /* Acquire exclusive access to the object type tracking list */
-        KE::KThread::EnterCriticalRegion();
+        KE::CriticalRegionGuard CriticalRegion;
         KE::PushLock::AcquireExclusivePushLock(&ObjectType->TypeLock);
 
         /* Unlink the object from the creator type list */
@@ -848,7 +848,6 @@ OB::LifeCycle::DeleteObject(IN PVOID Object,
 
         /* Release the object type tracking list */
         KE::PushLock::ReleaseExclusivePushLock(&ObjectType->TypeLock);
-        KE::KThread::LeaveCriticalRegion();
     }
 
     /* Check if the object has an allocated name buffer */

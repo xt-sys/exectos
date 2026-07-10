@@ -57,7 +57,7 @@ PS::ProcessManager::InitializeProcessManager(VOID)
     RTL::Memory::ZeroMemory(&ObjectTypeInitializer, sizeof(ObjectTypeInitializer));
 
     /* Initialize common attributes */
-    ObjectTypeInitializer.InvalidAttributes = OBJECT_PERMANENT | OBJECT_EXCLUSIVE | OBJECT_OPENIF;
+    ObjectTypeInitializer.InvalidAttributes = OBJECT_EXCLUSIVE | OBJECT_OPENIF | OBJECT_PERMANENT;
     ObjectTypeInitializer.Length = sizeof(ObjectTypeInitializer);
     ObjectTypeInitializer.PoolType = NonPagedPool;
     ObjectTypeInitializer.SecurityRequired = TRUE;

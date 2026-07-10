@@ -16,6 +16,40 @@
 /* Kernel Library */
 namespace KE
 {
+    class CriticalRegionGuard
+    {
+        private:
+            BOOLEAN Owned;
+            PKTHREAD SystemThread;
+
+        public:
+            CriticalRegionGuard(IN PKTHREAD Thread = NULLPTR,
+                                IN BOOLEAN Acquire = TRUE)
+            {
+                Owned = Acquire;
+                SystemThread = Thread;
+                if(Owned)
+                {
+                    if(!SystemThread)
+                    {
+                        SystemThread = KE::Processor::GetCurrentThread();
+                    }
+                    KE::KThread::EnterCriticalRegion(SystemThread);
+                }
+            }
+
+            ~CriticalRegionGuard()
+            {
+                if(Owned)
+                {
+                    KE::KThread::LeaveCriticalRegion(SystemThread);
+                }
+            }
+
+            CriticalRegionGuard(const CriticalRegionGuard&) = delete;
+            CriticalRegionGuard& operator=(const CriticalRegionGuard&) = delete;
+    };
+
     class QueuedSpinLockGuard
     {
         private:
@@ -47,36 +81,6 @@ namespace KE
             QueuedSpinLockGuard& operator=(const QueuedSpinLockGuard&) = delete;
     };
 
-    class SystemQueuedSpinLockGuard
-    {
-        private:
-            KSPIN_LOCK_QUEUE_LEVEL QueuedLockLevel;
-            BOOLEAN Owned;
-
-        public:
-            SystemQueuedSpinLockGuard(IN OUT KSPIN_LOCK_QUEUE_LEVEL LockLevel,
-                                      IN BOOLEAN Acquire = TRUE)
-            {
-                QueuedLockLevel = LockLevel;
-                Owned = Acquire;
-                if(Owned)
-                {
-                    KE::SpinLock::AcquireQueuedSpinLock(QueuedLockLevel);
-                }
-            }
-
-            ~SystemQueuedSpinLockGuard()
-            {
-                if(Owned)
-                {
-                    KE::SpinLock::ReleaseQueuedSpinLock(QueuedLockLevel);
-                }
-            }
-
-            SystemQueuedSpinLockGuard(const SystemQueuedSpinLockGuard&) = delete;
-            SystemQueuedSpinLockGuard& operator=(const SystemQueuedSpinLockGuard&) = delete;
-    };
-
     class SpinLockGuard
     {
         private:
@@ -105,6 +109,36 @@ namespace KE
 
             SpinLockGuard(const SpinLockGuard&) = delete;
             SpinLockGuard& operator=(const SpinLockGuard&) = delete;
+    };
+
+    class SystemQueuedSpinLockGuard
+    {
+        private:
+            KSPIN_LOCK_QUEUE_LEVEL QueuedLockLevel;
+            BOOLEAN Owned;
+
+        public:
+            SystemQueuedSpinLockGuard(IN OUT KSPIN_LOCK_QUEUE_LEVEL LockLevel,
+                                      IN BOOLEAN Acquire = TRUE)
+            {
+                QueuedLockLevel = LockLevel;
+                Owned = Acquire;
+                if(Owned)
+                {
+                    KE::SpinLock::AcquireQueuedSpinLock(QueuedLockLevel);
+                }
+            }
+
+            ~SystemQueuedSpinLockGuard()
+            {
+                if(Owned)
+                {
+                    KE::SpinLock::ReleaseQueuedSpinLock(QueuedLockLevel);
+                }
+            }
+
+            SystemQueuedSpinLockGuard(const SystemQueuedSpinLockGuard&) = delete;
+            SystemQueuedSpinLockGuard& operator=(const SystemQueuedSpinLockGuard&) = delete;
     };
 }
 
