@@ -75,7 +75,9 @@ typedef struct _EPROCESS
     EX_RUNDOWN_REFERENCE RundownProtect;
     HANDLE UniqueProcessId;
     SIZE_T QuotaUsage[PsQuotaTypes];
+    SIZE_T QuotaPeak[PsQuotaTypes];
     PHANDLE_TABLE ObjectTable;
+    PEPROCESS_QUOTA_BLOCK QuotaBlock;
     ACCESS_MASK GrantedAccess;
 } EPROCESS, *PEPROCESS;
 
