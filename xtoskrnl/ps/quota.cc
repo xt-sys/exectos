@@ -10,6 +10,192 @@
 
 
 /**
+ * Charges a specified amount of quota against a given process quota block.
+ *
+ * @param QuotaBlock
+ *        Supplies a pointer to the quota block from which the charge is being requested.
+ *
+ * @param Process
+ *        Supplies an optional pointer to the process object associated with the charge.
+ *
+ * @param QuotaType
+ *        Supplies the specific type of quota being charged.
+ *
+ * @param Amount
+ *        Supplies the exact size, in bytes, of the quota charge.
+ *
+ * @return This routine returns a status code indicating the success or failure of the operation.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+PS::Quota::ChargeProcessQuota(IN PEPROCESS_QUOTA_BLOCK QuotaBlock,
+                              IN PEPROCESS Process,
+                              IN PS_QUOTA_TYPE QuotaType,
+                              IN SIZE_T Amount)
+{
+    SIZE_T CurrentLimit, CurrentUsage, NewUsage, ObservedUsage, RecoveredQuota;
+    PEPROCESS_QUOTA_ENTRY QuotaEntry;
+
+    /* Check if the system process is being charged */
+    if(Process == PS::Process::GetSystemProcess())
+    {
+        /* Bypass quota enforcement for the initial system process, return success */
+        return STATUS_SUCCESS;
+    }
+
+    /* Resolve the quota entry */
+    QuotaEntry = &QuotaBlock->QuotaEntry[QuotaType];
+    CurrentUsage = QuotaEntry->Usage;
+
+    /* Memory barrier */
+    AR::CpuFunctions::MemoryBarrier();
+
+    /* Snapshot the current limit */
+    CurrentLimit = QuotaEntry->Limit;
+
+    /* Enter the lock-free contention loop */
+    while(TRUE)
+    {
+        /* Calculate the projected usage */
+        NewUsage = CurrentUsage + Amount;
+
+        /* Check if an integer overflow occurs */
+        if(NewUsage < CurrentUsage)
+        {
+            /* Reject the charge, return error code */
+            return STATUS_QUOTA_EXCEEDED;
+        }
+
+        /* Check if the projected usage is within the known limit */
+        if(NewUsage <= CurrentLimit)
+        {
+            /* Attempt to commit the new usage value */
+            ObservedUsage = RTL::Atomic::CompareExchange64((PLONG_PTR)&QuotaEntry->Usage, NewUsage, CurrentUsage);
+            if(ObservedUsage == CurrentUsage)
+            {
+                /* Successfully acquired quota, update the peak usage */
+                UpdatePeakUsage(&QuotaEntry->Peak, NewUsage);
+
+                /* Check if a process context was provided */
+                if(Process)
+                {
+                    /* Add the amount to the process's usage tracker */
+                    NewUsage = RTL::Atomic::Add64((PLONG_PTR)&Process->QuotaUsage[QuotaType], Amount);
+
+                    /* Update the per-process peak usage */
+                    UpdatePeakUsage(&Process->QuotaPeak[QuotaType], NewUsage);
+                }
+
+                /* Quota charge completed, return success */
+                return STATUS_SUCCESS;
+            }
+
+            /* Refresh the snapshot */
+            CurrentUsage = ObservedUsage;
+
+            /* Memory barrier */
+            AR::CpuFunctions::MemoryBarrier();
+
+            /* Refresh the limit snapshot */
+            CurrentLimit = QuotaEntry->Limit;
+            continue;
+        }
+
+        /* Check if this is a pagefile quota */
+        if(QuotaType == PsPageFile)
+        {
+            /* Pagefile quota cannot be expanded, return error code */
+            return STATUS_PAGEFILE_QUOTA_EXCEEDED;
+        }
+
+        /* Attempt to reclaim quota that was returned but not yet merged */
+        RecoveredQuota = RTL::Atomic::Exchange64((PLONG_PTR)&QuotaEntry->Return, 0);
+        if(RecoveredQuota > 0)
+        {
+            /* Reclaim successful, add the recovered amount and retry */
+            CurrentLimit = RTL::Atomic::Add64((PLONG_PTR)&QuotaEntry->Limit, RecoveredQuota);
+            continue;
+        }
+
+        /* Reclaim failed, attempt to expand the quota limit */
+        if(MM::Quota::RaisePoolQuota((MMPOOL_TYPE)QuotaType, CurrentLimit, &CurrentLimit))
+        {
+            /* Expansion successful, update the limit and retry */
+            RTL::Atomic::Exchange64((PLONG_PTR)&QuotaEntry->Limit, CurrentLimit);
+            continue;
+        }
+
+        /* Quota charge failed, return error code */
+        return STATUS_QUOTA_EXCEEDED;
+    }
+}
+
+/**
+ * Charges specified amounts of paged and non-paged pool quotas against a given process quota block.
+ *
+ * @param Process
+ *        Supplies a pointer to the target process whose quota block will be charged.
+ *
+ * @param PagedAmount
+ *        Supplies the amount of paged pool quota to charge, in bytes.
+ *
+ * @param NonPagedAmount
+ *        Supplies the amount of non-paged pool quota to charge, in bytes.
+ *
+ * @return This routine returns a pointer to the charged quota block, or NULLPTR if either of the pool limits is exceeded.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PEPROCESS_QUOTA_BLOCK
+PS::Quota::ChargeSharedPoolQuota(IN PEPROCESS Process,
+                                 IN SIZE_T PagedAmount,
+                                 IN SIZE_T NonPagedAmount)
+{
+    XTSTATUS Status;
+
+    /* Check if the system process is being charged */
+    if(Process == PS::Process::GetSystemProcess())
+    {
+        /* Return the pseudo-marker allowing allocations without tracking */
+        return PS_QUOTA_BYPASS_MARKER;
+    }
+
+    /* Check if a non-paged pool charge is required */
+    if(NonPagedAmount)
+    {
+        /* Attempt to charge the requested non-paged pool amount */
+        Status = ChargeProcessQuota(Process->QuotaBlock, NULLPTR, PsNonPagedPool, NonPagedAmount);
+        if(Status != STATUS_SUCCESS)
+        {
+            /* Non-paged pool charge failed, return NULL pointer */
+            return NULLPTR;
+        }
+    }
+
+    /* Check if a paged pool charge is required */
+    if(PagedAmount)
+    {
+        /* Attempt to charge the requested paged pool amount */
+        Status = ChargeProcessQuota(Process->QuotaBlock, NULLPTR, PsPagedPool, PagedAmount);
+        if(Status != STATUS_SUCCESS)
+        {
+            /* Paged pool charge failed, rollback the non-paged pool quota and return NULL pointer */
+            PS::Quota::ReturnProcessQuota(Process->QuotaBlock, NULLPTR, PsNonPagedPool, NonPagedAmount);
+            return NULLPTR;
+        }
+    }
+
+    /* Increment the reference count of the quota block */
+    RTL::Atomic::Increment32((VOLATILE PLONG)&Process->QuotaBlock->ReferenceCount);
+
+    /* Return the charged quota block */
+    return Process->QuotaBlock;
+}
+
+/**
  * Decrements the reference count of a quota block and destroys it if it reaches zero.
  *
  * @param QuotaBlock
@@ -250,4 +436,51 @@ PS::Quota::ReturnSharedPoolQuota(IN PEPROCESS_QUOTA_BLOCK QuotaBlock,
 
     /* Drop the reference count on the quota block */
     DereferenceQuotaBlock(QuotaBlock);
+}
+
+/**
+ * Updates a quota size tracker to a new peak maximum.
+ *
+ * @param TargetQuota
+ *        Supplies a pointer to the variable tracking the peak usage.
+ *
+ * @param NewQuota
+ *        Supplies the newly calculated usage to be evaluated against the peak.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTINLINE
+VOID
+PS::Quota::UpdatePeakUsage(IN PSIZE_T TargetQuota,
+                           IN SIZE_T NewQuota)
+{
+    SIZE_T CurrentQuota;
+    SIZE_T ObservedQuota;
+
+    /* Snapshot the initial memory value */
+    CurrentQuota = *TargetQuota;
+
+    /* Enter the CAS loop */
+    while(TRUE)
+    {
+        /* Check if the proposed quota does not exceed the current peak */
+        if(NewQuota <= CurrentQuota)
+        {
+            /* Nothing to update, break the loop */
+            break;
+        }
+
+        /* Attempt to overwrite the peak usage */
+        ObservedQuota = RTL::Atomic::CompareExchange64((PLONG_PTR)TargetQuota, NewQuota, CurrentQuota);
+        if(ObservedQuota == CurrentQuota)
+        {
+            /* The peak successfully updated, break the loop */
+            break;
+        }
+
+        /* Update the snapshot and retry */
+        CurrentQuota = ObservedQuota;
+    }
 }

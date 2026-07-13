@@ -22,6 +22,13 @@ namespace PS
             STATIC KSPIN_LOCK QuotaLock;
 
         public:
+            STATIC XTAPI XTSTATUS ChargeProcessQuota(IN PEPROCESS_QUOTA_BLOCK QuotaBlock,
+                                                     IN PEPROCESS Process,
+                                                     IN PS_QUOTA_TYPE QuotaType,
+                                                     IN SIZE_T Amount);
+            STATIC XTAPI PEPROCESS_QUOTA_BLOCK ChargeSharedPoolQuota(IN PEPROCESS Process,
+                                                                     IN SIZE_T PagedAmount,
+                                                                     IN SIZE_T NonPagedAmount);
             STATIC VOID XTAPI InitializeQuota(VOID);
             STATIC XTFASTCALL VOID ReturnProcessQuota(IN PEPROCESS_QUOTA_BLOCK QuotaBlock,
                                                       IN PEPROCESS Process,
@@ -33,6 +40,8 @@ namespace PS
 
         private:
             STATIC XTAPI VOID DereferenceQuotaBlock(IN PEPROCESS_QUOTA_BLOCK QuotaBlock);
+            STATIC XTINLINE VOID UpdatePeakUsage(IN PSIZE_T TargetQuota,
+                                                 IN SIZE_T NewQuota);
     };
 }
 
