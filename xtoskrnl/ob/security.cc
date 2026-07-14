@@ -10,6 +10,75 @@
 
 
 /**
+ * Consumes the audit mask for a handle table entry and triggers a security audit alarm if the requested access
+ * rights match the audit requirements.
+ *
+ * @param Handle
+ *        Supplies the handle being accessed.
+ *
+ * @param ObjectTableEntryInfo
+ *        Supplies a pointer to the extended handle table entry information containing the volatile audit mask.
+ *
+ * @param ObjectTypeName
+ *        Supplies a pointer to the Unicode string representing the object's type name.
+ *
+ * @param AccessMask
+ *        Supplies the access mask requested by the caller to be evaluated against the audit mask.
+ *
+ * @return This routine does not return a value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+OB::Security::AuditObjectAccess(IN HANDLE Handle,
+                                IN PHANDLE_TABLE_ENTRY_INFO ObjectTableEntryInfo,
+                                IN PUNICODE_STRING ObjectTypeName,
+                                IN ACCESS_MASK AccessMask)
+{
+    ACCESS_MASK BitsToAudit, CurrentAuditMask, PreviousAuditMask, RemainingAuditMask;
+
+    /* Enter a CAS loop */
+    while(ObjectTableEntryInfo->AuditMask)
+    {
+        /* Capture the current state of the audit mask */
+        CurrentAuditMask = ObjectTableEntryInfo->AuditMask;
+
+        /* Mask out the access rights */
+        RemainingAuditMask = CurrentAuditMask & ~AccessMask;
+
+        /* Check if the requested access intersects with the audit mask */
+        if(RemainingAuditMask == CurrentAuditMask)
+        {
+            /* No overlapping bits, return */
+            return;
+        }
+
+        /* Attempt to update the audit mask */
+        PreviousAuditMask = (ACCESS_MASK)RTL::Atomic::CompareExchange32((VOLATILE PLONG)&ObjectTableEntryInfo->AuditMask,
+                                                                        (LONG)RemainingAuditMask,
+                                                                        (LONG)CurrentAuditMask);
+
+        /* Verify if the update succeeded */
+        if(PreviousAuditMask == CurrentAuditMask)
+        {
+            /* Extract the access bits */
+            BitsToAudit = PreviousAuditMask & AccessMask;
+
+            /* Check if there are active bits */
+            if(BitsToAudit)
+            {
+                /* Dispatch the audit event */
+                SE::Audit::OperationAuditAlarm(NULLPTR, Handle, ObjectTypeName, BitsToAudit, NULLPTR);
+            }
+
+            /* Auditing completed, return */
+            return;
+        }
+    }
+}
+
+/**
  * Provides the default security procedure for handling object security descriptors.
  *
  * @param Object

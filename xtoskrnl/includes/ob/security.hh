@@ -18,6 +18,10 @@ namespace OB
     class Security
     {
         public:
+            STATIC XTAPI VOID AuditObjectAccess(IN HANDLE Handle,
+                                                IN PHANDLE_TABLE_ENTRY_INFO ObjectTableEntryInfo,
+                                                IN PUNICODE_STRING ObjectTypeName,
+                                                IN ACCESS_MASK DesiredAccess);
             STATIC XTAPI XTSTATUS ProcessObjectSecurityDescriptor(IN PVOID Object,
                                                                   IN SECURITY_OPERATION_CODE OperationCode,
                                                                   IN PSECURITY_INFORMATION SecurityInformation,
