@@ -9,8 +9,14 @@
 #include <xtos.hh>
 
 
+/* Pointer to the IDLE process object */
+PEPROCESS PS::Process::IdleProcess;
+
 /* Pointer to the system process object */
 PEPROCESS PS::Process::SystemProcess;
+
+/* Global handle to the root system process */
+HANDLE PS::Process::SystemProcessHandle;
 
 /* Global object type descriptor for Process objects */
 POBJECT_TYPE PS::ProcessManager::ProcessType;
