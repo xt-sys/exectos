@@ -21,6 +21,7 @@ namespace HL
             STATIC PKAFFINITY_MAP ActiveProcessors;
 
         public:
+            STATIC XTAPI PKAFFINITY_MAP GetActiveProcessors(VOID);
             STATIC XTAPI VOID InitializeProcessor(VOID);
             STATIC XTAPI XTSTATUS InitializeProcessorAffinity(VOID);
             STATIC XTAPI XTSTATUS StartAllProcessors(VOID);

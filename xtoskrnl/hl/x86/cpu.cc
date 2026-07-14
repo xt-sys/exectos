@@ -10,6 +10,21 @@
 
 
 /**
+ * Retrieves the system-wide active processor affinity map.
+ *
+ * @return This routine returns a pointer to the KAFFINITY_MAP structure representing the active processors.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PKAFFINITY_MAP
+HL::Cpu::GetActiveProcessors(VOID)
+{
+    /* Return active processors map */
+    return ActiveProcessors;
+}
+
+/**
  * Initializes the processor.
  *
  * @param CpuNumber
