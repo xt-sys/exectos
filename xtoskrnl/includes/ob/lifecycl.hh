@@ -18,6 +18,7 @@ namespace OB
     class LifeCycle
     {
         private:
+            STATIC PHANDLE_TABLE KernelHandleTable;
             STATIC PVOID RemoveObjectList;
             STATIC WORK_QUEUE_ITEM RemoveObjectWorkItem;
 
@@ -40,6 +41,12 @@ namespace OB
             STATIC XTFASTCALL LONG_PTR ReferenceObject(IN PVOID Object);
             STATIC XTFASTCALL LONG_PTR ReferenceObject(IN PVOID Object,
                                                        IN ULONG Count);
+            STATIC XTAPI XTSTATUS ReferenceObject(IN HANDLE Handle,
+                                                  IN ACCESS_MASK DesiredAccess,
+                                                  IN POBJECT_TYPE ObjectType,
+                                                  IN KPROCESSOR_MODE AccessMode,
+                                                  OUT PVOID *Object,
+                                                  OUT POBJECT_HANDLE_INFORMATION HandleInformation);
             STATIC XTFASTCALL POBJECT_HEADER_NAME_INFO ReferenceObjectNameInformation(IN POBJECT_HEADER ObjectHeader);
 
         private:

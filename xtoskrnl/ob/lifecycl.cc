@@ -1387,6 +1387,199 @@ OB::LifeCycle::ReferenceObject(IN PVOID Object,
 }
 
 /**
+ * Increments the pointer reference count on an object provided by a handle.
+ *
+ * @param Handle
+ *        Supplies the handle to the object being referenced.
+ *
+ * @param AccessMask
+ *        Supplies the access mask representing the requested access rights.
+ *
+ * @param ObjectType
+ *        Optionally supplies a pointer to the expected object type to validate against.
+ *
+ * @param ProcessorMode
+ *        Supplies the processor mode from which the handle is being accessed.
+ *
+ * @param Object
+ *        Receives a pointer to the referenced object body upon success.
+ *
+ * @param HandleInformation
+ *        Supplies an optional pointer that receives information regarding the handle's granted access and attributes.
+ *
+ * @return This routine returns a status code indicating the success or failure of the operation.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+OB::LifeCycle::ReferenceObject(IN HANDLE Handle,
+                               IN ACCESS_MASK AccessMask,
+                               IN POBJECT_TYPE ObjectType,
+                               IN KPROCESSOR_MODE ProcessorMode,
+                               OUT PVOID *Object,
+                               OUT POBJECT_HANDLE_INFORMATION HandleInformation)
+{
+    PHANDLE_TABLE_ENTRY ObjectTableEntry;
+    PHANDLE_TABLE_ENTRY_INFO ObjectInfo;
+    POBJECT_HEADER ObjectHeader;
+    PHANDLE_TABLE HandleTable;
+    ACCESS_MASK GrantedAccess;
+    POBJECT_TYPE PseudoType;
+    PVOID PseudoObject;
+    PEPROCESS Process;
+    PETHREAD Thread;
+    XTSTATUS Status;
+
+    /* Initialize the output pointer */
+    *Object = NULLPTR;
+
+    /* Retrieve the current execution context */
+    Thread = PS::Thread::GetCurrentThread();
+    Process = PS::Process::GetCurrentProcess();
+
+    /* Determine if the handle is a special kernel handle or a pseudohandle */
+    if((LONG)(ULONG_PTR)Handle < 0)
+    {
+        /* Check if the handle points to the current process or thread */
+        if(Handle == PS_CURRENT_PROCESS_HANDLE || Handle == PS_CURRENT_THREAD_HANDLE)
+        {
+            /* Check if the handle points to the current process */
+            if(Handle == PS_CURRENT_PROCESS_HANDLE)
+            {
+                /* Bind the execution context to the current process pseudohandle */
+                PseudoObject = (PVOID)Process;
+                PseudoType = PS::ProcessManager::GetProcessType();
+                GrantedAccess = Process->GrantedAccess;
+            }
+            else
+            {
+                /* Bind the execution context to the current thread pseudohandle */
+                PseudoObject = (PVOID)Thread;
+                PseudoType = PS::ProcessManager::GetThreadType();
+                GrantedAccess = Thread->GrantedAccess;
+            }
+
+            /* Validate the object type */
+            if(ObjectType && ObjectType != PseudoType)
+            {
+                /* Object type does not match the pseudohandle type, return error code */
+                return STATUS_OBJECT_TYPE_MISMATCH;
+            }
+
+            /* Enforce security constraints for user-mode requests */
+            if(ProcessorMode != KernelMode && SE::Access::ComputeDeniedAccesses(GrantedAccess, AccessMask))
+            {
+                /* The caller lacks the requested access rights, return error code */
+                return STATUS_ACCESS_DENIED;
+            }
+
+            /* Resolve the object header */
+            ObjectHeader = CONTAIN_RECORD(PseudoObject, OBJECT_HEADER, Body);
+
+            /* Increment the reference count */
+            RTL::Atomic::Increment64(&ObjectHeader->PointerCount);
+
+            /* Check if handle information is requested */
+            if(HandleInformation)
+            {
+                /* Populate the optional handle information descriptor */
+                HandleInformation->GrantedAccess = GrantedAccess;
+                HandleInformation->HandleAttributes = 0;
+            }
+
+            /* Assign the object pointer and return */
+            *Object = PseudoObject;
+            return STATUS_SUCCESS;
+        }
+
+        /* Check if request comes from a user-mode */
+        if(ProcessorMode != KernelMode)
+        {
+            /* Reject user-mode attempt, return error code */
+            return STATUS_INVALID_HANDLE;
+        }
+
+        /* Decode the kernel handle and select the system handle table */
+        Handle = OB::Handle::DecodeKernelHandle(Handle);
+        HandleTable = KernelHandleTable;
+    }
+    else
+    {
+        /* Use the process handle table */
+        HandleTable = Process->ObjectTable;
+    }
+
+    /* Enter a critical region */
+    KE::CriticalRegionGuard CriticalRegion(&Thread->ThreadControlBlock);
+
+    /* Map the given handle to its underlying physical table entry */
+    ObjectTableEntry = EX::Handle::MapHandleToPointer(HandleTable, Handle);
+    if(!ObjectTableEntry)
+    {
+        /* The handle is invalid or closed, return error code */
+        return STATUS_INVALID_HANDLE;
+    }
+
+    /* Resolve the object header */
+    ObjectHeader = (POBJECT_HEADER)(((ULONG_PTR)ObjectTableEntry->Object) & ~OBJECT_HANDLE_ATTRIBUTES);
+
+    /* Verify object type consistency */
+    if(ObjectType && ObjectHeader->Type != ObjectType)
+    {
+        /* Set status code */
+        Status = STATUS_OBJECT_TYPE_MISMATCH;
+    }
+    else
+    {
+        /* Decode the granted access mask */
+        GrantedAccess = ((ObjectTableEntry->GrantedAccess) & ~OBJECT_ACCESS_PROTECT_CLOSE_BIT);
+
+        /* Verify if the caller possesses the requested access rights */
+        if(ProcessorMode != KernelMode && SE::Access::ComputeDeniedAccesses(GrantedAccess, AccessMask))
+        {
+            /* Set status code */
+            Status = STATUS_ACCESS_DENIED;
+        }
+        else
+        {
+            /* Check if handle information is requested */
+            if(HandleInformation)
+            {
+                /* Populate the optional handle information descriptor */
+                HandleInformation->GrantedAccess = GrantedAccess;
+                HandleInformation->HandleAttributes = OB::Handle::GetHandleAttributes(ObjectTableEntry);
+            }
+
+            /* Check if audit is required */
+            if((ObjectTableEntry->ObAttributes & OBJECT_AUDIT_OBJECT_CLOSE) && AccessMask && ProcessorMode != KernelMode)
+            {
+                /* Fetch the handle information */
+                ObjectInfo = EX::Handle::GetHandleInformation(HandleTable, Handle, TRUE);
+                if(ObjectInfo && ObjectInfo->AuditMask)
+                {
+                    /* Generate a security audit event */
+                    OB::Security::AuditObjectAccess(Handle, ObjectInfo, &ObjectHeader->Type->Name, AccessMask);
+                }
+            }
+
+            /* Increment the reference count */
+            RTL::Atomic::Increment64(&ObjectHeader->PointerCount);
+
+            /* Assign the object pointer and mark the operation as successful */
+            *Object = &ObjectHeader->Body;
+            Status = STATUS_SUCCESS;
+        }
+    }
+
+    /* Release the handle table */
+    EX::Handle::UnlockHandleTableEntry(HandleTable, ObjectTableEntry);
+
+    /* Return status code */
+    return Status;
+}
+
+/**
  * Increments the query reference count of a NameInfo structure.
  *
  * @param ObjectHeader
