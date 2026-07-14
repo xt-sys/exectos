@@ -21,6 +21,7 @@ namespace PS
             STATIC XTAPI XTSTATUS CreateIdleThread(IN PKPROCESSOR_CONTROL_BLOCK Prcb,
                                                    IN PVOID Stack);
             STATIC XTAPI VOID DeleteThread(IN PVOID ThreadObject);
+            STATIC XTAPI PETHREAD GetCurrentThread(VOID);
     };
 }
 

@@ -78,3 +78,18 @@ PS::Thread::DeleteThread(IN PVOID ThreadObject)
 {
     UNIMPLEMENTED;
 }
+
+/**
+ * Retrieves a pointer to the currently executing executive thread object.
+ *
+ * @return This routine returns the address of the current executive thread object.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PETHREAD
+PS::Thread::GetCurrentThread(VOID)
+{
+    /* Retrieve the active kernel thread and cast it to the executive thread */
+    return (PETHREAD)KE::Processor::GetCurrentThread();
+}
