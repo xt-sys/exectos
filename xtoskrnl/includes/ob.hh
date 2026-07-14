@@ -12,6 +12,7 @@
 #include <xtos.hh>
 
 #include <ob/devmap.hh>
+#include <ob/handle.hh>
 #include <ob/lifecycl.hh>
 #include <ob/obdir.hh>
 #include <ob/obmgr.hh>

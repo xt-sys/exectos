@@ -92,6 +92,7 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/mm/quota.cc
     ${XTOSKRNL_SOURCE_DIR}/ob/data.cc
     ${XTOSKRNL_SOURCE_DIR}/ob/devmap.cc
+    ${XTOSKRNL_SOURCE_DIR}/ob/handle.cc
     ${XTOSKRNL_SOURCE_DIR}/ob/lifecycl.cc
     ${XTOSKRNL_SOURCE_DIR}/ob/obdir.cc
     ${XTOSKRNL_SOURCE_DIR}/ob/obmgr.cc
