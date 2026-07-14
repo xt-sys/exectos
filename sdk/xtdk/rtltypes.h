@@ -182,6 +182,24 @@ typedef enum _RTL_VARIABLE_TYPE
     TypeWideString
 } RTL_VARIABLE_TYPE, *PRTL_VARIABLE_TYPE;
 
+/* Activation context stack structure definition */
+typedef struct _ACTIVATION_CONTEXT_STACK
+{
+    PRTL_ACTIVATION_CONTEXT_STACK_FRAME ActiveFrame;
+    LIST_ENTRY FrameListCache;
+    ULONG Flags;
+    ULONG NextCookieSequenceNumber;
+    ULONG StackId;
+} ACTIVATION_CONTEXT_STACK, *PACTIVATION_CONTEXT_STACK;
+
+/* Activation context stack frame structure definition */
+typedef struct _RTL_ACTIVATION_CONTEXT_STACK_FRAME
+{
+    PRTL_ACTIVATION_CONTEXT_STACK_FRAME Previous;
+    PVOID ActivationContext;
+    ULONG Flags;
+} RTL_ACTIVATION_CONTEXT_STACK_FRAME, *PRTL_ACTIVATION_CONTEXT_STACK_FRAME;
+
 /* Runtime Library red-black tree balanced node structure definition */
 typedef struct _RTL_BALANCED_NODE
 {

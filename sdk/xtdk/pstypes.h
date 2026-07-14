@@ -12,6 +12,7 @@
 #include <xttypes.h>
 #include <xtstruct.h>
 #include <extypes.h>
+#include <iotypes.h>
 #include <mmtypes.h>
 #include <setypes.h>
 
@@ -195,12 +196,12 @@ typedef struct _PEB
     ULONG TlsBitmapBits[2];
     PVOID ReadOnlySharedMemoryBase;
     PVOID HotpatchInformation;
-    PVOID* ReadOnlyStaticServerData;
+    PVOID *ReadOnlyStaticServerData;
     PVOID AnsiCodePageData;
     PVOID OemCodePageData;
     PVOID UnicodeCaseTableData;
     ULONG NumberOfProcessors;
-    ULONG NtGlobalFlag;
+    ULONG GlobalFlag;
     LARGE_INTEGER CriticalSectionTimeout;
     ULONG_PTR HeapSegmentReserve;
     ULONG_PTR HeapSegmentCommit;
@@ -208,15 +209,8 @@ typedef struct _PEB
     ULONG_PTR HeapDeCommitFreeBlockThreshold;
     ULONG NumberOfHeaps;
     ULONG MaximumNumberOfHeaps;
-    PVOID* ProcessHeaps;
-    PVOID GdiSharedHandleTable;
+    PVOID *ProcessHeaps;
     PVOID ProcessStarterHelper;
-    ULONG GdiDCAttributeList;
-    ULONG OSMajorVersion;
-    ULONG OSMinorVersion;
-    USHORT OSBuildNumber;
-    USHORT OSCSDVersion;
-    ULONG OSPlatformId;
     ULONG ImageSubsystem;
     ULONG ImageSubsystemMajorVersion;
     ULONG ImageSubsystemMinorVersion;
@@ -230,7 +224,7 @@ typedef struct _PEB
     PVOID AppCompatInfo;
     UNICODE_STRING CSDVersion;
     ULONG_PTR MinimumStackCommit;
-    PVOID* FlsCallback;
+    PVOID *FlsCallback;
     LIST_ENTRY FlsListHead;
     PVOID FlsBitmap;
     ULONG FlsBitmapBits[4];
@@ -243,6 +237,76 @@ typedef struct _PEB_FREE_BLOCK
     PPEB_FREE_BLOCK Next;
     ULONG Size;
 } PEB_FREE_BLOCK, *PPEB_FREE_BLOCK;
+
+/* Kernel's representation of a thread environment block */
+typedef struct _TEB
+{
+    THREAD_INFORMATION_BLOCK ThreadInformationBlock;
+    PVOID EnvironmentPointer;
+    CLIENT_ID ClientId;
+    PVOID ActiveRpcHandle;
+    PVOID ThreadLocalStoragePointer;
+    PPEB ProcessEnvironmentBlock;
+    ULONG LastErrorValue;
+    ULONG CountOfOwnedCriticalSections;
+    ULONG UserReserved[5];
+    LCID CurrentLocale;
+    ULONG FpSoftwareStatusRegister;
+    PVOID SystemReserved1[54];
+    LONG ExceptionCode;
+    PACTIVATION_CONTEXT_STACK ActivationContextStackPointer;
+    CLIENT_ID RealClientId;
+    ULONG LastStatusValue;
+    UNICODE_STRING StaticUnicodeString;
+    WCHAR StaticUnicodeBuffer[261];
+    PVOID DeallocationStack;
+    PVOID TlsSlots[64];
+    LIST_ENTRY TlsLinks;
+    PVOID ReservedForNtRpc;
+    PVOID DbgSsReserved[2];
+    ULONG HardErrorMode;
+    PVOID Instrumentation[14];
+    PVOID SubProcessTag;
+    PVOID EtwTraceData;
+    PVOID WinSockData;
+    BOOLEAN InDbgPrint;
+    BOOLEAN FreeStackOnTermination;
+    BOOLEAN HasFiberData;
+    UCHAR IdealProcessor;
+    ULONG GuaranteedStackBytes;
+    PVOID ReservedForPerf;
+    PVOID ReservedForOle;
+    ULONG WaitingOnLoaderLock;
+    ULONG_PTR SparePointer1;
+    ULONG_PTR SoftPatchPtr1;
+    ULONG_PTR SoftPatchPtr2;
+    PVOID *TlsExpansionSlots;
+    ULONG ImpersonationLocale;
+    ULONG IsImpersonating;
+    PVOID NlsCache;
+    PVOID ShimData;
+    ULONG HeapVirtualAffinity;
+    HANDLE CurrentTransactionHandle;
+    PTEB_ACTIVE_FRAME ActiveFrame;
+    PVOID FlsData;
+    BOOLEAN SafeThunkCall;
+    BOOLEAN BooleanSpare[3];
+} TEB, *PTEB;
+
+/* Thread Environment Block Active Frame structure definition */
+typedef struct _TEB_ACTIVE_FRAME
+{
+    ULONG Flags;
+    PTEB_ACTIVE_FRAME Previous;
+    PTEB_ACTIVE_FRAME_CONTEXT Context;
+} TEB_ACTIVE_FRAME, *PTEB_ACTIVE_FRAME;
+
+/* Thread Environment Block Active Frame Context structure definition */
+typedef struct _TEB_ACTIVE_FRAME_CONTEXT
+{
+    ULONG Flags;
+    LPSTR FrameName;
+} TEB_ACTIVE_FRAME_CONTEXT, *PTEB_ACTIVE_FRAME_CONTEXT;
 
 #endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_PSTYPES_H */
