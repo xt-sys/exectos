@@ -80,4 +80,10 @@ PS::ProcessManager::InitializeProcessManager(VOID)
 
     /* Initialize system quota */
     PS::Quota::InitializeQuota();
+
+    /* Create system process */
+    PS::Process::CreateInitialSystemProcess();
+
+    /* Initialize IDLE process */
+    PS::Process::InitializeIdleProcess();
 }
