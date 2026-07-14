@@ -444,5 +444,56 @@ typedef struct _POOL_DESCRIPTOR
     SIZE_T Reserved;
 } POOL_DESCRIPTOR, *PPOOL_DESCRIPTOR;
 
+/* Working set list entry structure definition */
+typedef struct _MMWSLENTRY
+{
+    ULONG_PTR Valid:1;
+    ULONG_PTR LockedInWs:1;
+    ULONG_PTR LockedInMemory:1;
+    ULONG_PTR Protection:5;
+    ULONG_PTR Hashed:1;
+    ULONG_PTR Direct:1;
+    ULONG_PTR Age:2;
+    ULONG_PTR VirtualPageNumber:20;
+} MMWSLENTRY, *PMMWSLENTRY;
+
+/* Working set free entry structure definition */
+typedef struct _MMWSLE_FREE_ENTRY
+{
+    ULONG MustBeZero:1;
+    ULONG PreviousFree:11;
+    LONG NextFree:20;
+} MMWSLE_FREE_ENTRY, *PMMWSLE_FREE_ENTRY;
+
+/* Working set list entry union definition */
+typedef union _MMWSLE
+{
+    PVOID VirtualAddress;
+    ULONG_PTR Long;
+    MMWSLENTRY e1;
+    MMWSLE_FREE_ENTRY Free;
+} MMWSLE, *PMMWSLE;
+
+/* Working set list structure definition */
+typedef struct _MMWSL
+{
+    ULONG FirstFree;
+    ULONG FirstDynamic;
+    ULONG LastEntry;
+    ULONG NextSlot;
+    PMMWSLE Wsle;
+    ULONG LastInitializedWsle;
+    ULONG NonDirectCount;
+    PMMWSLE_HASH HashTable;
+    ULONG HashTableSize;
+    ULONG NumberOfCommittedPageTables;
+    PVOID HashTableStart;
+    PVOID HighestPermittedHashAddress;
+    ULONG NumberOfImageWaiters;
+    ULONG VadBitMapHint;
+    USHORT UsedPageTableEntries[768];
+    ULONG CommittedPageTables[24];
+} MMWSL, *PMMWSL;
+
 #endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_I686_MMTYPES_H */

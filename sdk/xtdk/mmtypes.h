@@ -11,6 +11,7 @@
 #define __XTDK_MMTYPES_H
 
 #include <xtbase.h>
+#include <ketypes.h>
 #include ARCH_HEADER(xtstruct.h)
 
 
@@ -281,6 +282,53 @@ typedef struct _POOL_TRACKING_TABLE
     LONG PagedFrees;
     ULONG Tag;
 } POOL_TRACKING_TABLE, *PPOOL_TRACKING_TABLE;
+
+/* Memory manager support flags structure definition */
+typedef struct _MMSUPPORT_FLAGS
+{
+    ULONG SessionSpace:1;
+    ULONG BeingTrimmed:1;
+    ULONG SessionLeader:1;
+    ULONG TrimHard:1;
+    ULONG MaximumWorkingSetHard:1;
+    ULONG ForceTrim:1;
+    ULONG MinimumWorkingSetHard:1;
+    ULONG Available0:1;
+    ULONG MemoryPriority:8;
+    ULONG GrowWsleHash:1;
+    ULONG AcquiredUnsafe:1;
+    ULONG Available:14;
+} MMSUPPORT_FLAGS, *PMMSUPPORT_FLAGS;
+
+/* Memory manager support structure definition */
+typedef struct _MMSUPPORT
+{
+    LIST_ENTRY WorkingSetExpansionLinks;
+    USHORT LastTrimpStamp;
+    USHORT NextPageColor;
+    MMSUPPORT_FLAGS Flags;
+    ULONG PageFaultCount;
+    ULONG PeakWorkingSetSize;
+    ULONG GrowthSinceLastEstimate;
+    ULONG MinimumWorkingSetSize;
+    ULONG MaximumWorkingSetSize;
+    PMMWSL VmWorkingSetList;
+    ULONG Claim;
+    ULONG NextEstimationSlot;
+    ULONG NextAgingSlot;
+    ULONG EstimatedAvailable;
+    ULONG WorkingSetSize;
+    PKEVENT ExitEvent;
+    KPUSH_LOCK WorkingSetMutex;
+    PVOID AccessLog;
+} MMSUPPORT, *PMMSUPPORT;
+
+/* Working Set List Entry Hash structure definition */
+typedef struct _MMWSLE_HASH
+{
+    PVOID Key;
+    ULONG Index;
+} MMWSLE_HASH, *PMMWSLE_HASH;
 
 #endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_MMTYPES_H */

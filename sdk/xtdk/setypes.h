@@ -169,6 +169,12 @@ typedef struct _PRIVILEGE_SET
     LUID_AND_ATTRIBUTES Privilege[1];
 } PRIVILEGE_SET, *PPRIVILEGE_SET;
 
+/* Security audit process creation information structure definition */
+typedef struct _SECURITY_AUDIT_PROCESS_CREATION_INFO
+{
+    POBJECT_NAME_INFORMATION ImageFileName;
+} SECURITY_AUDIT_PROCESS_CREATION_INFO, *PSECURITY_AUDIT_PROCESS_CREATION_INFO;
+
 /* Identifier authority structure definition */
 typedef struct _SID_IDENTIFIER_AUTHORITY
 {
