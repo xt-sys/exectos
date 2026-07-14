@@ -168,3 +168,9 @@ PFN_COUNT MM::Pte::TotalSystemFreePtes[MaximumPtePoolTypes];
 
 /* Template PTE entry containing standard flags for a valid, present kernel page */
 MMPTE MM::Pte::ValidPte;
+
+/* Global limit for system-wide non-paged pool quota allocations */
+SIZE_T MM::Quota::NonPagedPoolQuota;
+
+/* Global limit for system-wide paged pool quota allocations */
+SIZE_T MM::Quota::PagedPoolQuota;
