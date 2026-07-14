@@ -10,6 +10,45 @@
 
 
 /**
+ * Initializes an object attributes structure.
+ *
+ * @param ObjectAttributes
+ *        Supplies a pointer to the object attributes structure to be initialized.
+ *
+ * @param ObjectName
+ *        Supplies an optional pointer to a Unicode string representing the object name.
+ *
+ * @param Attributes
+ *        Supplies a bitmask of flags controlling object behavior.
+ *
+ * @param Directory
+ *        Supplies an optional handle to the root directory for relative path parsing.
+ *
+ * @param SecurityDescriptor
+ *        Supplies an optional pointer to a security descriptor for the object.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+VOID
+OB::Manager::InitializeObjectAttributes(OUT POBJECT_ATTRIBUTES ObjectAttributes,
+                                        IN PUNICODE_STRING ObjectName,
+                                        IN ULONG Attributes,
+                                        IN HANDLE Directory,
+                                        IN PVOID SecurityDescriptor)
+{
+    /* Initialize the object attributes structure */
+    ObjectAttributes->Attributes = Attributes;
+    ObjectAttributes->Length = sizeof(OBJECT_ATTRIBUTES);
+    ObjectAttributes->ObjectName = ObjectName;
+    ObjectAttributes->RootDirectory = Directory;
+    ObjectAttributes->SecurityDescriptor = SecurityDescriptor;
+    ObjectAttributes->SecurityQualityOfService = NULLPTR;
+}
+
+/**
  * Initializes the Object Manager subsystem.
  *
  * @return This routine returns a status code indicating the success or failure of the operation.
