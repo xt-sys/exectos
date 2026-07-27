@@ -842,26 +842,26 @@ Volume::DissectArcPath(IN PWCHAR SystemPath,
     *PartNumber = 0;
 
     /* Look for the ARC path */
-    if(RTL::WideString::CompareWideStringInsensitive(SystemPath, L"ramdisk(0)", 0) == 0)
+    if(RTL::WideString::CompareWideStringInsensitive(SystemPath, L"ramdisk(0)", 10) == 0)
     {
         /* This is RAM disk */
         ArcLength = 10;
         *DriveType = XTBL_BOOT_DEVICE_RAMDISK;
     }
-    else if(RTL::WideString::CompareWideStringInsensitive(SystemPath, L"multi(0)esp(0)", 0) == 0)
+    else if(RTL::WideString::CompareWideStringInsensitive(SystemPath, L"multi(0)esp(0)", 14) == 0)
     {
         /* This is ESP */
         ArcLength = 14;
         *DriveType = XTBL_BOOT_DEVICE_ESP;
     }
-    else if(RTL::WideString::CompareWideStringInsensitive(SystemPath, L"multi(0)disk(0)", 0) == 0)
+    else if(RTL::WideString::CompareWideStringInsensitive(SystemPath, L"multi(0)disk(0)", 15) == 0)
     {
         /* This is a multi-disk port */
         ArcLength = 15;
         ArcPath = SystemPath + ArcLength;
 
         /* Check for disk type */
-        if(RTL::WideString::CompareWideStringInsensitive(ArcPath, L"cdrom(", 0) == 0)
+        if(RTL::WideString::CompareWideStringInsensitive(ArcPath, L"cdrom(", 6) == 0)
         {
             /* This is an optical drive */
             ArcLength += 6;
@@ -882,7 +882,7 @@ Volume::DissectArcPath(IN PWCHAR SystemPath,
             *DriveType = XTBL_BOOT_DEVICE_CDROM;
             ArcLength++;
         }
-        else if(RTL::WideString::CompareWideStringInsensitive(ArcPath, L"fdisk(", 0) == 0)
+        else if(RTL::WideString::CompareWideStringInsensitive(ArcPath, L"fdisk(", 6) == 0)
         {
             /* This is a floppy drive */
             ArcLength += 6;
@@ -903,7 +903,7 @@ Volume::DissectArcPath(IN PWCHAR SystemPath,
             *DriveType = XTBL_BOOT_DEVICE_FLOPPY;
             ArcLength++;
         }
-        else if(RTL::WideString::CompareWideStringInsensitive(ArcPath, L"rdisk(", 0) == 0)
+        else if(RTL::WideString::CompareWideStringInsensitive(ArcPath, L"rdisk(", 6) == 0)
         {
             /* This is a hard disk */
             ArcLength += 6;
@@ -926,7 +926,7 @@ Volume::DissectArcPath(IN PWCHAR SystemPath,
             ArcPath = SystemPath + ArcLength;
 
             /* Look for a partition */
-            if(RTL::WideString::CompareWideStringInsensitive(ArcPath, L"partition(", 0) == 0)
+            if(RTL::WideString::CompareWideStringInsensitive(ArcPath, L"partition(", 10) == 0)
             {
                 /* Partition information found */
                 ArcLength += 10;
