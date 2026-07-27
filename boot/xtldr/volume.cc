@@ -456,7 +456,7 @@ Volume::GetDevicePath(IN PWCHAR SystemPath,
     if(Status != STATUS_EFI_SUCCESS)
     {
         /* Failed to parse system path */
-        Debug::Print(L"ERROR: Failed to parse system path: '%s' (Status Code: 0x%zX)\n", SystemPath, Status);
+        Debug::Print(L"ERROR: Failed to parse system path: '%S' (Status Code: 0x%zX)\n", SystemPath, Status);
         return Status;
     }
 
