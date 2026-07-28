@@ -26,7 +26,7 @@
  * @since XT 1.0
  */
 XTAPI
-SIZE_T
+LONG
 RTL::String::CompareString(IN PCSTR String1,
                            IN PCSTR String2,
                            IN SIZE_T Length)
@@ -78,7 +78,7 @@ RTL::String::CompareString(IN PCSTR String1,
  * @since XT 1.0
  */
 XTAPI
-SIZE_T
+LONG
 RTL::String::CompareStringInsensitive(IN PCSTR String1,
                                       IN PCSTR String2,
                                       IN SIZE_T Length)

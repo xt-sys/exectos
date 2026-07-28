@@ -18,12 +18,12 @@ namespace RTL
     class WideString
     {
         public:
-            STATIC XTAPI SIZE_T CompareWideString(IN PCWSTR String1,
-                                                  IN PCWSTR String2,
-                                                  IN SIZE_T Length);
-            STATIC XTAPI SIZE_T CompareWideStringInsensitive(IN PCWSTR String1,
-                                                             IN PCWSTR String2,
-                                                             IN SIZE_T Length);
+            STATIC XTAPI LONG CompareWideString(IN PCWSTR String1,
+                                                IN PCWSTR String2,
+                                                IN SIZE_T Length);
+            STATIC XTAPI LONG CompareWideStringInsensitive(IN PCWSTR String1,
+                                                           IN PCWSTR String2,
+                                                           IN SIZE_T Length);
             STATIC XTAPI PWCHAR ConcatenateWideString(OUT PWCHAR Destination,
                                                       IN PWCHAR Source,
                                                       IN SIZE_T Count);

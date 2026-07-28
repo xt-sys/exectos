@@ -59,28 +59,28 @@ RtlCompareMemory(IN PCVOID LeftBuffer,
 
 XTCLINK
 XTAPI
-SIZE_T
+LONG
 RtlCompareString(IN PCSTR String1,
                  IN PCSTR String2,
                  IN SIZE_T Length);
 
 XTCLINK
 XTAPI
-SIZE_T
+LONG
 RtlCompareStringInsensitive(IN PCSTR String1,
                             IN PCSTR String2,
                             IN SIZE_T Length);
 
 XTCLINK
 XTAPI
-SIZE_T
+LONG
 RtlCompareWideString(IN PCWSTR String1,
                      IN PCWSTR String2,
                      IN SIZE_T Length);
 
 XTCLINK
 XTAPI
-SIZE_T
+LONG
 RtlCompareWideStringInsensitive(IN PCWSTR String1,
                                 IN PCWSTR String2,
                                 IN SIZE_T Length);
