@@ -124,6 +124,13 @@ RTL::WideString::CompareWideStringInsensitive(IN PCWSTR String1,
         Index++;
     }
 
+    /* Check if one wide string ended before the other */
+    if((Length == 0 || Index < Length) && (String1[Index] != String2[Index]))
+    {
+        /* Wide strings are not equal */
+        return String1[Index] > String2[Index] ? 1 : -1;
+    }
+
     /* Strings are equal */
     return 0;
 }
