@@ -124,6 +124,13 @@ RTL::String::CompareStringInsensitive(IN PCSTR String1,
         Index++;
     }
 
+    /* Check if one string ended before the other */
+    if((Length == 0 || Index < Length) && (String1[Index] != String2[Index]))
+    {
+        /* Strings are not equal */
+        return String1[Index] > String2[Index] ? 1 : -1;
+    }
+
     /* Strings are equal */
     return 0;
 }
