@@ -308,6 +308,24 @@ Shell::ExecuteCommand(IN ULONG Argc,
 }
 
 /**
+ * Initializes the bootloader shell.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+Shell::InitializeShell()
+{
+    /* Initialize the shell commands list */
+    RTL::LinkedList::InitializeListHead(&ShellCommands);
+
+    /* Register all built-in commands */
+    RegisterBuiltinCommands();
+}
+
+/**
  * Splits the supplied raw command line string into an argument count and an argument vector suitable
  * for command dispatch. The input string is tokenized by whitespace.
  *
@@ -880,12 +898,6 @@ Shell::StartLoaderShell()
 
     /* Initialize console */
     Console::InitializeConsole();
-
-    /* Initialize the shell commands list */
-    RTL::LinkedList::InitializeListHead(&ShellCommands);
-
-    /* Register all built-in commands */
-    RegisterBuiltinCommands();
 
     /* Clear the shell exit request flag */
     ExitRequest = FALSE;

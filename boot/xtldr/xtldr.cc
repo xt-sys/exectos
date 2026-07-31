@@ -245,8 +245,9 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
         for(;;);
     }
 
-    /* Initialize XTLDR and */
+    /* Initialize XTLDR and shell */
     XtLoader::InitializeBootLoader(ImageHandle, SystemTable);
+    Shell::InitializeShell();
 
     /* Parse configuration options passed from UEFI shell */
     Status = Configuration::ParseCommandLine();
