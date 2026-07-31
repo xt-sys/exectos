@@ -138,6 +138,9 @@ XtLoader::InitializeBootLoader(IN EFI_HANDLE ImageHandle,
     /* Initialize XTLDR configuration */
     Configuration::InitializeConfiguration();
 
+    /* Initialize shell */
+    Shell::InitializeShell();
+
     /* Store SecureBoot status */
     LoaderStatus.SecureBoot = EfiUtils::GetSecureBootStatus();
 
@@ -245,9 +248,8 @@ BlStartXtLoader(IN EFI_HANDLE ImageHandle,
         for(;;);
     }
 
-    /* Initialize XTLDR and shell */
+    /* Initialize XTLDR */
     XtLoader::InitializeBootLoader(ImageHandle, SystemTable);
-    Shell::InitializeShell();
 
     /* Parse configuration options passed from UEFI shell */
     Status = Configuration::ParseCommandLine();
