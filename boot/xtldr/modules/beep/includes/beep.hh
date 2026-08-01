@@ -21,11 +21,12 @@ class Beep
     public:
         STATIC XTCDECL EFI_STATUS InitializeModule(IN EFI_HANDLE ImageHandle,
                                                    IN PEFI_SYSTEM_TABLE SystemTable);
-        STATIC XTCDECL VOID PlayTune(IN PWCHAR Arguments);
 
     private:
+        STATIC XTCDECL VOID CommandBeep(IN ULONG Argc, IN PWCHAR *Argv);
         STATIC XTCDECL VOID DisableToneBeep();
         STATIC XTCDECL VOID EnableToneBeep(IN UINT Pitch);
+        STATIC XTCDECL VOID PlayTune(IN PWCHAR Arguments);
         STATIC XTCDECL UINT WideStringToNumber(IN PWCHAR String);
 };
 

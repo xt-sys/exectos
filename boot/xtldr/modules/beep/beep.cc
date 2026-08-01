@@ -13,8 +13,78 @@
 MODULE_AUTHOR(L"Rafal Kupiec <belliash@codingworkshop.eu.org>");
 MODULE_DESCRIPTION(L"Plays a GRUB compatible tune via PC speaker");
 MODULE_LICENSE(L"GPLv3");
-MODULE_VERSION(L"0.1");
+MODULE_VERSION(L"0.2");
 
+/**
+ * Executes the beep shell command to play a musical tune.
+ *
+ * @param Argc
+ *        Supplies the number of arguments passed to the command line.
+ *
+ * @param Argv
+ *        Supplies a pointer to an array of null-terminated argument strings.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTCDECL
+VOID
+Beep::CommandBeep(IN ULONG Argc,
+                  IN PWCHAR *Argv)
+{
+    WCHAR Tune[XTBL_SH_MAX_LINE_LENGTH];
+    ULONG ArgumentIndex, TuneLength;
+    PWCHAR Character;
+
+    /* Check the number of arguments */
+    if(Argc < 2)
+    {
+        /* Invalid number of arguments, print usage message and return */
+        XtLdrProtocol->Console.Print(L"Usage: beep <tempo> <pitch1> <duration1> [pitch2 duration2 ...]\n");
+        return;
+    }
+
+    /* Rebuild the space-separated argument string */
+    TuneLength = 0;
+    for(ArgumentIndex = 1; ArgumentIndex < Argc; ArgumentIndex++)
+    {
+        /* Retrieve the pointer to the current argument string */
+        Character = Argv[ArgumentIndex];
+        while(*Character != L'\0')
+        {
+            /* Verify that the tune buffer has sufficient capacity */
+            if(TuneLength >= XTBL_SH_MAX_LINE_LENGTH - 1)
+            {
+                /* Buffer capacity exceeded, print error message and return */
+                XtLdrProtocol->Console.Print(L"ERROR: Tune is too long.\n");
+                return;
+            }
+
+            /* Copy the current character to the buffer and advance the source pointer */
+            Tune[TuneLength++] = *Character++;
+        }
+
+        /* Check if there are subsequent arguments */
+        if(ArgumentIndex + 1 < Argc)
+        {
+            /* Verify that the tune buffer has sufficient capacity */
+            if(TuneLength >= XTBL_SH_MAX_LINE_LENGTH - 1)
+            {
+                /* Buffer capacity exceeded, print error message and return */
+                XtLdrProtocol->Console.Print(L"ERROR: Tune is too long.\n");
+                return;
+            }
+
+            /* Append a space character to the tune buffer */
+            Tune[TuneLength++] = L' ';
+        }
+    }
+
+    /* Terminate the reconstructed string and dispatch it to the playback routine */
+    Tune[TuneLength] = L'\0';
+    PlayTune(Tune);
+}
 
 /**
  * Disables the PC speaker.
@@ -101,6 +171,9 @@ Beep::InitializeModule(IN EFI_HANDLE ImageHandle,
         /* Failed to open the protocol, return error */
         return STATUS_EFI_PROTOCOL_ERROR;
     }
+
+    /* Register the `beep` command */
+    XtLdrProtocol->Shell.RegisterCommand(L"beep", L"Plays a GRUB compatible tune", CommandBeep);
 
     /* Play the tune set in the configuration */
     XtLdrProtocol->Config.GetValue(L"TUNE", &Tune);
