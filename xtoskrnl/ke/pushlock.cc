@@ -500,7 +500,6 @@ KE::PushLock::ReleasePushLock(IN PKPUSH_LOCK PushLock)
  *
  * @since XT 1.0
  */
-XTINLINE
 XTFASTCALL
 VOID
 KE::PushLock::ReleaseSharedPushLock(IN PKPUSH_LOCK PushLock)
