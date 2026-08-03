@@ -26,7 +26,7 @@
  * @since XT 1.0
  */
 XTAPI
-SIZE_T
+LONG
 RTL::WideString::CompareWideString(IN PCWSTR String1,
                                    IN PCWSTR String2,
                                    IN SIZE_T Length)
@@ -78,7 +78,7 @@ RTL::WideString::CompareWideString(IN PCWSTR String1,
  * @since XT 1.0
  */
 XTAPI
-SIZE_T
+LONG
 RTL::WideString::CompareWideStringInsensitive(IN PCWSTR String1,
                                               IN PCWSTR String2,
                                               IN SIZE_T Length)
@@ -122,6 +122,13 @@ RTL::WideString::CompareWideStringInsensitive(IN PCWSTR String1,
 
         /* Get next character */
         Index++;
+    }
+
+    /* Check if one wide string ended before the other */
+    if((Length == 0 || Index < Length) && (String1[Index] != String2[Index]))
+    {
+        /* Wide strings are not equal */
+        return String1[Index] > String2[Index] ? 1 : -1;
     }
 
     /* Strings are equal */

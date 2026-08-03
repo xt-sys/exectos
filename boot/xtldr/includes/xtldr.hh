@@ -261,6 +261,7 @@ class Shell
         STATIC LIST_ENTRY ShellCommands;
 
     public:
+        STATIC XTCDECL VOID InitializeShell();
         STATIC XTCDECL EFI_STATUS RegisterCommand(IN PCWSTR Command,
                                                   IN PCWSTR Description,
                                                   IN PBL_SHELL_COMMAND Handler);

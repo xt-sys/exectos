@@ -26,7 +26,7 @@
  * @since XT 1.0
  */
 XTAPI
-SIZE_T
+LONG
 RTL::String::CompareString(IN PCSTR String1,
                            IN PCSTR String2,
                            IN SIZE_T Length)
@@ -78,7 +78,7 @@ RTL::String::CompareString(IN PCSTR String1,
  * @since XT 1.0
  */
 XTAPI
-SIZE_T
+LONG
 RTL::String::CompareStringInsensitive(IN PCSTR String1,
                                       IN PCSTR String2,
                                       IN SIZE_T Length)
@@ -122,6 +122,13 @@ RTL::String::CompareStringInsensitive(IN PCSTR String1,
 
         /* Get next character */
         Index++;
+    }
+
+    /* Check if one string ended before the other */
+    if((Length == 0 || Index < Length) && (String1[Index] != String2[Index]))
+    {
+        /* Strings are not equal */
+        return String1[Index] > String2[Index] ? 1 : -1;
     }
 
     /* Strings are equal */

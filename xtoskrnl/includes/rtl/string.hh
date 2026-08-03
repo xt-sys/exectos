@@ -18,12 +18,12 @@ namespace RTL
     class String
     {
         public:
-            STATIC XTAPI SIZE_T CompareString(IN PCSTR String1,
-                                              IN PCSTR String2,
-                                              IN SIZE_T Length);
-            STATIC XTAPI SIZE_T CompareStringInsensitive(IN PCSTR String1,
-                                                         IN PCSTR String2,
-                                                         IN SIZE_T Length);
+            STATIC XTAPI LONG CompareString(IN PCSTR String1,
+                                            IN PCSTR String2,
+                                            IN SIZE_T Length);
+            STATIC XTAPI LONG CompareStringInsensitive(IN PCSTR String1,
+                                                       IN PCSTR String2,
+                                                       IN SIZE_T Length);
             STATIC XTAPI PCHAR ConcatenateString(OUT PCHAR Destination,
                                                  IN PCHAR Source,
                                                  IN SIZE_T Count);
