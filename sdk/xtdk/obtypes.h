@@ -104,14 +104,20 @@
 #ifndef __XTOS_ASSEMBLER__
 
 /* Object Manager routine callbacks */
+typedef BOOLEAN (XTAPI *POB_CHANGE_HANDLE_ROUTINE)(IN PHANDLE_TABLE_ENTRY HandleTableEntry, IN ULONG_PTR Parameter);
+typedef VOID (XTAPI *POB_DESTROY_HANDLE_ROUTINE)(IN HANDLE Handle);
 typedef VOID (XTAPI *POB_DUMP_METHOD)(IN PVOID Object, IN POBJECT_DUMP_CONTROL Control);
+typedef BOOLEAN (XTAPI *POB_DUPLICATE_HANDLE_ROUTINE)(IN PEPROCESS Process, IN PHANDLE_TABLE OldHandleTable, IN PHANDLE_TABLE_ENTRY OldHandleTableEntry, IN PHANDLE_TABLE_ENTRY NewHandleTableEntry);
+typedef BOOLEAN (XTAPI *POB_ENUMERATE_HANDLE_ROUTINE)(IN PHANDLE_TABLE_ENTRY HandleTableEntry, IN HANDLE Handle, IN PVOID EnumParameter);
 typedef XTSTATUS (XTAPI *POB_OPEN_METHOD)(IN OBJECT_OPEN_REASON Reason, IN PEPROCESS Process, IN PVOID ObjectBody, IN ACCESS_MASK GrantedAccess, IN ULONG HandleCount);
 typedef VOID (XTAPI *POB_CLOSE_METHOD)(IN PEPROCESS Process, IN PVOID Object, IN ACCESS_MASK GrantedAccess, IN ULONG ProcessHandleCount, IN ULONG SystemHandleCount);
 typedef VOID (XTAPI *POB_DELETE_METHOD)(IN PVOID Object);
-typedef XTSTATUS (XTAPI *POB_PARSE_METHOD)(IN PVOID ParseObject, IN PVOID ObjectType, IN OUT PACCESS_STATE AccessState, IN KPROCESSOR_MODE ProcessorMode, IN ULONG Attributes, IN OUT PUNICODE_STRING CompleteName, IN OUT PUNICODE_STRING RemainingName, IN OUT PVOID Context, IN PSECURITY_QUALITY_OF_SERVICE SecurityQos, OUT PVOID *Object);
-typedef XTSTATUS (XTAPI *POB_SECURITY_METHOD)(IN PVOID Object, IN SECURITY_OPERATION_CODE OperationType, IN PSECURITY_INFORMATION SecurityInformation, IN PSECURITY_DESCRIPTOR SecurityDescriptor, IN OUT PULONG CapturedLength, IN OUT PSECURITY_DESCRIPTOR *ObjectSecurityDescriptor, IN MMPOOL_TYPE PoolType, IN PGENERIC_MAPPING GenericMapping);
-typedef XTSTATUS (XTAPI *POB_QUERYNAME_METHOD)(IN PVOID Object, IN BOOLEAN HasObjectName, OUT POBJECT_NAME_INFORMATION ObjectNameInfo, IN ULONG Length, OUT PULONG ReturnLength, IN KPROCESSOR_MODE ProcessorMode);
 typedef BOOLEAN (XTAPI *POB_OKAYTOCLOSE_METHOD)(IN PEPROCESS Process, IN PVOID Object, IN HANDLE Handle, IN KPROCESSOR_MODE ProcessorMode);
+typedef XTSTATUS (XTAPI *POB_PARSE_METHOD)(IN PVOID ParseObject, IN PVOID ObjectType, IN OUT PACCESS_STATE AccessState, IN KPROCESSOR_MODE ProcessorMode, IN ULONG Attributes, IN OUT PUNICODE_STRING CompleteName, IN OUT PUNICODE_STRING RemainingName, IN OUT PVOID Context, IN PSECURITY_QUALITY_OF_SERVICE SecurityQos, OUT PVOID *Object);
+typedef XTSTATUS (XTAPI *POB_QUERYNAME_METHOD)(IN PVOID Object, IN BOOLEAN HasObjectName, OUT POBJECT_NAME_INFORMATION ObjectNameInfo, IN ULONG Length, OUT PULONG ReturnLength, IN KPROCESSOR_MODE ProcessorMode);
+typedef XTSTATUS (XTAPI *POB_SECURITY_METHOD)(IN PVOID Object, IN SECURITY_OPERATION_CODE OperationType, IN PSECURITY_INFORMATION SecurityInformation, IN PSECURITY_DESCRIPTOR SecurityDescriptor, IN OUT PULONG CapturedLength, IN OUT PSECURITY_DESCRIPTOR *ObjectSecurityDescriptor, IN MMPOOL_TYPE PoolType, IN PGENERIC_MAPPING GenericMapping);
+typedef XTSTATUS (XTAPI *POB_SNAPSHOT_HANDLE_ENTRY)(IN OUT PSYSTEM_HANDLE_TABLE_ENTRY_INFO *HandleEntryInfo, IN PVOID ProcessId, IN PHANDLE_TABLE_ENTRY HandleTableEntry, IN HANDLE Handle, IN ULONG Length, IN OUT PULONG RequiredLength);
+typedef XTSTATUS (XTAPI *POB_SNAPSHOT_HANDLE_ENTRY_EX)(IN OUT PSYSTEM_HANDLE_TABLE_ENTRY_INFO_EX *HandleEntryInfo, IN PVOID ProcessId, IN PHANDLE_TABLE_ENTRY HandleTableEntry, IN HANDLE Handle, IN ULONG Length, IN OUT PULONG RequiredLength);
 
 /* Bitmasks used to identify the presence of optional object headers in memory */
 typedef enum _OBJECT_HEADER_INFO
@@ -460,6 +466,46 @@ typedef struct _OBJECT_TYPE
     ULONG Key;
     LIST_ENTRY CallbackList;
 } OBJECT_TYPE;
+
+/* System handle table entry structure definition */
+typedef struct _SYSTEM_HANDLE_TABLE_ENTRY_INFO
+{
+    USHORT UniqueProcessId;
+    USHORT CreatorBackTraceIndex;
+    UCHAR ObjectTypeIndex;
+    UCHAR HandleAttributes;
+    USHORT HandleValue;
+    PVOID Object;
+    ULONG GrantedAccess;
+} SYSTEM_HANDLE_TABLE_ENTRY_INFO, *PSYSTEM_HANDLE_TABLE_ENTRY_INFO;
+
+/* System extended handle information structure definition */
+typedef struct _SYSTEM_HANDLE_TABLE_ENTRY_INFO_EX
+{
+    PVOID Object;
+    ULONG_PTR UniqueProcessId;
+    ULONG_PTR HandleValue;
+    ULONG GrantedAccess;
+    USHORT CreatorBackTraceIndex;
+    USHORT ObjectTypeIndex;
+    ULONG HandleAttributes;
+    ULONG Reserved;
+} SYSTEM_HANDLE_TABLE_ENTRY_INFO_EX, *PSYSTEM_HANDLE_TABLE_ENTRY_INFO_EX;
+
+/* System handle information structure definition */
+typedef struct _SYSTEM_HANDLE_INFORMATION
+{
+    ULONG NumberOfHandles;
+    SYSTEM_HANDLE_TABLE_ENTRY_INFO Handles[1];
+} SYSTEM_HANDLE_INFORMATION, *PSYSTEM_HANDLE_INFORMATION;
+
+/* System extended handle information structure definition */
+typedef struct _SYSTEM_HANDLE_INFORMATION_EX
+{
+    ULONG_PTR NumberOfHandles;
+    ULONG_PTR Reserved;
+    SYSTEM_HANDLE_TABLE_ENTRY_INFO_EX Handles[1];
+} SYSTEM_HANDLE_INFORMATION_EX, *PSYSTEM_HANDLE_INFORMATION_EX;
 
 #endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_OBTYPES_H */
