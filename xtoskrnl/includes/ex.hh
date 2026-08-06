@@ -11,7 +11,6 @@
 
 #include <xtos.hh>
 
-#include <ex/handle.hh>
 #include <ex/laslist.hh>
 #include <ex/resource.hh>
 #include <ex/rundown.hh>

@@ -13,11 +13,11 @@
 
 #include <ob/devmap.hh>
 #include <ob/handle.hh>
+#include <ob/hndltlb.hh>
 #include <ob/lifecycl.hh>
 #include <ob/obdir.hh>
 #include <ob/obmgr.hh>
 #include <ob/security.hh>
 #include <ob/typereg.hh>
-
 
 #endif /* __XTOSKRNL_OB_HH */

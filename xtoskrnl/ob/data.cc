@@ -15,6 +15,12 @@ KPUSH_LOCK OB::DeviceMap::DeviceMapLock;
 /* Indicates whether the system employs unique device maps */
 BOOLEAN OB::DeviceMap::UniqueDeviceMaps;
 
+/* The list head for all active handle tables in the system */
+LIST_ENTRY OB::HandleTable::HandleTableListHead;
+
+/* Pushlock used to synchronize access to the handle table list */
+KPUSH_LOCK OB::HandleTable::HandleTableListLock;
+
 /* Pointer to the system-wide kernel handle table */
 PHANDLE_TABLE OB::LifeCycle::KernelHandleTable;
 

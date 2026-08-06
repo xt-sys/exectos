@@ -16,7 +16,6 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/traps.cc
     ${XTOSKRNL_SOURCE_DIR}/ex/data.cc
     ${XTOSKRNL_SOURCE_DIR}/ex/exports.cc
-    ${XTOSKRNL_SOURCE_DIR}/ex/handle.cc
     ${XTOSKRNL_SOURCE_DIR}/ex/laslist.cc
     ${XTOSKRNL_SOURCE_DIR}/ex/resource.cc
     ${XTOSKRNL_SOURCE_DIR}/ex/rundown.cc
@@ -93,6 +92,7 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/ob/data.cc
     ${XTOSKRNL_SOURCE_DIR}/ob/devmap.cc
     ${XTOSKRNL_SOURCE_DIR}/ob/handle.cc
+    ${XTOSKRNL_SOURCE_DIR}/ob/hndltlb.cc
     ${XTOSKRNL_SOURCE_DIR}/ob/lifecycl.cc
     ${XTOSKRNL_SOURCE_DIR}/ob/obdir.cc
     ${XTOSKRNL_SOURCE_DIR}/ob/obmgr.cc
