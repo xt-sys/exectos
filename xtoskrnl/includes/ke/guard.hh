@@ -53,6 +53,40 @@ namespace KE
             CriticalRegionGuard& operator=(const CriticalRegionGuard&) = delete;
     };
 
+    class GuardedRegionGuard
+    {
+        private:
+            BOOLEAN Owned;
+            PKTHREAD SystemThread;
+
+        public:
+            GuardedRegionGuard(IN PKTHREAD Thread = NULLPTR,
+                               IN BOOLEAN Acquire = TRUE)
+            {
+                Owned = Acquire;
+                SystemThread = Thread;
+                if(Owned)
+                {
+                    if(!SystemThread)
+                    {
+                        SystemThread = KE::Processor::GetCurrentThread();
+                    }
+                    KE::KThread::EnterGuardedRegion(SystemThread);
+                }
+            }
+
+            ~GuardedRegionGuard()
+            {
+                if(Owned)
+                {
+                    KE::KThread::LeaveGuardedRegion(SystemThread);
+                }
+            }
+
+            GuardedRegionGuard(const GuardedRegionGuard&) = delete;
+            GuardedRegionGuard& operator=(const GuardedRegionGuard&) = delete;
+    };
+
     class PushLockExclusiveGuard
     {
         private:
