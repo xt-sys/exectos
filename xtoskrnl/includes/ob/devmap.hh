@@ -19,11 +19,14 @@ namespace OB
     {
         private:
             STATIC KPUSH_LOCK DeviceMapLock;
+            STATIC PDEVICE_MAP SystemDeviceMap;
             STATIC BOOLEAN UniqueDeviceMaps;
 
         public:
             STATIC XTAPI POBJECT_DIRECTORY GetGlobalDevicesDirectory(IN POBJECT_DIRECTORY Directory);
             STATIC XTAPI BOOLEAN GetUniqueDeviceMaps(VOID);
+            STATIC VOID InheritDeviceMap(IN PEPROCESS NewProcess,
+                                         IN PEPROCESS ParentProcess);
             STATIC XTAPI XTSTATUS InitializeDeviceMap(VOID);
     };
 }

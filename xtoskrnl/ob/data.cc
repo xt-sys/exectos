@@ -12,6 +12,9 @@
 /* Synchronizes shared read and exclusive write access to system device map structures */
 KPUSH_LOCK OB::DeviceMap::DeviceMapLock;
 
+/* Pointer to the system device map */
+PDEVICE_MAP OB::DeviceMap::SystemDeviceMap = NULLPTR;
+
 /* Indicates whether the system employs unique device maps */
 BOOLEAN OB::DeviceMap::UniqueDeviceMaps;
 

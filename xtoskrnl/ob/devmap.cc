@@ -59,6 +59,51 @@ OB::DeviceMap::GetUniqueDeviceMaps(VOID)
 }
 
 /**
+ * Inherits the device map from a parent process or assigns the system default.
+ *
+ * @param NewProcess
+ *        Supplies the newly created process that will inherit the device map.
+ *
+ * @param ParentProcess
+ *        Supplies the optional parent process to inherit the device map from.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+VOID
+OB::DeviceMap::InheritDeviceMap(IN PEPROCESS NewProcess,
+                                IN PEPROCESS ParentProcess)
+{
+    PDEVICE_MAP TargetDeviceMap;
+
+    /* Acquire the device map lock */
+    KE::PushLockExclusiveGuard PushLock(&DeviceMapLock);
+
+    /* Determine the source of the device map */
+    if(ParentProcess)
+    {
+        /* Inherit the device map from the provided parent process */
+        TargetDeviceMap = (PDEVICE_MAP)ParentProcess->DeviceMap;
+    }
+    else
+    {
+        /* No parent process provided, use system device map */
+        TargetDeviceMap = SystemDeviceMap;
+    }
+
+    /* Check if a valid device map was resolved */
+    if(TargetDeviceMap)
+    {
+        /* Increment the reference count of the target device map */
+        TargetDeviceMap->ReferenceCount++;
+
+        /* Assign the device map to the process */
+        NewProcess->DeviceMap = TargetDeviceMap;
+    }
+}
+
+/**
  * Initializes the Object Manager's device map subsystem.
  *
  * @return This routine returns a status code indicating the success or failure of the operation.
