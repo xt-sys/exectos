@@ -56,16 +56,16 @@ RTL::Memory::CompareMemory(IN PCVOID LeftBuffer,
 }
 
 /**
- * This routine copies a block of memory.
+ * Copies a block of memory from a source buffer to a destination buffer.
  *
  * @param Destination
- *        Supplies a pointer to the buffer where data will be copied to.
+ *        Supplies a pointer to the target buffer where the data will be copied.
  *
  * @param Source
- *        Supplies a pointer to the source buffer that will be copied.
+ *        Supplies a pointer to the source buffer containing the data to copy.
  *
  * @param Length
- *        Specifies the number of bytes to copy.
+ *        Specifies the number of bytes to transfer.
  *
  * @return This routine does not return any value.
  *
@@ -77,13 +77,121 @@ RTL::Memory::CopyMemory(OUT PVOID Destination,
                         IN PCVOID Source,
                         IN SIZE_T Length)
 {
-    PCHAR DestinationBytes = (PCHAR)Destination;
-    PCCHAR SourceBytes = (PCHAR)Source;
+    ULONG_PTR BytesToAlign, DestinationPointer, Remainder, SourcePointer, WordCount;
+    PULONG_PTR DestinationWord, SourceWord;
+    PCHAR DestinationByte, SourceByte;
 
-    /* Forward buffer copy */
-    while(Length--)
+    /* Check if the payload is empty or the buffers are identical */
+    if(Length == 0 || Destination == Source)
     {
-        *DestinationBytes++ = *SourceBytes++;
+        /* No operation is required */
+        return;
+    }
+
+    /* Cast the pointers to scalar values */
+    DestinationPointer = (ULONG_PTR)Destination;
+    SourcePointer = (ULONG_PTR)Source;
+
+    /* Check if the destination overlaps the source in a destructive manner */
+    if(SourcePointer < DestinationPointer && DestinationPointer < (SourcePointer + Length))
+    {
+        /* Initialize the pointers for a backward traversal */
+        DestinationByte = (PCHAR)(DestinationPointer + Length);
+        SourceByte = (PCHAR)(SourcePointer + Length);
+
+        /* Calculate the number of trailing bytes */
+        BytesToAlign = ((ULONG_PTR)DestinationByte) & (sizeof(ULONG_PTR) - 1);
+        if(BytesToAlign > Length)
+        {
+            /* Clamp the alignment requirement */
+            BytesToAlign = Length;
+        }
+
+        /* Compute the alignment byte count from the remaining payload */
+        Length -= BytesToAlign;
+
+        /* Sequentially copy the unaligned trailing bytes */
+        while(BytesToAlign--)
+        {
+            /* Transfer a single byte */
+            *(--DestinationByte) = *(--SourceByte);
+        }
+
+        /* Compute the number of full words and any leftover */
+        WordCount = Length / sizeof(ULONG_PTR);
+        Remainder = Length & (sizeof(ULONG_PTR) - 1);
+
+        /* Elevate the byte pointers to word pointers */
+        DestinationWord = (PULONG_PTR)DestinationByte;
+        SourceWord = (PULONG_PTR)SourceByte;
+
+        /* Bulk data transfer */
+        while(WordCount--)
+        {
+            /* Transfer a full word */
+            *(--DestinationWord) = *(--SourceWord);
+        }
+
+        /* Downgrade the pointers back to byte */
+        DestinationByte = (PCHAR)DestinationWord;
+        SourceByte = (PCHAR)SourceWord;
+
+        /* Sequentially transfer any remaining bytes */
+        while(Remainder--)
+        {
+            /* Transfer a single byte */
+            *(--DestinationByte) = *(--SourceByte);
+        }
+    }
+    else
+    {
+        /* Calculate the number of leading bytes */
+        BytesToAlign = (sizeof(ULONG_PTR) - (DestinationPointer & (sizeof(ULONG_PTR) - 1))) & (sizeof(ULONG_PTR) - 1);
+        if(BytesToAlign > Length)
+        {
+            /* Clamp the alignment requirement */
+            BytesToAlign = Length;
+        }
+
+        /* Compute the alignment byte count from the remaining payload */
+        Length -= BytesToAlign;
+
+        /* Initialize the pointers for a forward traversal */
+        DestinationByte = (PCHAR)DestinationPointer;
+        SourceByte = (PCHAR)SourcePointer;
+
+        /* Sequentially copy the unaligned leading bytes */
+        while(BytesToAlign--)
+        {
+            /* Transfer a single byte */
+            *DestinationByte++ = *SourceByte++;
+        }
+
+        /* Compute the number of full words and any leftover */
+        WordCount = Length / sizeof(ULONG_PTR);
+        Remainder = Length & (sizeof(ULONG_PTR) - 1);
+
+        /* Elevate the byte pointers to word pointers */
+        DestinationWord = (PULONG_PTR)DestinationByte;
+        SourceWord = (PULONG_PTR)SourceByte;
+
+        /* Bulk data transfer */
+        while(WordCount--)
+        {
+            /* Transfer a full word */
+            *DestinationWord++ = *SourceWord++;
+        }
+
+        /* Downgrade the pointers back to byte */
+        DestinationByte = (PCHAR)DestinationWord;
+        SourceByte = (PCHAR)SourceWord;
+
+        /* Sequentially transfer any remaining bytes */
+        while(Remainder--)
+        {
+            /* Transfer a single byte */
+            *DestinationByte++ = *SourceByte++;
+        }
     }
 }
 
@@ -110,30 +218,8 @@ RTL::Memory::MoveMemory(OUT PVOID Destination,
                         IN PCVOID Source,
                         IN SIZE_T Length)
 {
-    PCHAR DestinationBytes = (PCHAR)Destination;
-    PCHAR SourceBytes = (PCHAR)Source;
-
-    /* Make sure there is anything to copy */
-    if((!SourceBytes) && (!DestinationBytes))
-    {
-        return;
-    }
-
-    /* Check if source and destination overlaps */
-    if((DestinationBytes > SourceBytes) && (SourceBytes + Length > DestinationBytes))
-    {
-        /* Backward buffer copy */
-        while(Length)
-        {
-            DestinationBytes[Length - 1] = SourceBytes[Length - 1];
-            Length--;
-        }
-    }
-    else
-    {
-        /* Forward buffer copy */
-        CopyMemory(Destination, Source, Length);
-    }
+    /* Copy the memory */
+    CopyMemory(Destination, Source, Length);
 }
 
 /**
