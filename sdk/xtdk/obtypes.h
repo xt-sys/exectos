@@ -51,6 +51,32 @@
                                                                  OBJECT_INHERIT | \
                                                                  OBJECT_AUDIT_OBJECT_CLOSE)
 
+/* Defines maximum number of handles */
+#define OBJECT_MAX_HANDLES                                      (1<<24)
+
+/* Handle Table Architecture Dimensions */
+#define OBJECT_HANDLE_HIGHLEVEL_COUNT                           OBJECT_MAX_HANDLES / (OBJECT_HANDLE_LOWLEVEL_COUNT * OBJECT_HANDLE_MEDIUMLEVEL_COUNT)
+#define OBJECT_HANDLE_MEDIUMLEVEL_COUNT                         (MM_PAGE_SIZE / sizeof(PHANDLE_TABLE_ENTRY))
+#define OBJECT_HANDLE_LOWLEVEL_COUNT                            (MM_PAGE_SIZE / sizeof(HANDLE_TABLE_ENTRY))
+#define OBJECT_HANDLE_HIGHLEVEL_SIZE                            (OBJECT_HANDLE_HIGHLEVEL_COUNT * sizeof(PHANDLE_TABLE_ENTRY))
+#define OBJECT_HANDLE_MEDIUMLEVEL_THRESHOLD                     (OBJECT_HANDLE_MEDIUMLEVEL_COUNT * OBJECT_HANDLE_LOWLEVEL_COUNT)
+
+/* Handle Value and Table Routing Constants */
+#define OBJECT_HANDLE_LEVEL_CODE_MASK                           3
+#define OBJECT_HANDLE_VALUE_INCREMENT                           4
+
+/* Handle free mask */
+#define OBJECT_FREE_HANDLE_MASK                                 0xFFFFFFFF
+
+/* Handle table entry lock bit */
+#define OBJECT_HANDLE_TABLE_ENTRY_LOCK_BIT                      1
+
+/* Handle additional information signature */
+#define OBJECT_HANDLE_ADDITIONAL_INFO_SIGNATURE                 (-2)
+
+/* Handle tracing constants */
+#define OBJECT_HANDLE_TRACE_DB_STACK_SIZE                       8
+
 /* Object protect-on-close access bit */
 #define OBJECT_ACCESS_PROTECT_CLOSE_BIT                         0x02000000L
 
@@ -128,6 +154,56 @@ typedef struct _DEVICE_MAP
     UCHAR DriveType[32];
 } DEVICE_MAP, *PDEVICE_MAP;
 
+/* Handle table entry structure definition */
+typedef struct _HANDLE_TABLE_ENTRY
+{
+    union
+    {
+        PVOID Object;
+        ULONG_PTR ObAttributes;
+        PHANDLE_TABLE_ENTRY_INFO InfoTable;
+        ULONG_PTR Value;
+    };
+    union
+    {
+        ULONG GrantedAccess;
+        struct
+        {
+            USHORT GrantedAccessIndex;
+            USHORT CreatorBackTraceIndex;
+        };
+        LONG NextFreeTableEntry;
+    };
+} HANDLE_TABLE_ENTRY, *PHANDLE_TABLE_ENTRY;
+
+/* Handle table entry info structure definition */
+typedef struct _HANDLE_TABLE_ENTRY_INFO
+{
+    ULONG AuditMask;
+} HANDLE_TABLE_ENTRY_INFO, *PHANDLE_TABLE_ENTRY_INFO;
+
+/* Handle table structure definition */
+typedef struct _HANDLE_TABLE
+{
+    ULONG_PTR TableCode;
+    PEPROCESS QuotaProcess;
+    PVOID UniqueProcessId;
+    KPUSH_LOCK HandleTableLock[4];
+    LIST_ENTRY HandleTableList;
+    KPUSH_LOCK HandleContentionEvent;
+    PVOID Reserved;
+    LONG ExtraInfoPages;
+    union
+    {
+        ULONG Flags;
+        UCHAR StrictFIFO:1;
+    };
+    PHANDLE_TABLE_ENTRY FirstFreeHandle;
+    PHANDLE_TABLE_ENTRY LastFreeHandle;
+    LONG HandleCount;
+    ULONG NextHandleNeedingPool;
+} HANDLE_TABLE, *PHANDLE_TABLE;
+
 /* Parameters provided by a caller when creating or opening an object */
 typedef struct _OBJECT_ATTRIBUTES
 {
@@ -184,6 +260,18 @@ typedef struct _OBJECT_DUMP_CONTROL
     PVOID Stream;
     ULONG Detail;
 } OBJECT_DUMP_CONTROL, *POBJECT_DUMP_CONTROL;
+
+/* Handle table interface union definition */
+typedef union _OBJECT_HANDLE
+{
+    struct
+    {
+        ULONG TagBits:2;
+        ULONG Index:30;
+    };
+    HANDLE GenericHandleOverlay;
+    ULONG_PTR Value;
+} OBJECT_HANDLE, *POBJECT_HANDLE;
 
 /* Entry tracking the number of open handles a specific process holds */
 typedef struct _OBJECT_HANDLE_COUNT_ENTRY

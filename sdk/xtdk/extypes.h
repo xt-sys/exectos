@@ -17,24 +17,6 @@
 /* Rundown protection flags */
 #define EX_RUNDOWN_ACTIVE                               0x1
 
-/* Defines maximum number of handles */
-#define MAX_HANDLES                                     (1<<24)
-
-/* Handle Table Architecture Dimensions */
-#define HANDLE_HILEVEL_COUNT                            MAX_HANDLES / (LOWLEVEL_COUNT * MIDLEVEL_COUNT)
-#define HANDLE_MIDLEVEL_COUNT                           (MM_PAGE_SIZE / sizeof(PHANDLE_TABLE_ENTRY))
-#define HANDLE_LOWLEVEL_COUNT                           (MM_PAGE_SIZE / sizeof(HANDLE_TABLE_ENTRY))
-
-/* Handle Value and Table Routing Constants */
-#define HANDLE_LEVEL_CODE_MASK                          3
-#define HANDLE_VALUE_INCREMENT                          4
-
-/* Handle table entry lock bit */
-#define EXHANDLE_TABLE_ENTRY_LOCK_BIT                   1
-
-/* Handle additional information signature */
-#define HANDLE_ADDITIONAL_INFO_SIGNATURE (-2)
-
 /* Number of lookaside lists */
 #define POOL_LOOKASIDE_LISTS                            32
 
@@ -99,18 +81,6 @@ typedef struct _ERESOURCE
     KSPIN_LOCK SpinLock;
 } ERESOURCE, *PERESOURCE;
 
-/* Handle table interface union definition */
-typedef union _EXHANDLE
-{
-    struct
-    {
-        ULONG TagBits:2;
-        ULONG Index:30;
-    };
-    HANDLE GenericHandleOverlay;
-    ULONG_PTR Value;
-} EXHANDLE, *PEXHANDLE;
-
 /* Executive rundown protection structure definition */
 typedef union _EX_RUNDOWN_REFERENCE
 {
@@ -168,56 +138,6 @@ typedef struct _GENERAL_LOOKASIDE
     };
     ULONG Future[2];
 } GENERAL_LOOKASIDE, *PGENERAL_LOOKASIDE;
-
-/* Handle table entry structure definition */
-typedef struct _HANDLE_TABLE_ENTRY
-{
-    union
-    {
-        PVOID Object;
-        ULONG_PTR ObAttributes;
-        PHANDLE_TABLE_ENTRY_INFO InfoTable;
-        ULONG_PTR Value;
-    };
-    union
-    {
-        ULONG GrantedAccess;
-        struct
-        {
-            USHORT GrantedAccessIndex;
-            USHORT CreatorBackTraceIndex;
-        };
-        LONG NextFreeTableEntry;
-    };
-} HANDLE_TABLE_ENTRY, *PHANDLE_TABLE_ENTRY;
-
-/* Handle table entry info structure definition */
-typedef struct _HANDLE_TABLE_ENTRY_INFO
-{
-    ULONG AuditMask;
-} HANDLE_TABLE_ENTRY_INFO, *PHANDLE_TABLE_ENTRY_INFO;
-
-/* Handle table structure definition */
-typedef struct _HANDLE_TABLE
-{
-    ULONG_PTR TableCode;
-    PEPROCESS QuotaProcess;
-    PVOID UniqueProcessId;
-    KPUSH_LOCK HandleTableLock[4];
-    LIST_ENTRY HandleTableList;
-    KPUSH_LOCK HandleContentionEvent;
-    PVOID Reserved;
-    LONG ExtraInfoPages;
-    union
-    {
-        ULONG Flags;
-        UCHAR StrictFIFO:1;
-    };
-    PHANDLE_TABLE_ENTRY FirstFreeHandle;
-    PHANDLE_TABLE_ENTRY LastFreeHandle;
-    LONG HandleCount;
-    ULONG NextHandleNeedingPool;
-} HANDLE_TABLE, *PHANDLE_TABLE;
 
 /* Lookaside list pointers structure definition */
 typedef struct _LOOKASIDE_LIST
