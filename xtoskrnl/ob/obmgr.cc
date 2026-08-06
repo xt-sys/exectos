@@ -78,9 +78,13 @@ OB::Manager::InitializeObjectManager(VOID)
     /* Initialize system lookaside list for BSP */
     InitializeSystemLookasideList();
 
+    /* Initialize handle table support */
+    OB::HandleTable::InitializeHandleTable();
+
     /* Initialize device map support */
     OB::DeviceMap::InitializeDeviceMap();
 
+    /* Initialize object life cycle support */
     OB::LifeCycle::InitializeObjectLifeCycle();
 
     /* Initialize object type registry */

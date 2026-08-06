@@ -1285,6 +1285,10 @@ OB::LifeCycle::InitializeObjectLifeCycle(VOID)
     /* Clear tracking pointer */
     RemoveObjectList = NULLPTR;
 
+    /* Create the kernel handle table and attach it to the current process */
+    KernelHandleTable = OB::HandleTable::CreateHandleTable(NULLPTR);
+    PS::Process::GetCurrentProcess()->ObjectTable = KernelHandleTable;
+
     /* Initialize deferred removal work item */
     EX::WorkItem::InitializeWorkItem(&RemoveObjectWorkItem, ProcessDeferredDeletionQueue, NULLPTR);
 }
