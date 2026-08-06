@@ -28,8 +28,9 @@ OB::DeviceMap::GetGlobalDevicesDirectory(IN POBJECT_DIRECTORY Directory)
     /* Assume no mapping exists */
     GlobalDevicesDirectory = NULLPTR;
 
-    /* Acquire the device map lock */
-    KE::PushLock::AcquireExclusivePushLock(&DeviceMapLock);
+    /* Enter guarded region and acquire the device map lock */
+    KE::GuardedRegionGuard GuardedRegion;
+    KE::PushLockExclusiveGuard PushLock(&DeviceMapLock);
 
     /* Check if the directory has an associated device map */
     if(Directory->DeviceMap)
@@ -37,9 +38,6 @@ OB::DeviceMap::GetGlobalDevicesDirectory(IN POBJECT_DIRECTORY Directory)
         /* Extract the global devices directory */
         GlobalDevicesDirectory = Directory->DeviceMap->GlobalDevicesDirectory;
     }
-
-    /* Release the device map lock */
-    KE::PushLock::ReleaseExclusivePushLock(&DeviceMapLock);
 
     /* Return the resolved directory */
     return GlobalDevicesDirectory;
