@@ -242,7 +242,7 @@ typedef struct _PEB_FREE_BLOCK
 /* Kernel's representation of a thread environment block */
 typedef struct _TEB
 {
-    THREAD_INFORMATION_BLOCK ThreadInformationBlock;
+    THREAD_INFORMATION_BLOCK InformationBlock;
     PVOID EnvironmentPointer;
     CLIENT_ID ClientId;
     PVOID ActiveRpcHandle;
