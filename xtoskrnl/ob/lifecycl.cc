@@ -1514,7 +1514,7 @@ OB::LifeCycle::ReferenceObject(IN HANDLE Handle,
     KE::CriticalRegionGuard CriticalRegion(&Thread->ThreadControlBlock);
 
     /* Map the given handle to its underlying physical table entry */
-    ObjectTableEntry = EX::Handle::MapHandleToPointer(HandleTable, Handle);
+    ObjectTableEntry = OB::HandleTable::MapHandleToPointer(HandleTable, Handle);
     if(!ObjectTableEntry)
     {
         /* The handle is invalid or closed, return error code */
@@ -1555,7 +1555,7 @@ OB::LifeCycle::ReferenceObject(IN HANDLE Handle,
             if((ObjectTableEntry->ObAttributes & OBJECT_AUDIT_OBJECT_CLOSE) && AccessMask && ProcessorMode != KernelMode)
             {
                 /* Fetch the handle information */
-                ObjectInfo = EX::Handle::GetHandleInformation(HandleTable, Handle, TRUE);
+                ObjectInfo = OB::HandleTable::GetHandleInformation(HandleTable, Handle, TRUE);
                 if(ObjectInfo && ObjectInfo->AuditMask)
                 {
                     /* Generate a security audit event */
@@ -1573,7 +1573,7 @@ OB::LifeCycle::ReferenceObject(IN HANDLE Handle,
     }
 
     /* Release the handle table */
-    EX::Handle::UnlockHandleTableEntry(HandleTable, ObjectTableEntry);
+    OB::HandleTable::UnlockHandleTableEntry(HandleTable, ObjectTableEntry);
 
     /* Return status code */
     return Status;
