@@ -465,7 +465,7 @@ typedef struct _OBJECT_TYPE
     KPUSH_LOCK TypeLock;
     ULONG Key;
     LIST_ENTRY CallbackList;
-} OBJECT_TYPE;
+} OBJECT_TYPE, *POBJECT_TYPE;
 
 /* System handle table entry structure definition */
 typedef struct _SYSTEM_HANDLE_TABLE_ENTRY_INFO
