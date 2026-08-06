@@ -88,6 +88,7 @@ typedef struct _EPROCESS
     PVOID SectionBaseAddress;
     PEPROCESS_QUOTA_BLOCK QuotaBlock;
     HANDLE InheritedFromUniqueProcessId;
+    PVOID DeviceMap;
     CHAR ImageFileName[16];
     LIST_ENTRY ThreadListHead;
     ACCESS_MASK GrantedAccess;
