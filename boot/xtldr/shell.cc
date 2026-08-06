@@ -807,7 +807,7 @@ Shell::ReadCommand(OUT PWCHAR Buffer,
  * @param Handler
  *        Supplies a pointer to the function that implements the command.
  *
- * @return This routine returns a status code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -835,6 +835,13 @@ Shell::RegisterCommand(IN PCWSTR Command,
             return STATUS_EFI_INVALID_PARAMETER;
         }
 
+        /* Check if the existing command string is lexicographically greater than the new command */
+        if(RTL::WideString::CompareWideStringInsensitive(CommandEntry->Command, Command, 0) > 0)
+        {
+            /* Break the traversal loop */
+            break;
+        }
+
         /* Advance to the next entry */
         ListEntry = ListEntry->Flink;
     }
@@ -852,8 +859,17 @@ Shell::RegisterCommand(IN PCWSTR Command,
     CommandEntry->Description = (PWCHAR)Description;
     CommandEntry->Handler = Handler;
 
-    /* Append the command to the global shell commands list */
-    RTL::LinkedList::InsertTailList(&ShellCommands, &CommandEntry->Flink);
+    /* Check if the traversal reached the end of the command list */
+    if(ListEntry == &ShellCommands)
+    {
+        /* Append the new command entry to the tail of the list */
+        RTL::LinkedList::InsertTailList(&ShellCommands, &CommandEntry->Flink);
+    }
+    else
+    {
+        /* Insert the new command entry before the current item */
+        RTL::LinkedList::InsertHeadList(ListEntry->Blink, &CommandEntry->Flink);
+    }
 
     /* Return success */
     return STATUS_EFI_SUCCESS;
