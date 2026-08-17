@@ -15,7 +15,7 @@
  * @param CreateInfo
  *        Supplies a pointer to the object creation information.
  *
- * @param OwnerProcessorMode
+ * @param ProcessorMode
  *        Supplies the processor mode that will own the object.
  *
  * @param ObjectType
@@ -37,7 +37,7 @@
 XTAPI
 XTSTATUS
 OB::LifeCycle::AllocateObject(IN POBJECT_CREATE_INFORMATION CreateInfo,
-                              IN KPROCESSOR_MODE OwnerProcessorMode,
+                              IN KPROCESSOR_MODE ProcessorMode,
                               IN POBJECT_TYPE ObjectType,
                               IN PUNICODE_STRING ObjectName,
                               IN ULONG ObjectBodySize,
@@ -160,7 +160,7 @@ OB::LifeCycle::AllocateObject(IN POBJECT_CREATE_INFORMATION CreateInfo,
     }
 
     /* Check if the object is being created in kernel mode */
-    if(OwnerProcessorMode == KernelMode)
+    if(ProcessorMode == KernelMode)
     {
         /* Assign kernel mode ownership */
         ObjectHeader->Flags |= OBJECT_FLAG_KERNEL_MODE;
@@ -229,7 +229,7 @@ OB::LifeCycle::AllocateObject(IN POBJECT_CREATE_INFORMATION CreateInfo,
  * @since XT 1.0
  */
 XTFASTCALL
-PWCH
+PWCHAR
 OB::LifeCycle::AllocateObjectName(IN ULONG Length,
                                   IN BOOLEAN UseLookaside,
                                   IN OUT PUNICODE_STRING ObjectName)
@@ -257,12 +257,12 @@ OB::LifeCycle::AllocateObjectName(IN ULONG Length,
     }
 
     /* Initialize the Unicode string descriptor */
-    ObjectName->Buffer = (PWCH)Buffer;
+    ObjectName->Buffer = (PWCHAR)Buffer;
     ObjectName->Length = (USHORT)Length;
     ObjectName->MaximumLength = (USHORT)MaximumLength;
 
     /* Return the buffer pointer */
-    return (PWCH)Buffer;
+    return (PWCHAR)Buffer;
 }
 
 /**
@@ -338,10 +338,8 @@ OB::LifeCycle::CalculateOptionalHeaderSize(IN POBJECT_CREATE_INFORMATION CreateI
     }
 
     /* Calculate the total size required for all optional headers */
-    Layout->TotalSize = Layout->QuotaInfoSize +
-                        Layout->HandleInfoSize +
-                        Layout->NameInfoSize +
-                        Layout->CreatorInfoSize;
+    Layout->TotalSize = Layout->QuotaInfoSize + Layout->HandleInfoSize +
+                        Layout->NameInfoSize + Layout->CreatorInfoSize;
 }
 
 /**
@@ -382,6 +380,7 @@ OB::LifeCycle::CaptureObjectCreateInformation(IN POBJECT_TYPE ObjectType,
                                               IN POBJECT_CREATE_INFORMATION ObjectCreateInfo,
                                               IN BOOLEAN UseLookaside)
 {
+    OBJECT_ATTRIBUTES CapturedAttributes;
     PSECURITY_QUALITY_OF_SERVICE SecurityQos;
     PSECURITY_DESCRIPTOR SecurityDescriptor;
     PUNICODE_STRING ObjectName;
@@ -395,85 +394,107 @@ OB::LifeCycle::CaptureObjectCreateInformation(IN POBJECT_TYPE ObjectType,
     /* Zero out the output structure */
     RTL::Memory::ZeroMemory(ObjectCreateInfo, sizeof(OBJECT_CREATE_INFORMATION));
 
-    /* Enter structured exception handler */
-    __try
+    /* Check if the caller supplied object attributes */
+    if(ObjectAttributes)
     {
-        /* Check if the caller supplied object attributes */
-        if(ObjectAttributes)
+        /* Enter structured exception handler for ObjectAttributes snapshot */
+        __try
         {
             /* Check if the request originated from user mode */
             if(ProcessorMode != KernelMode)
             {
                 /* Probe the object attributes structure */
                 MM::Probe::ProbeForReadStructure(ObjectAttributes, sizeof(OBJECT_ATTRIBUTES), sizeof(ULONG_PTR));
-            }
 
-            /* Validate structure length and verify that no unknown attributes are specified */
-            if((ObjectAttributes->Length != sizeof(OBJECT_ATTRIBUTES)) ||
-               (ObjectAttributes->Attributes & ~OBJECT_VALID_ATTRIBUTES))
-            {
-                /* Return error code */
-                Status = STATUS_INVALID_PARAMETER;
+                /* Snapshot the attributes to prevent TOCTOU and double-fetch vulnerabilities */
+                CapturedAttributes = *(CONST VOLATILE POBJECT_ATTRIBUTES)ObjectAttributes;
             }
             else
             {
-                /* Capture the root directory and sanitize basic attribute flags */
-                ObjectCreateInfo->RootDirectory = ObjectAttributes->RootDirectory;
-                ObjectCreateInfo->Attributes = ObjectAttributes->Attributes & OBJECT_VALID_ATTRIBUTES;
-
-                /* Check if the owner works in user mode */
-                if(OwnerProcessorMode != KernelMode)
-                {
-                    /* Enforce kernel handle restrictions */
-                    ObjectCreateInfo->Attributes &= ~OBJECT_KERNEL_HANDLE;
-                }
-
-                /* Cache pointers for subsequent capture and validation */
-                ObjectName = ObjectAttributes->ObjectName;
-                SecurityDescriptor = ObjectAttributes->SecurityDescriptor;
-                SecurityQos = ObjectAttributes->SecurityQualityOfService;
-
-                /* Check if security descriptor is present */
-                if(SecurityDescriptor)
-                {
-                    /* Capture the security descriptor*/
-                    Status = SE::Descriptor::CaptureSecurityDescriptor(SecurityDescriptor, ProcessorMode, PagedPool,
-                                                                       TRUE, &ObjectCreateInfo->SecurityDescriptor);
-                    if(Status != STATUS_SUCCESS)
-                    {
-                        /* Clear the descriptor pointer on failure */
-                        ObjectCreateInfo->SecurityDescriptor = NULLPTR;
-                    }
-                    else
-                    {
-                        /* Compute and assign the security quota charge for the descriptor */
-                        SE::Descriptor::ComputeQuotaInformationSize(ObjectCreateInfo->SecurityDescriptor, &Size);
-                        ObjectCreateInfo->ProbeMode = ProcessorMode;
-                        ObjectCreateInfo->SecurityDescriptorCharge = SE::Descriptor::ComputeSecurityQuota(Size);
-                    }
-                }
-
-                /* Check if previous operations succeeded and QoS data is available */
-                if(Status == STATUS_SUCCESS && SecurityQos)
-                {
-                    /* Check if the request originated from user mode */
-                    if(ProcessorMode != KernelMode)
-                    {
-                        /* Probe the QoS structure */
-                        MM::Probe::ProbeForReadStructure(SecurityQos, sizeof(SECURITY_QUALITY_OF_SERVICE), sizeof(ULONG));
-                    }
-
-                    /* Copy QoS data into the local structure and link the pointer */
-                    ObjectCreateInfo->SecurityQualityOfService = *SecurityQos;
-                    ObjectCreateInfo->SecurityQos = &ObjectCreateInfo->SecurityQualityOfService;
-                }
+                /* Copy the descriptor directly */
+                CapturedAttributes = *ObjectAttributes;
             }
         }
-    }
-    __except (RTL::Exception::SystemFilter())
-    {
-        /* Catch memory access violations */
-        Status = EXCEPTION_CODE;
+        __except(RTL::Exception::SystemFilter())
+        {
+            /* Catch memory access violations */
+            return EXCEPTION_CODE;
+        }
+
+        /* Validate structure length and verify that no unknown attributes are specified */
+        if((CapturedAttributes.Length != sizeof(OBJECT_ATTRIBUTES)) ||
+           (CapturedAttributes.Attributes & ~OBJECT_VALID_ATTRIBUTES))
+        {
+            /* Return error code immediately */
+            return STATUS_INVALID_PARAMETER;
+        }
+
+        /* Capture the root directory and sanitize basic attribute flags */
+        ObjectCreateInfo->RootDirectory = CapturedAttributes.RootDirectory;
+        ObjectCreateInfo->Attributes = CapturedAttributes.Attributes & OBJECT_VALID_ATTRIBUTES;
+
+        /* Check if the owner works in user mode */
+        if(OwnerProcessorMode != KernelMode)
+        {
+            /* Enforce kernel handle restrictions */
+            ObjectCreateInfo->Attributes &= ~OBJECT_KERNEL_HANDLE;
+        }
+
+        /* Cache pointers for subsequent capture and validation */
+        ObjectName = CapturedAttributes.ObjectName;
+        SecurityDescriptor = CapturedAttributes.SecurityDescriptor;
+        SecurityQos = CapturedAttributes.SecurityQualityOfService;
+
+        /* Check if QoS data is available */
+        if(SecurityQos)
+        {
+            /* Enter structured exception handler for Security QoS snapshot */
+            __try
+            {
+                /* Check if the request originated from user mode */
+                if(ProcessorMode != KernelMode)
+                {
+                    /* Probe the QoS structure */
+                    MM::Probe::ProbeForReadStructure(SecurityQos, sizeof(SECURITY_QUALITY_OF_SERVICE), sizeof(ULONG));
+
+                    /* Snapshot QoS data to prevent TOCTOU vulnerabilities */
+                    ObjectCreateInfo->SecurityQualityOfService = *(CONST VOLATILE PSECURITY_QUALITY_OF_SERVICE)SecurityQos;
+                }
+                else
+                {
+                    /* Copy QoS data directly */
+                    ObjectCreateInfo->SecurityQualityOfService = *SecurityQos;
+                }
+            }
+            __except(RTL::Exception::SystemFilter())
+            {
+                /* Catch memory access violations */
+                return EXCEPTION_CODE;
+            }
+
+            /* Link the pointer */
+            ObjectCreateInfo->SecurityQos = &ObjectCreateInfo->SecurityQualityOfService;
+        }
+
+        /* Capture Security Descriptor outside of the broad SEH to avoid masking kernel bugs */
+        if(SecurityDescriptor)
+        {
+            /* Capture the security descriptor */
+            Status = SE::Descriptor::CaptureSecurityDescriptor(SecurityDescriptor, ProcessorMode, PagedPool,
+                                                               TRUE, &ObjectCreateInfo->SecurityDescriptor);
+            if(Status != STATUS_SUCCESS)
+            {
+                /* Clear the descriptor pointer on failure */
+                ObjectCreateInfo->SecurityDescriptor = NULLPTR;
+            }
+            else
+            {
+                /* Compute and assign the security quota charge for the descriptor */
+                SE::Descriptor::ComputeQuotaInformationSize(ObjectCreateInfo->SecurityDescriptor, &Size);
+                ObjectCreateInfo->ProbeMode = ProcessorMode;
+                ObjectCreateInfo->SecurityDescriptorCharge = SE::Descriptor::ComputeSecurityQuota(Size);
+            }
+        }
     }
 
     /* Check If all structure and security captures succeeded */
@@ -482,7 +503,7 @@ OB::LifeCycle::CaptureObjectCreateInformation(IN POBJECT_TYPE ObjectType,
         /* Validate if an object name is available */
         if(ObjectName)
         {
-            /* Capture object name */
+            /* Capture object name (This function has its own SEH protection) */
             Status = CaptureObjectName(ProcessorMode, ObjectName, CapturedObjectName, UseLookaside);
         }
         else
@@ -519,15 +540,15 @@ OB::LifeCycle::CaptureObjectCreateInformation(IN POBJECT_TYPE ObjectType,
  *        Supplies the processor mode used to probe user-mode structures for accessibility.
  *
  * @param ObjectName
- * Supplies a pointer to the original Unicode string descriptor to be captured.
+ *        Supplies a pointer to the original Unicode string descriptor to be captured.
  *
  * @param CapturedObjectName
- * Supplies a pointer to the Unicode string descriptor that will receive the captured buffer.
+ *        Supplies a pointer to the Unicode string descriptor that will receive the captured buffer.
  *
  * @param UseLookaside
- * Indicates whether a lookaside list should be used for the buffer allocation if applicable.
+ *        Indicates whether a lookaside list should be used for the buffer allocation if applicable.
  *
- * @return Returns STATUS_SUCCESS if the name was captured safely, or an appropriate error code.
+ * @return This routine returns a status code indicating the success or failure of the operation.
  *
  * @since XT 1.0
  */
@@ -540,8 +561,8 @@ OB::LifeCycle::CaptureObjectName(IN KPROCESSOR_MODE ProcessorMode,
 {
     UNICODE_STRING InputObjectName;
     XTSTATUS Status;
+    PWCHAR Buffer;
     ULONG Length;
-    PWCH Buffer;
 
     /* Initialize local variables */
     Buffer = NULLPTR;
@@ -570,7 +591,16 @@ OB::LifeCycle::CaptureObjectName(IN KPROCESSOR_MODE ProcessorMode,
             /* Copy the descriptor */
             InputObjectName = *ObjectName;
         }
+    }
+    __except(RTL::Exception::SystemFilter())
+    {
+        /* Catch memory access violations */
+        Status = EXCEPTION_CODE;
+    }
 
+    /* Check if the memory probing succeeded */
+    if(Status == STATUS_SUCCESS)
+    {
         /* Check if the string is not empty */
         Length = InputObjectName.Length;
         if(Length > 0)
@@ -592,25 +622,29 @@ OB::LifeCycle::CaptureObjectName(IN KPROCESSOR_MODE ProcessorMode,
                 }
                 else
                 {
-                    /* Copy the string data into the buffer */
-                    RTL::Memory::CopyMemory(Buffer, InputObjectName.Buffer, Length);
+                    /* Enter structural exception handler */
+                    __try
+                    {
+                        /* Copy the string data into the buffer */
+                        RTL::Memory::CopyMemory(Buffer, InputObjectName.Buffer, Length);
 
-                    /* NULL-terminate the string */
-                    Buffer[Length / sizeof(WCHAR)] = (WCHAR)0;
+                        /* NULL-terminate the string */
+                        Buffer[Length / sizeof(WCHAR)] = (WCHAR)0;
+                    }
+                    __except(RTL::Exception::SystemFilter())
+                    {
+                        /* Catch memory access violations */
+                        Status = EXCEPTION_CODE;
+
+                        /* Check if a buffer was allocated */
+                        if(Buffer)
+                        {
+                            /* Release the buffer */
+                            FreeObjectName(CapturedObjectName);
+                        }
+                    }
                 }
             }
-        }
-    }
-    __except (RTL::Exception::SystemFilter())
-    {
-        /* Catch memory access violations */
-        Status = EXCEPTION_CODE;
-
-        /* Check if a buffer was allocated */
-        if(Buffer)
-        {
-            /* Release the buffer */
-            FreeObjectName(CapturedObjectName);
         }
     }
 
@@ -774,27 +808,27 @@ XTAPI
 VOID
 OB::LifeCycle::DeferObjectDeletion(IN POBJECT_HEADER ObjectHeader)
 {
-    PVOID OldListHead, ActualListHead;
+    PVOID ListHead, OldListHead;
 
     /* Capture the snapshot of the removal list */
     OldListHead = RemoveObjectList;
 
-    /* Enter the CAS loop */
+    /* Process the deferred object deletion */
     while(TRUE)
     {
         /* Link the current head to object header */
         ObjectHeader->NextToFree = OldListHead;
 
-        /* Attempt to push the header to the list head */
-        ActualListHead = RTL::Atomic::CompareExchangePointer(&RemoveObjectList, OldListHead, ObjectHeader);
-        if(ActualListHead == OldListHead)
+        /* Push the header to the list head */
+        ListHead = RTL::Atomic::CompareExchangePointer(&RemoveObjectList, OldListHead, ObjectHeader);
+        if(ListHead == OldListHead)
         {
             /* Successfully pushed to the stack, break the loop */
             break;
         }
 
         /* The list changed mid-flight, update the snapshot and retry */
-        OldListHead = ActualListHead;
+        OldListHead = ListHead;
     }
 
     /* Check if the list was empty */
@@ -943,23 +977,23 @@ OB::LifeCycle::DereferenceObject(IN PVOID Object,
                                  IN ULONG Count)
 {
     POBJECT_HEADER ObjectHeader;
-    LONG_PTR NewCount;
+    LONG_PTR ReferenceCount;
 
     /* Resolve the object header */
     ObjectHeader = CONTAIN_RECORD(Object, OBJECT_HEADER, Body);
 
     /* Decrement the reference count */
-    NewCount = RTL::Atomic::ExchangeAdd64(&ObjectHeader->PointerCount, -(LONG_PTR)(Count)) - Count;
+    ReferenceCount = RTL::Atomic::ExchangeAdd64(&ObjectHeader->PointerCount, -(LONG_PTR)(Count)) - Count;
 
     /* Check for object expiration */
-    if(NewCount == 0)
+    if(ReferenceCount == 0)
     {
         /* Defer deletion to worker thread */
         DeferObjectDeletion(ObjectHeader);
     }
 
     /* Return the updated reference count */
-    return NewCount;
+    return ReferenceCount;
 }
 
 /**
@@ -977,23 +1011,23 @@ LONG_PTR
 OB::LifeCycle::DereferenceObjectDeferDelete(IN PVOID Object)
 {
     POBJECT_HEADER ObjectHeader;
-    LONG_PTR NewCount;
+    LONG_PTR ReferenceCount;
 
     /* Resolve the object header */
     ObjectHeader = CONTAIN_RECORD(Object, OBJECT_HEADER, Body);
 
     /* Decrement the reference count */
-    NewCount = RTL::Atomic::Decrement64(&ObjectHeader->PointerCount);
+    ReferenceCount = RTL::Atomic::Decrement64(&ObjectHeader->PointerCount);
 
     /* Check for object expiration */
-    if(NewCount == 0)
+    if(ReferenceCount == 0)
     {
         /* Defer deletion to worker thread */
         DeferObjectDeletion(ObjectHeader);
     }
 
     /* Return the updated reference count */
-    return NewCount;
+    return ReferenceCount;
 }
 
 /**
@@ -1129,7 +1163,7 @@ OB::LifeCycle::FreeObject(IN PVOID Object)
 /**
  * Releases creation information resources and returns them back to the lookaside list.
  *
- * @param ObjectCreateInfo
+ * @param CreateInfo
  *        Supplies a pointer to the object creation information structure to be freed.
  *
  * @return This routine does not return any value.
@@ -1224,7 +1258,7 @@ OB::LifeCycle::GetObjectAllocationBase(IN POBJECT_HEADER ObjectHeader)
 /**
  * Retrieves the optional creator information header for a given object.
  *
- * @param Header
+ * @param ObjectHeader
  *        Supplies a pointer to the object's base header.
  *
  * @return This routine returns a pointer to the creator information, or NULLPTR if not present.
@@ -1233,23 +1267,23 @@ OB::LifeCycle::GetObjectAllocationBase(IN POBJECT_HEADER ObjectHeader)
  */
 XTFASTCALL
 POBJECT_HEADER_CREATOR_INFO
-OB::LifeCycle::GetObjectCreatorInformation(IN POBJECT_HEADER Header)
+OB::LifeCycle::GetObjectCreatorInformation(IN POBJECT_HEADER ObjectHeader)
 {
     /* Verify if the creator flag is set */
-    if((Header->Flags & OBJECT_FLAG_CREATOR_INFO) == 0)
+    if((ObjectHeader->Flags & OBJECT_FLAG_CREATOR_INFO) == 0)
     {
         /* Creator information not present, return NULL pounter */
         return NULLPTR;
     }
 
     /* Return the creator information */
-    return (POBJECT_HEADER_CREATOR_INFO)((PCHAR)Header - sizeof(OBJECT_HEADER_CREATOR_INFO));
+    return (POBJECT_HEADER_CREATOR_INFO)((PCHAR)ObjectHeader - sizeof(OBJECT_HEADER_CREATOR_INFO));
 }
 
 /**
  * Retrieves the optional name information header for a given object.
  *
- * @param Header
+ * @param ObjectHeader
  *        Supplies a pointer to the object's base header.
  *
  * @return This routine returns a pointer to the name information, or NULLPTR if not present.
@@ -1258,17 +1292,17 @@ OB::LifeCycle::GetObjectCreatorInformation(IN POBJECT_HEADER Header)
  */
 XTFASTCALL
 POBJECT_HEADER_NAME_INFO
-OB::LifeCycle::GetObjectNameInformation(IN POBJECT_HEADER Header)
+OB::LifeCycle::GetObjectNameInformation(IN POBJECT_HEADER ObjectHeader)
 {
     /* Check if the header is present */
-    if(!Header->NameInfoOffset)
+    if(!ObjectHeader->NameInfoOffset)
     {
         /* Name information not present, return NULL pointer */
         return NULLPTR;
     }
 
     /* Return the name information */
-    return (POBJECT_HEADER_NAME_INFO)((PCHAR)Header - Header->NameInfoOffset);
+    return (POBJECT_HEADER_NAME_INFO)((PCHAR)ObjectHeader - ObjectHeader->NameInfoOffset);
 }
 
 /**
@@ -1333,7 +1367,7 @@ OB::LifeCycle::ProcessDeferredDeletionQueue(IN PVOID Parameter)
         /* Check if the queue is still locked */
         if(RemoveObjectList == OBJECT_REMOVE_QUEUE_LOCKED)
         {
-            /* Attempt to clear the lock */
+            /* Clear the lock */
             OldValue = RTL::Atomic::CompareExchangePointer(&RemoveObjectList, OBJECT_REMOVE_QUEUE_LOCKED, NULLPTR);
             if(OldValue == OBJECT_REMOVE_QUEUE_LOCKED)
             {
@@ -1426,10 +1460,10 @@ OB::LifeCycle::ReferenceObject(IN HANDLE Handle,
 {
     PHANDLE_TABLE_ENTRY ObjectTableEntry;
     PHANDLE_TABLE_ENTRY_INFO ObjectInfo;
+    POBJECT_TYPE PseudoObjectType;
     POBJECT_HEADER ObjectHeader;
     PHANDLE_TABLE HandleTable;
     ACCESS_MASK GrantedAccess;
-    POBJECT_TYPE PseudoType;
     PVOID PseudoObject;
     PEPROCESS Process;
     PETHREAD Thread;
@@ -1453,19 +1487,19 @@ OB::LifeCycle::ReferenceObject(IN HANDLE Handle,
             {
                 /* Bind the execution context to the current process pseudohandle */
                 PseudoObject = (PVOID)Process;
-                PseudoType = PS::ProcessManager::GetProcessType();
+                PseudoObjectType = PS::ProcessManager::GetProcessType();
                 GrantedAccess = Process->GrantedAccess;
             }
             else
             {
                 /* Bind the execution context to the current thread pseudohandle */
                 PseudoObject = (PVOID)Thread;
-                PseudoType = PS::ProcessManager::GetThreadType();
+                PseudoObjectType = PS::ProcessManager::GetThreadType();
                 GrantedAccess = Thread->GrantedAccess;
             }
 
             /* Validate the object type */
-            if(ObjectType && ObjectType != PseudoType)
+            if(ObjectType && ObjectType != PseudoObjectType)
             {
                 /* Object type does not match the pseudohandle type, return error code */
                 return STATUS_OBJECT_TYPE_MISMATCH;
@@ -1613,7 +1647,7 @@ OB::LifeCycle::ReferenceObjectNameInformation(IN POBJECT_HEADER ObjectHeader)
     /* Initialize the old reference count snapshot */
     OldReferences = *(volatile LONG*)&NameInfo->QueryReferences;
 
-    /* Enter the CAS loop */
+    /* Process the reference count */
     while(TRUE)
     {
         /* Check if the reference count has dropped to zero */
@@ -1626,7 +1660,7 @@ OB::LifeCycle::ReferenceObjectNameInformation(IN POBJECT_HEADER ObjectHeader)
         /* Calculate the incremented reference count */
         NewReferences = OldReferences + 1;
 
-        /* Attempt to commit the incremented count */
+        /* Commit the incremented count */
         ActualReferences = RTL::Atomic::CompareExchange32((PLONG)&NameInfo->QueryReferences, OldReferences, NewReferences);
         if(ActualReferences == OldReferences)
         {
@@ -1689,7 +1723,7 @@ OB::LifeCycle::ReleaseObjectCreateInformation(IN POBJECT_CREATE_INFORMATION Crea
  */
 XTAPI
 VOID
-OB::LifeCycle::ReturnObjectQuota(IN POBJECT_HEADER Header,
+OB::LifeCycle::ReturnObjectQuota(IN POBJECT_HEADER ObjectHeader,
                                  IN POBJECT_TYPE ObjectType)
 {
     POBJECT_HEADER_QUOTA_INFO Quota;
@@ -1697,14 +1731,14 @@ OB::LifeCycle::ReturnObjectQuota(IN POBJECT_HEADER Header,
     ULONG PagedPoolCharge;
 
     /* Verify if a quota block is charged for the object */
-    if(!Header->QuotaBlockCharged)
+    if(!ObjectHeader->QuotaBlockCharged)
     {
         /* No quota charged, nothing to do */
         return;
     }
 
     /* Retrieve the quota information header */
-    Quota = (POBJECT_HEADER_QUOTA_INFO)(Header->QuotaInfoOffset == 0 ? NULLPTR : ((PCHAR)Header - Header->QuotaInfoOffset));
+    Quota = (POBJECT_HEADER_QUOTA_INFO)(ObjectHeader->QuotaInfoOffset == 0 ? NULLPTR : ((PCHAR)ObjectHeader - ObjectHeader->QuotaInfoOffset));
     if(Quota)
     {
         /* Extract the pool charges */
@@ -1718,7 +1752,7 @@ OB::LifeCycle::ReturnObjectQuota(IN POBJECT_HEADER Header,
         PagedPoolCharge = ObjectType->TypeInfo.DefaultPagedPoolCharge;
 
         /* Check if the object holds a default security descriptor quota */
-        if(Header->Flags & OBJECT_FLAG_SECURITY_QUOTA)
+        if(ObjectHeader->Flags & OBJECT_FLAG_SECURITY_QUOTA)
         {
             /* Add the default security quota to the paged pool charge */
             PagedPoolCharge += SE_DEFAULT_SECURITY_QUOTA;
@@ -1726,9 +1760,9 @@ OB::LifeCycle::ReturnObjectQuota(IN POBJECT_HEADER Header,
     }
 
     /* Return the calculated pool charges */
-    PS::Quota::ReturnSharedPoolQuota((PEPROCESS_QUOTA_BLOCK)Header->QuotaBlockCharged,
+    PS::Quota::ReturnSharedPoolQuota((PEPROCESS_QUOTA_BLOCK)ObjectHeader->QuotaBlockCharged,
                                      PagedPoolCharge, NonPagedPoolCharge);
 
     /* Nullify the quota block pointer */
-    Header->QuotaBlockCharged = NULLPTR;
+    ObjectHeader->QuotaBlockCharged = NULLPTR;
 }

@@ -24,19 +24,28 @@ namespace OB
 
         public:
             STATIC XTAPI XTSTATUS AllocateObject(IN POBJECT_CREATE_INFORMATION CreateInfo,
-                                                 IN KPROCESSOR_MODE OwnerProcessorMode,
+                                                 IN KPROCESSOR_MODE ProcessorMode,
                                                  IN POBJECT_TYPE ObjectType,
                                                  IN PUNICODE_STRING ObjectName,
                                                  IN ULONG ObjectBodySize,
                                                  OUT POBJECT_HEADER *ReturnedObjectHeader);
+            STATIC XTAPI XTSTATUS CreateObject(IN KPROCESSOR_MODE ProcessorMode,
+                                               IN POBJECT_TYPE ObjectType,
+                                               IN POBJECT_ATTRIBUTES ObjectAttributes,
+                                               IN KPROCESSOR_MODE OwnerProcessorMode,
+                                               IN OUT PVOID ParseContext,
+                                               IN ULONG ObjectBodySize,
+                                               IN ULONG PagedPoolCharge,
+                                               IN ULONG NonPagedPoolCharge,
+                                               OUT PVOID *Object);
             STATIC XTAPI VOID DeferObjectDeletion(IN POBJECT_HEADER ObjectHeader);
             STATIC XTFASTCALL LONG_PTR DereferenceObject(IN PVOID Object);
             STATIC XTFASTCALL LONG_PTR DereferenceObject(IN PVOID Object,
                                                          IN ULONG Count);
             STATIC XTFASTCALL LONG_PTR DereferenceObjectDeferDelete(IN PVOID Object);
             STATIC XTFASTCALL VOID DereferenceObjectNameInformation(IN POBJECT_HEADER_NAME_INFO NameInfo);
-            STATIC XTFASTCALL POBJECT_HEADER_CREATOR_INFO GetObjectCreatorInformation(IN POBJECT_HEADER Header);
-            STATIC XTFASTCALL POBJECT_HEADER_NAME_INFO GetObjectNameInformation(IN POBJECT_HEADER Header);
+            STATIC XTFASTCALL POBJECT_HEADER_CREATOR_INFO GetObjectCreatorInformation(IN POBJECT_HEADER ObjectHeader);
+            STATIC XTFASTCALL POBJECT_HEADER_NAME_INFO GetObjectNameInformation(IN POBJECT_HEADER ObjectHeader);
             STATIC XTAPI VOID InitializeObjectLifeCycle(VOID);
             STATIC XTFASTCALL LONG_PTR ReferenceObject(IN PVOID Object);
             STATIC XTFASTCALL LONG_PTR ReferenceObject(IN PVOID Object,
@@ -50,7 +59,7 @@ namespace OB
             STATIC XTFASTCALL POBJECT_HEADER_NAME_INFO ReferenceObjectNameInformation(IN POBJECT_HEADER ObjectHeader);
 
         private:
-            STATIC XTFASTCALL PWCH AllocateObjectName(IN ULONG Length,
+            STATIC XTFASTCALL PWCHAR AllocateObjectName(IN ULONG Length,
                                                       IN BOOLEAN UseLookaside,
                                                       IN OUT PUNICODE_STRING ObjectName);
             STATIC XTAPI VOID CalculateOptionalHeaderSize(IN POBJECT_CREATE_INFORMATION CreateInfo, 
@@ -68,15 +77,6 @@ namespace OB
                                                     IN PUNICODE_STRING ObjectName,
                                                     IN OUT PUNICODE_STRING CapturedObjectName,
                                                     IN BOOLEAN UseLookaside);
-            STATIC XTAPI XTSTATUS CreateObject(IN KPROCESSOR_MODE ProcessorMode,
-                                               IN POBJECT_TYPE ObjectType,
-                                               IN POBJECT_ATTRIBUTES ObjectAttributes,
-                                               IN KPROCESSOR_MODE OwnerProcessorMode,
-                                               IN OUT PVOID ParseContext,
-                                               IN ULONG ObjectBodySize,
-                                               IN ULONG PagedPoolCharge,
-                                               IN ULONG NonPagedPoolCharge,
-                                               OUT PVOID *Object);
             STATIC XTAPI VOID DeleteObject(IN PVOID Object,
                                            IN BOOLEAN CalledOnWorkerThread);
             STATIC XTAPI VOID FreeObject(IN PVOID Object);
