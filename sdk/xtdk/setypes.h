@@ -169,6 +169,13 @@ typedef struct _PRIVILEGE_SET
     LUID_AND_ATTRIBUTES Privilege[1];
 } PRIVILEGE_SET, *PPRIVILEGE_SET;
 
+/* Process audit information structure definition */
+typedef struct _SECURITY_PROCESS_AUDIT_INFO
+{
+    PEPROCESS Process;
+    PEPROCESS ParentProcess;
+} SECURITY_PROCESS_AUDIT_INFO, *PSECURITY_PROCESS_AUDIT_INFO;
+
 /* Security audit process creation information structure definition */
 typedef struct _SECURITY_AUDIT_PROCESS_CREATION_INFO
 {
