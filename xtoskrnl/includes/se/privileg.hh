@@ -19,8 +19,18 @@ namespace SE
     {
 
         public:
+            STATIC XTAPI BOOLEAN CheckPrivilege(IN OUT PPRIVILEGE_SET RequiredPrivileges,
+                                                IN PSECURITY_SUBJECT_CONTEXT SecurityContext,
+                                                IN KPROCESSOR_MODE ProcessorMode);
             STATIC XTAPI BOOLEAN CheckSinglePrivilege(LUID PrivilegeValue,
                                                       KPROCESSOR_MODE ProcessorMode);
+
+        private:
+            STATIC XTAPI BOOLEAN CheckPrivilege(IN PTOKEN Token,
+                                                IN OUT PLUID_AND_ATTRIBUTES Privileges,
+                                                IN ULONG PrivilegeCount,
+                                                IN ULONG PrivilegeSet,
+                                                IN KPROCESSOR_MODE ProcessorMode);
     };
 }
 
