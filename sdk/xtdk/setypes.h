@@ -119,6 +119,15 @@
 /* C/C++ specific code */
 #ifndef __XTOS_ASSEMBLER__
 
+/* The classification type for a security proxy token */
+typedef enum _PROXY_CLASS
+{
+    ProxyFull = 0,
+    ProxyService,
+    ProxyTree,
+    ProxyDirectory
+} PROXY_CLASS, *PPROXY_CLASS;
+
 /* Security impersonation levels */
 typedef enum _SECURITY_IMPERSONATION_LEVEL
 {
@@ -136,6 +145,52 @@ typedef enum _SECURITY_OPERATION_CODE
     DeleteSecurityDescriptor,
     AssignSecurityDescriptor
 } SECURITY_OPERATION_CODE, *PSECURITY_OPERATION_CODE;
+
+/* Access token types enumeration list */
+typedef enum _TOKEN_TYPE
+{
+    TokenPrimary = 1,
+    TokenImpersonation
+} TOKEN_TYPE, *PTOKEN_TYPE;
+
+/* Access Control List structure definition */
+typedef struct _ACL
+{
+    UCHAR AclRevision;
+    UCHAR Reserved1;
+    USHORT AclSize;
+    USHORT AceCount;
+    USHORT Reserved2;
+} ACL, *PACL;
+
+/* Bitfields for granular security audit policy categories */
+typedef struct _AUDIT_POLICY_CATEGORIES
+{
+    UCHAR System:4;
+    UCHAR Logon:4;
+    UCHAR ObjectAccess:4;
+    UCHAR PrivilegeUse:4;
+    UCHAR DetailedTracking:4;
+    UCHAR PolicyChange:4;
+    UCHAR AccountManagement:4;
+    UCHAR DirectoryServiceAccess:4;
+    UCHAR AccountLogon:4;
+} AUDIT_POLICY_CATEGORIES, *PAUDIT_POLICY_CATEGORIES;
+
+/* Overlay structure for manipulating audit policy bit masks */
+typedef struct _AUDIT_POLICY_OVERLAY
+{
+    ULONGLONG PolicyBits:36;
+    ULONGLONG SetBit:1;
+} AUDIT_POLICY_OVERLAY, *PAUDIT_POLICY_OVERLAY;
+
+/* Audit policy structure definition */
+typedef union _AUDIT_POLICY
+{
+    AUDIT_POLICY_CATEGORIES PolicyElements;
+    AUDIT_POLICY_OVERLAY PolicyOverlay;
+    ULONGLONG Overlay;
+} AUDIT_POLICY, *PAUDIT_POLICY;
 
 /* Generic security mapping structure definition */
 typedef struct _GENERIC_MAPPING
@@ -197,6 +252,13 @@ typedef struct _SID
     ULONG SubAuthority[1];
 } SID, *PSID;
 
+/* Security Identifier with its corresponding state attributes structure definition */
+typedef struct _SID_ATTRIBUTES
+{
+    PSID Sid;
+    ULONG Attributes;
+} SID_ATTRIBUTES, *PSID_ATTRIBUTES;
+
 /* Token source structure definition */
 typedef struct _TOKEN_SOURCE
 {
@@ -242,6 +304,35 @@ typedef struct _SECURITY_SUBJECT_CONTEXT
     PVOID ProcessAuditId;
 } SECURITY_SUBJECT_CONTEXT, *PSECURITY_SUBJECT_CONTEXT;
 
+/* Per-token audit generation information and access masks structure definition */
+typedef struct _SECURITY_TOKEN_AUDIT_DATA
+{
+    ULONG Length;
+    ULONG GrantMask;
+    ULONG DenyMask;
+} SECURITY_TOKEN_AUDIT_DATA, *PSECURITY_TOKEN_AUDIT_DATA;
+
+/* Security proxy configuration and constraint data structure definition */
+typedef struct _SECURITY_TOKEN_PROXY_DATA
+{
+    ULONG Length;
+    PROXY_CLASS ProxyClass;
+    UNICODE_STRING PathInfo;
+    ULONG ContainerMask;
+    ULONG ObjectMask;
+} SECURITY_TOKEN_PROXY_DATA, *PSECURITY_TOKEN_PROXY_DATA;
+
+/* Active references, device mappings, and tokens tracking data structure definition */
+typedef struct _SESSION_REFERENCES
+{
+    PSESSION_REFERENCES Next;
+    LUID LogonId;
+    ULONG ReferenceCount;
+    ULONG Flags;
+    PDEVICE_MAP DeviceMap;
+    LIST_ENTRY TokenList;
+} SESSION_REFERENCES, *PSESSION_REFERENCES;
+
 /* Access state structure definition */
 typedef struct _ACCESS_STATE
 {
@@ -266,6 +357,42 @@ typedef struct _ACCESS_STATE
     UNICODE_STRING ObjectName;
     UNICODE_STRING ObjectTypeName;
 } ACCESS_STATE, *PACCESS_STATE;
+
+/* The core access token structure definition */
+typedef struct _TOKEN
+{
+    TOKEN_SOURCE TokenSource;
+    LUID TokenId;
+    LUID AuthenticationId;
+    LUID ParentTokenId;
+    LARGE_INTEGER ExpirationTime;
+    PERESOURCE TokenLock;
+    AUDIT_POLICY AuditPolicy;
+    LUID ModifiedId;
+    ULONG SessionId;
+    ULONG UserAndGroupCount;
+    ULONG RestrictedSidCount;
+    ULONG PrivilegeCount;
+    ULONG VariableLength;
+    ULONG DynamicCharged;
+    ULONG DynamicAvailable;
+    ULONG DefaultOwnerIndex;
+    PSID_ATTRIBUTES UserAndGroups;
+    PSID_ATTRIBUTES RestrictedSids;
+    PSID PrimaryGroup;
+    PLUID_AND_ATTRIBUTES Privileges;
+    PULONG DynamicPart;
+    PACL DefaultDacl;
+    TOKEN_TYPE TokenType;
+    SECURITY_IMPERSONATION_LEVEL ImpersonationLevel;
+    ULONG TokenFlags;
+    BOOLEAN TokenInUse;
+    PSECURITY_TOKEN_PROXY_DATA ProxyData;
+    PSECURITY_TOKEN_AUDIT_DATA AuditData;
+    PSESSION_REFERENCES LogonSession;
+    LUID OriginatingLogonSession;
+    ULONG VariablePart;
+} TOKEN, *PTOKEN;
 
 #endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_SETYPES_H */
