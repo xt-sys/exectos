@@ -18,6 +18,11 @@ namespace SE
     class Audit
     {
         public:
+            STATIC XTAPI VOID AuditHandleDuplication(PVOID SourceHandle,
+                                                     PVOID TargetHandle,
+                                                     PEPROCESS SourceProcess,
+                                                     PEPROCESS TargetProcess);
+            STATIC XTFASTCALL BOOLEAN AuditWithToken(IN PACCESS_TOKEN AccessToken);
             STATIC XTAPI VOID OperationAuditAlarm(IN PUNICODE_STRING SubsystemName,
                                                   IN PVOID HandleId,
                                                   IN PUNICODE_STRING ObjectTypeName,
