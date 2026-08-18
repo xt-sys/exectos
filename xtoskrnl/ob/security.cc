@@ -10,6 +10,75 @@
 
 
 /**
+ * Assigns a newly allocated security descriptor to an object.
+ *
+ * @param Object
+ *        Supplies a pointer to the object being assigned a security descriptor.
+ *
+ * @param SecurityDescriptor
+ *        Supplies a pointer to the security descriptor to be assigned.
+ *
+ * @param PoolType
+ *        Supplies the type of pool memory used to allocate the security descriptor.
+ *
+ * @return This routine returns a status code indicating the success or failure of the operation.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+OB::Security::AssignObjectSecurityDescriptor(IN PVOID Object,
+                                             IN PSECURITY_DESCRIPTOR SecurityDescriptor,
+                                             IN MMPOOL_TYPE PoolType)
+{
+    UNIMPLEMENTED;
+
+    /* Return success */
+    return STATUS_SUCCESS;
+}
+
+/**
+ * Audits object handles inherited by a new process.
+ *
+ * @param ObjectTableEntry
+ *        Supplies a pointer to the specific handle table entry being enumerated.
+ *
+ * @param HandleId
+ *        Supplies the runtime handle identifier associated with the entry.
+ *
+ * @param Context
+ *        Supplies a pointer to the parent and child process contexts.
+ *
+ * @return This routine returns FALSE to ensure the enumeration continues across the entire handle table.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+BOOLEAN
+OB::Security::AuditInheritedHandle(IN PHANDLE_TABLE_ENTRY ObjectTableEntry,
+                                   IN HANDLE HandleId,
+                                   IN PVOID Context)
+{
+    PSECURITY_PROCESS_AUDIT_INFO AuditInfo;
+
+    /* Cast the enumeration parameter */
+    AuditInfo = (PSECURITY_PROCESS_AUDIT_INFO)Context;
+
+    /* Evaluate if the handle object is flagged for auditing */
+    if(ObjectTableEntry->ObAttributes & OBJECT_AUDIT_OBJECT_CLOSE)
+    {
+        /* Handle duplication event */
+        SE::Audit::AuditHandleDuplication(HandleId,
+                                          HandleId,
+                                          AuditInfo->ParentProcess,
+                                          AuditInfo->Process);
+    }
+
+    /* Return FALSE to proceed to the next handle entry */
+    return FALSE;
+}
+
+/**
  * Consumes the audit mask for a handle table entry and triggers a security audit alarm if the requested access
  * rights match the audit requirements.
  *
@@ -79,6 +148,26 @@ OB::Security::AuditObjectAccess(IN HANDLE Handle,
 }
 
 /**
+ * Deassigns and frees a security descriptor previously assigned to an object.
+ *
+ * @param SecurityDescriptor
+ *        Supplies a pointer to a variable containing the security descriptor to be removed.
+ *
+ * @return This routine returns a status code indicating the success or failure of the operation.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+OB::Security::DeassignSecurity(IN OUT PSECURITY_DESCRIPTOR *SecurityDescriptor)
+{
+    UNIMPLEMENTED;
+
+    /* Return success */
+    return STATUS_SUCCESS;
+}
+
+/**
  * Provides the default security procedure for handling object security descriptors.
  *
  * @param Object
@@ -126,18 +215,96 @@ OB::Security::ProcessObjectSecurityDescriptor(IN PVOID Object,
     switch(OperationCode)
     {
         case AssignSecurityDescriptor:
+            AssignObjectSecurityDescriptor(Object, SecurityDescriptor, PoolType);
             break;
         case DeleteSecurityDescriptor:
+            return DeassignSecurity(OldSecurityDescriptor);
             break;
         case QuerySecurityDescriptor:
+            return QuerySecurityDescriptorInfo(Object, SecurityInformation, SecurityDescriptor, Length, OldSecurityDescriptor);
             break;
         case SetSecurityDescriptor:
+            return SetSecurityDescriptorInfo(Object, SecurityInformation, SecurityDescriptor, OldSecurityDescriptor, PoolType, GenericMapping);
             break;
         default:
             KE::Crash::Panic(0x29, 0, STATUS_INVALID_PARAMETER, 0, 0);
             break;
     }
 
+    /* Return success */
+    return STATUS_SUCCESS;
+}
+
+/**
+ * Queries information from the security descriptor of an object.
+ *
+ * @param Object
+ *        Supplies a pointer to the object whose security descriptor is being queried.
+ *
+ * @param SecurityInformation
+ *        Supplies the type of security information being queried.
+ *
+ * @param SecurityDescriptor
+ *        Supplies a pointer to the output buffer that receives the security descriptor.
+ *
+ * @param Length
+ *        Supplies a pointer to a variable that specifies the length of the descriptor buffer.
+ *
+ * @param OldSecurityDescriptor
+ *        Supplies a pointer to the original security descriptor of the object.
+ *
+ * @return This routine returns a status code indicating the success or failure of the operation.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+OB::Security::QuerySecurityDescriptorInfo(IN PVOID Object,
+                                          IN PSECURITY_INFORMATION SecurityInformation,
+                                          OUT PSECURITY_DESCRIPTOR SecurityDescriptor,
+                                          IN OUT PULONG Length,
+                                          IN PSECURITY_DESCRIPTOR *OldSecurityDescriptor)
+{
+    UNIMPLEMENTED;
+
+    /* Return success */
+    return STATUS_SUCCESS;
+}
+
+/**
+ * Modifies the security descriptor information of an object.
+ *
+ * @param Object
+ *        Supplies a pointer to the object whose security descriptor is being modified.
+ *
+ * @param SecurityInformation
+ *        Supplies the type of security information to set.
+ *
+ * @param SecurityDescriptor
+ *        Supplies a pointer to the new security descriptor information to apply.
+ *
+ * @param OldSecurityDescriptor
+ *        Supplies a pointer to a variable that holds the current security descriptor of the object.
+ *
+ * @param PoolType
+ *        Supplies the type of pool memory used for allocating the new security descriptor.
+ *
+ * @param GenericMapping
+ *        Supplies a pointer to the generic mapping structure for the object type.
+ *
+ * @return This routine returns a status code indicating the success or failure of the operation.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+OB::Security::SetSecurityDescriptorInfo(IN PVOID Object,
+                                        IN PSECURITY_INFORMATION SecurityInformation,
+                                        IN OUT PSECURITY_DESCRIPTOR SecurityDescriptor,
+                                        IN OUT PSECURITY_DESCRIPTOR *OldSecurityDescriptor,
+                                        IN MMPOOL_TYPE PoolType,
+                                        IN PGENERIC_MAPPING GenericMapping)
+{
     UNIMPLEMENTED;
 
     /* Return success */
