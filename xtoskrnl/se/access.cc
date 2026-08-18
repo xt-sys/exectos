@@ -52,3 +52,53 @@ SE::Access::ComputeGrantedAccesses(IN ACCESS_MASK GrantedAccessMask,
     /* Return the desired granted accesses */
     return GrantedAccessMask & DesiredAccessMask;
 }
+
+/**
+ * Maps all generic accesses in the provided access mask to specific and standard accesses.
+ *
+ * @param AccessMask
+ *        Supplies a pointer to the access mask to be mapped.
+ *
+ * @param Mapping
+ *        Supplies the mapping of generic to specific and standard access types.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+SE::Access::MapGenericMask(IN OUT PACCESS_MASK AccessMask,
+                           IN PGENERIC_MAPPING Mapping)
+{
+    /* Check if the read right is present in the access mask */
+    if(*AccessMask & SE_GENERIC_READ)
+    {
+        /* Map the read flag to its specific access rights */
+        *AccessMask |= Mapping->GenericRead;
+    }
+
+    /* Check if the write right is present in the access mask */
+    if(*AccessMask & SE_GENERIC_WRITE)
+    {
+        /* Map the write flag to its specific access rights */
+        *AccessMask |= Mapping->GenericWrite;
+    }
+
+    /* Check if the execute right is present in the access mask */
+    if(*AccessMask & SE_GENERIC_EXECUTE)
+    {
+        /* Map the execute flag to its specific access rights */
+        *AccessMask |= Mapping->GenericExecute;
+    }
+
+    /* Check if the all right is present in the access mask */
+    if(*AccessMask & SE_GENERIC_ALL)
+    {
+        /* Map the all flag to its specific access rights */
+        *AccessMask |= Mapping->GenericAll;
+    }
+
+    /* Clear the generic flags from the final access mask */
+    *AccessMask &= ~(SE_GENERIC_READ | SE_GENERIC_WRITE | SE_GENERIC_EXECUTE | SE_GENERIC_ALL);
+}

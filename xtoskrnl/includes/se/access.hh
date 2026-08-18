@@ -22,6 +22,8 @@ namespace SE
                                                                 IN ACCESS_MASK DesiredAccess);
             STATIC XTFASTCALL ACCESS_MASK ComputeGrantedAccesses(IN ACCESS_MASK GrantedAccess,
                                                                  IN ACCESS_MASK DesiredAccess);
+            STATIC XTAPI VOID MapGenericMask(IN OUT PACCESS_MASK AccessMask,
+                                             IN PGENERIC_MAPPING Mapping);
     };
 }
 
