@@ -409,7 +409,7 @@ HL::FrameBuffer::EnableShadowBuffer(VOID)
 
     /* Allocate non-paged memory for the shadow buffer */
     Status = MM::Allocator::AllocatePool(NonPagedPool, FrameBufferSize,
-                                         &ScreenShadowBuffer, SIGNATURE32('F', 'B', 'U', 'F'));
+                                         &ScreenShadowBuffer, TAG_HL_FRAMEBUFFER);
     if(Status != STATUS_SUCCESS)
     {
         /* Allocation failed, return status code */

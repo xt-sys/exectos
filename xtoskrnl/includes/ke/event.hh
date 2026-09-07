@@ -25,6 +25,8 @@ namespace KE
             STATIC XTAPI LONG SetEvent(IN PKEVENT Event,
                                        IN KPRIORITY Increment,
                                        IN BOOLEAN Wait);
+            STATIC XTAPI VOID SetEventBoostPriority(IN PKEVENT Event,
+                                                    IN OUT PKTHREAD* WaitingThread);
     };
 }
 

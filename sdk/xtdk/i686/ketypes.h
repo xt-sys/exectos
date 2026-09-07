@@ -12,6 +12,7 @@
 #include <xtbase.h>
 #include <xtstruct.h>
 #include <xttypes.h>
+#include <extypes.h>
 #include <potypes.h>
 #include ARCH_HEADER(xtstruct.h)
 #include ARCH_HEADER(artypes.h)
@@ -154,6 +155,19 @@
 #define CONTEXT_FLOATING_POINT            (CONTEXT_ARCHITECTURE | 0x08)
 #define CONTEXT_DEBUG_REGISTERS           (CONTEXT_ARCHITECTURE | 0x10)
 #define CONTEXT_EXTENDED_REGISTERS        (CONTEXT_ARCHITECTURE | 0x20)
+#define CONTEXT_FULL                      (CONTEXT_CONTROL | CONTEXT_INTEGER | CONTEXT_SEGMENTS)
+#define CONTEXT_ALL                       (CONTEXT_CONTROL | CONTEXT_INTEGER | CONTEXT_SEGMENTS | \
+                                           CONTEXT_FLOATING_POINT | CONTEXT_DEBUG_REGISTERS | \
+                                           CONTEXT_EXTENDED_REGISTERS)
+
+/* Clock control flags */
+#define CLOCK_QUANTUM_DECREMENT           3
+
+/* DPC definitions */
+#define DPC_ADJUST_THRESHOLD              20
+#define DPC_IDEAL_RATE                    20
+#define DPC_MAXIMUM_QUEUE_DEPTH           4
+#define DPC_MINIMUM_RATE                  3
 
 /* Interrupt request levels definitions */
 #define PASSIVE_LEVEL                     0
@@ -291,7 +305,7 @@ typedef struct _CONTEXT
     ULONG Ebp;
     ULONG Eip;
     ULONG SegCs;
-    ULONG EFlags;
+    ULONG Flags;
     ULONG Esp;
     ULONG SegSs;
     UCHAR ExtendedRegisters[MAXIMUM_SUPPORTED_EXTENSION];
@@ -304,6 +318,16 @@ typedef struct _KDESCRIPTOR
     USHORT Limit;
     PVOID Base;
 } KDESCRIPTOR, *PKDESCRIPTOR;
+
+/* Device Queue structure definition */
+typedef struct _KDEVICE_QUEUE
+{
+    CSHORT Type;
+    CSHORT Size;
+    LIST_ENTRY DeviceListHead;
+    KSPIN_LOCK Lock;
+    BOOLEAN Busy;
+} KDEVICE_QUEUE, *PKDEVICE_QUEUE;
 
 /* Global Descriptor Table (GDT) entry structure definition */
 typedef struct _KGDTENTRY
@@ -415,18 +439,19 @@ typedef struct _KEXCEPTION_FRAME
 /* Thread start frame definition */
 typedef struct _KSTART_FRAME
 {
-    PKSYSTEM_ROUTINE SystemRoutine;
-    PKSTART_ROUTINE StartRoutine;
-    PVOID StartContext;
+    ULONG P1Home;
+    ULONG P2Home;
+    ULONG P3Home;
     BOOLEAN UserMode;
+    ULONG Return;
 } KSTART_FRAME, *PKSTART_FRAME;
 
 /* Switch frame definition */
 typedef struct _KSWITCH_FRAME
 {
     PVOID ExceptionList;
-    BOOLEAN ApcBypassDisabled;
-    PVOID Return;
+    KRUNLEVEL ApcBypass;
+    ULONG Return;
 } KSWITCH_FRAME, *PKSWITCH_FRAME;
 
 /* Trap frame definition */
@@ -519,13 +544,30 @@ typedef struct _KPROCESSOR_CONTROL_BLOCK
     ULONG_PTR SetMember;
     CPU_IDENTIFICATION CpuId;
     KPROCESSOR_STATE ProcessorState;
+    KSPIN_LOCK PrcbLock;
     KSPIN_LOCK_QUEUE LockQueue[MaximumLock];
+    LOOKASIDE_LIST LookasideList[16];
+    LOOKASIDE_LIST NonPagedLookasideList[POOL_LOOKASIDE_LISTS];
+    LOOKASIDE_LIST PagedLookasideList[POOL_LOOKASIDE_LISTS];
     ULONG_PTR MultiThreadProcessorSet;
+    VOLATILE ULONG IpiFrozen;
+    VOLATILE LONG_PTR RequestSummary;
     KDPC_DATA DpcData[2];
     PVOID DpcStack;
+    LONG MaximumDpcQueueDepth;
+    ULONG DpcRequestRate;
+    BOOLEAN DpcInterruptRequested;
     VOLATILE BOOLEAN DpcRoutineActive;
+    ULONG DpcLastCount;
+    VOLATILE ULONG_PTR TimerHand;
     VOLATILE ULONG_PTR TimerRequest;
     SINGLE_LIST_ENTRY DeferredReadyListHead;
+    ULONG InterruptCount;
+    ULONG KernelTime;
+    ULONG UserTime;
+    ULONG DpcTime;
+    ULONG InterruptTime;
+    ULONG AdjustDpcThreshold;
     PROCESSOR_POWER_STATE PowerState;
     ULONG ProfilingCountdown;
 } KPROCESSOR_CONTROL_BLOCK, *PKPROCESSOR_CONTROL_BLOCK;

@@ -18,6 +18,16 @@ namespace RTL
     class Atomic
     {
         public:
+            STATIC XTFASTCALL CHAR Add8(IN PCHAR Address,
+                                        IN CHAR Value);
+            STATIC XTFASTCALL SHORT Add16(IN PSHORT Address,
+                                          IN SHORT Value);
+            STATIC XTFASTCALL LONG Add32(IN PLONG Address,
+                                         IN LONG Value);
+            STATIC XTFASTCALL LONG_PTR Add64(IN PLONG_PTR Address,
+                                             IN LONG_PTR Value);
+            STATIC XTFASTCALL PVOID AddPointer(IN PVOID *Address,
+                                               IN PVOID Value);
             STATIC XTFASTCALL CHAR And8(IN PCHAR Address,
                                         IN CHAR Mask);
             STATIC XTFASTCALL SHORT And16(IN PSHORT Address,
@@ -26,6 +36,10 @@ namespace RTL
                                          IN LONG Mask);
             STATIC XTFASTCALL LONG_PTR And64(IN PLONG_PTR Address,
                                              IN LONG_PTR Mask);
+            STATIC XTFASTCALL UCHAR BitTestAndReset(IN PLONG Base,
+                                                    IN LONG Offset);
+            STATIC XTFASTCALL UCHAR BitTestAndReset64(IN PLONGLONG Base,
+                                                      IN LONGLONG Offset);
             STATIC XTFASTCALL UCHAR BitTestAndSet(IN PLONG Base,
                                                   IN LONG Offset);
             STATIC XTFASTCALL UCHAR BitTestAndSet64(IN PLONGLONG Base,
@@ -67,7 +81,7 @@ namespace RTL
                                                      IN LONG_PTR Value);
             STATIC XTFASTCALL PVOID ExchangePointer(IN PVOID *Address,
                                                     IN PVOID Exchange);
-            STATIC XTFASTCALL PSINGLE_LIST_ENTRY FlushSingleList(IN PSINGLE_LIST_HEADER Header);
+            STATIC XTFASTCALL PSINGLE_LIST_ENTRY FlushSingleList(IN PSINGLE_LIST_HEADER ListHead);
             STATIC XTFASTCALL CHAR Increment8(IN PCHAR Address);
             STATIC XTFASTCALL SHORT Increment16(IN PSHORT Address);
             STATIC XTFASTCALL LONG Increment32(IN PLONG Address);
@@ -80,8 +94,8 @@ namespace RTL
                                         IN LONG Mask);
             STATIC XTFASTCALL LONG_PTR Or64(IN PLONG_PTR Address,
                                             IN LONG_PTR Mask);
-            STATIC XTFASTCALL XTFASTCALL PSINGLE_LIST_ENTRY PopEntrySingleList(IN PSINGLE_LIST_HEADER Header);
-            STATIC XTFASTCALL PSINGLE_LIST_ENTRY PushEntrySingleList(IN PSINGLE_LIST_HEADER Header,
+            STATIC XTFASTCALL XTFASTCALL PSINGLE_LIST_ENTRY PopEntrySingleList(IN PSINGLE_LIST_HEADER ListHead);
+            STATIC XTFASTCALL PSINGLE_LIST_ENTRY PushEntrySingleList(IN PSINGLE_LIST_HEADER ListHead,
                                                                      IN PSINGLE_LIST_ENTRY Entry);
             STATIC XTFASTCALL CHAR Xor8(IN PCHAR Address,
                                         IN CHAR Mask);

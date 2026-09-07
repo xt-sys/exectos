@@ -41,6 +41,7 @@ KE::KThread::InitializeThreadContext(IN PKTHREAD Thread,
 {
     PKTHREAD_INIT_FRAME ThreadFrame;
     PFX_SAVE_FORMAT FxSaveFormat;
+    CONTEXT ContextFrame;
 
     /* Set initial thread frame */
     ThreadFrame = ((PKTHREAD_INIT_FRAME)Thread->InitialStack) - 1;
@@ -51,30 +52,44 @@ KE::KThread::InitializeThreadContext(IN PKTHREAD Thread,
     /* Check if context provided for this thread */
     if(ContextRecord)
     {
-        /* User mode thread needs further initialization, this is not completed */
-        UNIMPLEMENTED;
+        /* Make a local copy of the context to avoid mutating caller's memory */
+        RTL::Memory::CopyMemory(&ContextFrame, ContextRecord, sizeof(CONTEXT));
+
+        /* Disable debug registers and enable control and extended registers */
+        ContextFrame.ContextFlags |= (CONTEXT_CONTROL | CONTEXT_EXTENDED_REGISTERS);
+        ContextFrame.ContextFlags &= ~CONTEXT_DEBUG_REGISTERS;
 
         /* Fill trap frame with zeroes */
         RTL::Memory::ZeroMemory(&ThreadFrame->TrapFrame, sizeof(KTRAP_FRAME));
 
-        /* Disable debug registers and enable context registers */
-        ContextRecord->ContextFlags &= ~CONTEXT_DEBUG_REGISTERS | CONTEXT_CONTROL;
+        /* Translate Context frame to Trap frame */
+        KE::Processor::RestoreProcessorContext(&ThreadFrame->TrapFrame, NULLPTR,
+                                               &ContextFrame, ContextFrame.ContextFlags);
 
         /* This is user mode thread */
-        ThreadFrame->StartFrame.UserMode = TRUE;
         Thread->PreviousMode = UserMode;
+        ThreadFrame->StartFrame.UserMode = TRUE;
+        ThreadFrame->TrapFrame.PreviousMode = UserMode;
 
         /* Disable coprocessor floating point state */
         Thread->NpxState = NPX_STATE_UNLOADED;
-        Thread->Header.NpxIrql = PASSIVE_LEVEL;
+        Thread->NpxRunLevel = PASSIVE_LEVEL;
 
         /* Set initial floating point state */
         FxSaveFormat = (PFX_SAVE_FORMAT)ContextRecord->ExtendedRegisters;
         FxSaveFormat->ControlWord = 0x27F;
-        FxSaveFormat->MxCsr = 0x1F80;
-        ContextRecord->FloatSave.Cr0NpxState = 0;
+        FxSaveFormat->DataOffset = 0;
+        FxSaveFormat->DataSelector = 0;
+        FxSaveFormat->ErrorOffset = 0;
+        FxSaveFormat->ErrorSelector = 0;
+        FxSaveFormat->StatusWord = 0;
+        FxSaveFormat->TagWord = 0;
+        ContextFrame.FloatSave.Cr0NpxState = 0;
         ThreadFrame->NpxFrame.Cr0NpxState = 0;
         ThreadFrame->NpxFrame.NpxSavedCpu = 0;
+
+        /* Set initial MXCSR register value */
+        FxSaveFormat->MxCsr = 0x1F80;
 
         /* Clear DR6 and DR7 registers */
         ThreadFrame->TrapFrame.Dr6 = 0;
@@ -85,14 +100,14 @@ KE::KThread::InitializeThreadContext(IN PKTHREAD Thread,
         ThreadFrame->TrapFrame.SegEs |= RPL_MASK;
         ThreadFrame->TrapFrame.SegSs |= RPL_MASK;
 
-        /* Set user mode thread in the trap frame */
-        ThreadFrame->TrapFrame.PreviousMode = UserMode;
+        /* Set the routine that will handle the thread finishing its initialization and transition it to UserMode */
+        ThreadFrame->StartFrame.Return = (ULONG)SwitchToUserMode;
     }
     else
     {
         /* This is kernel mode thread */
-        ThreadFrame->StartFrame.UserMode = FALSE;
         Thread->PreviousMode = KernelMode;
+        ThreadFrame->StartFrame.UserMode = FALSE;
 
         /* Disable coprocessor floating point state */
         Thread->NpxState = NPX_STATE_UNLOADED;
@@ -100,17 +115,55 @@ KE::KThread::InitializeThreadContext(IN PKTHREAD Thread,
         /* Set initial floating point state */
         ThreadFrame->NpxFrame.FxArea.ControlWord = 0x27F;
         ThreadFrame->NpxFrame.FxArea.MxCsr = 0x1F80;
+
+        /* Set the routine that will handle a system thread that unexpectedly finished its execution */
+        ThreadFrame->StartFrame.Return = (ULONG)HandleSystemThreadExit;
     }
 
     /* Initialize thread startup information */
-    ThreadFrame->StartFrame.StartContext = StartContext;
-    ThreadFrame->StartFrame.StartRoutine = StartRoutine;
-    ThreadFrame->StartFrame.SystemRoutine = SystemRoutine;
+    ThreadFrame->StartFrame.P1Home = (ULONG)StartContext;
+    ThreadFrame->StartFrame.P2Home = (ULONG)StartRoutine;
+    ThreadFrame->StartFrame.P3Home = (ULONG)SystemRoutine;
 
     /* Initialize switch frame */
-    ThreadFrame->SwitchFrame.ApcBypassDisabled = TRUE;
+    ThreadFrame->SwitchFrame.ApcBypass = APC_LEVEL;
     ThreadFrame->SwitchFrame.ExceptionList = (PEXCEPTION_REGISTRATION_RECORD) - 1;
+    ThreadFrame->SwitchFrame.Return = (ULONG)RunThread;
 
-    /* Set thread stack */
+    /* Set thread stack boundaries */
+    Thread->InitialStack = (PVOID)&ThreadFrame->NpxFrame;
     Thread->KernelStack = &ThreadFrame->SwitchFrame;
+}
+
+/**
+ * Serves as the initial execution point for all threads after first context switch.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTASSEMBLY
+XTAPI
+VOID
+KE::KThread::RunThread(VOID)
+{
+    /* Initialize execution context, adjust runlevel and dispatch the thread */
+    __asm__ volatile("xorl %%ebx, %%ebx\n"
+                     "xorl %%ebp, %%ebp\n"
+                     "xorl %%edi, %%edi\n"
+                     "xorl %%esi, %%esi\n"
+                     "movl $%c[RunLevel], %%ecx\n"
+                     "call %P[LowerRunLevel]\n"
+                     "movl 0(%%esp), %%esi\n"
+                     "movl 4(%%esp), %%ebx\n"
+                     "movl 8(%%esp), %%edi\n"
+                     "pushl %%esi\n"
+                     "pushl %%ebx\n"
+                     "call *%%edi\n"
+                     "addl $16, %%esp\n"
+                     "ret\n"
+                     :
+                     : [RunLevel] "i" (APC_LEVEL),
+                       [LowerRunLevel] "i" (KE::RunLevel::LowerRunLevel)
+                     : "memory");
 }

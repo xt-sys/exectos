@@ -141,7 +141,7 @@ MM::Manager::GetPhysicalMemoryBlock(VOID)
                                              sizeof(PHYSICAL_MEMORY_RUN) *
                                              (DescriptorCount - 1),
                                              (PVOID*)&PrimaryBuffer,
-                                             SIGNATURE32('M', 'M', 'g', 'r'));
+                                             TAG_MM_MEMORY_MGR);
         if(Status != STATUS_SUCCESS || !PrimaryBuffer)
         {
             /* Primary pool allocation failed, return NULLPTR */
@@ -197,14 +197,14 @@ MM::Manager::GetPhysicalMemoryBlock(VOID)
                                                  sizeof(PHYSICAL_MEMORY_RUN) *
                                                  (RunCount - 1),
                                                  (PVOID*)&SecondaryBuffer,
-                                                 SIGNATURE32('M', 'M', 'g', 'r'));
+                                                 TAG_MM_MEMORY_MGR);
             if(Status == STATUS_SUCCESS && SecondaryBuffer)
             {
                 /* Copy the coalesced runs from the oversized primary buffer */
                 RtlCopyMemory(SecondaryBuffer->Run, PrimaryBuffer->Run, sizeof(PHYSICAL_MEMORY_RUN) * RunCount);
 
                 /* Free the primary buffer */
-                MM::Allocator::FreePool(PrimaryBuffer, SIGNATURE32('M', 'M', 'g', 'r'));
+                MM::Allocator::FreePool(PrimaryBuffer, TAG_MM_MEMORY_MGR);
 
                 /* Update the primary buffer pointer */
                 PrimaryBuffer = SecondaryBuffer;
@@ -232,6 +232,9 @@ XTAPI
 VOID
 MM::Manager::InitializeMemoryManager(VOID)
 {
+    /* Allocate low memory from the hardware pool before initializing the memory manager */
+    MM::HardwarePool::AllocateLowMemory(NULLPTR, NULLPTR);
+
     /* Scan memory descriptors provided by the boot loader */
     MM::Pfn::ScanMemoryDescriptors();
 
@@ -256,6 +259,9 @@ MM::Manager::InitializeMemoryManager(VOID)
     /* Initialize page table */
     MM::Pte::InitializePageTable();
 
+    /* Initialize PFN database */
+    MM::Pfn::InitializePfnDatabase();
+
     /* Initialize system PTE space */
     MM::Pte::InitializeSystemPteSpace();
 
@@ -264,9 +270,6 @@ MM::Manager::InitializeMemoryManager(VOID)
 
     /* Initialize non-paged pool */
     MM::Pool::InitializeNonPagedPool();
-
-    /* Initialize PFN database */
-    MM::Pfn::InitializePfnDatabase();
 
     /* Initialize allocations tracking tables */
     MM::Allocator::InitializeAllocationsTracking();

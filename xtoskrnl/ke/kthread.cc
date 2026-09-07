@@ -10,6 +10,144 @@
 
 
 /**
+ * Finalizes thread initialization by inheriting parent process scheduling properties.
+ *
+ * @param Thread
+ *        Supplies a pointer to the thread.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KE::KThread::AttachThread(IN OUT PKTHREAD Thread)
+{
+    ULONG IdealProcessor;
+    PKPROCESS Process;
+
+    /* Extract the parent process from the thread's initial APC state */
+    Process = Thread->ApcState.Process;
+
+    /* Inherit scheduling properties from the parent process */
+    Thread->DisableBoost = Process->DisableBoost;
+    Thread->Iopl = Process->Iopl;
+    Thread->Quantum = Process->Quantum;
+    Thread->SystemAffinityActive = FALSE;
+
+    /* Acquire the process lock */
+    KE::SpinLockGuard ProcessGuard(&Process->ProcessLock);
+
+    /* Inherit priority from the parent process */
+    Thread->BasePriority = Process->BasePriority;
+    Thread->Priority = Process->BasePriority;
+
+    /* Inherit affinity state from the parent process */
+    KE::Affinity::CopyAffinity(Thread->Affinity, Process->Affinity);
+    KE::Affinity::CopyAffinity(Thread->UserAffinity, Process->Affinity);
+
+    /* Calculate the ideal processor based on the process thread seed and the affinity map */
+    IdealProcessor = KE::Affinity::FindNextRightSetProcessor(Process->ThreadSeed, Thread->Affinity);
+
+    /* Advance the thread seed for the next thread created in this process */
+    Process->ThreadSeed++;
+
+    /* Assign the selected ideal processor */
+    Thread->IdealProcessor = (UCHAR)IdealProcessor;
+    Thread->UserIdealProcessor = (UCHAR)IdealProcessor;
+
+    /* Acquire the dispatcher database lock */
+    KE::SystemQueuedSpinLockGuard DispatcherGuard(DispatcherLock);
+
+    /* Insert the thread into the process's active thread list */
+    RTL::LinkedList::InsertTailList(&Process->ThreadListHead, &Thread->ThreadListEntry);
+
+    /* Handle edge cases where the stack count is uninitialized or explicitly maxed out */
+    if(Process->StackCount == MAXULONG_PTR)
+    {
+        /* Initialize the stack count for the first thread */
+        Process->StackCount = 1;
+    }
+    else
+    {
+        /* Increment the process stack count */
+        Process->StackCount++;
+    }
+}
+
+/**
+ * Disables the delivery of normal kernel APCs for the current thread.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+VOID
+KE::KThread::EnterCriticalRegion()
+{
+    /* Prevent the thread from being preempted by an APC */
+    EnterCriticalRegion(KE::Processor::GetCurrentThread());
+}
+
+/**
+ * Disables the delivery of normal kernel APCs for the specified thread.
+ *
+ * @param Thread
+ *        Supplies a pointer to the thread object whose APC delivery is to be disabled.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+VOID
+KE::KThread::EnterCriticalRegion(IN PKTHREAD Thread)
+{
+    /* Disable Kernel APCs */
+    Thread->KernelApcDisable--;
+
+    /* Prevent the compiler from reordering code */
+    AR::CpuFunctions::ReadWriteBarrier();
+}
+
+/**
+ * Disables the delivery of special APCs for the current thread.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+VOID
+KE::KThread::EnterGuardedRegion()
+{
+    /* Prevent the thread from being preempted by an APC */
+    EnterGuardedRegion(KE::Processor::GetCurrentThread());
+}
+
+/**
+ * Disables the delivery of special APCs for the specified thread.
+ *
+ * @param Thread
+ *        Supplies a pointer to the thread object whose APC delivery is to be disabled.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+VOID
+KE::KThread::EnterGuardedRegion(IN PKTHREAD Thread)
+{
+    /* Disable Special APCs */
+    Thread->SpecialApcDisable--;
+
+    /* Prevent the compiler from reordering code */
+    AR::CpuFunctions::ReadWriteBarrier();
+}
+
+/**
  * Retrieves a pointer to the system's initial executive thread object.
  *
  * @return This routine returns a pointer to the initial executive thread.
@@ -21,6 +159,91 @@ PETHREAD
 KE::KThread::GetInitialThread(VOID)
 {
     return &InitialThread;
+}
+
+/**
+ * Handles an unexpected system thread exit.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KE::KThread::HandleSystemThreadExit(VOID)
+{
+    /* Trigger a debugger breakpoint */
+    __asm__ volatile("int $3\n");
+}
+
+/**
+ * Initializes an Idle Thread.
+ *
+ * @param IdleProcess
+ *        Supplies a pointer to the global Idle Process container.
+ *
+ * @param IdleThread
+ *        Supplies a pointer to the KTHREAD structure being initialized.
+ *
+ * @param Prcb
+ *        Supplies a pointer to the Processor Control Block of the target CPU.
+ *
+ * @param Stack
+ *        Supplies a pointer to the pre-allocated kernel stack for this thread.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+KE::KThread::InitializeIdleThread(IN PKPROCESS IdleProcess,
+                                  IN OUT PKTHREAD IdleThread,
+                                  IN PKPROCESSOR_CONTROL_BLOCK Prcb,
+                                  IN PVOID Stack)
+{
+    XTSTATUS Status;
+    ULONG Cpus;
+
+    /* Get the number of installed CPUs */
+    Cpus = KE::Processor::GetInstalledCpus();
+
+    /* Allocate and initialize the primary affinity map for the thread */
+    Status = KE::Affinity::CreateAffinityMap(Cpus, &IdleThread->Affinity);
+    if(Status != STATUS_SUCCESS)
+    {
+        /* Affinity map allocation failed, return status code */
+        return Status;
+    }
+
+    /* Allocate and initialize the user-mode affinity map for the thread */
+    Status = KE::Affinity::CreateAffinityMap(Cpus, &IdleThread->UserAffinity);
+    if(Status != STATUS_SUCCESS)
+    {
+        /* Affinity map allocation failed, free affinity map and return status code */
+        KE::Affinity::DestroyAffinityMap(IdleThread->Affinity);
+        return Status;
+    }
+
+    /* Initialize Idle thread */
+    KE::KThread::InitializeThread(IdleProcess, IdleThread, NULLPTR, NULLPTR, NULLPTR,
+                                  NULLPTR, NULLPTR, Stack, TRUE);
+
+    /* Configure Idle thread scheduling parameters */
+    IdleThread->NextProcessor = Prcb->CpuNumber;
+    IdleThread->Priority = THREAD_HIGH_PRIORITY;
+    IdleThread->State = Running;
+    IdleThread->WaitRunLevel = DISPATCH_LEVEL;
+
+    /* Configure thread affinity */
+    KE::Affinity::SetProcessorAffinity(IdleThread->Affinity, Prcb->CpuNumber);
+    KE::Affinity::SetProcessorAffinity(IdleThread->UserAffinity, Prcb->CpuNumber);
+
+    /* Register CPU as active in the IDLE Process */
+    KE::Affinity::AtomicSetProcessorAffinity(IdleProcess->ActiveProcessors, Prcb->CpuNumber);
+
+    /* Return success */
+    return STATUS_SUCCESS;
 }
 
 /**
@@ -64,7 +287,7 @@ KE::KThread::InitializeThread(IN PKPROCESS Process,
                               IN PCONTEXT Context,
                               IN PVOID EnvironmentBlock,
                               IN PVOID Stack,
-                              IN BOOLEAN RunThread)
+                              IN BOOLEAN AttachToProcess)
 {
     PKWAIT_BLOCK TimerWaitBlock;
     BOOLEAN Allocation;
@@ -75,18 +298,21 @@ KE::KThread::InitializeThread(IN PKPROCESS Process,
     Allocation = FALSE;
 
     /* Initialize thread dispatcher header */
-    Thread->Header.Type = ThreadObject;
     Thread->Header.SignalState = 0;
+    Thread->Header.Size = sizeof(KTHREAD) / sizeof(LONG);
+    Thread->Header.DebugActive = FALSE;
+    Thread->Header.Type = ThreadObject;
 
     /* Initialize thread wait list */
     RTL::LinkedList::InitializeListHead(&Thread->Header.WaitListHead);
 
-    /* Initialize thread mutant list head */
-    RTL::LinkedList::InitializeListHead(&Thread->MutantListHead);
+    /* Initialize thread mutex list head */
+    RTL::LinkedList::InitializeListHead(&Thread->MutexListHead);
 
     /* Initialize the builtin wait blocks */
     for(Index = 0; Index <= KTHREAD_WAIT_BLOCK; Index++)
     {
+        /* Backlink the wait block to the owning thread */
         Thread->WaitBlock[Index].Thread = Thread;
     }
 
@@ -99,15 +325,18 @@ KE::KThread::InitializeThread(IN PKPROCESS Process,
     /* Set priority adjustment reason */
     Thread->AdjustReason = AdjustNone;
 
+    /* Set the thread service table */
+    Thread->ServiceTable = KE::SystemServices::GetSystemServicesDescriptorTable();
+
     /* Initialize thread lock */
     KE::SpinLock::InitializeSpinLock(&Thread->ThreadLock);
 
     /* Initialize thread APC */
-    Thread->ApcStatePointer[0] = &Thread->ApcState;
-    Thread->ApcStatePointer[1] = &Thread->SavedApcState;
     Thread->ApcQueueable = TRUE;
     Thread->ApcState.Process = Process;
-    Thread->Process = Process;
+    Thread->ApcStateIndex = OriginalApcEnvironment;
+    Thread->ApcStatePointer[OriginalApcEnvironment] = &Thread->ApcState;
+    Thread->ApcStatePointer[AttachedApcEnvironment] = &Thread->SavedApcState;
 
     /* Initialize APC list heads */
     RTL::LinkedList::InitializeListHead(&Thread->ApcState.ApcListHead[KernelMode]);
@@ -132,8 +361,9 @@ KE::KThread::InitializeThread(IN PKPROCESS Process,
     TimerWaitBlock->WaitListEntry.Flink = &(&Thread->Timer)->Header.WaitListHead;
     TimerWaitBlock->WaitListEntry.Blink = &(&Thread->Timer)->Header.WaitListHead;
 
-    /* Initialize Thread Environment Block*/
+    /* Initialize Thread Environment Block and set owner process */
     Thread->EnvironmentBlock = (PTHREAD_ENVIRONMENT_BLOCK)EnvironmentBlock;
+    Thread->Process = Process;
 
     /* Make sure there is a valid stack available */
     if(!Stack)
@@ -150,6 +380,7 @@ KE::KThread::InitializeThread(IN PKPROCESS Process,
         Allocation = TRUE;
     }
 
+    /* Setup thread stack */
     Thread->InitialStack = Stack;
     Thread->StackBase = Stack;
     Thread->StackLimit = (PVOID)((ULONG_PTR)Stack - KERNEL_STACK_SIZE);
@@ -178,10 +409,10 @@ KE::KThread::InitializeThread(IN PKPROCESS Process,
     Thread->State = Initialized;
 
     /* Check if thread should be started */
-    if(RunThread)
+    if(AttachToProcess)
     {
         /* Start thread */
-        StartThread(Thread);
+        AttachThread(Thread);
     }
 
     /* Return success */
@@ -189,20 +420,108 @@ KE::KThread::InitializeThread(IN PKPROCESS Process,
 }
 
 /**
- * Starts the thread.
- *
- * @param Thread
- *        Supplies a pointer to the thread.
+ * Re-enables the delivery of kernel APCs for the current thread.
  *
  * @return This routine does not return any value.
  *
  * @since XT 1.0
  */
-XTAPI
+XTFASTCALL
 VOID
-KE::KThread::StartThread(IN PKTHREAD Thread)
+KE::KThread::LeaveCriticalRegion()
 {
-    UNIMPLEMENTED;
+    /* Allow APCs to preempt the thread */
+    LeaveCriticalRegion(KE::Processor::GetCurrentThread());
+}
+
+/**
+ * Re-enables the delivery of kernel APCs for the specified thread.
+ *
+ * @param Thread
+ *        Supplies a pointer to the thread object whose APC delivery is to be re-enabled.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+VOID
+KE::KThread::LeaveCriticalRegion(IN PKTHREAD Thread)
+{
+    /* Ensure the compiler does not reorder code */
+    AR::CpuFunctions::ReadWriteBarrier();
+
+    /* Re-enable APC delivery */
+    Thread->KernelApcDisable++;
+
+    /* Check if APC delivery is enabled */
+    if(!Thread->KernelApcDisable)
+    {
+        /* Memory barrier */
+        AR::CpuFunctions::MemoryBarrier();
+
+        /* Check for any pending kernel APCs */
+        if(!RTL::LinkedList::ListEmpty(&Thread->ApcState.ApcListHead[KernelMode]))
+        {
+            /* Check if special kernel APCs are not disabled */
+            if(!Thread->SpecialApcDisable)
+            {
+                /* Initiate delivery of the pending APCs */
+                KE::Apc::CheckApcDelivery();
+            }
+        }
+    }
+}
+
+/**
+ * Re-enables the delivery of special APCs for the current thread.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+VOID
+KE::KThread::LeaveGuardedRegion()
+{
+    /* Allow APCs to preempt the thread */
+    LeaveGuardedRegion(KE::Processor::GetCurrentThread());
+}
+
+
+/**
+ * Re-enables the delivery of special APCs for the specified thread.
+ *
+ * @param Thread
+ *        Supplies a pointer to the thread object whose APC delivery is to be re-enabled.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+VOID
+KE::KThread::LeaveGuardedRegion(IN PKTHREAD Thread)
+{
+    /* Ensure the compiler does not reorder code */
+    AR::CpuFunctions::ReadWriteBarrier();
+
+    /* Re-enable APC delivery */
+    Thread->SpecialApcDisable++;
+
+    /* Check if APC delivery is enabled */
+    if(!Thread->SpecialApcDisable)
+    {
+        /* Memory barrier */
+        AR::CpuFunctions::MemoryBarrier();
+
+        /* Check for any pending kernel APCs */
+        if(!RTL::LinkedList::ListEmpty(&Thread->ApcState.ApcListHead[KernelMode]))
+        {
+            /* Initiate delivery of the pending APCs */
+            KE::Apc::CheckApcDelivery();
+        }
+    }
 }
 
 /**
@@ -276,6 +595,20 @@ VOID
 KE::KThread::SuspendThread(IN PVOID NormalContext,
                            IN PVOID SystemArgument1,
                            IN PVOID SystemArgument2)
+{
+    UNIMPLEMENTED;
+}
+
+/**
+ * Switches a new thread into User Mode.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KE::KThread::SwitchToUserMode(VOID)
 {
     UNIMPLEMENTED;
 }

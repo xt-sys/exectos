@@ -57,7 +57,7 @@ MM::KernelPool::AllocateKernelStack(OUT PVOID *Stack,
 
     /* Acquire the PFN database lock and raise runlevel to DISPATCH_LEVEL */
     KE::RaiseRunLevel RunLevel(DISPATCH_LEVEL);
-    KE::QueuedSpinLockGuard SpinLock(SystemSpaceLock);
+    KE::SystemQueuedSpinLockGuard SpinLock(SystemSpaceLock);
 
     /* Start iterating from the base of the reserved PTE block */
     PointerPte = StackPte;
@@ -155,7 +155,7 @@ MM::KernelPool::FreeKernelStack(IN PVOID Stack,
     /* Start a guarded code block */
     {
         /* Acquire the PFN database lock */
-        KE::QueuedSpinLockGuard SpinLock(SystemSpaceLock);
+        KE::SystemQueuedSpinLockGuard SpinLock(SystemSpaceLock);
 
         /* Loop through each page of the stack that needs to be freed */
         for(Index = 0; Index < StackPages; Index++)

@@ -12,6 +12,7 @@
 #include <xtbase.h>
 #include <xtstruct.h>
 #include <xttypes.h>
+#include <extypes.h>
 #include <potypes.h>
 #include ARCH_HEADER(xtstruct.h)
 #include ARCH_HEADER(artypes.h)
@@ -132,6 +133,18 @@
 #define CONTEXT_SEGMENTS                  (CONTEXT_ARCHITECTURE | 0x04)
 #define CONTEXT_FLOATING_POINT            (CONTEXT_ARCHITECTURE | 0x08)
 #define CONTEXT_DEBUG_REGISTERS           (CONTEXT_ARCHITECTURE | 0x10)
+#define CONTEXT_FULL                      (CONTEXT_CONTROL | CONTEXT_INTEGER | CONTEXT_FLOATING_POINT)
+#define CONTEXT_ALL                       (CONTEXT_CONTROL | CONTEXT_INTEGER | CONTEXT_SEGMENTS | \
+                                           CONTEXT_FLOATING_POINT | CONTEXT_DEBUG_REGISTERS)
+
+/* Clock control flags */
+#define CLOCK_QUANTUM_DECREMENT           3
+
+/* DPC definitions */
+#define DPC_ADJUST_THRESHOLD              20
+#define DPC_IDEAL_RATE                    20
+#define DPC_MAXIMUM_QUEUE_DEPTH           4
+#define DPC_MINIMUM_RATE                  3
 
 /* Interrupt request levels definitions */
 #define PASSIVE_LEVEL                     0
@@ -232,7 +245,7 @@ typedef struct _CONTEXT
     USHORT SegFs;
     USHORT SegGs;
     USHORT SegSs;
-    ULONG EFlags;
+    ULONG Flags;
     ULONG64 Dr0;
     ULONG64 Dr1;
     ULONG64 Dr2;
@@ -297,6 +310,24 @@ typedef struct _KDESCRIPTOR
     USHORT Limit;
     PVOID Base;
 } KDESCRIPTOR, *PKDESCRIPTOR;
+
+/* Device Queue structure definition */
+typedef struct _KDEVICE_QUEUE
+{
+    CSHORT Type;
+    CSHORT Size;
+    LIST_ENTRY DeviceListHead;
+    KSPIN_LOCK Lock;
+    union
+    {
+      BOOLEAN Busy;
+      struct
+      {
+        LONGLONG Reserved:8;
+        LONGLONG Hint:56;
+      };
+    };
+} KDEVICE_QUEUE, *PKDEVICE_QUEUE;
 
 /* Global Descriptor Table (GDT) entry union definition */
 typedef struct _KGDTENTRY
@@ -560,13 +591,30 @@ typedef struct _KPROCESSOR_CONTROL_BLOCK
     ULONG_PTR SetMember;
     CPU_IDENTIFICATION CpuId;
     KPROCESSOR_STATE ProcessorState;
+    KSPIN_LOCK PrcbLock;
     KSPIN_LOCK_QUEUE LockQueue[MaximumLock];
+    LOOKASIDE_LIST LookasideList[16];
+    LOOKASIDE_LIST NonPagedLookasideList[POOL_LOOKASIDE_LISTS];
+    LOOKASIDE_LIST PagedLookasideList[POOL_LOOKASIDE_LISTS];
+    VOLATILE ULONG IpiFrozen;
+    VOLATILE LONG_PTR RequestSummary;
     KDPC_DATA DpcData[2];
     PVOID DpcStack;
+    LONG MaximumDpcQueueDepth;
+    ULONG DpcRequestRate;
+    BOOLEAN DpcInterruptRequested;
     VOLATILE BOOLEAN DpcRoutineActive;
+    ULONG DpcLastCount;
+    VOLATILE ULONG_PTR TimerHand;
     VOLATILE ULONG_PTR TimerRequest;
     ULONG_PTR MultiThreadProcessorSet;
     SINGLE_LIST_ENTRY DeferredReadyListHead;
+    ULONG InterruptCount;
+    ULONG KernelTime;
+    ULONG UserTime;
+    ULONG DpcTime;
+    ULONG InterruptTime;
+    ULONG AdjustDpcThreshold;
     PROCESSOR_POWER_STATE PowerState;
     ULONG ProfilingCountdown;
 } KPROCESSOR_CONTROL_BLOCK, *PKPROCESSOR_CONTROL_BLOCK;

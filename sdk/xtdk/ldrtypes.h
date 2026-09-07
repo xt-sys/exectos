@@ -74,5 +74,18 @@ typedef struct _LDR_DATA_TABLE_ENTRY
     PVOID PatchInformation;
 } LDR_DATA_TABLE_ENTRY, *PLDR_DATA_TABLE_ENTRY;
 
+typedef struct _LDR_PEB_DATA
+{
+    ULONG Length;
+    BOOLEAN Initialized;
+    PVOID SsHandle;
+    LIST_ENTRY InLoadOrderModuleList;
+    LIST_ENTRY InMemoryOrderModuleList;
+    LIST_ENTRY InInitializationOrderModuleList;
+    PVOID EntryInProgress;
+    UCHAR ShutdownInProgress;
+    PVOID ShutdownThreadId;
+} LDR_PEB_DATA, *PLDR_PEB_DATA;
+
 #endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_LDRTYPES_H */

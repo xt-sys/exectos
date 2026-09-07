@@ -11,6 +11,7 @@
 
 #include <xttarget.h>
 #include <xtcompat.h>
+#include <xtstruct.h>
 
 
 /* C/C++ specific code */
@@ -156,6 +157,41 @@ typedef LPCUWSTR PCUTSTR, LPCUTSTR;
 /* Variadic ABI types */
 typedef __builtin_va_list VA_LIST, *PVA_LIST;
 
+/* ANSI string structure */
+typedef struct _ANSI_STRING
+{
+    USHORT Length;
+    USHORT MaximumLength;
+    PSTR Buffer;
+} ANSI_STRING, *PANSI_STRING;
+typedef const ANSI_STRING *PCANSI_STRING;
+
+/* 32-bit ANSI string structure */
+typedef struct _ANSI_STRING32
+{
+    USHORT Length;
+    USHORT MaximumLength;
+    ULONG Buffer;
+} ANSI_STRING32, *PANSI_STRING32;
+typedef const ANSI_STRING32 *PCANSI_STRING32;
+
+/* 64-bit ANSI string structure */
+typedef struct _ANSI_STRING64
+{
+    USHORT Length;
+    USHORT MaximumLength;
+    ULONGLONG Buffer;
+} ANSI_STRING64, *PANSI_STRING64;
+typedef const ANSI_STRING64 *PCANSI_STRING64;
+
+/* Constant counted string structure */
+typedef struct _CSTRING
+{
+    USHORT Length;
+    USHORT MaximumLength;
+    PCCHAR Buffer;
+} CSTRING, *PCSTRING;
+
 /* 128-bit floats structure */
 typedef struct _FLOAT128
 {
@@ -191,21 +227,32 @@ typedef union _LARGE_INTEGER
     LONGLONG QuadPart;
 } LARGE_INTEGER, *PLARGE_INTEGER;
 
-/* 64-bit unsigned integer union */
-typedef union _ULARGE_INTEGER
+/* Double linked list structure definition */
+typedef struct _LIST_ENTRY
 {
-    struct
-    {
-        ULONG LowPart;
-        ULONG HighPart;
-    };
-    struct
-    {
-        ULONG LowPart;
-        ULONG HighPart;
-    } u;
-    ULONGLONG QuadPart;
-} ULARGE_INTEGER, *PULARGE_INTEGER;
+    PLIST_ENTRY Flink;
+    PLIST_ENTRY Blink;
+} LIST_ENTRY, *PLIST_ENTRY;
+
+/* Locally Unique Identifier structure definition */
+typedef struct _LUID
+{
+    ULONG LowPart;
+    LONG HighPart;
+} LUID, *PLUID;
+
+/* 128-bit 16-byte aligned XMM register */
+typedef struct _M128
+{
+    ULONGLONG Low;
+    LONGLONG High;
+} ALIGN(16) M128, *PM128;
+
+/* Quadruple-word alignment structure definition */
+typedef struct _QUAD
+{
+    unsigned long long Alignment;
+} QUAD, *PQUAD;
 
 /* Counted string structure */
 typedef struct _STRING
@@ -231,40 +278,21 @@ typedef struct _STRING64
     ULONGLONG Buffer;
 } STRING64, *PSTRING64;
 
-/* Constant counted string structure */
-typedef struct _CSTRING
+/* 64-bit unsigned integer union */
+typedef union _ULARGE_INTEGER
 {
-    USHORT Length;
-    USHORT MaximumLength;
-    PCCHAR Buffer;
-} CSTRING, *PCSTRING;
-
-/* ANSI string structure */
-typedef struct _ANSI_STRING
-{
-    USHORT Length;
-    USHORT MaximumLength;
-    PSTR Buffer;
-} ANSI_STRING, *PANSI_STRING;
-typedef const ANSI_STRING *PCANSI_STRING;
-
-/* 32-bit ANSI string structure */
-typedef struct _ANSI_STRING32
-{
-    USHORT Length;
-    USHORT MaximumLength;
-    ULONG Buffer;
-} ANSI_STRING32, *PANSI_STRING32;
-typedef const ANSI_STRING32 *PCANSI_STRING32;
-
-/* 64-bit ANSI string structure */
-typedef struct _ANSI_STRING64
-{
-    USHORT Length;
-    USHORT MaximumLength;
-    ULONGLONG Buffer;
-} ANSI_STRING64, *PANSI_STRING64;
-typedef const ANSI_STRING64 *PCANSI_STRING64;
+    struct
+    {
+        ULONG LowPart;
+        ULONG HighPart;
+    };
+    struct
+    {
+        ULONG LowPart;
+        ULONG HighPart;
+    } u;
+    ULONGLONG QuadPart;
+} ULARGE_INTEGER, *PULARGE_INTEGER;
 
 /* UNICODE string structure */
 typedef struct _UNICODE_STRING

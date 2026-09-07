@@ -9,6 +9,26 @@
 #include <xtos.hh>
 
 
+/**
+ * Returns the current interrupt time.
+ *
+ * @param SystemTime
+ *        Supplies a pointer to a variable that receives the current interrupt time.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KE::SystemTime::GetInterruptTime(OUT PLARGE_INTEGER InterruptTime)
+{
+    LARGE_INTEGER CurrentTime;
+
+    /* Fetch the time using the lock-free shared data mechanism and return it */
+    CurrentTime = KE::SharedData::GetInterruptTime();
+    InterruptTime->QuadPart = CurrentTime.QuadPart;
+}
 
 /**
  * Returns the current system time.
@@ -152,6 +172,7 @@ KE::SystemTime::UpdateSystemTime(IN PKTRAP_FRAME TrapFrame,
                                  IN KRUNLEVEL RunLevel)
 {
     LARGE_INTEGER InterruptTime, SystemTime;
+    PKPROCESSOR_CONTROL_BLOCK ControlBlock;
     LONG CurrentTickOffset;
 
     /* Advance the global interrupt time on every hardware tick */
@@ -162,6 +183,12 @@ KE::SystemTime::UpdateSystemTime(IN PKTRAP_FRAME TrapFrame,
     /* Atomically consume the current tick budget and retrieve the pre-decrement value */
     CurrentTickOffset = RTL::Atomic::ExchangeAdd32((PLONG)&TickOffset, -(LONG)Increment);
 
+    /* Retrieve the current processor control block */
+    ControlBlock = KE::Processor::GetCurrentProcessorControlBlock();
+
+    /* Verify the system timer expiration */
+    KE::Timer::VerifySystemTimerExpiration(ControlBlock, TrapFrame, InterruptTime);
+
     /* Determine whether the accumulated increments have crossed the full tick boundary */
     if(CurrentTickOffset <= (LONG)Increment)
     {
@@ -170,13 +197,19 @@ KE::SystemTime::UpdateSystemTime(IN PKTRAP_FRAME TrapFrame,
         SystemTime.QuadPart += TimeAdjustment;
         KE::SharedData::SetSystemTime(SystemTime);
 
-        /* Update the tick count */
+        /* Update the tick count and reverify the system timer expiration */
         KE::SharedData::IncrementTickCount();
+        KE::Timer::VerifySystemTimerExpiration(ControlBlock, TrapFrame, InterruptTime);
 
         /* Reload the tick offset accumulator for the next full tick period */
         TickOffset += MaximumIncrement;
 
         /* Update processor and thread runtime accounting */
         KE::Dispatcher::UpdateRunTime(TrapFrame, RunLevel);
+    }
+    else
+    {
+        /* Increment the interrupt count */
+        ControlBlock->InterruptCount++;
     }
 }

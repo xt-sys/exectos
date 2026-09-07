@@ -46,6 +46,7 @@ namespace MM
             VIRTUAL XTAPI ULONG GetPteSoftwarePrototype(IN PMMPTE PtePointer) = 0;
             VIRTUAL XTAPI ULONG GetPteSoftwareTransition(IN PMMPTE PtePointer) = 0;
             VIRTUAL XTAPI PVOID GetPteVirtualAddress(IN PMMPTE PtePointer) = 0;
+            XTAPI ULONG_PTR GetUserProbeAddress(VOID);
             XTAPI BOOLEAN GetXpaStatus();
             VIRTUAL XTAPI VOID InitializePageMapInfo(VOID) = 0;
             VIRTUAL XTAPI BOOLEAN PteValid(IN PMMPTE PtePointer) = 0;

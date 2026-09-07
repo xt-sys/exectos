@@ -27,17 +27,26 @@ namespace KE
     {
         private:
             KRUNLEVEL PreviousRunLevel;
+            BOOLEAN Switched;
 
         public:
-            LowerRunLevel(KRUNLEVEL RunLevel)
+            LowerRunLevel(IN KRUNLEVEL RunLevel,
+                          IN BOOLEAN ChangeLevel = TRUE)
             {
                 PreviousRunLevel = KE::RunLevel::GetCurrentRunLevel();
-                KE::RunLevel::LowerRunLevel(RunLevel);
+                Switched = ChangeLevel;
+                if(Switched)
+                {
+                    KE::RunLevel::LowerRunLevel(RunLevel);
+                }
             }
 
             ~LowerRunLevel()
             {
-                KE::RunLevel::RaiseRunLevel(PreviousRunLevel);
+                if(Switched)
+                {
+                    KE::RunLevel::RaiseRunLevel(PreviousRunLevel);
+                }
             }
 
             LowerRunLevel(const LowerRunLevel&) = delete;
@@ -48,17 +57,26 @@ namespace KE
     {
         private:
             KRUNLEVEL PreviousRunLevel;
+            BOOLEAN Switched;
 
         public:
-            RaiseRunLevel(KRUNLEVEL RunLevel)
+            RaiseRunLevel(IN KRUNLEVEL RunLevel,
+                          IN BOOLEAN ChangeLevel = TRUE)
             {
                 PreviousRunLevel = KE::RunLevel::GetCurrentRunLevel();
-                KE::RunLevel::RaiseRunLevel(RunLevel);
+                Switched = ChangeLevel;
+                if(Switched)
+                {
+                    KE::RunLevel::RaiseRunLevel(RunLevel);
+                }
             }
 
             ~RaiseRunLevel()
             {
-                KE::RunLevel::LowerRunLevel(PreviousRunLevel);
+                if(Switched)
+                {
+                    KE::RunLevel::LowerRunLevel(PreviousRunLevel);
+                }
             }
 
             RaiseRunLevel(const RaiseRunLevel&) = delete;

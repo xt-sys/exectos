@@ -174,6 +174,21 @@ MM::PageMap::GetPteOffset(IN PVOID Address)
 }
 
 /**
+ * Retrieves the maximum valid memory address accessible to user-mode applications.
+ *
+ * @return This routine returns the user-mode probe address boundary.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG_PTR
+MM::PageMap::GetUserProbeAddress(VOID)
+{
+    /* Return user probe address */
+    return MM_USER_PROBE_ADDRESS;
+}
+
+/**
  * Gets the status of Extended Paging Address (XPA) mode.
  *
  * @return This routine returns TRUE if XPA is enabled, FALSE otherwise.

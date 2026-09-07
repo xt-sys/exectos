@@ -46,10 +46,13 @@ KE::KernelInit::BootstrapApplicationProcessor(IN PPROCESSOR_START_BLOCK StartBlo
     PO::Idle::InitializeProcessorIdleState(ControlBlock);
 
     /* Save processor state */
-    KE::Processor::SaveProcessorState(&ControlBlock->ProcessorState);
+    KE::Processor::SaveProcessorControlState(&ControlBlock->ProcessorState);
 
     /* Initialize per-CPU spin lock queues */
     KE::SpinLock::InitializeLockQueues();
+
+    /* Initialize interrupt handlers */
+    InitializeInterruptHandlers();
 
     /* Lower to APC runlevel */
     KE::RunLevel::LowerRunLevel(APC_LEVEL);
@@ -57,10 +60,16 @@ KE::KernelInit::BootstrapApplicationProcessor(IN PPROCESSOR_START_BLOCK StartBlo
     /* Initialize local clock for this CPU */
     HL::Timer::InitializeLocalClock();
 
-    /* Enter infinite loop */
-    DebugPrint(L"KernelInit::BootstrapApplicationProcessor() finished for CPU #%lu. Entering infinite loop.\n",
+    /* Create and initialize IDLE thread */
+    PS::Thread::CreateIdleThread(ControlBlock, StartBlock->Stack);
+
+    /* Register DISPATCH interrupt handler */
+    HL::Irq::RegisterSystemInterruptHandler(APIC_VECTOR_DPC, KE::Dispatcher::HandleDispatchInterrupt);
+
+    /* Enter idle loop */
+    DebugPrint(L"KernelInit::BootstrapApplicationProcessor() finished for CPU #%lu. Entering IDLE loop.\n",
                ControlBlock->CpuNumber);
-    KE::Crash::HaltSystem();
+    KE::Dispatcher::EnterIdleLoop();
 }
 
 /**
@@ -76,26 +85,22 @@ VOID
 KE::KernelInit::BootstrapKernel(VOID)
 {
     PKPROCESSOR_CONTROL_BLOCK Prcb;
-    ULONG_PTR PageDirectory[2];
-    PKPROCESS CurrentProcess;
-    PKTHREAD CurrentThread;
 
-    /* Get processor control block and current thread */
+    /* Get processor control block */
     Prcb = KE::Processor::GetCurrentProcessorControlBlock();
-    CurrentThread = KE::Processor::GetCurrentThread();
-
-    /* Get current process */
-    CurrentProcess = CurrentThread->ApcState.Process;
 
     /* Initialize CPU power state structures */
     PO::Idle::InitializeProcessorIdleState(Prcb);
 
     /* Save processor state */
-    KE::Processor::SaveProcessorState(&Prcb->ProcessorState);
+    KE::Processor::SaveProcessorControlState(&Prcb->ProcessorState);
 
     /* Initialize spin locks */
     KE::SpinLock::InitializeAllLocks();
     KE::SpinLock::InitializeLockQueues();
+
+    /* Initialize interrupt handlers */
+    InitializeInterruptHandlers();
 
     /* Lower to APC runlevel */
     KE::RunLevel::LowerRunLevel(APC_LEVEL);
@@ -103,35 +108,43 @@ KE::KernelInit::BootstrapKernel(VOID)
     /* Initialize XTOS kernel */
     InitializeKernel();
 
-    /* Initialize Idle process */
-    PageDirectory[0] = 0;
-    PageDirectory[1] = 0;
-    KE::KProcess::InitializeProcess(CurrentProcess, 0, MAXULONG_PTR, PageDirectory, FALSE);
-    CurrentProcess->Quantum = MAXCHAR;
-
-    /* Initialize Idle thread */
-    KE::KThread::InitializeThread(CurrentProcess, CurrentThread, NULLPTR, NULLPTR, NULLPTR,
-                                  NULLPTR, NULLPTR, AR::ProcessorSupport::GetBootStack(), TRUE);
-    CurrentThread->NextProcessor = Prcb->CpuNumber;
-    CurrentThread->Priority = THREAD_HIGH_PRIORITY;
-    CurrentThread->State = Running;
-    CurrentThread->Affinity = (ULONG_PTR)1 << Prcb->CpuNumber;
-    CurrentThread->WaitRunLevel = DISPATCH_LEVEL;
-    CurrentProcess->ActiveProcessors |= (ULONG_PTR)1 << Prcb->CpuNumber;
-
     /* Initialize Memory Manager */
     MM::Manager::InitializeMemoryManager();
 
     /* Enable shadow buffer for framebuffer */
     HL::FrameBuffer::EnableShadowBuffer();
 
+    /* Create and initialize IDLE process */
+    PS::Process::CreateIdleProcess(Prcb);
+
     /* Start all application processors */
     KE::Processor::InitializeProcessorBlocks();
+    HL::Cpu::InitializeProcessorAffinity();
     HL::Cpu::StartAllProcessors();
 
-    /* Enter infinite loop */
-    DebugPrint(L"KernelInit::BootstrapKernel() finished. Entering infinite loop.\n");
-    KE::Crash::HaltSystem();
+    /* Register DISPATCH interrupt handler */
+    HL::Irq::RegisterSystemInterruptHandler(APIC_VECTOR_DPC, KE::Dispatcher::HandleDispatchInterrupt);
+
+    /* Enter idle loop */
+    DebugPrint(L"KernelInit::BootstrapKernel() finished. Entering IDLE loop.\n");
+    KE::Dispatcher::EnterIdleLoop();
+}
+
+/**
+ * Initializes and registers the core system interrupt handlers.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KE::KernelInit::InitializeInterruptHandlers(VOID)
+{
+    /* Register interrupt handlers */
+    HL::Irq::RegisterSystemInterruptHandler(APIC_VECTOR_APC, KE::Apc::HandleApcInterrupt);
+    HL::Irq::RegisterSystemInterruptHandler(APIC_VECTOR_DPC, KE::Dispatcher::HandleDispatchInterrupt);
+    HL::Irq::RegisterSystemInterruptHandler(APIC_VECTOR_IPI, KE::Ipi::HandleIpiInterrupt);
 }
 
 /**
@@ -209,7 +222,7 @@ KE::KernelInit::SwitchBootStack(VOID)
     __asm__ volatile("movq %[Stack], %%rsp\n"
                      "subq %[TotalSize], %%rsp\n"
                      "xorq %%rbp, %%rbp\n"
-                     "jmp *%[TargetRoutine]\n"
+                     "call *%[TargetRoutine]\n"
                      :
                      : [Stack] "r" (Stack),
                        [TargetRoutine] "r" (StartKernel),

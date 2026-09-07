@@ -14,6 +14,7 @@
 #include <xttarget.h>
 #include <xttypes.h>
 #include ARCH_HEADER(xtstruct.h)
+#include ARCH_HEADER(rtltypes.h)
 
 
 /* Exception types and handling mechanisms */
@@ -24,14 +25,49 @@
 /* Maximum number of exception parameters */
 #define EXCEPTION_MAXIMUM_PARAMETERS                15
 
+/* IPI types */
+#define IPI_APC                                     1
+#define IPI_DPC                                     2
+#define IPI_FREEZE                                  4
+#define IPI_PACKET_READY                            8
+#define IPI_SYNC_REQUEST                            16
+
+/* IPI frozen states */
+#define IPI_FROZEN_STATE_RUNNING                    0x00
+#define IPI_FROZEN_STATE_FROZEN                     0x02
+#define IPI_FROZEN_STATE_THAW                       0x03
+#define IPI_FROZEN_STATE_OWNER                      0x04
+#define IPI_FROZEN_STATE_FREEZE                     0x05
+#define IPI_FROZEN_STATE_ACTIVE                     0x20
+
+/* Lock queue states */
+#define LOCK_QUEUE_WAIT                             1
+#define LOCK_QUEUE_OWNER                            2
+
 /* APC pending state length */
 #define KAPC_STATE_LENGTH                           (FIELD_OFFSET(KAPC_STATE, UserApcPending) + sizeof(BOOLEAN))
+
+/* Indices used to access the PushLock data structure */
+#define KPUSHLOCK_INDEX                             ((ULONG_PTR)0x00)
+#define KPUSHLOCK_LOCK                              ((ULONG_PTR)0x01)
+#define KPUSHLOCK_WAITING                           ((ULONG_PTR)0x02)
+#define KPUSHLOCK_WAKING                            ((ULONG_PTR)0x04)
+#define KPUSHLOCK_MULTIPLE_SHARED                   ((ULONG_PTR)0x08)
+#define KPUSHLOCK_INCREMENT_SHARED                  ((ULONG_PTR)0x10)
+
+/* Mask for the pointer bits */
+#define KPUSHLOCK_PTR_BITS                          ((ULONG_PTR)0x0F)
+
+/* PushLock related definitions */
+#define KPUSH_LOCK_TOTAL_BITS                       (sizeof(ULONG_PTR) * 8)
+#define KPUSH_LOCK_SPIN_COUNT                       1024
 
 /* Kernel service descriptor tables count */
 #define KSERVICE_TABLES_COUNT                       4
 
-/* Timer length */
+/* Timer related definitions */
 #define KTIMER_LENGTH                               (FIELD_OFFSET(KTIMER, Period) + sizeof(LONG))
+#define KTIMER_TABLE_SIZE                           512
 
 /* Kernel builtin wait blocks */
 #define EVENT_WAIT_BLOCK                            2
@@ -42,6 +78,9 @@
 /* Quantum values */
 #define READY_SKIP_QUANTUM                          2
 #define THREAD_QUANTUM                              6
+
+/* Dispatcher object type mask */
+#define DISPATCHER_OBJECT_TYPE_MASK                 0x7L
 
 /* Thread priority levels */
 #define THREAD_LOW_PRIORITY                         0
@@ -79,6 +118,15 @@ typedef enum _KAPC_ENVIRONMENT
     InsertApcEnvironment
 } KAPC_ENVIRONMENT, *PKAPC_ENVIRONMENT;
 
+/* Continue status enumeration list */
+typedef enum _KCONTINUE_STATUS
+{
+    ContinueError,
+    ContinueSuccess,
+    ContinueProcessorReselected,
+    ContinueNextProcessor
+} KCONTINUE_STATUS, *PKCONTINUE_STATUS;
+
 /* DPC importance enumeration list */
 typedef enum _KDPC_IMPORTANCE
 {
@@ -100,7 +148,7 @@ typedef enum _KOBJECTS
 {
     EventNotificationObject = 0,
     EventSynchronizationObject = 1,
-    MutantObject = 2,
+    MutexObject = 2,
     ProcessObject = 3,
     QueueObject = 4,
     SemaphoreObject = 5,
@@ -212,6 +260,55 @@ typedef enum _KTIMER_TYPE
     SynchronizationTimer
 } KTIMER_TYPE, *PKTIMER_TYPE;
 
+/* Wait reason */
+typedef enum _KWAIT_REASON
+{
+    Executive,
+    FreePage,
+    PageIn,
+    PoolAllocation,
+    DelayExecution,
+    Suspended,
+    UserRequest,
+    WrExecutive,
+    WrFreePage,
+    WrPageIn,
+    WrPoolAllocation,
+    WrDelayExecution,
+    WrSuspended,
+    WrUserRequest,
+    WrEventPair,
+    WrQueue,
+    WrLpcReceive,
+    WrLpcReply,
+    WrVirtualMemory,
+    WrPageOut,
+    WrRendezvous,
+    WrKeyedEvent,
+    WrTerminated,
+    WrProcessInSwap,
+    WrCpuRateControl,
+    WrCalloutStack,
+    WrKernel,
+    WrResource,
+    WrPushLock,
+    WrMutex,
+    WrQuantumEnd,
+    WrDispatchInt,
+    WrPreempted,
+    WrYieldExecution,
+    WrFastMutex,
+    WrGuardedMutex,
+    WrRundown,
+    WrAlertByThreadId,
+    WrDeferredPreempt,
+    WrPhysicalFault,
+    WrIoRing,
+    WrMdlCache,
+    WrRcu,
+    MaximumWaitReason
+} KWAIT_REASON, *PKWAIT_REASON;
+
 /* APC Types */
 typedef enum _MODE
 {
@@ -252,6 +349,27 @@ typedef VOID (XTAPI *PKRUNDOWN_ROUTINE)(IN PKAPC Apc);
 typedef VOID (XTCDECL *PKSTART_ROUTINE)(IN PVOID StartContext);
 typedef VOID (XTCDECL *PKSYSTEM_ROUTINE)(IN PKSTART_ROUTINE StartRoutine, IN PVOID StartContext);
 
+/* Dispatcher object header structure definition */
+typedef struct _DISPATCHER_HEADER
+{
+    union
+    {
+        struct
+        {
+            UCHAR Type;
+            UCHAR Absolute;
+            UCHAR Size;
+            union {
+                UCHAR Inserted;
+                BOOLEAN DebugActive;
+            };
+        };
+        VOLATILE LONG Lock;
+    };
+    LONG SignalState;
+    LIST_ENTRY WaitListHead;
+} DISPATCHER_HEADER, *PDISPATCHER_HEADER;
+
 /* Exception record structure definition */
 typedef struct _EXCEPTION_RECORD
 {
@@ -262,6 +380,14 @@ typedef struct _EXCEPTION_RECORD
     ULONG NumberParameters;
     ULONG_PTR ExceptionInformation[EXCEPTION_MAXIMUM_PARAMETERS];
 } EXCEPTION_RECORD, *PEXCEPTION_RECORD;
+
+/* Extended affinity structure definition */
+typedef struct _KAFFINITY_MAP
+{
+    USHORT Size;
+    ULONG Reserved;
+    KAFFINITY Bitmap[];
+} KAFFINITY_MAP, *PKAFFINITY_MAP;
 
 /* Asynchronous Procedure Call (APC) object structure definition */
 typedef struct _KAPC
@@ -331,11 +457,49 @@ typedef struct _KAPC_STATE
     BOOLEAN UserApcPending;
 } KAPC_STATE, *PKAPC_STATE;
 
-/* Event gate structure definition */
-typedef struct _KGATE
+/* Device queue entry structure definition */
+typedef struct _KDEVICE_QUEUE_ENTRY
+{
+    LIST_ENTRY DeviceListEntry;
+    ULONG SortKey;
+    BOOLEAN Inserted;
+} KDEVICE_QUEUE_ENTRY, *PKDEVICE_QUEUE_ENTRY;
+
+/* Mutex object structure definition */
+typedef struct _KMUTEX
 {
     DISPATCHER_HEADER Header;
-} KGATE, *PKGATE;
+    LIST_ENTRY MutexListEntry;
+    PKTHREAD OwnerThread;
+    BOOLEAN Abandoned;
+    UCHAR ApcDisable;
+} KMUTEX, *PKMUTEX;
+
+/* Push Lock structure definition */
+typedef union _KPUSH_LOCK
+{
+    struct
+    {
+        ULONG_PTR Locked:1;
+        ULONG_PTR Waiting:1;
+        ULONG_PTR Waking:1;
+        ULONG_PTR MultipleShared:1;
+        ULONG_PTR Shared:(KPUSH_LOCK_TOTAL_BITS - 4);
+    };
+    ULONG_PTR Value;
+    PVOID Ptr;
+} KPUSH_LOCK, *PKPUSH_LOCK;
+
+/* Push lock wait block structure definition */
+typedef struct _KPUSH_LOCK_WAIT_BLOCK
+{
+    KEVENT WakeEvent;
+    PKPUSH_LOCK_WAIT_BLOCK Next;
+    PKPUSH_LOCK_WAIT_BLOCK Last;
+    PKPUSH_LOCK_WAIT_BLOCK Previous;
+    LONG ShareCount;
+    LONG Flags;
+} KPUSH_LOCK_WAIT_BLOCK, *PKPUSH_LOCK_WAIT_BLOCK;
 
 /* Semaphore object structure definition */
 typedef struct _KSEMAPHORE
@@ -419,7 +583,8 @@ typedef struct _KPROCESS
     ULONG_PTR DirectoryTable[2];
     USHORT IopmOffset;
     UCHAR Iopl;
-    VOLATILE KAFFINITY ActiveProcessors;
+    PKAFFINITY_MAP Affinity;
+    PKAFFINITY_MAP ActiveProcessors;
     ULONG KernelTime;
     ULONG UserTime;
     LIST_ENTRY ReadyListHead;
@@ -427,7 +592,6 @@ typedef struct _KPROCESS
     PVOID VdmTrapHandler;
     LIST_ENTRY ThreadListHead;
     KSPIN_LOCK ProcessLock;
-    KAFFINITY Affinity;
     union
     {
         struct
@@ -476,13 +640,12 @@ typedef struct _KSHARED_DATA
 typedef struct _KTHREAD
 {
     DISPATCHER_HEADER Header;
-    LIST_ENTRY MutantListHead;
+    LIST_ENTRY MutexListHead;
     PVOID InitialStack;
     PVOID KernelStack;
     PVOID StackBase;
     PVOID StackLimit;
     KSPIN_LOCK ThreadLock;
-
     ULONG ContextSwitches;
     VOLATILE UCHAR State;
     UCHAR NpxState;
@@ -507,7 +670,7 @@ typedef struct _KTHREAD
     PKWAIT_BLOCK WaitBlockList;
     BOOLEAN Alertable;
     BOOLEAN WaitNext;
-    UCHAR WaitReason;
+    KWAIT_REASON WaitReason;
     SCHAR Priority;
     UCHAR StackSwap;
     VOLATILE UCHAR SwapBusy;
@@ -545,9 +708,9 @@ typedef struct _KTHREAD
     CHAR PreviousMode;
     UCHAR ResourceIndex;
     UCHAR DisableBoost;
-    KAFFINITY UserAffinity;
+    PKAFFINITY_MAP UserAffinity;
     PKPROCESS Process;
-    KAFFINITY Affinity;
+    PKAFFINITY_MAP Affinity;
     PVOID ServiceTable;
     PKAPC_STATE ApcStatePointer[2];
     KAPC_STATE SavedApcState;
@@ -563,12 +726,12 @@ typedef struct _KTHREAD
     LIST_ENTRY ThreadListEntry;
     UCHAR LargeStack;
     UCHAR PowerState;
-    UCHAR NpxIrql;
+    UCHAR NpxRunLevel;
     UCHAR Spare5;
     BOOLEAN AutoAlignment;
     UCHAR Iopl;
-    CCHAR FreezeCount;
-    CCHAR SuspendCount;
+    CHAR FreezeCount;
+    CHAR SuspendCount;
     UCHAR Spare0[1];
     UCHAR UserIdealProcessor;
     UCHAR Spare2[3];

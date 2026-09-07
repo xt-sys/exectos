@@ -10,6 +10,21 @@
 
 
 /**
+ * Retrieves the pointer to the global Idle process.
+ *
+ * @return Returns a pointer to the Idle process.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+PKPROCESS
+KE::KProcess::GetIdleProcess(VOID)
+{
+    /* Return pointer to the idle process */
+    return &InitialProcess.ProcessControlBlock;
+}
+
+/**
  * Retrieves a pointer to the system's initial executive process object.
  *
  * @return This routine returns a pointer to the initial executive process.
@@ -24,6 +39,58 @@ KE::KProcess::GetInitialProcess(VOID)
 }
 
 /**
+ * Initializes the system-wide Idle Process.
+ *
+ * @param Process
+ *        Supplies a pointer to the KPROCESS structure representing the idle process.
+ *
+ * @param DirectoryTable
+ *        Supplies a pointer to the initial hardware page directory table for the process.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+XTSTATUS
+KE::KProcess::InitializeIdleProcess(IN OUT PKPROCESS IdleProcess,
+                                    IN PULONG_PTR DirectoryTable)
+{
+    XTSTATUS Status;
+    ULONG Cpus;
+
+    /* Get the number of natively installed CPUs */
+    Cpus = KE::Processor::GetInstalledCpus();
+
+    /* Allocate and initialize the baseline affinity map for the process */
+    Status = KE::Affinity::CreateAffinityMap(Cpus, &IdleProcess->Affinity);
+    if(Status != STATUS_SUCCESS)
+    {
+        /* Affinity map allocation failed, return status code */
+        return Status;
+    }
+
+    /* Allocate and initialize the dynamic map used to track actively running CPUs */
+    Status = KE::Affinity::CreateAffinityMap(Cpus, &IdleProcess->ActiveProcessors);
+    if(Status != STATUS_SUCCESS)
+    {
+        /* Affinity map allocation failed, free affinity map and return status code */
+        KE::Affinity::DestroyAffinityMap(IdleProcess->Affinity);
+        return Status;
+    }
+
+    /* Set Idle Process affinity */
+    KE::Affinity::SetAllProcessorsAffinity(IdleProcess->Affinity);
+
+    /* Initialize Idle process */
+    KE::KProcess::InitializeProcess(IdleProcess, 0, NULLPTR, DirectoryTable, FALSE);
+    IdleProcess->Quantum = MAXCHAR;
+
+    /* Return success */
+    return STATUS_SUCCESS;
+}
+
+/**
  * Initializes the process.
  *
  * @param Process
@@ -32,8 +99,8 @@ KE::KProcess::GetInitialProcess(VOID)
  * @param Priority
  *        Specifies the process priority.
  *
- * @param Affinity
- *        Specifies a process affinity designating processors on which process can run.
+ * @param AffinityMap
+ *        Specifies a process affinity map designating processors on which process can run.
  *
  * @param DirectoryTable
  *        Supplies a pointer to the directory table.
@@ -49,11 +116,13 @@ XTAPI
 VOID
 KE::KProcess::InitializeProcess(IN OUT PKPROCESS Process,
                                 IN KPRIORITY Priority,
-                                IN KAFFINITY Affinity,
+                                IN PKAFFINITY_MAP AffinityMap,
                                 IN PULONG_PTR DirectoryTable,
                                 IN BOOLEAN Alignment)
 {
     /* Initialize process dispatcher header */
+    Process->Header.SignalState = 0;
+    Process->Header.Size = sizeof(KPROCESS) / sizeof(LONG);
     Process->Header.Type = ProcessObject;
 
     /* Initialize process wait list */
@@ -64,15 +133,23 @@ KE::KProcess::InitializeProcess(IN OUT PKPROCESS Process,
     RtlInitializeListHead(&Process->ReadyListHead);
     RtlInitializeListHead(&Process->ThreadListHead);
 
+    /* Check if source affinity map was provided */
+    if(AffinityMap != NULLPTR && AffinityMap != Process->Affinity)
+    {
+        /* Set process affinity */
+        KE::Affinity::CopyAffinity(Process->Affinity, AffinityMap);
+    }
+
     /* Set base process properties */
     Process->BasePriority = Priority;
-    Process->Affinity = Affinity;
     Process->AutoAlignment = Alignment;
+
+    /* Set directory tables */
     Process->DirectoryTable[0] = DirectoryTable[0];
     Process->DirectoryTable[1] = DirectoryTable[1];
-    Process->StackCount = MAXSHORT;
 
-    /* Set thread quantum */
+    /* Set the initial stack count and process quantum */
+    Process->StackCount = MAXULONG_PTR;
     Process->Quantum = THREAD_QUANTUM;
 
     /* Set IOPM offset */

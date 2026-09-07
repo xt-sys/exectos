@@ -14,8 +14,12 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/data.cc
     ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/procsup.cc
     ${XTOSKRNL_SOURCE_DIR}/ar/${ARCH}/traps.cc
+    ${XTOSKRNL_SOURCE_DIR}/ex/data.cc
     ${XTOSKRNL_SOURCE_DIR}/ex/exports.cc
+    ${XTOSKRNL_SOURCE_DIR}/ex/laslist.cc
+    ${XTOSKRNL_SOURCE_DIR}/ex/resource.cc
     ${XTOSKRNL_SOURCE_DIR}/ex/rundown.cc
+    ${XTOSKRNL_SOURCE_DIR}/ex/workitem.cc
     ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/cpu.cc
     ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/firmware.cc
     ${XTOSKRNL_SOURCE_DIR}/hl/${ARCH}/ioport.cc
@@ -31,30 +35,38 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/hl/fbdev.cc
     ${XTOSKRNL_SOURCE_DIR}/hl/init.cc
     ${XTOSKRNL_SOURCE_DIR}/hl/ioreg.cc
+    ${XTOSKRNL_SOURCE_DIR}/kd/${ARCH}/debug.cc
     ${XTOSKRNL_SOURCE_DIR}/kd/data.cc
     ${XTOSKRNL_SOURCE_DIR}/kd/dbgio.cc
+    ${XTOSKRNL_SOURCE_DIR}/kd/debug.cc
     ${XTOSKRNL_SOURCE_DIR}/kd/exports.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/dispatch.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/krnlinit.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/kthread.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/${ARCH}/proc.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/affinity.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/apc.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/bootinfo.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/crash.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/data.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/dispatch.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/dispobj.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/dpc.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/event.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/exports.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/ipi.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/kprocess.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/krnlinit.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/kthread.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/kubsan.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/pushlock.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/runlevel.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/schedule.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/semphore.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/shdata.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/spinlock.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/sysres.cc
+    ${XTOSKRNL_SOURCE_DIR}/ke/sysserv.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/systime.cc
     ${XTOSKRNL_SOURCE_DIR}/ke/timer.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/${ARCH}/mmgr.cc
@@ -74,26 +86,51 @@ list(APPEND XTOSKRNL_SOURCE
     ${XTOSKRNL_SOURCE_DIR}/mm/paging.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/pfn.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/pool.cc
+    ${XTOSKRNL_SOURCE_DIR}/mm/probe.cc
     ${XTOSKRNL_SOURCE_DIR}/mm/pte.cc
+    ${XTOSKRNL_SOURCE_DIR}/mm/quota.cc
+    ${XTOSKRNL_SOURCE_DIR}/ob/data.cc
+    ${XTOSKRNL_SOURCE_DIR}/ob/devmap.cc
+    ${XTOSKRNL_SOURCE_DIR}/ob/handle.cc
+    ${XTOSKRNL_SOURCE_DIR}/ob/hndltlb.cc
+    ${XTOSKRNL_SOURCE_DIR}/ob/lifecycl.cc
+    ${XTOSKRNL_SOURCE_DIR}/ob/obdir.cc
+    ${XTOSKRNL_SOURCE_DIR}/ob/obmgr.cc
+    ${XTOSKRNL_SOURCE_DIR}/ob/security.cc
+    ${XTOSKRNL_SOURCE_DIR}/ob/typereg.cc
     ${XTOSKRNL_SOURCE_DIR}/po/idle.cc
+    ${XTOSKRNL_SOURCE_DIR}/ps/data.cc
+    ${XTOSKRNL_SOURCE_DIR}/ps/process.cc
+    ${XTOSKRNL_SOURCE_DIR}/ps/psmgr.cc
+    ${XTOSKRNL_SOURCE_DIR}/ps/quota.cc
+    ${XTOSKRNL_SOURCE_DIR}/ps/thread.cc
+    ${XTOSKRNL_SOURCE_DIR}/rtl/${ARCH}/atomic.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/${ARCH}/dispatch.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/${ARCH}/exsup.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/${ARCH}/intrin.cc
+    ${XTOSKRNL_SOURCE_DIR}/rtl/${ARCH}/slist.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/atomic.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/bitmap.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/data.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/endian.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/exports.cc
+    ${XTOSKRNL_SOURCE_DIR}/rtl/exsup.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/guid.cc
+    ${XTOSKRNL_SOURCE_DIR}/rtl/lifo.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/llist.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/math.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/memory.cc
+    ${XTOSKRNL_SOURCE_DIR}/rtl/nls.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/rbtree.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/sha1.cc
-    ${XTOSKRNL_SOURCE_DIR}/rtl/slist.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/string.cc
     ${XTOSKRNL_SOURCE_DIR}/rtl/time.cc
-    ${XTOSKRNL_SOURCE_DIR}/rtl/widestr.cc)
+    ${XTOSKRNL_SOURCE_DIR}/rtl/unicode.cc
+    ${XTOSKRNL_SOURCE_DIR}/rtl/widestr.cc
+    ${XTOSKRNL_SOURCE_DIR}/se/access.cc
+    ${XTOSKRNL_SOURCE_DIR}/se/audit.cc
+    ${XTOSKRNL_SOURCE_DIR}/se/descript.cc
+    ${XTOSKRNL_SOURCE_DIR}/se/privileg.cc)
 
 # Set module definition SPEC file
 set_specfile(xtoskrnl.spec xtoskrnl.exe)

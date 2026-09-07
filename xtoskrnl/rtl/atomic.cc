@@ -4,10 +4,116 @@
  * FILE:            xtoskrnl/rtl/atomic.cc
  * DESCRIPTION:     Atomic operations support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ *                  Aiken Harris <harraiken91@gmail.com>
  */
 
 #include <xtos.hh>
 
+
+/**
+ * Performs an atomic addition on the 8-bit value.
+ *
+ * @param Address
+ *        Supplies the address of the value on which the addition is to be performed.
+ *
+ * @param Value
+ *        Supplies the value to be added.
+ *
+ * @return This routine returns the initial value at the given address.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+CHAR
+RTL::Atomic::Add8(IN PCHAR Address,
+                  IN CHAR Value)
+{
+    return __sync_fetch_and_add(Address, Value);
+}
+
+/**
+ * Performs an atomic addition on the 16-bit value.
+ *
+ * @param Address
+ *        Supplies the address of the value on which the addition is to be performed.
+ *
+ * @param Value
+ *        Supplies the value to be added.
+ *
+ * @return This routine returns the initial value at the given address.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+SHORT
+RTL::Atomic::Add16(IN PSHORT Address,
+                   IN SHORT Value)
+{
+    return __sync_fetch_and_add(Address, Value);
+}
+
+/**
+ * Performs an atomic addition on the 32-bit value.
+ *
+ * @param Address
+ *        Supplies the address of the value on which the addition is to be performed.
+ *
+ * @param Value
+ *        Supplies the value to be added.
+ *
+ * @return This routine returns the initial value at the given address.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+LONG
+RTL::Atomic::Add32(IN PLONG Address,
+                   IN LONG Value)
+{
+    return __sync_fetch_and_add(Address, Value);
+}
+
+/**
+ * Performs an atomic addition on the 64-bit value.
+ *
+ * @param Address
+ *        Supplies the address of the value on which the addition is to be performed.
+ *
+ * @param Value
+ *        Supplies the value to be added.
+ *
+ * @return This routine returns the initial value at the given address.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+LONG_PTR
+RTL::Atomic::Add64(IN PLONG_PTR Address,
+                   IN LONG_PTR Value)
+{
+    return __sync_fetch_and_add(Address, Value);
+}
+
+/**
+ * Performs an atomic addition on the pointer value.
+ *
+ * @param Address
+ *        Supplies the address of the pointer on which the addition is to be performed.
+ *
+ * @param Value
+ *        Supplies the value (in bytes) to be added to the pointer.
+ *
+ * @return This routine returns the initial pointer value at the given address.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+PVOID
+RTL::Atomic::AddPointer(IN PVOID *Address,
+                        IN PVOID Value)
+{
+    return (PVOID)__sync_fetch_and_add(Address, Value);
+}
 
 /**
  * Performs an atomic bitwise AND operation on the 8-bit value.
@@ -94,6 +200,48 @@ RTL::Atomic::And64(IN PLONG_PTR Address,
 }
 
 /**
+ * Performs an atomic test of the specified bit of the specified long value and resets it to 0.
+ *
+ * @param Base
+ *        Supplies a pointer to the variable.
+ *
+ * @param Offset
+ *        Specifies the bit position to be tested.
+ *
+ * @return This routine returns the original value of the specified bit.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+UCHAR
+RTL::Atomic::BitTestAndReset(IN PLONG Base,
+                             IN LONG Offset)
+{
+    return (__atomic_fetch_and(Base, ~(1l << Offset), __ATOMIC_SEQ_CST) >> Offset) & 1;
+}
+
+/**
+ * Performs an atomic test of the specified bit of the specified 64-bit long value and resets it to 0.
+ *
+ * @param Base
+ *        Supplies a pointer to the variable.
+ *
+ * @param Offset
+ *        Specifies the bit position to be tested.
+ *
+ * @return This routine returns the original value of the specified bit.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+UCHAR
+RTL::Atomic::BitTestAndReset64(IN PLONGLONG Base,
+                               IN LONGLONG Offset)
+{
+    return (__atomic_fetch_and(Base, ~(1ll << Offset), __ATOMIC_SEQ_CST) >> Offset) & 1;
+}
+
+/**
  * Performs an atomic test of the specified bit of the specified long value and sets it to 1.
  *
  * @param Base
@@ -102,7 +250,7 @@ RTL::Atomic::And64(IN PLONG_PTR Address,
  * @param Offset
  *        Specifies the bit position to be tested.
  *
- * @return Returns a value of the specified bit.
+ * @return This routine returns a value of the specified bit.
  *
  * @since XT 1.0
  */
@@ -123,7 +271,7 @@ RTL::Atomic::BitTestAndSet(IN PLONG Base,
  * @param Offset
  *        Specifies the bit position to be tested.
  *
- * @return Returns a value of the specified bit.
+ * @return This routine returns a value of the specified bit.
  *
  * @since XT 1.0
  */
@@ -519,23 +667,6 @@ RTL::Atomic::ExchangePointer(IN PVOID *Address,
 }
 
 /**
- * Removes all entries from single linked list.
- *
- * @param Header
- *        Supplies a pointer to the header of linked list.
- *
- * @return This routine returns a pointer to the original list, or NULLPTR if the list was already empty.
- *
- * @since XT 1.0
- */
-XTFASTCALL
-PSINGLE_LIST_ENTRY
-RTL::Atomic::FlushSingleList(IN PSINGLE_LIST_HEADER Header)
-{
-    return (PSINGLE_LIST_ENTRY)Exchange64((PLONG_PTR)&Header->Alignment, (LONGLONG)NULLPTR);
-}
-
-/**
  * Performs atomically increment of the 8-bit value.
  *
  * @param Address
@@ -685,89 +816,6 @@ RTL::Atomic::Or64(IN PLONG_PTR Address,
                   IN LONG_PTR Mask)
 {
     return __sync_fetch_and_or(Address, Mask);
-}
-
-/**
- * Removes and returns the first entry from single linked list.
- *
- * @param Header
- *        Supplies a pointer to the header of a single linked list.
- *
- * @return This routine returns a pointer to the removed element, or NULLPTR if the list was empty.
- *
- * @since XT 1.0
- */
-XTFASTCALL
-PSINGLE_LIST_ENTRY
-RTL::Atomic::PopEntrySingleList(IN PSINGLE_LIST_HEADER Header)
-{
-    PSINGLE_LIST_ENTRY ListHead, FirstEntry, NextEntry;
-
-    /* Save header and first entry */
-    ListHead = (PSINGLE_LIST_ENTRY)Header;
-    FirstEntry = ListHead->Next;
-    do
-    {
-        /* Check if list is not empty */
-        if(!FirstEntry)
-        {
-            /* Empty list */
-            return NULLPTR;
-        }
-
-        /* Update link */
-        NextEntry = FirstEntry;
-
-        /* Compare and exchange */
-        FirstEntry = (PSINGLE_LIST_ENTRY)CompareExchange64((PLONG_PTR)ListHead,
-                                                           (LONG_PTR)FirstEntry->Next,
-                                                           (LONG_PTR)FirstEntry);
-    } while(FirstEntry != NextEntry);
-
-    /* Return removed element */
-    return FirstEntry;
-}
-
-/**
- * Inserts new entry at the beginning of single linked list.
- *
- * @param Header
- *        Supplies a pointer to the header of linked list.
- *
- * @param Entry
- *        Supplies a pointer to entry, that will be inserted into linked list.
- *
- * @return This routine returns a pointer to original heading, or NULLPTR if the list was originally empty.
- *
- * @since XT 1.0
- */
-XTFASTCALL
-PSINGLE_LIST_ENTRY
-RTL::Atomic::PushEntrySingleList(IN PSINGLE_LIST_HEADER Header,
-                                 IN PSINGLE_LIST_ENTRY Entry)
-{
-    PSINGLE_LIST_ENTRY ListHead, ListEntry, FirstEntry, NextEntry;
-
-    /* Save header and new entry */
-    ListHead = (PSINGLE_LIST_ENTRY)Header;
-    ListEntry = Entry;
-
-    /* Save next link in new first element */
-    FirstEntry = ListHead->Next;
-    do
-    {
-        /* Update links */
-        ListEntry->Next = FirstEntry;
-        NextEntry = FirstEntry;
-
-        /* Compare and exchange */
-        FirstEntry = (PSINGLE_LIST_ENTRY)CompareExchange64((PLONG_PTR)ListHead,
-                                                           (LONG_PTR)ListEntry,
-                                                           (LONG_PTR)FirstEntry);
-    } while(FirstEntry != NextEntry);
-
-    /* Return original first element */
-    return FirstEntry;
 }
 
 /**

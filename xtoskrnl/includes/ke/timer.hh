@@ -17,6 +17,9 @@ namespace KE
 {
     class Timer
     {
+        private:
+            STATIC LIST_ENTRY TimerTableListHead[KTIMER_TABLE_SIZE];
+
         public:
             STATIC XTAPI BOOLEAN CancelTimer(IN PKTIMER Timer);
             STATIC XTAPI VOID ClearTimer(IN PKTIMER Timer);
@@ -28,6 +31,9 @@ namespace KE
                                        IN LARGE_INTEGER DueTime,
                                        IN LONG Period,
                                        IN PKDPC Dpc);
+            STATIC XTAPI VOID VerifySystemTimerExpiration(IN PKPROCESSOR_CONTROL_BLOCK Prcb,
+                                                          IN PKTRAP_FRAME TrapFrame,
+                                                          IN LARGE_INTEGER Time);
 
         private:
             STATIC XTAPI VOID RemoveTimer(IN OUT PKTIMER Timer);

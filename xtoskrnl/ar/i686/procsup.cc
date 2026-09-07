@@ -28,7 +28,7 @@ XTAPI
 VOID
 AR::ProcessorSupport::GetTrampolineInformation(IN TRAMPOLINE_TYPE TrampolineType,
                                                OUT PVOID *TrampolineCode,
-                                               OUT PULONG_PTR TrampolineSize)
+                                               OUT PULONG TrampolineSize)
 {
     /* Get trampoline information */
     switch(TrampolineType)
@@ -465,8 +465,9 @@ AR::ProcessorSupport::InitializeProcessorBlock(OUT PKPROCESSOR_BLOCK ProcessorBl
     ProcessorBlock->Prcb.IdleThread = &(KE::KThread::GetInitialThread())->ThreadControlBlock;
     ProcessorBlock->Prcb.NextThread = NULLPTR;
 
-    /* Set initial runlevel */
+    /* Set initial runlevel and mark processor as started */
     ProcessorBlock->RunLevel = PASSIVE_LEVEL;
+    ProcessorBlock->Started = TRUE;
 }
 
 /**

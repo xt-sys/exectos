@@ -12,6 +12,15 @@
 /* Kernel initialization block passed by boot loader */
 PKERNEL_INITIALIZATION_BLOCK KE::BootInformation::InitializationBlock = {};
 
+/* Processor control block belonging to the freeze owner */
+PKPROCESSOR_CONTROL_BLOCK KE::Crash::FreezeOwner;
+
+/* Kernel panic state */
+BOOLEAN KE::Crash::KernelPanic;
+
+/* System runlevel before execution freeze */
+KRUNLEVEL KE::Crash::RunLevel;
+
 /* Kernel initial process */
 EPROCESS KE::KProcess::InitialProcess;
 
@@ -95,3 +104,6 @@ LONG KE::SystemTime::TickOffset;
 
 /* The runtime adjustment value applied to the system clock at each interrupt */
 ULONG KE::SystemTime::TimeAdjustment;
+
+/* Kernel timer table containing a list of active timers */
+LIST_ENTRY KE::Timer::TimerTableListHead[KTIMER_TABLE_SIZE];

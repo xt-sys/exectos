@@ -33,7 +33,7 @@ namespace AR
             STATIC XTAPI PVOID GetBootStack(VOID);
             STATIC XTAPI VOID GetTrampolineInformation(IN TRAMPOLINE_TYPE TrampolineType,
                                                        OUT PVOID *TrampolineCode,
-                                                       OUT PULONG_PTR TrampolineSize);
+                                                       OUT PULONG TrampolineSize);
             STATIC XTAPI VOID InitializeProcessor(IN PVOID ProcessorStructures);
             STATIC XTAPI VOID InitializeProcessorStructures(IN PVOID ProcessorStructures,
                                                             OUT PKGDTENTRY *Gdt,

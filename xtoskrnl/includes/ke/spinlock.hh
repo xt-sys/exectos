@@ -36,13 +36,20 @@ namespace KE
 
         public:
             STATIC XTFASTCALL VOID AcquireQueuedSpinLock(IN KSPIN_LOCK_QUEUE_LEVEL LockLevel);
+            STATIC XTFASTCALL VOID AcquireQueuedSpinLock(IN PKSPIN_LOCK SpinLock,
+                                                         IN PKLOCK_QUEUE_HANDLE LockQueueHandle);
             STATIC XTFASTCALL VOID AcquireSpinLock(IN OUT PKSPIN_LOCK SpinLock);
             STATIC XTAPI VOID InitializeAllLocks();
             STATIC XTAPI VOID InitializeLockQueues();
             STATIC XTAPI VOID InitializeSpinLock(IN PKSPIN_LOCK SpinLock);
             STATIC XTFASTCALL VOID ReleaseQueuedSpinLock(IN KSPIN_LOCK_QUEUE_LEVEL LockLevel);
+            STATIC XTFASTCALL VOID ReleaseQueuedSpinLock(IN PKLOCK_QUEUE_HANDLE LockQueueHandle);
             STATIC XTFASTCALL VOID ReleaseSpinLock(IN OUT PKSPIN_LOCK SpinLock);
             STATIC XTFASTCALL BOOLEAN TestSpinLock(IN PKSPIN_LOCK SpinLock);
+
+        private:
+            STATIC XTFASTCALL VOID AcquireQueuedSpinLock(IN PKSPIN_LOCK_QUEUE LockQueue);
+            STATIC XTFASTCALL VOID ReleaseQueuedSpinLock(IN PKSPIN_LOCK_QUEUE LockQueue);
     };
 }
 

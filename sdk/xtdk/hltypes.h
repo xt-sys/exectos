@@ -215,6 +215,30 @@ typedef ULONG (XTAPI *PHALP_QUERY_TIME_DELTA)(VOID);
 typedef ULONG (XTAPI *PHALP_SET_CLOCK_RATE)(IN ULONG Increment);
 typedef VOID (XTAPI *PHALP_STALL_EXECUTION)(IN ULONG MicroSeconds);
 
+/* Interface types */
+typedef enum _INTERFACE_TYPE
+{
+    InterfaceTypeUndefined = -1,
+    Internal,
+    Isa,
+    Eisa,
+    MicroChannel,
+    TurboChannel,
+    PCIBus,
+    VMEBus,
+    NuBus,
+    PCMCIABus,
+    CBus,
+    MPIBus,
+    MPSABus,
+    ProcessorInternal,
+    InternalPowerBus,
+    PNPISABus,
+    PNPBus,
+    Vmcs,
+    MaximumInterfaceType
+} INTERFACE_TYPE, *PINTERFACE_TYPE;
+
 /* Generic Address structure */
 typedef struct _GENERIC_ADDRESS
 {

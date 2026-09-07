@@ -17,15 +17,19 @@
 #include <rtl/bitmap.hh>
 #include <rtl/dispatch.hh>
 #include <rtl/endian.hh>
+#include <rtl/exsup.hh>
 #include <rtl/guid.hh>
+#include <rtl/lifo.hh>
 #include <rtl/llist.hh>
 #include <rtl/math.hh>
 #include <rtl/memory.hh>
+#include <rtl/nls.hh>
 #include <rtl/rbtree.hh>
 #include <rtl/sha1.hh>
 #include <rtl/slist.hh>
 #include <rtl/string.hh>
 #include <rtl/time.hh>
+#include <rtl/unicode.hh>
 #include <rtl/widestr.hh>
 
 #endif /* __XTOSKRNL_RTL_HH */

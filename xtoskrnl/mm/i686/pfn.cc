@@ -51,7 +51,7 @@ MM::Pfn::InitializePfnDatabase(VOID)
 
     /* Raise runlevel and acquire PFN lock */
     KE::RaiseRunLevel RunLevel(DISPATCH_LEVEL);
-    KE::QueuedSpinLockGuard SpinLock(SystemSpaceLock);
+    KE::SystemQueuedSpinLockGuard SpinLock(SystemSpaceLock);
 
     /* Get the kernel initialization block */
     InitializationBlock = KE::BootInformation::GetInitializationBlock();

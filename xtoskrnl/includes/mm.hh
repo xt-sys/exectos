@@ -24,5 +24,8 @@
 #include <mm/pfault.hh>
 #include <mm/pfn.hh>
 #include <mm/pool.hh>
+#include <mm/probe.hh>
+#include <mm/quota.hh>
+#include <mm/tags.hh>
 
 #endif /* __XTOSKRNL_MM_HH */

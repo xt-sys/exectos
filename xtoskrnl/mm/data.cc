@@ -60,6 +60,12 @@ LOADER_MEMORY_DESCRIPTOR MM::HardwarePool::HardwareAllocationDescriptors[MM_HARD
 /* Live address of kernel's hardware heap */
 PVOID MM::HardwarePool::HardwareHeapStart = MM_HARDWARE_HEAP_START_ADDRESS;
 
+/* Physical address of kernel's low memory region */
+PHYSICAL_ADDRESS MM::HardwarePool::LowMemoryPhysicalAddress;
+
+/* Virtual address of kernel's low memory region */
+PVOID MM::HardwarePool::LowMemoryVirtualAddress;
+
 /* Number of used hardware allocation descriptors */
 ULONG MM::HardwarePool::UsedHardwareAllocationDescriptors = 0;
 
@@ -162,3 +168,9 @@ PFN_COUNT MM::Pte::TotalSystemFreePtes[MaximumPtePoolTypes];
 
 /* Template PTE entry containing standard flags for a valid, present kernel page */
 MMPTE MM::Pte::ValidPte;
+
+/* Global limit for system-wide non-paged pool quota allocations */
+SIZE_T MM::Quota::NonPagedPoolQuota;
+
+/* Global limit for system-wide paged pool quota allocations */
+SIZE_T MM::Quota::PagedPoolQuota;

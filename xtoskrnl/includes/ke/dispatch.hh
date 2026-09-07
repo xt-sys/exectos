@@ -18,13 +18,25 @@ namespace KE
     class Dispatcher
     {
         public:
+            STATIC XTAPI VOID EnterIdleLoop(VOID);
             STATIC XTFASTCALL VOID ExitDispatcher(IN KRUNLEVEL OldRunLevel);
+            STATIC XTCDECL VOID HandleDispatchInterrupt(IN PKTRAP_FRAME TrapFrame);
             STATIC XTFASTCALL BOOLEAN SwitchContext(IN PKTHREAD CurrentThread,
                                                     IN KRUNLEVEL RunLevel);
+            STATIC XTAPI XTSTATUS WaitForSingleObject(IN PVOID Object,
+                                                      IN KWAIT_REASON WaitReason,
+                                                      IN KPROCESSOR_MODE WaitMode,
+                                                      IN BOOLEAN Alertable,
+                                                      IN PLARGE_INTEGER Timeout);
             STATIC XTAPI VOID UpdateRunTime(IN PKTRAP_FRAME TrapFrame,
                                             IN KRUNLEVEL RunLevel);
 
         private:
+            STATIC XTFASTCALL PLARGE_INTEGER ComputeWaitInterval(IN PLARGE_INTEGER OriginalDueTime,
+                                                                 IN PLARGE_INTEGER PreviousDueTime,
+                                                                 IN OUT PLARGE_INTEGER NewDueTime);
+            STATIC XTFASTCALL XTSTATUS SatisfyWaitingObject(IN PDISPATCHER_HEADER Object,
+                                                            IN PKTHREAD Thread);
             STATIC XTFASTCALL BOOLEAN SwitchThreadContext(IN PKTHREAD CurrentThread,
                                                           IN BOOLEAN ApcBypass);
             STATIC XTFASTCALL BOOLEAN SwitchThreadStack(IN PKTHREAD CurrentThread,

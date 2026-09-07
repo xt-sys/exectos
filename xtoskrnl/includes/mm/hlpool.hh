@@ -20,6 +20,8 @@ namespace MM
         private:
             STATIC LOADER_MEMORY_DESCRIPTOR HardwareAllocationDescriptors[MM_HARDWARE_ALLOCATION_DESCRIPTORS];
             STATIC PVOID HardwareHeapStart;
+            STATIC PHYSICAL_ADDRESS LowMemoryPhysicalAddress;
+            STATIC PVOID LowMemoryVirtualAddress;
             STATIC ULONG UsedHardwareAllocationDescriptors;
 
         public:
@@ -27,12 +29,19 @@ namespace MM
                                                          IN BOOLEAN Aligned,
                                                          IN ULONGLONG MaximumAddress,
                                                          OUT PPHYSICAL_ADDRESS Buffer);
-            STATIC XTAPI XTSTATUS AllocateRealModeMemory(IN PFN_NUMBER PageCount,
-                                                         OUT PVOID *MemoryAddress);
+            STATIC XTAPI XTSTATUS AllocateLowMemory(OUT PPHYSICAL_ADDRESS PhysicalAddress,
+                                                    OUT PVOID *VirtualAddress);
+            STATIC XTAPI ULONG CalculateRealModeAllocationPages(IN ULONG TrampolineCodeSize);
+            STATIC XTAPI XTSTATUS FreeHardwareMemory(IN PHYSICAL_ADDRESS PhysicalAddress,
+                                                     IN PFN_NUMBER PageCount);
+            STATIC XTAPI XTSTATUS FreeRealModeMemory(IN PVOID VirtualAddress,
+                                                     IN PFN_NUMBER PageCount);
             STATIC XTAPI XTSTATUS MapHardwareMemory(IN PHYSICAL_ADDRESS PhysicalAddress,
                                                     IN PFN_NUMBER PageCount,
                                                     IN BOOLEAN FlushTlb,
                                                     OUT PVOID *VirtualAddress);
+            STATIC XTAPI XTSTATUS MapRealModeMemory(IN PHYSICAL_ADDRESS PhysicalAddress,
+                                                    IN ULONG Size);
             STATIC XTAPI VOID MarkHardwareMemoryWriteThrough(IN PVOID VirtualAddress,
                                                              IN PFN_NUMBER PageCount);
             STATIC XTAPI VOID RemapHardwareMemory(IN PVOID VirtualAddress,
@@ -41,6 +50,8 @@ namespace MM
             STATIC XTAPI XTSTATUS UnmapHardwareMemory(IN PVOID VirtualAddress,
                                                       IN PFN_NUMBER PageCount,
                                                       IN BOOLEAN FlushTlb);
+            STATIC XTAPI VOID UnmapRealModeMemory(IN PHYSICAL_ADDRESS PhysicalAddress,
+                                                  IN ULONG Size);
     };
 }
 

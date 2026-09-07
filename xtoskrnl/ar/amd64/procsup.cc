@@ -28,7 +28,7 @@ XTAPI
 VOID
 AR::ProcessorSupport::GetTrampolineInformation(IN TRAMPOLINE_TYPE TrampolineType,
                                                OUT PVOID *TrampolineCode,
-                                               OUT PULONG_PTR TrampolineSize)
+                                               OUT PULONG TrampolineSize)
 {
     /* Get trampoline information */
     switch(TrampolineType)
@@ -320,30 +320,28 @@ AR::ProcessorSupport::InitializeIdt(IN PKPROCESSOR_BLOCK ProcessorBlock)
     }
 
     /* Setup IDT handlers for known interrupts and traps */
-    SetIdtGate(ProcessorBlock->IdtBase, 0x00, (PVOID)ArTrapEntry[0x00], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_TRAP_GATE);
-    SetIdtGate(ProcessorBlock->IdtBase, 0x01, (PVOID)ArTrapEntry[0x01], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_TRAP_GATE);
+    SetIdtGate(ProcessorBlock->IdtBase, 0x00, (PVOID)ArTrapEntry[0x00], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_INTERRUPT_GATE);
+    SetIdtGate(ProcessorBlock->IdtBase, 0x01, (PVOID)ArTrapEntry[0x01], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_INTERRUPT_GATE);
     SetIdtGate(ProcessorBlock->IdtBase, 0x02, (PVOID)ArTrapEntry[0x02], KGDT_R0_CODE, KIDT_IST_NMI, KIDT_ACCESS_RING0, AMD64_INTERRUPT_GATE);
-    SetIdtGate(ProcessorBlock->IdtBase, 0x03, (PVOID)ArTrapEntry[0x03], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING3, AMD64_TRAP_GATE);
-    SetIdtGate(ProcessorBlock->IdtBase, 0x04, (PVOID)ArTrapEntry[0x04], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING3, AMD64_TRAP_GATE);
-    SetIdtGate(ProcessorBlock->IdtBase, 0x05, (PVOID)ArTrapEntry[0x05], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_TRAP_GATE);
-    SetIdtGate(ProcessorBlock->IdtBase, 0x06, (PVOID)ArTrapEntry[0x06], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_TRAP_GATE);
-    SetIdtGate(ProcessorBlock->IdtBase, 0x07, (PVOID)ArTrapEntry[0x07], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_TRAP_GATE);
-    SetIdtGate(ProcessorBlock->IdtBase, 0x08, (PVOID)ArTrapEntry[0x08], KGDT_R0_CODE, KIDT_IST_PANIC, KIDT_ACCESS_RING0, AMD64_TRAP_GATE);
-    SetIdtGate(ProcessorBlock->IdtBase, 0x09, (PVOID)ArTrapEntry[0x09], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_TRAP_GATE);
-    SetIdtGate(ProcessorBlock->IdtBase, 0x0A, (PVOID)ArTrapEntry[0x0A], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_TRAP_GATE);
-    SetIdtGate(ProcessorBlock->IdtBase, 0x0B, (PVOID)ArTrapEntry[0x0B], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_TRAP_GATE);
-    SetIdtGate(ProcessorBlock->IdtBase, 0x0C, (PVOID)ArTrapEntry[0x0C], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_TRAP_GATE);
-    SetIdtGate(ProcessorBlock->IdtBase, 0x0D, (PVOID)ArTrapEntry[0x0D], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_TRAP_GATE);
-    SetIdtGate(ProcessorBlock->IdtBase, 0x0E, (PVOID)ArTrapEntry[0x0E], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_TRAP_GATE);
-    SetIdtGate(ProcessorBlock->IdtBase, 0x10, (PVOID)ArTrapEntry[0x10], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_TRAP_GATE);
-    SetIdtGate(ProcessorBlock->IdtBase, 0x11, (PVOID)ArTrapEntry[0x11], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_TRAP_GATE);
-    SetIdtGate(ProcessorBlock->IdtBase, 0x12, (PVOID)ArTrapEntry[0x12], KGDT_R0_CODE, KIDT_IST_MCA, KIDT_ACCESS_RING0, AMD64_TRAP_GATE);
-    SetIdtGate(ProcessorBlock->IdtBase, 0x13, (PVOID)ArTrapEntry[0x13], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_TRAP_GATE);
+    SetIdtGate(ProcessorBlock->IdtBase, 0x03, (PVOID)ArTrapEntry[0x03], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING3, AMD64_INTERRUPT_GATE);
+    SetIdtGate(ProcessorBlock->IdtBase, 0x04, (PVOID)ArTrapEntry[0x04], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING3, AMD64_INTERRUPT_GATE);
+    SetIdtGate(ProcessorBlock->IdtBase, 0x05, (PVOID)ArTrapEntry[0x05], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_INTERRUPT_GATE);
+    SetIdtGate(ProcessorBlock->IdtBase, 0x06, (PVOID)ArTrapEntry[0x06], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_INTERRUPT_GATE);
+    SetIdtGate(ProcessorBlock->IdtBase, 0x07, (PVOID)ArTrapEntry[0x07], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_INTERRUPT_GATE);
+    SetIdtGate(ProcessorBlock->IdtBase, 0x08, (PVOID)ArTrapEntry[0x08], KGDT_R0_CODE, KIDT_IST_PANIC, KIDT_ACCESS_RING0, AMD64_INTERRUPT_GATE);
+    SetIdtGate(ProcessorBlock->IdtBase, 0x09, (PVOID)ArTrapEntry[0x09], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_INTERRUPT_GATE);
+    SetIdtGate(ProcessorBlock->IdtBase, 0x0A, (PVOID)ArTrapEntry[0x0A], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_INTERRUPT_GATE);
+    SetIdtGate(ProcessorBlock->IdtBase, 0x0B, (PVOID)ArTrapEntry[0x0B], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_INTERRUPT_GATE);
+    SetIdtGate(ProcessorBlock->IdtBase, 0x0C, (PVOID)ArTrapEntry[0x0C], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_INTERRUPT_GATE);
+    SetIdtGate(ProcessorBlock->IdtBase, 0x0D, (PVOID)ArTrapEntry[0x0D], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_INTERRUPT_GATE);
+    SetIdtGate(ProcessorBlock->IdtBase, 0x0E, (PVOID)ArTrapEntry[0x0E], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_INTERRUPT_GATE);
+    SetIdtGate(ProcessorBlock->IdtBase, 0x10, (PVOID)ArTrapEntry[0x10], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_INTERRUPT_GATE);
+    SetIdtGate(ProcessorBlock->IdtBase, 0x11, (PVOID)ArTrapEntry[0x11], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_INTERRUPT_GATE);
+    SetIdtGate(ProcessorBlock->IdtBase, 0x12, (PVOID)ArTrapEntry[0x12], KGDT_R0_CODE, KIDT_IST_MCA, KIDT_ACCESS_RING0, AMD64_INTERRUPT_GATE);
+    SetIdtGate(ProcessorBlock->IdtBase, 0x13, (PVOID)ArTrapEntry[0x13], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_INTERRUPT_GATE);
     SetIdtGate(ProcessorBlock->IdtBase, 0x1F, (PVOID)ArTrapEntry[0x1F], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_INTERRUPT_GATE);
-    SetIdtGate(ProcessorBlock->IdtBase, 0x2C, (PVOID)ArTrapEntry[0x2C], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING3, AMD64_TRAP_GATE);
-    SetIdtGate(ProcessorBlock->IdtBase, 0x2D, (PVOID)ArTrapEntry[0x2D], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING3, AMD64_TRAP_GATE);
-    SetIdtGate(ProcessorBlock->IdtBase, 0x2F, (PVOID)ArTrapEntry[0x2F], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_INTERRUPT_GATE);
-    SetIdtGate(ProcessorBlock->IdtBase, 0xE1, (PVOID)ArInterruptEntry[0xE1], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING0, AMD64_INTERRUPT_GATE);
+    SetIdtGate(ProcessorBlock->IdtBase, 0x2C, (PVOID)ArTrapEntry[0x2C], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING3, AMD64_INTERRUPT_GATE);
+    SetIdtGate(ProcessorBlock->IdtBase, 0x2D, (PVOID)ArTrapEntry[0x2D], KGDT_R0_CODE, KIDT_IST_RESERVED, KIDT_ACCESS_RING3, AMD64_INTERRUPT_GATE);
 }
 
 /**
@@ -477,8 +475,9 @@ AR::ProcessorSupport::InitializeProcessorBlock(OUT PKPROCESSOR_BLOCK ProcessorBl
     /* Set initial MXCSR register value */
     ProcessorBlock->Prcb.MxCsr = INITIAL_MXCSR;
 
-    /* Set initial runlevel */
+    /* Set initial runlevel and mark processor as started */
     ProcessorBlock->RunLevel = PASSIVE_LEVEL;
+    ProcessorBlock->Started = TRUE;
 }
 
 /**

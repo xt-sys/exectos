@@ -28,22 +28,27 @@
 #include <xtuefi.h>
 
 /* Low level data types headers */
+#include <cmtypes.h>
 #include <extypes.h>
 #include <hltypes.h>
 #include <iotypes.h>
 #include <kdtypes.h>
 #include <ketypes.h>
 #include <ldrtypes.h>
+#include <lpctypes.h>
 #include <mmtypes.h>
+#include <obtypes.h>
 #include <potypes.h>
 #include <pstypes.h>
 #include <rtltypes.h>
+#include <setypes.h>
 
 /* Architecture-specific low level data types headers */
 #include ARCH_HEADER(artypes.h)
 #include ARCH_HEADER(hltypes.h)
 #include ARCH_HEADER(ketypes.h)
 #include ARCH_HEADER(mmtypes.h)
+#include ARCH_HEADER(rtltypes.h)
 
 /* XT routines */
 #include <exfuncs.h>

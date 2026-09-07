@@ -21,10 +21,13 @@ namespace KE
             STATIC EPROCESS InitialProcess;
 
         public:
+            STATIC XTAPI PKPROCESS GetIdleProcess(VOID);
             STATIC XTAPI PEPROCESS GetInitialProcess(VOID);
+            STATIC XTAPI XTSTATUS InitializeIdleProcess(IN OUT PKPROCESS IdleProcess,
+                                                        IN PULONG_PTR DirectoryTable);
             STATIC XTAPI VOID InitializeProcess(IN OUT PKPROCESS Process,
                                                 IN KPRIORITY Priority,
-                                                IN KAFFINITY Affinity,
+                                                IN PKAFFINITY_MAP AffinityMap,
                                                 IN PULONG_PTR DirectoryTable,
                                                 IN BOOLEAN Alignment);
     };

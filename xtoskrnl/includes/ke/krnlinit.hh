@@ -24,6 +24,7 @@ namespace KE
 
         private:
             STATIC XTAPI VOID BootstrapKernel(VOID);
+            STATIC XTAPI VOID InitializeInterruptHandlers(VOID);
             STATIC XTAPI VOID InitializeKernel(VOID);
     };
 }

@@ -4,6 +4,7 @@
  * FILE:            sdk/xtdk/rtltypes.h
  * DESCRIPTION:     Runtime library structures definitions
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ *                  Aiken Harris <harraiken91@gmail.com>
  */
 
 #ifndef __XTDK_RTLTYPES_H
@@ -11,6 +12,7 @@
 
 #include <xtbase.h>
 #include <xttypes.h>
+#include ARCH_HEADER(xtstruct.h)
 
 
 /* UUID string lengths */
@@ -31,6 +33,23 @@
 #define DOUBLE_HEX_PRECISION                            13
 #define DOUBLE_SCIENTIFIC_PRECISION                     -4
 #define DOUBLE_SIGN_BIT                                 0x8000000000000000ULL
+
+/* Exception Record flags */
+#define EXCEPTION_CONTINUE_SEARCH                       0x00
+#define EXCEPTION_NONCONTINUABLE                        0x01
+#define EXCEPTION_UNWINDING                             0x02
+#define EXCEPTION_EXIT_UNWIND                           0x04
+#define EXCEPTION_STACK_INVALID                         0x08
+#define EXCEPTION_NESTED_CALL                           0x10
+#define EXCEPTION_TARGET_UNWIND                         0x20
+#define EXCEPTION_COLLIDED_UNWIND                       0x40
+
+/* Exception Record accessors */
+#define EXCEPTION_CODE                                  _exception_code()
+#define EXCEPTION_INFORMATION                           (PEXCEPTION_POINTERS)_exception_info()
+
+/* Maximum number of lead bytes for NLS */
+#define NLS_MAXIMUM_LEADBYTES                           12
 
 /* Print flag definitions */
 #define PFL_ALWAYS_PRINT_SIGN                           0x00000001
@@ -72,6 +91,74 @@
 typedef XTSTATUS (*PWRITE_CHARACTER)(IN CHAR Character);
 typedef XTSTATUS (*PWRITE_WIDE_CHARACTER)(IN WCHAR Character);
 
+/* Compressed data information structure definition */
+typedef struct _COMPRESSED_DATA_INFO
+{
+    USHORT CompressionFormatAndEngine;
+    UCHAR CompressionUnitShift;
+    UCHAR ChunkShift;
+    UCHAR ClusterShift;
+    UCHAR Reserved;
+    USHORT NumberOfChunks;
+    ULONG CompressedChunkSizes[1];
+} COMPRESSED_DATA_INFO, *PCOMPRESSED_DATA_INFO;
+
+/* Code page table structure definition */
+typedef struct _CPTABLE_INFO
+{
+    USHORT CodePage;
+    USHORT MaximumCharacterSize;
+    USHORT DefaultChar;
+    USHORT UniDefaultChar;
+    USHORT TransDefaultChar;
+    USHORT TransUniDefaultChar;
+    USHORT DBCSCodePage;
+    UCHAR LeadByte[NLS_MAXIMUM_LEADBYTES];
+    PUSHORT MultiByteTable;
+    PVOID WideCharTable;
+    PUSHORT DBCSRanges;
+    PUSHORT DBCSOffsets;
+} CPTABLE_INFO, *PCPTABLE_INFO;
+
+/* Exception Pointers structure definition */
+typedef struct _EXCEPTION_POINTERS
+{
+    PEXCEPTION_RECORD ExceptionRecord;
+    PCONTEXT ContextRecord;
+} EXCEPTION_POINTERS, *PEXCEPTION_POINTERS;
+
+/* 128-bit buffer containing a unique identifier value */
+typedef struct _GUID
+{
+    UINT Data1;
+    USHORT Data2;
+    USHORT Data3;
+    UCHAR Data4[8];
+} GUID, *PGUID;
+
+/* 32-bit double linked list structure definition */
+typedef struct _LIST_ENTRY32
+{
+    ULONG Flink;
+    ULONG Blink;
+} LIST_ENTRY32, *PLIST_ENTRY32;
+
+/* 64-bit double linked list structure definition */
+typedef struct _LIST_ENTRY64
+{
+    ULONGLONG Flink;
+    ULONGLONG Blink;
+} LIST_ENTRY64, *PLIST_ENTRY64;
+
+/* NLS table structure definition */
+typedef struct _NLSTABLE_INFO
+{
+    CPTABLE_INFO OemTableInfo;
+    CPTABLE_INFO AnsiTableInfo;
+    PUSHORT UpperCaseTable;
+    PUSHORT LowerCaseTable;
+} NLSTABLE_INFO, *PNLSTABLE_INFO;
+
 /* Red-black tree node color enumeration list */
 typedef enum _RTL_BALANCED_NODE_COLOR
 {
@@ -94,6 +181,24 @@ typedef enum _RTL_VARIABLE_TYPE
     TypeWideChar,
     TypeWideString
 } RTL_VARIABLE_TYPE, *PRTL_VARIABLE_TYPE;
+
+/* Activation context stack structure definition */
+typedef struct _ACTIVATION_CONTEXT_STACK
+{
+    PRTL_ACTIVATION_CONTEXT_STACK_FRAME ActiveFrame;
+    LIST_ENTRY FrameListCache;
+    ULONG Flags;
+    ULONG NextCookieSequenceNumber;
+    ULONG StackId;
+} ACTIVATION_CONTEXT_STACK, *PACTIVATION_CONTEXT_STACK;
+
+/* Activation context stack frame structure definition */
+typedef struct _RTL_ACTIVATION_CONTEXT_STACK_FRAME
+{
+    PRTL_ACTIVATION_CONTEXT_STACK_FRAME Previous;
+    PVOID ActivationContext;
+    ULONG Flags;
+} RTL_ACTIVATION_CONTEXT_STACK_FRAME, *PRTL_ACTIVATION_CONTEXT_STACK_FRAME;
 
 /* Runtime Library red-black tree balanced node structure definition */
 typedef struct _RTL_BALANCED_NODE
@@ -155,6 +260,12 @@ typedef struct _RTL_SHA1_CONTEXT
     ULONG Count[2];
     UCHAR Buffer[SHA1_BLOCK_SIZE];
 } RTL_SHA1_CONTEXT, *PRTL_SHA1_CONTEXT;
+
+/* Single linked list structure definition */
+typedef struct _SINGLE_LIST_ENTRY
+{
+    PSINGLE_LIST_ENTRY Next;
+} SINGLE_LIST_ENTRY, *PSINGLE_LIST_ENTRY;
 
 /* Runtime time fields structure definition */
 typedef struct _TIME_FIELDS

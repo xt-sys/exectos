@@ -4,6 +4,7 @@
  * FILE:            xtoskrnl/ke/timer.cc
  * DESCRIPTION:     Kernel timer object support
  * DEVELOPERS:      Rafal Kupiec <belliash@codingworkshop.eu.org>
+ *                  Aiken Harris <harraiken91@gmail.com>
  */
 
 #include <xtos.hh>
@@ -157,6 +158,25 @@ KE::Timer::QueryTimer(IN PKTIMER Timer)
 }
 
 /**
+ * Removes a specified timer from the timer list.
+ *
+ * @param Timer
+ *        Supplies a pointer to a timer object.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+VOID
+KE::Timer::RemoveTimer(IN OUT PKTIMER Timer)
+{
+    /* Remove the timer from the list */
+    Timer->Header.Inserted = FALSE;
+    RTL::LinkedList::RemoveEntryList(&Timer->TimerListEntry);
+}
+
+/**
  * Sets the supplied timer to expire at the specified time.
  *
  * @param Timer
@@ -186,10 +206,17 @@ KE::Timer::SetTimer(IN PKTIMER Timer,
 }
 
 /**
- * Removes a specified timer from the timer list.
+ * Verifies if any system timers have expired for the current tick and requests a software
+ * DISPATCH interrupt to process them if necessary.
  *
- * @param Timer
- *        Supplies a pointer to a timer object.
+ * @param Prcb
+ *        Supplies a pointer to the current Processor Control Block.
+ *
+ * @param TrapFrame
+ *        Supplies a pointer to the trap frame representing the interrupted context.
+ *
+ * @param Time
+ *        Supplies the current absolute interrupt time.
  *
  * @return This routine does not return any value.
  *
@@ -197,9 +224,37 @@ KE::Timer::SetTimer(IN PKTIMER Timer,
  */
 XTAPI
 VOID
-KE::Timer::RemoveTimer(IN OUT PKTIMER Timer)
+KE::Timer::VerifySystemTimerExpiration(IN PKPROCESSOR_CONTROL_BLOCK Prcb,
+                                       IN PKTRAP_FRAME TrapFrame,
+                                       IN LARGE_INTEGER Time)
 {
-    /* Remove the timer from the list */
-    Timer->Header.Inserted = FALSE;
-    RTL::LinkedList::RemoveEntryList(&Timer->TimerListEntry);
+    LARGE_INTEGER TickCount;
+    ULONG TimerHand;
+    PKTIMER Timer;
+
+    /* Retrieve the current system tick count and calculate the index into the timer table */
+    TickCount = KE::SharedData::GetTickCount();
+    TimerHand = TickCount.LowPart & (KTIMER_TABLE_SIZE - 1);
+
+    /* Check if there are any active timers scheduled */
+    if(!RTL::LinkedList::ListEmpty(&TimerTableListHead[TimerHand]))
+    {
+        /* Retrieve the first timer object from the list */
+        Timer = CONTAIN_RECORD((&TimerTableListHead[TimerHand])->Flink, KTIMER, TimerListEntry);
+
+        /* Check if the timer due time has been reached */
+        if(Timer->DueTime.QuadPart <= Time.QuadPart)
+        {
+            /* Ensure there is no pending timer expiration request */
+            if(!Prcb->TimerRequest)
+            {
+                /* Register the timer expiration request and record a timer slot */
+                Prcb->TimerRequest = (ULONG_PTR)TrapFrame;
+                Prcb->TimerHand = TimerHand;
+
+                /* Request a DPC to safely retire the timer */
+                HL::Irq::SendSoftwareInterrupt(DISPATCH_LEVEL);
+            }
+        }
+    }
 }

@@ -40,6 +40,7 @@ KE::KThread::InitializeThreadContext(IN PKTHREAD Thread,
                                      IN PCONTEXT ContextRecord)
 {
     PKTHREAD_INIT_FRAME ThreadFrame;
+    CONTEXT ContextFrame;
 
     /* Set initial thread frame */
     ThreadFrame = ((PKTHREAD_INIT_FRAME)Thread->InitialStack) - 1;
@@ -50,45 +51,63 @@ KE::KThread::InitializeThreadContext(IN PKTHREAD Thread,
     /* Check if context provided for this thread */
     if(ContextRecord)
     {
-        /* User mode thread needs further initialization, this is not completed */
-        UNIMPLEMENTED;
+        /* Make a local copy of the context to avoid mutating caller's memory */
+        RTL::Memory::CopyMemory(&ContextFrame, ContextRecord, sizeof(CONTEXT));
+
+        /* Disable debug registers and enable context registers */
+        ContextFrame.ContextFlags |= CONTEXT_CONTROL;
+        ContextFrame.ContextFlags &= ~CONTEXT_DEBUG_REGISTERS;
+
+        /* Align the stack and reserve space for 4 parameters and return value */
+        ContextFrame.Rsp = (ContextFrame.Rsp & ~15) - 40;
+
+        /* Set CS and SS segments for user mode */
+        ContextFrame.SegCs = KGDT_R3_CODE | RPL_MASK;
+        ContextFrame.SegSs = KGDT_R3_DATA | RPL_MASK;
 
         /* Fill exception and trap frames with zeroes */
         RTL::Memory::ZeroMemory(&ThreadFrame->ExceptionFrame, sizeof(KEXCEPTION_FRAME));
         RTL::Memory::ZeroMemory(&ThreadFrame->TrapFrame, sizeof(KTRAP_FRAME));
 
-        /* Disable debug registers and enable context registers */
-        ContextRecord->ContextFlags &= ~CONTEXT_DEBUG_REGISTERS | CONTEXT_CONTROL;
-
-        /* Align the stack and reserve space for 4 parameters and return value */
-        ContextRecord->Rsp = (ContextRecord->Rsp & ~15) - 40;
-
-        /* Set CS and SS segments for user mode */
-        ContextRecord->SegCs = KGDT_R3_CODE | RPL_MASK;
-        ContextRecord->SegSs = KGDT_R3_DATA | RPL_MASK;
+        /* Translate Context frame to Trap frame */
+        KE::Processor::RestoreProcessorContext(&ThreadFrame->TrapFrame, &ThreadFrame->ExceptionFrame,
+                                               &ContextFrame, ContextFrame.ContextFlags);
 
         /* This is user mode thread */
         Thread->PreviousMode = UserMode;
+        ThreadFrame->TrapFrame.PreviousMode = UserMode;
 
         /* Enable floating point state */
         Thread->NpxState = NPX_STATE_SCRUB;
 
         /* Set initial floating point state */
         ThreadFrame->NpxFrame.ControlWord = 0x27F;
+        ThreadFrame->NpxFrame.DataOffset = 0;
+        ThreadFrame->NpxFrame.DataSelector = 0;
+        ThreadFrame->NpxFrame.ErrorOffset = 0;
+        ThreadFrame->NpxFrame.ErrorOpcode = 0;
+        ThreadFrame->NpxFrame.ErrorSelector = 0;
+        ThreadFrame->NpxFrame.StatusWord = 0;
         ThreadFrame->NpxFrame.TagWord = 0xFFFF;
+
+        /* Set initial MXCSR register value */
+        ThreadFrame->TrapFrame.MxCsr = INITIAL_MXCSR;
 
         /* Clear DR6 and DR7 registers */
         ThreadFrame->TrapFrame.Dr6 = 0;
         ThreadFrame->TrapFrame.Dr7 = 0;
 
-        /* Set initial MXCSR register value */
-        ThreadFrame->TrapFrame.MxCsr = INITIAL_MXCSR;
+        /* Terminate the Exception Handler List */
+        ThreadFrame->TrapFrame.ExceptionFrame = (ULONGLONG)NULLPTR;
 
         /* Initialize exception frame */
-        ThreadFrame->ExceptionFrame.P1Home = (ULONG64)StartContext;
-        ThreadFrame->ExceptionFrame.P2Home = (ULONG64)StartRoutine;
-        ThreadFrame->ExceptionFrame.P3Home = (ULONG64)SystemRoutine;
-        ThreadFrame->ExceptionFrame.P4Home = (ULONG64)SystemRoutine;
+        ThreadFrame->ExceptionFrame.P1Home = (ULONGLONG)StartContext;
+        ThreadFrame->ExceptionFrame.P2Home = (ULONGLONG)StartRoutine;
+        ThreadFrame->ExceptionFrame.P3Home = (ULONGLONG)SystemRoutine;
+        ThreadFrame->ExceptionFrame.P4Home = (ULONGLONG)SystemRoutine;
+
+        /* Set the routine that will handle the thread finishing its initialization and transition it to UserMode */
+        ThreadFrame->StartFrame.Return = (ULONG64)SwitchToUserMode;
     }
     else
     {
@@ -98,21 +117,64 @@ KE::KThread::InitializeThreadContext(IN PKTHREAD Thread,
         /* Disable floating point state */
         Thread->NpxState = NPX_STATE_UNUSED;
 
-        /* Set thread start address */
-        ThreadFrame->StartFrame.Return = (ULONG64)NULLPTR;
+        /* Set the routine that will handle a system thread that unexpectedly finished its execution */
+        ThreadFrame->StartFrame.Return = (ULONG64)HandleSystemThreadExit;
     }
 
     /* Initialize thread startup information */
-    ThreadFrame->StartFrame.P1Home = (ULONG64)StartContext;
-    ThreadFrame->StartFrame.P2Home = (ULONG64)StartRoutine;
-    ThreadFrame->StartFrame.P3Home = (ULONG64)SystemRoutine;
-    ThreadFrame->StartFrame.P4Home = (ULONG64)SystemRoutine;
+    ThreadFrame->StartFrame.P1Home = (ULONGLONG)StartContext;
+    ThreadFrame->StartFrame.P2Home = (ULONGLONG)StartRoutine;
+    ThreadFrame->StartFrame.P3Home = (ULONGLONG)SystemRoutine;
+    ThreadFrame->StartFrame.P4Home = (ULONGLONG)SystemRoutine;
 
     /* Initialize switch frame */
     ThreadFrame->SwitchFrame.ApcBypass = APC_LEVEL;
     ThreadFrame->SwitchFrame.MxCsr = INITIAL_MXCSR;
-    ThreadFrame->SwitchFrame.Rbp = (ULONG64)&ThreadFrame->TrapFrame;
+    ThreadFrame->SwitchFrame.Rbp = (ULONGLONG)&ThreadFrame->TrapFrame;
+    ThreadFrame->SwitchFrame.Return = (ULONGLONG)RunThread;
 
-    /* Set thread stack */
+    /* Set thread stack boundaries */
+    Thread->InitialStack = (PVOID)&ThreadFrame->NpxFrame;
     Thread->KernelStack = &ThreadFrame->SwitchFrame;
+}
+
+/**
+ * Serves as the initial execution point for all threads after first context switch.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTASSEMBLY
+XTAPI
+VOID
+KE::KThread::RunThread(VOID)
+{
+    /* Initialize execution context, adjust runlevel and dispatch the thread */
+    __asm__ volatile("xorq %%rbx, %%rbx\n"
+                     "xorq %%r10, %%r10\n"
+                     "xorq %%r11, %%r11\n"
+                     "xorq %%r12, %%r12\n"
+                     "xorq %%r13, %%r13\n"
+                     "xorq %%r14, %%r14\n"
+                     "xorq %%r15, %%r15\n"
+                     "xorq %%rbp, %%rbp\n"
+                     "xorq %%rdi, %%rdi\n"
+                     "xorq %%rsi, %%rsi\n"
+                     "subq $32, %%rsp\n"
+                     "movb $%c[RunLevel], %%cl\n"
+                     "callq %P[LowerRunLevel]\n"
+                     "addq $32, %%rsp\n"
+                     "movq 8(%%rsp), %%rcx\n"
+                     "movq 0(%%rsp), %%rdx\n"
+                     "movq 24(%%rsp), %%rax\n"
+                     "subq $32, %%rsp\n"
+                     "callq *%%rax\n"
+                     "addq $32, %%rsp\n"
+                     "addq $40, %%rsp\n"
+                     "ret\n"
+                     :
+                     : [RunLevel] "i" (APC_LEVEL),
+                       [LowerRunLevel] "i" (KE::RunLevel::LowerRunLevel)
+                     : "memory");
 }

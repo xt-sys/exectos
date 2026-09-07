@@ -756,6 +756,21 @@ MM::PageMapBasic::GetPxeVirtualAddress(IN PMMPXE PxePointer)
 }
 
 /**
+ * Retrieves the maximum valid memory address accessible to user-mode applications.
+ *
+ * @return This routine returns the user-mode probe address boundary.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG_PTR
+MM::PageMapBasic::GetUserProbeAddress(VOID)
+{
+    /* Return user probe address */
+    return MM_USER_PROBE_ADDRESS;
+}
+
+/**
  * Initializes page map information for basic paging (PML4).
  *
  * @return This routine does not return any value.
@@ -850,6 +865,21 @@ MM::PageMapXpa::GetPxeVirtualAddress(IN PMMPXE PxePointer)
 {
     /* Return PXE virtual address */
     return (PVOID)(((LONGLONG)PxePointer << 43) >> 7);
+}
+
+/**
+ * Retrieves the maximum valid memory address accessible to user-mode applications.
+ *
+ * @return This routine returns the user-mode probe address boundary.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG_PTR
+MM::PageMapXpa::GetUserProbeAddress(VOID)
+{
+    /* Return user probe address */
+    return MM_USER_PROBE_LA57_ADDRESS;
 }
 
 /**

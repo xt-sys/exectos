@@ -11,7 +11,7 @@
 
 
 /**
- * Acquires a specified queued spinlock.
+ * Acquires a pre-allocated system queued spinlock.
  *
  * @param LockLevel
  *        Supplies the queued spinlock level.
@@ -25,7 +25,66 @@ VOID
 KE::SpinLock::AcquireQueuedSpinLock(IN KSPIN_LOCK_QUEUE_LEVEL LockLevel)
 {
     /* Acquire the queued spinlock */
-    AcquireSpinLock(KE::Processor::GetCurrentProcessorControlBlock()->LockQueue[LockLevel].Lock);
+    AcquireQueuedSpinLock(&KE::Processor::GetCurrentProcessorControlBlock()->LockQueue[LockLevel]);
+}
+
+/**
+ * Initializes a lock queue handle and acquires an in-stack queued spin lock.
+ *
+ * @param SpinLock
+ *        Supplies a pointer to the global queued spin lock to be acquired.
+ *
+ * @param LockQueueHandle
+ *        Supplies a pointer to a caller-allocated lock queue handle.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+VOID
+KE::SpinLock::AcquireQueuedSpinLock(IN PKSPIN_LOCK SpinLock,
+                                    IN PKLOCK_QUEUE_HANDLE LockQueueHandle)
+{
+    /* Initialize the queue node */
+    LockQueueHandle->LockQueue.Lock = SpinLock;
+    LockQueueHandle->LockQueue.Next = NULLPTR;
+
+    /* Acquire queued spin lock */
+    AcquireQueuedSpinLock(&LockQueueHandle->LockQueue);
+}
+
+/**
+ * Acquires an in-stack queued spin lock.
+ *
+ * @param LockQueue
+ *        Supplies a pointer to the local, stack-allocated lock queue entry.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+VOID
+KE::SpinLock::AcquireQueuedSpinLock(IN PKSPIN_LOCK_QUEUE LockQueue)
+{
+    PKSPIN_LOCK_QUEUE LockQueueTail;
+
+    /* Swap the global lock pointer */
+    LockQueueTail = (PKSPIN_LOCK_QUEUE)RTL::Atomic::ExchangePointer((PVOID*)LockQueue->Lock, LockQueue);
+    if(LockQueueTail)
+    {
+        /* Mark the lock state as waiting and link local node to the previous queue tail */
+        LockQueue->Lock = (PKSPIN_LOCK)((ULONG_PTR)LockQueue->Lock | LOCK_QUEUE_WAIT);
+        LockQueueTail->Next = LockQueue;
+
+        /* Spin until the previous owner clears the wait flag */
+        while((*(VOLATILE PULONG_PTR)&LockQueue->Lock) & LOCK_QUEUE_WAIT)
+        {
+            /* Yield the processor*/
+            AR::CpuFunctions::YieldProcessor();
+        }
+    }
 }
 
 /**
@@ -148,7 +207,7 @@ KE::SpinLock::InitializeSpinLock(IN PKSPIN_LOCK SpinLock)
 }
 
 /**
- * Releases a queued spinlock.
+ * Releases a pre-allocated system queued spinlock.
  *
  * @param LockLevel
  *        Supplies the queued spinlock level.
@@ -162,7 +221,65 @@ VOID
 KE::SpinLock::ReleaseQueuedSpinLock(IN KSPIN_LOCK_QUEUE_LEVEL LockLevel)
 {
     /* Clear the lock */
-    ReleaseSpinLock(KE::Processor::GetCurrentProcessorControlBlock()->LockQueue[LockLevel].Lock);
+    ReleaseQueuedSpinLock(&KE::Processor::GetCurrentProcessorControlBlock()->LockQueue[LockLevel]);
+}
+
+/**
+ * Releases an in-stack queued spin lock using the provided lock queue handle.
+ *
+ * @param LockQueueHandle
+ *        Supplies a pointer to the lock queue handle that currently holds the lock.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+VOID
+KE::SpinLock::ReleaseQueuedSpinLock(IN PKLOCK_QUEUE_HANDLE LockQueueHandle)
+{
+    /* Release queued spin lock */
+    ReleaseQueuedSpinLock(&LockQueueHandle->LockQueue);
+}
+
+/**
+ * Releases an in-stack queued spin lock.
+ *
+ * @param LockQueue
+ *        Supplies a pointer to the local, stack-allocated lock queue entry that currently holds the lock.
+ *
+ * @return This routine does not return any value.
+ *
+ * @since XT 1.0
+ */
+XTFASTCALL
+VOID
+KE::SpinLock::ReleaseQueuedSpinLock(IN PKSPIN_LOCK_QUEUE LockQueue)
+{
+    PKSPIN_LOCK_QUEUE NextLockQueue;
+
+    /* Get the pointer to the next waiting processor in the queue */
+    NextLockQueue = LockQueue->Next;
+    if(!NextLockQueue)
+    {
+        /* Remove the lock  */
+        if(RTL::Atomic::CompareExchangePointer((PVOID *)LockQueue->Lock, LockQueue, NULLPTR) == LockQueue)
+        {
+            /* Lock removed, exit */
+            return;
+        }
+
+        /* Wait until next pointer is updated */
+        while(!(NextLockQueue = *(VOLATILE PKSPIN_LOCK_QUEUE *)&LockQueue->Next))
+        {
+            /* Yield the processor*/
+            AR::CpuFunctions::YieldProcessor();
+        }
+    }
+
+    /* Clean up local node and clear wait flag */
+    LockQueue->Next = NULLPTR;
+    NextLockQueue->Lock = (PKSPIN_LOCK)((ULONG_PTR)NextLockQueue->Lock ^ LOCK_QUEUE_WAIT);
 }
 
 /**

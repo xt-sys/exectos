@@ -311,7 +311,7 @@ XTCDECL
 VOID
 HL::Pic::HandleApicErrorInterrupt(IN PKTRAP_FRAME TrapFrame)
 {
-    ULONG ErrorStatus;
+    UNUSED ULONG ErrorStatus;
 
     /* Write 0 to the ESR register to trigger an internal state update, then read the latched status */
     WriteApicRegister(APIC_ESR, 0);

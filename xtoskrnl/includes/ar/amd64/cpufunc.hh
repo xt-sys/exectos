@@ -42,6 +42,10 @@ namespace AR
             STATIC XTCDECL ULONGLONG ReadTimeStampCounter(VOID);
             STATIC XTCDECL ULONGLONG ReadTimeStampCounterProcessor(OUT PULONG TscAux);
             STATIC XTCDECL VOID ReadWriteBarrier(VOID);
+            STATIC XTCDECL BOOLEAN ScanForwardBit(OUT PULONG Index,
+                                                  IN ULONG Mask);
+            STATIC XTCDECL BOOLEAN ScanReverseBit(OUT PULONG Index,
+                                                  IN ULONG Mask);
             STATIC XTCDECL VOID SetInterruptFlag(VOID);
             STATIC XTCDECL VOID StoreGlobalDescriptorTable(OUT PVOID Destination);
             STATIC XTCDECL VOID StoreInterruptDescriptorTable(OUT PVOID Destination);

@@ -110,6 +110,10 @@
 /* Highest system address */
 #define MM_HIGHEST_SYSTEM_ADDRESS                  0xFFFFFFFFFFFFFFFFULL
 
+/* User probe address */
+#define MM_USER_PROBE_ADDRESS                      0x00007FFFFFFF0000ULL
+#define MM_USER_PROBE_LA57_ADDRESS                 0x00FFFFFFFFFF0000ULL
+
 /* Trampoline code address */
 #define MM_TRAMPOLINE_ADDRESS                      0x80000
 
@@ -347,6 +351,63 @@ typedef struct _POOL_DESCRIPTOR
     SIZE_T TotalBytes;
     SIZE_T Reserved;
 } POOL_DESCRIPTOR, *PPOOL_DESCRIPTOR;
+
+/* Working set list entry structure definition */
+typedef struct _MMWSLENTRY
+{
+    ULONG_PTR Valid:1;
+    ULONG_PTR LockedInWs:1;
+    ULONG_PTR LockedInMemory:1;
+    ULONG_PTR Protection:5;
+    ULONG_PTR Hashed:1;
+    ULONG_PTR Direct:1;
+    ULONG_PTR Age:2;
+    ULONG_PTR VirtualPageNumber:52;
+} MMWSLENTRY, *PMMWSLENTRY;
+
+/* Working set free entry structure definition */
+typedef struct _MMWSLE_FREE_ENTRY
+{
+    ULONG MustBeZero:1;
+    ULONG PreviousFree:31;
+    LONG NextFree;
+} MMWSLE_FREE_ENTRY, *PMMWSLE_FREE_ENTRY;
+
+/* Working set list entry union definition */
+typedef union _MMWSLE
+{
+    PVOID VirtualAddress;
+    ULONG_PTR Long;
+    MMWSLENTRY e1;
+    MMWSLE_FREE_ENTRY Free;
+} MMWSLE, *PMMWSLE;
+
+/* Working set list structure definition */
+typedef struct _MMWSL
+{
+    ULONG FirstFree;
+    ULONG FirstDynamic;
+    ULONG LastEntry;
+    ULONG NextSlot;
+    PMMWSLE Wsle;
+    ULONG LastInitializedWsle;
+    ULONG NonDirectCount;
+    PMMWSLE_HASH HashTable;
+    ULONG HashTableSize;
+    ULONG NumberOfCommittedPageTables;
+    PVOID HashTableStart;
+    PVOID HighestPermittedHashAddress;
+    ULONG NumberOfImageWaiters;
+    ULONG VadBitMapHint;
+    PVOID HighestUserAddress;
+    ULONG MaximumUserPageTablePages;
+    ULONG MaximumUserPageDirectoryPages;
+    PULONG CommittedPageTables;
+    ULONG NumberOfCommittedPageDirectories;
+    PULONG CommittedPageDirectories;
+    ULONG NumberOfCommittedPageDirectoryParents;
+    ULONGLONG CommittedPageDirectoryParents[1];
+} MMWSL, *PMMWSL;
 
 #endif /* __XTOS_ASSEMBLER__ */
 #endif /* __XTDK_AMD64_MMTYPES_H */

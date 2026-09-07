@@ -30,7 +30,7 @@ namespace AR
         public:
             STATIC XTAPI VOID GetTrampolineInformation(IN TRAMPOLINE_TYPE TrampolineType,
                                                        OUT PVOID *TrampolineCode,
-                                                       OUT PULONG_PTR TrampolineSize);
+                                                       OUT PULONG TrampolineSize);
     };
 }
 

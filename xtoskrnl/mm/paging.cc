@@ -471,6 +471,21 @@ MM::Paging::GetPteVirtualAddress(IN PMMPTE PtePointer)
 }
 
 /**
+ * Retrieves the maximum valid memory address accessible to user-mode applications.
+ *
+ * @return This routine returns the user-mode probe address boundary.
+ *
+ * @since XT 1.0
+ */
+XTAPI
+ULONG_PTR
+MM::Paging::GetUserProbeAddress(VOID)
+{
+    /* Return user probe address */
+    return PmlRoutines->GetUserProbeAddress();
+}
+
+/**
  * Gets current status of eXtended Physical Addressing (XPA).
  *
  * @return This routine returns TRUE if PAE or LA57 (XPA) is enabled, or FALSE otherwise.

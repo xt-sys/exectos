@@ -45,6 +45,9 @@
 #define APIC_VECTOR_PERF                                0xFE
 #define APIC_VECTOR_NMI                                 0xFF
 
+/* APIC SIPI vector shift */
+#define APIC_VECTOR_SIPI_SHIFT                          12
+
 /* APIC destination formats */
 #define APIC_DF_FLAT                                    0xFFFFFFFF
 #define APIC_DF_CLUSTER                                 0x0FFFFFFF
